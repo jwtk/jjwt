@@ -12,7 +12,7 @@ random.nextBytes(key);
 
 Claims claims = JWTs.claims().setIssuer("Me").setSubject("Joe");
 
-String jwt = JWTs.builder().setClaims(claims).signWith(SigningAlgorithm.HS256, key).compact();
+String jwt = JWTs.builder().setClaims(claims).signWith(SignatureAlgorithm.HS256, key).compact();
 ```
 
 How easy was that!?
