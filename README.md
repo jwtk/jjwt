@@ -4,38 +4,43 @@
 
 This library is intended to be the easiest to use and understand library for creating JSON Web Tokens (JWTs) on the JVM, period.  Most complexity is hidden behind convenient and readable Builder chaining calls.  Here's an example:
 
-    //Let's create a random signing key for testing:
-    Random random = new SecureRandom();
-    byte[] key = new byte[64];
-    random.nextBytes(key);
+```java
+//Let's create a random signing key for testing:
+Random random = new SecureRandom();
+byte[] key = new byte[64];
+random.nextBytes(key);
 
-    Claims claims = JWTs.claims().setIssuer("Me").setSubject("Joe")
-                                 .setExpiration(new Date(System.currentTimeMillis() + 3600));
+Claims claims = JWTs.claims().setIssuer("Me").setSubject("Joe");
 
-    String jwt = JWTs.builder().setClaims(claims).signWith(SigningAlgorithm.HS256, key).compact();
+String jwt = JWTs.builder().setClaims(claims).signWith(SigningAlgorithm.HS256, key).compact();
+```
 
 How easy was that!?
 
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
-    Token token = JWTs.parser().setSigningKey(key).parse(jwt);
+```java
+Token token = JWTs.parser().setSigningKey(key).parse(jwt);
 
-    assert token.getClaims().getSubject().equals("Joe");
+assert token.getClaims().getSubject().equals("Joe");
+```
 
 You have to love one-line code snippets in Java!
 
 But what if signature validation failed?  You can catch `SignatureException` and react accordingly:
 
-    try {
+```java
+try {
 
-        JWTs.parser().setSigningKey(key).parse(jwt);
+    JWTs.parser().setSigningKey(key).parse(jwt);
 
-        //OK, we can trust this JWT
+    //OK, we can trust this JWT
 
-    } catch (SignatureException e) {
+} catch (SignatureException e) {
 
-        //don't trust the JWT!
-    }
+    //don't trust the JWT!
+}
+```
 
 ## Supported Features
 
