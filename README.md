@@ -1,5 +1,4 @@
-jjwt
-====
+[![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
 
 # JSON Web Token for Java
 
