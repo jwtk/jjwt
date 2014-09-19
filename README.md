@@ -39,9 +39,9 @@ But what if signature validation failed?  You can catch `SignatureException` and
 
 ## Supported Features
 
-* Creating and parsing plaintext JWTs
+* Creating and parsing plaintext compact JWTs
 
-* Creating and parsing digitally signed JWTs (aka JWSs) with the following algorithms:
+* Creating and parsing digitally signed compact JWTs (aka JWSs) with the following algorithms:
     * HS256: HMAC using SHA-384
     * HS384: HMAC using SHA-384
     * HS512: HMAC using SHA-512
@@ -54,7 +54,8 @@ But what if signature validation failed?  You can catch `SignatureException` and
 
 ## Currently Unsupported Features
 
-* Elliptic Curve signature algorithms ES256, ES384 and ES512 are not yet implemented.
+* [Non-compact](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31#section-7.2) serialization and parsing are not yet implemented.
+* Elliptic Curve signature algorithms `ES256`, `ES384` and `ES512` are not yet implemented.
 * JWE (Encryption for JWT) is not yet implemented.
 
-Both of these feature sets will be implemented in a future release when possible.  Community contributions are welcome!
+These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
