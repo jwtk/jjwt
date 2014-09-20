@@ -2,7 +2,7 @@
 
 # JSON Web Token for Java
 
-This library is intended to be the easiest to use and understand library for creating JSON Web Tokens (JWTs) on the JVM, period.
+This library is intended to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM, period.
 
 ## Installation
 
