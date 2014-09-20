@@ -17,6 +17,12 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.RuntimeEnvironment;
 
+/**
+ * Type-safe representation of standard JWT algorithm names as defined in the
+ * <a href="https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31">JSON Web Algorithms</a> specification.
+ *
+ * @since 0.1
+ */
 public enum SignatureAlgorithm {
 
     NONE("none", "No digital signature or MAC performed", null, false),

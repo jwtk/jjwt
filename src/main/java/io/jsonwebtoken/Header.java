@@ -17,23 +17,87 @@ package io.jsonwebtoken;
 
 import java.util.Map;
 
-public interface Header extends Map<String,Object> {
+/**
+ * A JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5">JOSE header</a>.
+ *
+ * <p>This is ultimately a JSON map and any values can be added to it, but JWT JOSE standard names are provided as
+ * type-safe getters and setters for convenience.</p>
+ *
+ * <p>Because this interface extends {@code Map&lt;String, Object&gt;}, if you would like to add your own properties,
+ * you simply use map methods, for example:</p>
+ *
+ * <pre>
+ * header.{@link Map#put(Object, Object) put}("headerParamName", "headerParamValue");
+ * </pre>
+ *
+ * <h4>Creation</h4>
+ *
+ * <p>It is easiest to create a {@code Header} instance by calling one of the
+ * {@link Jwts#header() JWTs.header()} factory methods.</p>
+ *
+ * @since 0.1
+ */
+public interface Header<T extends Header<T>> extends Map<String,Object> {
 
+    /** JWT {@code Type} (typ) value: <code>"JWT"</code> */
     public static final String JWT_TYPE = "JWT";
+
+    /** JWT {@code Type} header parameter name: <code>"typ"</code> */
     public static final String TYPE = "typ";
-    public static final String ALGORITHM = "alg";
+
+    /** JWT {@code Content Type} header parameter name: <code>"cty"</code> */
     public static final String CONTENT_TYPE = "cty";
 
-    public String getType();
+    /**
+     * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
+     * <code>typ</code></a> (type) header value or {@code null} if not present.
+     *
+     * @return the {@code typ} header value or {@code null} if not present.
+     */
+    String getType();
 
-    public Header setType(String typ);
+    /**
+     * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
+     * <code>typ</code></a> (Type) header value.  A {@code null} value will remove the property from the JSON map.
+     *
+     * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
+     * @return the {@code Header} instance for method chaining.
+     */
+    T setType(String typ);
 
-    public String getAlgorithm();
+    /**
+     * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.2">
+     * <code>cty</code></a> (Content Type) header value or {@code null} if not present.
+     *
+     * <p>In the normal case where nested signing or encryption operations are not employed (i.e. a compact
+     * serialization JWT), the use of this header parameter is NOT RECOMMENDED.  In the case that nested
+     * signing or encryption is employed, this Header Parameter MUST be present; in this case, the value MUST be
+     * {@code JWT}, to indicate that a Nested JWT is carried in this JWT.  While media type names are not
+     * case-sensitive, it is RECOMMENDED that {@code JWT} always be spelled using uppercase characters for
+     * compatibility with legacy implementations.  See
+     * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#appendix-A.2">JWT Appendix A.2</a> for
+     * an example of a Nested JWT.</p>
+     *
+     * @return the {@code typ} header parameter value or {@code null} if not present.
+     */
+    String getContentType();
 
-    public Header setAlgorithm(String alg);
-
-    public String getContentType();
-
-    public void setContentType(String cty);
+    /**
+     * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.2">
+     * <code>cty</code></a> (Content Type) header parameter value.  A {@code null} value will remove the property from
+     * the JSON map.
+     *
+     * <p>In the normal case where nested signing or encryption operations are not employed (i.e. a compact
+     * serialization JWT), the use of this header parameter is NOT RECOMMENDED.  In the case that nested
+     * signing or encryption is employed, this Header Parameter MUST be present; in this case, the value MUST be
+     * {@code JWT}, to indicate that a Nested JWT is carried in this JWT.  While media type names are not
+     * case-sensitive, it is RECOMMENDED that {@code JWT} always be spelled using uppercase characters for
+     * compatibility with legacy implementations.  See
+     * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#appendix-A.2">JWT Appendix A.2</a> for
+     * an example of a Nested JWT.</p>
+     *
+     * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
+     */
+    T setContentType(String cty);
 
 }

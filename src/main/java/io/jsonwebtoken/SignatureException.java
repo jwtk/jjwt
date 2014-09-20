@@ -15,6 +15,11 @@
  */
 package io.jsonwebtoken;
 
+/**
+ * Exception indicating that either calculating a signature or verifying an existing signature of a JWT failed.
+ *
+ * @since 0.1
+ */
 public class SignatureException extends JwtException {
 
     public SignatureException(String message) {

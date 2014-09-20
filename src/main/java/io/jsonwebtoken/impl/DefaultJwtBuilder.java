@@ -19,7 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JWTs;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -33,6 +34,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class DefaultJwtBuilder implements JwtBuilder {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -123,7 +125,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setClaims(Map<String, Object> claims) {
-        this.claims = JWTs.claims(claims);
+        this.claims = Jwts.claims(claims);
         return this;
     }
 
@@ -148,14 +150,22 @@ public class DefaultJwtBuilder implements JwtBuilder {
             key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
         }
 
-        if (key != null) {
-            header.setAlgorithm(algorithm.getValue());
+        JwsHeader jwsHeader;
+
+        if (header instanceof JwsHeader) {
+            jwsHeader = (JwsHeader)header;
         } else {
-            //no signature - plaintext JWT:
-            header.setAlgorithm(SignatureAlgorithm.NONE.getValue());
+            jwsHeader = new DefaultJwsHeader(header);
         }
 
-        String base64UrlEncodedHeader = base64UrlEncode(header, "Unable to serialize header to json.");
+        if (key != null) {
+            jwsHeader.setAlgorithm(algorithm.getValue());
+        } else {
+            //no signature - plaintext JWT:
+            jwsHeader.setAlgorithm(SignatureAlgorithm.NONE.getValue());
+        }
+
+        String base64UrlEncodedHeader = base64UrlEncode(jwsHeader, "Unable to serialize header to json.");
 
         String base64UrlEncodedBody = this.payload != null ?
                                       TextCodec.BASE64URL.encode(this.payload) :

@@ -15,13 +15,24 @@
  */
 package io.jsonwebtoken;
 
-public interface Token<B> {
+/**
+ * An JWT instance.
+ *
+ * @param <B> the type of the JWT body, either a {@link String} or a {@link Claims} instance.
+ */
+public interface Jwt<H extends Header, B> {
 
-    Header getHeader();
+    /**
+     * Returns the JWT {@link Header} or {@code null} if not present.
+     *
+     * @return the JWT {@link Header} or {@code null} if not present.
+     */
+    H getHeader();
 
+    /**
+     * Returns the JWT body, either a {@code String} or a {@code Claims} instance.
+     *
+     * @return the JWT body, either a {@code String} or a {@code Claims} instance.
+     */
     B getBody();
-
-    boolean isSigned();
-
-    String getSignature();
 }

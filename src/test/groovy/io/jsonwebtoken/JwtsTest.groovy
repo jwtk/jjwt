@@ -25,7 +25,7 @@ import java.security.SecureRandom
 
 import static org.testng.Assert.*
 
-class JWTsTest {
+class JwtsTest {
 
     @Test
     void testPlaintextJwtString() {
@@ -40,7 +40,7 @@ class JWTsTest {
                 ' "exp":1300819380,\r\n' +
                 ' "http://example.com/is_root":true}'
 
-        String val = JWTs.builder().setPayload(payload).compact();
+        String val = Jwts.builder().setPayload(payload).compact();
 
         def specOutput = 'eyJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
 
@@ -52,32 +52,32 @@ class JWTsTest {
 
         def claims = [iss: 'joe', exp: 1300819380, 'http://example.com/is_root':true]
 
-        String jwt = JWTs.builder().setClaims(claims).compact();
+        String jwt = Jwts.builder().setClaims(claims).compact();
 
-        def token = JWTs.parser().parse(jwt);
+        def token = Jwts.parser().parse(jwt);
 
         assertEquals token.body, claims
     }
 
     @Test(expectedExceptions = IllegalArgumentException)
     void testParseNull() {
-        JWTs.parser().parse(null)
+        Jwts.parser().parse(null)
     }
 
     @Test(expectedExceptions = IllegalArgumentException)
     void testParseEmptyString() {
-        JWTs.parser().parse('')
+        Jwts.parser().parse('')
     }
 
     @Test(expectedExceptions = IllegalArgumentException)
     void testParseWhitespaceString() {
-        JWTs.parser().parse('   ')
+        Jwts.parser().parse('   ')
     }
 
     @Test
     void testParseWithNoPeriods() {
         try {
-            JWTs.parser().parse('foo')
+            Jwts.parser().parse('foo')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 0"
@@ -87,7 +87,7 @@ class JWTsTest {
     @Test
     void testParseWithOnePeriodOnly() {
         try {
-            JWTs.parser().parse('.')
+            Jwts.parser().parse('.')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 1"
@@ -97,7 +97,7 @@ class JWTsTest {
     @Test
     void testParseWithTwoPeriodsOnly() {
         try {
-            JWTs.parser().parse('..')
+            Jwts.parser().parse('..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..' is missing a body/payload."
@@ -107,7 +107,7 @@ class JWTsTest {
     @Test
     void testParseWithHeaderOnly() {
         try {
-            JWTs.parser().parse('foo..')
+            Jwts.parser().parse('foo..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string 'foo..' is missing a body/payload."
@@ -117,7 +117,7 @@ class JWTsTest {
     @Test
     void testParseWithSignatureOnly() {
         try {
-            JWTs.parser().parse('..bar')
+            Jwts.parser().parse('..bar')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..bar' is missing a body/payload."
@@ -127,7 +127,7 @@ class JWTsTest {
     @Test
     void testParseWithHeaderAndSignatureOnly() {
         try {
-            JWTs.parser().parse('foo..bar')
+            Jwts.parser().parse('foo..bar')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string 'foo..bar' is missing a body/payload."
@@ -209,14 +209,14 @@ class JWTsTest {
 
         def claims = [iss: 'joe', exp: 1300819380, 'http://example.com/is_root':true]
 
-        String jwt = JWTs.builder().setClaims(claims).signWith(alg, privateKey).compact();
+        String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact();
 
         def key = publicKey;
         if (verifyWithPrivateKey) {
             key = privateKey;
         }
 
-        def token = JWTs.parser().setSigningKey(key).parse(jwt);
+        def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
         assertEquals token.header, [alg: alg.name()]
 
@@ -232,9 +232,9 @@ class JWTsTest {
 
         def claims = [iss: 'joe', exp: 1300819380, 'http://example.com/is_root':true]
 
-        String jwt = JWTs.builder().setClaims(claims).signWith(alg, key).compact();
+        String jwt = Jwts.builder().setClaims(claims).signWith(alg, key).compact();
 
-        def token = JWTs.parser().setSigningKey(key).parse(jwt)
+        def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
         assertEquals token.header, [alg: alg.name()]
 

@@ -62,5 +62,6 @@ try {
 * [Non-compact](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31#section-7.2) serialization and parsing are not yet implemented.
 * Elliptic Curve signature algorithms `ES256`, `ES384` and `ES512` are not yet implemented.
 * JWE (Encryption for JWT) is not yet implemented.
+* Awesome JavaDoc
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!

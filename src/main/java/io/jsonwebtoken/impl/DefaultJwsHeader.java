@@ -15,40 +15,40 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JwsHeader;
 
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
-public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header<T> {
+public class DefaultJwsHeader extends DefaultHeader implements JwsHeader {
 
-    public DefaultHeader() {
+    public DefaultJwsHeader() {
         super();
     }
 
-    public DefaultHeader(Map<String, Object> map) {
+    public DefaultJwsHeader(Map<String, Object> map) {
         super(map);
     }
 
     @Override
-    public String getType() {
-        return getString(TYPE);
+    public String getAlgorithm() {
+        return getString(ALGORITHM);
     }
 
     @Override
-    public T setType(String typ) {
-        setValue(TYPE, typ);
-        return (T)this;
+    public JwsHeader setAlgorithm(String alg) {
+        setValue(ALGORITHM, alg);
+        return this;
     }
 
     @Override
-    public String getContentType() {
-        return getString(CONTENT_TYPE);
+    public String getKeyId() {
+        return getString(KEY_ID);
     }
 
     @Override
-    public T setContentType(String cty) {
-        setValue(CONTENT_TYPE, cty);
-        return (T)this;
+    public JwsHeader setKeyId(String kid) {
+        setValue(KEY_ID, kid);
+        return this;
     }
+
 }

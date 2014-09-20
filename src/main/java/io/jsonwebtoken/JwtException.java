@@ -15,6 +15,11 @@
  */
 package io.jsonwebtoken;
 
+/**
+ * Base class for JWT-related runtime exceptions.
+ *
+ * @since 0.1
+ */
 public class JwtException extends RuntimeException {
 
     public JwtException(String message) {

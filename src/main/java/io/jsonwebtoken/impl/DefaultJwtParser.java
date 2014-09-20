@@ -18,11 +18,12 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.Token;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.lang.Assert;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class DefaultJwtParser implements JwtParser {
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -88,7 +90,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Token parse(String jwt) throws MalformedJwtException, SignatureException {
+    public Jwt parse(String jwt) throws MalformedJwtException, SignatureException {
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
 
@@ -137,7 +139,12 @@ public class DefaultJwtParser implements JwtParser {
         if (base64UrlEncodedHeader != null) {
             String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
             Map<String, Object> m = readValue(origValue);
-            header = new DefaultHeader(m);
+
+            if (base64UrlEncodedDigest != null) {
+                header = new DefaultJwsHeader(m);
+            } else {
+                header = new DefaultHeader(m);
+            }
         }
 
         // =============== Body =================
@@ -153,10 +160,12 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Signature =================
         if (base64UrlEncodedDigest != null) { //it is signed - validate the signature
 
+            JwsHeader jwsHeader = (JwsHeader)header;
+
             SignatureAlgorithm algorithm = null;
 
             if (header != null) {
-                String alg = header.getAlgorithm();
+                String alg = jwsHeader.getAlgorithm();
                 if (Strings.hasText(alg)) {
                     algorithm = SignatureAlgorithm.forName(alg);
                 }
@@ -200,10 +209,12 @@ public class DefaultJwtParser implements JwtParser {
             }
         }
 
-        if (claims != null) {
-            return new DefaultToken<Claims>(header, claims, base64UrlEncodedDigest);
+        Object body = claims != null ? claims : payload;
+
+        if (base64UrlEncodedDigest != null) {
+            return new DefaultJws<Object>((JwsHeader)header, body, base64UrlEncodedDigest);
         } else {
-            return new DefaultToken<String>(header, payload, base64UrlEncodedDigest);
+            return new DefaultJwt<Object>(header, body);
         }
     }
 

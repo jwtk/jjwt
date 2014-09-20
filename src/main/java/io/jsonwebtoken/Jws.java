@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-public interface SignedToken<B> extends Token<B> {
+public interface Jws<B> extends Jwt<JwsHeader,B> {
 
-    String getDigest();
+    String getSignature();
 }

@@ -18,6 +18,11 @@ package io.jsonwebtoken;
 import java.security.Key;
 import java.util.Map;
 
+/**
+ * A builder for constructing JWT instances.
+ *
+ * @since 0.1
+ */
 public interface JwtBuilder {
 
     //replaces any existing header with the specified header.

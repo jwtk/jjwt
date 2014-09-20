@@ -16,38 +16,20 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Token;
-import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.Jwt;
 
-public class DefaultToken<B> implements Token<B> {
+public class DefaultJwt<B> implements Jwt<Header,B> {
 
     private final Header header;
     private final B body;
-    private final String signature;
 
-    public DefaultToken(Header header, B body, String signature) {
+    public DefaultJwt(Header header, B body) {
         this.header = header;
         this.body = body;
-        this.signature = signature;
-    }
-
-    public boolean hasHeader() {
-        return this.header != null;
-    }
-
-    public boolean isSigned() {
-        return this.signature != null;
-    }
-
-    @Override
-    public String getSignature() {
-        Assert.notNull(signature, "Not a signed token.  Call 'isSigned()' before calling this method.");
-        return this.signature;
     }
 
     @Override
     public Header getHeader() {
-        Assert.notNull(header, "Header is not present.  Call 'hasHeader()' before calling this method.");
         return header;
     }
 

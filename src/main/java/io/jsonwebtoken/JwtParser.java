@@ -17,6 +17,11 @@ package io.jsonwebtoken;
 
 import java.security.Key;
 
+/**
+ * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
+ *
+ * @since 0.1
+ */
 public interface JwtParser {
 
     public static final char SEPARATOR_CHAR = '.';
@@ -29,5 +34,5 @@ public interface JwtParser {
 
     boolean isSigned(String jwt);
 
-    Token parse(String jwt) throws MalformedJwtException, SignatureException;
+    Jwt parse(String jwt) throws MalformedJwtException, SignatureException;
 }

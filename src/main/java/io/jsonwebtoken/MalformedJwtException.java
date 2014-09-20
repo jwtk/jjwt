@@ -15,6 +15,11 @@
  */
 package io.jsonwebtoken;
 
+/**
+ * Exception indicating that a JWT was not correctly constructed and should be rejected.
+ *
+ * @since 0.2
+ */
 public class MalformedJwtException extends JwtException {
 
     public MalformedJwtException(String message) {

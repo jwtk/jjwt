@@ -16,12 +16,36 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.impl.DefaultClaims;
+import io.jsonwebtoken.impl.DefaultHeader;
+import io.jsonwebtoken.impl.DefaultJwsHeader;
 import io.jsonwebtoken.impl.DefaultJwtBuilder;
 import io.jsonwebtoken.impl.DefaultJwtParser;
 
 import java.util.Map;
 
-public class JWTs {
+/**
+ * Factory class useful for creating instances of JWT interfaces.  Using this factory class can be a good
+ * alternative to tightly coupling your code to implementation classes.
+ *
+ * @since 0.1
+ */
+public class Jwts {
+
+    public static Header header() {
+        return new DefaultHeader();
+    }
+
+    public static Header header(Map<String,Object> header) {
+        return new DefaultHeader(header);
+    }
+
+    public static JwsHeader jwsHeader() {
+        return new DefaultJwsHeader();
+    }
+
+    public static JwsHeader jwsHeader(Map<String,Object> header) {
+        return new DefaultJwsHeader(header);
+    }
 
     public static Claims claims() {
         return new DefaultClaims();
