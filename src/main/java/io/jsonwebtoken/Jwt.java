@@ -16,9 +16,11 @@
 package io.jsonwebtoken;
 
 /**
- * An JWT instance.
+ * An expanded (not compact/serialized) JSON Web Token.
  *
- * @param <B> the type of the JWT body, either a {@link String} or a {@link Claims} instance.
+ * @param <B> the type of the JWT body contents, either a String or a {@link Claims} instance.
+ *
+ * @since 0.1
  */
 public interface Jwt<H extends Header, B> {
 
