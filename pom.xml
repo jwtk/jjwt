@@ -54,9 +54,6 @@
 
     <properties>
 
-        <!-- Turn off JDK 8's lint checks: -->
-        <additionalparam>-Xdoclint:none</additionalparam>
-
         <maven.jar.version>2.4</maven.jar.version>
         <maven.compiler.version>3.1</maven.compiler.version>
 
@@ -271,6 +268,16 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>jdk8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <!-- Turn off JDK 8's lint checks: -->
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+        </profile>
         <profile>
             <id>sign</id>
             <build>
