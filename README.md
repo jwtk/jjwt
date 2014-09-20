@@ -2,17 +2,36 @@
 
 # JSON Web Token for Java
 
-This library is intended to be the easiest to use and understand library for creating JSON Web Tokens (JWTs) on the JVM, period.  Most complexity is hidden behind convenient and readable Builder chaining calls.  Here's an example:
+This library is intended to be the easiest to use and understand library for creating JSON Web Tokens (JWTs) on the JVM, period.
+
+## Installation
+
+Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central:
+
+```xml
+
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt</artifactId>
+    <version>0.1</version>
+</dependency>
+```
+
+## Usage
+
+Most complexity is hidden behind convenient and readable Builder chaining calls.  Here's an example:
 
 ```java
+import static io.jsonwebtoken.SignatureAlgorithm.*;
+
 //Let's create a random signing key for testing:
 Random random = new SecureRandom();
 byte[] key = new byte[64];
 random.nextBytes(key);
 
-Claims claims = JWTs.claims().setIssuer("Me").setSubject("Joe");
+Claims claims = Jwts.claims().setIssuer("Me").setSubject("Joe");
 
-String jwt = JWTs.builder().setClaims(claims).signWith(SignatureAlgorithm.HS256, key).compact();
+String jwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
 ```
 
 How easy was that!?
@@ -20,7 +39,7 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-Token token = JWTs.parser().setSigningKey(key).parse(jwt);
+Token token = Jwts.parser().setSigningKey(key).parse(jwt);
 
 assert token.getClaims().getSubject().equals("Joe");
 ```
@@ -32,7 +51,7 @@ But what if signature validation failed?  You can catch `SignatureException` and
 ```java
 try {
 
-    JWTs.parser().setSigningKey(key).parse(jwt);
+    Jwts.parser().setSigningKey(key).parse(jwt);
 
     //OK, we can trust this JWT
 
@@ -62,6 +81,5 @@ try {
 * [Non-compact](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31#section-7.2) serialization and parsing are not yet implemented.
 * Elliptic Curve signature algorithms `ES256`, `ES384` and `ES512` are not yet implemented.
 * JWE (Encryption for JWT) is not yet implemented.
-* Awesome JavaDoc
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
