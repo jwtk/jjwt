@@ -22,6 +22,7 @@ Use your favorite Maven-compatible build tool to pull the dependency (and its tr
 Most complexity is hidden behind convenient and readable Builder chaining calls.  Here's an example:
 
 ```java
+import io.jsonwebtoken.Jwts;
 import static io.jsonwebtoken.SignatureAlgorithm.*;
 
 //Let's create a random signing key for testing:
