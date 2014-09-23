@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
 
-# JSON Web Token for Java
+# Java JWT: JSON Web Token for Java
 
 This library is intended to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM, period.
 
