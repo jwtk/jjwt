@@ -2,9 +2,9 @@
 
 # Java JWT: JSON Web Token for Java
 
-This library is intended to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM, period.
+JJWT library is intended to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM, period.
 
-JJWT is a 'clean room' implementation based soley on the [JWT](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25), [JWS](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31), [JWE](https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-31) and [JWA](https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31) RFC draft specifications.
+JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25), [JWS](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31), [JWE](https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-31) and [JWA](https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31) RFC draft specifications.
 
 ## Installation
 
