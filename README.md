@@ -4,6 +4,8 @@
 
 This library is intended to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM, period.
 
+JJWT is a 'clean room' implementation based soley on the [JWT](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25), [JWS](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31), [JWE](https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-31) and [JWA](https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31) RFC draft specifications.
+
 ## Installation
 
 Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central:
