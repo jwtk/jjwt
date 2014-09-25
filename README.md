@@ -66,7 +66,7 @@ try {
 
 * Creating and parsing plaintext compact JWTs
 
-* Creating and parsing digitally signed compact JWTs (aka JWSs) with the following algorithms:
+* Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with the following algorithms:
     * HS256: HMAC using SHA-384
     * HS384: HMAC using SHA-384
     * HS512: HMAC using SHA-512
