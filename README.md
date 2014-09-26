@@ -11,13 +11,14 @@ JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ie
 Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central:
 
 ```xml
-
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
     <version>0.1</version>
 </dependency>
 ```
+
+Note: JJWT depends on Jackson 2.x.  If you're already using an older version of Jackson in your app, [read this](#olderJackson)
 
 ## Usage
 
@@ -86,3 +87,16 @@ try {
 * JWE (Encryption for JWT)
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
+
+<a name="olderJackson"></a>
+#### Already using an older Jackson dependency?
+
+JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson version in your own application less than 2.x, for example 1.9.x, you will likely see compile/build failures.  To avoid this, you should upgrade your project's build configuration to point to a 2.x version of Jackson.  For example:
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.4.2</version>
+</dependency>
+```
