@@ -35,7 +35,7 @@ random.nextBytes(key);
 
 Claims claims = Jwts.claims().setIssuer("Me").setSubject("Joe");
 
-String jwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
+String compactJwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
 ```
 
 How easy was that!?
@@ -43,9 +43,9 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-Token token = Jwts.parser().setSigningKey(key).parse(jwt);
+Jwt jwt = Jwts.parser().setSigningKey(key).parse(compactJwt);
 
-assert token.getClaims().getSubject().equals("Joe");
+assert jwt.getClaims().getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets in Java!
@@ -55,7 +55,7 @@ But what if signature validation failed?  You can catch `SignatureException` and
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parse(jwt);
+    Jwts.parser().setSigningKey(key).parse(compactJwt);
 
     //OK, we can trust this JWT
 
