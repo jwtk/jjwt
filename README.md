@@ -33,7 +33,7 @@ Random random = new SecureRandom();
 byte[] key = new byte[64];
 random.nextBytes(key);
 
-String compactJwt = Jwts.builder().setSubject("Joe").signWith(HS256, key).compact();
+String compact = Jwts.builder().setSubject("Joe").signWith(HS256, key).compact();
 ```
 
 How easy was that!?
@@ -41,9 +41,9 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-Jwt jwt = Jwts.parser().setSigningKey(key).parse(compactJwt);
+Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(compact).getBody();
 
-assert ((Claims)jwt.getBody()).getSubject().equals("Joe");
+assert claims.getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets in Java!
