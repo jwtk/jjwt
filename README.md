@@ -106,7 +106,7 @@ can now be written as:
 String compactJwt = Jwts.builder().setIssuer("Me").setSubject("Joe").signWith(HS256, key).compact();
 ```
 
-and the JWT payload will use a constructed Claims instance automatically.
+A Claims instance based on the specified claims will be created and set as the JWT's payload automatically.
 
 <a name="olderJackson"></a>
 #### Already using an older Jackson dependency?
