@@ -232,16 +232,16 @@ public class DefaultJwtParser implements JwtParser {
             Jws jws = (Jws)jwt;
             Object body = jws.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJws(jws);
+                return handler.onClaimsJws((Jws<Claims>)jws);
             } else {
-                return handler.onPlaintextJws(jws);
+                return handler.onPlaintextJws((Jws<String>)jws);
             }
         } else {
             Object body = jwt.getBody();
             if (body instanceof Claims) {
-                return handler.onPlaintextJwt(jwt);
+                return handler.onClaimsJwt((Jwt<Header,Claims>)jwt);
             } else {
-                return handler.onClaimsJwt(jwt);
+                return handler.onPlaintextJwt((Jwt<Header,String>)jwt);
             }
         }
     }
