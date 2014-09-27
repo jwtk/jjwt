@@ -33,7 +33,7 @@ Random random = new SecureRandom();
 byte[] key = new byte[64];
 random.nextBytes(key);
 
-String compactJwt = Jwts.builder().setIssuer("Me").setSubject("Joe").signWith(HS256, key).compact();
+String compact = Jwts.builder().setSubject("Joe").signWith(HS256, key).compact();
 ```
 
 How easy was that!?
@@ -41,9 +41,9 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-Jwt jwt = Jwts.parser().setSigningKey(key).parse(compactJwt);
+Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(compact).getBody();
 
-assert ((Claims)jwt.getBody()).getSubject().equals("Joe");
+assert claims.getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets in Java!
@@ -95,7 +95,7 @@ These feature sets will be implemented in a future release when possible.  Commu
 This release adds convenience methods to the `JwtBuilder` interface so you can set claims directly on the builder without having to create a separate Claims instance/builder, reducing the amount of code you have to write.  For example, this:
 
 ```java
-Claims claims = Jwts.claims().setIssuer("Me").setSubject("Joe");
+Claims claims = Jwts.claims().setSubject("Joe");
 
 String compactJwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
 ```
@@ -103,7 +103,7 @@ String compactJwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compac
 can now be written as:
 
 ```java
-String compactJwt = Jwts.builder().setIssuer("Me").setSubject("Joe").signWith(HS256, key).compact();
+String compactJwt = Jwts.builder().setSubject("Joe").signWith(HS256, key).compact();
 ```
 
 A Claims instance based on the specified claims will be created and set as the JWT's payload automatically.
