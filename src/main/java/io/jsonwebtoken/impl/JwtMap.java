@@ -47,11 +47,13 @@ public class JwtMap implements Map<String,Object> {
         } else if (v instanceof Date) {
             return (Date) v;
         } else if (v instanceof Number) {
-            int seconds = ((Number) v).intValue();
-            return new Date(seconds * 1000);
+            long seconds = ((Number) v).longValue();
+            long millis = seconds * 1000;
+            return new Date(millis);
         } else if (v instanceof String) {
-            int seconds = Integer.parseInt((String) v);
-            return new Date(seconds * 1000);
+            long seconds = Long.parseLong((String) v);
+            long millis = seconds * 1000;
+            return new Date(millis);
         } else {
             throw new IllegalStateException("Cannot convert '" + name + "' value [" + v + "] to Date instance.");
         }

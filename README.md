@@ -33,9 +33,7 @@ Random random = new SecureRandom();
 byte[] key = new byte[64];
 random.nextBytes(key);
 
-Claims claims = Jwts.claims().setIssuer("Me").setSubject("Joe");
-
-String compactJwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
+String compactJwt = Jwts.builder().setIssuer("Me").setSubject("Joe").signWith(HS256, key).compact();
 ```
 
 How easy was that!?
@@ -45,7 +43,7 @@ Now let's verify the JWT (you should always discard JWTs that don't match an exp
 ```java
 Jwt jwt = Jwts.parser().setSigningKey(key).parse(compactJwt);
 
-assert jwt.getClaims().getSubject().equals("Joe");
+assert ((Claims)jwt.getBody()).getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets in Java!
@@ -87,6 +85,28 @@ try {
 * JWE (Encryption for JWT)
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
+
+## Release Notes
+
+### 0.2
+
+#### More convenient Claims building
+
+This release adds convenience methods to the `JwtBuilder` interface so you can set claims directly on the builder without having to create a separate Claims instance/builder, reducing the amount of code you have to write.  For example, this:
+
+```java
+Claims claims = Jwts.claims().setIssuer("Me").setSubject("Joe");
+
+String compactJwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
+```
+
+can now be written as:
+
+```java
+String compactJwt = Jwts.builder().setIssuer("Me").setSubject("Joe").signWith(HS256, key).compact();
+```
+
+A Claims instance based on the specified claims will be created and set as the JWT's payload automatically.
 
 <a name="olderJackson"></a>
 #### Already using an older Jackson dependency?
