@@ -22,7 +22,7 @@ Note: JJWT depends on Jackson 2.x.  If you're already using an older version of 
 
 ## Usage
 
-Most complexity is hidden behind convenient and readable Builder chaining calls.  Here's an example:
+Most complexity is hidden behind a convenient and readable builder-based [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface), great for relying on IDE auto-completion to write code quickly.  Here's an example:
 
 ```java
 import io.jsonwebtoken.Jwts;
