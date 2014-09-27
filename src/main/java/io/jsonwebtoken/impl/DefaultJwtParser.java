@@ -27,6 +27,7 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.lang.Assert;
@@ -239,9 +240,9 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             Object body = jwt.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<Header,Claims>)jwt);
+                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
             } else {
-                return handler.onPlaintextJwt((Jwt<Header,String>)jwt);
+                return handler.onPlaintextJwt((Jwt<Header, String>) jwt);
             }
         }
     }
@@ -258,22 +259,30 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
-        return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
-            @Override
-            public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
-                return jwt;
-            }
-        });
+        try {
+            return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
+                @Override
+                public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
+                    return jwt;
+                }
+            });
+        } catch (IllegalArgumentException iae) {
+            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
+        }
     }
 
     @Override
     public Jws<String> parsePlaintextJws(String plaintextJws) {
-        return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
-            @Override
-            public Jws<String> onPlaintextJws(Jws<String> jws) {
-                return jws;
-            }
-        });
+        try {
+            return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
+                @Override
+                public Jws<String> onPlaintextJws(Jws<String> jws) {
+                    return jws;
+                }
+            });
+        } catch (IllegalArgumentException iae) {
+            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
+        }
     }
 
     @Override

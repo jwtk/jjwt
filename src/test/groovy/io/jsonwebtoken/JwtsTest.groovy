@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.impl.DefaultHeader
+import io.jsonwebtoken.impl.DefaultJwsHeader
 import org.testng.annotations.Test
 
 import java.security.KeyPair
@@ -26,6 +28,45 @@ import java.security.SecureRandom
 import static org.testng.Assert.*
 
 class JwtsTest {
+
+    @Test
+    void testHeaderWithNoArgs() {
+        def header = Jwts.header()
+        assertTrue header instanceof DefaultHeader
+    }
+
+    @Test
+    void testHeaderWithMapArg() {
+        def header = Jwts.header([alg: "HS256"])
+        assertTrue header instanceof DefaultHeader
+        assertEquals header.alg, 'HS256'
+    }
+
+    @Test
+    void testJwsHeaderWithNoArgs() {
+        def header = Jwts.jwsHeader()
+        assertTrue header instanceof DefaultJwsHeader
+    }
+
+    @Test
+    void testJwsHeaderWithMapArg() {
+        def header = Jwts.jwsHeader([alg: "HS256"])
+        assertTrue header instanceof DefaultJwsHeader
+        assertEquals header.getAlgorithm(), 'HS256'
+    }
+
+    @Test
+    void testClaims() {
+        Claims claims = Jwts.claims()
+        assertNotNull claims
+    }
+
+    @Test
+    void testClaimsWithMapArg() {
+        Claims claims = Jwts.claims([sub: 'Joe'])
+        assertNotNull claims
+        assertEquals claims.getSubject(), 'Joe'
+    }
 
     @Test
     void testPlaintextJwtString() {
@@ -179,11 +220,11 @@ class JwtsTest {
         assertNull claims.getAudience()
     }
 
-    private Date dateWithOnlySecondPrecision() {
+    private static Date dateWithOnlySecondPrecision() {
         return dateWithOnlySecondPrecision(System.currentTimeMillis());
     }
 
-    private Date dateWithOnlySecondPrecision(long millis) {
+    private static Date dateWithOnlySecondPrecision(long millis) {
         long seconds = millis / 1000;
         long secondOnlyPrecisionMillis = seconds * 1000;
         return new Date(secondOnlyPrecisionMillis);

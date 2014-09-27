@@ -91,9 +91,6 @@ public class Jwts {
      * @return a new {@link Claims} instance populated with the specified name/value pairs.
      */
     public static Claims claims(Map<String, Object> claims) {
-        if (claims == null) {
-            return claims();
-        }
         return new DefaultClaims(claims);
     }
 
