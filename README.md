@@ -14,7 +14,7 @@ Use your favorite Maven-compatible build tool to pull the dependency (and its tr
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 </dependency>
 ```
 
