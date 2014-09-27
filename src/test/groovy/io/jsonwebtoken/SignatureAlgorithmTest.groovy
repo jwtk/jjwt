@@ -16,6 +16,7 @@
 package io.jsonwebtoken
 
 import org.testng.annotations.Test
+
 import static org.testng.Assert.*
 
 class SignatureAlgorithmTest {
@@ -41,4 +42,38 @@ class SignatureAlgorithmTest {
     void testUnrecognizedAlgorithmName() {
         SignatureAlgorithm.forName('whatever')
     }
+
+    @Test
+    void testIsHmac() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.name().startsWith("HS")) {
+                assertTrue alg.isHmac()
+            } else {
+                assertFalse alg.isHmac()
+            }
+        }
+    }
+
+    @Test
+    void testIsRsa() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.getDescription().startsWith("RSASSA")) {
+                assertTrue alg.isRsa()
+            } else {
+                assertFalse alg.isRsa()
+            }
+        }
+    }
+
+    @Test
+    void testIsEllipticCurve() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.name().startsWith("ES")) {
+                assertTrue alg.isEllipticCurve()
+            } else {
+                assertFalse alg.isEllipticCurve()
+            }
+        }
+    }
+
 }

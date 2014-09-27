@@ -135,6 +135,128 @@ class JwtsTest {
     }
 
     @Test
+    void testConvenienceIssuer() {
+        String compact = Jwts.builder().setIssuer("Me").compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getIssuer(), "Me"
+
+        compact = Jwts.builder().setSubject("Joe")
+                .setIssuer("Me") //set it
+                .setIssuer(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getIssuer()
+    }
+
+    @Test
+    void testConvenienceSubject() {
+        String compact = Jwts.builder().setSubject("Joe").compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getSubject(), "Joe"
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setSubject("Joe") //set it
+                .setSubject(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getSubject()
+    }
+
+    @Test
+    void testConvenienceAudience() {
+        String compact = Jwts.builder().setAudience("You").compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getAudience(), "You"
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setAudience("You") //set it
+                .setAudience(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getAudience()
+    }
+
+    private Date dateWithOnlySecondPrecision() {
+        return dateWithOnlySecondPrecision(System.currentTimeMillis());
+    }
+
+    private Date dateWithOnlySecondPrecision(long millis) {
+        long seconds = millis / 1000;
+        long secondOnlyPrecisionMillis = seconds * 1000;
+        return new Date(secondOnlyPrecisionMillis);
+    }
+
+    @Test
+    void testConvenienceExpiration() {
+        Date now = dateWithOnlySecondPrecision() //jwt exp only supports *seconds* since epoch:
+        String compact = Jwts.builder().setExpiration(now).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        def claimedDate = claims.getExpiration()
+        assertEquals claimedDate, now
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setExpiration(now) //set it
+                .setExpiration(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getExpiration()
+    }
+
+    @Test
+    void testConvenienceNotBefore() {
+        Date now = dateWithOnlySecondPrecision() //jwt exp only supports *seconds* since epoch:
+        String compact = Jwts.builder().setNotBefore(now).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        def claimedDate = claims.getNotBefore()
+        assertEquals claimedDate, now
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setNotBefore(now) //set it
+                .setNotBefore(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getNotBefore()
+    }
+
+    @Test
+    void testConvenienceIssuedAt() {
+        Date now = dateWithOnlySecondPrecision() //jwt exp only supports *seconds* since epoch:
+        String compact = Jwts.builder().setIssuedAt(now).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        def claimedDate = claims.getIssuedAt()
+        assertEquals claimedDate, now
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setIssuedAt(now) //set it
+                .setIssuedAt(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getIssuedAt()
+    }
+
+    @Test
+    void testConvenienceId() {
+        String id = UUID.randomUUID().toString();
+        String compact = Jwts.builder().setId(id).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getId(), id
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setId(id) //set it
+                .setId(null) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getId()
+    }
+
+    @Test
     void testHS256() {
         testHmac(SignatureAlgorithm.HS256);
     }

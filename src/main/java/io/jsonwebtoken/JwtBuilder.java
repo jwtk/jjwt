@@ -16,6 +16,7 @@
 package io.jsonwebtoken;
 
 import java.security.Key;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -23,7 +24,7 @@ import java.util.Map;
  *
  * @since 0.1
  */
-public interface JwtBuilder {
+public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     //replaces any existing header with the specified header.
 
@@ -99,6 +100,223 @@ public interface JwtBuilder {
      * @return the builder for method chaining.
      */
     JwtBuilder setClaims(Map<String, Object> claims);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">
+     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setIssuer(String) issuer} field with the specified value.  This allows you to write
+     * code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setIssuer("Joe").compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setIssuer("Joe");
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param iss the JWT {@code iss} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setIssuer(String iss);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.2">
+     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setSubject(String) subject} field with the specified value.  This allows you to write
+     * code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setSubject("Me").compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setSubject("Me");
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setSubject(String sub);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
+     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setAudience(String) audience} field with the specified value.  This allows you to write
+     * code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setAudience("You").compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setSubject("You");
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setAudience(String aud);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">
+     * <code>exp</code></a> (expiration) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setExpiration(java.util.Date) expiration} field with the specified value.  This allows
+     * you to write code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setExpiration(new Date(System.currentTimeMillis() + 3600000)).compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setExpiration(new Date(System.currentTimeMillis() + 3600000));
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setExpiration(Date exp);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
+     * <code>nbf</code></a> (not before) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setNotBefore(java.util.Date) notBefore} field with the specified value.  This allows
+     * you to write code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setNotBefore(new Date()).compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setNotBefore(new Date());
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setNotBefore(Date nbf);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
+     * <code>iat</code></a> (issued at) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is the timestamp when the JWT was created.</p>
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setIssuedAt(java.util.Date) issuedAt} field with the specified value.  This allows
+     * you to write code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setIssuedAt(new Date()).compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setIssuedAt(new Date());
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setIssuedAt(Date iat);
+
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">
+     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
+     * manner that ensures that there is a negligible probability that the same value will be accidentally
+     * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.</p>
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setId(String) id} field with the specified value.  This allows
+     * you to write code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setId(UUID.randomUUID().toString()).compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setIssuedAt(UUID.randomUUID().toString());
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param jti the JWT {@code jti} (id) value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setId(String jti);
+
+    /**
+     * Sets a custom JWT Claims parameter value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set the
+     * named property on the Claims instance using the Claims {@link Claims#put(Object, Object) put} method. This allows
+     * you to write code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().claim("aName", "aValue").compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().put("aName", "aValue");
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     *
+     * @param name the JWT Claims property name
+     * @param value the value to set for the specified Claims property name
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    JwtBuilder claim(String name, Object value);
 
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.

@@ -29,9 +29,11 @@ import io.jsonwebtoken.impl.crypto.JwtSigner;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Strings;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.util.Date;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -117,6 +119,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this;
     }
 
+    protected Claims ensureClaims() {
+        if (this.claims == null) {
+            this.claims = new DefaultClaims();
+        }
+        return this.claims;
+    }
+
     @Override
     public JwtBuilder setClaims(Claims claims) {
         this.claims = claims;
@@ -130,12 +139,117 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
+    public JwtBuilder setIssuer(String iss) {
+        if (Strings.hasText(iss)) {
+            ensureClaims().setIssuer(iss);
+        } else {
+            if (this.claims != null) {
+                claims.setIssuer(iss);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder setSubject(String sub) {
+        if (Strings.hasText(sub)) {
+            ensureClaims().setSubject(sub);
+        } else {
+            if (this.claims != null) {
+                claims.setSubject(sub);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder setAudience(String aud) {
+        if (Strings.hasText(aud)) {
+            ensureClaims().setAudience(aud);
+        } else {
+            if (this.claims != null) {
+                claims.setAudience(aud);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder setExpiration(Date exp) {
+        if (exp != null) {
+            ensureClaims().setExpiration(exp);
+        } else {
+            if (this.claims != null) {
+                //noinspection ConstantConditions
+                this.claims.setExpiration(exp);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder setNotBefore(Date nbf) {
+        if (nbf != null) {
+            ensureClaims().setNotBefore(nbf);
+        } else {
+            if (this.claims != null) {
+                //noinspection ConstantConditions
+                this.claims.setNotBefore(nbf);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder setIssuedAt(Date iat) {
+        if (iat != null) {
+            ensureClaims().setIssuedAt(iat);
+        } else {
+            if (this.claims != null) {
+                //noinspection ConstantConditions
+                this.claims.setIssuedAt(iat);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder setId(String jti) {
+        if (Strings.hasText(jti)) {
+            ensureClaims().setId(jti);
+        } else {
+            if (this.claims != null) {
+                claims.setId(jti);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JwtBuilder claim(String name, Object value) {
+        Assert.hasText(name, "Claim property name cannot be null or empty.");
+        if (this.claims == null) {
+            if (value != null) {
+                ensureClaims().put(name, value);
+            }
+        } else {
+            if (value == null) {
+                this.claims.remove(name);
+            } else {
+                this.claims.put(name, value);
+            }
+        }
+
+        return this;
+    }
+
+    @Override
     public String compact() {
-        if (payload == null && claims == null) {
+        if (payload == null && Collections.isEmpty(claims)) {
             throw new IllegalStateException("Either 'payload' or 'claims' must be specified.");
         }
 
-        if (payload != null && claims != null) {
+        if (payload != null && !Collections.isEmpty(claims)) {
             throw new IllegalStateException("Both 'payload' and 'claims' cannot both be specified. Choose either one.");
         }
 
