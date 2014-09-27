@@ -170,7 +170,7 @@ T returnVal = Jwts.parser().setSigningKey(key).parse(plaintextJwt, new JwtHandle
 
 ##### Known Type convenience parse methods
 
-If, unlike above, you are confident of the type of the compact JWT string, you can just use one of the 4 new convenience parsing methods to get exactly the type of JWT or JWS you know exists.  For example:
+If, unlike above, you are confident of the compact string format and know which type of JWT or JWS it will produce, you can just use one of the 4 new convenience parsing methods to get exactly the type of JWT or JWS you know exists.  For example:
 
 ```java
 
