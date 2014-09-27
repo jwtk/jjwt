@@ -108,6 +108,86 @@ String compactJwt = Jwts.builder().setSubject("Joe").signWith(HS256, key).compac
 
 A Claims instance based on the specified claims will be created and set as the JWT's payload automatically.
 
+#### Type-safe handling for JWT and JWS with generics
+
+The following < 0.2 code produced a JWT as expected:
+
+```java
+Jwt jwt = Jwts.parser().setSigningKey(key).parse(compact);
+```
+
+But you couldn't easily determine if the `jwt` was a `JWT` or `JWS` instance or if the body was a `Claims` instance or a plaintext `String`.  In 0.2, we introduce the `JwtHandler` when you don't know the exact format of the compact JWT string ahead of time, and parsing convenience methods when you do.
+
+##### JwtHandler
+
+If you do not know the format of the compact JWT string at the time you try to parse it, you can determine what type it is after parsing by providing a `JwtHandler` instance to the `JwtParser` with the new `parse(String compactJwt, JwtHandler handler)` method.  For example:
+
+```java
+T returnVal = Jwts.parser().setSigningKey(key).parse(compact, new JwtHandler<T>() {
+    @Override
+    public Object onPlaintextJwt(Jwt<Header, String> jwt) {
+        //the JWT parsed was an unsigned plaintext JWT
+        //inspect it, then return an instance of T (see returnVal above)
+    }
+    
+    @Override
+    public Object onClaimsJwt(Jwt<Header, Claims> jwt) {
+        //the JWT parsed was an unsigned Claims JWT
+        //inspect it, then return an instance of T (see returnVal above)
+    }
+
+    @Override
+    public Object onPlaintextJws(Jws<String> jws) {
+        //the JWT parsed was a signed plaintext JWS
+        //inspect it, then return an instance of T (see returnVal above)
+    }
+
+    @Override
+    public Object onClaimsJws(Jws<Claims> jws) {
+        //the JWT parsed was a signed Claims JWS
+        //inspect it, then return an instance of T (see returnVal above)
+    }
+});
+```
+
+Of course, if you know you'll only have to parse a subset of the above, you can use the `JwtHandlerAdapter` and implement only the methods you need.  For example:
+
+```java
+T returnVal = Jwts.parser().setSigningKey(key).parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, T>>() {
+    @Override
+    public Object onPlaintextJws(Jws<String> jws) {
+        //the JWT parsed was a signed plaintext JWS
+        //inspect it, then return an instance of T (see returnVal above)
+    }
+
+    @Override
+    public Object onClaimsJws(Jws<Claims> jws) {
+        //the JWT parsed was a signed Claims JWS
+        //inspect it, then return an instance of T (see returnVal above)
+    }
+});
+```
+
+##### Known Type convenience parse methods
+
+If, unlike above, you are confident of the type of the compact JWT string, you can just use one of the 4 new convenience parsing methods to get exactly the type of JWT or JWS you know exists.  For example:
+
+```java
+
+//for a known plaintext jwt string:
+Jwt<Header,String> jwt = Jwts.parser().parsePlaintextJwt(compact);
+
+//for a known Claims JWT string:
+Jwt<Header,Claims> jwt = Jwts.parser().parseClaimsJwt(compact);
+
+//for a known signed plaintext JWT (aka a plaintext JWS):
+Jws<String> jws = Jwts.parser().setSigningKey(key).parsePlaintextJws(compact);
+
+//for a known signed Claims JWT (aka a Claims JWS):
+Jws<Claims> jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+
+```
+
 <a name="olderJackson"></a>
 #### Already using an older Jackson dependency?
 
