@@ -258,17 +258,32 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
-        return null;
+        return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
+            @Override
+            public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
+                return jwt;
+            }
+        });
     }
 
     @Override
     public Jws<String> parsePlaintextJws(String plaintextJws) {
-        return null;
+        return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
+            @Override
+            public Jws<String> onPlaintextJws(Jws<String> jws) {
+                return jws;
+            }
+        });
     }
 
     @Override
     public Jws<Claims> parseClaimsJws(String claimsJws) {
-        return null;
+        return parse(claimsJws, new JwtHandlerAdapter<Jws<Claims>>() {
+            @Override
+            public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
+                return jws;
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
