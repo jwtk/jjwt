@@ -18,12 +18,16 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtHandler;
+import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.lang.Assert;
@@ -216,6 +220,79 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             return new DefaultJwt<Object>(header, body);
         }
+    }
+
+    @Override
+    public <T> T parse(String compact, JwtHandler<T> handler) throws MalformedJwtException, SignatureException {
+        Assert.notNull(handler, "JwtHandler argument cannot be null.");
+        Assert.hasText(compact, "JWT String argument cannot be null or empty.");
+
+        Jwt jwt = parse(compact);
+
+        if (jwt instanceof Jws) {
+            Jws jws = (Jws)jwt;
+            Object body = jws.getBody();
+            if (body instanceof Claims) {
+                return handler.onClaimsJws((Jws<Claims>)jws);
+            } else {
+                return handler.onPlaintextJws((Jws<String>)jws);
+            }
+        } else {
+            Object body = jwt.getBody();
+            if (body instanceof Claims) {
+                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
+            } else {
+                return handler.onPlaintextJwt((Jwt<Header, String>) jwt);
+            }
+        }
+    }
+
+    @Override
+    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
+        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
+            @Override
+            public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
+                return jwt;
+            }
+        });
+    }
+
+    @Override
+    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
+        try {
+            return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
+                @Override
+                public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
+                    return jwt;
+                }
+            });
+        } catch (IllegalArgumentException iae) {
+            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
+        }
+    }
+
+    @Override
+    public Jws<String> parsePlaintextJws(String plaintextJws) {
+        try {
+            return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
+                @Override
+                public Jws<String> onPlaintextJws(Jws<String> jws) {
+                    return jws;
+                }
+            });
+        } catch (IllegalArgumentException iae) {
+            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
+        }
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(String claimsJws) {
+        return parse(claimsJws, new JwtHandlerAdapter<Jws<Claims>>() {
+            @Override
+            public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
+                return jws;
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
