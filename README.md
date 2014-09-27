@@ -11,13 +11,14 @@ JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ie
 Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central:
 
 ```xml
-
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
     <version>0.1</version>
 </dependency>
 ```
+
+Note: JJWT depends on Jackson 2.x.  If you're already using an older version of Jackson in your app, [read this](#olderJackson)
 
 ## Usage
 
@@ -34,7 +35,7 @@ random.nextBytes(key);
 
 Claims claims = Jwts.claims().setIssuer("Me").setSubject("Joe");
 
-String jwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
+String compactJwt = Jwts.builder().setClaims(claims).signWith(HS256, key).compact();
 ```
 
 How easy was that!?
@@ -42,9 +43,9 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-Token token = Jwts.parser().setSigningKey(key).parse(jwt);
+Jwt jwt = Jwts.parser().setSigningKey(key).parse(compactJwt);
 
-assert token.getClaims().getSubject().equals("Joe");
+assert jwt.getClaims().getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets in Java!
@@ -54,7 +55,7 @@ But what if signature validation failed?  You can catch `SignatureException` and
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parse(jwt);
+    Jwts.parser().setSigningKey(key).parse(compactJwt);
 
     //OK, we can trust this JWT
 
@@ -86,3 +87,16 @@ try {
 * JWE (Encryption for JWT)
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
+
+<a name="olderJackson"></a>
+#### Already using an older Jackson dependency?
+
+JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson version in your own application less than 2.x, for example 1.9.x, you will likely see [runtime errors](https://github.com/jwtk/jjwt/issues/1).  To avoid this, you should change your project build configuration to explicitly point to a 2.x version of Jackson.  For example:
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.4.2</version>
+</dependency>
+```
