@@ -18,8 +18,11 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtHandler;
+import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -216,6 +219,56 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             return new DefaultJwt<Object>(header, body);
         }
+    }
+
+    @Override
+    public <T> T parse(String compact, JwtHandler<T> handler) throws MalformedJwtException, SignatureException {
+        Assert.notNull(handler, "JwtHandler argument cannot be null.");
+        Assert.hasText(compact, "JWT String argument cannot be null or empty.");
+
+        Jwt jwt = parse(compact);
+
+        if (jwt instanceof Jws) {
+            Jws jws = (Jws)jwt;
+            Object body = jws.getBody();
+            if (body instanceof Claims) {
+                return handler.onClaimsJws(jws);
+            } else {
+                return handler.onPlaintextJws(jws);
+            }
+        } else {
+            Object body = jwt.getBody();
+            if (body instanceof Claims) {
+                return handler.onPlaintextJwt(jwt);
+            } else {
+                return handler.onClaimsJwt(jwt);
+            }
+        }
+    }
+
+    @Override
+    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
+        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
+            @Override
+            public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
+                return jwt;
+            }
+        });
+    }
+
+    @Override
+    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
+        return null;
+    }
+
+    @Override
+    public Jws<String> parsePlaintextJws(String plaintextJws) {
+        return null;
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(String claimsJws) {
+        return null;
     }
 
     @SuppressWarnings("unchecked")
