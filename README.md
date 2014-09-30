@@ -125,25 +125,25 @@ If you do not know the format of the compact JWT string at the time you try to p
 ```java
 T returnVal = Jwts.parser().setSigningKey(key).parse(compact, new JwtHandler<T>() {
     @Override
-    public Object onPlaintextJwt(Jwt<Header, String> jwt) {
+    public T onPlaintextJwt(Jwt<Header, String> jwt) {
         //the JWT parsed was an unsigned plaintext JWT
         //inspect it, then return an instance of T (see returnVal above)
     }
     
     @Override
-    public Object onClaimsJwt(Jwt<Header, Claims> jwt) {
+    public T onClaimsJwt(Jwt<Header, Claims> jwt) {
         //the JWT parsed was an unsigned Claims JWT
         //inspect it, then return an instance of T (see returnVal above)
     }
 
     @Override
-    public Object onPlaintextJws(Jws<String> jws) {
+    public T onPlaintextJws(Jws<String> jws) {
         //the JWT parsed was a signed plaintext JWS
         //inspect it, then return an instance of T (see returnVal above)
     }
 
     @Override
-    public Object onClaimsJws(Jws<Claims> jws) {
+    public T onClaimsJws(Jws<Claims> jws) {
         //the JWT parsed was a signed Claims JWS
         //inspect it, then return an instance of T (see returnVal above)
     }
@@ -155,13 +155,13 @@ Of course, if you know you'll only have to parse a subset of the above, you can 
 ```java
 T returnVal = Jwts.parser().setSigningKey(key).parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, T>>() {
     @Override
-    public Object onPlaintextJws(Jws<String> jws) {
+    public T onPlaintextJws(Jws<String> jws) {
         //the JWT parsed was a signed plaintext JWS
         //inspect it, then return an instance of T (see returnVal above)
     }
 
     @Override
-    public Object onClaimsJws(Jws<Claims> jws) {
+    public T onClaimsJws(Jws<Claims> jws) {
         //the JWT parsed was a signed Claims JWS
         //inspect it, then return an instance of T (see returnVal above)
     }
