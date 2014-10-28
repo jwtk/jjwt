@@ -90,7 +90,7 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 ### 0.3
 
-Parsing a expired Claims JWT or JWS (as determined by the `exp` claims field) will now throw an `ExpiredJwtException`.
+Parsing an expired Claims JWT or JWS (as determined by the `exp` claims field) will now throw an `ExpiredJwtException`.
 
 ### 0.2
 
