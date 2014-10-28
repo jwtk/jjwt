@@ -160,6 +160,20 @@ class JwtParserTest {
         assertEquals jwt.body, payload
     }
 
+    @Test
+    void testParseWithExpiredJwt() {
+
+        Date exp = new Date(System.currentTimeMillis() - 1000);
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact();
+
+        try {
+            Jwts.parser().parse(compact);
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
     // ========================================================================
     // parsePlaintextJwt tests
     // ========================================================================
@@ -275,6 +289,23 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseClaimsJwtWithExpiredJwt() {
+
+        long nowMillis = System.currentTimeMillis();
+        //some time in the past:
+        Date exp = new Date(nowMillis - 1000);
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        try {
+            Jwts.parser().parseClaimsJwt(compact);
+            fail();
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
     // ========================================================================
     // parsePlaintextJws tests
     // ========================================================================
@@ -357,6 +388,25 @@ class JwtParserTest {
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
 
         assertEquals jwt.getBody().getSubject(), sub
+    }
+
+    @Test
+    void testParseClaimsJwsWithExpiredJws() {
+
+        byte[] key = randomKey()
+
+        long nowMillis = System.currentTimeMillis();
+        //some time in the past:
+        Date exp = new Date(nowMillis - 1000);
+
+        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).setExpiration(exp).compact()
+
+        try {
+            Jwts.parser().parseClaimsJwt(compact);
+            fail();
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
     }
 
     @Test

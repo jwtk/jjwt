@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
@@ -37,6 +38,8 @@ import io.jsonwebtoken.lang.Strings;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.Key;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -94,7 +97,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt parse(String jwt) throws MalformedJwtException, SignatureException {
+    public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
 
@@ -161,6 +164,28 @@ public class DefaultJwtParser implements JwtParser {
             claims = new DefaultClaims(claimsMap);
         }
 
+        //since 0.3:
+        if (claims != null) {
+
+            Date exp = claims.getExpiration();
+
+            if (exp != null) {
+
+                Date now = new Date();
+
+                if (now.after(exp)) {
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"); //don't need millis since JWT exp field only has second granularity
+
+                    String expVal = sdf.format(exp);
+                    String nowVal = sdf.format(now);
+
+                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal;
+                    throw new ExpiredJwtException(msg);
+                }
+            }
+        }
+
         // =============== Signature =================
         if (base64UrlEncodedDigest != null) { //it is signed - validate the signature
 
@@ -223,7 +248,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public <T> T parse(String compact, JwtHandler<T> handler) throws MalformedJwtException, SignatureException {
+    public <T> T parse(String compact, JwtHandler<T> handler) throws ExpiredJwtException, MalformedJwtException, SignatureException {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
 

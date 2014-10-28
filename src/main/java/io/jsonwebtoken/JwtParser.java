@@ -106,6 +106,8 @@ public interface JwtParser {
      *                                  JWTs should not be trusted and should be discarded.
      * @throws SignatureException       if a JWS signature was discovered, but could not be verified.  JWTs that fail
      *                                  signature validation should not be trusted and should be discarded.
+     * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
+     *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace.
      * @see #parse(String, JwtHandler)
      * @see #parsePlaintextJwt(String)
@@ -113,7 +115,7 @@ public interface JwtParser {
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      */
-    Jwt parse(String jwt) throws MalformedJwtException, SignatureException, IllegalArgumentException;
+    Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -150,6 +152,8 @@ public interface JwtParser {
      *                                  Invalid JWTs should not be trusted and should be discarded.
      * @throws SignatureException       if a JWS signature was discovered, but could not be verified.  JWTs that fail
      *                                  signature validation should not be trusted and should be discarded.
+     * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
+     *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace, or if the
      *                                  {@code handler} is {@code null}.
      * @see #parsePlaintextJwt(String)
@@ -160,7 +164,7 @@ public interface JwtParser {
      * @since 0.2
      */
     <T> T parse(String jwt, JwtHandler<T> handler)
-        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -210,6 +214,8 @@ public interface JwtParser {
      * @throws MalformedJwtException    if the {@code claimsJwt} string is not a valid JWT
      * @throws SignatureException       if the {@code claimsJwt} string is actually a JWS and signature validation
      *                                  fails
+     * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
+     *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJwt} string is {@code null} or empty or only whitespace
      * @see #parsePlaintextJwt(String)
      * @see #parsePlaintextJws(String)
@@ -219,7 +225,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jwt<Header, Claims> parseClaimsJwt(String claimsJwt)
-        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -265,6 +271,8 @@ public interface JwtParser {
      * @throws UnsupportedJwtException  if the {@code claimsJws} argument does not represent an Claims JWS
      * @throws MalformedJwtException    if the {@code claimsJws} string is not a valid JWS
      * @throws SignatureException       if the {@code claimsJws} JWS signature validation fails
+     * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
+     *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJws} string is {@code null} or empty or only whitespace
      * @see #parsePlaintextJwt(String)
      * @see #parseClaimsJwt(String)
@@ -274,5 +282,5 @@ public interface JwtParser {
      * @since 0.2
      */
     Jws<Claims> parseClaimsJws(String claimsJws)
-        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 }
