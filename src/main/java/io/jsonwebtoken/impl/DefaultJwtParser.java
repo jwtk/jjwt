@@ -20,8 +20,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
@@ -44,6 +44,9 @@ import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser implements JwtParser {
+
+    //don't need millis since JWT date fields are only second granularity:
+    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -167,16 +170,18 @@ public class DefaultJwtParser implements JwtParser {
         //since 0.3:
         if (claims != null) {
 
-            Date exp = claims.getExpiration();
+            Date now = null;
+            SimpleDateFormat sdf;
 
+            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
+            //token MUST NOT be accepted on or after any specified exp time:
+            Date exp = claims.getExpiration();
             if (exp != null) {
 
-                Date now = new Date();
+                now = new Date();
 
-                if (now.after(exp)) {
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"); //don't need millis since JWT exp field only has second granularity
-
+                if (now.equals(exp) || now.after(exp)) {
+                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
                     String expVal = sdf.format(exp);
                     String nowVal = sdf.format(now);
 
@@ -184,12 +189,33 @@ public class DefaultJwtParser implements JwtParser {
                     throw new ExpiredJwtException(msg);
                 }
             }
+
+            /*
+            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
+            //token MUST NOT be accepted before any specified nbf time:
+            Date nbf = claims.getNotBefore();
+            if (nbf != null) {
+
+                if (now == null) {
+                    now = new Date();
+                }
+
+                if (now.before(nbf)) {
+                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
+                    String nbfVal = sdf.format(nbf);
+                    String nowVal = sdf.format(now);
+
+                    String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal;
+                    throw new PrematureJwtException(msg);
+                }
+            }
+            */
         }
 
         // =============== Signature =================
         if (base64UrlEncodedDigest != null) { //it is signed - validate the signature
 
-            JwsHeader jwsHeader = (JwsHeader)header;
+            JwsHeader jwsHeader = (JwsHeader) header;
 
             SignatureAlgorithm algorithm = null;
 
@@ -218,7 +244,8 @@ public class DefaultJwtParser implements JwtParser {
 
                 if (!Objects.isEmpty(this.keyBytes)) {
 
-                    Assert.isTrue(!algorithm.isRsa(), "Key bytes cannot be specified for RSA signatures.  Please specify a PublicKey or PrivateKey instance.");
+                    Assert.isTrue(!algorithm.isRsa(),
+                                  "Key bytes cannot be specified for RSA signatures.  Please specify a PublicKey or PrivateKey instance.");
 
                     key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
                 }
@@ -241,26 +268,27 @@ public class DefaultJwtParser implements JwtParser {
         Object body = claims != null ? claims : payload;
 
         if (base64UrlEncodedDigest != null) {
-            return new DefaultJws<Object>((JwsHeader)header, body, base64UrlEncodedDigest);
+            return new DefaultJws<Object>((JwsHeader) header, body, base64UrlEncodedDigest);
         } else {
             return new DefaultJwt<Object>(header, body);
         }
     }
 
     @Override
-    public <T> T parse(String compact, JwtHandler<T> handler) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    public <T> T parse(String compact, JwtHandler<T> handler)
+        throws ExpiredJwtException, MalformedJwtException, SignatureException {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
 
         Jwt jwt = parse(compact);
 
         if (jwt instanceof Jws) {
-            Jws jws = (Jws)jwt;
+            Jws jws = (Jws) jwt;
             Object body = jws.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJws((Jws<Claims>)jws);
+                return handler.onClaimsJws((Jws<Claims>) jws);
             } else {
-                return handler.onPlaintextJws((Jws<String>)jws);
+                return handler.onPlaintextJws((Jws<String>) jws);
             }
         } else {
             Object body = jwt.getBody();

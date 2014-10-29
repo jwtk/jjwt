@@ -16,7 +16,7 @@
 package io.jsonwebtoken;
 
 /**
- * Exception indicating that a JWT was referenced after it expired and should be rejected.
+ * Exception indicating that a JWT was accepted after it expired and must be rejected.
  *
  * @since 0.3
  */

@@ -91,7 +91,7 @@ class JwtsTest {
     @Test
     void testParsePlaintextToken() {
 
-        def claims = [iss: 'joe', exp: 1300819380, 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
 
         String jwt = Jwts.builder().setClaims(claims).compact();
 
@@ -220,8 +220,20 @@ class JwtsTest {
         assertNull claims.getAudience()
     }
 
-    private static Date dateWithOnlySecondPrecision() {
+    private static Date now() {
         return dateWithOnlySecondPrecision(System.currentTimeMillis());
+    }
+
+    private static int later() {
+        return laterDate().getTime() / 1000;
+    }
+
+    private static Date laterDate(int seconds) {
+        return dateWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000));
+    }
+
+    private static Date laterDate() {
+        return laterDate(10000);
     }
 
     private static Date dateWithOnlySecondPrecision(long millis) {
@@ -232,14 +244,14 @@ class JwtsTest {
 
     @Test
     void testConvenienceExpiration() {
-        Date now = dateWithOnlySecondPrecision() //jwt exp only supports *seconds* since epoch:
-        String compact = Jwts.builder().setExpiration(now).compact();
+        Date then = laterDate();
+        String compact = Jwts.builder().setExpiration(then).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()
-        assertEquals claimedDate, now
+        assertEquals claimedDate, then
 
         compact = Jwts.builder().setIssuer("Me")
-                .setExpiration(now) //set it
+                .setExpiration(then) //set it
                 .setExpiration(null) //null should remove it
                 .compact();
 
@@ -249,7 +261,7 @@ class JwtsTest {
 
     @Test
     void testConvenienceNotBefore() {
-        Date now = dateWithOnlySecondPrecision() //jwt exp only supports *seconds* since epoch:
+        Date now = now() //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setNotBefore(now).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
         def claimedDate = claims.getNotBefore()
@@ -266,7 +278,7 @@ class JwtsTest {
 
     @Test
     void testConvenienceIssuedAt() {
-        Date now = dateWithOnlySecondPrecision() //jwt exp only supports *seconds* since epoch:
+        Date now = now() //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setIssuedAt(now).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
         def claimedDate = claims.getIssuedAt()
@@ -370,7 +382,7 @@ class JwtsTest {
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
-        def claims = [iss: 'joe', exp: 1300819380, 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact();
 
@@ -393,7 +405,7 @@ class JwtsTest {
         byte[] key = new byte[64];
         random.nextBytes(key);
 
-        def claims = [iss: 'joe', exp: 1300819380, 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, key).compact();
 

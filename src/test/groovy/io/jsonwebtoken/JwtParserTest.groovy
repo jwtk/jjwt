@@ -174,6 +174,22 @@ class JwtParserTest {
         }
     }
 
+    /*
+    @Test
+    void testParseWithPrematureJwt() {
+
+        Date nbf = new Date(System.currentTimeMillis() + 100000);
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact();
+
+        try {
+            Jwts.parser().parse(compact);
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+        }
+    }
+    */
+
     // ========================================================================
     // parsePlaintextJwt tests
     // ========================================================================
