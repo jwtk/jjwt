@@ -174,7 +174,6 @@ class JwtParserTest {
         }
     }
 
-    /*
     @Test
     void testParseWithPrematureJwt() {
 
@@ -188,7 +187,6 @@ class JwtParserTest {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
     }
-    */
 
     // ========================================================================
     // parsePlaintextJwt tests
@@ -322,6 +320,20 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseClaimsJwtWithPrematureJwt() {
+
+        Date nbf = new Date(System.currentTimeMillis() + 100000);
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact();
+
+        try {
+            Jwts.parser().parseClaimsJwt(compact);
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+        }
+    }
+
     // ========================================================================
     // parsePlaintextJws tests
     // ========================================================================
@@ -422,6 +434,22 @@ class JwtParserTest {
             fail();
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
+    @Test
+    void testParseClaimsJwsWithPrematureJws() {
+
+        byte[] key = randomKey()
+
+        Date nbf = new Date(System.currentTimeMillis() + 100000);
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact();
+
+        try {
+            Jwts.parser().parseClaimsJws(compact);
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
     }
 

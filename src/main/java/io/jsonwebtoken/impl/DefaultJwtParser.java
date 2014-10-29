@@ -26,6 +26,7 @@ import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -190,7 +191,6 @@ public class DefaultJwtParser implements JwtParser {
                 }
             }
 
-            /*
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
             //token MUST NOT be accepted before any specified nbf time:
             Date nbf = claims.getNotBefore();
@@ -209,7 +209,6 @@ public class DefaultJwtParser implements JwtParser {
                     throw new PrematureJwtException(msg);
                 }
             }
-            */
         }
 
         // =============== Signature =================
