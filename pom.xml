@@ -25,7 +25,7 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <name>JSON Web Token support for the JVM</name>
     <packaging>jar</packaging>
 
