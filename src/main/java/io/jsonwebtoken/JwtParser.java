@@ -78,6 +78,21 @@ public interface JwtParser {
     JwtParser setSigningKey(Key key);
 
     /**
+     * Sets the {@link JwsSigningKeyResolver} used to resolve the <code>signing key</code> using the parsed {@link JwsHeader}
+     * and/or the {@link Claims}.  If the specified JWT string is not a JWS (no signature), this resolver is not used.
+     * <p/>
+     * <p>This method will set the signing key resolver to be used in case a signing key is not provided by any of the other methods.</p>
+     * <p/>
+     * <p>This is a convenience method: the {@code jwsSignatureKeyResolver} is used after a Jws has been parsed and either the
+     * {@link JwsHeader} or the {@link Claims} embedded in the {@link Jws} can be used to resolve the signing key.
+     * </p>
+     *
+     * @param jwsSigningKeyResolver the signing key resolver used to retrieve the signing key.
+     * @return the parser for method chaining.
+     */
+    JwtParser setJwsSigningKeyResolver(JwsSigningKeyResolver jwsSigningKeyResolver);
+
+    /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      *
