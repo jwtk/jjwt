@@ -21,7 +21,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwsSigningKeyResolver;
+import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
@@ -56,7 +56,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private Key key;
 
-    private JwsSigningKeyResolver jwsSigningKeyResolver;
+    private SigningKeyResolver signingKeyResolver;
 
     @Override
     public JwtParser setSigningKey(byte[] key) {
@@ -80,9 +80,9 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public JwtParser setJwsSigningKeyResolver(JwsSigningKeyResolver jwsSigningKeyResolver) {
-        Assert.notNull(jwsSigningKeyResolver, "jwsSigningKeyResolver cannot be null.");
-        this.jwsSigningKeyResolver = jwsSigningKeyResolver;
+    public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
+        Assert.notNull(signingKeyResolver, "jwsSigningKeyResolver cannot be null.");
+        this.signingKeyResolver = signingKeyResolver;
         return this;
     }
 
@@ -244,7 +244,7 @@ public class DefaultJwtParser implements JwtParser {
 
             if (key != null && keyBytes != null) {
                 throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
-            } else if ((key != null || keyBytes != null) && jwsSigningKeyResolver != null) {
+            } else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
                 String object = key != null ? " a key object " : " key bytes ";
                 throw new IllegalStateException("A signing key resolver object and" + object + "cannot both be specified. Choose either.");
             }
@@ -256,8 +256,12 @@ public class DefaultJwtParser implements JwtParser {
 
                 byte[] keyBytes = this.keyBytes;
 
-                if (Objects.isEmpty(keyBytes) && jwsSigningKeyResolver != null) { //use the jwsSigningKeyResolver
-                    keyBytes = jwsSigningKeyResolver.resolveSigningKey(jwsHeader, claims);
+                if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
+                    if (claims != null) {
+                        keyBytes = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+                    } else {
+                        keyBytes = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+                    }
                 }
 
                 if (!Objects.isEmpty(keyBytes)) {
