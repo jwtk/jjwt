@@ -116,9 +116,9 @@ This of course requires that you put some sort of information in the JWS when yo
 Jwts.builder().setHeaderParam("kid", your_signing_key_id_NOT_THE_SECRET).build();
 ```
 
-You could of course set any other header parameter or claims parameter instead of setting `kid` if you want - that's just the 'default'/'standard' field for key identification.
+You could of course set any other header parameter or claims parameter instead of setting `kid` if you want - that's just the default field reserved for signing key identification.  If you can locate the signing key based on other information in the header or claims, you don't need to set the `kid` field - just make sure your resolver implementation knows how to look up the key.
 
-Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick anonymous classes or subclasses for simpler implementations instead of having to implement `SigningKeyResolver` directly.  For example:
+Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick and simple subclasses or anonymous classes instead of having to implement `SigningKeyResolver` directly.  For example:
 
 ```java
 Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
