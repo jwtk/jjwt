@@ -8,7 +8,9 @@ JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ie
 
 ## Installation
 
-Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central:
+Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central.
+
+Maven:
 
 ```xml
 <dependency>
@@ -17,8 +19,10 @@ Use your favorite Maven-compatible build tool to pull the dependency (and its tr
     <version>0.4</version>
 </dependency>
 ```
-gradle:
-```
+
+Gradle:
+
+```groovy
 dependencies {
     compile 'io.jsonwebtoken:jjwt:0.4'
 }
