@@ -14,8 +14,14 @@ Use your favorite Maven-compatible build tool to pull the dependency (and its tr
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.3</version>
+    <version>0.4</version>
 </dependency>
+```
+gradle:
+```
+dependencies {
+    compile 'io.jsonwebtoken:jjwt:0.4'
+}
 ```
 
 Note: JJWT depends on Jackson 2.x.  If you're already using an older version of Jackson in your app, [read this](#olderJackson)
@@ -41,9 +47,7 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(compact).getBody();
-
-assert claims.getSubject().equals("Joe");
+assert Jwts.parser().setSigningKey(key).parseClaimsJws(compact).getBody().getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets in Java!
@@ -87,6 +91,40 @@ try {
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
 
 ## Release Notes
+
+### 0.4
+
+- [Issue 8](https://github.com/jwtk/jjwt/issues/8): Add ability to find signing key by inspecting the JWS values before verifying the signature.
+
+This is a handy little feature.  If you need to parse a signed JWT (a JWS) and you don't know which signing key was used to sign it, you can now use the new `SigningKeyResolver` concept.  A `SigningKeyresolver` can inspect the JWS header and body (Claims or String) _before_ the JWS signature is verified. By inspecting the data, you can find the key and return it, and the parser will use the returned key to validate the signature.  For example:
+
+```java
+SigningKeyResolver resolver = new MySigningKeyResolver();
+
+Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(resolver).parseClaimsJws(compact);
+```
+
+The signature is still validated, and the `JWS<Claims>` instance will still not be returned if the jwt string is invalid, as expected.  You just get to 'see' the JWT data for key discovery before the parser validates.  Nice.
+
+This of course requires that you put some sort of information in the JWS when you create it so that your `SigningKeyResolver` implementation can look at it later and look up the key.  The *standard* way to do this is to use the JWS `kid` ('key id') field, for example:
+
+```java
+Jwts.builder().setHeaderParam("kid", your_signing_key_id_NOT_THE_SECRET).build();
+```
+
+You could of course set any other header parameter or claims parameter instead of setting `kid` if you want - that's just the 'default'/'standard' field for key identification.
+
+Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick anonymous classes or subclasses for simpler implementations instead of having to implement `SigningKeyResolver` directly.  For example:
+
+```java
+Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
+        &#64;Override
+        public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+            //inspect the header or claims, lookup and return the signing key
+            return getSigningKey(header, claims); //implement me
+        }})
+    .parseClaimsJws(compact);
+```
 
 ### 0.3
 
