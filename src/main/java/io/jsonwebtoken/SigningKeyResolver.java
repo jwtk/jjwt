@@ -15,44 +15,59 @@
  */
 package io.jsonwebtoken;
 
+import java.security.Key;
+
 /**
- * A JwsSigningKeyResolver is invoked by a {@link io.jsonwebtoken.JwtParser JwtParser} if it's provided and the
- * JWT being parsed is signed.
- * <p/>
- * Implementations of this interfaces must be provided to {@link io.jsonwebtoken.JwtParser JwtParser} when the values
- * embedded in the JWS need to be used to determine the <code>signing key</code> used to sign the JWS.
+ * A {@code SigningKeyResolver} can be used by a {@link io.jsonwebtoken.JwtParser JwtParser} to find a signing key that
+ * should be used to verify a JWS signature.
  *
+ * <p>A {@code SigningKeyResolver} is necessary when the signing key is not already known before parsing the JWT and the
+ * JWT header or payload (plaintext body or Claims) must be inspected first to determine how to look up the signing key.
+ * Once returned by the resolver, the JwtParser will then verify the JWS signature with the returned key.  For
+ * example:</p>
+ *
+ * <pre>
+ * Jws&lt;Claims&gt; jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
+ *         &#64;Override
+ *         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+ *             //inspect the header or claims, lookup and return the signing key
+ *             return getSigningKeyBytes(header, claims); //implement me
+ *         }})
+ *     .parseClaimsJws(compact);
+ * </pre>
+ *
+ * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>
+ *
+ * <h4>SigningKeyResolverAdapter</h4>
+ *
+ * <p>If you only need to resolve a signing key for a particular JWS (either a plaintext or Claims JWS), consider using
+ * the {@link io.jsonwebtoken.SigningKeyResolverAdapter} and overriding only the method you need to support instead of
+ * implementing this interface directly.</p>
+ *
+ * @see io.jsonwebtoken.SigningKeyResolverAdapter
  * @since 0.4
  */
 public interface SigningKeyResolver {
 
     /**
-     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} parsed a {@link Jws} and needs
-     * to resolve the signing key, based on a value embedded in the {@link JwsHeader} and/or the {@link Claims}
-     * <p/>
-     * <p>This method will only be invoked if an implementation is provided.</p>
-     * <p/>
-     * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
-     * (as the {@code alg} header parameter).</p>
+     * Returns the signing key that should be used to validate a digital signature for the Claims JWS with the specified
+     * header and claims.
      *
-     * @param header the parsed {@link JwsHeader}
-     * @param claims the parsed {@link Claims}
-     * @return any object to be used after inspecting the JWS, or {@code null} if no return value is necessary.
+     * @param header the header of the JWS to validate
+     * @param claims the claims (body) of the JWS to validate
+     * @return the signing key that should be used to validate a digital signature for the Claims JWS with the specified
+     * header and claims.
      */
-    byte[] resolveSigningKey(JwsHeader header, Claims claims);
+    Key resolveSigningKey(JwsHeader header, Claims claims);
 
     /**
-     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} parsed a {@link Jws} and needs
-     * to resolve the signing key, based on a value embedded in the {@link JwsHeader} and/or the plaintext payload.
-     * <p/>
-     * <p>This method will only be invoked if an implementation is provided.</p>
-     * <p/>
-     * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
-     * (as the {@code alg} header parameter).</p>
+     * Returns the signing key that should be used to validate a digital signature for the Plaintext JWS with the
+     * specified header and plaintext payload.
      *
-     * @param header  the parsed {@link JwsHeader}
-     * @param payload the jws plaintext payload.
-     * @return any object to be used after inspecting the JWS, or {@code null} if no return value is necessary.
+     * @param header    the header of the JWS to validate
+     * @param plaintext the plaintext body of the JWS to validate
+     * @return the signing key that should be used to validate a digital signature for the Plaintext JWS with the
+     * specified header and plaintext payload.
      */
-    byte[] resolveSigningKey(JwsHeader header, String payload);
+    Key resolveSigningKey(JwsHeader header, String plaintext);
 }

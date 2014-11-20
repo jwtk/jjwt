@@ -516,7 +516,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKey(JwsHeader header, Claims claims) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                 return key
             }
         }
@@ -537,7 +537,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKey(JwsHeader header, Claims claims) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                 return randomKey()
             }
         }
@@ -561,7 +561,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKey(JwsHeader header, Claims claims) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                 return randomKey()
             }
         }
@@ -570,7 +570,7 @@ class JwtParserTest {
             Jwts.parser().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact);
             fail()
         } catch (IllegalStateException ise) {
-            assertEquals ise.getMessage(), 'A signing key resolver object and a key object cannot both be specified. Choose either.'
+            assertEquals ise.getMessage(), 'A signing key resolver and a key object cannot both be specified. Choose either.'
         }
     }
 
@@ -585,7 +585,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKey(JwsHeader header, Claims claims) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                 return randomKey()
             }
         }
@@ -594,7 +594,7 @@ class JwtParserTest {
             Jwts.parser().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact);
             fail()
         } catch (IllegalStateException ise) {
-            assertEquals ise.getMessage(), 'A signing key resolver object and key bytes cannot both be specified. Choose either.'
+            assertEquals ise.getMessage(), 'A signing key resolver and key bytes cannot both be specified. Choose either.'
         }
     }
 
@@ -611,7 +611,7 @@ class JwtParserTest {
             Jwts.parser().setSigningKeyResolver(null).parseClaimsJws(compact);
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.getMessage(), 'jwsSigningKeyResolver cannot be null.'
+            assertEquals iae.getMessage(), 'SigningKeyResolver cannot be null.'
         }
     }
 
@@ -630,7 +630,9 @@ class JwtParserTest {
             Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact);
             fail()
         } catch (UnsupportedJwtException ex) {
-            assertEquals ex.getMessage(), 'Resolving signing keys with claims are not supported.'
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
+                    'Claims JWS signing key resolution.  Consider overriding either the ' +
+                    'resolveSigningKey(JwsHeader, Claims) or resolveSigningKeyBytes(JwsHeader, Claims) method.'
         }
     }
 
@@ -649,7 +651,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKey(JwsHeader header, String payload) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
                 return key
             }
         }
@@ -670,7 +672,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKey(JwsHeader header, String payload) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
                 return randomKey()
             }
         }
@@ -698,7 +700,9 @@ class JwtParserTest {
             Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact);
             fail()
         } catch (UnsupportedJwtException ex) {
-            assertEquals ex.getMessage(), 'Resolving signing keys with plaintext payload are not supported.'
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
+                    'JWS signing key resolution.  Consider overriding either the ' +
+                    'resolveSigningKey(JwsHeader, String) or resolveSigningKeyBytes(JwsHeader, String) method.'
         }
     }
 }

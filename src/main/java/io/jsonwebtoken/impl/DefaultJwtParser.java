@@ -81,7 +81,7 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
-        Assert.notNull(signingKeyResolver, "jwsSigningKeyResolver cannot be null.");
+        Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
         this.signingKeyResolver = signingKeyResolver;
         return this;
     }
@@ -245,8 +245,8 @@ public class DefaultJwtParser implements JwtParser {
             if (key != null && keyBytes != null) {
                 throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
             } else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
-                String object = key != null ? " a key object " : " key bytes ";
-                throw new IllegalStateException("A signing key resolver object and" + object + "cannot both be specified. Choose either.");
+                String object = key != null ? "a key object" : "key bytes";
+                throw new IllegalStateException("A signing key resolver and " + object + " cannot both be specified. Choose either.");
             }
 
             //digitally signed, let's assert the signature:
@@ -258,9 +258,9 @@ public class DefaultJwtParser implements JwtParser {
 
                 if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
                     if (claims != null) {
-                        keyBytes = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+                        key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
                     } else {
-                        keyBytes = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+                        key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
                     }
                 }
 

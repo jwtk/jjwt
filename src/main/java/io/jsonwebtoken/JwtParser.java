@@ -78,17 +78,32 @@ public interface JwtParser {
     JwtParser setSigningKey(Key key);
 
     /**
-     * Sets the {@link SigningKeyResolver} used to resolve the <code>signing key</code> using the parsed {@link JwsHeader}
-     * and/or the {@link Claims}.  If the specified JWT string is not a JWS (no signature), this resolver is not used.
-     * <p/>
-     * <p>This method will set the signing key resolver to be used in case a signing key is not provided by any of the other methods.</p>
-     * <p/>
-     * <p>This is a convenience method: the {@code jwsSignatureKeyResolver} is used after a Jws has been parsed and either the
-     * {@link JwsHeader} or the {@link Claims} embedded in the {@link Jws} can be used to resolve the signing key.
-     * </p>
+     * Sets the {@link SigningKeyResolver} used to acquire the <code>signing key</code> that should be used to verify
+     * a JWS's signature.  If the parsed String is not a JWS (no signature), this resolver is not used.
+     *
+     * <p>Specifying a {@code SigningKeyResolver} is necessary when the signing key is not already known before parsing
+     * the JWT and the JWT header or payload (plaintext body or Claims) must be inspected first to determine how to
+     * look up the signing key.  Once returned by the resolver, the JwtParser will then verify the JWS signature with the
+     * returned key.  For example:</p>
+     *
+     * <pre>
+     * Jws&lt;Claims&gt; jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
+     *         &#64;Override
+     *         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+     *             //inspect the header or claims, lookup and return the signing key
+     *             return getSigningKey(header, claims); //implement me
+     *         }})
+     *     .parseClaimsJws(compact);
+     * </pre>
+     *
+     * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>
+     *
+     * <p>This method should only be used if a signing key is not provided by the other {@code setSigningKey*} builder
+     * methods.</p>
      *
      * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
      * @return the parser for method chaining.
+     * @since 0.4
      */
     JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
@@ -96,7 +111,7 @@ public interface JwtParser {
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      *
-     * <p>Note that if you are reasonably sure that the token is signed, it is usually more efficient to attempt to
+     * <p>Note that if you are reasonably sure that the token is signed, it is more efficient to attempt to
      * parse the token (and catching exceptions if necessary) instead of calling this method first before parsing.</p>
      *
      * @param jwt the compact serialized JWT to check

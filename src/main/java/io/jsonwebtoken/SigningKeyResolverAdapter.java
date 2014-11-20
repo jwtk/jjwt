@@ -15,27 +15,82 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.Assert;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+
 /**
  * An <a href="http://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
- * {@link SigningKeyResolver} interface that allows subclasses to process only the type of Jws body that
- * are known/expected for a particular case.
+ * {@link SigningKeyResolver} interface that allows subclasses to process only the type of JWS body that
+ * is known/expected for a particular case.
  *
- * <p>All of the methods in this implementation throw exceptions: overridden methods represent
- * scenarios expected by calling code in known situations.  It would be unexpected to receive a JWS or JWT that did
- * not match parsing expectations, so all non-overridden methods throw exceptions to indicate that the JWT
- * input was unexpected.</p>
+ * <p>The {@link #resolveSigningKey(JwsHeader, Claims)} and {@link #resolveSigningKey(JwsHeader, String)} method
+ * implementations delegate to the
+ * {@link #resolveSigningKeyBytes(JwsHeader, Claims)} and {@link #resolveSigningKeyBytes(JwsHeader, String)} methods
+ * respectively.  The latter two methods simply throw exceptions:  they represent scenarios expected by
+ * calling code in known situations, and it is expected that you override the implementation in those known situations;
+ * non-overridden *KeyBytes methods indicates that the JWS input was unexpected.</p>
+ *
+ * <p>If either {@link #resolveSigningKey(JwsHeader, String)} or {@link #resolveSigningKey(JwsHeader, String)}
+ * are not overridden, one (or both) of the *KeyBytes variants must be overridden depending on your expected
+ * use case.  You do not have to override any method that does not represent an expected condition.</p>
  *
  * @since 0.4
  */
 public class SigningKeyResolverAdapter implements SigningKeyResolver {
 
     @Override
-    public byte[] resolveSigningKey(JwsHeader header, Claims claims) {
-        throw new UnsupportedJwtException("Resolving signing keys with claims are not supported.");
+    public Key resolveSigningKey(JwsHeader header, Claims claims) {
+        SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
+        byte[] keyBytes = resolveSigningKeyBytes(header, claims);
+        Assert.isTrue(!alg.isRsa(), "resolveSigningKeyBytes(JwsHeader, Claims) cannot be used for RSA signatures.  " +
+                                    "Override the resolveSigningKey(JwsHeader, Claims) method instead and return a " +
+                                    "PublicKey or PrivateKey instance.");
+        return new SecretKeySpec(keyBytes, alg.getJcaName());
     }
 
     @Override
-    public byte[] resolveSigningKey(JwsHeader header, String payload) {
-        throw new UnsupportedJwtException("Resolving signing keys with plaintext payload are not supported.");
+    public Key resolveSigningKey(JwsHeader header, String plaintext) {
+        SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
+        byte[] keyBytes = resolveSigningKeyBytes(header, plaintext);
+        Assert.isTrue(!alg.isRsa(), "resolveSigningKeyBytes(JwsHeader, String) cannot be used for RSA signatures.  " +
+                                    "Override the resolveSigningKey(JwsHeader, String) method instead and return a " +
+                                    "PublicKey or PrivateKey instance.");
+        return new SecretKeySpec(keyBytes, alg.getJcaName());
+    }
+
+    /**
+     * Convenience method invoked by {@link #resolveSigningKey(JwsHeader, Claims)} that obtains the necessary signing
+     * key bytes.  This implementation simply throws an exception: if the JWS parsed is a Claims JWS, you must
+     * override this method or the {@link #resolveSigningKey(JwsHeader, Claims)} method instead.
+     *
+     * <p><b>NOTE:</b> You cannot override this method when validating RSA signatures.  If you expect RSA signatures, </p>
+     *
+     * @param header the parsed {@link JwsHeader}
+     * @param claims the parsed {@link Claims}
+     * @return the signing key bytes to use to verify the JWS signature.
+     */
+    public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+        throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
+                                          "Claims JWS signing key resolution.  Consider overriding either the " +
+                                          "resolveSigningKey(JwsHeader, Claims) or " +
+                                          "resolveSigningKeyBytes(JwsHeader, Claims) method.");
+    }
+
+    /**
+     * Convenience method invoked by {@link #resolveSigningKey(JwsHeader, String)} that obtains the necessary signing
+     * key bytes.  This implementation simply throws an exception: if the JWS parsed is a plaintext JWS, you must
+     * override this method or the {@link #resolveSigningKey(JwsHeader, String)} method instead.
+     *
+     * @param header the parsed {@link JwsHeader}
+     * @param payload the parsed String plaintext payload
+     * @return the signing key bytes to use to verify the JWS signature.
+     */
+    public byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+        throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
+                                          "plaintext JWS signing key resolution.  Consider overriding either the " +
+                                          "resolveSigningKey(JwsHeader, String) or " +
+                                          "resolveSigningKeyBytes(JwsHeader, String) method.");
     }
 }
