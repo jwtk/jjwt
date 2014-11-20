@@ -108,7 +108,7 @@ SigningKeyResolver resolver = new MySigningKeyResolver();
 Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(resolver).parseClaimsJws(compact);
 ```
 
-The signature is still validated, and the `JWS<Claims>` instance will still not be returned if the jwt string is invalid, as expected.  You just get to 'see' the JWT data for key discovery before the parser validates.  Nice.
+The signature is still validated, and the JWT instance will still not be returned if the jwt string is invalid, as expected.  You just get to 'see' the JWT data for key discovery before the parser validates.  Nice.
 
 This of course requires that you put some sort of information in the JWS when you create it so that your `SigningKeyResolver` implementation can look at it later and look up the key.  The *standard* way to do this is to use the JWS `kid` ('key id') field, for example:
 
@@ -122,10 +122,11 @@ Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write qu
 
 ```java
 Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
-        &#64;Override
+        @Override
         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
             //inspect the header or claims, lookup and return the signing key
-            return getSigningKey(header, claims); //implement me
+            String keyId = header.getKeyId(); //or any other field that you need to inspect
+            return getSigningKey(keyId); //implement me
         }})
     .parseClaimsJws(compact);
 ```
