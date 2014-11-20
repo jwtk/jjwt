@@ -54,7 +54,7 @@ Now let's verify the JWT (you should always discard JWTs that don't match an exp
 assert Jwts.parser().setSigningKey(key).parseClaimsJws(compact).getBody().getSubject().equals("Joe");
 ```
 
-You have to love one-line code snippets in Java!
+You have to love one-line code snippets!
 
 But what if signature validation failed?  You can catch `SignatureException` and react accordingly:
 
@@ -100,7 +100,9 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 - [Issue 8](https://github.com/jwtk/jjwt/issues/8): Add ability to find signing key by inspecting the JWS values before verifying the signature.
 
-This is a handy little feature.  If you need to parse a signed JWT (a JWS) and you don't know which signing key was used to sign it, you can now use the new `SigningKeyResolver` concept.  A `SigningKeyresolver` can inspect the JWS header and body (Claims or String) _before_ the JWS signature is verified. By inspecting the data, you can find the key and return it, and the parser will use the returned key to validate the signature.  For example:
+This is a handy little feature.  If you need to parse a signed JWT (a JWS) and you don't know which signing key was used to sign it, you can now use the new `SigningKeyResolver` concept.
+
+A `SigningKeyresolver` can inspect the JWS header and body (Claims or String) _before_ the JWS signature is verified. By inspecting the data, you can find the key and return it, and the parser will use the returned key to validate the signature.  For example:
 
 ```java
 SigningKeyResolver resolver = new MySigningKeyResolver();
@@ -118,7 +120,7 @@ Jwts.builder().setHeaderParam("kid", your_signing_key_id_NOT_THE_SECRET).build()
 
 You could of course set any other header parameter or claims parameter instead of setting `kid` if you want - that's just the default field reserved for signing key identification.  If you can locate the signing key based on other information in the header or claims, you don't need to set the `kid` field - just make sure your resolver implementation knows how to look up the key.
 
-Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick and simple subclasses or anonymous classes instead of having to implement `SigningKeyResolver` directly.  For example:
+Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick and simple subclasses or anonymous classes instead of having to implement the `SigningKeyResolver` interface directly.  For example:
 
 ```java
 Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
