@@ -178,49 +178,6 @@ public class DefaultJwtParser implements JwtParser {
             claims = new DefaultClaims(claimsMap);
         }
 
-        //since 0.3:
-        if (claims != null) {
-
-            Date now = null;
-            SimpleDateFormat sdf;
-
-            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
-            //token MUST NOT be accepted on or after any specified exp time:
-            Date exp = claims.getExpiration();
-            if (exp != null) {
-
-                now = new Date();
-
-                if (now.equals(exp) || now.after(exp)) {
-                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
-                    String expVal = sdf.format(exp);
-                    String nowVal = sdf.format(now);
-
-                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal;
-                    throw new ExpiredJwtException(msg);
-                }
-            }
-
-            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
-            //token MUST NOT be accepted before any specified nbf time:
-            Date nbf = claims.getNotBefore();
-            if (nbf != null) {
-
-                if (now == null) {
-                    now = new Date();
-                }
-
-                if (now.before(nbf)) {
-                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
-                    String nbfVal = sdf.format(nbf);
-                    String nowVal = sdf.format(now);
-
-                    String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal;
-                    throw new PrematureJwtException(msg);
-                }
-            }
-        }
-
         // =============== Signature =================
         if (base64UrlEncodedDigest != null) { //it is signed - validate the signature
 
@@ -284,6 +241,49 @@ public class DefaultJwtParser implements JwtParser {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
                              "asserted and should not be trusted.";
                 throw new SignatureException(msg);
+            }
+        }
+
+        //since 0.3:
+        if (claims != null) {
+
+            Date now = null;
+            SimpleDateFormat sdf;
+
+            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
+            //token MUST NOT be accepted on or after any specified exp time:
+            Date exp = claims.getExpiration();
+            if (exp != null) {
+
+                now = new Date();
+
+                if (now.equals(exp) || now.after(exp)) {
+                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
+                    String expVal = sdf.format(exp);
+                    String nowVal = sdf.format(now);
+
+                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal;
+                    throw new ExpiredJwtException(header, claims, msg);
+                }
+            }
+
+            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
+            //token MUST NOT be accepted before any specified nbf time:
+            Date nbf = claims.getNotBefore();
+            if (nbf != null) {
+
+                if (now == null) {
+                    now = new Date();
+                }
+
+                if (now.before(nbf)) {
+                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
+                    String nbfVal = sdf.format(nbf);
+                    String nowVal = sdf.format(now);
+
+                    String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal;
+                    throw new PrematureJwtException(header, claims, msg);
+                }
             }
         }
 

@@ -20,13 +20,13 @@ package io.jsonwebtoken;
  *
  * @since 0.3
  */
-public class ExpiredJwtException extends JwtException {
+public class ExpiredJwtException extends ClaimJwtException {
 
-    public ExpiredJwtException(String message) {
-        super(message);
+    public ExpiredJwtException(Header header, Claims claims, String message) {
+        super(header, claims, message);
     }
 
-    public ExpiredJwtException(String message, Throwable cause) {
-        super(message, cause);
+    public ExpiredJwtException(Header header, Claims claims, String message, Throwable cause) {
+        super(header, claims, message, cause);
     }
 }
