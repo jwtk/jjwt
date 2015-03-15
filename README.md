@@ -36,14 +36,14 @@ Most complexity is hidden behind a convenient and readable builder-based [fluent
 
 ```java
 import io.jsonwebtoken.Jwts;
-import static io.jsonwebtoken.SignatureAlgorithm.*;
+import io.jsonwebtoken.SignatureAlgorithm;
 
-//Let's create a random signing key for testing:
-Random random = new SecureRandom();
+// We need a signing key, so we'll create one just for this example. Usually
+// the key would be read from your application configuration instead.
 byte[] key = new byte[64];
-random.nextBytes(key);
+new SecureRandom().nextBytes(key);
 
-String compact = Jwts.builder().setSubject("Joe").signWith(HS256, key).compact();
+String compact = Jwts.builder().setSubject("Joe").signWith(SignatureAlgorithm.HS256, key).compact();
 ```
 
 How easy was that!?
@@ -179,7 +179,7 @@ T returnVal = Jwts.parser().setSigningKey(key).parse(compact, new JwtHandler<T>(
         //the JWT parsed was an unsigned plaintext JWT
         //inspect it, then return an instance of T (see returnVal above)
     }
-    
+
     @Override
     public T onClaimsJwt(Jwt<Header, Claims> jwt) {
         //the JWT parsed was an unsigned Claims JWT
