@@ -26,7 +26,13 @@ public class PrematureJwtException extends ClaimJwtException {
         super(header, claims, message);
     }
 
-    @SuppressWarnings("UnusedDeclaration")
+    /**
+     * @param header jwt header
+     * @param claims jwt claims (body)
+     * @param message exception message
+     * @param cause cause
+     * @since 0.5
+     */
     public PrematureJwtException(Header header, Claims claims, String message, Throwable cause) {
         super(header, claims, message, cause);
     }
