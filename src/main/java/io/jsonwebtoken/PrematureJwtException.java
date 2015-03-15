@@ -20,14 +20,14 @@ package io.jsonwebtoken;
  *
  * @since 0.3
  */
-public class PrematureJwtException extends JwtException {
+public class PrematureJwtException extends ClaimJwtException {
 
-    public PrematureJwtException(String message) {
-        super(message);
+    public PrematureJwtException(Header header, Claims claims, String message) {
+        super(header, claims, message);
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public PrematureJwtException(String message, Throwable cause) {
-        super(message, cause);
+    public PrematureJwtException(Header header, Claims claims, String message, Throwable cause) {
+        super(header, claims, message, cause);
     }
 }
