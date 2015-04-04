@@ -106,6 +106,22 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Provided scope: only used in Android environments - not downloaded as a transitive dependency.
+             This dependency is only a stub of the actual implementation, which means we can't use it at test time
+             during TestNG tests.  An Android environment is required to test for real. -->
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>4.1.1.4</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
