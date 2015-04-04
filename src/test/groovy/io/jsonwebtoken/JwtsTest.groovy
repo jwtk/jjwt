@@ -369,6 +369,83 @@ class JwtsTest {
         testRsa(SignatureAlgorithm.RS512, 1024, true);
     }
 
+    //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
+    @Test
+    void testParseClaimsJwsWithUnsignedJwt() {
+
+        //create random signing key for testing:
+        Random random = new SecureRandom();
+        byte[] key = new byte[64];
+        random.nextBytes(key);
+
+        String notSigned = Jwts.builder().setSubject("Foo").compact();
+
+        try {
+            Jwts.parser().setSigningKey(key).parseClaimsJws(notSigned);
+            fail('parseClaimsJws must fail for unsigned JWTs')
+        } catch (UnsupportedJwtException expected) {
+            assertEquals expected.message, 'Unsigned Claims JWTs are not supported.'
+        }
+    }
+
+    //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
+    @Test
+    void testForgedTokenWithSwappedHeaderUsingNoneAlgorithm() {
+
+        //create random signing key for testing:
+        Random random = new SecureRandom();
+        byte[] key = new byte[64];
+        random.nextBytes(key);
+
+        //this is a 'real', valid JWT:
+        String compact = Jwts.builder().setSubject("Joe").signWith(SignatureAlgorithm.HS256, key).compact();
+
+        //Now strip off the signature so we can add it back in later on a forged token:
+        int i = compact.lastIndexOf('.');
+        String signature = compact.substring(i+1);
+
+        //now let's create a fake header and payload with whatever we want (without signing):
+        String forged = Jwts.builder().setSubject("Not Joe").compact();
+
+        //assert that our forged header has a 'NONE' algorithm:
+        assertEquals Jwts.parser().parseClaimsJwt(forged).getHeader().get('alg'), 'none'
+
+        //now let's forge it by appending the signature the server expects:
+        forged += signature;
+
+        //now assert that, when the server tries to parse the forged token, parsing fails:
+        try {
+            Jwts.parser().setSigningKey(key).parse(forged);
+            fail("Parsing must fail for a forged token.")
+        } catch (MalformedJwtException expected) {
+            assertEquals expected.message, 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.'
+        }
+    }
+
+    //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
+    @Test
+    void testForgedTokenWhenUsingRsaPublicKeyAsHmacSigningKey() {
+
+        //Create a legitimate RSA public and private key pair:
+        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+        keyGenerator.initialize(1024);
+        KeyPair kp = keyGenerator.genKeyPair();
+        PublicKey publicKey = kp.getPublic();
+        PrivateKey privateKey = kp.getPrivate();
+
+        // Now for the forgery: simulate a client using the RSA public key to sign a token, but
+        // using it as an HMAC signing key instead of RSA:
+        String forged = Jwts.builder().setPayload('foo').signWith(SignatureAlgorithm.HS256, publicKey).compact();
+
+        // Assert that the server (that should always use the private key) does not recognized the forged token:
+        try {
+            Jwts.parser().setSigningKey(privateKey).parse(forged);
+            fail("Forged token must not be successfully parsed.")
+        } catch (SignatureException expected) {
+            assertEquals expected.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
+        }
+    }
+
     static void testRsa(SignatureAlgorithm alg) {
         testRsa(alg, 1024, false);
     }
