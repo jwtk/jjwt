@@ -32,7 +32,7 @@ import java.security.Key;
  * calling code in known situations, and it is expected that you override the implementation in those known situations;
  * non-overridden *KeyBytes methods indicates that the JWS input was unexpected.</p>
  *
- * <p>If either {@link #resolveSigningKey(JwsHeader, String)} or {@link #resolveSigningKey(JwsHeader, String)}
+ * <p>If either {@link #resolveSigningKey(JwsHeader, String)} or {@link #resolveSigningKey(JwsHeader, Claims)}
  * are not overridden, one (or both) of the *KeyBytes variants must be overridden depending on your expected
  * use case.  You do not have to override any method that does not represent an expected condition.</p>
  *
