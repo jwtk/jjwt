@@ -19,36 +19,28 @@ import io.jsonwebtoken.lang.Classes;
 
 public class Base64Codec extends AbstractTextCodec {
 
-    private static final boolean STANDARD_JVM = Classes.isAvailable("javax.xml.bind.DatatypeConverter");
-
     private static final boolean ANDROID = Classes.isAvailable("android.util.Base64");
 
     public String encode(byte[] data) {
-
-        if (STANDARD_JVM) {
-            return javax.xml.bind.DatatypeConverter.printBase64Binary(data);
-        }
 
         if (ANDROID) {
             int flags = android.util.Base64.NO_PADDING | android.util.Base64.NO_WRAP;
             return android.util.Base64.encodeToString(data, flags);
         }
 
-        throw new IllegalStateException("Unable to locate a Base64 codec for the current JVM");
+        //else, assume standard JVM
+        return javax.xml.bind.DatatypeConverter.printBase64Binary(data);
     }
 
     @Override
     public byte[] decode(String encoded) {
 
-        if (STANDARD_JVM) {
-            return javax.xml.bind.DatatypeConverter.parseBase64Binary(encoded);
-        }
-
         if (ANDROID) {
             return android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
         }
 
-        throw new IllegalStateException("Unable to locate a Base64 codec for the current JVM");
+        //else assume standard JVM:
+        return javax.xml.bind.DatatypeConverter.parseBase64Binary(encoded);
     }
 
 }
