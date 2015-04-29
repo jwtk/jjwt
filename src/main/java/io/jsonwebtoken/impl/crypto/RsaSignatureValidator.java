@@ -19,38 +19,48 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.lang.Assert;
 
+import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 
 public class RsaSignatureValidator extends RsaProvider implements SignatureValidator {
 
+    private final RsaSigner SIGNER;
+
     public RsaSignatureValidator(SignatureAlgorithm alg, Key key) {
         super(alg, key);
-        Assert.isTrue(key instanceof PrivateKey || key instanceof PublicKey,
-                      "RSA Signature validation requires either a PublicKey or PrivateKey instance.");
+        Assert.isTrue(key instanceof RSAPrivateKey || key instanceof RSAPublicKey,
+                      "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.");
+        this.SIGNER = key instanceof RSAPrivateKey ? new RsaSigner(alg, key) : null;
     }
 
     @Override
     public boolean isValid(byte[] data, byte[] signature) {
-
         if (key instanceof PublicKey) {
             Signature sig = createSignatureInstance();
             PublicKey publicKey = (PublicKey) key;
             try {
-                sig.initVerify(publicKey);
-                sig.update(data);
-                return sig.verify(signature);
+                return doVerify(sig, publicKey, data, signature);
             } catch (Exception e) {
-                String msg = "Unable to verify RSA signature using configured PublicKey.  " + e.getMessage();
+                String msg = "Unable to verify RSA signature using configured PublicKey. " + e.getMessage();
                 throw new SignatureException(msg, e);
             }
         } else {
-            byte[] computed = new RsaSigner(alg, key).sign(data);
+            assert this.SIGNER != null;
+            byte[] computed = this.SIGNER.sign(data);
             return Arrays.equals(computed, signature);
         }
+    }
+
+    protected boolean doVerify(Signature sig, PublicKey publicKey, byte[] data, byte[] signature)
+        throws InvalidKeyException, java.security.SignatureException {
+        sig.initVerify(publicKey);
+        sig.update(data);
+        return sig.verify(signature);
     }
 
 }

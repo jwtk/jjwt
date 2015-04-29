@@ -15,10 +15,15 @@
  */
 package io.jsonwebtoken
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.TextCodec
 import org.testng.annotations.Test
 
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+import java.nio.charset.Charset
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
@@ -422,9 +427,9 @@ class JwtsTest {
         }
     }
 
-    //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
+    //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20 and https://github.com/jwtk/jjwt/issues/25
     @Test
-    void testForgedTokenWhenUsingRsaPublicKeyAsHmacSigningKey() {
+    void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPrivateKey() {
 
         //Create a legitimate RSA public and private key pair:
         KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
@@ -433,16 +438,62 @@ class JwtsTest {
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
-        // Now for the forgery: simulate a client using the RSA public key to sign a token, but
+        ObjectMapper om = new ObjectMapper()
+        String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
+        String body = TextCodec.BASE64URL.encode(om.writeValueAsString('foo'))
+        String compact = header + '.' + body + '.'
+
+        // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
-        String forged = Jwts.builder().setPayload('foo').signWith(SignatureAlgorithm.HS256, publicKey).compact();
+        Mac mac = Mac.getInstance('HmacSHA256');
+        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
+        byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
+        String encodedSignature = TextCodec.BASE64URL.encode(signatureBytes);
+
+        //Finally, the forged token is the header + body + forged signature:
+        String forged = compact + encodedSignature;
 
         // Assert that the server (that should always use the private key) does not recognized the forged token:
         try {
             Jwts.parser().setSigningKey(privateKey).parse(forged);
             fail("Forged token must not be successfully parsed.")
-        } catch (SignatureException expected) {
-            assertEquals expected.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
+        } catch (UnsupportedJwtException expected) {
+            assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
+        }
+    }
+
+    //Asserts correct behavior for https://github.com/jwtk/jjwt/issues/25
+    @Test
+    void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPublicKey() {
+
+        //Create a legitimate RSA public and private key pair:
+        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+        keyGenerator.initialize(1024);
+        KeyPair kp = keyGenerator.genKeyPair();
+        PublicKey publicKey = kp.getPublic();
+        PrivateKey privateKey = kp.getPrivate();
+
+        ObjectMapper om = new ObjectMapper()
+        String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
+        String body = TextCodec.BASE64URL.encode(om.writeValueAsString('foo'))
+        String compact = header + '.' + body + '.'
+
+        // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
+        // using it as an HMAC signing key instead of RSA:
+        Mac mac = Mac.getInstance('HmacSHA256');
+        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
+        byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
+        String encodedSignature = TextCodec.BASE64URL.encode(signatureBytes);
+
+        //Finally, the forged token is the header + body + forged signature:
+        String forged = compact + encodedSignature;
+
+        // Assert that the parser does not recognized the forged token:
+        try {
+            Jwts.parser().setSigningKey(publicKey).parse(forged);
+            fail("Forged token must not be successfully parsed.")
+        } catch (UnsupportedJwtException expected) {
+            assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
         }
     }
 

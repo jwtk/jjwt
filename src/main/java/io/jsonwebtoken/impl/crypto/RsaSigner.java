@@ -17,18 +17,22 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.lang.Assert;
 
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.security.interfaces.RSAPrivateKey;
 
 public class RsaSigner extends RsaProvider implements Signer {
 
     public RsaSigner(SignatureAlgorithm alg, Key key) {
         super(alg, key);
-        Assert.isInstanceOf(PrivateKey.class, key, "RSA signatures be computed using a PrivateKey.");
+        if (!(key instanceof RSAPrivateKey)) {
+            String msg = "RSA signatures must be computed using an RSAPrivateKey.  The specified key of type " +
+                         key.getClass().getName() + " is not an RSAPrivateKey.";
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     @Override
@@ -43,7 +47,6 @@ public class RsaSigner extends RsaProvider implements Signer {
     }
 
     protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException {
-        Assert.isInstanceOf(PrivateKey.class, key, "RSA signatures be computed using a PrivateKey.");
         PrivateKey privateKey = (PrivateKey)key;
         Signature sig = createSignatureInstance();
         sig.initSign(privateKey);
