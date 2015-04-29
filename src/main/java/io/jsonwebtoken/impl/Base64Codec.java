@@ -15,11 +15,26 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.lang.Classes;
-
 public class Base64Codec extends AbstractTextCodec {
 
-    private static final boolean ANDROID = Classes.isAvailable("android.util.Base64");
+    private static final boolean ANDROID = isAndroid();
+
+    private static boolean isAndroid() {
+
+        String name = System.getProperty("java.vm.name");
+        if (name != null) {
+            String lcase = name.toLowerCase();
+            return lcase.contains("dalvik");
+        }
+
+        name = System.getProperty("java.vm.vendor");
+        if (name != null) {
+            String lcase = name.toLowerCase();
+            return lcase.contains("android");
+        }
+
+        return false;
+    }
 
     public String encode(byte[] data) {
 
