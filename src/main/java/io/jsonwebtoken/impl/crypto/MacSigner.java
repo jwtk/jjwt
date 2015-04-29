@@ -17,8 +17,10 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.Mac;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -32,6 +34,12 @@ public class MacSigner extends MacProvider implements Signer {
 
     public MacSigner(SignatureAlgorithm alg, Key key) {
         super(alg, key);
+        Assert.isTrue(alg.isHmac(), "The MacSigner only supports HMAC signature algorithms.");
+        if (!(key instanceof SecretKey)) {
+            String msg = "MAC signatures must be computed and verified using a SecretKey.  The specified key of " +
+                         "type " + key.getClass().getName() + " is not a SecretKey.";
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     @Override

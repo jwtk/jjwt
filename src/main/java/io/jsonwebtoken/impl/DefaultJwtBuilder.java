@@ -19,10 +19,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
@@ -91,7 +91,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKey) {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notEmpty(secretKey, "secret key byte array cannot be null or empty.");
-        Assert.isTrue(!alg.isRsa(), "Key bytes cannot be specified for RSA signatures.  Please specify an RSA PrivateKey instance.");
+        Assert.isTrue(!alg.isRsa(), "Key bytes cannot be specified for RSA signatures.  Please specify an RSAPrivateKey instance.");
         this.algorithm = alg;
         this.keyBytes = secretKey;
         return this;
@@ -289,7 +289,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         if (key != null) { //jwt must be signed:
 
-            JwtSigner signer = new DefaultJwtSigner(algorithm, key);
+            JwtSigner signer = createSigner(algorithm, key);
 
             String base64UrlSignature = signer.sign(jwt);
 
@@ -301,6 +301,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
 
         return jwt;
+    }
+
+    /*
+     * @since 0.5 mostly to allow testing overrides
+     */
+    protected JwtSigner createSigner(SignatureAlgorithm alg, Key key) {
+        return new DefaultJwtSigner(alg, key);
     }
 
     public static String base64UrlEncode(Object o, String errMsg) {

@@ -235,7 +235,20 @@ public class DefaultJwtParser implements JwtParser {
             //re-create the jwt part without the signature.  This is what needs to be signed for verification:
             String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR + base64UrlEncodedPayload;
 
-            JwtSignatureValidator validator = new DefaultJwtSignatureValidator(algorithm, key);
+            JwtSignatureValidator validator;
+            try {
+                validator = createSignatureValidator(algorithm, key);
+            } catch (IllegalArgumentException e) {
+                String algName = algorithm.getValue();
+                String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
+                             "algorithm, but the specified signing key of type " + key.getClass().getName() +
+                             " may not be used to verify " + algName + " signatures.  Because the specified " +
+                             "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                             "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
+                             "trusted.  Another possibility is that the parser was configured with the incorrect " +
+                             "signing key, but this cannot be assumed for security reasons.";
+                throw new UnsupportedJwtException(msg, e);
+            }
 
             if (!validator.isValid(jwtWithoutSignature, base64UrlEncodedDigest)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
@@ -294,6 +307,13 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             return new DefaultJwt<Object>(header, body);
         }
+    }
+
+    /*
+     * @since 0.5 mostly to allow testing overrides
+     */
+    protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
+        return new DefaultJwtSignatureValidator(alg, key);
     }
 
     @Override
