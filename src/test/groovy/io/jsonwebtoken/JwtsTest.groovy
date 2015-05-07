@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.TextCodec
+import org.bouncycastle.jce.ECNamedCurveTable
 import org.testng.annotations.Test
 
 import javax.crypto.Mac
@@ -33,6 +34,8 @@ import java.security.SecureRandom
 import static org.testng.Assert.*
 
 class JwtsTest {
+
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Test
     void testHeaderWithNoArgs() {
@@ -374,14 +377,38 @@ class JwtsTest {
         testRsa(SignatureAlgorithm.RS512, 1024, true);
     }
 
+    @Test
+    void testES256() {
+        testEC(SignatureAlgorithm.ES256)
+    }
+
+    @Test
+    void testES384() {
+        testEC(SignatureAlgorithm.ES384)
+    }
+
+    @Test
+    void testES512() {
+        testEC(SignatureAlgorithm.ES512)
+    }
+
+    @Test
+    void testES256WithPrivateKeyValidation() {
+        try {
+            testEC(SignatureAlgorithm.ES256, true)
+            fail("EC private keys cannot be used to validate EC signatures.")
+        } catch (UnsupportedJwtException e) {
+            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey.  ECPrivateKeys may not be used."
+        }
+    }
+
     //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
     @Test
     void testParseClaimsJwsWithUnsignedJwt() {
 
         //create random signing key for testing:
-        Random random = new SecureRandom();
         byte[] key = new byte[64];
-        random.nextBytes(key);
+        RANDOM.nextBytes(key);
 
         String notSigned = Jwts.builder().setSubject("Foo").compact();
 
@@ -398,9 +425,8 @@ class JwtsTest {
     void testForgedTokenWithSwappedHeaderUsingNoneAlgorithm() {
 
         //create random signing key for testing:
-        Random random = new SecureRandom();
         byte[] key = new byte[64];
-        random.nextBytes(key);
+        RANDOM.nextBytes(key);
 
         //this is a 'real', valid JWT:
         String compact = Jwts.builder().setSubject("Joe").signWith(SignatureAlgorithm.HS256, key).compact();
@@ -497,11 +523,7 @@ class JwtsTest {
         }
     }
 
-    static void testRsa(SignatureAlgorithm alg) {
-        testRsa(alg, 1024, false);
-    }
-
-    static void testRsa(SignatureAlgorithm alg, int keySize, boolean verifyWithPrivateKey) {
+    static void testRsa(SignatureAlgorithm alg, int keySize=1024, boolean verifyWithPrivateKey=false) {
 
         KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
         keyGenerator.initialize(keySize);
@@ -529,15 +551,37 @@ class JwtsTest {
 
     static void testHmac(SignatureAlgorithm alg) {
         //create random signing key for testing:
-        Random random = new SecureRandom();
         byte[] key = new byte[64];
-        random.nextBytes(key);
+        RANDOM.nextBytes(key);
 
         def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, key).compact();
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
+
+        assertEquals token.header, [alg: alg.name()]
+
+        assertEquals token.body, claims
+    }
+
+    static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey=false) {
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        g.initialize(ECNamedCurveTable.getParameterSpec(alg.getJcaName()), RANDOM);
+        KeyPair pair = g.generateKeyPair();
+        PublicKey publicKey = pair.getPublic()
+        PrivateKey privateKey = pair.getPrivate()
+
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
+
+        String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact();
+
+        def key = publicKey;
+        if (verifyWithPrivateKey) {
+            key = privateKey;
+        }
+
+        def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
         assertEquals token.header, [alg: alg.name()]
 

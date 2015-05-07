@@ -46,7 +46,7 @@ public class DefaultSignatureValidatorFactory implements SignatureValidatorFacto
             case ES256:
             case ES384:
             case ES512:
-                throw new UnsupportedOperationException("Elliptic Curve digests are not yet supported.");
+                return new EllipticCurveSignatureValidator(alg, key);
             default:
                 String msg = "Unrecognized algorithm '" + alg.name() + "'.  This is a bug.  Please submit a ticket " +
                              "via the project issue tracker.";
