@@ -25,6 +25,8 @@ public class RuntimeEnvironment {
 
     private static final AtomicBoolean bcLoaded = new AtomicBoolean(false);
 
+    public static final boolean BOUNCY_CASTLE_AVAILABLE = Classes.isAvailable(BC_PROVIDER_CLASS_NAME);
+
     public static void enableBouncyCastleIfPossible() {
 
         if (bcLoaded.get()) {

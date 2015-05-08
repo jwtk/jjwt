@@ -19,20 +19,26 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.TextCodec
+import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
+import io.jsonwebtoken.impl.crypto.MacProvider
+import io.jsonwebtoken.impl.crypto.RsaProvider
 import org.testng.annotations.Test
 
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
 import java.security.KeyPair
-import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
-import java.security.SecureRandom
 
 import static org.testng.Assert.*
 
 class JwtsTest {
+
+    @Test
+    void testSubclass() {
+        new Jwts()
+    }
 
     @Test
     void testHeaderWithNoArgs() {
@@ -374,14 +380,37 @@ class JwtsTest {
         testRsa(SignatureAlgorithm.RS512, 1024, true);
     }
 
+    @Test
+    void testES256() {
+        testEC(SignatureAlgorithm.ES256)
+    }
+
+    @Test
+    void testES384() {
+        testEC(SignatureAlgorithm.ES384)
+    }
+
+    @Test
+    void testES512() {
+        testEC(SignatureAlgorithm.ES512)
+    }
+
+    @Test
+    void testES256WithPrivateKeyValidation() {
+        try {
+            testEC(SignatureAlgorithm.ES256, true)
+            fail("EC private keys cannot be used to validate EC signatures.")
+        } catch (UnsupportedJwtException e) {
+            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey. ECPrivateKeys may not be used."
+        }
+    }
+
     //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
     @Test
     void testParseClaimsJwsWithUnsignedJwt() {
 
         //create random signing key for testing:
-        Random random = new SecureRandom();
-        byte[] key = new byte[64];
-        random.nextBytes(key);
+        byte[] key = MacProvider.generateKey().getEncoded()
 
         String notSigned = Jwts.builder().setSubject("Foo").compact();
 
@@ -398,9 +427,7 @@ class JwtsTest {
     void testForgedTokenWithSwappedHeaderUsingNoneAlgorithm() {
 
         //create random signing key for testing:
-        Random random = new SecureRandom();
-        byte[] key = new byte[64];
-        random.nextBytes(key);
+        byte[] key = MacProvider.generateKey().getEncoded()
 
         //this is a 'real', valid JWT:
         String compact = Jwts.builder().setSubject("Joe").signWith(SignatureAlgorithm.HS256, key).compact();
@@ -432,9 +459,7 @@ class JwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPrivateKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(1024);
-        KeyPair kp = keyGenerator.genKeyPair();
+        KeyPair kp = RsaProvider.generateKeyPair(1024)
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
@@ -467,11 +492,9 @@ class JwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPublicKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(1024);
-        KeyPair kp = keyGenerator.genKeyPair();
+        KeyPair kp = RsaProvider.generateKeyPair(1024)
         PublicKey publicKey = kp.getPublic();
-        PrivateKey privateKey = kp.getPrivate();
+        //PrivateKey privateKey = kp.getPrivate();
 
         ObjectMapper om = new ObjectMapper()
         String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
@@ -497,16 +520,9 @@ class JwtsTest {
         }
     }
 
-    static void testRsa(SignatureAlgorithm alg) {
-        testRsa(alg, 1024, false);
-    }
+    static void testRsa(SignatureAlgorithm alg, int keySize=1024, boolean verifyWithPrivateKey=false) {
 
-    static void testRsa(SignatureAlgorithm alg, int keySize, boolean verifyWithPrivateKey) {
-
-        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(keySize);
-
-        KeyPair kp = keyGenerator.genKeyPair();
+        KeyPair kp = RsaProvider.generateKeyPair(keySize)
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
@@ -529,15 +545,35 @@ class JwtsTest {
 
     static void testHmac(SignatureAlgorithm alg) {
         //create random signing key for testing:
-        Random random = new SecureRandom();
-        byte[] key = new byte[64];
-        random.nextBytes(key);
+        byte[] key = MacProvider.generateKey().encoded
 
         def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, key).compact();
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
+
+        assertEquals token.header, [alg: alg.name()]
+
+        assertEquals token.body, claims
+    }
+
+    static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey=false) {
+
+        KeyPair pair = EllipticCurveProvider.generateKeyPair(alg)
+        PublicKey publicKey = pair.getPublic()
+        PrivateKey privateKey = pair.getPrivate()
+
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
+
+        String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact();
+
+        def key = publicKey;
+        if (verifyWithPrivateKey) {
+            key = privateKey;
+        }
+
+        def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
         assertEquals token.header, [alg: alg.name()]
 

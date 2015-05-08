@@ -242,7 +242,7 @@ public class DefaultJwtParser implements JwtParser {
                 String algName = algorithm.getValue();
                 String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
                              "algorithm, but the specified signing key of type " + key.getClass().getName() +
-                             " may not be used to verify " + algName + " signatures.  Because the specified " +
+                             " may not be used to validate " + algName + " signatures.  Because the specified " +
                              "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
                              "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
                              "trusted.  Another possibility is that the parser was configured with the incorrect " +

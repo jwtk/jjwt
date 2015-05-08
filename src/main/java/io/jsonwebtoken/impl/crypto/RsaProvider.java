@@ -21,12 +21,38 @@ import io.jsonwebtoken.lang.Assert;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.HashMap;
+import java.util.Map;
 
-abstract class RsaProvider extends SignatureProvider {
+public abstract class RsaProvider extends SignatureProvider {
+
+    private static final Map<SignatureAlgorithm, PSSParameterSpec> PSS_PARAMETER_SPECS = createPssParameterSpecs();
+
+    private static Map<SignatureAlgorithm, PSSParameterSpec> createPssParameterSpecs() {
+
+        Map<SignatureAlgorithm, PSSParameterSpec> m = new HashMap<SignatureAlgorithm, PSSParameterSpec>();
+
+        MGF1ParameterSpec ps = MGF1ParameterSpec.SHA256;
+        PSSParameterSpec spec = new PSSParameterSpec(ps.getDigestAlgorithm(), "MGF1", ps, 32, 1);
+        m.put(SignatureAlgorithm.PS256, spec);
+
+        ps = MGF1ParameterSpec.SHA384;
+        spec = new PSSParameterSpec(ps.getDigestAlgorithm(), "MGF1", ps, 48, 1);
+        m.put(SignatureAlgorithm.PS384, spec);
+
+        ps = MGF1ParameterSpec.SHA512;
+        spec = new PSSParameterSpec(ps.getDigestAlgorithm(), "MGF1", ps, 64, 1);
+        m.put(SignatureAlgorithm.PS512, spec);
+
+        return m;
+    }
 
     protected RsaProvider(SignatureAlgorithm alg, Key key) {
         super(alg, key);
@@ -35,58 +61,51 @@ abstract class RsaProvider extends SignatureProvider {
 
     protected Signature createSignatureInstance() {
 
-        Signature sig = newSignatureInstance();
+        Signature sig = super.createSignatureInstance();
 
-        if (alg.name().startsWith("PS")) {
-
-            MGF1ParameterSpec paramSpec;
-            int saltLength;
-
-            switch (alg) {
-                case PS256:
-                    paramSpec = MGF1ParameterSpec.SHA256;
-                    saltLength = 32;
-                    break;
-                case PS384:
-                    paramSpec = MGF1ParameterSpec.SHA384;
-                    saltLength = 48;
-                    break;
-                case PS512:
-                    paramSpec = MGF1ParameterSpec.SHA512;
-                    saltLength = 64;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported RSASSA-PSS algorithm: " + alg);
-            }
-
-            PSSParameterSpec pssParamSpec =
-                new PSSParameterSpec(paramSpec.getDigestAlgorithm(), "MGF1", paramSpec, saltLength, 1);
-
-            setParameter(sig, pssParamSpec);
+        PSSParameterSpec spec = PSS_PARAMETER_SPECS.get(alg);
+        if (spec != null) {
+            setParameter(sig, spec);
         }
-
         return sig;
-    }
-
-    protected Signature newSignatureInstance() {
-        try {
-            return Signature.getInstance(alg.getJcaName());
-        } catch (NoSuchAlgorithmException e) {
-            String msg = "Unavailable RSA Signature algorithm.";
-            if (!alg.isJdkStandard()) {
-                msg += " This is not a standard JDK algorithm. Try including BouncyCastle in the runtime classpath.";
-            }
-            throw new SignatureException(msg, e);
-        }
     }
 
     protected void setParameter(Signature sig, PSSParameterSpec spec) {
         try {
-            sig.setParameter(spec);
+            doSetParameter(sig, spec);
         } catch (InvalidAlgorithmParameterException e) {
             String msg = "Unsupported RSASSA-PSS parameter '" + spec + "': " + e.getMessage();
             throw new SignatureException(msg, e);
         }
-
     }
+
+    protected void doSetParameter(Signature sig, PSSParameterSpec spec) throws InvalidAlgorithmParameterException {
+        sig.setParameter(spec);
+    }
+
+    public static KeyPair generateKeyPair() {
+        return generateKeyPair(4096);
+    }
+
+    public static KeyPair generateKeyPair(int keySizeInBits) {
+        return generateKeyPair(keySizeInBits, SignatureProvider.DEFAULT_SECURE_RANDOM);
+    }
+
+    public static KeyPair generateKeyPair(int keySizeInBits, SecureRandom random) {
+        return generateKeyPair("RSA", keySizeInBits, random);
+    }
+
+    protected static KeyPair generateKeyPair(String jcaAlgName, int keySizeInBits, SecureRandom random) {
+        KeyPairGenerator keyGenerator;
+        try {
+            keyGenerator = KeyPairGenerator.getInstance(jcaAlgName);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Unable to obtain an RSA KeyPairGenerator: " + e.getMessage(), e);
+        }
+
+        keyGenerator.initialize(keySizeInBits, random);
+
+        return keyGenerator.genKeyPair();
+    }
+
 }
