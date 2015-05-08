@@ -310,14 +310,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return new DefaultJwtSigner(alg, key);
     }
 
-    public static String base64UrlEncode(Object o, String errMsg) {
+    protected String base64UrlEncode(Object o, String errMsg) {
         String s;
         try {
-            s = OBJECT_MAPPER.writeValueAsString(o);
+            s = toJson(o);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(errMsg, e);
         }
 
         return TextCodec.BASE64URL.encode(s);
+    }
+
+    protected String toJson(Object o) throws JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsString(o);
     }
 }

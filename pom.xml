@@ -102,7 +102,7 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>${bouncycastle.version}</version>
-            <scope>runtime</scope> <!-- Not required at compile time -->
+            <scope>compile</scope>
             <optional>true</optional>
         </dependency>
 

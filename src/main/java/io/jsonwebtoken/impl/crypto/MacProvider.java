@@ -18,12 +18,46 @@ package io.jsonwebtoken.impl.crypto;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.security.SecureRandom;
+import java.security.Signature;
 
-abstract class MacProvider extends SignatureProvider {
+public abstract class MacProvider extends SignatureProvider {
 
     protected MacProvider(SignatureAlgorithm alg, Key key) {
         super(alg, key);
         Assert.isTrue(alg.isHmac(), "SignatureAlgorithm must be a HMAC SHA algorithm.");
+    }
+
+    public static SecretKey generateKey() {
+        return generateKey(SignatureAlgorithm.HS512);
+    }
+
+    public static SecretKey generateKey(SignatureAlgorithm alg) {
+        return generateKey(alg, SignatureProvider.DEFAULT_SECURE_RANDOM);
+    }
+
+    public static SecretKey generateKey(SignatureAlgorithm alg, SecureRandom random) {
+
+        Assert.isTrue(alg.isHmac(), "SignatureAlgorithm argument must represent an HMAC algorithm.");
+
+        byte[] bytes;
+
+        switch(alg) {
+            case HS256:
+                bytes = new byte[32];
+                break;
+            case HS384:
+                bytes = new byte[48];
+                break;
+            default:
+                bytes = new byte[64];
+        }
+
+        random.nextBytes(bytes);
+
+        return new SecretKeySpec(bytes, alg.getJcaName());
     }
 }

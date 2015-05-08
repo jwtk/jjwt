@@ -75,7 +75,7 @@ try {
 
 * Creating and parsing plaintext compact JWTs
 
-* Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with the following algorithms:
+* Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
     * HS256: HMAC using SHA-256
     * HS384: HMAC using SHA-384
     * HS512: HMAC using SHA-512
@@ -85,11 +85,13 @@ try {
     * PS256: RSASSA-PSS using SHA-256 and MGF1 with SHA-256
     * PS384: RSASSA-PSS using SHA-384 and MGF1 with SHA-384
     * PS512: RSASSA-PSS using SHA-512 and MGF1 with SHA-512
+    * ES256: ECDSA using P-256 and SHA-256
+    * ES384: ECDSA using P-384 and SHA-384
+    * ES512: ECDSA using P-512 and SHA-512
 
 ## Currently Unsupported Features
 
 * [Non-compact](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31#section-7.2) serialization and parsing.
-* Elliptic Curve signature algorithms `ES256`, `ES384` and `ES512`.
 * JWE (Encryption for JWT)
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
