@@ -111,10 +111,6 @@ class JwtMapTest {
         assertEquals( m.keySet(), ['a', 'c'] as Set)
     }
 
-    void testEntrySet() {
-
-    }
-
     @Test
     void testValues() {
         def m = new JwtMap()
