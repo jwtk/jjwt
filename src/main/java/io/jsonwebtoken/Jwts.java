@@ -29,7 +29,9 @@ import java.util.Map;
  *
  * @since 0.1
  */
-public class Jwts {
+public final class Jwts {
+
+    private Jwts(){}
 
     /**
      * Creates a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.  As this

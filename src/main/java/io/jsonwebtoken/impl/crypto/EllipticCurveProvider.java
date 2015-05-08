@@ -16,25 +16,24 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.lang.Assert;
 
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
-abstract class EllipticCurveProvider extends SignatureProvider {
+public abstract class EllipticCurveProvider extends SignatureProvider {
 
-    private static final Map<SignatureAlgorithm, String> EC_SIG_ALG_NAMES = createEcSigAlgNames();
+    private static final Map<SignatureAlgorithm, String> EC_CURVE_NAMES = createEcCurveNames();
 
-    private static Map<SignatureAlgorithm, String> createEcSigAlgNames() {
-        Map<SignatureAlgorithm, String> m =
-            new HashMap<SignatureAlgorithm, String>(); //EC alg name to EC alg signature name
-        m.put(SignatureAlgorithm.ES256, "SHA256withECDSA");
-        m.put(SignatureAlgorithm.ES384, "SHA384withECDSA");
-        m.put(SignatureAlgorithm.ES512, "SHA512withECDSA");
+    private static Map<SignatureAlgorithm, String> createEcCurveNames() {
+        Map<SignatureAlgorithm, String> m = new HashMap<SignatureAlgorithm, String>(); //alg to ASN1 OID name
+        m.put(SignatureAlgorithm.ES256, "secp256r1");
+        m.put(SignatureAlgorithm.ES384, "secp384r1");
+        m.put(SignatureAlgorithm.ES512, "secp521r1");
         return m;
     }
 
@@ -43,24 +42,27 @@ abstract class EllipticCurveProvider extends SignatureProvider {
         Assert.isTrue(alg.isEllipticCurve(), "SignatureAlgorithm must be an Elliptic Curve algorithm.");
     }
 
-    protected Signature createSignatureInstance() {
-        return newSignatureInstance();
+    public static KeyPair generateKeyPair() {
+        return generateKeyPair(SignatureAlgorithm.ES512);
     }
 
-    protected Signature newSignatureInstance() {
+    public static KeyPair generateKeyPair(SignatureAlgorithm alg) {
+        return generateKeyPair(alg, SignatureProvider.DEFAULT_SECURE_RANDOM);
+    }
+
+    public static KeyPair generateKeyPair(SignatureAlgorithm alg, SecureRandom random) {
+        return generateKeyPair("ECDSA", "BC", alg, random);
+    }
+
+    public static KeyPair generateKeyPair(String jcaAlgorithmName, String jcaProviderName, SignatureAlgorithm alg, SecureRandom random) {
+        Assert.isTrue(alg != null && alg.isEllipticCurve(), "SignatureAlgorithm argument must represent an Elliptic Curve algorithm.");
         try {
-            String sigAlgName = EC_SIG_ALG_NAMES.get(alg);
-            if (sigAlgName == null) {
-                throw new NoSuchAlgorithmException("No EllipticCurve signature algorithm for algorithm " + alg +
-                                                   ".  This is a bug.  Please report this to the project issue tracker.");
-            }
-            return Signature.getInstance(sigAlgName);
-        } catch (NoSuchAlgorithmException e) {
-            String msg = "Unavailable Elliptic Curve Signature algorithm.";
-            if (!alg.isJdkStandard()) {
-                msg += " This is not a standard JDK algorithm. Try including BouncyCastle in the runtime classpath.";
-            }
-            throw new SignatureException(msg, e);
+            KeyPairGenerator g = KeyPairGenerator.getInstance(jcaAlgorithmName, jcaProviderName);
+            String paramSpecCurveName = EC_CURVE_NAMES.get(alg);
+            g.initialize(org.bouncycastle.jce.ECNamedCurveTable.getParameterSpec(paramSpecCurveName), random);
+            return g.generateKeyPair();
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to generate Elliptic Curve KeyPair: " + e.getMessage(), e);
         }
     }
 }

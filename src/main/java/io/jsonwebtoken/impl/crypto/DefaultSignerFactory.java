@@ -30,8 +30,6 @@ public class DefaultSignerFactory implements SignerFactory {
         Assert.notNull(key, "Signing Key cannot be null.");
 
         switch (alg) {
-            case NONE:
-                throw new IllegalArgumentException("The 'NONE' algorithm cannot be used for signing.");
             case HS256:
             case HS384:
             case HS512:
@@ -48,9 +46,7 @@ public class DefaultSignerFactory implements SignerFactory {
             case ES512:
                 return new EllipticCurveSigner(alg, key);
             default:
-                String msg = "Unrecognized algorithm '" + alg.name() + "'.  This is a bug.  Please submit a ticket " +
-                             "via the project issue tracker.";
-                throw new IllegalStateException(msg);
+                throw new IllegalArgumentException("The '" + alg.name() + "' algorithm cannot be used for signing.");
         }
     }
 }

@@ -26,67 +26,67 @@ import io.jsonwebtoken.lang.RuntimeEnvironment;
 public enum SignatureAlgorithm {
 
     /** JWA name for {@code No digital signature or MAC performed} */
-    NONE("none", "No digital signature or MAC performed", null, false),
+    NONE("none", "No digital signature or MAC performed", "None", null, false),
 
     /** JWA algorithm name for {@code HMAC using SHA-256} */
-    HS256("HS256", "HMAC using SHA-256", "HmacSHA256", true),
+    HS256("HS256", "HMAC using SHA-256", "HMAC", "HmacSHA256", true),
 
     /** JWA algorithm name for {@code HMAC using SHA-384} */
-    HS384("HS384", "HMAC using SHA-384", "HmacSHA384", true),
+    HS384("HS384", "HMAC using SHA-384", "HMAC", "HmacSHA384", true),
 
     /** JWA algorithm name for {@code HMAC using SHA-512} */
-    HS512("HS512", "HMAC using SHA-512", "HmacSHA512", true),
+    HS512("HS512", "HMAC using SHA-512", "HMAC", "HmacSHA512", true),
 
     /** JWA algorithm name for {@code RSASSA-PKCS-v1_5 using SHA-256} */
-    RS256("RS256", "RSASSA-PKCS-v1_5 using SHA-256", "SHA256withRSA", true),
+    RS256("RS256", "RSASSA-PKCS-v1_5 using SHA-256", "RSA", "SHA256withRSA", true),
 
     /** JWA algorithm name for {@code RSASSA-PKCS-v1_5 using SHA-384} */
-    RS384("RS384", "RSASSA-PKCS-v1_5 using SHA-384", "SHA384withRSA", true),
+    RS384("RS384", "RSASSA-PKCS-v1_5 using SHA-384", "RSA", "SHA384withRSA", true),
 
     /** JWA algorithm name for {@code RSASSA-PKCS-v1_5 using SHA-512} */
-    RS512("RS512", "RSASSA-PKCS-v1_5 using SHA-512", "SHA512withRSA", true),
+    RS512("RS512", "RSASSA-PKCS-v1_5 using SHA-512", "RSA", "SHA512withRSA", true),
 
     /**
      * JWA algorithm name for {@code ECDSA using P-256 and SHA-256}.  <b>This is not a JDK standard algorithm and
      * requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle will be used
      * automatically if found in the runtime classpath.
      */
-    ES256("ES256", "ECDSA using P-256 and SHA-256", "secp256r1", false),
+    ES256("ES256", "ECDSA using P-256 and SHA-256", "Elliptic Curve", "SHA256withECDSA", false),
 
     /**
      * JWA algorithm name for {@code ECDSA using P-384 and SHA-384}.  <b>This is not a JDK standard algorithm and
      * requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle will be used
      * automatically if found in the runtime classpath.
      */
-    ES384("ES384", "ECDSA using P-384 and SHA-384", "secp384r1", false),
+    ES384("ES384", "ECDSA using P-384 and SHA-384", "Elliptic Curve", "SHA384withECDSA", false),
 
     /**
      * JWA algorithm name for {@code ECDSA using P-512 and SHA-512}.  <b>This is not a JDK standard algorithm and
      * requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle will be used
      * automatically if found in the runtime classpath.
      */
-    ES512("ES512", "ECDSA using P-512 and SHA-512", "secp521r1", false),
+    ES512("ES512", "ECDSA using P-512 and SHA-512", "Elliptic Curve", "SHA512withECDSA", false),
 
     /**
      * JWA algorithm name for {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256}.  <b>This is not a JDK standard
      * algorithm and requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle
      * will be used automatically if found in the runtime classpath.
      */
-    PS256("PS256", "RSASSA-PSS using SHA-256 and MGF1 with SHA-256", "SHA256withRSAandMGF1", false),
+    PS256("PS256", "RSASSA-PSS using SHA-256 and MGF1 with SHA-256", "RSA", "SHA256withRSAandMGF1", false),
 
     /**
      * JWA algorithm name for {@code RSASSA-PSS using SHA-384 and MGF1 with SHA-384}.  <b>This is not a JDK standard
      * algorithm and requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle
      * will be used automatically if found in the runtime classpath.
      */
-    PS384("PS384", "RSASSA-PSS using SHA-384 and MGF1 with SHA-384", "SHA384withRSAandMGF1", false),
+    PS384("PS384", "RSASSA-PSS using SHA-384 and MGF1 with SHA-384", "RSA", "SHA384withRSAandMGF1", false),
 
     /**
      * JWA algorithm name for {@code RSASSA-PSS using SHA-512 and MGF1 with SHA-512}. <b>This is not a JDK standard
      * algorithm and requires that a JCA provider like BouncyCastle be in the classpath.</b>  BouncyCastle will be used
      * automatically if found in the runtime classpath.
      */
-    PS512("PS512", "RSASSA-PSS using SHA-512 and MGF1 with SHA-512", "SHA512withRSAandMGF1", false);
+    PS512("PS512", "RSASSA-PSS using SHA-512 and MGF1 with SHA-512", "RSA", "SHA512withRSAandMGF1", false);
 
     static {
         RuntimeEnvironment.enableBouncyCastleIfPossible();
@@ -94,12 +94,14 @@ public enum SignatureAlgorithm {
 
     private final String  value;
     private final String  description;
+    private final String  familyName;
     private final String  jcaName;
     private final boolean jdkStandard;
 
-    private SignatureAlgorithm(String value, String description, String jcaName, boolean jdkStandard) {
+    SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard) {
         this.value = value;
         this.description = description;
+        this.familyName = familyName;
         this.jcaName = jcaName;
         this.jdkStandard = jdkStandard;
     }
@@ -120,6 +122,78 @@ public enum SignatureAlgorithm {
      */
     public String getDescription() {
         return description;
+    }
+
+
+    /**
+     * Returns the cryptographic family name of the signature algorithm.  The value returned is according to the
+     * following table:
+     *
+     * <table>
+     *     <thead>
+     *         <tr>
+     *             <th>SignatureAlgorithm</th>
+     *             <th>Family Name</th>
+     *         </tr>
+     *     </thead>
+     *     <tbody>
+     *         <tr>
+     *             <td>HS256</td>
+     *             <td>HMAC</td>
+     *         </tr>
+     *         <tr>
+     *             <td>HS384</td>
+     *             <td>HMAC</td>
+     *         </tr>
+     *         <tr>
+     *             <td>HS512</td>
+     *             <td>HMAC</td>
+     *         </tr>
+     *         <tr>
+     *             <td>RS256</td>
+     *             <td>RSA</td>
+     *         </tr>
+     *         <tr>
+     *             <td>RS384</td>
+     *             <td>RSA</td>
+     *         </tr>
+     *         <tr>
+     *             <td>RS512</td>
+     *             <td>RSA</td>
+     *         </tr>
+     *         <tr>
+     *             <td>PS256</td>
+     *             <td>RSA</td>
+     *         </tr>
+     *         <tr>
+     *             <td>PS384</td>
+     *             <td>RSA</td>
+     *         </tr>
+     *         <tr>
+     *             <td>PS512</td>
+     *             <td>RSA</td>
+     *         </tr>
+     *         <tr>
+     *             <td>ES256</td>
+     *             <td>Elliptic Curve</td>
+     *         </tr>
+     *         <tr>
+     *             <td>ES384</td>
+     *             <td>Elliptic Curve</td>
+     *         </tr>
+     *         <tr>
+     *             <td>ES512</td>
+     *             <td>Elliptic Curve</td>
+     *         </tr>
+     *     </tbody>
+     * </table>
+     *
+     * @return Returns the cryptographic family name of the signature algorithm.
+     *
+     * @since 0.5
+     */
+    public String getFamilyName() {
+        return familyName;
     }
 
     /**

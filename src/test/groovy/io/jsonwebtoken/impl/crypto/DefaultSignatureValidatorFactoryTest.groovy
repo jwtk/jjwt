@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 jsonwebtoken.io
+ * Copyright (C) 2015 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,17 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
 import org.testng.annotations.Test
-
-import javax.crypto.spec.SecretKeySpec
-
 import static org.testng.Assert.*
 
-class DefaultSignerFactoryTest {
+class DefaultSignatureValidatorFactoryTest {
 
     @Test
-    void testCreateSignerWithNoneAlgorithm() {
-
-        def factory = new DefaultSignerFactory();
-
+    void testNoneAlgorithm() {
         try {
-            factory.createSigner(SignatureAlgorithm.NONE, MacProvider.generateKey());
-            fail();
+            new DefaultSignatureValidatorFactory().createSignatureValidator(SignatureAlgorithm.NONE, MacProvider.generateKey())
+            fail()
         } catch (IllegalArgumentException iae) {
             assertEquals iae.message, "The 'NONE' algorithm cannot be used for signing."
         }
     }
-
 }

@@ -19,64 +19,48 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.SignatureException
 import org.testng.annotations.Test
 
-import javax.crypto.spec.SecretKeySpec
 import java.security.InvalidKeyException
 import java.security.KeyPair
-import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
 
 import static org.testng.Assert.*
 
-class RsaSignerTest {
-
-    private static final Random rng = new Random(); //doesn't need to be secure - we're just testing
+class EllipticCurveSignerTest {
 
     @Test
-    void testConstructorWithoutRsaAlg() {
-
-        byte[] bytes = new byte[16]
-        rng.nextBytes(bytes)
-        SecretKeySpec key = new SecretKeySpec(bytes, 'HmacSHA256')
-
+    void testConstructorWithoutECAlg() {
         try {
-            new RsaSigner(SignatureAlgorithm.HS256, key);
-            fail('RsaSigner should reject non RSA algorithms.')
+            new EllipticCurveSigner(SignatureAlgorithm.HS256, MacProvider.generateKey());
+            fail('EllipticCurveSigner should reject non ECPrivateKeys');
         } catch (IllegalArgumentException expected) {
-            assertEquals expected.message, 'SignatureAlgorithm must be an RSASSA or RSASSA-PSS algorithm.';
+            assertEquals expected.message, 'SignatureAlgorithm must be an Elliptic Curve algorithm.';
         }
     }
 
     @Test
-    void testConstructorWithoutRsaPrivateKey() {
-
-        byte[] bytes = new byte[16]
-        rng.nextBytes(bytes)
-        SecretKeySpec key = new SecretKeySpec(bytes, 'HmacSHA256')
-
+    void testConstructorWithoutECPrivateKey() {
+        def key = MacProvider.generateKey()
         try {
-            new RsaSigner(SignatureAlgorithm.RS256, key);
-            fail('RsaSigner should reject non RSAPrivateKey instances.')
+            new EllipticCurveSigner(SignatureAlgorithm.ES256, key);
+            fail('EllipticCurveSigner should reject non ECPrivateKey instances.')
         } catch (IllegalArgumentException expected) {
-            assertEquals expected.message, "RSA signatures must be computed using an RSAPrivateKey.  The specified key of type " +
-                    key.getClass().getName() + " is not an RSAPrivateKey.";
+            assertEquals expected.message, "Elliptic Curve signatures must be computed using an ECPrivateKey.  The specified key of " +
+            "type " + key.getClass().getName() + " is not an ECPrivateKey.";
         }
     }
 
     @Test
     void testDoSignWithInvalidKeyException() {
 
-        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(1024);
-
-        KeyPair kp = keyGenerator.genKeyPair();
+        KeyPair kp = EllipticCurveProvider.generateKeyPair()
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
         String msg = 'foo'
         final InvalidKeyException ex = new InvalidKeyException(msg)
 
-        RsaSigner signer = new RsaSigner(SignatureAlgorithm.RS256, privateKey) {
+        def signer = new EllipticCurveSigner(SignatureAlgorithm.ES256, privateKey) {
             @Override
             protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException {
                 throw ex
@@ -84,13 +68,13 @@ class RsaSignerTest {
         }
 
         byte[] bytes = new byte[16]
-        rng.nextBytes(bytes)
+        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
 
         try {
             signer.sign(bytes)
             fail();
         } catch (SignatureException se) {
-            assertEquals se.message, 'Invalid RSA PrivateKey. ' + msg
+            assertEquals se.message, 'Invalid Elliptic Curve PrivateKey. ' + msg
             assertSame se.cause, ex
         }
     }
@@ -98,17 +82,14 @@ class RsaSignerTest {
     @Test
     void testDoSignWithJdkSignatureException() {
 
-        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(1024);
-
-        KeyPair kp = keyGenerator.genKeyPair();
+        KeyPair kp = EllipticCurveProvider.generateKeyPair()
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
         String msg = 'foo'
         final java.security.SignatureException ex = new java.security.SignatureException(msg)
 
-        RsaSigner signer = new RsaSigner(SignatureAlgorithm.RS256, privateKey) {
+        def signer = new EllipticCurveSigner(SignatureAlgorithm.ES256, privateKey) {
             @Override
             protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException {
                 throw ex
@@ -116,13 +97,13 @@ class RsaSignerTest {
         }
 
         byte[] bytes = new byte[16]
-        rng.nextBytes(bytes)
+        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
 
         try {
             signer.sign(bytes)
             fail();
         } catch (SignatureException se) {
-            assertEquals se.message, 'Unable to calculate signature using RSA PrivateKey. ' + msg
+            assertEquals se.message, 'Unable to calculate signature using Elliptic Curve PrivateKey. ' + msg
             assertSame se.cause, ex
         }
     }

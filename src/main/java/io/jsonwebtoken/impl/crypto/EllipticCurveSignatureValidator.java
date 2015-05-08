@@ -28,12 +28,16 @@ import java.security.interfaces.ECPublicKey;
 
 public class EllipticCurveSignatureValidator extends EllipticCurveProvider implements SignatureValidator {
 
+    private static final String NO_EC_PRIVATE_KEY_MSG =
+        "Elliptic Curve signature validation requires an ECPublicKey. ECPrivateKeys may not be used.";
+
+    private static final String EC_PUBLIC_KEY_REQD_MSG =
+        "Elliptic Curve Signature validation requires either an ECPublicKey instance.";
+
     public EllipticCurveSignatureValidator(SignatureAlgorithm alg, Key key) {
         super(alg, key);
-        Assert.isTrue(!(key instanceof ECPrivateKey),
-                      "Elliptic Curve signature validation requires an ECPublicKey.  ECPrivateKeys may not be used.");
-        Assert.isTrue(key instanceof ECPublicKey,
-                      "Elliptic Curve Signature validation requires either an ECPublicKey instance.");
+        Assert.isTrue(!(key instanceof ECPrivateKey), NO_EC_PRIVATE_KEY_MSG);
+        Assert.isTrue(key instanceof ECPublicKey, EC_PUBLIC_KEY_REQD_MSG);
     }
 
     @Override

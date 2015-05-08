@@ -55,6 +55,15 @@ class SignatureAlgorithmTest {
     }
 
     @Test
+    void testHmacFamilyName() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.name().startsWith("HS")) {
+                assertEquals alg.getFamilyName(), "HMAC"
+            }
+        }
+    }
+
+    @Test
     void testIsRsa() {
         for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.getDescription().startsWith("RSASSA")) {
@@ -66,12 +75,30 @@ class SignatureAlgorithmTest {
     }
 
     @Test
+    void testRsaFamilyName() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.name().startsWith("RS") || alg.name().startsWith("PS")) {
+                assertEquals alg.getFamilyName(), "RSA"
+            }
+        }
+    }
+
+    @Test
     void testIsEllipticCurve() {
         for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("ES")) {
                 assertTrue alg.isEllipticCurve()
             } else {
                 assertFalse alg.isEllipticCurve()
+            }
+        }
+    }
+
+    @Test
+    void testEllipticCurveFamilyName() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.name().startsWith("ES")) {
+                assertEquals alg.getFamilyName(), "Elliptic Curve"
             }
         }
     }

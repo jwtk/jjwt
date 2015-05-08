@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 jsonwebtoken.io
+ * Copyright (C) 2015 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.crypto
+package io.jsonwebtoken
 
-import io.jsonwebtoken.SignatureAlgorithm
 import org.testng.annotations.Test
-
-import javax.crypto.spec.SecretKeySpec
 
 import static org.testng.Assert.*
 
-class DefaultSignerFactoryTest {
+class ExpiredJwtExceptionTest {
 
     @Test
-    void testCreateSignerWithNoneAlgorithm() {
+    void testOverloadedConstructor() {
+        def header = Jwts.header()
+        def claims = Jwts.claims()
+        def msg = 'foo'
+        def cause = new NullPointerException()
 
-        def factory = new DefaultSignerFactory();
+        def ex = new ExpiredJwtException(header, claims, msg, cause)
 
-        try {
-            factory.createSigner(SignatureAlgorithm.NONE, MacProvider.generateKey());
-            fail();
-        } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, "The 'NONE' algorithm cannot be used for signing."
-        }
+        assertSame ex.header, header
+        assertSame ex.claims, claims
+        assertEquals ex.message, msg
+        assertSame ex.cause, cause
     }
-
 }
