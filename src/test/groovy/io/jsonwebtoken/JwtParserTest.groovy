@@ -16,13 +16,12 @@
 package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.TextCodec
-import org.testng.annotations.Test
 
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
-import static org.testng.Assert.*
-
+import org.junit.Test
+import static org.junit.Assert.*
 
 class JwtParserTest {
 
@@ -97,7 +96,7 @@ class JwtParserTest {
             Jwts.parser().setSigningKey(randomKey()).parse(bad);
             fail()
         } catch (SignatureException se) {
-            assertEquals se.getMessage(), "Unsupported signature algorithm '$badAlgorithmName'"
+            assertEquals se.getMessage(), "Unsupported signature algorithm '$badAlgorithmName'".toString()
         }
     }
 

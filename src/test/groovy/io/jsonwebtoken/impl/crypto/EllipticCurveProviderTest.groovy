@@ -16,15 +16,14 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import org.testng.annotations.Test
 
 import java.security.KeyPair
 import java.security.NoSuchProviderException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
-import static org.testng.Assert.*
-
+import org.junit.Test
+import static org.junit.Assert.*
 
 class EllipticCurveProviderTest {
 

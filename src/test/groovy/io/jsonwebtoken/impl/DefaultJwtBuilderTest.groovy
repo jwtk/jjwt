@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.crypto.MacProvider
-import org.testng.annotations.Test
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class DefaultJwtBuilderTest {
 

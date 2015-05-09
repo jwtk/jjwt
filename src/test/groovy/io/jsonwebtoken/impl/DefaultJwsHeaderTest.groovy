@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl
 
-import org.testng.annotations.Test
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class DefaultJwsHeaderTest {
 

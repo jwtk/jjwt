@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl;
 
 public interface TextCodec {
 
-    public static final TextCodec BASE64    = new Base64Codec();
+    public static final TextCodec BASE64    = new DefaultTextCodecFactory().getTextCodec();
     public static final TextCodec BASE64URL = new Base64UrlCodec();
 
     String encode(String data);

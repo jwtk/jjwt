@@ -17,14 +17,14 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.SignatureException
-import org.testng.annotations.Test
 
 import java.security.InvalidKeyException
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
 
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class EllipticCurveSignerTest {
 

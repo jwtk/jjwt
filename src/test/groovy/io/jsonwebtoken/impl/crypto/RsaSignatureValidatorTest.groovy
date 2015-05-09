@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.SignatureException
-import org.testng.annotations.Test
 
 import java.security.InvalidKeyException
 import java.security.KeyPair
@@ -26,10 +25,8 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.Signature
 
-import static org.testng.Assert.assertEquals
-import static org.testng.Assert.assertSame
-import static org.testng.Assert.fail
-
+import org.junit.Test
+import static org.junit.Assert.*
 
 class RsaSignatureValidatorTest {
 

@@ -17,45 +17,12 @@ package io.jsonwebtoken.impl;
 
 public class Base64Codec extends AbstractTextCodec {
 
-    private static final boolean ANDROID = isAndroid();
-
-    private static boolean isAndroid() {
-
-        String name = System.getProperty("java.vm.name");
-        if (name != null) {
-            String lcase = name.toLowerCase();
-            return lcase.contains("dalvik");
-        }
-
-        name = System.getProperty("java.vm.vendor");
-        if (name != null) {
-            String lcase = name.toLowerCase();
-            return lcase.contains("android");
-        }
-
-        return false;
-    }
-
     public String encode(byte[] data) {
-
-        if (ANDROID) {
-            int flags = android.util.Base64.NO_PADDING | android.util.Base64.NO_WRAP;
-            return android.util.Base64.encodeToString(data, flags);
-        }
-
-        //else, assume standard JVM
         return javax.xml.bind.DatatypeConverter.printBase64Binary(data);
     }
 
     @Override
     public byte[] decode(String encoded) {
-
-        if (ANDROID) {
-            return android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
-        }
-
-        //else assume standard JVM:
         return javax.xml.bind.DatatypeConverter.parseBase64Binary(encoded);
     }
-
 }

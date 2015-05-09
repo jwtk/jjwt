@@ -22,7 +22,6 @@ import io.jsonwebtoken.impl.TextCodec
 import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.impl.crypto.RsaProvider
-import org.testng.annotations.Test
 
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -31,7 +30,8 @@ import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
 
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class JwtsTest {
 
@@ -108,20 +108,20 @@ class JwtsTest {
 
         def token = Jwts.parser().parse(jwt);
 
-        assertEquals token.body, claims
+        assert token.body == claims
     }
 
-    @Test(expectedExceptions = IllegalArgumentException)
+    @Test(expected = IllegalArgumentException)
     void testParseNull() {
         Jwts.parser().parse(null)
     }
 
-    @Test(expectedExceptions = IllegalArgumentException)
+    @Test(expected = IllegalArgumentException)
     void testParseEmptyString() {
         Jwts.parser().parse('')
     }
 
-    @Test(expectedExceptions = IllegalArgumentException)
+    @Test(expected = IllegalArgumentException)
     void testParseWhitespaceString() {
         Jwts.parser().parse('   ')
     }
@@ -537,10 +537,8 @@ class JwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
-        assertEquals token.header, [alg: alg.name()]
-
-        assertEquals token.body, claims
-
+        assert [alg: alg.name()] == token.header
+        assert token.body == claims
     }
 
     static void testHmac(SignatureAlgorithm alg) {
@@ -553,9 +551,8 @@ class JwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
-        assertEquals token.header, [alg: alg.name()]
-
-        assertEquals token.body, claims
+        assert token.header == [alg: alg.name()]
+        assert token.body == claims
     }
 
     static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey=false) {
@@ -575,9 +572,8 @@ class JwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
-        assertEquals token.header, [alg: alg.name()]
-
-        assertEquals token.body, claims
+        assert token.header == [alg: alg.name()]
+        assert token.body == claims
     }
 }
 
