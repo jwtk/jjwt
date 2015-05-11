@@ -50,7 +50,7 @@ public class RsaSignatureValidator extends RsaProvider implements SignatureValid
                 throw new SignatureException(msg, e);
             }
         } else {
-            assert this.SIGNER != null;
+            Assert.notNull(this.SIGNER, "RSA Signer instance cannot be null.  This is a bug.  Please report it.");
             byte[] computed = this.SIGNER.sign(data);
             return Arrays.equals(computed, signature);
         }

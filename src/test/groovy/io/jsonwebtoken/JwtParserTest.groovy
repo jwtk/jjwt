@@ -16,11 +16,11 @@
 package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.TextCodec
+import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
-import org.junit.Test
 import static org.junit.Assert.*
 
 class JwtParserTest {
@@ -638,8 +638,8 @@ class JwtParserTest {
             fail()
         } catch (UnsupportedJwtException ex) {
             assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
-                    'Claims JWS signing key resolution.  Consider overriding either the ' +
-                    'resolveSigningKey(JwsHeader, Claims) or resolveSigningKeyBytes(JwsHeader, Claims) method.'
+                    'Claims JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, Claims) method ' +
+                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.'
         }
     }
 
@@ -708,8 +708,8 @@ class JwtParserTest {
             fail()
         } catch (UnsupportedJwtException ex) {
             assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
-                    'JWS signing key resolution.  Consider overriding either the ' +
-                    'resolveSigningKey(JwsHeader, String) or resolveSigningKeyBytes(JwsHeader, String) method.'
+                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
+                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
         }
     }
 }
