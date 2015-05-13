@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl
 
-import org.testng.annotations.Test
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class JwtMapTest {
 
@@ -115,6 +115,7 @@ class JwtMapTest {
     void testValues() {
         def m = new JwtMap()
         m.putAll([a: 'b', c: 'd'])
-        assertEquals( m.values(), ['b', 'd'] as Set)
+        def s = ['b', 'd']
+        assertTrue m.values().containsAll(s) && s.containsAll(m.values())
     }
 }

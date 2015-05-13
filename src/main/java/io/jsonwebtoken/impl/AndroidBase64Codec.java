@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.crypto
+package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.SignatureAlgorithm
-import org.junit.Test
-import static org.junit.Assert.*
+public class AndroidBase64Codec extends AbstractTextCodec {
 
-class DefaultSignatureValidatorFactoryTest {
+    @Override
+    public String encode(byte[] data) {
+        int flags = android.util.Base64.NO_PADDING | android.util.Base64.NO_WRAP;
+        return android.util.Base64.encodeToString(data, flags);
+    }
 
-    @Test
-    void testNoneAlgorithm() {
-        try {
-            new DefaultSignatureValidatorFactory().createSignatureValidator(SignatureAlgorithm.NONE, MacProvider.generateKey())
-            fail()
-        } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, "The 'NONE' algorithm cannot be used for signing."
-        }
+    @Override
+    public byte[] decode(String encoded) {
+        return android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
     }
 }

@@ -70,8 +70,9 @@
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <groovy.version>2.3.0-beta-2</groovy.version>
         <logback.version>1.0.7</logback.version>
-        <easymock.version>3.1</easymock.version>
-        <testng.version>6.8</testng.version>
+        <easymock.version>3.3.1</easymock.version>
+        <junit.version>4.12</junit.version>
+        <powermock.version>1.6.2</powermock.version>
         <failsafe.plugin.version>2.12.4</failsafe.plugin.version>
 
     </properties>
@@ -83,14 +84,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -106,17 +99,27 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Provided scope: only used in Android environments - not downloaded as a transitive dependency.
+             This dependency is only a stub of the actual implementation, which means we can't use it at test time.
+             An Android environment is required to test for real. -->
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>4.1.1.4</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -129,6 +132,30 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>${easymock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-easymock</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-core</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
 
@@ -245,6 +272,73 @@
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <instrumentation>
+                        <excludes>
+                            <exclude>io/jsonwebtoken/lang/*.class</exclude>
+                        </excludes>
+                        <ignores>
+                            <ignore>io.jsonwebtoken.lang.*</ignore>
+                        </ignores>
+                    </instrumentation>
+                    <check>
+                        <lineRate>100</lineRate>
+                        <branchRate>100</branchRate>
+                        <packageLineRate>100</packageLineRate>
+                        <packageBranchRate>100</packageBranchRate>
+                        <haltOnFailure>true</haltOnFailure>
+                        <regexes>
+                            <regex>
+                                <!-- Cannot get to 100% on DefaultClaims because of Cobertura bug w/ generics:
+                                     https://github.com/cobertura/cobertura/issues/207 -->
+                                <pattern>io.jsonwebtoken.impl.DefaultClaims</pattern>
+                                <lineRate>96</lineRate>
+                                <branchRate>100</branchRate>
+                            </regex>
+                            <regex>
+                                <pattern>io.jsonwebtoken.impl.Base64UrlCodec</pattern>
+                                <lineRate>100</lineRate>
+                                <branchRate>95</branchRate>
+                            </regex>
+                            <regex>
+                                <pattern>io.jsonwebtoken.impl.DefaultJwtBuilder</pattern>
+                                <lineRate>91</lineRate>
+                                <branchRate>85</branchRate>
+                            </regex>
+                            <regex>
+                                <pattern>io.jsonwebtoken.impl.DefaultJwtParser</pattern>
+                                <lineRate>97</lineRate>
+                                <branchRate>88</branchRate>
+                            </regex>
+                            <regex>
+                                <pattern>io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator</pattern>
+                                <lineRate>95</lineRate>
+                                <branchRate>100</branchRate>
+                            </regex>
+                            <regex>
+                                <pattern>io.jsonwebtoken.impl.crypto.RsaSignatureValidator</pattern>
+                                <lineRate>93</lineRate>
+                                <branchRate>100</branchRate>
+                            </regex>
+                        </regexes>
+                    </check>
+                    <formats>
+                        <format>html</format>
+                    </formats>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>clean</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

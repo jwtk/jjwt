@@ -36,7 +36,6 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
 public class DefaultJwtBuilder implements JwtBuilder {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

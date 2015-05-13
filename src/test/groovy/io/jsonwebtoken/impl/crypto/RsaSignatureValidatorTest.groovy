@@ -17,23 +17,25 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.SignatureException
-import org.testng.annotations.Test
+import org.junit.Test
 
-import java.security.InvalidKeyException
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.PrivateKey
-import java.security.PublicKey
-import java.security.Signature
+import java.security.*
 
-import static org.testng.Assert.assertEquals
-import static org.testng.Assert.assertSame
-import static org.testng.Assert.fail
-
+import static org.junit.Assert.*
 
 class RsaSignatureValidatorTest {
 
     private static final Random rng = new Random(); //doesn't need to be secure - we're just testing
+
+    @Test
+    void testConstructorWithNonRsaKey() {
+        try {
+            new RsaSignatureValidator(SignatureAlgorithm.RS256, MacProvider.generateKey());
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.", iae.message
+        }
+    }
 
     @Test
     void testDoVerifyWithInvalidKeyException() {

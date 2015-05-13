@@ -17,8 +17,8 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
-import org.testng.annotations.Test
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class DefaultJwsTest {
 

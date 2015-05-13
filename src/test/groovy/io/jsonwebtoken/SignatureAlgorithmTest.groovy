@@ -15,9 +15,8 @@
  */
 package io.jsonwebtoken
 
-import org.testng.annotations.Test
-
-import static org.testng.Assert.*
+import org.junit.Test
+import static org.junit.Assert.*
 
 class SignatureAlgorithmTest {
 
@@ -38,7 +37,7 @@ class SignatureAlgorithmTest {
         assert alg.description != null && alg.description != ""
     }
 
-    @Test(expectedExceptions = SignatureException)
+    @Test(expected = SignatureException)
     void testUnrecognizedAlgorithmName() {
         SignatureAlgorithm.forName('whatever')
     }

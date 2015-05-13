@@ -55,7 +55,8 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
     }
 
     public static KeyPair generateKeyPair(String jcaAlgorithmName, String jcaProviderName, SignatureAlgorithm alg, SecureRandom random) {
-        Assert.isTrue(alg != null && alg.isEllipticCurve(), "SignatureAlgorithm argument must represent an Elliptic Curve algorithm.");
+        Assert.notNull(alg, "SignatureAlgorithm argument cannot be null.");
+        Assert.isTrue(alg.isEllipticCurve(), "SignatureAlgorithm argument must represent an Elliptic Curve algorithm.");
         try {
             KeyPairGenerator g = KeyPairGenerator.getInstance(jcaAlgorithmName, jcaProviderName);
             String paramSpecCurveName = EC_CURVE_NAMES.get(alg);

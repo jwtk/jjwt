@@ -22,7 +22,7 @@ import io.jsonwebtoken.impl.TextCodec
 import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.impl.crypto.RsaProvider
-import org.testng.annotations.Test
+import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -31,7 +31,7 @@ import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
 
-import static org.testng.Assert.*
+import static org.junit.Assert.*
 
 class JwtsTest {
 
@@ -108,20 +108,20 @@ class JwtsTest {
 
         def token = Jwts.parser().parse(jwt);
 
-        assertEquals token.body, claims
+        assert token.body == claims
     }
 
-    @Test(expectedExceptions = IllegalArgumentException)
+    @Test(expected = IllegalArgumentException)
     void testParseNull() {
         Jwts.parser().parse(null)
     }
 
-    @Test(expectedExceptions = IllegalArgumentException)
+    @Test(expected = IllegalArgumentException)
     void testParseEmptyString() {
         Jwts.parser().parse('')
     }
 
-    @Test(expectedExceptions = IllegalArgumentException)
+    @Test(expected = IllegalArgumentException)
     void testParseWhitespaceString() {
         Jwts.parser().parse('   ')
     }
@@ -401,7 +401,7 @@ class JwtsTest {
             testEC(SignatureAlgorithm.ES256, true)
             fail("EC private keys cannot be used to validate EC signatures.")
         } catch (UnsupportedJwtException e) {
-            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey. ECPrivateKeys may not be used."
+            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey instance."
         }
     }
 
@@ -520,6 +520,39 @@ class JwtsTest {
         }
     }
 
+    //Asserts correct behavior for https://github.com/jwtk/jjwt/issues/25
+    @Test
+    void testParseForgedEllipticCurvePublicKeyAsHmacToken() {
+
+        //Create a legitimate RSA public and private key pair:
+        KeyPair kp = EllipticCurveProvider.generateKeyPair()
+        PublicKey publicKey = kp.getPublic();
+        //PrivateKey privateKey = kp.getPrivate();
+
+        ObjectMapper om = new ObjectMapper()
+        String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
+        String body = TextCodec.BASE64URL.encode(om.writeValueAsString('foo'))
+        String compact = header + '.' + body + '.'
+
+        // Now for the forgery: simulate an attacker using the Elliptic Curve public key to sign a token, but
+        // using it as an HMAC signing key instead of Elliptic Curve:
+        Mac mac = Mac.getInstance('HmacSHA256');
+        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
+        byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
+        String encodedSignature = TextCodec.BASE64URL.encode(signatureBytes);
+
+        //Finally, the forged token is the header + body + forged signature:
+        String forged = compact + encodedSignature;
+
+        // Assert that the parser does not recognized the forged token:
+        try {
+            Jwts.parser().setSigningKey(publicKey).parse(forged);
+            fail("Forged token must not be successfully parsed.")
+        } catch (UnsupportedJwtException expected) {
+            assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
+        }
+    }
+
     static void testRsa(SignatureAlgorithm alg, int keySize=1024, boolean verifyWithPrivateKey=false) {
 
         KeyPair kp = RsaProvider.generateKeyPair(keySize)
@@ -537,10 +570,8 @@ class JwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
-        assertEquals token.header, [alg: alg.name()]
-
-        assertEquals token.body, claims
-
+        assert [alg: alg.name()] == token.header
+        assert token.body == claims
     }
 
     static void testHmac(SignatureAlgorithm alg) {
@@ -553,9 +584,8 @@ class JwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
-        assertEquals token.header, [alg: alg.name()]
-
-        assertEquals token.body, claims
+        assert token.header == [alg: alg.name()]
+        assert token.body == claims
     }
 
     static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey=false) {
@@ -575,9 +605,8 @@ class JwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
-        assertEquals token.header, [alg: alg.name()]
-
-        assertEquals token.body, claims
+        assert token.header == [alg: alg.name()]
+        assert token.body == claims
     }
 }
 

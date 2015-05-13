@@ -16,15 +16,14 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import org.testng.annotations.Test
+import org.junit.Test
 
 import java.security.KeyPair
 import java.security.NoSuchProviderException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
-import static org.testng.Assert.*
-
+import static org.junit.Assert.*
 
 class EllipticCurveProviderTest {
 
@@ -44,6 +43,26 @@ class EllipticCurveProviderTest {
         } catch (IllegalStateException ise) {
             assertEquals ise.message, "Unable to generate Elliptic Curve KeyPair: no such provider: Foo"
             assertTrue ise.cause instanceof NoSuchProviderException
+        }
+    }
+
+    @Test
+    void testGenerateKeyPairWithNullAlgorithm() {
+        try {
+            EllipticCurveProvider.generateKeyPair("ECDSA", "Foo", null, null)
+            fail()
+        } catch (IllegalArgumentException ise) {
+            assertEquals ise.message, "SignatureAlgorithm argument cannot be null."
+        }
+    }
+
+    @Test
+    void testGenerateKeyPairWithNonEllipticCurveAlgorithm() {
+        try {
+            EllipticCurveProvider.generateKeyPair("ECDSA", "Foo", SignatureAlgorithm.HS256, null)
+            fail()
+        } catch (IllegalArgumentException ise) {
+            assertEquals ise.message, "SignatureAlgorithm argument must represent an Elliptic Curve algorithm."
         }
     }
 }
