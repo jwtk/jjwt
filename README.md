@@ -51,7 +51,7 @@ How easy was that!?
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-assert Jwts.parser().setSigningKey(key).parseClaimsJws(compact).getBody().getSubject().equals("Joe");
+assert Jwts.parser().setSigningKey(key).parseClaimsJws(s).getBody().getSubject().equals("Joe");
 ```
 
 You have to love one-line code snippets!
