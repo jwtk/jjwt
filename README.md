@@ -106,15 +106,17 @@ These feature sets will be implemented in a future release when possible.  Commu
 - Elliptic Curve signature algorithms!  `SignatureAlgorithm.ES256`, `ES384` and `ES512` are now supported.
 
 - Super convenient key generation methods, so you don't have to worry how to do this safely:
-  -- `MacProvider.generateKey(); //or generateKey(SignatureAlgorithm)`
-  -- `RsaProvider.generateKeyPair(); //or generateKeyPair(sizeInBits)`
-  -- `EllipticCurveProvider.generateKeyPair(); //or generateKeyPair(SignatureAlgorithm)`
+  - `MacProvider.generateKey(); //or generateKey(SignatureAlgorithm)`
+  - `RsaProvider.generateKeyPair(); //or generateKeyPair(sizeInBits)`
+  - `EllipticCurveProvider.generateKeyPair(); //or generateKeyPair(SignatureAlgorithm)`
+
   The `generate`* methods that accept an `SignatureAlgorithm` argument know to generate a key of sufficient strength that reflects the specified algorithm strength.
 
-- *100% LINE TEST COVERAGE!* every line of JJWT code (excluding generic `lang` package language helper code) is guaranteed to be executed during a build.  The `cobertura` maven plugin enforces 100% coverage for all new code in the future too.  This means that JJWT will be stable and regression tested for all future releases, ensuring a stable (and cryptographically sound) codebase for the long future. 
+
+- *100% LINE TEST COVERAGE!* every line of JJWT code (excluding generic `lang` package language helper code) is guaranteed to be executed during a build.  The `cobertura` maven plugin enforces 100% coverage for all new code in the future too.  This means that JJWT will be stable and regression tested for all future releases, ensuring a stable (and cryptographically sound) codebase for the long future.
 
 Please see the full [0.5 closed issues list](https://github.com/jwtk/jjwt/issues?q=milestone%3A0.5+is%3Aclosed) for more information.
- 
+
 ### 0.4
 
 - [Issue 8](https://github.com/jwtk/jjwt/issues/8): Add ability to find signing key by inspecting the JWS values before verifying the signature.
