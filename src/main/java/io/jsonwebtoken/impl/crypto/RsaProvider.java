@@ -83,22 +83,72 @@ public abstract class RsaProvider extends SignatureProvider {
         sig.setParameter(spec);
     }
 
+    /**
+     * Generates a new RSA secure-random 4096 bit key pair.  4096 bits is JJWT's current recommended minimum key size
+     * for use in modern applications (during or after year 2015).  This is a convenience method that immediately
+     * delegates to {@link #generateKeyPair(int)}.
+     *
+     * @return a new RSA secure-random 4096 bit key pair.
+     * @see #generateKeyPair(int)
+     * @see #generateKeyPair(int, SecureRandom)
+     * @see #generateKeyPair(String, int, SecureRandom)
+     * @since 0.5
+     */
     public static KeyPair generateKeyPair() {
         return generateKeyPair(4096);
     }
 
+    /**
+     * Generates a new RSA secure-randomly key pair of the specified size using JJWT's default {@link
+     * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
+     * delegates to {@link #generateKeyPair(int, SecureRandom)}.
+     *
+     * @param keySizeInBits the key size in bits (<em>NOT bytes</em>).
+     * @return a new RSA secure-random key pair of the specified size.
+     * @see #generateKeyPair()
+     * @see #generateKeyPair(int, SecureRandom)
+     * @see #generateKeyPair(String, int, SecureRandom)
+     * @since 0.5
+     */
     public static KeyPair generateKeyPair(int keySizeInBits) {
         return generateKeyPair(keySizeInBits, SignatureProvider.DEFAULT_SECURE_RANDOM);
     }
 
+    /**
+     * Generates a new RSA secure-random key pair of the specified size using the given SecureRandom number generator.
+     * This is a convenience method that immediately delegates to {@link #generateKeyPair(String, int, SecureRandom)}
+     * using {@code RSA} as the {@code jcaAlgorithmName} argument.
+     *
+     * @param keySizeInBits the key size in bits (<em>NOT bytes</em>)
+     * @param random        the secure random number generator to use during key generation.
+     * @return a new RSA secure-random key pair of the specified size using the given SecureRandom number generator.
+     * @see #generateKeyPair()
+     * @see #generateKeyPair(int)
+     * @see #generateKeyPair(String, int, SecureRandom)
+     * @since 0.5
+     */
     public static KeyPair generateKeyPair(int keySizeInBits, SecureRandom random) {
         return generateKeyPair("RSA", keySizeInBits, random);
     }
 
-    protected static KeyPair generateKeyPair(String jcaAlgName, int keySizeInBits, SecureRandom random) {
+    /**
+     * Generates a new secure-random key pair of the specified size using the specified SecureRandom according to the
+     * specified {@code jcaAlgorithmName}.
+     *
+     * @param jcaAlgorithmName the name of the JCA algorithm to use for key pair generation, for example, {@code RSA}.
+     * @param keySizeInBits    the key size in bits (<em>NOT bytes</em>)
+     * @param random           the SecureRandom generator to use during key generation.
+     * @return a new secure-randomly generated key pair of the specified size using the specified SecureRandom according
+     * to the specified {@code jcaAlgorithmName}.
+     * @see #generateKeyPair()
+     * @see #generateKeyPair(int)
+     * @see #generateKeyPair(int, SecureRandom)
+     * @since 0.5
+     */
+    protected static KeyPair generateKeyPair(String jcaAlgorithmName, int keySizeInBits, SecureRandom random) {
         KeyPairGenerator keyGenerator;
         try {
-            keyGenerator = KeyPairGenerator.getInstance(jcaAlgName);
+            keyGenerator = KeyPairGenerator.getInstance(jcaAlgorithmName);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Unable to obtain an RSA KeyPairGenerator: " + e.getMessage(), e);
         }

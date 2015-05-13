@@ -24,10 +24,22 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.util.Random;
 
 abstract class SignatureProvider {
 
+    /**
+     * JJWT's default SecureRandom number generator.  This RNG is initialized using the JVM default as follows:
+     *
+     * <pre><code>
+     * static {
+     *     DEFAULT_SECURE_RANDOM = new SecureRandom();
+     *     DEFAULT_SECURE_RANDOM.nextBytes(new byte[64]);
+     * }
+     * </code></pre>
+     *
+     * <p><code>nextBytes</code> is called to force the RNG to initialize itself if not already initialized.  The
+     * byte array is not used and discarded immediately for garbage collection.</p>
+     */
     public static final SecureRandom DEFAULT_SECURE_RANDOM;
 
     static {

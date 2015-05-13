@@ -21,6 +21,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.crypto.MacProvider
 import org.junit.Test
+
 import static org.junit.Assert.*
 
 class DefaultJwtBuilderTest {
@@ -171,6 +172,28 @@ class DefaultJwtBuilderTest {
             fail()
         } catch (IllegalStateException ise) {
             assertEquals ise.cause.message, 'foo'
+        }
+
+    }
+
+    @Test
+    void testSignWithBytesWithoutHmac() {
+        def bytes = new byte[16];
+        try {
+            new DefaultJwtBuilder().signWith(SignatureAlgorithm.ES256, bytes);
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.", iae.message
+        }
+    }
+
+    @Test
+    void testSignWithBase64EncodedBytesWithoutHmac() {
+        try {
+            new DefaultJwtBuilder().signWith(SignatureAlgorithm.ES256, 'foo');
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals "Base64-encoded key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.", iae.message
         }
 
     }

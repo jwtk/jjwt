@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
 
-# Java JWT: JSON Web Token for Java
+# Java JWT: JSON Web Token for Java and Android
 
 JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM.
 
@@ -8,7 +8,7 @@ JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ie
 
 ## Installation
 
-Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central.
+Use your favorite Maven-compatible build tool to pull the dependency (and its transitive dependencies) from Maven Central:
 
 Maven:
 
@@ -16,7 +16,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.4</version>
+    <version>0.5</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.4'
+    compile 'io.jsonwebtoken:jjwt:0.5'
 }
 ```
 
@@ -37,13 +37,13 @@ Most complexity is hidden behind a convenient and readable builder-based [fluent
 ```java
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.crypto.MacProvider;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
-byte[] key = new byte[64];
-new SecureRandom().nextBytes(key);
+byte[] key = MacProvider.generateKey();
 
-String compact = Jwts.builder().setSubject("Joe").signWith(SignatureAlgorithm.HS256, key).compact();
+String s = Jwts.builder().setSubject("Joe").signWith(SignatureAlgorithm.HS512, key).compact();
 ```
 
 How easy was that!?
@@ -98,6 +98,20 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 ## Release Notes
 
+### 0.5
+
+- Android support! Android's built-in Base64 codec will be used if JJWT detects it is running in an Android environment.  Other than Base64, all other parts of JJWT were already Android-compliant.  Now it is fully compliant.
+
+- Elliptic Curve signature algorithms!  `SignatureAlgorithm.ES256`, `ES384` and `ES512` are now supported.
+
+- Super convenient key generation methods, so you don't have to worry how to do this safely:
+  -- `MacProvider.generateKey(); //or generateKey(SignatureAlgorithm)`
+  -- `RsaProvider.generateKeyPair(); //or generateKeyPair(sizeInBits)`
+  -- `EllipticCurveProvider.generateKeyPair(); //or generateKeyPair(SignatureAlgorithm)`
+  The `generate`* methods that accept an `SignatureAlgorithm` argument know to generate a key of sufficient strength that reflects the specified algorithm strength.
+
+- *100% LINE TEST COVERAGE!* every line of JJWT code (excluding generic `lang` package language helper code) is guaranteed to be executed during a build.  The `cobertura` maven plugin enforces 100% coverage for all new code in the future too.  This means that JJWT will be stable and regression tested for all future releases, ensuring a stable (and cryptographically sound) codebase for the long future. 
+ 
 ### 0.4
 
 - [Issue 8](https://github.com/jwtk/jjwt/issues/8): Add ability to find signing key by inspecting the JWS values before verifying the signature.

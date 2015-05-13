@@ -90,7 +90,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKey) {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notEmpty(secretKey, "secret key byte array cannot be null or empty.");
-        Assert.isTrue(!alg.isRsa(), "Key bytes cannot be specified for RSA signatures.  Please specify an RSAPrivateKey instance.");
+        Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         this.algorithm = alg;
         this.keyBytes = secretKey;
         return this;
@@ -99,6 +99,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
+        Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         byte[] bytes = TextCodec.BASE64.decode(base64EncodedSecretKey);
         return signWith(alg, bytes);
     }
