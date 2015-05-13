@@ -111,6 +111,8 @@ These feature sets will be implemented in a future release when possible.  Commu
   The `generate`* methods that accept an `SignatureAlgorithm` argument know to generate a key of sufficient strength that reflects the specified algorithm strength.
 
 - *100% LINE TEST COVERAGE!* every line of JJWT code (excluding generic `lang` package language helper code) is guaranteed to be executed during a build.  The `cobertura` maven plugin enforces 100% coverage for all new code in the future too.  This means that JJWT will be stable and regression tested for all future releases, ensuring a stable (and cryptographically sound) codebase for the long future. 
+
+Please see the full [0.5 closed issues list](https://github.com/jwtk/jjwt/issues?q=milestone%3A0.5+is%3Aclosed) for more information.
  
 ### 0.4
 
