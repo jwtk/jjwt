@@ -82,7 +82,14 @@ public class Base64UrlCodec extends AbstractTextCodec {
 
         char[] result = chars; //assume argument in case no padding is necessary
 
-        int paddingCount = chars.length % 4;
+        int paddingCount = 0;
+
+        //fix for https://github.com/jwtk/jjwt/issues/31
+        int remainder = chars.length % 4;
+        if (remainder == 2 || remainder == 3) {
+            paddingCount = 4 - remainder;
+        }
+
         if (paddingCount > 0) {
             result = new char[chars.length + paddingCount];
             System.arraycopy(chars, 0, result, 0, chars.length);
