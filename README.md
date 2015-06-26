@@ -16,7 +16,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.5</version>
+    <version>0.5.1</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.5'
+    compile 'io.jsonwebtoken:jjwt:0.5.1'
 }
 ```
 
@@ -98,6 +98,10 @@ try {
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
 
 ## Release Notes
+
+### 0.5.1
+
+- Minor [bug](https://github.com/jwtk/jjwt/issues/31) fix [release](https://github.com/jwtk/jjwt/issues?q=milestone%3A0.5.1+is%3Aclosed) that ensures correct Base64 padding in Android runtimes.
 
 ### 0.5
 
