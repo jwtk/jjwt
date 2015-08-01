@@ -97,6 +97,15 @@ try {
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
 
+## Learn More
+
+- [JSON Web Token for Java and Android](https://stormpath.com/blog/jjwt-how-it-works-why/)
+- [How to Create and Verify JWTs in Java](https://stormpath.com/blog/jwt-java-create-verify/)
+
+## Author
+
+Maintained by [Stormpath](https://stormpath.com/)
+
 ## Release Notes
 
 ### 0.5.1
@@ -118,7 +127,7 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 Please see the full [0.5 closed issues list](https://github.com/jwtk/jjwt/issues?q=milestone%3A0.5+is%3Aclosed) for more information.
 
-### 0.4
+### 0.
 
 - [Issue 8](https://github.com/jwtk/jjwt/issues/8): Add ability to find signing key by inspecting the JWS values before verifying the signature.
 
@@ -272,3 +281,7 @@ JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson ve
     <version>2.4.2</version>
 </dependency>
 ```
+
+## Licensing
+
+This project is open-source via the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
