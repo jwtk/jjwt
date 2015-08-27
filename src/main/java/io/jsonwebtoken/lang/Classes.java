@@ -15,9 +15,6 @@
  */
 package io.jsonwebtoken.lang;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 
@@ -25,11 +22,6 @@ import java.lang.reflect.Constructor;
  * @since 0.1
  */
 public class Classes {
-
-    /**
-     * Private internal log instance.
-     */
-    private static final Logger log = LoggerFactory.getLogger(Classes.class);
 
     /**
      * @since 0.1
@@ -78,18 +70,10 @@ public class Classes {
         Class clazz = THREAD_CL_ACCESSOR.loadClass(fqcn);
 
         if (clazz == null) {
-            if (log.isTraceEnabled()) {
-                log.trace("Unable to load class named [" + fqcn +
-                          "] from the thread context ClassLoader.  Trying the current ClassLoader...");
-            }
             clazz = CLASS_CL_ACCESSOR.loadClass(fqcn);
         }
 
         if (clazz == null) {
-            if (log.isTraceEnabled()) {
-                log.trace("Unable to load class named [" + fqcn + "] from the current ClassLoader.  " +
-                          "Trying the system/application ClassLoader...");
-            }
             clazz = SYSTEM_CL_ACCESSOR.loadClass(fqcn);
         }
 
@@ -212,9 +196,7 @@ public class Classes {
                 try {
                     clazz = cl.loadClass(fqcn);
                 } catch (ClassNotFoundException e) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Unable to load clazz named [" + fqcn + "] from class loader [" + cl + "]");
-                    }
+                    //Class couldn't be found by loader
                 }
             }
             return clazz;
@@ -233,9 +215,7 @@ public class Classes {
             try {
                 return doGetClassLoader();
             } catch (Throwable t) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Unable to acquire ClassLoader.", t);
-                }
+                //Unable to get ClassLoader
             }
             return null;
         }
