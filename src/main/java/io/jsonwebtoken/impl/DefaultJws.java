@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 
-public class DefaultJws<B> implements Jws {
+public class DefaultJws<B> implements Jws<B> {
 
     private final JwsHeader header;
     private final B body;
