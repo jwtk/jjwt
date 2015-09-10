@@ -120,6 +120,17 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testCompactWithoutPayloadOrClaims() {
+        def b = new DefaultJwtBuilder()
+        try {
+            b.compact()
+            fail()
+        } catch (IllegalStateException ise) {
+            assertEquals ise.message, "Either 'payload' or 'claims' must be specified."
+        }
+    }
+
+    @Test
     void testCompactWithBothPayloadAndClaims() {
         def b = new DefaultJwtBuilder()
         b.setPayload('foo')
@@ -197,4 +208,54 @@ class DefaultJwtBuilderTest {
         }
 
     }
+
+    @Test
+    void testSetHeaderParamsWithNullMap() {
+        def b = new DefaultJwtBuilder()
+        b.setHeaderParams(null)
+        assertNull b.header
+    }
+
+    @Test
+    void testSetHeaderParamsWithEmptyMap() {
+        def b = new DefaultJwtBuilder()
+        b.setHeaderParams([:])
+        assertNull b.header
+    }
+
+    @Test
+    void testSetIssuerWithNull() {
+        def b = new DefaultJwtBuilder()
+        b.setIssuer(null)
+        assertNull b.claims
+    }
+
+    @Test
+    void testSetSubjectWithNull() {
+        def b = new DefaultJwtBuilder()
+        b.setSubject(null)
+        assertNull b.claims
+    }
+
+    @Test
+    void testSetAudienceWithNull() {
+        def b = new DefaultJwtBuilder()
+        b.setAudience(null)
+        assertNull b.claims
+    }
+
+    @Test
+    void testSetIdWithNull() {
+        def b = new DefaultJwtBuilder()
+        b.setId(null)
+        assertNull b.claims
+    }
+
+    @Test
+    void testClaimNullValue() {
+        def b = new DefaultJwtBuilder()
+        b.claim('foo', null)
+        assertNull b.claims
+    }
+
 }

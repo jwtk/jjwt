@@ -297,11 +297,6 @@
                                 <branchRate>100</branchRate>
                             </regex>
                             <regex>
-                                <pattern>io.jsonwebtoken.impl.Base64UrlCodec</pattern>
-                                <lineRate>100</lineRate>
-                                <branchRate>95</branchRate>
-                            </regex>
-                            <regex>
                                 <pattern>io.jsonwebtoken.impl.DefaultJwtBuilder</pattern>
                                 <lineRate>91</lineRate>
                                 <branchRate>85</branchRate>
