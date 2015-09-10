@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.BadAudienceJwtException;
+import io.jsonwebtoken.BadIdJwtException;
 import io.jsonwebtoken.BadIssuedAtJwtException;
 import io.jsonwebtoken.BadIssuerJwtException;
 import io.jsonwebtoken.BadSubjectJwtException;
@@ -67,6 +68,7 @@ public class DefaultJwtParser implements JwtParser {
     private String audience;
     private String subject;
     private Date issuedAt;
+    private String id;
 
     @Override
     public JwtParser setIssuer(String issuer) {
@@ -92,6 +94,12 @@ public class DefaultJwtParser implements JwtParser {
             // want date, but with seconds precision, not millis
             this.issuedAt = new Date(issuedAt.getTime() / 1000 * 1000);
         }
+        return this;
+    }
+
+    @Override
+    public JwtParser setId(String id) {
+        this.id = id;
         return this;
     }
 
@@ -336,34 +344,7 @@ public class DefaultJwtParser implements JwtParser {
                 }
             }
 
-            if (issuer != null && !issuer.equals(claims.getIssuer())) {
-                String msg = String.format(
-                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, claims.getIssuer(), issuer
-                );
-                throw new BadIssuerJwtException(header, claims, msg);
-            }
-
-            if (audience != null && !audience.equals(claims.getAudience())) {
-                String msg = String.format(
-                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, claims.getAudience(), audience
-                );
-                throw new BadAudienceJwtException(header, claims, msg);
-            }
-
-            if (subject != null && !subject.equals(claims.getSubject())) {
-                String msg = String.format(
-                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, claims.getSubject(), subject
-                );
-                throw new BadSubjectJwtException(header, claims, msg);
-            }
-
-            if (issuedAt != null && !issuedAt.equals(claims.getIssuedAt())) {
-                String claimsIssuedAt = (claims.getIssuedAt() != null) ? claims.getIssuedAt().toString() : null;
-                String msg = String.format(
-                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, claimsIssuedAt, issuedAt.toString()
-                );
-                throw new BadIssuedAtJwtException(header, claims, msg);
-            }
+            validateOptionalClaims(header, claims);
 
         }
 
@@ -373,6 +354,44 @@ public class DefaultJwtParser implements JwtParser {
             return new DefaultJws<Object>((JwsHeader) header, body, base64UrlEncodedDigest);
         } else {
             return new DefaultJwt<Object>(header, body);
+        }
+    }
+
+    private void validateOptionalClaims(Header header, Claims claims) {
+        if (issuer != null && !issuer.equals(claims.getIssuer())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, claims.getIssuer(), issuer
+            );
+            throw new BadIssuerJwtException(header, claims, msg);
+        }
+
+        if (audience != null && !audience.equals(claims.getAudience())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, claims.getAudience(), audience
+            );
+            throw new BadAudienceJwtException(header, claims, msg);
+        }
+
+        if (subject != null && !subject.equals(claims.getSubject())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, claims.getSubject(), subject
+            );
+            throw new BadSubjectJwtException(header, claims, msg);
+        }
+
+        if (issuedAt != null && !issuedAt.equals(claims.getIssuedAt())) {
+            String claimsIssuedAt = (claims.getIssuedAt() != null) ? claims.getIssuedAt().toString() : null;
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, claimsIssuedAt, issuedAt.toString()
+            );
+            throw new BadIssuedAtJwtException(header, claims, msg);
+        }
+
+        if (id != null && !id.equals(claims.getId())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ID, claims.getId(), id
+            );
+            throw new BadIdJwtException(header, claims, msg);
         }
     }
 

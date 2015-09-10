@@ -900,4 +900,43 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseSetId_Success() {
+        def id = 'A Most Awesome Id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId(id).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setId(id).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getId(), id
+    }
+
+    @Test
+    void testParseSetId_Fail() {
+        def goodId = 'A Most Awesome Id'
+        def badId = 'A Most Bogus Id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId(goodId).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setId(badId).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIdJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ID, goodId, badId), e.getMessage()
+        }
+    }
+
+
 }

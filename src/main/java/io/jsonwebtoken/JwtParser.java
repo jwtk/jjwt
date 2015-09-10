@@ -63,6 +63,16 @@ public interface JwtParser {
      */
     JwtParser setIssuedAt(Date issuedAt);
 
+
+    /**
+     * Sets the expected value for the jti registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param id the string representing the expected value for the jti (jwt id) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setId(String id);
+
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
