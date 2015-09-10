@@ -16,6 +16,8 @@
 package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.BadIssuerJwtException;
+import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
@@ -57,6 +59,14 @@ public class DefaultJwtParser implements JwtParser {
     private Key key;
 
     private SigningKeyResolver signingKeyResolver;
+
+    private String issuer;
+
+    @Override
+    public JwtParser setIssuer(String issuer) {
+        this.issuer = issuer;
+        return this;
+    }
 
     @Override
     public JwtParser setSigningKey(byte[] key) {
@@ -297,6 +307,13 @@ public class DefaultJwtParser implements JwtParser {
                     String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal;
                     throw new PrematureJwtException(header, claims, msg);
                 }
+            }
+
+            if (issuer != null && !issuer.equals(claims.getIssuer())) {
+                String msg = String.format(
+                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, claims.getIssuer(), issuer
+                );
+                throw new BadIssuerJwtException(header, claims, msg);
             }
         }
 

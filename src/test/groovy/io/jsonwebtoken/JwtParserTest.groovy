@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
 import static org.junit.Assert.*
+import static ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE;
 
 class JwtParserTest {
 
@@ -721,6 +722,44 @@ class JwtParserTest {
             assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
                     'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
                     'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
+        }
+    }
+
+    @Test
+    void testParseSetIssuer_Success() {
+        def issuer = 'A Most Awesome Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer(issuer).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setIssuer(issuer).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getIssuer(), issuer
+    }
+
+    @Test
+    void testParseSetIssuer_Fail() {
+        def goodIssuer = 'A Most Awesome Issuer'
+        def badIssuer = 'A Most Bogus Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer(goodIssuer).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setIssuer(badIssuer).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIssuerJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, goodIssuer, badIssuer), e.getMessage()
         }
     }
 }

@@ -27,6 +27,15 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
+     * Sets the expected value for the iss registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param issuer the string representing the expected value for the iss (issuer) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setIssuer(String issuer);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      *
