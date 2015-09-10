@@ -167,7 +167,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact();
 
         try {
-            Jwts.parser().parse(compact);
+            Jwts.parser().parse(compact)
+            fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
         }
@@ -181,7 +182,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact();
 
         try {
-            Jwts.parser().parse(compact);
+            Jwts.parser().parse(compact)
+            fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
@@ -268,7 +270,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).compact()
 
         try {
-            Jwts.parser().parseClaimsJwt(compact);
+            Jwts.parser().parseClaimsJwt(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
         }
@@ -327,7 +330,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact();
 
         try {
-            Jwts.parser().parseClaimsJwt(compact);
+            Jwts.parser().parseClaimsJwt(compact)
+            fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
@@ -361,7 +365,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact);
+            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
         }
@@ -377,7 +382,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact);
+            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
         }
@@ -393,7 +399,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact);
+            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
         }
@@ -452,7 +459,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact();
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+            fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
             assertEquals e.getClaims().getSubject(), sub
@@ -470,7 +478,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
         }
@@ -486,7 +495,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
         }
@@ -502,7 +512,8 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
         }
