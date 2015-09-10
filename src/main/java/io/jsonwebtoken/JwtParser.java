@@ -36,6 +36,15 @@ public interface JwtParser {
     JwtParser setIssuer(String issuer);
 
     /**
+     * Sets the expected value for the aud registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param audience the string representing the expected value for the aud (audience) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setAudience(String audience);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      *

@@ -762,4 +762,43 @@ class JwtParserTest {
             assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, goodIssuer, badIssuer), e.getMessage()
         }
     }
+
+    @Test
+    void testParseAudience_Success() {
+        def audience = 'A Most Awesome Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setAudience(audience).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
+
+    @Test
+    void testParseSetAudience_Fail() {
+        def goodAudience = 'A Most Awesome Audience'
+        def badAudience = 'A Most Bogus Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(goodAudience).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setAudience(badAudience).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadAudienceJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, goodAudience, badAudience), e.getMessage()
+        }
+    }
+
 }
