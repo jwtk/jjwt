@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.crypto;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.security.Key;
+import java.security.MessageDigest;
 import java.util.Arrays;
 
 public class MacValidator implements SignatureValidator {
@@ -31,6 +32,6 @@ public class MacValidator implements SignatureValidator {
     @Override
     public boolean isValid(byte[] data, byte[] signature) {
         byte[] computed = this.signer.sign(data);
-        return Arrays.equals(computed, signature);
+        return MessageDigest.isEqual(computed, signature);
     }
 }
