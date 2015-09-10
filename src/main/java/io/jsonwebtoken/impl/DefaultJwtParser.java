@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.BadAudienceJwtException;
 import io.jsonwebtoken.BadIssuerJwtException;
+import io.jsonwebtoken.BadSubjectJwtException;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -62,8 +63,8 @@ public class DefaultJwtParser implements JwtParser {
     private SigningKeyResolver signingKeyResolver;
 
     private String issuer;
-
     private String audience;
+    private String subject;
 
     @Override
     public JwtParser setIssuer(String issuer) {
@@ -74,6 +75,12 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setAudience(String audience) {
         this.audience = audience;
+        return this;
+    }
+
+    @Override
+    public JwtParser setSubject(String subject) {
+        this.subject = subject;
         return this;
     }
 
@@ -330,6 +337,13 @@ public class DefaultJwtParser implements JwtParser {
                     ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, claims.getAudience(), audience
                 );
                 throw new BadAudienceJwtException(header, claims, msg);
+            }
+
+            if (subject != null && !subject.equals(claims.getSubject())) {
+                String msg = String.format(
+                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, claims.getSubject(), subject
+                );
+                throw new BadSubjectJwtException(header, claims, msg);
             }
         }
 

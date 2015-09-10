@@ -801,4 +801,42 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseSubject_Success() {
+        def subject = 'A Most Awesome Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject(subject).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setSubject(subject).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseSetSubject_Fail() {
+        def goodSubject = 'A Most Awesome Subject'
+        def badSubject = 'A Most Bogus Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject(goodSubject).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setSubject(badSubject).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadSubjectJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, goodSubject, badSubject), e.getMessage()
+        }
+    }
+
 }

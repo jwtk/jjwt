@@ -45,6 +45,15 @@ public interface JwtParser {
     JwtParser setAudience(String audience);
 
     /**
+     * Sets the expected value for the sub registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param subject the string representing the expected value for the sub (subject) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setSubject(String subject);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      *
