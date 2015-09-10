@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.BadAudienceJwtException;
+import io.jsonwebtoken.BadIssuedAtJwtException;
 import io.jsonwebtoken.BadIssuerJwtException;
 import io.jsonwebtoken.BadSubjectJwtException;
 import io.jsonwebtoken.ClaimJwtException;
@@ -65,6 +66,7 @@ public class DefaultJwtParser implements JwtParser {
     private String issuer;
     private String audience;
     private String subject;
+    private Date issuedAt;
 
     @Override
     public JwtParser setIssuer(String issuer) {
@@ -81,6 +83,15 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setSubject(String subject) {
         this.subject = subject;
+        return this;
+    }
+
+    @Override
+    public JwtParser setIssuedAt(Date issuedAt) {
+        if (issuedAt != null) {
+            // want date, but with seconds precision, not millis
+            this.issuedAt = new Date(issuedAt.getTime() / 1000 * 1000);
+        }
         return this;
     }
 
@@ -345,6 +356,15 @@ public class DefaultJwtParser implements JwtParser {
                 );
                 throw new BadSubjectJwtException(header, claims, msg);
             }
+
+            if (issuedAt != null && !issuedAt.equals(claims.getIssuedAt())) {
+                String claimsIssuedAt = (claims.getIssuedAt() != null) ? claims.getIssuedAt().toString() : null;
+                String msg = String.format(
+                    ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, claimsIssuedAt, issuedAt.toString()
+                );
+                throw new BadIssuedAtJwtException(header, claims, msg);
+            }
+
         }
 
         Object body = claims != null ? claims : payload;

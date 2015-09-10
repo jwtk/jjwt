@@ -839,4 +839,65 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseIssuedAt_Success() {
+        def issuedAt = new Date(System.currentTimeMillis())
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuedAt(issuedAt).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setIssuedAt(issuedAt).
+            parseClaimsJws(compact)
+
+        // system converts to seconds (lopping off millis precision), then returns millis
+        def issuedAtMillis = ((long)issuedAt.getTime() / 1000) * 1000
+
+        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis
+    }
+
+    @Test
+    void testParseSetIssuedAt_Fail() {
+        def goodIssuedAt = new Date(System.currentTimeMillis())
+        def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuedAt(goodIssuedAt).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setIssuedAt(badIssuedAt).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIssuedAtJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, goodIssuedAt, badIssuedAt), e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseSetIssuedAt_NullCheck_Fail() {
+        def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject("me").
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setIssuedAt(badIssuedAt).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIssuedAtJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, null, badIssuedAt), e.getMessage()
+        }
+    }
+
 }
