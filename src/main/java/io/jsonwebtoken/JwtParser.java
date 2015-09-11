@@ -16,6 +16,7 @@
 package io.jsonwebtoken;
 
 import java.security.Key;
+import java.util.Date;
 
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
@@ -25,6 +26,52 @@ import java.security.Key;
 public interface JwtParser {
 
     public static final char SEPARATOR_CHAR = '.';
+
+    /**
+     * Sets the expected value for the iss registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param issuer the string representing the expected value for the iss (issuer) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setIssuer(String issuer);
+
+    /**
+     * Sets the expected value for the aud registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param audience the string representing the expected value for the aud (audience) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setAudience(String audience);
+
+    /**
+     * Sets the expected value for the sub registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param subject the string representing the expected value for the sub (subject) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setSubject(String subject);
+
+    /**
+     * Sets the expected value for the iat registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param issuedAt the date representing the expected value for the iat (issued at) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setIssuedAt(Date issuedAt);
+
+
+    /**
+     * Sets the expected value for the jti registered claim. If the actual content of the JWT does not match
+     * (including if it's empty), then an exception will be thrown
+     *
+     * @param id the string representing the expected value for the jti (jwt id) claim of the JWT
+     * @return the parser for method chaining.
+     */
+    JwtParser setId(String id);
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not

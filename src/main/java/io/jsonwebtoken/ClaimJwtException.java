@@ -22,6 +22,8 @@ package io.jsonwebtoken;
  */
 public abstract class ClaimJwtException extends JwtException {
 
+    public static final String BAD_CLAIM_MESSAGE_TEMPLATE = "Expected %s to be: %s, but was: %s";
+
     private final Header header;
 
     private final Claims claims;

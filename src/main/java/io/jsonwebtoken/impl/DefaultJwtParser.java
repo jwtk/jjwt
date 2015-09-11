@@ -16,6 +16,12 @@
 package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.BadAudienceJwtException;
+import io.jsonwebtoken.BadIdJwtException;
+import io.jsonwebtoken.BadIssuedAtJwtException;
+import io.jsonwebtoken.BadIssuerJwtException;
+import io.jsonwebtoken.BadSubjectJwtException;
+import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
@@ -57,6 +63,45 @@ public class DefaultJwtParser implements JwtParser {
     private Key key;
 
     private SigningKeyResolver signingKeyResolver;
+
+    private String issuer;
+    private String audience;
+    private String subject;
+    private Date issuedAt;
+    private String id;
+
+    @Override
+    public JwtParser setIssuer(String issuer) {
+        this.issuer = issuer;
+        return this;
+    }
+
+    @Override
+    public JwtParser setAudience(String audience) {
+        this.audience = audience;
+        return this;
+    }
+
+    @Override
+    public JwtParser setSubject(String subject) {
+        this.subject = subject;
+        return this;
+    }
+
+    @Override
+    public JwtParser setIssuedAt(Date issuedAt) {
+        if (issuedAt != null) {
+            // want date, but with seconds precision, not millis
+            this.issuedAt = new Date(issuedAt.getTime() / 1000 * 1000);
+        }
+        return this;
+    }
+
+    @Override
+    public JwtParser setId(String id) {
+        this.id = id;
+        return this;
+    }
 
     @Override
     public JwtParser setSigningKey(byte[] key) {
@@ -298,6 +343,9 @@ public class DefaultJwtParser implements JwtParser {
                     throw new PrematureJwtException(header, claims, msg);
                 }
             }
+
+            validateOptionalClaims(header, claims);
+
         }
 
         Object body = claims != null ? claims : payload;
@@ -306,6 +354,44 @@ public class DefaultJwtParser implements JwtParser {
             return new DefaultJws<Object>((JwsHeader) header, body, base64UrlEncodedDigest);
         } else {
             return new DefaultJwt<Object>(header, body);
+        }
+    }
+
+    private void validateOptionalClaims(Header header, Claims claims) {
+        if (issuer != null && !issuer.equals(claims.getIssuer())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, claims.getIssuer(), issuer
+            );
+            throw new BadIssuerJwtException(header, claims, msg);
+        }
+
+        if (audience != null && !audience.equals(claims.getAudience())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, claims.getAudience(), audience
+            );
+            throw new BadAudienceJwtException(header, claims, msg);
+        }
+
+        if (subject != null && !subject.equals(claims.getSubject())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, claims.getSubject(), subject
+            );
+            throw new BadSubjectJwtException(header, claims, msg);
+        }
+
+        if (issuedAt != null && !issuedAt.equals(claims.getIssuedAt())) {
+            String claimsIssuedAt = (claims.getIssuedAt() != null) ? claims.getIssuedAt().toString() : null;
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, claimsIssuedAt, issuedAt.toString()
+            );
+            throw new BadIssuedAtJwtException(header, claims, msg);
+        }
+
+        if (id != null && !id.equals(claims.getId())) {
+            String msg = String.format(
+                ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ID, claims.getId(), id
+            );
+            throw new BadIdJwtException(header, claims, msg);
         }
     }
 

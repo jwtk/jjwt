@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
 import static org.junit.Assert.*
+import static ClaimJwtException.BAD_CLAIM_MESSAGE_TEMPLATE;
 
 class JwtParserTest {
 
@@ -723,4 +724,219 @@ class JwtParserTest {
                     'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
         }
     }
+
+    @Test
+    void testParseSetIssuer_Success() {
+        def issuer = 'A Most Awesome Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer(issuer).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setIssuer(issuer).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getIssuer(), issuer
+    }
+
+    @Test
+    void testParseSetIssuer_Fail() {
+        def goodIssuer = 'A Most Awesome Issuer'
+        def badIssuer = 'A Most Bogus Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer(goodIssuer).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setIssuer(badIssuer).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIssuerJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, goodIssuer, badIssuer), e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseAudience_Success() {
+        def audience = 'A Most Awesome Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setAudience(audience).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
+
+    @Test
+    void testParseSetAudience_Fail() {
+        def goodAudience = 'A Most Awesome Audience'
+        def badAudience = 'A Most Bogus Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(goodAudience).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setAudience(badAudience).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadAudienceJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, goodAudience, badAudience), e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseSubject_Success() {
+        def subject = 'A Most Awesome Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject(subject).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setSubject(subject).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseSetSubject_Fail() {
+        def goodSubject = 'A Most Awesome Subject'
+        def badSubject = 'A Most Bogus Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject(goodSubject).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setSubject(badSubject).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadSubjectJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, goodSubject, badSubject), e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseIssuedAt_Success() {
+        def issuedAt = new Date(System.currentTimeMillis())
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuedAt(issuedAt).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setIssuedAt(issuedAt).
+            parseClaimsJws(compact)
+
+        // system converts to seconds (lopping off millis precision), then returns millis
+        def issuedAtMillis = ((long)issuedAt.getTime() / 1000) * 1000
+
+        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis
+    }
+
+    @Test
+    void testParseSetIssuedAt_Fail() {
+        def goodIssuedAt = new Date(System.currentTimeMillis())
+        def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuedAt(goodIssuedAt).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setIssuedAt(badIssuedAt).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIssuedAtJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, goodIssuedAt, badIssuedAt), e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseSetIssuedAt_NullCheck_Fail() {
+        def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject("me").
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setIssuedAt(badIssuedAt).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIssuedAtJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, null, badIssuedAt), e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseSetId_Success() {
+        def id = 'A Most Awesome Id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId(id).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            setId(id).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getId(), id
+    }
+
+    @Test
+    void testParseSetId_Fail() {
+        def goodId = 'A Most Awesome Id'
+        def badId = 'A Most Bogus Id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId(goodId).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                setId(badId).
+                parseClaimsJws(compact)
+            fail()
+        } catch(BadIdJwtException e) {
+            assertEquals String.format(BAD_CLAIM_MESSAGE_TEMPLATE, Claims.ID, goodId, badId), e.getMessage()
+        }
+    }
+
+
 }
