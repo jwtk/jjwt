@@ -62,7 +62,7 @@ But what if signature validation failed?  You can catch `SignatureException` and
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parse(compactJwt);
+    Jwts.parser().setSigningKey(key).parseClaimsJws(compactJwt);
 
     //OK, we can trust this JWT
 
