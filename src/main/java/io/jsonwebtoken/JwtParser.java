@@ -16,6 +16,7 @@
 package io.jsonwebtoken;
 
 import java.security.Key;
+import java.util.Date;
 
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
@@ -25,6 +26,14 @@ import java.security.Key;
 public interface JwtParser {
 
     public static final char SEPARATOR_CHAR = '.';
+
+    /**
+     * Sets an expected value for the issuedAt claim.
+     *
+     * @param issuedAt
+     * @return the parser for method chaining.
+     */
+    JwtParser expectIssuedAt(Date issuedAt);
 
     /**
      * Sets an expected value for any given claim name.

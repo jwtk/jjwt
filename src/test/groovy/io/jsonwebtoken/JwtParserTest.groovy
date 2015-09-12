@@ -22,6 +22,8 @@ import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
 import static org.junit.Assert.*
+import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
+import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 
 class JwtParserTest {
 
@@ -819,7 +821,7 @@ class JwtParserTest {
             fail()
         } catch (IncorrectClaimException e) {
             assertEquals(
-                String.format(ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, goodClaimName, goodClaimValue, badClaimValue),
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, goodClaimName, goodClaimValue, badClaimValue),
                 e.getMessage()
             )
         }
@@ -843,7 +845,74 @@ class JwtParserTest {
             fail()
         } catch (MissingClaimException e) {
             assertEquals(
-                String.format(ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, claimName, claimValue),
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, claimName, claimValue),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectIssuedAt_Success() {
+        def issuedAt = new Date(System.currentTimeMillis())
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuedAt(issuedAt).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            expectIssuedAt(issuedAt).
+            parseClaimsJws(compact)
+
+        // system converts to seconds (lopping off millis precision), then returns millis
+        def issuedAtMillis = ((long)issuedAt.getTime() / 1000) * 1000
+
+        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis
+    }
+
+    @Test
+    void testParseExpectIssuedAt_Incorrect_Fail() {
+        def goodIssuedAt = new Date(System.currentTimeMillis())
+        def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuedAt(badIssuedAt).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectIssuedAt(goodIssuedAt).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, goodIssuedAt, badIssuedAt),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectIssuedAt_Missing_Fail() {
+        def issuedAt = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject("Dummy").
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectIssuedAt(issuedAt).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, issuedAt),
                 e.getMessage()
             )
         }

@@ -46,7 +46,6 @@ import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -63,7 +62,16 @@ public class DefaultJwtParser implements JwtParser {
 
     private SigningKeyResolver signingKeyResolver;
 
-    Map<String, Object> expectedClaims = new LinkedHashMap<String, Object>();
+    Claims expectedClaims = new DefaultClaims();
+
+    @Override
+    public JwtParser expectIssuedAt(Date issuedAt) {
+        if (issuedAt != null) {
+            expectedClaims.setIssuedAt(issuedAt);
+        }
+
+        return this;
+    }
 
     @Override
     public JwtParser expect(String claimName, Object value) {
@@ -329,8 +337,16 @@ public class DefaultJwtParser implements JwtParser {
 
     private void validateExpectedClaims(Header header, Claims claims) {
         for (String expectedClaimName : expectedClaims.keySet()) {
-            Object expectedClaimValue = expectedClaims.get(expectedClaimName);
-            Object actualClaimValue = claims.get(expectedClaimName);
+            Object expectedClaimValue = null;
+            Object actualClaimValue = null;
+            if (Claims.ISSUED_AT.equals(expectedClaimName)) {
+                expectedClaimValue = expectedClaims.getIssuedAt();
+                actualClaimValue = claims.getIssuedAt();
+            } else {
+                expectedClaimValue = expectedClaims.get(expectedClaimName);
+                actualClaimValue = claims.get(expectedClaimName);
+            }
+
             InvalidClaimException invalidClaimException = null;
 
             if (actualClaimValue == null) {
