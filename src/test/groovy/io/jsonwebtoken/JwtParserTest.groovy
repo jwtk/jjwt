@@ -1046,4 +1046,67 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseExpectSubject_Success() {
+        def subject = 'A Most Awesome Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject(subject).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            expectSubject(subject).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseExpectSubject_Incorrect_Fail() {
+        def goodSubject = 'A Most Awesome Subject'
+        def badSubject = 'A Most Bogus Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject(badSubject).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectSubject(goodSubject).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, goodSubject, badSubject),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectSubject_Missing_Fail() {
+        def subject = 'A Most Awesome Subject'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId('id').
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectSubject(subject).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, subject),
+                e.getMessage()
+            )
+        }
+    }
 }
