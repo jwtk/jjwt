@@ -27,6 +27,23 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
+     * Sets an expected value for any given claim name.
+     *
+     * If an expectation is set for a particular claim name and the JWT being parsed does not have that claim set,
+     * a {@Link MissingClaimException} will be thrown.
+     *
+     * If an expectation is set for a particular claim name and the JWT being parsed has a value that is different than
+     * the expected value, a {@link IncorrectClaimException} will be thrown.
+     *
+     * If either {@code claimName} is null or empty or {@code value} is null, the expectation is simply ignored.
+     *
+     * @param claimName
+     * @param value
+     * @return the parser for method chaining.
+     */
+    JwtParser expect(String claimName, Object value);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      *

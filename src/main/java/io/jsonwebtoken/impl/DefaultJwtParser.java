@@ -16,11 +16,15 @@
 package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.IncorrectClaimException;
+import io.jsonwebtoken.InvalidClaimException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtHandler;
@@ -42,6 +46,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -57,6 +62,17 @@ public class DefaultJwtParser implements JwtParser {
     private Key key;
 
     private SigningKeyResolver signingKeyResolver;
+
+    Map<String, Object> expectedClaims = new LinkedHashMap<String, Object>();
+
+    @Override
+    public JwtParser expect(String claimName, Object value) {
+        if (claimName != null && claimName.length() > 0 && value != null) {
+            expectedClaims.put(claimName, value);
+        }
+
+        return this;
+    }
 
     @Override
     public JwtParser setSigningKey(byte[] key) {
@@ -298,6 +314,8 @@ public class DefaultJwtParser implements JwtParser {
                     throw new PrematureJwtException(header, claims, msg);
                 }
             }
+
+            validateExpectedClaims(header, claims);
         }
 
         Object body = claims != null ? claims : payload;
@@ -306,6 +324,35 @@ public class DefaultJwtParser implements JwtParser {
             return new DefaultJws<Object>((JwsHeader) header, body, base64UrlEncodedDigest);
         } else {
             return new DefaultJwt<Object>(header, body);
+        }
+    }
+
+    private void validateExpectedClaims(Header header, Claims claims) {
+        for (String expectedClaimName : expectedClaims.keySet()) {
+            Object expectedClaimValue = expectedClaims.get(expectedClaimName);
+            Object actualClaimValue = claims.get(expectedClaimName);
+            InvalidClaimException invalidClaimException = null;
+
+            if (actualClaimValue == null) {
+                String msg = String.format(
+                    ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                    expectedClaimName, expectedClaimValue
+                );
+                invalidClaimException = new MissingClaimException(header, claims, msg);
+            }
+            else if (!expectedClaimValue.equals(actualClaimValue)) {
+                String msg = String.format(
+                    ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                    expectedClaimName, expectedClaimValue, actualClaimValue
+                );
+                invalidClaimException = new IncorrectClaimException(header, claims, msg);
+            }
+
+            if (invalidClaimException != null) {
+                invalidClaimException.setClaimName(expectedClaimName);
+                invalidClaimException.setClaimValue(expectedClaimValue);
+                throw invalidClaimException;
+            }
         }
     }
 

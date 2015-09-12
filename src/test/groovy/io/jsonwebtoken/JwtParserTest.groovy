@@ -723,4 +723,129 @@ class JwtParserTest {
                     'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
         }
     }
+
+    @Test
+    void testParseExpectIgnoreNullClaimName() {
+        def expectedClaimValue = 'A Most Awesome Claim Value'
+
+        byte[] key = randomKey()
+
+        // not setting expected claim name in JWT
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer('Dummy').
+            compact()
+
+        // expecting null claim name, but with value
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+            expect(null, expectedClaimValue).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getIssuer(), 'Dummy'
+    }
+
+    @Test
+    void testParseExpectIgnoreEmptyClaimName() {
+        def expectedClaimValue = 'A Most Awesome Claim Value'
+
+        byte[] key = randomKey()
+
+        // not setting expected claim name in JWT
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setIssuer('Dummy').
+                compact()
+
+        // expecting null claim name, but with value
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+                expect("", expectedClaimValue).
+                parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getIssuer(), 'Dummy'
+    }
+
+    @Test
+    void testParseExpectIgnoreNullClaimValue() {
+        def expectedClaimName = 'A Most Awesome Claim Name'
+
+        byte[] key = randomKey()
+
+        // not setting expected claim name in JWT
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer('Dummy').
+            compact()
+
+        // expecting claim name, but with null value
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+            expect(expectedClaimName, null).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getIssuer(), 'Dummy'
+    }
+
+    @Test
+    void testParseExpectGeneric_Success() {
+        def expectedClaimName = 'A Most Awesome Claim Name'
+        def expectedClaimValue = 'A Most Awesome Claim Value'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            claim(expectedClaimName, expectedClaimValue).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            expect(expectedClaimName, expectedClaimValue).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().get(expectedClaimName), expectedClaimValue
+    }
+
+    @Test
+    void testParseExpectGeneric_Incorrect_Fail() {
+        def goodClaimName = 'A Most Awesome Claim Name'
+        def goodClaimValue = 'A Most Awesome Claim Value'
+
+        def badClaimValue = 'A Most Bogus Claim Value'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            claim(goodClaimName, badClaimValue).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expect(goodClaimName, goodClaimValue).
+                parseClaimsJws(compact)
+            fail()
+        } catch (IncorrectClaimException e) {
+            assertEquals(
+                String.format(ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, goodClaimName, goodClaimValue, badClaimValue),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectedGeneric_Missing_Fail() {
+        def claimName = 'A Most Awesome Claim Name'
+        def claimValue = 'A Most Awesome Claim Value'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer('Dummy').
+            compact()
+
+        try {
+            Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+                expect(claimName, claimValue).
+                parseClaimsJws(compact)
+            fail()
+        } catch (MissingClaimException e) {
+            assertEquals(
+                String.format(ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, claimName, claimValue),
+                e.getMessage()
+            )
+        }
+    }
 }
