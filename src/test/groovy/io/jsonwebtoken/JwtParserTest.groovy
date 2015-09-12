@@ -917,4 +917,68 @@ class JwtParserTest {
             )
         }
     }
+
+    @Test
+    void testParseExpectIssuer_Success() {
+        def issuer = 'A Most Awesome Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer(issuer).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            expectIssuer(issuer).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getIssuer(), issuer
+    }
+
+    @Test
+    void testParseExpectIssuer_Incorrect_Fail() {
+        def goodIssuer = 'A Most Awesome Issuer'
+        def badIssuer = 'A Most Bogus Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setIssuer(badIssuer).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectIssuer(goodIssuer).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, goodIssuer, badIssuer),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectIssuer_Missing_Fail() {
+        def issuer = 'A Most Awesome Issuer'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId('id').
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectIssuer(issuer).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, issuer),
+                e.getMessage()
+            )
+        }
+    }
 }

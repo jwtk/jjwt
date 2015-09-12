@@ -74,6 +74,13 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser expectIssuer(String issuer) {
+        expect(Claims.ISSUER, issuer);
+
+        return this;
+    }
+
+    @Override
     public JwtParser expect(String claimName, Object value) {
         if (claimName != null && claimName.length() > 0 && value != null) {
             expectedClaims.put(claimName, value);
@@ -337,8 +344,12 @@ public class DefaultJwtParser implements JwtParser {
 
     private void validateExpectedClaims(Header header, Claims claims) {
         for (String expectedClaimName : expectedClaims.keySet()) {
-            Object expectedClaimValue = null;
-            Object actualClaimValue = null;
+            Object expectedClaimValue;
+            Object actualClaimValue;
+
+            // since issued at is a date, call the specific method
+            // other methods deal with strings and the more
+            // general method can be used
             if (Claims.ISSUED_AT.equals(expectedClaimName)) {
                 expectedClaimValue = expectedClaims.getIssuedAt();
                 actualClaimValue = claims.getIssuedAt();
