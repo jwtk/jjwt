@@ -981,4 +981,69 @@ class JwtParserTest {
             )
         }
     }
+
+    @Test
+    void testParseExpectAudience_Success() {
+        def audience = 'A Most Awesome Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            expectAudience(audience).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
+
+    @Test
+    void testParseExpectAudience_Incorrect_Fail() {
+        def goodAudience = 'A Most Awesome Audience'
+        def badAudience = 'A Most Bogus Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(badAudience).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectAudience(goodAudience).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, goodAudience, badAudience),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectAudience_Missing_Fail() {
+        def audience = 'A Most Awesome audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId('id').
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectAudience(audience).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, audience),
+                e.getMessage()
+            )
+        }
+    }
+
 }

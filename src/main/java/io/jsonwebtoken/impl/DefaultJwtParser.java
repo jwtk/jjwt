@@ -81,6 +81,13 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser expectAudience(String audience) {
+        expect(Claims.AUDIENCE, audience);
+
+        return this;
+    }
+
+    @Override
     public JwtParser expect(String claimName, Object value) {
         if (claimName != null && claimName.length() > 0 && value != null) {
             expectedClaims.put(claimName, value);

@@ -28,6 +28,14 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
+     * Sets an expected value for the audience claim.
+     *
+     * @param audience
+     * @return the parser for method chaining.
+     */
+    JwtParser expectAudience(String audience);
+
+    /**
      * Sets an expected value for the issuer claim.
      *
      * @param issuer
