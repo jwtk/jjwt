@@ -28,6 +28,14 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
+     * Sets an expected value for the jti claim.
+     *
+     * @param id
+     * @return the parser for method chaining.
+     */
+    JwtParser expectId(String id);
+
+    /**
      * Sets an expected value for the subject claim.
      *
      * @param subject

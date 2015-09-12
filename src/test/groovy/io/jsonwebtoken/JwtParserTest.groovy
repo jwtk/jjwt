@@ -1109,4 +1109,68 @@ class JwtParserTest {
             )
         }
     }
+
+    @Test
+    void testParseExpectId_Success() {
+        def id = 'A Most Awesome id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId(id).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            expectId(id).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getId(), id
+    }
+
+    @Test
+    void testParseExpectId_Incorrect_Fail() {
+        def goodId = 'A Most Awesome Id'
+        def badId = 'A Most Bogus Id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId(badId).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectId(goodId).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ID, goodId, badId),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseExpectId_Missing_Fail() {
+        def id = 'A Most Awesome Id'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setIssuer('me').
+                compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                expectId(id).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ID, id),
+                e.getMessage()
+            )
+        }
+    }
 }
