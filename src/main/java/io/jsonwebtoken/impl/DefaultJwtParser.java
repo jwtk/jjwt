@@ -66,37 +66,35 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public JwtParser expectIssuedAt(Date issuedAt) {
-        if (issuedAt != null) {
-            expectedClaims.setIssuedAt(issuedAt);
-        }
+        expectedClaims.setIssuedAt(issuedAt);
 
         return this;
     }
 
     @Override
     public JwtParser expectIssuer(String issuer) {
-        expect(Claims.ISSUER, issuer);
+        expectedClaims.setIssuer(issuer);
 
         return this;
     }
 
     @Override
     public JwtParser expectAudience(String audience) {
-        expect(Claims.AUDIENCE, audience);
+        expectedClaims.setAudience(audience);
 
         return this;
     }
 
     @Override
     public JwtParser expectSubject(String subject) {
-        expect(Claims.SUBJECT, subject);
+        expectedClaims.setSubject(subject);
 
         return this;
     }
 
     @Override
     public JwtParser expectId(String id) {
-        expect(Claims.ID, id);
+        expectedClaims.setId(id);
 
         return this;
     }
