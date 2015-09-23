@@ -103,9 +103,9 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public JwtParser expect(String claimName, Object value) {
-        if (claimName != null && claimName.length() > 0 && value != null) {
-            expectedClaims.put(claimName, value);
-        }
+        Assert.hasText(claimName, "claim name cannot be null or empty.");
+        Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
+        expectedClaims.put(claimName, value);
 
         return this;
     }

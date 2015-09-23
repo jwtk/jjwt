@@ -727,7 +727,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectIgnoreNullClaimName() {
+    void testParseExpectDontAllowNullClaimName() {
         def expectedClaimValue = 'A Most Awesome Claim Value'
 
         byte[] key = randomKey()
@@ -737,35 +737,47 @@ class JwtParserTest {
             setIssuer('Dummy').
             compact()
 
-        // expecting null claim name, but with value
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-            expect(null, expectedClaimValue).
-            parseClaimsJws(compact)
-
-        assertEquals jwt.getBody().getIssuer(), 'Dummy'
+        try {
+            // expecting null claim name, but with value
+            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+                expect(null, expectedClaimValue).
+                parseClaimsJws(compact)
+            fail()
+        } catch (IllegalArgumentException e) {
+            assertEquals(
+                "claim name cannot be null or empty.",
+                e.getMessage()
+            )
+        }
     }
 
     @Test
-    void testParseExpectIgnoreEmptyClaimName() {
+    void testParseExpectDontAllowEmptyClaimName() {
         def expectedClaimValue = 'A Most Awesome Claim Value'
 
         byte[] key = randomKey()
 
         // not setting expected claim name in JWT
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-                setIssuer('Dummy').
-                compact()
+            setIssuer('Dummy').
+            compact()
 
-        // expecting null claim name, but with value
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        try {
+            // expecting null claim name, but with value
+            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
                 expect("", expectedClaimValue).
                 parseClaimsJws(compact)
-
-        assertEquals jwt.getBody().getIssuer(), 'Dummy'
+            fail()
+        } catch (IllegalArgumentException e) {
+            assertEquals(
+                "claim name cannot be null or empty.",
+                e.getMessage()
+            )
+        }
     }
 
     @Test
-    void testParseExpectIgnoreNullClaimValue() {
+    void testParseExpectDontAllowNullClaimValue() {
         def expectedClaimName = 'A Most Awesome Claim Name'
 
         byte[] key = randomKey()
@@ -775,12 +787,18 @@ class JwtParserTest {
             setIssuer('Dummy').
             compact()
 
-        // expecting claim name, but with null value
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-            expect(expectedClaimName, null).
-            parseClaimsJws(compact)
-
-        assertEquals jwt.getBody().getIssuer(), 'Dummy'
+        try {
+            // expecting claim name, but with null value
+            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+                expect(expectedClaimName, null).
+                parseClaimsJws(compact)
+            fail()
+        } catch (IllegalArgumentException e) {
+            assertEquals(
+                "The value cannot be null for claim name: " + expectedClaimName,
+                e.getMessage()
+            )
+        }
     }
 
     @Test
