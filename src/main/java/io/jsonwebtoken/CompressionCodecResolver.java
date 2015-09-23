@@ -16,12 +16,16 @@
 package io.jsonwebtoken;
 
 /**
- * CompressionCodecResolver
+ * Resolves "calg" header to an implementation of CompressionCodec.
  *
  * @since 0.5.2
  */
 public interface CompressionCodecResolver {
-
+    /**
+     * Examines the header and returns a CompressionCodec if it finds one that it recognizes.
+     * @param header of the JWT
+     * @return CompressionCodec matching the "calg" header, or null if there is no "calg" header.
+     */
     CompressionCodec resolveCompressionCodec(Header header);
 
 }

@@ -15,9 +15,6 @@
  */
 package io.jsonwebtoken.impl.compression;
 
-import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.CompressionException;
-import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayOutputStream;
@@ -27,11 +24,10 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
 
 /**
- * DeflateCompressionCodec
- *
+ * Codec implementing the <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate</a> compression algorithm
  * @since 0.5.2
  */
-public class DeflateCompressionCodec implements CompressionCodec {
+public class DeflateCompressionCodec extends BaseCompressionCodec {
 
     private static final String DEFLATE = "DEF";
 
@@ -41,8 +37,7 @@ public class DeflateCompressionCodec implements CompressionCodec {
     }
 
     @Override
-    public byte[] compress(byte[] payload) {
-        Assert.notNull(payload, "payload cannot be null.");
+    public byte[] doCompress(byte[] payload) throws IOException {
 
         Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
 
@@ -55,17 +50,13 @@ public class DeflateCompressionCodec implements CompressionCodec {
             deflaterOutputStream.write(payload, 0, payload.length);
             deflaterOutputStream.flush();
             return outputStream.toByteArray();
-        } catch (IOException e) {
-            throw new CompressionException("Unable to compress payload.", e);
         } finally {
             Objects.nullSafeClose(outputStream, deflaterOutputStream);
         }
     }
 
     @Override
-    public byte[] decompress(byte[] compressed) {
-        Assert.notNull(compressed, "compressed cannot be null.");
-
+    public byte[] doDecompress(byte[] compressed) throws IOException {
         InflaterOutputStream inflaterOutputStream = null;
         ByteArrayOutputStream decompressedOutputStream = null;
 
@@ -75,8 +66,6 @@ public class DeflateCompressionCodec implements CompressionCodec {
             inflaterOutputStream.write(compressed);
             inflaterOutputStream.flush();
             return decompressedOutputStream.toByteArray();
-        } catch (IOException e) {
-            throw new CompressionException("Unable to decompress compressed payload.", e);
         } finally {
             Objects.nullSafeClose(decompressedOutputStream, inflaterOutputStream);
         }

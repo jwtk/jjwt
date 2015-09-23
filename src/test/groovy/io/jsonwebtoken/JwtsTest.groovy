@@ -20,9 +20,12 @@ import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.TextCodec
 import io.jsonwebtoken.impl.compression.CompressionCodecs
+import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
+import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.impl.crypto.RsaProvider
+import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -109,6 +112,7 @@ class JwtsTest {
 
         def token = Jwts.parser().parse(jwt);
 
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
     }
 
@@ -332,6 +336,27 @@ class JwtsTest {
     }
 
     @Test
+    void testUncompressedJwt() {
+
+        byte[] key = MacProvider.generateKey().getEncoded()
+
+        String id = UUID.randomUUID().toString()
+
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(SignatureAlgorithm.HS256, key)
+                .claim("state", "hello this is an amazing jwt").compact()
+
+        def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+
+        Claims claims = jws.body
+
+        assertNull jws.header.getCompressionAlgorithm()
+
+        assertEquals id, claims.getId()
+        assertEquals "an audience", claims.getAudience()
+        assertEquals "hello this is an amazing jwt", claims.state
+    }
+
+    @Test
     void testCompressedJwtWithDeflate() {
 
         byte[] key = MacProvider.generateKey().getEncoded()
@@ -371,6 +396,58 @@ class JwtsTest {
         assertEquals id, claims.getId()
         assertEquals "an audience", claims.getAudience()
         assertEquals "hello this is an amazing jwt", claims.state
+    }
+
+    @Test
+    void testCompressedWithCustomResolver() {
+        byte[] key = MacProvider.generateKey().getEncoded()
+
+        String id = UUID.randomUUID().toString()
+
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(SignatureAlgorithm.HS256, key)
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+            @Override
+            String getAlgorithmName() {
+                return "CUSTOM"
+            }
+        }).compact()
+
+        def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new DefaultCompressionCodecResolver() {
+            @Override
+            CompressionCodec resolveCompressionCodec(Header header) {
+                String algorithm = getAlgorithmFromHeader(header);
+                if ("CUSTOM".equals(algorithm)) {
+                    return CompressionCodecs.GZIP
+                } else {
+                    return null
+                }
+            }
+        }).parseClaimsJws(compact)
+
+        Claims claims = jws.body
+
+        assertEquals "CUSTOM", jws.header.getCompressionAlgorithm()
+
+        assertEquals id, claims.getId()
+        assertEquals "an audience", claims.getAudience()
+        assertEquals "hello this is an amazing jwt", claims.state
+
+    }
+    @Test(expected = CompressionException.class)
+    void testCompressedJwtWithUnrecognizedHeader() {
+        byte[] key = MacProvider.generateKey().getEncoded()
+
+        String id = UUID.randomUUID().toString()
+
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(SignatureAlgorithm.HS256, key)
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+            @Override
+            String getAlgorithmName() {
+                return "CUSTOM"
+            }
+        }).compact()
+
+        Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
     }
 
     @Test
@@ -643,6 +720,7 @@ class JwtsTest {
         def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
         assert [alg: alg.name()] == token.header
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
     }
 
@@ -657,6 +735,7 @@ class JwtsTest {
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
         assert token.header == [alg: alg.name()]
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
     }
 
@@ -678,6 +757,7 @@ class JwtsTest {
         def token = Jwts.parser().setSigningKey(key).parse(jwt);
 
         assert token.header == [alg: alg.name()]
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
     }
 }
