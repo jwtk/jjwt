@@ -68,6 +68,22 @@ public interface JwtParser {
     JwtParser requireIssuedAt(Date issuedAt);
 
     /**
+     * Sets an expected value for the expiration claim.
+     *
+     * @param expiration
+     * @return the parser for method chaining.
+     */
+    JwtParser requireExpiration(Date expiration);
+
+    /**
+     * Sets an expected value for the notBefore claim.
+     *
+     * @param notBefore
+     * @return the parser for method chaining
+     */
+    JwtParser requireNotBefore(Date notBefore);
+
+    /**
      * Sets an expected value for any given claim name.
      *
      * If an expectation is set for a particular claim name and the JWT being parsed does not have that claim set,

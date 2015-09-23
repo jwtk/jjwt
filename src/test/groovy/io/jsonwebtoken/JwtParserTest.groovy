@@ -1191,4 +1191,140 @@ class JwtParserTest {
             )
         }
     }
+
+    @Test
+    void testParseRequireExpiration_Success() {
+        // expire in the future
+        def expiration = new Date(System.currentTimeMillis() + 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setExpiration(expiration).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            requireExpiration(expiration).
+            parseClaimsJws(compact)
+
+        // system converts to seconds (lopping off millis precision), then returns millis
+        def expirationMillis = ((long)expiration.getTime() / 1000) * 1000
+
+        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis
+    }
+
+    @Test
+    void testParseRequireExpirationAt_Incorrect_Fail() {
+        def goodExpiration = new Date(System.currentTimeMillis() + 20000)
+        def badExpiration = new Date(System.currentTimeMillis() + 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setExpiration(badExpiration).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                requireExpiration(goodExpiration).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.EXPIRATION, goodExpiration, badExpiration),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireExpiration_Missing_Fail() {
+        def expiration = new Date(System.currentTimeMillis() + 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject("Dummy").
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                requireExpiration(expiration).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.EXPIRATION, expiration),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireNotBefore_Success() {
+        // expire in the future
+        def notBefore = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setNotBefore(notBefore).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            requireNotBefore(notBefore).
+            parseClaimsJws(compact)
+
+        // system converts to seconds (lopping off millis precision), then returns millis
+        def notBeforeMillis = ((long)notBefore.getTime() / 1000) * 1000
+
+        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis
+    }
+
+    @Test
+    void testParseRequireNotBefore_Incorrect_Fail() {
+        def goodNotBefore = new Date(System.currentTimeMillis() - 20000)
+        def badNotBefore = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setNotBefore(badNotBefore).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                requireNotBefore(goodNotBefore).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.NOT_BEFORE, goodNotBefore, badNotBefore),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireNotBefore_Missing_Fail() {
+        def notBefore = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject("Dummy").
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                requireNotBefore(notBefore).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.NOT_BEFORE, notBefore),
+                e.getMessage()
+            )
+        }
+    }
 }

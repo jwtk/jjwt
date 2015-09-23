@@ -100,6 +100,20 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser requireExpiration(Date expiration) {
+        expectedClaims.setExpiration(expiration);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireNotBefore(Date notBefore) {
+        expectedClaims.setNotBefore(notBefore);
+
+        return this;
+    }
+
+    @Override
     public JwtParser require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
