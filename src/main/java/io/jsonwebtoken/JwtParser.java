@@ -28,81 +28,99 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
-     * Ensures that the specified {@code jti} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param id
      * @return the parser method for chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireId(String id);
 
     /**
-     * Ensures that the specified {@code sub} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code sub} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param subject
      * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireSubject(String subject);
 
     /**
-     * Ensures that the specified {@code aud} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code aud} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param audience
      * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireAudience(String audience);
 
     /**
-     * Ensures that the specified {@code iss} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code iss} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param issuer
      * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireIssuer(String issuer);
 
     /**
-     * Ensures that the specified {@code iat} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code iat} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param issuedAt
      * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireIssuedAt(Date issuedAt);
 
     /**
-     * Ensures that the specified {@code exp} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param expiration
      * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireExpiration(Date expiration);
 
     /**
-     * Ensures that the specified {@code nbf} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
+     * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param notBefore
      * @return the parser for method chaining
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser requireNotBefore(Date notBefore);
 
     /**
-     * Ensures that the specified {@code claimName} value is present when parsing the JWT.  If not present,
-     * an exception will be thrown indicating that the JWT is invalid and may not be used.
-     *
-     * If a particular claim is required and the JWT being parsed does not have that claim set,
-     * a {@Link MissingClaimException} will be thrown.
-     *
-     * If a particular claim is required and the JWT being parsed has a value that is different than
-     * the required value, a {@link IncorrectClaimException} will be thrown.
+     * Ensures that the specified {@code claimName} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
      *
      * @param claimName
      * @param value
      * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
      */
     JwtParser require(String claimName, Object value);
 
