@@ -16,7 +16,11 @@
 package io.jsonwebtoken;
 
 /**
- * InvalidClaimException is a subclass of the {@link ClaimJwtException} that is thrown after a validation of an JTW claim failed.
+ * Exception indicating a parsed claim is invalid in some way.  Subclasses reflect the specific
+ * reason the claim is invalid.
+ *
+ * @see IncorrectClaimException
+ * @see MissingClaimException
  *
  * @since 0.6
  */

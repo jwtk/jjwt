@@ -16,8 +16,8 @@
 package io.jsonwebtoken;
 
 /**
- *  IncorrectClaimException is a subclass of the {@link InvalidClaimException} that is thrown after it is found that an
- *  expected claim has a value that is not expected.
+ * Exception thrown when discovering that a required claim does not equal the required value, indicating the JWT is
+ * invalid and may not be used.
  *
  * @since 0.6
  */

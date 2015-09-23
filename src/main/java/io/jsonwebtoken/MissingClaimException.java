@@ -16,8 +16,8 @@
 package io.jsonwebtoken;
 
 /**
- *  MissingClaimException is a subclass of the {@link InvalidClaimException} that is thrown after it is found that an
- *  expected claim is missing.
+ * Exception thrown when discovering that a required claim is not present, indicating the JWT is
+ * invalid and may not be used.
  *
  * @since 0.6
  */
