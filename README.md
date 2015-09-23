@@ -101,7 +101,43 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 ### 0.6
 
-- Added the ability to set expectations when parsing a JWT which enforces a particular claim having a particular value
+#### Enforce JWT Values when Parsing
+
+We added the ability to set expectations when parsing a JWT which ensures particular claims having particular values.
+
+For example, let's say that you require that the JWT you are parsing has a specific `sub` (subject) value,
+otherwise you may not trust the token.  You can do that by using one of the `require` methods on the parser builder:
+
+```java
+try {
+    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+} catch(InvalidClaimException ice) {
+    // the sub field was missing or did not have a 'jsmith' value
+}
+```
+
+If it is important to react to a missing vs an incorrect value, instead of catching `InvalidClaimException`, you can catch either `MissingClaimException` or `IncorrectClaimException`:
+
+```java
+try {
+    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+} catch(MissingClaimException mce) {
+    // the parsed JWT did not have the sub field
+} catch(IncorrectClaimException ice) {
+    // the parsed JWT had a sub field, but its value was not equal to 'jsmith'
+}
+```
+
+You can also require custom fields by using the `require(name, requiredValue)` method - for example:
+
+```java
+try {
+    Jwts.parser().require("myfield", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
+} catch(InvalidClaimException ice) {
+    // the 'myfield' field was missing or did not have a 'myRequiredValue' value
+}
+```
+(or, again, you could catch either MissingClaimException or IncorrectClaimException instead)
 
 ### 0.5.1
 
