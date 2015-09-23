@@ -65,42 +65,42 @@ public class DefaultJwtParser implements JwtParser {
     Claims expectedClaims = new DefaultClaims();
 
     @Override
-    public JwtParser expectIssuedAt(Date issuedAt) {
+    public JwtParser requireIssuedAt(Date issuedAt) {
         expectedClaims.setIssuedAt(issuedAt);
 
         return this;
     }
 
     @Override
-    public JwtParser expectIssuer(String issuer) {
+    public JwtParser requireIssuer(String issuer) {
         expectedClaims.setIssuer(issuer);
 
         return this;
     }
 
     @Override
-    public JwtParser expectAudience(String audience) {
+    public JwtParser requireAudience(String audience) {
         expectedClaims.setAudience(audience);
 
         return this;
     }
 
     @Override
-    public JwtParser expectSubject(String subject) {
+    public JwtParser requireSubject(String subject) {
         expectedClaims.setSubject(subject);
 
         return this;
     }
 
     @Override
-    public JwtParser expectId(String id) {
+    public JwtParser requireId(String id) {
         expectedClaims.setId(id);
 
         return this;
     }
 
     @Override
-    public JwtParser expect(String claimName, Object value) {
+    public JwtParser require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
         expectedClaims.put(claimName, value);

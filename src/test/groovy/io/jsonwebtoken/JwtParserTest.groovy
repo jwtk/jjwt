@@ -727,7 +727,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectDontAllowNullClaimName() {
+    void testParseRequireDontAllowNullClaimName() {
         def expectedClaimValue = 'A Most Awesome Claim Value'
 
         byte[] key = randomKey()
@@ -740,7 +740,7 @@ class JwtParserTest {
         try {
             // expecting null claim name, but with value
             Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-                expect(null, expectedClaimValue).
+                require(null, expectedClaimValue).
                 parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
@@ -752,7 +752,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectDontAllowEmptyClaimName() {
+    void testParseRequireDontAllowEmptyClaimName() {
         def expectedClaimValue = 'A Most Awesome Claim Value'
 
         byte[] key = randomKey()
@@ -765,7 +765,7 @@ class JwtParserTest {
         try {
             // expecting null claim name, but with value
             Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-                expect("", expectedClaimValue).
+                require("", expectedClaimValue).
                 parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
@@ -777,7 +777,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectDontAllowNullClaimValue() {
+    void testParseRequireDontAllowNullClaimValue() {
         def expectedClaimName = 'A Most Awesome Claim Name'
 
         byte[] key = randomKey()
@@ -790,7 +790,7 @@ class JwtParserTest {
         try {
             // expecting claim name, but with null value
             Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-                expect(expectedClaimName, null).
+                require(expectedClaimName, null).
                 parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
@@ -802,7 +802,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectGeneric_Success() {
+    void testParseRequireGeneric_Success() {
         def expectedClaimName = 'A Most Awesome Claim Name'
         def expectedClaimValue = 'A Most Awesome Claim Value'
 
@@ -813,14 +813,14 @@ class JwtParserTest {
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            expect(expectedClaimName, expectedClaimValue).
+            require(expectedClaimName, expectedClaimValue).
             parseClaimsJws(compact)
 
         assertEquals jwt.getBody().get(expectedClaimName), expectedClaimValue
     }
 
     @Test
-    void testParseExpectGeneric_Incorrect_Fail() {
+    void testParseRequireGeneric_Incorrect_Fail() {
         def goodClaimName = 'A Most Awesome Claim Name'
         def goodClaimValue = 'A Most Awesome Claim Value'
 
@@ -834,7 +834,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expect(goodClaimName, goodClaimValue).
+                require(goodClaimName, goodClaimValue).
                 parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -846,7 +846,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectedGeneric_Missing_Fail() {
+    void testParseRequireedGeneric_Missing_Fail() {
         def claimName = 'A Most Awesome Claim Name'
         def claimValue = 'A Most Awesome Claim Value'
 
@@ -858,7 +858,7 @@ class JwtParserTest {
 
         try {
             Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-                expect(claimName, claimValue).
+                require(claimName, claimValue).
                 parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -870,7 +870,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectIssuedAt_Success() {
+    void testParseRequireIssuedAt_Success() {
         def issuedAt = new Date(System.currentTimeMillis())
 
         byte[] key = randomKey()
@@ -880,7 +880,7 @@ class JwtParserTest {
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            expectIssuedAt(issuedAt).
+            requireIssuedAt(issuedAt).
             parseClaimsJws(compact)
 
         // system converts to seconds (lopping off millis precision), then returns millis
@@ -890,7 +890,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectIssuedAt_Incorrect_Fail() {
+    void testParseRequireIssuedAt_Incorrect_Fail() {
         def goodIssuedAt = new Date(System.currentTimeMillis())
         def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
 
@@ -902,7 +902,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectIssuedAt(goodIssuedAt).
+                requireIssuedAt(goodIssuedAt).
                 parseClaimsJws(compact)
             fail()
         } catch(IncorrectClaimException e) {
@@ -914,7 +914,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectIssuedAt_Missing_Fail() {
+    void testParseRequireIssuedAt_Missing_Fail() {
         def issuedAt = new Date(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
@@ -925,7 +925,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectIssuedAt(issuedAt).
+                requireIssuedAt(issuedAt).
                 parseClaimsJws(compact)
             fail()
         } catch(MissingClaimException e) {
@@ -937,7 +937,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectIssuer_Success() {
+    void testParseRequireIssuer_Success() {
         def issuer = 'A Most Awesome Issuer'
 
         byte[] key = randomKey()
@@ -947,14 +947,14 @@ class JwtParserTest {
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            expectIssuer(issuer).
+            requireIssuer(issuer).
             parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getIssuer(), issuer
     }
 
     @Test
-    void testParseExpectIssuer_Incorrect_Fail() {
+    void testParseRequireIssuer_Incorrect_Fail() {
         def goodIssuer = 'A Most Awesome Issuer'
         def badIssuer = 'A Most Bogus Issuer'
 
@@ -966,7 +966,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectIssuer(goodIssuer).
+                requireIssuer(goodIssuer).
                 parseClaimsJws(compact)
             fail()
         } catch(IncorrectClaimException e) {
@@ -978,7 +978,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectIssuer_Missing_Fail() {
+    void testParseRequireIssuer_Missing_Fail() {
         def issuer = 'A Most Awesome Issuer'
 
         byte[] key = randomKey()
@@ -989,7 +989,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectIssuer(issuer).
+                requireIssuer(issuer).
                 parseClaimsJws(compact)
             fail()
         } catch(MissingClaimException e) {
@@ -1001,7 +1001,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectAudience_Success() {
+    void testParseRequireAudience_Success() {
         def audience = 'A Most Awesome Audience'
 
         byte[] key = randomKey()
@@ -1011,14 +1011,14 @@ class JwtParserTest {
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            expectAudience(audience).
+            requireAudience(audience).
             parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getAudience(), audience
     }
 
     @Test
-    void testParseExpectAudience_Incorrect_Fail() {
+    void testParseRequireAudience_Incorrect_Fail() {
         def goodAudience = 'A Most Awesome Audience'
         def badAudience = 'A Most Bogus Audience'
 
@@ -1030,7 +1030,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectAudience(goodAudience).
+                requireAudience(goodAudience).
                 parseClaimsJws(compact)
             fail()
         } catch(IncorrectClaimException e) {
@@ -1042,7 +1042,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectAudience_Missing_Fail() {
+    void testParseRequireAudience_Missing_Fail() {
         def audience = 'A Most Awesome audience'
 
         byte[] key = randomKey()
@@ -1053,7 +1053,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectAudience(audience).
+                requireAudience(audience).
                 parseClaimsJws(compact)
             fail()
         } catch(MissingClaimException e) {
@@ -1065,7 +1065,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectSubject_Success() {
+    void testParseRequireSubject_Success() {
         def subject = 'A Most Awesome Subject'
 
         byte[] key = randomKey()
@@ -1075,14 +1075,14 @@ class JwtParserTest {
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            expectSubject(subject).
+            requireSubject(subject).
             parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
     }
 
     @Test
-    void testParseExpectSubject_Incorrect_Fail() {
+    void testParseRequireSubject_Incorrect_Fail() {
         def goodSubject = 'A Most Awesome Subject'
         def badSubject = 'A Most Bogus Subject'
 
@@ -1094,7 +1094,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectSubject(goodSubject).
+                requireSubject(goodSubject).
                 parseClaimsJws(compact)
             fail()
         } catch(IncorrectClaimException e) {
@@ -1106,7 +1106,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectSubject_Missing_Fail() {
+    void testParseRequireSubject_Missing_Fail() {
         def subject = 'A Most Awesome Subject'
 
         byte[] key = randomKey()
@@ -1117,7 +1117,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectSubject(subject).
+                requireSubject(subject).
                 parseClaimsJws(compact)
             fail()
         } catch(MissingClaimException e) {
@@ -1129,7 +1129,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectId_Success() {
+    void testParseRequireId_Success() {
         def id = 'A Most Awesome id'
 
         byte[] key = randomKey()
@@ -1139,14 +1139,14 @@ class JwtParserTest {
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            expectId(id).
+            requireId(id).
             parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getId(), id
     }
 
     @Test
-    void testParseExpectId_Incorrect_Fail() {
+    void testParseRequireId_Incorrect_Fail() {
         def goodId = 'A Most Awesome Id'
         def badId = 'A Most Bogus Id'
 
@@ -1158,7 +1158,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectId(goodId).
+                requireId(goodId).
                 parseClaimsJws(compact)
             fail()
         } catch(IncorrectClaimException e) {
@@ -1170,7 +1170,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseExpectId_Missing_Fail() {
+    void testParseRequireId_Missing_Fail() {
         def id = 'A Most Awesome Id'
 
         byte[] key = randomKey()
@@ -1181,7 +1181,7 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                expectId(id).
+                requireId(id).
                 parseClaimsJws(compact)
             fail()
         } catch(MissingClaimException e) {

@@ -33,7 +33,7 @@ public interface JwtParser {
      * @param id
      * @return the parser for method chaining.
      */
-    JwtParser expectId(String id);
+    JwtParser requireId(String id);
 
     /**
      * Sets an expected value for the subject claim.
@@ -41,7 +41,7 @@ public interface JwtParser {
      * @param subject
      * @return the parser for method chaining.
      */
-    JwtParser expectSubject(String subject);
+    JwtParser requireSubject(String subject);
 
     /**
      * Sets an expected value for the audience claim.
@@ -49,7 +49,7 @@ public interface JwtParser {
      * @param audience
      * @return the parser for method chaining.
      */
-    JwtParser expectAudience(String audience);
+    JwtParser requireAudience(String audience);
 
     /**
      * Sets an expected value for the issuer claim.
@@ -57,7 +57,7 @@ public interface JwtParser {
      * @param issuer
      * @return the parser for method chaining.
      */
-    JwtParser expectIssuer(String issuer);
+    JwtParser requireIssuer(String issuer);
 
     /**
      * Sets an expected value for the issuedAt claim.
@@ -65,7 +65,7 @@ public interface JwtParser {
      * @param issuedAt
      * @return the parser for method chaining.
      */
-    JwtParser expectIssuedAt(Date issuedAt);
+    JwtParser requireIssuedAt(Date issuedAt);
 
     /**
      * Sets an expected value for any given claim name.
@@ -82,7 +82,7 @@ public interface JwtParser {
      * @param value
      * @return the parser for method chaining.
      */
-    JwtParser expect(String claimName, Object value);
+    JwtParser require(String claimName, Object value);
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
