@@ -128,7 +128,7 @@ try {
 }
 ```
 
-You can also require custom fields by using the `require(name, requiredValue)` method - for example:
+You can also require custom fields by using the `require(fieldName, requiredFieldValue)` method - for example:
 
 ```java
 try {
