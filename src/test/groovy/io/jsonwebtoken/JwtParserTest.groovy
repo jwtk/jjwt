@@ -1327,4 +1327,21 @@ class JwtParserTest {
             )
         }
     }
+
+//    @Test
+//    void testParseExpectedCustomDate_Success() {
+//        def aDate = new Date(System.currentTimeMillis())
+//
+//        byte[] key = randomKey()
+//
+//        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+//            claim("aDate", aDate).
+//            compact()
+//
+//        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+//            expect("aDate", aDate).
+//            parseClaimsJws(compact)
+//
+//        assertEquals jwt.getBody().get("aDate"), aDate
+//    }
 }
