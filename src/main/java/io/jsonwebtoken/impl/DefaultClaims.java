@@ -66,7 +66,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Date getExpiration() {
-        return getDate(Claims.EXPIRATION);
+        return get(Claims.EXPIRATION, Date.class);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Date getNotBefore() {
-        return getDate(Claims.NOT_BEFORE);
+        return get(Claims.NOT_BEFORE, Date.class);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Date getIssuedAt() {
-        return getDate(Claims.ISSUED_AT);
+        return get(Claims.ISSUED_AT, Date.class);
     }
 
     @Override
@@ -112,6 +112,13 @@ public class DefaultClaims extends JwtMap implements Claims {
     public <T> T get(String claimName, Class<T> requiredType) {
         Object value = get(claimName);
         if (value == null) { return null; }
+
+        if (Claims.EXPIRATION.equals(claimName) ||
+            Claims.ISSUED_AT.equals(claimName) ||
+            Claims.NOT_BEFORE.equals(claimName)
+        ) {
+            value = getDate(claimName);
+        }
 
         if (requiredType == Date.class && value instanceof Long) {
             value = new Date((Long)value);

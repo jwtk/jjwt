@@ -28,15 +28,17 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
-     * Sets an expected value for the jti claim.
+     * Ensures that the specified {@code jti} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param id
-     * @return the parser for method chaining.
+     * @return the parser method for chaining.
      */
     JwtParser requireId(String id);
 
     /**
-     * Sets an expected value for the subject claim.
+     * Ensures that the specified {@code sub} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param subject
      * @return the parser for method chaining.
@@ -44,7 +46,8 @@ public interface JwtParser {
     JwtParser requireSubject(String subject);
 
     /**
-     * Sets an expected value for the audience claim.
+     * Ensures that the specified {@code aud} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param audience
      * @return the parser for method chaining.
@@ -52,7 +55,8 @@ public interface JwtParser {
     JwtParser requireAudience(String audience);
 
     /**
-     * Sets an expected value for the issuer claim.
+     * Ensures that the specified {@code iss} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param issuer
      * @return the parser for method chaining.
@@ -60,7 +64,8 @@ public interface JwtParser {
     JwtParser requireIssuer(String issuer);
 
     /**
-     * Sets an expected value for the issuedAt claim.
+     * Ensures that the specified {@code iat} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param issuedAt
      * @return the parser for method chaining.
@@ -68,7 +73,8 @@ public interface JwtParser {
     JwtParser requireIssuedAt(Date issuedAt);
 
     /**
-     * Sets an expected value for the expiration claim.
+     * Ensures that the specified {@code exp} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param expiration
      * @return the parser for method chaining.
@@ -76,7 +82,8 @@ public interface JwtParser {
     JwtParser requireExpiration(Date expiration);
 
     /**
-     * Sets an expected value for the notBefore claim.
+     * Ensures that the specified {@code nbf} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
      * @param notBefore
      * @return the parser for method chaining
@@ -84,15 +91,14 @@ public interface JwtParser {
     JwtParser requireNotBefore(Date notBefore);
 
     /**
-     * Sets an expected value for any given claim name.
+     * Ensures that the specified {@code claimName} value is present when parsing the JWT.  If not present,
+     * an exception will be thrown indicating that the JWT is invalid and may not be used.
      *
-     * If an expectation is set for a particular claim name and the JWT being parsed does not have that claim set,
+     * If a particular claim is required and the JWT being parsed does not have that claim set,
      * a {@Link MissingClaimException} will be thrown.
      *
-     * If an expectation is set for a particular claim name and the JWT being parsed has a value that is different than
-     * the expected value, a {@link IncorrectClaimException} will be thrown.
-     *
-     * If either {@code claimName} is null or empty or {@code value} is null, the expectation is simply ignored.
+     * If a particular claim is required and the JWT being parsed has a value that is different than
+     * the required value, a {@link IncorrectClaimException} will be thrown.
      *
      * @param claimName
      * @param value

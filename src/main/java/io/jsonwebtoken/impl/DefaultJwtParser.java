@@ -381,16 +381,18 @@ public class DefaultJwtParser implements JwtParser {
             Object expectedClaimValue = expectedClaims.get(expectedClaimName);
             Object actualClaimValue = claims.get(expectedClaimName);
 
-            if (Claims.ISSUED_AT.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getIssuedAt();
-                actualClaimValue = claims.getIssuedAt();
-            } else if (Claims.EXPIRATION.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getExpiration();
-                actualClaimValue = claims.getExpiration();
-            } else if (Claims.NOT_BEFORE.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getNotBefore();
-                actualClaimValue = claims.getNotBefore();
-            } else if (expectedClaimValue instanceof Date && actualClaimValue != null && actualClaimValue instanceof Long) {
+            if (
+                Claims.ISSUED_AT.equals(expectedClaimName) ||
+                Claims.EXPIRATION.equals(expectedClaimName) ||
+                Claims.NOT_BEFORE.equals(expectedClaimName)
+            ) {
+                expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
+                actualClaimValue = claims.get(expectedClaimName, Date.class);
+            } else if (
+                expectedClaimValue instanceof Date &&
+                actualClaimValue != null &&
+                actualClaimValue instanceof Long
+            ) {
                 actualClaimValue = new Date((Long)actualClaimValue);
             }
 

@@ -64,7 +64,7 @@ class DefaultClaimsTest {
         def actual = new Date();
         claims.put("aDate", actual)
         Date expected = claims.get("aDate", Date.class);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -73,6 +73,31 @@ class DefaultClaimsTest {
         // note that Long is stored in claim
         claims.put("aDate", actual.getTime())
         Date expected = claims.get("aDate", Date.class);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual)
     }
+
+    @Test
+    void testGetClaimExpiration_Success() {
+        def now = new Date(System.currentTimeMillis())
+        claims.setExpiration(now)
+        Date expected = claims.get("exp", Date.class)
+        assertEquals(expected, claims.getExpiration())
+    }
+
+    @Test
+    void testGetClaimIssuedAt_Success() {
+        def now = new Date(System.currentTimeMillis())
+        claims.setIssuedAt(now)
+        Date expected = claims.get("iat", Date.class)
+        assertEquals(expected, claims.getIssuedAt())
+    }
+
+    @Test
+    void testGetClaimNotBefore_Success() {
+        def now = new Date(System.currentTimeMillis())
+        claims.setNotBefore(now)
+        Date expected = claims.get("nbf", Date.class)
+        assertEquals(expected, claims.getNotBefore())
+    }
+
 }
