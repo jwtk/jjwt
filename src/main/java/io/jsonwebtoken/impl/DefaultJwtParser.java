@@ -378,31 +378,20 @@ public class DefaultJwtParser implements JwtParser {
     private void validateExpectedClaims(Header header, Claims claims) {
         for (String expectedClaimName : expectedClaims.keySet()) {
 
-            // this will be overridden if one of the default claims is used
             Object expectedClaimValue = expectedClaims.get(expectedClaimName);
             Object actualClaimValue = claims.get(expectedClaimName);
 
             if (Claims.ISSUED_AT.equals(expectedClaimName)) {
                 expectedClaimValue = expectedClaims.getIssuedAt();
                 actualClaimValue = claims.getIssuedAt();
-            } else if (Claims.AUDIENCE.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getAudience();
-                actualClaimValue = claims.getAudience();
-            } else if (Claims.ISSUER.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getIssuer();
-                actualClaimValue = claims.getIssuer();
-            } else if (Claims.SUBJECT.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getSubject();
-                actualClaimValue = claims.getSubject();
             } else if (Claims.EXPIRATION.equals(expectedClaimName)) {
                 expectedClaimValue = expectedClaims.getExpiration();
                 actualClaimValue = claims.getExpiration();
             } else if (Claims.NOT_BEFORE.equals(expectedClaimName)) {
                 expectedClaimValue = expectedClaims.getNotBefore();
                 actualClaimValue = claims.getNotBefore();
-            } else if (Claims.ID.equals(expectedClaimName)) {
-                expectedClaimValue = expectedClaims.getId();
-                actualClaimValue = claims.getId();
+            } else if (expectedClaimValue instanceof Date && actualClaimValue != null && actualClaimValue instanceof Long) {
+                actualClaimValue = new Date((Long)actualClaimValue);
             }
 
             InvalidClaimException invalidClaimException = null;

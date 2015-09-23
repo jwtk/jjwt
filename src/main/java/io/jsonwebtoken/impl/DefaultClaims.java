@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.RequiredTypeException;
 
 import java.util.Date;
 import java.util.Map;
@@ -105,5 +106,21 @@ public class DefaultClaims extends JwtMap implements Claims {
     public Claims setId(String jti) {
         setValue(Claims.ID, jti);
         return this;
+    }
+
+    @Override
+    public <T> T get(String claimName, Class<T> requiredType) {
+        Object value = get(claimName);
+        if (value == null) { return null; }
+
+        if (requiredType == Date.class && value instanceof Long) {
+            value = new Date((Long)value);
+        }
+
+        if (!requiredType.isInstance(value)) {
+            throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
+        }
+
+        return requiredType.cast(value);
     }
 }

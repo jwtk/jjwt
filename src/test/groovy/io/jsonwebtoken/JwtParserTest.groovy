@@ -1328,20 +1328,68 @@ class JwtParserTest {
         }
     }
 
-//    @Test
-//    void testParseExpectedCustomDate_Success() {
-//        def aDate = new Date(System.currentTimeMillis())
-//
-//        byte[] key = randomKey()
-//
-//        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-//            claim("aDate", aDate).
-//            compact()
-//
-//        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-//            expect("aDate", aDate).
-//            parseClaimsJws(compact)
-//
-//        assertEquals jwt.getBody().get("aDate"), aDate
-//    }
+    @Test
+    void testParseRequireCustomDate_Success() {
+        def aDate = new Date(System.currentTimeMillis())
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            claim("aDate", aDate).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            require("aDate", aDate).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().get("aDate", Date.class), aDate
+    }
+
+    @Test
+    void testParseRequireCustomDate_Incorrect_Fail() {
+        def goodDate = new Date(System.currentTimeMillis())
+        def badDate = new Date(System.currentTimeMillis() - 10000)
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            claim("aDate", badDate).
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                require("aDate", goodDate).
+                parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "aDate", goodDate, badDate),
+                e.getMessage()
+            )
+        }
+
+    }
+
+    @Test
+    void testParseRequireCustomDate_Missing_Fail() {
+        def aDate = new Date(System.currentTimeMillis())
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setSubject("Dummy").
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                require("aDate", aDate).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "aDate", aDate),
+                e.getMessage()
+            )
+        }
+    }
 }
