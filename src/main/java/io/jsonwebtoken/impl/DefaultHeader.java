@@ -51,4 +51,16 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
         setValue(CONTENT_TYPE, cty);
         return (T)this;
     }
+
+    @Override
+    public String getCompressionAlgorithm() {
+        return getString(COMPRESSION_ALGORITHM);
+    }
+
+    @Override
+    public T setCompressionAlgorithm(String compressionAlgorithm) {
+        setValue(COMPRESSION_ALGORITHM, compressionAlgorithm);
+        return (T) this;
+    }
+
 }

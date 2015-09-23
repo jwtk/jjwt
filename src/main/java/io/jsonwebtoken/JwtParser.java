@@ -108,6 +108,14 @@ public interface JwtParser {
     JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
     /**
+     *
+     * @param compressionCodecResolver
+     * @return the parser for method chaining.
+     * @since 0.5.2
+     */
+    JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
+
+    /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      *

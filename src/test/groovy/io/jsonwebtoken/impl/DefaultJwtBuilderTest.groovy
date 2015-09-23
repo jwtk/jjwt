@@ -173,7 +173,7 @@ class DefaultJwtBuilderTest {
 
         def b = new DefaultJwtBuilder() {
             @Override
-            protected String toJson(Object o) throws JsonProcessingException {
+            protected byte[] toJson(Object o) throws JsonProcessingException {
                 throw new JsonMappingException('foo')
             }
         }

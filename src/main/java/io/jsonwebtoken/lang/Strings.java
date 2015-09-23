@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.lang;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,6 +40,8 @@ public abstract class Strings {
     private static final String CURRENT_PATH = ".";
 
     private static final char EXTENSION_SEPARATOR = '.';
+
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     //---------------------------------------------------------------------
     // General convenience methods for working with Strings

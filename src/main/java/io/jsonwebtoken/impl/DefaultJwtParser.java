@@ -17,11 +17,12 @@ package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
@@ -30,7 +31,9 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.lang.Assert;
@@ -58,6 +61,8 @@ public class DefaultJwtParser implements JwtParser {
 
     private SigningKeyResolver signingKeyResolver;
 
+    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+
     @Override
     public JwtParser setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
@@ -83,6 +88,13 @@ public class DefaultJwtParser implements JwtParser {
     public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
         Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
         this.signingKeyResolver = signingKeyResolver;
+        return this;
+    }
+
+    @Override
+    public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
+        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
+        this.compressionCodecResolver = compressionCodecResolver;
         return this;
     }
 
@@ -157,6 +169,8 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Header =================
         Header header = null;
 
+        CompressionCodec compressionCodec = null;
+
         if (base64UrlEncodedHeader != null) {
             String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
             Map<String, Object> m = readValue(origValue);
@@ -166,10 +180,18 @@ public class DefaultJwtParser implements JwtParser {
             } else {
                 header = new DefaultHeader(m);
             }
+
+            compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
         }
 
         // =============== Body =================
-        String payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        String payload;
+        if (compressionCodec != null) {
+            byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
+            payload = new String(decompressed, Strings.UTF_8);
+        } else {
+            payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        }
 
         Claims claims = null;
 

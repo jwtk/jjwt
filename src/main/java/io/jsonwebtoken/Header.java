@@ -48,6 +48,9 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     /** JWT {@code Content Type} header parameter name: <code>"cty"</code> */
     public static final String CONTENT_TYPE = "cty";
 
+    /** JWT {@code Compression Algorithm} header parameter name: <code>"calg"</code> */
+    public static final String COMPRESSION_ALGORITHM = "calg";
+
     /**
      * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
      * <code>typ</code></a> (type) header value or {@code null} if not present.
@@ -99,5 +102,9 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
      */
     T setContentType(String cty);
+
+    String getCompressionAlgorithm();
+
+    T setCompressionAlgorithm(String compressionAlgorithm);
 
 }

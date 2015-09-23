@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.TextCodec
+import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.impl.crypto.RsaProvider
@@ -187,6 +188,16 @@ class JwtsTest {
     }
 
     @Test
+    void testWithInvalidCompressionAlgorithm() {
+        try {
+
+            Jwts.builder().setHeaderParam(Header.COMPRESSION_ALGORITHM, "CUSTOM").setId("andId").compact()
+        } catch (CompressionException e) {
+            assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
+        }
+    }
+
+    @Test
     void testConvenienceIssuer() {
         String compact = Jwts.builder().setIssuer("Me").compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
@@ -318,6 +329,67 @@ class JwtsTest {
 
         claims = Jwts.parser().parse(compact).body as Claims
         assertNull claims.getId()
+    }
+
+    @Test
+    void testCompressedJwtWithDeflate() {
+
+        byte[] key = MacProvider.generateKey().getEncoded()
+
+        String id = UUID.randomUUID().toString()
+
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(SignatureAlgorithm.HS256, key)
+                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.DEFLATE).compact()
+
+        def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+
+        Claims claims = jws.body
+
+        assertEquals "DEF", jws.header.getCompressionAlgorithm()
+
+        assertEquals id, claims.getId()
+        assertEquals "an audience", claims.getAudience()
+        assertEquals "hello this is an amazing jwt", claims.state
+    }
+
+    @Test
+    void testCompressedJwtWithGZIP() {
+
+        byte[] key = MacProvider.generateKey().getEncoded()
+
+        String id = UUID.randomUUID().toString()
+
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(SignatureAlgorithm.HS256, key)
+                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.GZIP).compact()
+
+        def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+
+        Claims claims = jws.body
+
+        assertEquals "GZIP", jws.header.getCompressionAlgorithm()
+
+        assertEquals id, claims.getId()
+        assertEquals "an audience", claims.getAudience()
+        assertEquals "hello this is an amazing jwt", claims.state
+    }
+
+    @Test
+    void testCompressStringPayloadWithDeflate() {
+
+        byte[] key = MacProvider.generateKey().getEncoded()
+
+        String payload = "this is my test for a payload"
+
+        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key)
+                .compressWith(CompressionCodecs.DEFLATE).compact()
+
+        def jws = Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+
+        String parsed = jws.body
+
+        assertEquals "DEF", jws.header.getCompressionAlgorithm()
+
+        assertEquals "this is my test for a payload", parsed
     }
 
     @Test
