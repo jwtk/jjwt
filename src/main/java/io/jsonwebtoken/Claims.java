@@ -170,4 +170,5 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
     @Override //only for better/targeted JavaDoc
     Claims setId(String jti);
 
+    <T> T get(String claimName, Class<T> requiredType);
 }

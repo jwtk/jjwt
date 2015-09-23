@@ -16,7 +16,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.5.1</version>
+    <version>0.6</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.5.1'
+    compile 'io.jsonwebtoken:jjwt:0.6'
 }
 ```
 
@@ -98,6 +98,10 @@ try {
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
 
 ## Release Notes
+
+### 0.6
+
+- Added the ability to set expectations when parsing a JWT which enforces a particular claim having a particular value
 
 ### 0.5.1
 
