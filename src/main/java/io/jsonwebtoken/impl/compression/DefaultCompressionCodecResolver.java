@@ -23,7 +23,8 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
 /**
- * DefaultCompressionCodecResolver
+ * Default implementation of {@link CompressionCodecResolver}.  This implementation will resolve DEF to
+ * {@link DeflateCompressionCodec} and GZIP to {@link GzipCompressionCodec}.
  *
  * @since 0.5.2
  */
@@ -31,22 +32,25 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
 
     @Override
     public CompressionCodec resolveCompressionCodec(Header header) {
-        Assert.notNull(header, "header cannot be null.");
+        String cmpAlg = getAlgorithmFromHeader(header);
 
-        String cmpAlg = header.getCompressionAlgorithm();
-
-        if (!Strings.hasText(cmpAlg)) {
+        final boolean hasCompressionAlgorithm = Strings.hasText(cmpAlg);
+        if (!hasCompressionAlgorithm) {
             return null;
         }
-
         if (CompressionCodecs.DEFLATE.getAlgorithmName().equalsIgnoreCase(cmpAlg)) {
             return CompressionCodecs.DEFLATE;
         }
-
         if (CompressionCodecs.GZIP.getAlgorithmName().equalsIgnoreCase(cmpAlg)) {
             return CompressionCodecs.GZIP;
         }
 
         throw new CompressionException("Unsupported compression algorithm '" + cmpAlg + "'");
+    }
+
+    private String getAlgorithmFromHeader(Header header) {
+        Assert.notNull(header, "header cannot be null.");
+
+        return header.getCompressionAlgorithm();
     }
 }

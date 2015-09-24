@@ -16,15 +16,29 @@
 package io.jsonwebtoken;
 
 /**
- * CompressionCodec
+ * Defines how to compress and decompress byte arrays.
  *
- * @since 0.59
+ * @since 0.5.2
  */
 public interface CompressionCodec {
 
+    /**
+     * The algorithm name that would appear in the JWT header.
+     * @return the algorithm name that would appear in the JWT header
+     */
     String getAlgorithmName();
 
+    /**
+     * Takes a byte array and returns a compressed version.
+     * @param payload bytes to compress
+     * @return compressed bytes
+     */
     byte[] compress(byte[] payload);
 
+    /**
+     * Takes a compressed byte array and returns a decompressed version.
+     * @param compressed compressed bytes
+     * @return decompressed bytes
+     */
     byte[] decompress(byte[] compressed);
 }

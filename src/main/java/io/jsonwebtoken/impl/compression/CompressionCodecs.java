@@ -22,13 +22,16 @@ import io.jsonwebtoken.CompressionCodec;
  *
  * @since 0.5.2
  */
-public abstract class CompressionCodecs {
+public interface CompressionCodecs {
 
-    private CompressionCodecs(){}
+    /**
+     * Codec implementing the <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate</a> compression algorithm
+     */
+    CompressionCodec DEFLATE = new DeflateCompressionCodec();
 
-    public static final CompressionCodec DEFLATE = new DeflateCompressionCodec();
-
-    public static final CompressionCodec GZIP = new GzipCompressionCodec();
-
+    /**
+     * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm
+     */
+    CompressionCodec GZIP = new GzipCompressionCodec();
 
 }
