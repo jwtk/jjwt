@@ -21,6 +21,12 @@ import static org.junit.Assert.*
 class JwtMapTest {
 
     @Test
+    void testToDateFromNull() {
+        Date actual = JwtMap.toDate(null, 'foo')
+        assertNull actual
+    }
+
+    @Test
     void testToDateFromDate() {
 
         def d = new Date()

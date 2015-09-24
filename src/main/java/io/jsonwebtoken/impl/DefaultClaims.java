@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.RequiredTypeException;
 
 import java.util.Date;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Date getExpiration() {
-        return getDate(Claims.EXPIRATION);
+        return get(Claims.EXPIRATION, Date.class);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Date getNotBefore() {
-        return getDate(Claims.NOT_BEFORE);
+        return get(Claims.NOT_BEFORE, Date.class);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Date getIssuedAt() {
-        return getDate(Claims.ISSUED_AT);
+        return get(Claims.ISSUED_AT, Date.class);
     }
 
     @Override
@@ -105,5 +106,28 @@ public class DefaultClaims extends JwtMap implements Claims {
     public Claims setId(String jti) {
         setValue(Claims.ID, jti);
         return this;
+    }
+
+    @Override
+    public <T> T get(String claimName, Class<T> requiredType) {
+        Object value = get(claimName);
+        if (value == null) { return null; }
+
+        if (Claims.EXPIRATION.equals(claimName) ||
+            Claims.ISSUED_AT.equals(claimName) ||
+            Claims.NOT_BEFORE.equals(claimName)
+        ) {
+            value = getDate(claimName);
+        }
+
+        if (requiredType == Date.class && value instanceof Long) {
+            value = new Date((Long)value);
+        }
+
+        if (!requiredType.isInstance(value)) {
+            throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
+        }
+
+        return requiredType.cast(value);
     }
 }
