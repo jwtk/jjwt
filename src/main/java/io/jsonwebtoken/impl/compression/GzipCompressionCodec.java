@@ -16,8 +16,6 @@
 package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.CompressionException;
-import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayInputStream;
@@ -27,11 +25,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * GzipCompressionCodec
+ * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm
  *
  * @since 0.5.2
  */
-public class GzipCompressionCodec implements CompressionCodec {
+public class GzipCompressionCodec extends BaseCompressionCodec implements CompressionCodec {
 
     private static final String GZIP = "GZIP";
 
@@ -41,29 +39,7 @@ public class GzipCompressionCodec implements CompressionCodec {
     }
 
     @Override
-    public byte[] compress(byte[] payload) {
-        Assert.notNull(payload, "payload cannot be null.");
-
-        ByteArrayOutputStream outputStream = null;
-        GZIPOutputStream gzipOutputStream = null;
-
-        try {
-            outputStream = new ByteArrayOutputStream();
-            gzipOutputStream = new GZIPOutputStream(outputStream, true);
-            gzipOutputStream.write(payload, 0, payload.length);
-            gzipOutputStream.finish();
-            return outputStream.toByteArray();
-        } catch (IOException e) {
-            throw new CompressionException("Unable to compress payload.", e);
-        } finally {
-            Objects.nullSafeClose(outputStream, gzipOutputStream);
-        }
-    }
-
-    @Override
-    public byte[] decompress(byte[] compressed) {
-        Assert.notNull(compressed, "compressed cannot be null.");
-
+    protected byte[] doDecompress(byte[] compressed) throws IOException {
         byte[] buffer = new byte[512];
 
         ByteArrayOutputStream outputStream = null;
@@ -79,10 +55,20 @@ public class GzipCompressionCodec implements CompressionCodec {
                 outputStream.write(buffer, 0, read);
             }
             return outputStream.toByteArray();
-        } catch (IOException e) {
-            throw new CompressionException("Unable to decompress compressed payload.", e);
         } finally {
             Objects.nullSafeClose(inputStream, gzipInputStream, outputStream);
+        }
+    }
+
+    protected byte[] doCompress(byte[] payload) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        GZIPOutputStream compressorOutputStream = new GZIPOutputStream(outputStream, true);
+        try {
+            compressorOutputStream.write(payload, 0, payload.length);
+            compressorOutputStream.finish();
+            return outputStream.toByteArray();
+        } finally {
+            Objects.nullSafeClose(compressorOutputStream, outputStream);
         }
     }
 }
