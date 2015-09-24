@@ -415,7 +415,7 @@ class JwtsTest {
         def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new DefaultCompressionCodecResolver() {
             @Override
             CompressionCodec resolveCompressionCodec(Header header) {
-                String algorithm = getAlgorithmFromHeader(header);
+                String algorithm = header.getCompressionAlgorithm()
                 if ("CUSTOM".equals(algorithm)) {
                     return CompressionCodecs.GZIP
                 } else {

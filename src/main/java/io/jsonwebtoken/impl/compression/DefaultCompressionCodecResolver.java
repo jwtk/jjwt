@@ -48,7 +48,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         throw new CompressionException("Unsupported compression algorithm '" + cmpAlg + "'");
     }
 
-    protected final String getAlgorithmFromHeader(Header header) {
+    private String getAlgorithmFromHeader(Header header) {
         Assert.notNull(header, "header cannot be null.");
 
         return header.getCompressionAlgorithm();
