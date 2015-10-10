@@ -350,7 +350,10 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder signWith(SignatureAlgorithm alg, Key key);
 
     /**
-     * Compresses the JWT body before being signed.
+     * Compresses the JWT body using the {@link CompressionCodec} passed as argument.
+     *
+     * Note: Compression is not part of the Json Web Token specification and is not expected that other libraries (including
+     * older versions of this one) are able to consume a compressed JWT body correctly.
      *
      * @param codec implementation of the {@link CompressionCodec} to be used.
      * @return the builder for method chaining.

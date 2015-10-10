@@ -206,8 +206,10 @@ public interface JwtParser {
     JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
     /**
+     * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to verify
+     * a decompress the JWT body. If the parsed JWT is not compressed, this resolver si not used.
      *
-     * @param compressionCodecResolver
+     * @param compressionCodecResolver  the compression codec resolver used to decompress the JWT body.
      * @return the parser for method chaining.
      * @since 0.5.2
      */

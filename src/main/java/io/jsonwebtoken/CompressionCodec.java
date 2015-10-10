@@ -19,6 +19,8 @@ package io.jsonwebtoken;
  * Defines how to compress and decompress byte arrays.
  *
  * @since 0.5.2
+ * @see io.jsonwebtoken.impl.compression.DeflateCompressionCodec
+ * @see io.jsonwebtoken.impl.compression.GzipCompressionCodec
  */
 public interface CompressionCodec {
 
