@@ -16,7 +16,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.6</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.6'
+    compile 'io.jsonwebtoken:jjwt:0.6.0'
 }
 ```
 
@@ -99,7 +99,7 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 ## Release Notes
 
-### 0.6
+### 0.6.0
 
 #### Enforce JWT Claims when Parsing
 
