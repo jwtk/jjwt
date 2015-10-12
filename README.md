@@ -179,7 +179,7 @@ Jwts.parser().setSigningKey(key)
     .parseClaimsJws(compact);
 ```
 
-*NOTE*: Because body compression is not a standard JWT feature, you should only enable compression if both your JWT builder and parser are JJWT versions >= 0.6.0, or if you're using another library that implements the exact same functionality.  This feature is best reserved for your own use cases - where you both create and later parse the tokens.  It will likely cause problems if you compressed a token and expected a 3rd party (who doesn't use JJWT) to parse the token.
+*NOTE*: Because body compression is not JWT specification compliant, you should only enable compression if both your JWT builder and parser are JJWT versions >= 0.6.0, or if you're using another library that implements the exact same functionality.  This feature is best reserved for your own use cases - where you both create and later parse the tokens.  It will likely cause problems if you compressed a token and expected a 3rd party (who doesn't use JJWT) to parse the token.
 
 ### 0.5.1
 
