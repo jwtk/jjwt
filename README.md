@@ -146,7 +146,7 @@ try {
 If your JWT body is large and you have size restrictions (for example, if embedding a JWT in a URL and the URL must be under a certain length for legacy browsers or mail user agents), you may now compress the JWT body using a `CompressionCodec`:
 
 ```java
-Jwts.builder().claim("foo", "someReallyDataString...")
+Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compressWith(CompressionCodecs.DEFLATE) // or CompressionCodecs.GZIP
     .signWith(SignatureAlgorithm.HS256, key)
     .compact();
@@ -165,7 +165,7 @@ Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
 If the DEFLATE or GZIP algorithms are not sufficient for your needs, you can specify your own Compression algorithms by implementing the `CompressionCodec` interface and setting it on the parser:
 
 ```java
-Jwts.builder().claim("foo", "someReallyDataString...")
+Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compressWith(new MyCompressionCodec())
     .signWith(SignatureAlgorithm.HS256, key)
     .compact();
@@ -179,7 +179,7 @@ Jwts.parser().setSigningKey(key)
     .parseClaimsJws(compact);
 ```
 
-*NOTE*: Because body compression is not a standard JWT feature, you should only enable compression if both your JWT builder and parser are JJWT versions >= 0.6.0, or if you're using another library that implements the exact same functionality.  It is best used for your own use cases - where you both create and later parse the tokens.  This feature will likely cause problems if you compressed a token and expected a 3rd party (who doesn't use JJWT) to parse the token.
+*NOTE*: Because body compression is not a standard JWT feature, you should only enable compression if both your JWT builder and parser are JJWT versions >= 0.6.0, or if you're using another library that implements the exact same functionality.  This feature is best reserved for your own use cases - where you both create and later parse the tokens.  It will likely cause problems if you compressed a token and expected a 3rd party (who doesn't use JJWT) to parse the token.
 
 ### 0.5.1
 
