@@ -44,4 +44,9 @@ public class DefaultJws<B> implements Jws<B> {
     public String getSignature() {
         return this.signature;
     }
+
+    @Override
+    public String toString() {
+        return "header=" + header + ",body=" + body + ",signature=" + signature;
+    }
 }
