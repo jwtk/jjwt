@@ -101,9 +101,9 @@ These feature sets will be implemented in a future release when possible.  Commu
 
 ### 0.6
 
-#### Enforce JWT Values when Parsing
+#### Enforce JWT Claims when Parsing
 
-We added the ability to set expectations when parsing a JWT which ensures particular claims having particular values.
+You can now enforce that JWT claims have expected values when parsing a compact JWT string.
 
 For example, let's say that you require that the JWT you are parsing has a specific `sub` (subject) value,
 otherwise you may not trust the token.  You can do that by using one of the `require` methods on the parser builder:
@@ -138,6 +138,48 @@ try {
 }
 ```
 (or, again, you could catch either MissingClaimException or IncorrectClaimException instead)
+
+#### Body Compression
+
+*This feature is NOT JWT specification compliant, but it can be very useful when you parse your own tokens.*
+
+If your JWT body is large and you have size restrictions (for example, if embedding a JWT in a URL and the URL must be under a certain length for legacy browsers or mail user agents), you may now compress the JWT body using a `CompressionCodec`:
+
+```java
+Jwts.builder().claim("foo", "someReallyDataString...")
+    .compressWith(CompressionCodecs.DEFLATE) // or CompressionCodecs.GZIP
+    .signWith(SignatureAlgorithm.HS256, key)
+    .compact();
+```
+
+This will set a new `calg` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
+
+The default parser implementation will automatically decompress DEFLATE or GZIP compressed bodies, so you don't need to set anything on the parser - it looks like normal:
+
+```java
+Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+```
+
+##### Custom Compression Algorithms
+
+If the DEFLATE or GZIP algorithms are not sufficient for your needs, you can specify your own Compression algorithms by implementing the `CompressionCodec` interface and setting it on the parser:
+
+```java
+Jwts.builder().claim("foo", "someReallyDataString...")
+    .compressWith(new MyCompressionCodec())
+    .signWith(SignatureAlgorithm.HS256, key)
+    .compact();
+```
+
+You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `calg` header and return your custom codec when discovered:
+
+```java
+Jwts.parser().setSigningKey(key)
+    .setCompressionCodecResolver(new MyCustomCompressionCodecResolver())
+    .parseClaimsJws(compact);
+```
+
+*NOTE*: Because body compression is not a standard JWT feature, you should only enable compression if both your JWT builder and parser are JJWT versions >= 0.6.0, or if you're using another library that implements the exact same functionality.  It is best used for your own use cases - where you both create and later parse the tokens.  This feature will likely cause problems if you compressed a token and expected a 3rd party (who doesn't use JJWT) to parse the token.
 
 ### 0.5.1
 
