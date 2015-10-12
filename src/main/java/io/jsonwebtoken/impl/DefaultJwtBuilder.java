@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
@@ -47,6 +48,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private SignatureAlgorithm algorithm;
     private Key                key;
     private byte[]             keyBytes;
+
+    private CompressionCodec compressionCodec;
 
     @Override
     public JwtBuilder setHeader(Header header) {
@@ -110,6 +113,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.notNull(key, "Key argument cannot be null.");
         this.algorithm = alg;
         this.key = key;
+        return this;
+    }
+
+    @Override
+    public JwtBuilder compressWith(CompressionCodec compressionCodec) {
+        Assert.notNull(compressionCodec, "compressionCodec cannot be null");
+        this.compressionCodec = compressionCodec;
         return this;
     }
 
@@ -279,11 +289,30 @@ public class DefaultJwtBuilder implements JwtBuilder {
             jwsHeader.setAlgorithm(SignatureAlgorithm.NONE.getValue());
         }
 
+        if (compressionCodec != null) {
+            jwsHeader.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
+        }
+
         String base64UrlEncodedHeader = base64UrlEncode(jwsHeader, "Unable to serialize header to json.");
 
-        String base64UrlEncodedBody = this.payload != null ?
-                                      TextCodec.BASE64URL.encode(this.payload) :
-                                      base64UrlEncode(claims, "Unable to serialize claims object to json.");
+        String base64UrlEncodedBody;
+
+        if (compressionCodec != null) {
+
+            byte[] bytes;
+            try {
+                bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Unable to serialize claims object to json.");
+            }
+
+            base64UrlEncodedBody = TextCodec.BASE64URL.encode(compressionCodec.compress(bytes));
+
+        } else {
+            base64UrlEncodedBody = this.payload != null ?
+                    TextCodec.BASE64URL.encode(this.payload) :
+                    base64UrlEncode(claims, "Unable to serialize claims object to json.");
+        }
 
         String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
@@ -311,17 +340,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     protected String base64UrlEncode(Object o, String errMsg) {
-        String s;
+        byte[] bytes;
         try {
-            s = toJson(o);
+            bytes = toJson(o);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(errMsg, e);
         }
 
-        return TextCodec.BASE64URL.encode(s);
+        return TextCodec.BASE64URL.encode(bytes);
     }
 
-    protected String toJson(Object o) throws JsonProcessingException {
-        return OBJECT_MAPPER.writeValueAsString(o);
+
+    protected byte[] toJson(Object object) throws  JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsBytes(object);
     }
 }

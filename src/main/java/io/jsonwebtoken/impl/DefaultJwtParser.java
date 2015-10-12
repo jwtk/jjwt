@@ -18,6 +18,8 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.IncorrectClaimException;
@@ -34,7 +36,9 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.lang.Assert;
@@ -61,6 +65,8 @@ public class DefaultJwtParser implements JwtParser {
     private Key key;
 
     private SigningKeyResolver signingKeyResolver;
+
+    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
     Claims expectedClaims = new DefaultClaims();
 
@@ -151,6 +157,13 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
+        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
+        this.compressionCodecResolver = compressionCodecResolver;
+        return this;
+    }
+
+    @Override
     public boolean isSigned(String jwt) {
 
         if (jwt == null) {
@@ -221,6 +234,8 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Header =================
         Header header = null;
 
+        CompressionCodec compressionCodec = null;
+
         if (base64UrlEncodedHeader != null) {
             String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
             Map<String, Object> m = readValue(origValue);
@@ -230,10 +245,18 @@ public class DefaultJwtParser implements JwtParser {
             } else {
                 header = new DefaultHeader(m);
             }
+
+            compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
         }
 
         // =============== Body =================
-        String payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        String payload;
+        if (compressionCodec != null) {
+            byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
+            payload = new String(decompressed, Strings.UTF_8);
+        } else {
+            payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        }
 
         Claims claims = null;
 

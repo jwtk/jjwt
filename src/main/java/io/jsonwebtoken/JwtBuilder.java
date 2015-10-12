@@ -350,6 +350,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder signWith(SignatureAlgorithm alg, Key key);
 
     /**
+     * Compresses the JWT body using the {@link CompressionCodec} passed as argument.
+     *
+     * Note: Compression is not part of the Json Web Token specification and is not expected that other libraries (including
+     * older versions of this one) are able to consume a compressed JWT body correctly.
+     *
+     * @param codec implementation of the {@link CompressionCodec} to be used.
+     * @return the builder for method chaining.
+     * @since 0.5.2
+     */
+    JwtBuilder compressWith(CompressionCodec codec);
+
+    /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the
      * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-7">JWT Compact Serialization</a>
      * rules.
