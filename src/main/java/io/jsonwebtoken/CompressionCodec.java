@@ -20,7 +20,7 @@ package io.jsonwebtoken;
  *
  * @see io.jsonwebtoken.impl.compression.DeflateCompressionCodec
  * @see io.jsonwebtoken.impl.compression.GzipCompressionCodec
- * @since 0.5.2
+ * @since 0.6.0
  */
 public interface CompressionCodec {
 

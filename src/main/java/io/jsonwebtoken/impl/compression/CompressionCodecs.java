@@ -23,7 +23,7 @@ import io.jsonwebtoken.CompressionCodec;
  * @see #DEFLATE
  * @see #GZIP
  *
- * @since 0.5.2
+ * @since 0.6.0
  */
 public final class CompressionCodecs {
 

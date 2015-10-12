@@ -29,7 +29,7 @@ package io.jsonwebtoken;
  * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} and
  * {@link io.jsonwebtoken.JwtParser#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
- * @since 0.5.2
+ * @since 0.6.0
  */
 public interface CompressionCodecResolver {
 

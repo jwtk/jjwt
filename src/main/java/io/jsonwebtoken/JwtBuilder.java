@@ -357,15 +357,15 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * certain length.  Using compression can help ensure the compact JWT fits within that length.  However, NOTE:</p>
      *
      * <p><b>WARNING:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
-     * (including JJWT versions < 0.5.2) are able to consume a compressed JWT body correctly.  Only use this method
-     * if you are sure that you will consume the JWT with JJWT >= 0.5.2 or another library that you know implements
+     * (including JJWT versions < 0.6.0) are able to consume a compressed JWT body correctly.  Only use this method
+     * if you are sure that you will consume the JWT with JJWT >= 0.6.0 or another library that you know implements
      * the same behavior.</p>
      *
      * @see io.jsonwebtoken.impl.compression.CompressionCodecs
      *
      * @param codec implementation of the {@link CompressionCodec} to be used.
      * @return the builder for method chaining.
-     * @since 0.5.2
+     * @since 0.6.0
      */
     JwtBuilder compressWith(CompressionCodec codec);
 

@@ -27,7 +27,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip compression algorithm</a>.
  *
- * @since 0.5.2
+ * @since 0.6.0
  */
 public class GzipCompressionCodec extends AbstractCompressionCodec implements CompressionCodec {
 

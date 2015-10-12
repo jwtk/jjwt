@@ -20,7 +20,7 @@ import io.jsonwebtoken.CompressionException
 import org.junit.Test
 
 /**
- * @since 0.5.2
+ * @since 0.6.0
  */
 class AbstractCompressionCodecTest {
     static class ExceptionThrowingCodec extends AbstractCompressionCodec {

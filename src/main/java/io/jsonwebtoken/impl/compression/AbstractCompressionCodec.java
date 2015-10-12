@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * Abstract class that asserts arguments and wraps IOException with CompressionException.
  *
- * @since 0.5.2
+ * @since 0.6.0
  */
 public abstract class AbstractCompressionCodec implements CompressionCodec {
 

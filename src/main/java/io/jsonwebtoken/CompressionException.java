@@ -18,7 +18,7 @@ package io.jsonwebtoken;
 /**
  * Exception indicating that either compressing or decompressing an JWT body failed.
  *
- * @since 0.5.2
+ * @since 0.6.0
  */
 public class CompressionException extends JwtException {
 

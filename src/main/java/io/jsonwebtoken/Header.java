@@ -107,7 +107,7 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * Returns the JWT <code>calg</code> (Compression Algorithm) header value or {@code null} if not present.
      *
      * @return the {@code calg} header parameter value or {@code null} if not present.
-     * @since 0.5.2
+     * @since 0.6.0
      */
     String getCompressionAlgorithm();
 
@@ -120,7 +120,7 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * be able to deserialize a compressed JTW body correctly. </p>
      *
      * @param calg the JWT compression algorithm {@code calg} value or {@code null} to remove the property from the JSON map.
-     * @since 0.5.2
+     * @since 0.6.0
      */
     T setCompressionAlgorithm(String calg);
 

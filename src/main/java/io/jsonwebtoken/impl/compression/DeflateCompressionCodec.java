@@ -26,7 +26,7 @@ import java.util.zip.InflaterOutputStream;
 /**
  * Codec implementing the <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate compression algorithm</a>.
  *
- * @since 0.5.2
+ * @since 0.6.0
  */
 public class DeflateCompressionCodec extends AbstractCompressionCodec {
 

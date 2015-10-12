@@ -41,7 +41,7 @@ import io.jsonwebtoken.lang.Strings;
  *
  * @see DeflateCompressionCodec
  * @see GzipCompressionCodec
- * @since 0.5.2
+ * @since 0.6.0
  */
 public class DefaultCompressionCodecResolver implements CompressionCodecResolver {
 
