@@ -22,13 +22,15 @@ import io.jsonwebtoken.lang.Assert;
 import java.io.IOException;
 
 /**
- * Base class that asserts arguments and wraps IOException with CompressionException.
+ * Abstract class that asserts arguments and wraps IOException with CompressionException.
  *
  * @since 0.5.2
  */
-public abstract class BaseCompressionCodec implements CompressionCodec {
+public abstract class AbstractCompressionCodec implements CompressionCodec {
+
     /**
      * Implement this method to do the actual work of compressing the payload
+     *
      * @param payload the bytes to compress
      * @return the compressed bytes
      * @throws IOException if the compression causes an IOException
@@ -36,10 +38,11 @@ public abstract class BaseCompressionCodec implements CompressionCodec {
     protected abstract byte[] doCompress(byte[] payload) throws IOException;
 
     /**
-     * Asserts that payload is not null and calls doCompress
+     * Asserts that payload is not null and calls {@link #doCompress(byte[]) doCompress}
+     *
      * @param payload bytes to compress
      * @return compressed bytes
-     * @throws CompressionException if doCompress throws an IOException
+     * @throws CompressionException if {@link #doCompress(byte[]) doCompress} throws an IOException
      */
     @Override
     public final byte[] compress(byte[] payload) {
@@ -53,10 +56,11 @@ public abstract class BaseCompressionCodec implements CompressionCodec {
     }
 
     /**
-     * Asserts the compressed bytes is not null and calls doDecompress
+     * Asserts the compressed bytes is not null and calls {@link #doDecompress(byte[]) doDecompress}
+     *
      * @param compressed compressed bytes
      * @return decompressed bytes
-     * @throws CompressionException if doCompress throws an IOException
+     * @throws CompressionException if {@link #doDecompress(byte[]) doDecompress} throws an IOException
      */
     @Override
     public final byte[] decompress(byte[] compressed) {
@@ -71,6 +75,7 @@ public abstract class BaseCompressionCodec implements CompressionCodec {
 
     /**
      * Implement this method to do the actual work of decompressing the compressed bytes.
+     *
      * @param compressed compressed bytes
      * @return decompressed bytes
      * @throws IOException if the decompression runs into an IO problem

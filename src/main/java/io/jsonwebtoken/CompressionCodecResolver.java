@@ -16,16 +16,31 @@
 package io.jsonwebtoken;
 
 /**
- * Resolves "calg" header to an implementation of CompressionCodec.
+ * Looks for a JWT {@code calg} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+ * can use to decompress the JWT body.
+ *
+ * <p>JJWT's default {@link JwtParser} implementation supports both the
+ * {@link io.jsonwebtoken.impl.compression.DeflateCompressionCodec DEFLATE}
+ * and {@link io.jsonwebtoken.impl.compression.GzipCompressionCodec GZIP} algorithms by default - you do not need to
+ * specify a {@code CompressionCodecResolver} in these cases.</p>
+ *
+ * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement
+ * your own {@link CompressionCodecResolver} and specify that when
+ * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} and
+ * {@link io.jsonwebtoken.JwtParser#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
  * @since 0.5.2
  */
 public interface CompressionCodecResolver {
+
     /**
-     * Examines the header and returns a CompressionCodec if it finds one that it recognizes.
+     * Looks for a JWT {@code calg} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+     * can use to decompress the JWT body.
+     *
      * @param header of the JWT
-     * @return CompressionCodec matching the "calg" header, or null if there is no "calg" header.
+     * @return CompressionCodec matching the {@code calg} header, or null if there is no {@code calg} header.
+     * @throws CompressionException if a {@code calg} header value is found and not supported.
      */
-    CompressionCodec resolveCompressionCodec(Header header);
+    CompressionCodec resolveCompressionCodec(Header header) throws CompressionException;
 
 }

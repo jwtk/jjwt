@@ -16,31 +16,40 @@
 package io.jsonwebtoken;
 
 /**
- * Defines how to compress and decompress byte arrays.
+ * Compresses and decompresses byte arrays according to a compression algorithm.
  *
- * @since 0.5.2
  * @see io.jsonwebtoken.impl.compression.DeflateCompressionCodec
  * @see io.jsonwebtoken.impl.compression.GzipCompressionCodec
+ * @since 0.5.2
  */
 public interface CompressionCodec {
 
     /**
-     * The algorithm name that would appear in the JWT header.
-     * @return the algorithm name that would appear in the JWT header
+     * The algorithm name to use as the JWT's {@code calg} header value.
+     *
+     * @return the algorithm name to use as the JWT's {@code calg} header value.
      */
     String getAlgorithmName();
 
     /**
-     * Takes a byte array and returns a compressed version.
+     * Compresses the specified byte array according to the compression {@link #getAlgorithmName() algorithm}.
+     *
      * @param payload bytes to compress
      * @return compressed bytes
+     * @throws CompressionException if the specified byte array cannot be compressed according to the compression
+     *                              {@link #getAlgorithmName() algorithm}.
      */
-    byte[] compress(byte[] payload);
+    byte[] compress(byte[] payload) throws CompressionException;
 
     /**
-     * Takes a compressed byte array and returns a decompressed version.
+     * Decompresses the specified compressed byte array according to the compression
+     * {@link #getAlgorithmName() algorithm}.  The specified byte array must already be in compressed form
+     * according to the {@link #getAlgorithmName() algorithm}.
+     *
      * @param compressed compressed bytes
      * @return decompressed bytes
+     * @throws CompressionException if the specified byte array cannot be decompressed according to the compression
+     *                              {@link #getAlgorithmName() algorithm}.
      */
-    byte[] decompress(byte[] compressed);
+    byte[] decompress(byte[] compressed) throws CompressionException;
 }

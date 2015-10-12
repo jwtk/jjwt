@@ -25,11 +25,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm
+ * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip compression algorithm</a>.
  *
  * @since 0.5.2
  */
-public class GzipCompressionCodec extends BaseCompressionCodec implements CompressionCodec {
+public class GzipCompressionCodec extends AbstractCompressionCodec implements CompressionCodec {
 
     private static final String GZIP = "GZIP";
 

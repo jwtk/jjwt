@@ -350,10 +350,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder signWith(SignatureAlgorithm alg, Key key);
 
     /**
-     * Compresses the JWT body using the {@link CompressionCodec} passed as argument.
+     * Compresses the JWT body using the specified {@link CompressionCodec}.
      *
-     * Note: Compression is not part of the Json Web Token specification and is not expected that other libraries (including
-     * older versions of this one) are able to consume a compressed JWT body correctly.
+     * <p>If your compact JWTs are large, and you want to reduce their total size during network transmission, this
+     * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
+     * certain length.  Using compression can help ensure the compact JWT fits within that length.  However, NOTE:</p>
+     *
+     * <p><b>WARNING:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
+     * (including JJWT versions < 0.5.2) are able to consume a compressed JWT body correctly.  Only use this method
+     * if you are sure that you will consume the JWT with JJWT >= 0.5.2 or another library that you know implements
+     * the same behavior.</p>
+     *
+     * @see io.jsonwebtoken.impl.compression.CompressionCodecs
      *
      * @param codec implementation of the {@link CompressionCodec} to be used.
      * @return the builder for method chaining.

@@ -22,8 +22,8 @@ import org.junit.Test
 /**
  * @since 0.5.2
  */
-class BaseCompressionCodecTest {
-    static class ExceptionThrowingCodec extends BaseCompressionCodec {
+class AbstractCompressionCodecTest {
+    static class ExceptionThrowingCodec extends AbstractCompressionCodec {
 
         @Override
         protected byte[] doCompress(byte[] payload) throws IOException {

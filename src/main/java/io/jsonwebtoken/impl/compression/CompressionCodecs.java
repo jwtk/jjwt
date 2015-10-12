@@ -18,20 +18,27 @@ package io.jsonwebtoken.impl.compression;
 import io.jsonwebtoken.CompressionCodec;
 
 /**
- * CompressionCodecs exposes default implementation of the {@link CompressionCodec} interface.
+ * Provides default implementations of the {@link CompressionCodec} interface.
+ *
+ * @see #DEFLATE
+ * @see #GZIP
  *
  * @since 0.5.2
  */
-public interface CompressionCodecs {
+public final class CompressionCodecs {
+
+    private static final CompressionCodecs I = new CompressionCodecs();
+
+    private CompressionCodecs(){} //prevent external instantiation
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate</a> compression algorithm
      */
-    CompressionCodec DEFLATE = new DeflateCompressionCodec();
+    public static final CompressionCodec DEFLATE = new DeflateCompressionCodec();
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm
      */
-    CompressionCodec GZIP = new GzipCompressionCodec();
+    public static final CompressionCodec GZIP = new GzipCompressionCodec();
 
 }
