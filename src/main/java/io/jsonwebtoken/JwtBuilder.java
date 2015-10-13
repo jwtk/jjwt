@@ -370,6 +370,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder compressWith(CompressionCodec codec);
 
     /**
+     * Builds the JWT.
+     *
+     * @return An expanded (not compact/serialized) JSON Web Token.
+     */
+    Jwt build();
+
+    /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the
      * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-7">JWT Compact Serialization</a>
      * rules.
