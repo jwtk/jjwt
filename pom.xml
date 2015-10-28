@@ -274,6 +274,8 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.7</version>
                 <configuration>
+                    <maxmem>256m</maxmem>
+                    <aggregate>true</aggregate>
                     <instrumentation>
                         <excludes>
                             <exclude>io/jsonwebtoken/lang/*.class</exclude>
@@ -319,6 +321,7 @@
                         </regexes>
                     </check>
                     <formats>
+                        <format>xml</format>
                         <format>html</format>
                     </formats>
                 </configuration>
@@ -363,6 +366,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.0.0</version>
             </plugin>
         </plugins>
     </build>
