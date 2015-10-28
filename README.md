@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
+[![Coverage Status](https://coveralls.io/repos/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/r/jwtk/jjwt?branch=master)
 
 # Java JWT: JSON Web Token for Java and Android
 
