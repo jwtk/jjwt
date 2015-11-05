@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.crypto.MacProvider
 import org.junit.Test
 
@@ -185,6 +186,26 @@ class DefaultJwtBuilderTest {
             assertEquals ise.cause.message, 'foo'
         }
 
+    }
+
+    @Test
+    void testCompactCompressionCodecJsonProcessingException() {
+        def b = new DefaultJwtBuilder() {
+            @Override
+            protected byte[] toJson(Object o) throws JsonProcessingException {
+                if (o instanceof DefaultJwsHeader) { return super.toJson(o) }
+                throw new JsonProcessingException('simulate json processing exception on claims')
+            }
+        }
+
+        def c = Jwts.claims().setSubject("Joe");
+
+        try {
+            b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals iae.message, 'Unable to serialize claims object to json.'
+        }
     }
 
     @Test
