@@ -58,8 +58,8 @@ class RsaSignerTest {
             new RsaSigner(SignatureAlgorithm.RS256, key);
             fail('RsaSigner should reject non RSAPrivateKey instances.')
         } catch (IllegalArgumentException expected) {
-            assertEquals expected.message, "RSA signatures must be computed using an RSAPrivateKey.  The specified key of type " +
-                    key.getClass().getName() + " is not an RSAPrivateKey.";
+            assertEquals expected.message, "RSA signatures must be computed using an RSA PrivateKey.  The specified key of type " +
+                    key.getClass().getName() + " is not an RSA PrivateKey.";
         }
     }
 
