@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec
 import java.security.InvalidKeyException
 import java.security.KeyPair
 import java.security.KeyPairGenerator
+import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
 
@@ -48,13 +49,45 @@ class RsaSignerTest {
     }
 
     @Test
-    void testConstructorWithoutRsaPrivateKey() {
+    void testConstructorWithoutPrivateKey() {
 
         byte[] bytes = new byte[16]
         rng.nextBytes(bytes)
         SecretKeySpec key = new SecretKeySpec(bytes, 'HmacSHA256')
 
         try {
+            //noinspection GroovyResultOfObjectAllocationIgnored
+            new RsaSigner(SignatureAlgorithm.RS256, key);
+            fail('RsaSigner should reject non RSAPrivateKey instances.')
+        } catch (IllegalArgumentException expected) {
+            assertEquals expected.message, "RSA signatures must be computed using an RSA PrivateKey.  The specified key of type " +
+                    key.getClass().getName() + " is not an RSA PrivateKey.";
+        }
+    }
+
+    @Test
+    void testConstructorWithoutRSAKey() {
+
+        //private key, but not an RSAKey instance:
+        PrivateKey key = new PrivateKey() {
+            @Override
+            String getAlgorithm() {
+                return null
+            }
+
+            @Override
+            String getFormat() {
+                return null
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return new byte[0]
+            }
+        }
+
+        try {
+            //noinspection GroovyResultOfObjectAllocationIgnored
             new RsaSigner(SignatureAlgorithm.RS256, key);
             fail('RsaSigner should reject non RSAPrivateKey instances.')
         } catch (IllegalArgumentException expected) {
@@ -125,5 +158,25 @@ class RsaSignerTest {
             assertEquals se.message, 'Unable to calculate signature using RSA PrivateKey. ' + msg
             assertSame se.cause, ex
         }
+    }
+
+    @Test
+    void testSignSuccessful() {
+
+        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+        keyGenerator.initialize(1024);
+
+        KeyPair kp = keyGenerator.genKeyPair();
+        PrivateKey privateKey = kp.getPrivate();
+
+        byte[] bytes = new byte[16]
+        rng.nextBytes(bytes)
+
+        RsaSigner signer = new RsaSigner(SignatureAlgorithm.RS256, privateKey);
+        byte[] out1 = signer.sign(bytes)
+
+        byte[] out2 = signer.sign(bytes)
+
+        assertTrue(MessageDigest.isEqual(out1, out2))
     }
 }
