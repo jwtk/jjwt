@@ -252,7 +252,24 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         return this;
     }
+    
+    /**
+     * Add custom claims to the jwt payload
+     * @param customClaims map containing custom claims
+     * @return JwtBuilder
+     */
+    public JwtBuilder appendCustomClaims(Map<String, Object> customClaims){
+        if(customClaims.isEmpty()){
+            throw new IllegalStateException("Claims cannot be empty");
+        } else {
+            for (Map.Entry<String, Object> c : customClaims.entrySet()){
+                claim(c.getKey(), c.getValue());
+            }
+        }
 
+        return this;
+    }
+    
     @Override
     public String compact() {
         if (payload == null && Collections.isEmpty(claims)) {
