@@ -64,6 +64,8 @@ public class DefaultJwtParser implements JwtParser {
     private Key key;
 
     private SigningKeyResolver signingKeyResolver;
+    
+    private long expirationExtension;
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
@@ -161,6 +163,12 @@ public class DefaultJwtParser implements JwtParser {
         this.compressionCodecResolver = compressionCodecResolver;
         return this;
     }
+    
+	@Override
+	public JwtParser setExpirationExtension(long expirationExtension) {
+		this.expirationExtension = expirationExtension;
+		return this;
+	}
 
     @Override
     public boolean isSigned(String jwt) {
@@ -346,28 +354,27 @@ public class DefaultJwtParser implements JwtParser {
         //since 0.3:
         if (claims != null) {
 
-            Date now = null;
             SimpleDateFormat sdf;
-
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
             Date exp = claims.getExpiration();
             if (exp != null) {
 
-                now = new Date();
-
-                if (now.equals(exp) || now.after(exp)) {
+                Date nowWithExtension = new Date(new Date().getTime()-expirationExtension);
+                
+                if (nowWithExtension.equals(exp) || nowWithExtension.after(exp)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
                     String expVal = sdf.format(exp);
-                    String nowVal = sdf.format(now);
+                    String nowVal = sdf.format(nowWithExtension);
 
-                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal;
+                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + " with " + expirationExtension + " milliseconds expiration extension.";
                     throw new ExpiredJwtException(header, claims, msg);
                 }
             }
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
             //token MUST NOT be accepted before any specified nbf time:
+            Date now = null;
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
 

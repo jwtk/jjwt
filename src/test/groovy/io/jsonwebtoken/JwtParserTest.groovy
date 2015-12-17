@@ -190,6 +190,32 @@ class JwtParserTest {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
     }
+    
+    @Test
+    void testParseWithExtendedExpirationJwt() {
+    
+        Date exp = new Date(System.currentTimeMillis() - 1000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+		Jwts.parser().setExpirationExtension(2000).parse(compact)
+
+    }
+    
+    @Test
+    void testParseWithExtendedExpirationButStillExpiredJwt() {
+    
+    	Date exp = new Date(System.currentTimeMillis() - 2000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        try {
+            Jwts.parser().setExpirationExtension(1000).parse(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }     
+    }
 
     // ========================================================================
     // parsePlaintextJwt tests
