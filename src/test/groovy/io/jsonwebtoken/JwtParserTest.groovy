@@ -194,27 +194,84 @@ class JwtParserTest {
     @Test
     void testParseWithExtendedExpirationJwt() {
     
-        Date exp = new Date(System.currentTimeMillis() - 1000)
+        Date exp = new Date(System.currentTimeMillis() - 10000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
-		Jwts.parser().setExpirationExtension(2000).parse(compact)
+		Jwts.parser().setExpirationExtensionMillis(20000).parse(compact)
 
     }
     
     @Test
     void testParseWithExtendedExpirationButStillExpiredJwt() {
     
-    	Date exp = new Date(System.currentTimeMillis() - 2000)
+    	Date exp = new Date(System.currentTimeMillis() - 20000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
-            Jwts.parser().setExpirationExtension(1000).parse(compact)
+            Jwts.parser().setExpirationExtensionMillis(10000).parse(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
         }     
+    }
+    
+    @Test
+    void testParseWithDriftTimeJwt() {
+    
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+		Jwts.parser().setDriftTimeMillis(10000).parse(compact)
+    
+        exp = new Date(System.currentTimeMillis() + 3000)
+
+        compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
+
+		Jwts.parser().setDriftTimeMillis(10000).parse(compact)
+    }
+    
+    @Test
+    void testParseWithDriftTimeButStillExpiredJwt() {
+    
+    	Date exp = new Date(System.currentTimeMillis() - 20000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        try {
+            Jwts.parser().setDriftTimeMillis(10000).parse(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }     
+    }
+    
+    @Test
+    void testParseWithDriftTimeButStillPrematureJwt() {
+    
+    	Date exp = new Date(System.currentTimeMillis() + 20000)
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
+
+        try {
+            Jwts.parser().setDriftTimeMillis(10000).parse(compact)
+            fail()
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+        }     
+    }
+    
+    @Test
+    void testParseWithDriftTimeAndExpirationExtensionJwt() {
+    
+        Date exp = new Date(System.currentTimeMillis() - 30000)
+		Date notBefore = new Date(System.currentTimeMillis() + 3000)
+		
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).setNotBefore(notBefore).compact()
+
+		Jwts.parser().setDriftTimeMillis(10000).setExpirationExtensionMillis(50000).parse(compact)
     }
 
     // ========================================================================

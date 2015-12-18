@@ -234,7 +234,16 @@ public interface JwtParser {
      * @return the parser for method chaining.
      * @since 0.7.0
      */
-    JwtParser setExpirationExtension(long expirationExtension);
+    JwtParser setExpirationExtensionMillis(long expirationExtensionMillis);
+    
+    /**
+     * Time skew for premature and expiration timeout. 
+     * 
+     * @param driftTimeMillis time skew in milliseconds
+     * @return the parser for method chaining.
+     * @since 0.7.0
+     */
+    JwtParser setDriftTimeMillis(long driftTimeMillis);
 
     /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}

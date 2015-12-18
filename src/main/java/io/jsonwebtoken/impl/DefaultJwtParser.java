@@ -65,7 +65,9 @@ public class DefaultJwtParser implements JwtParser {
 
     private SigningKeyResolver signingKeyResolver;
     
-    private long expirationExtension;
+    private long expirationExtensionMillis;
+    
+    private long driftTimeMillis;
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
@@ -165,8 +167,14 @@ public class DefaultJwtParser implements JwtParser {
     }
     
 	@Override
-	public JwtParser setExpirationExtension(long expirationExtension) {
-		this.expirationExtension = expirationExtension;
+	public JwtParser setExpirationExtensionMillis(long expirationExtensionMillis) {
+		this.expirationExtensionMillis = expirationExtensionMillis;
+		return this;
+	}
+	
+	@Override
+	public JwtParser setDriftTimeMillis(long driftTimeMillis) {
+		this.driftTimeMillis = driftTimeMillis;
 		return this;
 	}
 
@@ -360,32 +368,29 @@ public class DefaultJwtParser implements JwtParser {
             Date exp = claims.getExpiration();
             if (exp != null) {
 
-                Date nowWithExtension = new Date(new Date().getTime()-expirationExtension);
+                Date nowWithExtension = new Date(System.currentTimeMillis() - expirationExtensionMillis - driftTimeMillis);
                 
                 if (nowWithExtension.equals(exp) || nowWithExtension.after(exp)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
                     String expVal = sdf.format(exp);
                     String nowVal = sdf.format(nowWithExtension);
 
-                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + " with " + expirationExtension + " milliseconds expiration extension.";
+                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + " with " + expirationExtensionMillis + " milliseconds expiration extension.";
                     throw new ExpiredJwtException(header, claims, msg);
                 }
             }
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
             //token MUST NOT be accepted before any specified nbf time:
-            Date now = null;
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
 
-                if (now == null) {
-                    now = new Date();
-                }
+                Date nowWithDriftTime = new Date(System.currentTimeMillis() + driftTimeMillis);
 
-                if (now.before(nbf)) {
+                if (nowWithDriftTime.before(nbf)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
                     String nbfVal = sdf.format(nbf);
-                    String nowVal = sdf.format(now);
+                    String nowVal = sdf.format(nowWithDriftTime);
 
                     String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal;
                     throw new PrematureJwtException(header, claims, msg);
