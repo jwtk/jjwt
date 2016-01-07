@@ -28,6 +28,36 @@ public interface JwtParser {
     public static final char SEPARATOR_CHAR = '.';
 
     /**
+     * Do not validate the {@code exp} claim when parsing the JWT.
+     * <p>
+     * <p>Note that this circumvents security features of JWT.</p>
+     *
+     * @return the parser for method chaining.
+     * @see ExpiredJwtException
+     */
+    JwtParser ignoreExpiry();
+
+    /**
+     * Do not validate the {@code nbf} claim when parsing the JWT.
+     * <p>
+     * <p>Note that this circumvents security features of JWT.</p>
+
+     * @return the parser for method chaining.
+     * @see PrematureJwtException
+     */
+    JwtParser ignoreNotBefore();
+
+    /**
+     * Do not validate the JWS digital signature.
+     * <p>
+     * <p>Note that this circumvents security features of JWT and JWS.</p>
+     *
+     * @return the parser for method chaining.
+     * @see SignatureException
+     */
+    JwtParser ignoreSignature();
+
+    /**
      * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.

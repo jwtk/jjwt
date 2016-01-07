@@ -69,6 +69,33 @@ public class DefaultJwtParser implements JwtParser {
 
     Claims expectedClaims = new DefaultClaims();
 
+    private boolean ignoreExpiry = false;
+
+    private boolean ignoreNotBefore = false;
+
+    private boolean ignoreSignature = false;
+
+    @Override
+    public JwtParser ignoreExpiry() {
+        ignoreExpiry = true;
+
+        return this;
+    }
+
+    @Override
+    public JwtParser ignoreNotBefore() {
+        ignoreNotBefore = true;
+
+        return this;
+    }
+
+    @Override
+    public JwtParser ignoreSignature() {
+        ignoreSignature = true;
+
+        return this;
+    }
+
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
         expectedClaims.setIssuedAt(issuedAt);
@@ -265,7 +292,7 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Signature =================
-        if (base64UrlEncodedDigest != null) { //it is signed - validate the signature
+        if (base64UrlEncodedDigest != null && !ignoreSignature) { //it is signed - validate the signature
 
             JwsHeader jwsHeader = (JwsHeader) header;
 
@@ -352,7 +379,7 @@ public class DefaultJwtParser implements JwtParser {
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
             Date exp = claims.getExpiration();
-            if (exp != null) {
+            if (exp != null && !ignoreExpiry) {
 
                 now = new Date();
 
@@ -369,7 +396,7 @@ public class DefaultJwtParser implements JwtParser {
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
             //token MUST NOT be accepted before any specified nbf time:
             Date nbf = claims.getNotBefore();
-            if (nbf != null) {
+            if (nbf != null && !ignoreNotBefore) {
 
                 if (now == null) {
                     now = new Date();
