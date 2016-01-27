@@ -57,6 +57,7 @@ public class DefaultJwtParser implements JwtParser {
 
     //don't need millis since JWT date fields are only second granularity:
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    private static final int MILLISECONDS_PER_SECOND = 1000;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -71,6 +72,8 @@ public class DefaultJwtParser implements JwtParser {
     Claims expectedClaims = new DefaultClaims();
 
     private Clock clock = DefaultClock.INSTANCE;
+
+    private int allowedClockSkewInSeconds = 0;
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
@@ -134,6 +137,12 @@ public class DefaultJwtParser implements JwtParser {
     public JwtParser setClock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
+        return this;
+    }
+
+    @Override
+    public JwtParser setAllowedClockSkewInSeconds(int seconds) {
+        allowedClockSkewInSeconds = seconds;
         return this;
     }
 
@@ -356,6 +365,7 @@ public class DefaultJwtParser implements JwtParser {
         //since 0.3:
         if (claims != null) {
 
+            long allowedClockSkewInMilliseconds = (long) allowedClockSkewInSeconds * MILLISECONDS_PER_SECOND;
             SimpleDateFormat sdf;
 
             final Date now = this.clock.now();
@@ -365,12 +375,14 @@ public class DefaultJwtParser implements JwtParser {
             Date exp = claims.getExpiration();
             if (exp != null) {
 
-                if (now.equals(exp) || now.after(exp)) {
+                Date nowWithAllowedClockSkew = new Date(now.getTime() - allowedClockSkewInMilliseconds);
+                if (nowWithAllowedClockSkew.equals(exp) || nowWithAllowedClockSkew.after(exp)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
                     String expVal = sdf.format(exp);
                     String nowVal = sdf.format(now);
 
-                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal;
+                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal +
+                                 ". Allowed clock skew: " + allowedClockSkewInSeconds + " second(s).";
                     throw new ExpiredJwtException(header, claims, msg);
                 }
             }
@@ -380,12 +392,14 @@ public class DefaultJwtParser implements JwtParser {
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
 
-                if (now.before(nbf)) {
+                Date nowWithAllowedClockSkew = new Date(now.getTime() + allowedClockSkewInMilliseconds);
+                if (nowWithAllowedClockSkew.before(nbf)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
                     String nbfVal = sdf.format(nbf);
                     String nowVal = sdf.format(now);
 
-                    String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal;
+                    String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal +
+                                 ". Allowed clock skew: " + allowedClockSkewInSeconds + " second(s).";
                     throw new PrematureJwtException(header, claims, msg);
                 }
             }

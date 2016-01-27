@@ -137,6 +137,16 @@ public interface JwtParser {
     JwtParser setClock(Clock clock);
 
     /**
+     * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
+     * and {@code nbf} claims.
+     *
+     * @param seconds
+     * @return the parser for method chaining.
+     * @since 0.7.0
+     */
+    JwtParser setAllowedClockSkewInSeconds(int seconds);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      * <p>
