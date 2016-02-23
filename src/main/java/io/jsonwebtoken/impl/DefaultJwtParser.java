@@ -69,6 +69,8 @@ public class DefaultJwtParser implements JwtParser {
 
     Claims expectedClaims = new DefaultClaims();
 
+    private Date now = new Date();
+
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
         expectedClaims.setIssuedAt(issuedAt);
@@ -123,6 +125,17 @@ public class DefaultJwtParser implements JwtParser {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
         expectedClaims.put(claimName, value);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser setFixedClock(Date now) {
+        if (now == null) {
+            this.now = new Date();
+        } else {
+            this.now = now;
+        }
 
         return this;
     }
@@ -346,15 +359,12 @@ public class DefaultJwtParser implements JwtParser {
         //since 0.3:
         if (claims != null) {
 
-            Date now = null;
             SimpleDateFormat sdf;
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
             Date exp = claims.getExpiration();
             if (exp != null) {
-
-                now = new Date();
 
                 if (now.equals(exp) || now.after(exp)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
@@ -370,10 +380,6 @@ public class DefaultJwtParser implements JwtParser {
             //token MUST NOT be accepted before any specified nbf time:
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
-
-                if (now == null) {
-                    now = new Date();
-                }
 
                 if (now.before(nbf)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);

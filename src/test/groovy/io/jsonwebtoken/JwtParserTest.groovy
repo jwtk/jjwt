@@ -1392,4 +1392,15 @@ class JwtParserTest {
             )
         }
     }
+
+    @Test
+    void testParseClockManipulation() {
+        def then = System.currentTimeMillis() - 1000
+        Date expiry = new Date(then)
+        Date beforeExpiry = new Date(then - 1000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
+
+        Jwts.parser().setFixedClock(beforeExpiry).parse(compact)
+    }
 }
