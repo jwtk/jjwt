@@ -48,6 +48,9 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     /** JWT {@code Content Type} header parameter name: <code>"cty"</code> */
     public static final String CONTENT_TYPE = "cty";
 
+    /** JWT {@code Compression Algorithm} header parameter name: <code>"calg"</code> */
+    public static final String COMPRESSION_ALGORITHM = "calg";
+
     /**
      * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
      * <code>typ</code></a> (type) header value or {@code null} if not present.
@@ -99,5 +102,26 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
      */
     T setContentType(String cty);
+
+    /**
+     * Returns the JWT <code>calg</code> (Compression Algorithm) header value or {@code null} if not present.
+     *
+     * @return the {@code calg} header parameter value or {@code null} if not present.
+     * @since 0.6.0
+     */
+    String getCompressionAlgorithm();
+
+    /**
+     * Sets the JWT <code>calg</code> (Compression Algorithm) header parameter value. A {@code null} value will remove
+     * the property from the JSON map.
+     * <p>
+     * <p>The compression algorithm is NOT part of the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25>JWT specification</a>
+     * and must be used carefully since, is not expected that other libraries (including previous versions of this one)
+     * be able to deserialize a compressed JTW body correctly. </p>
+     *
+     * @param calg the JWT compression algorithm {@code calg} value or {@code null} to remove the property from the JSON map.
+     * @since 0.6.0
+     */
+    T setCompressionAlgorithm(String calg);
 
 }

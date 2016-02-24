@@ -22,15 +22,17 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAKey;
 
 public class RsaSigner extends RsaProvider implements Signer {
 
     public RsaSigner(SignatureAlgorithm alg, Key key) {
         super(alg, key);
-        if (!(key instanceof RSAPrivateKey)) {
-            String msg = "RSA signatures must be computed using an RSAPrivateKey.  The specified key of type " +
-                         key.getClass().getName() + " is not an RSAPrivateKey.";
+        // https://github.com/jwtk/jjwt/issues/68
+        // Instead of checking for an instance of RSAPrivateKey, check for PrivateKey and RSAKey:
+        if (!(key instanceof PrivateKey && key instanceof RSAKey)) {
+            String msg = "RSA signatures must be computed using an RSA PrivateKey.  The specified key of type " +
+                         key.getClass().getName() + " is not an RSA PrivateKey.";
             throw new IllegalArgumentException(msg);
         }
     }

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.lang;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
@@ -905,4 +907,19 @@ public abstract class Objects {
         return sb.toString();
     }
 
+    public static void nullSafeClose(Closeable... closeables) {
+        if (closeables == null) {
+            return;
+        }
+
+        for (Closeable closeable : closeables) {
+            if (closeable != null) {
+                try {
+                    closeable.close();
+                } catch (IOException e) {
+                    //Ignore the exception during close.
+                }
+            }
+        }
+    }
 }

@@ -16,21 +16,28 @@
 package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.IncorrectClaimException;
+import io.jsonwebtoken.InvalidClaimException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.lang.Assert;
@@ -58,6 +65,68 @@ public class DefaultJwtParser implements JwtParser {
 
     private SigningKeyResolver signingKeyResolver;
 
+    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+
+    Claims expectedClaims = new DefaultClaims();
+
+    @Override
+    public JwtParser requireIssuedAt(Date issuedAt) {
+        expectedClaims.setIssuedAt(issuedAt);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireIssuer(String issuer) {
+        expectedClaims.setIssuer(issuer);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireAudience(String audience) {
+        expectedClaims.setAudience(audience);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireSubject(String subject) {
+        expectedClaims.setSubject(subject);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireId(String id) {
+        expectedClaims.setId(id);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireExpiration(Date expiration) {
+        expectedClaims.setExpiration(expiration);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser requireNotBefore(Date notBefore) {
+        expectedClaims.setNotBefore(notBefore);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser require(String claimName, Object value) {
+        Assert.hasText(claimName, "claim name cannot be null or empty.");
+        Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
+        expectedClaims.put(claimName, value);
+
+        return this;
+    }
+
     @Override
     public JwtParser setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
@@ -83,6 +152,13 @@ public class DefaultJwtParser implements JwtParser {
     public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
         Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
         this.signingKeyResolver = signingKeyResolver;
+        return this;
+    }
+
+    @Override
+    public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
+        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
+        this.compressionCodecResolver = compressionCodecResolver;
         return this;
     }
 
@@ -157,6 +233,8 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Header =================
         Header header = null;
 
+        CompressionCodec compressionCodec = null;
+
         if (base64UrlEncodedHeader != null) {
             String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
             Map<String, Object> m = readValue(origValue);
@@ -166,10 +244,18 @@ public class DefaultJwtParser implements JwtParser {
             } else {
                 header = new DefaultHeader(m);
             }
+
+            compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
         }
 
         // =============== Body =================
-        String payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        String payload;
+        if (compressionCodec != null) {
+            byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
+            payload = new String(decompressed, Strings.UTF_8);
+        } else {
+            payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+        }
 
         Claims claims = null;
 
@@ -298,6 +384,8 @@ public class DefaultJwtParser implements JwtParser {
                     throw new PrematureJwtException(header, claims, msg);
                 }
             }
+
+            validateExpectedClaims(header, claims);
         }
 
         Object body = claims != null ? claims : payload;
@@ -306,6 +394,51 @@ public class DefaultJwtParser implements JwtParser {
             return new DefaultJws<Object>((JwsHeader) header, body, base64UrlEncodedDigest);
         } else {
             return new DefaultJwt<Object>(header, body);
+        }
+    }
+
+    private void validateExpectedClaims(Header header, Claims claims) {
+        for (String expectedClaimName : expectedClaims.keySet()) {
+
+            Object expectedClaimValue = expectedClaims.get(expectedClaimName);
+            Object actualClaimValue = claims.get(expectedClaimName);
+
+            if (
+                Claims.ISSUED_AT.equals(expectedClaimName) ||
+                Claims.EXPIRATION.equals(expectedClaimName) ||
+                Claims.NOT_BEFORE.equals(expectedClaimName)
+            ) {
+                expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
+                actualClaimValue = claims.get(expectedClaimName, Date.class);
+            } else if (
+                expectedClaimValue instanceof Date &&
+                actualClaimValue != null &&
+                actualClaimValue instanceof Long
+            ) {
+                actualClaimValue = new Date((Long)actualClaimValue);
+            }
+
+            InvalidClaimException invalidClaimException = null;
+
+            if (actualClaimValue == null) {
+                String msg = String.format(
+                    ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                    expectedClaimName, expectedClaimValue
+                );
+                invalidClaimException = new MissingClaimException(header, claims, msg);
+            } else if (!expectedClaimValue.equals(actualClaimValue)) {
+                String msg = String.format(
+                    ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                    expectedClaimName, expectedClaimValue, actualClaimValue
+                );
+                invalidClaimException = new IncorrectClaimException(header, claims, msg);
+            }
+
+            if (invalidClaimException != null) {
+                invalidClaimException.setClaimName(expectedClaimName);
+                invalidClaimException.setClaimValue(expectedClaimValue);
+                throw invalidClaimException;
+            }
         }
     }
 

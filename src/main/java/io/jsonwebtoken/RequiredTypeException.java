@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.crypto;
+package io.jsonwebtoken;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-
-import java.security.Key;
-import java.security.MessageDigest;
-import java.util.Arrays;
-
-public class MacValidator implements SignatureValidator {
-
-    private final MacSigner signer;
-
-    public MacValidator(SignatureAlgorithm alg, Key key) {
-        this.signer = new MacSigner(alg, key);
+/**
+ * Exception thrown when {@link Claims#get(String, Class)} is called and the value does not match the type of the
+ * {@code Class} argument.
+ *
+ * @since 0.6
+ */
+public class RequiredTypeException extends JwtException {
+    public RequiredTypeException(String message) {
+        super(message);
     }
 
-    @Override
-    public boolean isValid(byte[] data, byte[] signature) {
-        byte[] computed = this.signer.sign(data);
-        return MessageDigest.isEqual(computed, signature);
+    public RequiredTypeException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

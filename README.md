@@ -1,10 +1,11 @@
 [![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
+[![Coverage Status](https://coveralls.io/repos/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/r/jwtk/jjwt?branch=master)
 
 # Java JWT: JSON Web Token for Java and Android
 
 JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM.
 
-JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25), [JWS](https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-31), [JWE](https://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-31) and [JWA](https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31) RFC draft specifications.
+JJWT is a 'clean room' implementation based solely on the [JWT](https://tools.ietf.org/html/rfc7519), [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications.
 
 ## Installation
 
@@ -16,7 +17,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.5.1</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -24,7 +25,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.5.1'
+    compile 'io.jsonwebtoken:jjwt:0.6.0'
 }
 ```
 
@@ -62,7 +63,7 @@ But what if signature validation failed?  You can catch `SignatureException` and
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parse(compactJwt);
+    Jwts.parser().setSigningKey(key).parseClaimsJws(compactJwt);
 
     //OK, we can trust this JWT
 
@@ -107,6 +108,88 @@ These feature sets will be implemented in a future release when possible.  Commu
 Maintained by [Stormpath](https://stormpath.com/)
 
 ## Release Notes
+
+### 0.6.0
+
+#### Enforce JWT Claims when Parsing
+
+You can now enforce that JWT claims have expected values when parsing a compact JWT string.
+
+For example, let's say that you require that the JWT you are parsing has a specific `sub` (subject) value,
+otherwise you may not trust the token.  You can do that by using one of the `require` methods on the parser builder:
+
+```java
+try {
+    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+} catch(InvalidClaimException ice) {
+    // the sub field was missing or did not have a 'jsmith' value
+}
+```
+
+If it is important to react to a missing vs an incorrect value, instead of catching `InvalidClaimException`, you can catch either `MissingClaimException` or `IncorrectClaimException`:
+
+```java
+try {
+    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+} catch(MissingClaimException mce) {
+    // the parsed JWT did not have the sub field
+} catch(IncorrectClaimException ice) {
+    // the parsed JWT had a sub field, but its value was not equal to 'jsmith'
+}
+```
+
+You can also require custom fields by using the `require(fieldName, requiredFieldValue)` method - for example:
+
+```java
+try {
+    Jwts.parser().require("myfield", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
+} catch(InvalidClaimException ice) {
+    // the 'myfield' field was missing or did not have a 'myRequiredValue' value
+}
+```
+(or, again, you could catch either MissingClaimException or IncorrectClaimException instead)
+
+#### Body Compression
+
+**This feature is NOT JWT specification compliant**, *but it can be very useful when you parse your own tokens*.
+
+If your JWT body is large and you have size restrictions (for example, if embedding a JWT in a URL and the URL must be under a certain length for legacy browsers or mail user agents), you may now compress the JWT body using a `CompressionCodec`:
+
+```java
+Jwts.builder().claim("foo", "someReallyLongDataString...")
+    .compressWith(CompressionCodecs.DEFLATE) // or CompressionCodecs.GZIP
+    .signWith(SignatureAlgorithm.HS256, key)
+    .compact();
+```
+
+This will set a new `calg` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
+
+The default parser implementation will automatically decompress DEFLATE or GZIP compressed bodies, so you don't need to set anything on the parser - it looks like normal:
+
+```java
+Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
+```
+
+##### Custom Compression Algorithms
+
+If the DEFLATE or GZIP algorithms are not sufficient for your needs, you can specify your own Compression algorithms by implementing the `CompressionCodec` interface and setting it on the parser:
+
+```java
+Jwts.builder().claim("foo", "someReallyLongDataString...")
+    .compressWith(new MyCompressionCodec())
+    .signWith(SignatureAlgorithm.HS256, key)
+    .compact();
+```
+
+You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `calg` header and return your custom codec when discovered:
+
+```java
+Jwts.parser().setSigningKey(key)
+    .setCompressionCodecResolver(new MyCustomCompressionCodecResolver())
+    .parseClaimsJws(compact);
+```
+
+*NOTE*: Because body compression is not JWT specification compliant, you should only enable compression if both your JWT builder and parser are JJWT versions >= 0.6.0, or if you're using another library that implements the exact same functionality.  This feature is best reserved for your own use cases - where you both create and later parse the tokens.  It will likely cause problems if you compressed a token and expected a 3rd party (who doesn't use JJWT) to parse the token.
 
 ### 0.5.1
 

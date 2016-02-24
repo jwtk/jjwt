@@ -37,4 +37,9 @@ public class DefaultJwt<B> implements Jwt<Header,B> {
     public B getBody() {
         return body;
     }
+
+    @Override
+    public String toString() {
+        return "header=" + header + ",body=" + body;
+    }
 }

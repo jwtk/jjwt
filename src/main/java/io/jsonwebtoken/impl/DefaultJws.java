@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 
-public class DefaultJws<B> implements Jws {
+public class DefaultJws<B> implements Jws<B> {
 
     private final JwsHeader header;
     private final B body;
@@ -43,5 +43,10 @@ public class DefaultJws<B> implements Jws {
     @Override
     public String getSignature() {
         return this.signature;
+    }
+
+    @Override
+    public String toString() {
+        return "header=" + header + ",body=" + body + ",signature=" + signature;
     }
 }
