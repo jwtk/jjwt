@@ -18,8 +18,10 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.DefaultClock;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.IncorrectClaimException;
@@ -69,7 +71,7 @@ public class DefaultJwtParser implements JwtParser {
 
     Claims expectedClaims = new DefaultClaims();
 
-    private Date now = new Date();
+    private Clock clock = new DefaultClock();
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
@@ -130,11 +132,11 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public JwtParser setFixedClock(Date now) {
-        if (now == null) {
-            this.now = new Date();
+    public JwtParser setClock(Clock clock) {
+        if (clock == null) {
+            this.clock = new DefaultClock();
         } else {
-            this.now = now;
+            this.clock = clock;
         }
 
         return this;
@@ -360,6 +362,8 @@ public class DefaultJwtParser implements JwtParser {
         if (claims != null) {
 
             SimpleDateFormat sdf;
+
+            final Date now = this.clock.now();
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
