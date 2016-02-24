@@ -29,7 +29,7 @@ dependencies {
 }
 ```
 
-Release changes are viewable in the [change log](https://github.com/jwtk/jjwt/blob/master/changelog.md)
+Release changes are viewable in the [change log](changelog.md)
 
 Note: JJWT depends on Jackson 2.x.  If you're already using an older version of Jackson in your app, [read this](#olderJackson)
 
