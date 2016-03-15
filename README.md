@@ -108,10 +108,7 @@ These feature sets will be implemented in a future release when possible.  Commu
 - [Use JWT the Right Way!](https://stormpath.com/blog/jwt-the-right-way/)
 - [Token Authentication for Java Applications](https://stormpath.com/blog/token-auth-for-java/)
 
-## Author
-
-Maintained by [Stormpath](https://stormpath.com/)
-
+<a name="olderJackson"></a>
 #### Already using an older Jackson dependency?
 
 JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson version in your own application less than 2.x, for example 1.9.x, you will likely see [runtime errors](https://github.com/jwtk/jjwt/issues/1).  To avoid this, you should change your project build configuration to explicitly point to a 2.x version of Jackson.  For example:
@@ -123,6 +120,10 @@ JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson ve
     <version>2.4.2</version>
 </dependency>
 ```
+
+## Author
+
+Maintained by [Stormpath](https://stormpath.com/)
 
 ## Licensing
 
