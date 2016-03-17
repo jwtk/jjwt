@@ -98,6 +98,14 @@ try {
 
 These feature sets will be implemented in a future release when possible.  Community contributions are welcome!
 
+## Learn More
+
+- [JSON Web Token for Java and Android](https://stormpath.com/blog/jjwt-how-it-works-why/)
+- [How to Create and Verify JWTs in Java](https://stormpath.com/blog/jwt-java-create-verify/)
+- [Where to Store Your JWTs - Cookies vs HTML5 Web Storage](https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage/)
+- [Use JWT the Right Way!](https://stormpath.com/blog/jwt-the-right-way/)
+- [Token Authentication for Java Applications](https://stormpath.com/blog/token-auth-for-java/)
+
 ## Release Notes
 
 ### 0.6.0
@@ -355,3 +363,11 @@ JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson ve
     <version>2.4.2</version>
 </dependency>
 ```
+
+## Author
+
+Maintained by [Stormpath](https://stormpath.com/)
+
+## Licensing
+
+This project is open-source via the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
