@@ -228,6 +228,24 @@ public interface JwtParser {
     JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
 
     /**
+     * In some cases you need to accept a token even after it is expired.
+     * 
+     * @param expirationExtension in milliseconds
+     * @return the parser for method chaining.
+     * @since 0.7.0
+     */
+    JwtParser setExpirationExtensionMillis(long expirationExtensionMillis);
+    
+    /**
+     * Time skew for premature and expiration timeout. 
+     * 
+     * @param driftTimeMillis time skew in milliseconds
+     * @return the parser for method chaining.
+     * @since 0.7.0
+     */
+    JwtParser setDriftTimeMillis(long driftTimeMillis);
+
+    /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      * <p>
