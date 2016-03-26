@@ -309,11 +309,8 @@ public class DefaultJwtParser implements JwtParser {
 
                 if (!Objects.isEmpty(keyBytes)) {
 
-                    Assert.isTrue(!algorithm.isRsa(),
-                                  "Key bytes cannot be specified for RSA signatures.  Please specify a PublicKey or PrivateKey instance.");
-
-                    Assert.isTrue(!algorithm.isEllipticCurve(),
-                                  "Key bytes cannot be specified for ECDSA signatures.  Please specify a PublicKey instance.");
+                    Assert.isTrue(algorithm.isHmac(),
+                                  "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
 
                     key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
                 }
