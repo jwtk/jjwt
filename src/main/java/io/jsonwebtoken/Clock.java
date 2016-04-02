@@ -1,7 +1,5 @@
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.impl.DefaultClock;
-
 import java.util.Date;
 
 /**
@@ -10,8 +8,6 @@ import java.util.Date;
  * @since 0.7.0
  */
 public interface Clock {
-
-    public static final Clock DEFAULT = new DefaultClock();
 
     /**
      * Returns the clock's current timestamp at the instant the method is invoked.

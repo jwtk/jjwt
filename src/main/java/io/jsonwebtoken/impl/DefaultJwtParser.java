@@ -70,7 +70,7 @@ public class DefaultJwtParser implements JwtParser {
 
     Claims expectedClaims = new DefaultClaims();
 
-    private Clock clock = Clock.DEFAULT;
+    private Clock clock = DefaultClock.INSTANCE;
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
