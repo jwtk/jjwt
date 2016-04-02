@@ -21,7 +21,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
-import io.jsonwebtoken.DefaultClock;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.IncorrectClaimException;
@@ -71,7 +70,7 @@ public class DefaultJwtParser implements JwtParser {
 
     Claims expectedClaims = new DefaultClaims();
 
-    private Clock clock = new DefaultClock();
+    private Clock clock = Clock.DEFAULT;
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
@@ -133,12 +132,8 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public JwtParser setClock(Clock clock) {
-        if (clock == null) {
-            this.clock = new DefaultClock();
-        } else {
-            this.clock = clock;
-        }
-
+        Assert.notNull(clock, "Clock instance cannot be null.");
+        this.clock = clock;
         return this;
     }
 

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.impl.DefaultClock;
+
 import java.security.Key;
 import java.util.Date;
 
@@ -125,11 +127,12 @@ public interface JwtParser {
     JwtParser require(String claimName, Object value);
 
     /**
-     * Replace the {@code clock} used by the parser to determine the current time-of-day to use when validating
-     * the parsed JWT. If {@code null}, will reset the behavior to use the system clock.
+     * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
+     * The parser uses a {@link DefaultClock DefaultClock} instance by default.
      *
-     * @param clock a {@code Clock} object to return the time-of-day or {@code null}
+     * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the builder instance for method chaining.
+     * @since 0.7.0
      */
     JwtParser setClock(Clock clock);
 

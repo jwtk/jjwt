@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.impl.DefaultClock
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.TextCodec
 import org.junit.Test
@@ -1407,15 +1408,11 @@ class JwtParserTest {
 
     @Test
     void testParseClockManipulationWithNullClock() {
-        Date expiry = new Date(System.currentTimeMillis() - 1000)
-
-        String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
-
+        JwtParser parser = Jwts.parser();
         try {
-            Jwts.parser().setClock(null).parse(compact)
+            parser.setClock(null)
             fail()
-        } catch (ExpiredJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT expired at ')
+        } catch (IllegalArgumentException expected) {
         }
     }
 
