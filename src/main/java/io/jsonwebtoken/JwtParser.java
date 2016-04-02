@@ -125,6 +125,15 @@ public interface JwtParser {
     JwtParser require(String claimName, Object value);
 
     /**
+     * Replace the {@code clock} used by the parser to determine the current time-of-day to use when validating
+     * the parsed JWT. If {@code null}, will reset the behavior to use the system clock.
+     *
+     * @param clock a {@code Clock} object to return the time-of-day or {@code null}
+     * @return the builder instance for method chaining.
+     */
+    JwtParser setClock(Clock clock);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      * <p>

@@ -18,8 +18,10 @@ package io.jsonwebtoken.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.DefaultClock;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.IncorrectClaimException;
@@ -68,6 +70,8 @@ public class DefaultJwtParser implements JwtParser {
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
     Claims expectedClaims = new DefaultClaims();
+
+    private Clock clock = new DefaultClock();
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
@@ -123,6 +127,17 @@ public class DefaultJwtParser implements JwtParser {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
         expectedClaims.put(claimName, value);
+
+        return this;
+    }
+
+    @Override
+    public JwtParser setClock(Clock clock) {
+        if (clock == null) {
+            this.clock = new DefaultClock();
+        } else {
+            this.clock = clock;
+        }
 
         return this;
     }
@@ -346,15 +361,14 @@ public class DefaultJwtParser implements JwtParser {
         //since 0.3:
         if (claims != null) {
 
-            Date now = null;
             SimpleDateFormat sdf;
+
+            final Date now = this.clock.now();
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
             Date exp = claims.getExpiration();
             if (exp != null) {
-
-                now = new Date();
 
                 if (now.equals(exp) || now.after(exp)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
@@ -370,10 +384,6 @@ public class DefaultJwtParser implements JwtParser {
             //token MUST NOT be accepted before any specified nbf time:
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
-
-                if (now == null) {
-                    now = new Date();
-                }
 
                 if (now.before(nbf)) {
                     sdf = new SimpleDateFormat(ISO_8601_FORMAT);
