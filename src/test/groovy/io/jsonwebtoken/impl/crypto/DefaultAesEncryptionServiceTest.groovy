@@ -200,4 +200,82 @@ class DefaultAesEncryptionServiceTest {
 
         assertEquals(PLAINTEXT, decryptedPlaintext);
     }
+
+    @Test
+    void testEncryptWithEmptyAdditionalAuthenticatedData() {
+
+        def service = new DefaultAesEncryptionService(generateKey());
+
+        def ereq = new DummyEncryptionRequest(plaintext: PLAINTEXT_BYTES)
+
+        def eres = service.encrypt(ereq)
+
+        assertTrue eres instanceof DefaultEncryptionResult
+        assertFalse eres instanceof AuthenticatedEncryptionResult
+
+        DecryptionRequest dreq = DecryptionRequests.builder()
+                .setInitializationVector(eres.getInitializationVector())
+                .setCiphertext(eres.getCiphertext())
+                .build()
+
+        def decryptedPlaintextBytes = service.decrypt(dreq)
+
+        def decryptedPlaintext = new String(decryptedPlaintextBytes, Charsets.UTF_8);
+
+        assertEquals(PLAINTEXT, decryptedPlaintext);
+    }
+
+    @Test
+    void testDecryptWithSpecifiedKey() {
+
+        def key = generateKey()
+
+        def service = new DefaultAesEncryptionService(key);
+
+        EncryptionRequest ereq = EncryptionRequests.builder()
+                .setPlaintext(PLAINTEXT_BYTES)
+                .build()
+
+        def eres = service.encrypt(ereq)
+
+        assertTrue eres instanceof DefaultEncryptionResult
+        assertFalse eres instanceof AuthenticatedEncryptionResult
+
+        DecryptionRequest dreq = DecryptionRequests.builder()
+                .setKey(key)
+                .setInitializationVector(eres.getInitializationVector())
+                .setCiphertext(eres.getCiphertext())
+                .build()
+
+        def decryptedPlaintextBytes = service.decrypt(dreq)
+
+        def decryptedPlaintext = new String(decryptedPlaintextBytes, Charsets.UTF_8);
+
+        assertEquals(PLAINTEXT, decryptedPlaintext);
+    }
+
+    private static class DummyEncryptionRequest implements EncryptionRequest, AssociatedDataSource {
+
+        byte[] plaintext;
+
+        @Override
+        byte[] getAssociatedData() {
+            return new byte[0]
+        }
+
+        @Override
+        byte[] getPlaintext() {
+            return this.plaintext
+        }
+
+        @Override
+        byte[] getKey() {
+            return null
+        }
+
+        @Override
+        byte[] getInitializationVector() {
+            return null
+        }
+    }
 }

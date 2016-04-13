@@ -26,6 +26,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import static io.jsonwebtoken.lang.Arrays.length;
+
 /**
  * Default {@link EncryptionService} implementation that uses AES in GCM mode.
  */
@@ -118,7 +120,7 @@ public class DefaultAesEncryptionService implements EncryptionService {
 
         //Ensure IV:
         byte[] iv = req.getInitializationVector();
-        int ivLength = Arrays.length(iv);
+        int ivLength = length(iv);
         if (ivLength == 0) {
             iv = new byte[GCM_NONCE_SIZE]; //for AES GCM, the IV is often called the nonce
             random.nextBytes(iv);
@@ -127,7 +129,7 @@ public class DefaultAesEncryptionService implements EncryptionService {
         //Ensure Key:
         SecretKey key = this.key;
         byte[] keyBytes = req.getKey();
-        int keyBytesLength = Arrays.length(keyBytes);
+        int keyBytesLength = length(keyBytes);
         if (keyBytesLength > 0) {
             key = new SecretKeySpec(keyBytes, "AES");
         }
@@ -138,7 +140,7 @@ public class DefaultAesEncryptionService implements EncryptionService {
         int aadLength = 0;
         if (req instanceof AssociatedDataSource) {
             byte[] aad = ((AssociatedDataSource) req).getAssociatedData();
-            aadLength = Arrays.length(aad);
+            aadLength = length(aad);
             if (aadLength > 0) {
                 aesGcm.updateAAD(aad);
             }
@@ -187,7 +189,8 @@ public class DefaultAesEncryptionService implements EncryptionService {
         //Ensure Key:
         SecretKey key = this.key;
         byte[] keyBytes = req.getKey();
-        if (keyBytes != null && keyBytes.length > 0) {
+        int keyLen = length(keyBytes);
+        if (keyLen > 0) {
             key = new SecretKeySpec(keyBytes, "AES");
         }
 
@@ -202,7 +205,7 @@ public class DefaultAesEncryptionService implements EncryptionService {
             AuthenticatedDecryptionRequest areq = (AuthenticatedDecryptionRequest) req;
 
             byte[] aad = areq.getAssociatedData();
-            Assert.notEmpty(aad, "AuthenticatedDecryptionRRequests must include Additional Authenticated Data.");
+            Assert.notEmpty(aad, "AuthenticatedDecryptionRequests must include Additional Authenticated Data.");
 
             aesGcm.updateAAD(aad);
 
@@ -210,7 +213,7 @@ public class DefaultAesEncryptionService implements EncryptionService {
             //byte array.  So we'll append it here:
 
             byte[] tag = areq.getAuthenticationTag();
-            Assert.notEmpty(tag, "AuthenticatedDecryptionReqeusts must include an authentication tag.");
+            Assert.notEmpty(tag, "AuthenticatedDecryptionRequests must include an authentication tag.");
 
             byte[] taggedCiphertext = new byte[ciphertext.length + tag.length];
             System.arraycopy(ciphertext, 0, taggedCiphertext, 0, ciphertext.length);

@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
-import static io.jsonwebtoken.lang.Arrays.length;
+import static io.jsonwebtoken.lang.Arrays.clean;
 
 public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder {
 
@@ -28,13 +28,13 @@ public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder
 
     @Override
     public EncryptionRequestBuilder setInitializationVector(byte[] iv) {
-        this.iv = length(iv) > 0 ? iv : null;
+        this.iv = clean(iv);
         return this;
     }
 
     @Override
     public EncryptionRequestBuilder setKey(byte[] key) {
-        this.key = length(key) > 0 ? key : null;
+        this.key = clean(key);
         return this;
     }
 
@@ -47,7 +47,7 @@ public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder
 
     @Override
     public EncryptionRequestBuilder setAdditionalAuthenticatedData(byte[] aad) {
-        this.aad = length(aad) > 0 ? aad : null;
+        this.aad = clean(aad);
         return this;
     }
 
@@ -55,7 +55,7 @@ public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder
     public EncryptionRequest build() {
         Assert.notEmpty(plaintext, "Plaintext cannot be null or empty.");
 
-        if (length(aad) > 0) {
+        if (aad != null) {
             return new DefaultAuthenticatedEncryptionRequest(key, iv, plaintext, aad);
         }
 

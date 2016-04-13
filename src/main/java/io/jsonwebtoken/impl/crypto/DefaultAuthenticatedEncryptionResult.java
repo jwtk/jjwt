@@ -54,8 +54,6 @@ public class DefaultAuthenticatedEncryptionResult extends DefaultEncryptionResul
         System.arraycopy(ciphertext, 0, output, ivLength, ciphertextLength);
 
         //tag can never be empty based on the assertion in the constructor
-        assert tagLength > 0;
-
         System.arraycopy(tag, 0, output, ivLength + ciphertextLength, tagLength);
 
         return output;

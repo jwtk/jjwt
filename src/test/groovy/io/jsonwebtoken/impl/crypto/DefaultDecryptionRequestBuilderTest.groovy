@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.crypto
 
 import org.junit.Test
+
 import static org.junit.Assert.*
 
 class DefaultDecryptionRequestBuilderTest {
@@ -24,6 +25,22 @@ class DefaultDecryptionRequestBuilderTest {
         byte[] data = new byte[32];
         new Random().nextBytes(data) //does not need to be secure for this test
         return data;
+    }
+
+    @Test
+    void testWithoutAadAndWithoutTag() {
+
+        def key = generateData()
+        def iv = generateData()
+        def ciphertext = generateData()
+
+        def req = new DefaultDecryptionRequestBuilder()
+                .setKey(key).setInitializationVector(iv).setCiphertext(ciphertext).build()
+
+        assertTrue req instanceof DefaultDecryptionRequest
+        assertSame key, req.getKey()
+        assertSame iv, req.getInitializationVector()
+        assertSame ciphertext, req.getCiphertext()
     }
 
     @Test
@@ -46,5 +63,29 @@ class DefaultDecryptionRequestBuilderTest {
         } catch (IllegalArgumentException expected) {
             assertEquals(DefaultDecryptionRequestBuilder.TAG_NEEDS_AAD_MSG, expected.getMessage())
         }
+    }
+
+    @Test
+    void testSetInitializationVectorWithEmptyArray() {
+        def b = new DefaultDecryptionRequestBuilder().setInitializationVector(new byte[0])
+        assertNull b.iv
+    }
+
+    @Test
+    void testSetKeyWithEmptyArray() {
+        def b = new DefaultDecryptionRequestBuilder().setKey(new byte[0])
+        assertNull b.key
+    }
+
+    @Test
+    void testSetAdditionalAuthenticatedDataWithEmptyArray() {
+        def b = new DefaultDecryptionRequestBuilder().setAdditionalAuthenticatedData(new byte[0])
+        assertNull b.aad
+    }
+
+    @Test
+    void testSetAuthenticationTagWithEmptyArray() {
+        def b = new DefaultDecryptionRequestBuilder().setAuthenticationTag(new byte[0])
+        assertNull b.tag
     }
 }

@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
-import static io.jsonwebtoken.lang.Arrays.length;
+import static io.jsonwebtoken.lang.Arrays.clean;
 
 public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder {
 
@@ -36,13 +36,13 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
 
     @Override
     public DecryptionRequestBuilder setInitializationVector(byte[] iv) {
-        this.iv = length(iv) > 0 ? iv : null;
+        this.iv = clean(iv);
         return this;
     }
 
     @Override
     public DecryptionRequestBuilder setKey(byte[] key) {
-        this.key = length(key) > 0 ? key : null;
+        this.key = clean(key);
         return this;
     }
 
@@ -54,13 +54,13 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
 
     @Override
     public DecryptionRequestBuilder setAdditionalAuthenticatedData(byte[] aad) {
-        this.aad = length(aad) > 0 ? aad : null;
+        this.aad = clean(aad);
         return this;
     }
 
     @Override
     public DecryptionRequestBuilder setAuthenticationTag(byte[] tag) {
-        this.tag = length(tag) > 0 ? tag : null;
+        this.tag = clean(tag);
         return this;
     }
 
@@ -68,19 +68,17 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
     public DecryptionRequest build() {
         Assert.notEmpty(ciphertext, "Ciphertext cannot be null or empty.");
 
-        int aadLength = length(aad);
-        int tagLength = length(tag);
-
-        if (aadLength > 0 && tagLength == 0) {
+        if (aad != null && tag == null) {
             String msg = AAD_NEEDS_TAG_MSG;
             throw new IllegalArgumentException(msg);
         }
-        if (tagLength > 0 && aadLength == 0) {
+
+        if (tag != null && aad == null) {
             String msg = TAG_NEEDS_AAD_MSG;
             throw new IllegalArgumentException(msg);
         }
 
-        if (aadLength > 0 || tagLength > 0) {
+        if (aad != null) {
             return new DefaultAuthenticatedDecryptionRequest(key, iv, ciphertext, aad, tag);
         }
 

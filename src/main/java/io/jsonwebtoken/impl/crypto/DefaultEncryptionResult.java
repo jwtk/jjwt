@@ -43,14 +43,15 @@ public class DefaultEncryptionResult implements EncryptionResult {
     @Override
     public byte[] compact() {
 
-        int ivLength = length(iv);
-        int ciphertextLength = length(ciphertext);
-
-        int outputLength = ivLength + ciphertextLength;
-
         byte[] output = ciphertext; //default
 
+        int ivLength = length(iv);
+
         if (ivLength > 0) {
+
+            int ciphertextLength = length(ciphertext);
+
+            int outputLength = ivLength + ciphertextLength;
 
             output = new byte[outputLength];
 

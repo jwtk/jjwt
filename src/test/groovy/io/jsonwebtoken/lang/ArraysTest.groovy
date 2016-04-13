@@ -7,6 +7,22 @@ import static org.junit.Assert.*
 class ArraysTest {
 
     @Test
+    void testCleanWithNull() {
+        assertNull Arrays.clean(null)
+    }
+
+    @Test
+    void testCleanWithEmpty() {
+        assertNull Arrays.clean(new byte[0])
+    }
+
+    @Test
+    void testCleanWithElements() {
+        byte[] bytes = "hello".getBytes(Charsets.UTF_8)
+        assertSame bytes, Arrays.clean(bytes)
+    }
+
+    @Test
     void testByteArrayLengthWithNull() {
         assertEquals 0, Arrays.length(null)
     }
