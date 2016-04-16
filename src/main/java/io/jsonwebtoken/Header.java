@@ -48,8 +48,12 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     /** JWT {@code Content Type} header parameter name: <code>"cty"</code> */
     public static final String CONTENT_TYPE = "cty";
 
-    /** JWT {@code Compression Algorithm} header parameter name: <code>"calg"</code> */
-    public static final String COMPRESSION_ALGORITHM = "calg";
+    /** JWT {@code Compression Algorithm} header parameter name: <code>"zip"</code> */
+    public static final String COMPRESSION_ALGORITHM = "zip";
+
+    /** JJWT legacy/deprecated {@code Compression Algorithm} header parameter names <code>"calg"</code>
+     * @deprecated use {@link #COMPRESSION_ALGORITHM} instead. */
+    public static final String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
     /**
      * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
@@ -104,24 +108,38 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     T setContentType(String cty);
 
     /**
-     * Returns the JWT <code>calg</code> (Compression Algorithm) header value or {@code null} if not present.
+     * Returns the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
+     * (Compression Algorithm) header parameter value or {@code null} if not present.
      *
-     * @return the {@code calg} header parameter value or {@code null} if not present.
+     * <h5>Compatiblity Note</h5>
+     *
+     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE (Json Web Encryption)
+     * specification, JJWT will also support compression for JWS as well if you choose to use it.  However,
+     * be aware that <b>if you use
+     * compression when creating a JWS token, other libraries may not be able to parse the JWS</b>. Compression when
+     * creating JWE tokens however should be universally accepted for any library that supports JWE.</p>
+     *
+     * @return the {@code zip} header parameter value or {@code null} if not present.
      * @since 0.6.0
      */
     String getCompressionAlgorithm();
 
     /**
-     * Sets the JWT <code>calg</code> (Compression Algorithm) header parameter value. A {@code null} value will remove
+     * Sets the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
+     * (Compression Algorithm) header parameter value. A {@code null} value will remove
      * the property from the JSON map.
-     * <p>
-     * <p>The compression algorithm is NOT part of the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25>JWT specification</a>
-     * and must be used carefully since, is not expected that other libraries (including previous versions of this one)
-     * be able to deserialize a compressed JTW body correctly. </p>
      *
-     * @param calg the JWT compression algorithm {@code calg} value or {@code null} to remove the property from the JSON map.
+     * <h5>Compatiblity Note</h5>
+     *
+     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE (Json Web Encryption)
+     * specification, JJWT will also support compression for JWS as well if you choose to use it.  However,
+     * be aware that <b>if you use
+     * compression when creating a JWS token, other libraries may not be able to parse the JWS</b>. Compression when
+     * creating JWE tokens however should be universally accepted for any library that supports JWE.</p>
+     *
+     * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the JSON map.
      * @since 0.6.0
      */
-    T setCompressionAlgorithm(String calg);
+    T setCompressionAlgorithm(String zip);
 
 }

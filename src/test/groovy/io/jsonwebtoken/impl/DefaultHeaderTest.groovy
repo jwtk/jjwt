@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.Header
 import org.junit.Test
 import static org.junit.Assert.*
 
@@ -36,5 +37,12 @@ class DefaultHeaderTest {
 
         h.setContentType('bar')
         assertEquals h.getContentType(), 'bar'
+    }
+
+    @Test
+    void testBackwardsCompatibleCompressionHeader() {
+        def h = new DefaultHeader()
+        h.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
+        assertEquals "DEF", h.getCompressionAlgorithm()
     }
 }

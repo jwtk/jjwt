@@ -25,7 +25,6 @@ import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.impl.crypto.RsaProvider
-import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -106,7 +105,7 @@ class JwtsTest {
     @Test
     void testParsePlaintextToken() {
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
         String jwt = Jwts.builder().setClaims(claims).compact();
 
@@ -194,7 +193,6 @@ class JwtsTest {
     @Test
     void testWithInvalidCompressionAlgorithm() {
         try {
-
             Jwts.builder().setHeaderParam(Header.COMPRESSION_ALGORITHM, "CUSTOM").setId("andId").compact()
         } catch (CompressionException e) {
             assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
@@ -433,6 +431,7 @@ class JwtsTest {
         assertEquals "hello this is an amazing jwt", claims.state
 
     }
+
     @Test(expected = CompressionException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
         byte[] key = MacProvider.generateKey().getEncoded()
@@ -583,7 +582,7 @@ class JwtsTest {
 
         //Now strip off the signature so we can add it back in later on a forged token:
         int i = compact.lastIndexOf('.');
-        String signature = compact.substring(i+1);
+        String signature = compact.substring(i + 1);
 
         //now let's create a fake header and payload with whatever we want (without signing):
         String forged = Jwts.builder().setSubject("Not Joe").compact();
@@ -702,13 +701,13 @@ class JwtsTest {
         }
     }
 
-    static void testRsa(SignatureAlgorithm alg, int keySize=1024, boolean verifyWithPrivateKey=false) {
+    static void testRsa(SignatureAlgorithm alg, int keySize = 1024, boolean verifyWithPrivateKey = false) {
 
         KeyPair kp = RsaProvider.generateKeyPair(keySize)
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact();
 
@@ -728,7 +727,7 @@ class JwtsTest {
         //create random signing key for testing:
         byte[] key = MacProvider.generateKey().encoded
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, key).compact();
 
@@ -739,13 +738,13 @@ class JwtsTest {
         assert token.body == claims
     }
 
-    static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey=false) {
+    static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
         KeyPair pair = EllipticCurveProvider.generateKeyPair(alg)
         PublicKey publicKey = pair.getPublic()
         PrivateKey privateKey = pair.getPrivate()
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root':true]
+        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
         String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact();
 
