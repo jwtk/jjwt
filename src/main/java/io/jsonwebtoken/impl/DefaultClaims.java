@@ -23,6 +23,8 @@ import java.util.Map;
 
 public class DefaultClaims extends JwtMap implements Claims {
 
+    private static final DefaultClaims INSTANCE = new DefaultClaims();
+
     public DefaultClaims() {
         super();
     }
