@@ -51,8 +51,9 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     /** JWT {@code Compression Algorithm} header parameter name: <code>"zip"</code> */
     public static final String COMPRESSION_ALGORITHM = "zip";
 
-    /** JJWT legacy/deprecated {@code Compression Algorithm} header parameter names <code>"calg"</code>
+    /** JJWT legacy/deprecated compression algorithm header parameter name: <code>"calg"</code>
      * @deprecated use {@link #COMPRESSION_ALGORITHM} instead. */
+    @Deprecated
     public static final String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
     /**
