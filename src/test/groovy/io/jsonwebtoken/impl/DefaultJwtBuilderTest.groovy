@@ -279,4 +279,25 @@ class DefaultJwtBuilderTest {
         assertNull b.claims
     }
 
+    @Test
+    void testSetNullExpirationWithNullClaims() {
+        def b = new DefaultJwtBuilder()
+        b.setExpiration(null)
+        assertNull b.claims
+    }
+
+    @Test
+    void testSetNullNotBeforeWithNullClaims() {
+        def b = new DefaultJwtBuilder()
+        b.setNotBefore(null)
+        assertNull b.claims
+    }
+
+    @Test
+    void testSetNullIssuedAtWithNullClaims() {
+        def b = new DefaultJwtBuilder()
+        b.setIssuedAt(null)
+        assertNull b.claims
+    }
+
 }
