@@ -23,12 +23,13 @@ package io.jsonwebtoken.lang;
  */
 public class UnknownClassException extends RuntimeException {
 
+    /*
     /**
      * Creates a new UnknownClassException.
-     */
+     *
     public UnknownClassException() {
         super();
-    }
+    }*/
 
     /**
      * Constructs a new UnknownClassException.
@@ -39,11 +40,11 @@ public class UnknownClassException extends RuntimeException {
         super(message);
     }
 
-    /**
+    /*
      * Constructs a new UnknownClassException.
      *
      * @param cause the underlying Throwable that caused this exception to be thrown.
-     */
+     *
     public UnknownClassException(Throwable cause) {
         super(cause);
     }
@@ -53,9 +54,10 @@ public class UnknownClassException extends RuntimeException {
      *
      * @param message the reason for the exception
      * @param cause   the underlying Throwable that caused this exception to be thrown.
-     */
+     *
     public UnknownClassException(String message, Throwable cause) {
         super(message, cause);
     }
+    */
 
 }

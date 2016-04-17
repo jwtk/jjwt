@@ -278,19 +278,23 @@
                     <aggregate>true</aggregate>
                     <instrumentation>
                         <excludes>
-                            <exclude>io/jsonwebtoken/lang/*.class</exclude>
+                            <exclude>io.jsonwebtoken.lang.*</exclude>
                         </excludes>
-                        <ignores>
-                            <ignore>io.jsonwebtoken.lang.*</ignore>
-                        </ignores>
                     </instrumentation>
                     <check>
                         <lineRate>100</lineRate>
                         <branchRate>100</branchRate>
-                        <packageLineRate>100</packageLineRate>
-                        <packageBranchRate>100</packageBranchRate>
+                        <!-- <packageLineRate>100</packageLineRate>
+                        <packageBranchRate>100</packageBranchRate> -->
                         <haltOnFailure>true</haltOnFailure>
                         <regexes>
+                            <regex>
+                                <!-- This was pulled in from another project (without pulling in the tests) -
+                                     we don't care about coverage here really.: -->
+                                <pattern>io.jsonwebtoken.lang.*</pattern>
+                                <branchRate>0</branchRate>
+                                <lineRate>0</lineRate>
+                            </regex>
                             <regex>
                                 <!-- Cannot get to 100% on DefaultClaims because of Cobertura bug w/ generics:
                                      https://github.com/cobertura/cobertura/issues/207 -->

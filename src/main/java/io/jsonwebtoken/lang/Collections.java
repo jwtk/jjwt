@@ -24,7 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public abstract class Collections {
+public final class Collections {
+
+    //for code coverage
+    private static final Collections INSTANCE = new Collections();
+
+    private Collections(){}
 
     /**
      * Return <code>true</code> if the supplied Collection is <code>null</code>

@@ -5,6 +5,7 @@ package io.jsonwebtoken.lang;
  */
 public final class Arrays {
 
+    //for code coverage
     private static final Arrays INSTANCE = new Arrays();
 
     private Arrays(){}

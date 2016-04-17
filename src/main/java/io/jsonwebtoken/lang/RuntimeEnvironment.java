@@ -19,7 +19,11 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RuntimeEnvironment {
+public final class RuntimeEnvironment {
+
+    private static final RuntimeEnvironment INSTANCE = new RuntimeEnvironment();
+
+    private RuntimeEnvironment(){}
 
     private static final String BC_PROVIDER_CLASS_NAME = "org.bouncycastle.jce.provider.BouncyCastleProvider";
 

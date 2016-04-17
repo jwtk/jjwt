@@ -29,7 +29,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-public abstract class Strings {
+public final class Strings {
+
+    private static final Strings INSTANCE = new Strings(); //for code coverage
 
     private static final String FOLDER_SEPARATOR = "/";
 
@@ -42,6 +44,8 @@ public abstract class Strings {
     private static final char EXTENSION_SEPARATOR = '.';
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
+
+    private Strings(){}
 
     //---------------------------------------------------------------------
     // General convenience methods for working with Strings

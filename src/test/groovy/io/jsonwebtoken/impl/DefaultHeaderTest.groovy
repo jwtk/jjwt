@@ -40,6 +40,13 @@ class DefaultHeaderTest {
     }
 
     @Test
+    void testSetCompressionAlgorithm() {
+        def h = new DefaultHeader()
+        h.setCompressionAlgorithm("DEF")
+        assertEquals "DEF", h.getCompressionAlgorithm()
+    }
+
+    @Test
     void testBackwardsCompatibleCompressionHeader() {
         def h = new DefaultHeader()
         h.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
