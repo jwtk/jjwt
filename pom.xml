@@ -304,12 +304,12 @@
                             </regex>
                             <regex>
                                 <pattern>io.jsonwebtoken.impl.DefaultJwtBuilder</pattern>
-                                <lineRate>93</lineRate>
+                                <lineRate>100</lineRate>
                                 <branchRate>95</branchRate>
                             </regex>
                             <regex>
                                 <pattern>io.jsonwebtoken.impl.DefaultJwtParser</pattern>
-                                <lineRate>97</lineRate>
+                                <lineRate>100</lineRate>
                                 <branchRate>90</branchRate>
                             </regex>
                         </regexes>
