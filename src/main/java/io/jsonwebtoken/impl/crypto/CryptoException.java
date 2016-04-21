@@ -15,7 +15,13 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
-public class CryptoException extends RuntimeException {
+import io.jsonwebtoken.JwtException;
+
+public class CryptoException extends JwtException {
+
+    public CryptoException(String message) {
+        super(message);
+    }
 
     public CryptoException(String message, Throwable cause) {
         super(message, cause);

@@ -17,6 +17,8 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.security.SecureRandom;
+
 import static io.jsonwebtoken.lang.Arrays.clean;
 
 public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder {
@@ -25,14 +27,18 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
                                                    "decryption, you must also specify the authentication tag " +
                                                    "computed during encryption.";
 
-    public static final String TAG_NEEDS_AAD_MSG = "If you specify an authentication tag during decryption, you must " +
-                                                   "also specify the additional authenticated data used " +
-                                                   "during encryption.";
+    private SecureRandom secureRandom;
     private byte[] iv;
     private byte[] key;
     private byte[] ciphertext;
     private byte[] aad;
     private byte[] tag;
+
+    @Override
+    public DecryptionRequestBuilder setSecureRandom(SecureRandom secureRandom) {
+        this.secureRandom = secureRandom;
+        return this;
+    }
 
     @Override
     public DecryptionRequestBuilder setInitializationVector(byte[] iv) {
@@ -73,16 +79,11 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
             throw new IllegalArgumentException(msg);
         }
 
-        if (tag != null && aad == null) {
-            String msg = TAG_NEEDS_AAD_MSG;
-            throw new IllegalArgumentException(msg);
+        if (aad != null || tag != null) {
+            return new DefaultAuthenticatedDecryptionRequest(secureRandom, key, iv, ciphertext, aad, tag);
         }
 
-        if (aad != null) {
-            return new DefaultAuthenticatedDecryptionRequest(key, iv, ciphertext, aad, tag);
-        }
-
-        return new DefaultDecryptionRequest(key, iv, ciphertext);
+        return new DefaultDecryptionRequest(secureRandom, key, iv, ciphertext);
     }
 
 }

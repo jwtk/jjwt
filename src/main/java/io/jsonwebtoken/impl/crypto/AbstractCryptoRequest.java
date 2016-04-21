@@ -15,14 +15,23 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
+import java.security.SecureRandom;
+
 public abstract class AbstractCryptoRequest implements CryptoRequest {
 
+    private final SecureRandom random;
     private final byte[] key;
     private final byte[] iv;
 
-    public AbstractCryptoRequest(byte[] key, byte[] iv) {
+    public AbstractCryptoRequest(SecureRandom random, byte[] key, byte[] iv) {
+        this.random = random;
         this.key = key;
         this.iv = iv;
+    }
+
+    @Override
+    public SecureRandom getSecureRandom() {
+        return this.random;
     }
 
     @Override

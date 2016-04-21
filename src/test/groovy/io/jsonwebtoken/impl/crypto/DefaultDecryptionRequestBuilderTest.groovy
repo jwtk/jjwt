@@ -55,17 +55,6 @@ class DefaultDecryptionRequestBuilderTest {
     }
 
     @Test
-    void testTagWithoutAad() {
-        try {
-            new DefaultDecryptionRequestBuilder().setCiphertext(generateData())
-                    .setAuthenticationTag(generateData()).build()
-            fail()
-        } catch (IllegalArgumentException expected) {
-            assertEquals(DefaultDecryptionRequestBuilder.TAG_NEEDS_AAD_MSG, expected.getMessage())
-        }
-    }
-
-    @Test
     void testSetInitializationVectorWithEmptyArray() {
         def b = new DefaultDecryptionRequestBuilder().setInitializationVector(new byte[0])
         assertNull b.iv

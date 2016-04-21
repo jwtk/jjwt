@@ -17,13 +17,15 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.security.SecureRandom;
+
 public class DefaultAuthenticatedEncryptionRequest extends DefaultEncryptionRequest
     implements AuthenticatedEncryptionRequest {
 
     private final byte[] aad;
 
-    public DefaultAuthenticatedEncryptionRequest(byte[] key, byte[] iv, byte[] plaintext, byte[] aad) {
-        super(key, iv, plaintext);
+    public DefaultAuthenticatedEncryptionRequest(SecureRandom secureRandom, byte[] key, byte[] iv, byte[] plaintext, byte[] aad) {
+        super(secureRandom, key, iv, plaintext);
         Assert.notEmpty(aad, "Additional Authenticated Data cannot be null or empty.");
         this.aad = aad;
     }

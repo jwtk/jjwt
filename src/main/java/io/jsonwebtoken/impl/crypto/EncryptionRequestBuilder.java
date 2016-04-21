@@ -15,7 +15,11 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
+import java.security.SecureRandom;
+
 public interface EncryptionRequestBuilder {
+
+    EncryptionRequestBuilder setSecureRandom(SecureRandom secureRandom);
 
     EncryptionRequestBuilder setInitializationVector(byte[] iv);
 

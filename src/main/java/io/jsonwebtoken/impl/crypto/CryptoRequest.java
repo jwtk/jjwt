@@ -15,10 +15,41 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
+import java.security.SecureRandom;
+
+/**
+ * @since 0.7.0
+ */
 public interface CryptoRequest {
 
+    /**
+     * Returns the {@code SecureRandom} to use when performing cryptographic operations when processing the request, or
+     * {@code null} if a default {@link SecureRandom} should be used.
+     *
+     * @return the {@code SecureRandom} to use when performing cryptographic operations when processing the request, or
+     * {@code null} if a default {@link SecureRandom} should be used.
+     */
+    SecureRandom getSecureRandom();
+
+    /**
+     * Returns the encryption key to use for encryption or decryption depending on the type of request.
+     *
+     * @return the encryption key to use for encryption or decryption depending on the type of request.
+     */
     byte[] getKey();
 
+    /**
+     * Returns the initialization vector to use during encryption or decryption depending on the type of request.
+     * <p>
+     * <p>If this value is {@code null} on an {@link EncryptionRequest}, a default initialization vector will be
+     * auto-generated, as it is never safe to use most cryptographic algorithms without initialization vectors
+     * (such as AES).</p>
+     * <p>
+     * <p>This implies that all decryption requests must always supply an initialization vector since encryption
+     * will always have one.</p>
+     *
+     * @return the initialization vector to use during encryption or decryption depending on the type of request.
+     */
     byte[] getInitializationVector();
 
 }

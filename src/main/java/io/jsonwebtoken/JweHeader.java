@@ -63,4 +63,30 @@ public interface JweHeader<T extends JweHeader<T>> extends Header<T> {
      */
     public static final String CRITICAL = "crit";
 
+    /**
+     * Returns the JWE Key Management
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header value or {@code null} if not present.
+     * <p>For a JWE, the algorithm header parameter identifies the cryptographic algorithm used to encrypt or
+     * determine the value of the Content Encryption Key (CEK).  The encrypted content is not usable if the
+     * <code>alg</code> value does not represent a supported algorithm, or if the recipient does not have a key
+     * that can be used with that algorithm.</p>
+     *
+     * @return the JWE Key Management Algorithm header value or {@code null} if not present.  This will always be
+     * {@code non-null} on validly constructed JWE instances, but could be {@code null} during construction.
+     */
+    KeyManagementAlgorithm getKeyManagementAlgorithm();
+
+    /**
+     * Sets the JWE Key Management
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header value.
+     * A {@code null} value will remove the property from the JSON map.
+     * <p>For a JWE, the algorithm header parameter identifies the cryptographic algorithm used to encrypt or
+     * determine the value of the Content Encryption Key (CEK).  The encrypted content is not usable if the
+     * <code>alg</code> value does not represent a supported algorithm, or if the recipient does not have a key
+     * that can be used with that algorithm.</p>
+     *
+     * @return the JWE Key Management Algorithm header value or {@code null} if not present.  This will always be
+     * {@code non-null} on validly constructed JWE instances, but could be {@code null} during construction.
+     */
+    T setKeyManagementAlgorithm(KeyManagementAlgorithm alg);
 }

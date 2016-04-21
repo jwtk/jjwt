@@ -17,14 +17,23 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.security.SecureRandom;
+
 import static io.jsonwebtoken.lang.Arrays.clean;
 
 public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder {
 
+    private SecureRandom secureRandom;
     private byte[] iv;
     private byte[] key;
     private byte[] plaintext;
     private byte[] aad;
+
+    @Override
+    public EncryptionRequestBuilder setSecureRandom(SecureRandom secureRandom) {
+        this.secureRandom = secureRandom;
+        return this;
+    }
 
     @Override
     public EncryptionRequestBuilder setInitializationVector(byte[] iv) {
@@ -56,9 +65,9 @@ public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder
         Assert.notEmpty(plaintext, "Plaintext cannot be null or empty.");
 
         if (aad != null) {
-            return new DefaultAuthenticatedEncryptionRequest(key, iv, plaintext, aad);
+            return new DefaultAuthenticatedEncryptionRequest(secureRandom, key, iv, plaintext, aad);
         }
 
-        return new DefaultEncryptionRequest(key, iv, plaintext);
+        return new DefaultEncryptionRequest(secureRandom, key, iv, plaintext);
     }
 }

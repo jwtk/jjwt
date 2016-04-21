@@ -259,6 +259,11 @@ class DefaultAesEncryptionServiceTest {
         byte[] plaintext;
 
         @Override
+        SecureRandom getSecureRandom() {
+            return null;
+        }
+
+        @Override
         byte[] getAssociatedData() {
             return new byte[0]
         }

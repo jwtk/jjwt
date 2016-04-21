@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.*;
@@ -31,6 +30,7 @@ import static io.jsonwebtoken.lang.Arrays.length;
 /**
  * Default {@link EncryptionService} implementation that uses AES in GCM mode.
  */
+@SuppressWarnings("Duplicates")
 public class DefaultAesEncryptionService implements EncryptionService {
 
     private static final int GCM_TAG_SIZE = 16; //number of bytes, not bits. Highest for GCM is 128 bits and recommended
@@ -41,9 +41,21 @@ public class DefaultAesEncryptionService implements EncryptionService {
             "requests that do not include initialization vectors.  AES " +
             "ciphertext without an IV is weak and should never be used.";
 
+    private static final byte[] RANDOM_KEY; //TODO: remove this concept
+
+    static {
+        byte[] key = new byte[32];
+        DEFAULT_RANDOM.nextBytes(key);
+        RANDOM_KEY = key;
+    }
+
     private final SecretKey key;
 
     private final SecureRandom random;
+
+    public DefaultAesEncryptionService() {
+        this(RANDOM_KEY, DEFAULT_RANDOM);
+    }
 
     public DefaultAesEncryptionService(byte[] key) {
         this(key, DEFAULT_RANDOM);
