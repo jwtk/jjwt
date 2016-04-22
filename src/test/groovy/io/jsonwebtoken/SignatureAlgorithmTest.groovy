@@ -112,4 +112,11 @@ class SignatureAlgorithmTest {
             }
         }
     }
+
+    @Test
+    void testToString() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            assertEquals alg.value, alg.toString()
+        }
+    }
 }

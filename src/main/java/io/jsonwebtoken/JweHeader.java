@@ -74,7 +74,7 @@ public interface JweHeader<T extends JweHeader<T>> extends Header<T> {
      * @return the JWE Key Management Algorithm header value or {@code null} if not present.  This will always be
      * {@code non-null} on validly constructed JWE instances, but could be {@code null} during construction.
      */
-    KeyManagementAlgorithm getKeyManagementAlgorithm();
+    KeyManagementAlgorithmName getKeyManagementAlgorithm();
 
     /**
      * Sets the JWE Key Management
@@ -88,5 +88,5 @@ public interface JweHeader<T extends JweHeader<T>> extends Header<T> {
      * @return the JWE Key Management Algorithm header value or {@code null} if not present.  This will always be
      * {@code non-null} on validly constructed JWE instances, but could be {@code null} during construction.
      */
-    T setKeyManagementAlgorithm(KeyManagementAlgorithm alg);
+    T setKeyManagementAlgorithm(KeyManagementAlgorithmName alg);
 }

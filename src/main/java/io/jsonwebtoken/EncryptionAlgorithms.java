@@ -1,6 +1,6 @@
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.impl.crypto.AesEncryptionAlgorithm;
+import io.jsonwebtoken.impl.crypto.AbstractAesEncryptionAlgorithm;
 import io.jsonwebtoken.impl.crypto.GcmAesEncryptionAlgorithm;
 import io.jsonwebtoken.impl.crypto.HmacAesEncryptionAlgorithm;
 import io.jsonwebtoken.lang.Collections;
@@ -8,6 +8,12 @@ import io.jsonwebtoken.lang.Collections;
 import java.util.List;
 
 public final class EncryptionAlgorithms {
+
+    //for code coverage only
+    private static final EncryptionAlgorithms INSTANCE = new EncryptionAlgorithms();
+
+    //prevent instantiation
+    private EncryptionAlgorithms(){}
 
     public static final HmacAesEncryptionAlgorithm A128CBC_HS256 =
             new HmacAesEncryptionAlgorithm(EncryptionAlgorithmName.A128CBC_HS256.getValue(), SignatureAlgorithm.HS256);
@@ -27,6 +33,6 @@ public final class EncryptionAlgorithms {
     public static final GcmAesEncryptionAlgorithm A256GCM =
             new GcmAesEncryptionAlgorithm(EncryptionAlgorithmName.A256GCM.getValue(), 32);
 
-    public static List<? extends AesEncryptionAlgorithm> VALUES =
+    public static List<? extends AbstractAesEncryptionAlgorithm> VALUES =
             Collections.of(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512, A128GCM, A192GCM, A256GCM);
 }

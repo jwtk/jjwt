@@ -29,7 +29,7 @@ public class DefaultJweFactory {
                              EncryptionAlgorithm encryptionAlgorithm, DecryptionKeyResolver decryptionKeyResolver) {
         Assert.notNull(base64UrlCodec, "Base64Url TextCodec cannot be null.");
         Assert.notNull(serializationCodec, "SerializationCodec cannot be null.");
-        Assert.notNull(encryptionAlgorithm, "EncryptionService cannot be null.");
+        Assert.notNull(encryptionAlgorithm, "EncryptionAlgorithm cannot be null.");
         Assert.notNull(decryptionKeyResolver, "DecryptionKeyResolver cannot be null.");
         this.serializationCodec = serializationCodec;
         this.encryptionAlgorithm = encryptionAlgorithm;

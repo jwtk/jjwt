@@ -289,6 +289,30 @@
                         <haltOnFailure>true</haltOnFailure>
                         <regexes>
                             <regex>
+                                <!-- Work in progress: -->
+                                <pattern>io.jsonwebtoken.impl.serialization.*</pattern>
+                                <branchRate>0</branchRate>
+                                <lineRate>0</lineRate>
+                            </regex>
+                            <regex>
+                                <!-- Work in progress: -->
+                                <pattern>io.jsonwebtoken.impl.DefaultJweFactory</pattern>
+                                <branchRate>0</branchRate>
+                                <lineRate>0</lineRate>
+                            </regex>
+                            <regex>
+                                <!-- Work in progress: -->
+                                <pattern>io.jsonwebtoken.impl.DefaultJweHeader</pattern>
+                                <branchRate>0</branchRate>
+                                <lineRate>0</lineRate>
+                            </regex>
+                            <regex>
+                                <!-- Work in progress: -->
+                                <pattern>io.jsonwebtoken.impl.DispatchingParser</pattern>
+                                <branchRate>0</branchRate>
+                                <lineRate>0</lineRate>
+                            </regex>
+                            <regex>
                                 <!-- This was pulled in from another project (without pulling in the tests) -
                                      we don't care about coverage here really.: -->
                                 <pattern>io.jsonwebtoken.lang.*</pattern>

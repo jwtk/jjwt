@@ -17,14 +17,12 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
-import java.security.SecureRandom;
-
 public class DefaultDecryptionRequest extends AbstractCryptoRequest implements DecryptionRequest {
 
     private final byte[] ciphertext;
 
-    public DefaultDecryptionRequest(SecureRandom secureRandom, byte[] key, byte[] iv, byte[] ciphertext) {
-        super(secureRandom, key, iv);
+    public DefaultDecryptionRequest(byte[] key, byte[] iv, byte[] ciphertext) {
+        super(key, iv);
         Assert.notEmpty(ciphertext, "ciphertext cannot be null or empty.");
         this.ciphertext = ciphertext;
     }

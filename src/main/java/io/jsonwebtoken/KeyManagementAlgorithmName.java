@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @since 0.7.0
  */
-public enum KeyManagementAlgorithm {
+public enum KeyManagementAlgorithmName {
 
     RSA1_5("RSA1_5", "RSAES-PKCS1-v1_5", Collections.<String>emptyList(), "RSA/ECB/PKCS1Padding"),
     RSA_OAEP("RSA-OAEP", "RSAES OAEP using default parameters", Collections.<String>emptyList(), "RSA/ECB/OAEPWithSHA-1AndMGF1Padding"),
@@ -36,7 +36,7 @@ public enum KeyManagementAlgorithm {
     private final List<String> moreHeaderParams;
     private final String jcaName;
 
-    KeyManagementAlgorithm(String value, String description, List<String> moreHeaderParams, String jcaName) {
+    KeyManagementAlgorithmName(String value, String description, List<String> moreHeaderParams, String jcaName) {
         this.value = value;
         this.description = description;
         this.moreHeaderParams = moreHeaderParams;
@@ -82,22 +82,22 @@ public enum KeyManagementAlgorithm {
     }
 
     /**
-     * Returns the corresponding {@code KeyManagementAlgorithm} enum instance based on a
+     * Returns the corresponding {@code KeyManagementAlgorithmName} enum instance based on a
      * case-<em>insensitive</em> name comparison of the specified JWE <code>alg</code> value.
      *
      * @param name the case-insensitive JWE <code>alg</code> header value.
-     * @return Returns the corresponding {@code KeyManagementAlgorithm} enum instance based on a
+     * @return Returns the corresponding {@code KeyManagementAlgorithmName} enum instance based on a
      * case-<em>insensitive</em> name comparison of the specified JWE <code>alg</code> value.
-     * @throws CryptoException if the specified value does not match any JWE {@code KeyManagementAlgorithm} value.
+     * @throws CryptoException if the specified value does not match any JWE {@code KeyManagementAlgorithmName} value.
      */
-    public static KeyManagementAlgorithm forName(String name) throws CryptoException {
-        for (KeyManagementAlgorithm alg : values()) {
+    public static KeyManagementAlgorithmName forName(String name) throws CryptoException {
+        for (KeyManagementAlgorithmName alg : values()) {
             if (alg.getValue().equalsIgnoreCase(name)) {
                 return alg;
             }
         }
 
-        throw new CryptoException("Unsupported JWE Key Management Algorithm name: " + name);
+        throw new IllegalArgumentException("Unsupported JWE Key Management Algorithm name: " + name);
     }
 
     @Override

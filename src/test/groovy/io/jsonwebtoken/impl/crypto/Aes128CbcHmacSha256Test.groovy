@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl.crypto
 
-import io.jsonwebtoken.EncryptionAlgorithmName
 import io.jsonwebtoken.EncryptionAlgorithms
 import org.junit.Test
 
@@ -87,7 +86,7 @@ class Aes128CbcHmacSha256Test {
 
         // now test decryption:
 
-        AuthenticatedDecryptionRequest decryptionRequest = DecryptionRequests.builder()
+        def dreq = DecryptionRequests.builder()
                 .setAdditionalAuthenticatedData(A)
                 .setCiphertext(resultCiphertext)
                 .setInitializationVector(resultIv)
@@ -95,7 +94,7 @@ class Aes128CbcHmacSha256Test {
                 .setAuthenticationTag(resultTag)
                 .build();
 
-        byte[] decryptionResult = alg.decrypt(decryptionRequest)
+        byte[] decryptionResult = alg.decrypt(dreq)
 
         assertArrayEquals(P, decryptionResult);
     }

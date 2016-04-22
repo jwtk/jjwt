@@ -8,7 +8,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.spec.AlgorithmParameterSpec;
 
-public class GcmAesEncryptionAlgorithm extends AesEncryptionAlgorithm {
+public class GcmAesEncryptionAlgorithm extends AbstractAesEncryptionAlgorithm {
 
     private static final int GCM_IV_SIZE = 12; //number of bytes, not bits. 12 is recommended for GCM for efficiency
     private static final String TRANSFORMATION_STRING = "AES/GCM/NoPadding";

@@ -17,8 +17,6 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
-import java.security.SecureRandom;
-
 public class DefaultAuthenticatedDecryptionRequest extends DefaultDecryptionRequest
         implements AuthenticatedDecryptionRequest {
 
@@ -26,8 +24,8 @@ public class DefaultAuthenticatedDecryptionRequest extends DefaultDecryptionRequ
 
     private final byte[] tag;
 
-    public DefaultAuthenticatedDecryptionRequest(SecureRandom secureRandom, byte[] key, byte[] iv, byte[] ciphertext, byte[] aad, byte[] tag) {
-        super(secureRandom, key, iv, ciphertext);
+    public DefaultAuthenticatedDecryptionRequest(byte[] key, byte[] iv, byte[] ciphertext, byte[] aad, byte[] tag) {
+        super(key, iv, ciphertext);
         Assert.notEmpty(tag, "Authentication tag cannot be null or empty.");
         this.aad = aad;
         this.tag = tag;

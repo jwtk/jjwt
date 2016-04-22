@@ -12,8 +12,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import static io.jsonwebtoken.lang.Arrays.length;
 
-@SuppressWarnings("Duplicates")
-public abstract class AesEncryptionAlgorithm implements EncryptionAlgorithm {
+public abstract class AbstractAesEncryptionAlgorithm implements EncryptionAlgorithm {
 
     public static final SecureRandom DEFAULT_RANDOM = new SecureRandom();
 
@@ -30,7 +29,7 @@ public abstract class AesEncryptionAlgorithm implements EncryptionAlgorithm {
     private final int generatedIvLength;
     private final int requiredKeyLength;
 
-    public AesEncryptionAlgorithm(String name, String transformationString, int generatedIvLength, int requiredKeyLength) {
+    public AbstractAesEncryptionAlgorithm(String name, String transformationString, int generatedIvLength, int requiredKeyLength) {
 
         Assert.hasText(name, "Name cannot be null or empty.");
         this.name = name;
@@ -52,7 +51,7 @@ public abstract class AesEncryptionAlgorithm implements EncryptionAlgorithm {
         try {
             return doGenerateKey();
         } catch (Exception e) {
-            throw new CryptoException("Unable to obtain AES KeyGenerator: " + e.getMessage(), e);
+            throw new CryptoException("Unable to generate a new " + getName() + " SecretKey: " + e.getMessage(), e);
         }
     }
 
@@ -100,7 +99,7 @@ public abstract class AesEncryptionAlgorithm implements EncryptionAlgorithm {
         return iv;
     }
 
-    protected SecureRandom getSecureRandom(CryptoRequest request) {
+    protected SecureRandom getSecureRandom(EncryptionRequest request) {
         SecureRandom random = request.getSecureRandom();
         return random != null ? random : DEFAULT_RANDOM;
     }

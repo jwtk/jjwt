@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 import static io.jsonwebtoken.lang.Arrays.length;
 
-public class HmacAesEncryptionAlgorithm extends AesEncryptionAlgorithm {
+public class HmacAesEncryptionAlgorithm extends AbstractAesEncryptionAlgorithm {
 
     protected static final String TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
 
@@ -46,13 +46,21 @@ public class HmacAesEncryptionAlgorithm extends AesEncryptionAlgorithm {
 
         int subKeyLength = getRequiredKeyLength() / 2;
 
-        SecretKey macKey = MacProvider.generateKey(SIGALG);
-        byte[] macKeyBytes = macKey.getEncoded();
+        byte[] macKeyBytes = generateHmacKeyBytes();
+        Assert.notEmpty(macKeyBytes, "Generated HMAC key byte array cannot be null or empty.");
 
         if (macKeyBytes.length > subKeyLength) {
             byte[] subKeyBytes = new byte[subKeyLength];
             System.arraycopy(macKeyBytes, 0, subKeyBytes, 0, subKeyLength);
             macKeyBytes = subKeyBytes;
+        }
+
+        if (macKeyBytes.length != subKeyLength) {
+            String msg = "Generated HMAC key must be " + subKeyLength + " bytes (" +
+                    subKeyLength * Byte.SIZE + " bits) long. The " + getClass().getName() + " implementation " +
+                    "generated a key " + macKeyBytes.length + " bytes (" +
+                    macKeyBytes.length * Byte.SIZE + " bits) long";
+            throw new IllegalStateException(msg);
         }
 
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -69,6 +77,11 @@ public class HmacAesEncryptionAlgorithm extends AesEncryptionAlgorithm {
         System.arraycopy(encKeyBytes, 0, combinedKeyBytes, macKeyBytes.length, encKeyBytes.length);
 
         return new SecretKeySpec(combinedKeyBytes, getName());
+    }
+
+    protected byte[] generateHmacKeyBytes() {
+        SecretKey macKey = MacProvider.generateKey(SIGALG);
+        return macKey.getEncoded();
     }
 
     @Override

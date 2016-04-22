@@ -64,7 +64,7 @@ public enum EncryptionAlgorithmName {
             }
         }
 
-        throw new CryptoException("Unsupported JWE Content Encryption Algorithm name: " + name);
+        throw new IllegalArgumentException("Unsupported JWE Content Encryption Algorithm name: " + name);
     }
 
     @Override

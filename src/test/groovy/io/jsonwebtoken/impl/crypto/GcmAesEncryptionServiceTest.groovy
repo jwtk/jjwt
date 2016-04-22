@@ -1,14 +1,11 @@
 package io.jsonwebtoken.impl.crypto
 
+import io.jsonwebtoken.EncryptionAlgorithmName
 import io.jsonwebtoken.EncryptionAlgorithms
 import org.junit.Test
 
-import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
-/**
- * Test defined in https://tools.ietf.org/html/rfc7516#appendix-A.1
- */
 class GcmAesEncryptionServiceTest {
 
     final byte[] K =
@@ -33,9 +30,11 @@ class GcmAesEncryptionServiceTest {
     final byte[] T =
             [0x5c, 0x50, 0x68, 0x31, 0x85, 0x19, 0xa1, 0xd7, 0xad, 0x65, 0xdb, 0xd3, 0x88, 0x5b, 0xd2, 0x91] as byte[]
 
-
+    /**
+     * Test that reflects https://tools.ietf.org/html/rfc7516#appendix-A.1
+     */
     @Test
-    void test() {
+    void testEncryptionAndDecryption() {
 
         def alg = EncryptionAlgorithms.A256GCM
 
@@ -77,5 +76,14 @@ class GcmAesEncryptionServiceTest {
         def c = array.collect { '0x' + Integer.toHexString(it) }
 
         println '[' + c.join(', ') + ']' */
+    }
+
+    @Test
+    void testInstantiationWithInvalidKeyLength() {
+        try {
+            new GcmAesEncryptionAlgorithm(EncryptionAlgorithmName.A128GCM.getValue(), 5);
+            fail()
+        } catch (IllegalArgumentException expected) {
+        }
     }
 }

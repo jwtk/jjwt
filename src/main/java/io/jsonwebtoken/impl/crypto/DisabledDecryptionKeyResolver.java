@@ -10,6 +10,11 @@ import java.security.Key;
  */
 public class DisabledDecryptionKeyResolver implements DecryptionKeyResolver {
 
+    /**
+     * Singleton instance that may be used if direct instantiation is not desired.
+     */
+    public static final DisabledDecryptionKeyResolver INSTANCE = new DisabledDecryptionKeyResolver();
+
     @Override
     public Key resolveDecryptionKey(JweHeader header) {
         return null;

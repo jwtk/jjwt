@@ -15,26 +15,15 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
-import java.security.SecureRandom;
-
 /**
  * @since 0.7.0
  */
 public interface CryptoRequest {
 
     /**
-     * Returns the {@code SecureRandom} to use when performing cryptographic operations when processing the request, or
-     * {@code null} if a default {@link SecureRandom} should be used.
+     * Returns the key to use for encryption or decryption depending on the type of request.
      *
-     * @return the {@code SecureRandom} to use when performing cryptographic operations when processing the request, or
-     * {@code null} if a default {@link SecureRandom} should be used.
-     */
-    SecureRandom getSecureRandom();
-
-    /**
-     * Returns the encryption key to use for encryption or decryption depending on the type of request.
-     *
-     * @return the encryption key to use for encryption or decryption depending on the type of request.
+     * @return the key to use for encryption or decryption depending on the type of request.
      */
     byte[] getKey();
 

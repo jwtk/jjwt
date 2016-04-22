@@ -17,28 +17,19 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.lang.Assert;
 
-import java.security.SecureRandom;
-
 import static io.jsonwebtoken.lang.Arrays.clean;
 
 public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder {
 
     public static final String AAD_NEEDS_TAG_MSG = "If you specify additional authentication data during " +
-                                                   "decryption, you must also specify the authentication tag " +
-                                                   "computed during encryption.";
+            "decryption, you must also specify the authentication tag " +
+            "computed during encryption.";
 
-    private SecureRandom secureRandom;
     private byte[] iv;
     private byte[] key;
     private byte[] ciphertext;
     private byte[] aad;
     private byte[] tag;
-
-    @Override
-    public DecryptionRequestBuilder setSecureRandom(SecureRandom secureRandom) {
-        this.secureRandom = secureRandom;
-        return this;
-    }
 
     @Override
     public DecryptionRequestBuilder setInitializationVector(byte[] iv) {
@@ -80,10 +71,10 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
         }
 
         if (aad != null || tag != null) {
-            return new DefaultAuthenticatedDecryptionRequest(secureRandom, key, iv, ciphertext, aad, tag);
+            return new DefaultAuthenticatedDecryptionRequest(key, iv, ciphertext, aad, tag);
         }
 
-        return new DefaultDecryptionRequest(secureRandom, key, iv, ciphertext);
+        return new DefaultDecryptionRequest(key, iv, ciphertext);
     }
 
 }

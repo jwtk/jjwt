@@ -32,7 +32,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithoutAad() {
 
-        for (AesEncryptionAlgorithm alg : EncryptionAlgorithms.VALUES) {
+        for (AbstractAesEncryptionAlgorithm alg : EncryptionAlgorithms.VALUES) {
 
             def skey = alg.generateKey()
             def key = skey.getEncoded()
@@ -67,7 +67,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithAad() {
 
-        for (AesEncryptionAlgorithm alg : EncryptionAlgorithms.VALUES) {
+        for (AbstractAesEncryptionAlgorithm alg : EncryptionAlgorithms.VALUES) {
 
             def skey = alg.generateKey()
             def key = skey.getEncoded()

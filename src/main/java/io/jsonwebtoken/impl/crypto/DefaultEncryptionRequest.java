@@ -21,12 +21,20 @@ import java.security.SecureRandom;
 
 public class DefaultEncryptionRequest extends AbstractCryptoRequest implements EncryptionRequest {
 
+    private final SecureRandom random;
+
     private final byte[] plaintext;
 
     public DefaultEncryptionRequest(SecureRandom secureRandom, byte[] key, byte[] iv, byte[] plaintext) {
-        super(secureRandom, key, iv);
+        super(key, iv);
         Assert.notEmpty(plaintext, "plaintext cannot be null or empty.");
         this.plaintext = plaintext;
+        this.random = secureRandom;
+    }
+
+    @Override
+    public SecureRandom getSecureRandom() {
+        return this.random;
     }
 
     @Override
