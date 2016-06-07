@@ -157,14 +157,12 @@ public class JwtMap implements Map<String,Object> {
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return map.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return map.equals(obj);
     }
 }
