@@ -242,16 +242,3 @@ Jws<String> jws = Jwts.parser().setSigningKey(key).parsePlaintextJws(compact);
 Jws<Claims> jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact);
 
 ```
-
-<a name="olderJackson"></a>
-#### Already using an older Jackson dependency?
-
-JJWT depends on Jackson 2.4.x (or later).  If you are already using a Jackson version in your own application less than 2.x, for example 1.9.x, you will likely see [runtime errors](https://github.com/jwtk/jjwt/issues/1).  To avoid this, you should change your project build configuration to explicitly point to a 2.x version of Jackson.  For example:
-
-```xml
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.4.2</version>
-</dependency>
-```
