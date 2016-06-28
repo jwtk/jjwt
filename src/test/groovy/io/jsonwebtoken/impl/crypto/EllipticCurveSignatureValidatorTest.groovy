@@ -186,4 +186,19 @@ class EllipticCurveSignatureValidatorTest {
             assertEquals e.message, 'Invalid ECDSA signature format'
         }
     }
+
+    @Test
+    void verifySwarmTest() {
+        for (SignatureAlgorithm algorithm : [SignatureAlgorithm.ES256, SignatureAlgorithm.ES384, SignatureAlgorithm.ES512]) {
+            int i = 0
+            while(i < 10) {
+                i++
+                def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
+                def keypair = EllipticCurveProvider.generateKeyPair()
+                def data = withoutSignature.getBytes("US-ASCII")
+                def signature = new EllipticCurveSigner(algorithm, keypair.private).sign(data)
+                assert new EllipticCurveSignatureValidator(algorithm, keypair.public).isValid(data, signature)
+            }
+        }
+    }
 }
