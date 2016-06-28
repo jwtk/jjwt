@@ -307,11 +307,6 @@
                                 <lineRate>100</lineRate>
                                 <branchRate>90</branchRate>
                             </regex>
-                            <regex>
-                                <pattern>io.jsonwebtoken.impl.crypto.ECDSA</pattern>
-                                <lineRate>80</lineRate>
-                                <branchRate>60</branchRate>
-                            </regex>
                         </regexes>
                     </check>
                 </configuration>
