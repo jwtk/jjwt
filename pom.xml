@@ -309,10 +309,6 @@
                             </regex>
                         </regexes>
                     </check>
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
                 </configuration>
                 <executions>
                     <execution>
@@ -374,7 +370,6 @@
             </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
             <id>jdk8</id>
@@ -441,5 +436,21 @@
             </build>
         </profile>
     </profiles>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <formats>
+                        <format>xml</format>
+                        <format>html</format>
+                    </formats>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>

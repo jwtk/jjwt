@@ -15,14 +15,15 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
+
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 
 public class EllipticCurveSigner extends EllipticCurveProvider implements Signer {
 
@@ -43,14 +44,16 @@ public class EllipticCurveSigner extends EllipticCurveProvider implements Signer
             throw new SignatureException("Invalid Elliptic Curve PrivateKey. " + e.getMessage(), e);
         } catch (java.security.SignatureException e) {
             throw new SignatureException("Unable to calculate signature using Elliptic Curve PrivateKey. " + e.getMessage(), e);
+        } catch (JwtException e) {
+            throw new SignatureException("Unable to convert signature to JOSE format. " + e.getMessage(), e);
         }
     }
 
-    protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException {
+    protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException, JwtException {
         PrivateKey privateKey = (PrivateKey)key;
         Signature sig = createSignatureInstance();
         sig.initSign(privateKey);
         sig.update(data);
-        return sig.sign();
+        return transcodeSignatureToConcat(sig.sign(), getSignatureByteArrayLength(alg));
     }
 }
