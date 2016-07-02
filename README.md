@@ -5,12 +5,56 @@
 
 JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM.
 
-JJWT is an implementation based on the [JWT](https://tools.ietf.org/html/rfc7519), [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications.
+JJWT is a Java implementation based on the [JWT](https://tools.ietf.org/html/rfc7519), [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications.
 
 The library was created by [Stormpath's](http://www.stormpath.com) CTO, [Les Hazlewood](https://github.com/lhazlewood)
 and is now maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
 
 We've also added some convenience extensions that are not part of the specification, such as JWT compression and claim enforcement.
+
+## What's a JSON Web Token?
+
+Don't know what a JSON Web Token is? Read on. Otherwise, jump on down to the [Installation](#installation) section.
+
+JWT is a means of transmitting information between two parties in a compact, verifiable form.
+
+The bits of information encoded in the body of a JWT are called `claims`. The expanded form of the JWT is in a JSON format, so each `claim` is a key in the JSON object.
+ 
+JWTs can be cryptographically signed (making it a [JWS](https://tools.ietf.org/html/rfc7515)) or encrypted (making it a [JWE](https://tools.ietf.org/html/rfc7516)).
+
+This adds a powerful layer of verifiability to the user of JWTs. The receiver has a high degree of confidence that the JWT has not been tampered with by verifying the signature, for instance.
+
+The compacted representation of a signed JWT is a string that has three parts, each separated by a `.`:
+
+```
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.ipevRNuRP6HflG8cFKnmUPtypruRC4fb1DWtoLL62SY
+```
+
+Each section is [base 64](https://en.wikipedia.org/wiki/Base64) encoded. The first section is the header, which at a minimum needs to specify the algorithm used to sign the JWT. The second section is the body. This section has all the claims of this JWT encoded in it. The final section is the signature. It's computed by passing a combination of the header and body through the algorithm specified in the header.
+ 
+If you pass the first two sections through a base 64 decoder, you'll get the following (formatting added for clarity):
+
+`header`
+```
+{
+  "alg": "HS256"
+}
+```
+
+`body`
+```
+{
+  "sub": "Joe"
+}
+```
+
+In this case, the information we have is that the HMAC using SHA-256 algorithm was used to sign the JWT. And, the body has a single claim, `sub` with value `Joe`.
+
+There are a number of standard claims, called [Registered Claims](https://tools.ietf.org/html/rfc7519#section-4.1), in the specification and `sub` (for subject) is one of them.
+
+To compute the signature, you must know the secret that was used to sign it. In this case, it was the word `secret`. You can see the signature creation is action [here](https://jsfiddle.net/dogeared/2fy2y0yd/11/) (Note: Trailing `=` are lopped off the signature for the JWT).
+
+Now you know (just about) all you need to know about JWTs.
 
 ## Installation
 
@@ -113,46 +157,46 @@ try {
 
 ### Enhancements Beyond the Specification:
 
-* Body compression. If the JWT body is large, you can use a `CompressionCodec` to compress it. Best of all, the JJWT library will automtically decompress and parse the JWT without additional coding.
+* **Body compression.** If the JWT body is large, you can use a `CompressionCodec` to compress it. Best of all, the JJWT library will automtically decompress and parse the JWT without additional coding.
 
-```java
-String compactJws =  Jwts.builder()
-    .setSubject("Joe")
-    .compressWith(CompressionCodecs.DEFLATE)
-    .signWith(SignatureAlgorithm.HS512, key)
-    .compact();
-```
+    ```java
+    String compactJws =  Jwts.builder()
+        .setSubject("Joe")
+        .compressWith(CompressionCodecs.DEFLATE)
+        .signWith(SignatureAlgorithm.HS512, key)
+        .compact();
+    ```
 
-If you examine the header section of the `compactJws`, it decodes to this:
+    If you examine the header section of the `compactJws`, it decodes to this:
+    
+    ```
+    {
+      "alg": "HS512",
+      "zip": "DEF"
+    }
+    ```
+    
+    JJWT automatically detects that compression was used by examining the header and will automatically decompress when parsing. No extra coding is needed on your part for decompression.
 
-```
-{
-  "alg": "HS512",
-  "zip": "DEF"
-}
-```
+* **Require Claims.** When parsing, you can specify that certain calims *must* be present and set to a certain value.
 
-JJWT automatically detects that compression was used by examining the header and will automatically decompress when parsing. No extra coding is needed on your part for decompression.
-
-* Require Claims. When parsing, you can specify that certain calims *must* be present and set to a certain value.
-
-```java
-try {
-    Jws<Claims> claims = Jwts.parser()
-        .requireSubject("Joe")
-        .require("hasMotorcycle", true)
-        .setSigningKey(key)
-        .parseClaimsJws(compactJws);
-} catch (MissingClaimException e) {
-
-    // we get here if the required claim is not present
-
-} catch (IncorrectClaimException) {
-
-    // we get here if ther required claim has the wrong value
-
-}
-```
+    ```java
+    try {
+        Jws<Claims> claims = Jwts.parser()
+            .requireSubject("Joe")
+            .require("hasMotorcycle", true)
+            .setSigningKey(key)
+            .parseClaimsJws(compactJws);
+    } catch (MissingClaimException e) {
+    
+        // we get here if the required claim is not present
+    
+    } catch (IncorrectClaimException) {
+    
+        // we get here if ther required claim has the wrong value
+    
+    }
+    ```
 
 ## Currently Unsupported Features
 
