@@ -270,51 +270,19 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.6.201602180812</version>
                 <configuration>
-                    <maxmem>256m</maxmem>
-                    <aggregate>true</aggregate>
-                    <instrumentation>
-                        <excludes>
-                            <exclude>io.jsonwebtoken.lang.*</exclude>
-                        </excludes>
-                    </instrumentation>
-                    <check>
-                        <lineRate>100</lineRate>
-                        <branchRate>100</branchRate>
-                        <!-- <packageLineRate>100</packageLineRate>
-                        <packageBranchRate>100</packageBranchRate> -->
-                        <haltOnFailure>true</haltOnFailure>
-                        <regexes>
-                            <regex>
-                                <!-- This was pulled in from another project (without pulling in the tests) -
-                                     we don't care about coverage here really.: -->
-                                <pattern>io.jsonwebtoken.lang.*</pattern>
-                                <branchRate>0</branchRate>
-                                <lineRate>0</lineRate>
-                            </regex>
-                            <regex>
-                                <!-- Cannot get to 100% on DefaultClaims because of Cobertura bug w/ generics:
-                                     https://github.com/cobertura/cobertura/issues/207 -->
-                                <pattern>io.jsonwebtoken.impl.DefaultClaims</pattern>
-                                <lineRate>96</lineRate>
-                                <branchRate>100</branchRate>
-                            </regex>
-                            <regex>
-                                <pattern>io.jsonwebtoken.impl.DefaultJwtParser</pattern>
-                                <lineRate>100</lineRate>
-                                <branchRate>90</branchRate>
-                            </regex>
-                        </regexes>
-                    </check>
+                    <excludes>
+                        <exclude>**/io/jsonwebtoken/lang/*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
-                            <goal>clean</goal>
-                            <goal>check</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -436,21 +404,4 @@
             </build>
         </profile>
     </profiles>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
-
 </project>
