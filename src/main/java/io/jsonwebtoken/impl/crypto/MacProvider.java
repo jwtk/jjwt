@@ -69,7 +69,7 @@ public abstract class MacProvider extends SignatureProvider {
      *
      * <table> <thead> <tr> <th>Signature Algorithm</th> <th>Generated Key Size</th> </tr> </thead> <tbody> <tr>
      * <td>HS256</td> <td>256 bits (32 bytes)</td> </tr> <tr> <td>HS384</td> <td>384 bits (48 bytes)</td> </tr> <tr>
-     * <td>HS512</td> <td>256 bits (64 bytes)</td> </tr> </tbody> </table>
+     * <td>HS512</td> <td>512 bits (64 bytes)</td> </tr> </tbody> </table>
      *
      * @param alg    the signature algorithm that will be used with the generated key
      * @param random the secure random number generator used during key generation
