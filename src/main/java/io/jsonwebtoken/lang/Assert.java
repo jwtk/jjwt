@@ -18,7 +18,12 @@ package io.jsonwebtoken.lang;
 import java.util.Collection;
 import java.util.Map;
 
-public abstract class Assert {
+public final class Assert {
+
+    //for code coverage
+    private static final Assert INSTANCE = new Assert();
+
+    private Assert(){}
 
     /**
      * Assert a boolean expression, throwing <code>IllegalArgumentException</code>

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.impl.DefaultClock;
+
 import java.security.Key;
 import java.util.Date;
 
@@ -123,6 +125,16 @@ public interface JwtParser {
      * @see IncorrectClaimException
      */
     JwtParser require(String claimName, Object value);
+
+    /**
+     * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
+     * The parser uses a {@link DefaultClock DefaultClock} instance by default.
+     *
+     * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
+     * @return the builder instance for method chaining.
+     * @since 0.7.0
+     */
+    JwtParser setClock(Clock clock);
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not

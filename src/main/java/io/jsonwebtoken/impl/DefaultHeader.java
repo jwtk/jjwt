@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.lang.Strings;
 
 import java.util.Map;
 
@@ -52,9 +53,14 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
         return (T)this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String getCompressionAlgorithm() {
-        return getString(COMPRESSION_ALGORITHM);
+        String alg = getString(COMPRESSION_ALGORITHM);
+        if (!Strings.hasText(alg)) {
+            alg = getString(DEPRECATED_COMPRESSION_ALGORITHM);
+        }
+        return alg;
     }
 
     @Override

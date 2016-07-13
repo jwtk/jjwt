@@ -21,7 +21,11 @@ import java.lang.reflect.Constructor;
 /**
  * @since 0.1
  */
-public class Classes {
+public final class Classes {
+
+    private static final Classes INSTANCE = new Classes();
+
+    private Classes() {}
 
     /**
      * @since 0.1
@@ -79,7 +83,7 @@ public class Classes {
 
         if (clazz == null) {
             String msg = "Unable to load class named [" + fqcn + "] from the thread context, current, or " +
-                         "system/application ClassLoaders.  All heuristics have been exhausted.  Class could not be found.";
+                    "system/application ClassLoaders.  All heuristics have been exhausted.  Class could not be found.";
 
             if (fqcn != null && fqcn.startsWith("com.stormpath.sdk.impl")) {
                 msg += "  Have you remembered to include the stormpath-sdk-impl .jar in your runtime classpath?";
@@ -100,7 +104,7 @@ public class Classes {
      *
      * @param name the name of the resource to acquire from the classloader(s).
      * @return the InputStream of the resource found, or <code>null</code> if the resource cannot be found from any
-     *         of the three mentioned ClassLoaders.
+     * of the three mentioned ClassLoaders.
      * @since 0.8
      */
     public static InputStream getResourceAsStream(String name) {
@@ -181,6 +185,7 @@ public class Classes {
      */
     private static interface ClassLoaderAccessor {
         Class loadClass(String fqcn);
+
         InputStream getResourceStream(String name);
     }
 

@@ -24,7 +24,9 @@ import io.jsonwebtoken.CompressionCodec;
  * @see #GZIP
  *
  * @since 0.6.0
+ * @deprecated use {@link io.jsonwebtoken.CompressionCodecs} instead.
  */
+@Deprecated
 public final class CompressionCodecs {
 
     private static final CompressionCodecs I = new CompressionCodecs();
@@ -33,12 +35,16 @@ public final class CompressionCodecs {
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate</a> compression algorithm
+     * @deprecated use {@link io.jsonwebtoken.CompressionCodecs#DEFLATE} instead.
      */
-    public static final CompressionCodec DEFLATE = new DeflateCompressionCodec();
+    @Deprecated
+    public static final CompressionCodec DEFLATE = io.jsonwebtoken.CompressionCodecs.DEFLATE;
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm
+     * @deprecated use {@link io.jsonwebtoken.CompressionCodecs#GZIP} instead.
      */
-    public static final CompressionCodec GZIP = new GzipCompressionCodec();
+    @Deprecated
+    public static final CompressionCodec GZIP = io.jsonwebtoken.CompressionCodecs.GZIP;
 
 }

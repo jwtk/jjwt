@@ -61,7 +61,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.4.2</jackson.version>
+        <jackson.version>2.7.0</jackson.version>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.51</bouncycastle.version>
@@ -270,66 +270,19 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.6.201602180812</version>
                 <configuration>
-                    <maxmem>256m</maxmem>
-                    <aggregate>true</aggregate>
-                    <instrumentation>
-                        <excludes>
-                            <exclude>io/jsonwebtoken/lang/*.class</exclude>
-                        </excludes>
-                        <ignores>
-                            <ignore>io.jsonwebtoken.lang.*</ignore>
-                        </ignores>
-                    </instrumentation>
-                    <check>
-                        <lineRate>100</lineRate>
-                        <branchRate>100</branchRate>
-                        <packageLineRate>100</packageLineRate>
-                        <packageBranchRate>100</packageBranchRate>
-                        <haltOnFailure>true</haltOnFailure>
-                        <regexes>
-                            <regex>
-                                <!-- Cannot get to 100% on DefaultClaims because of Cobertura bug w/ generics:
-                                     https://github.com/cobertura/cobertura/issues/207 -->
-                                <pattern>io.jsonwebtoken.impl.DefaultClaims</pattern>
-                                <lineRate>96</lineRate>
-                                <branchRate>100</branchRate>
-                            </regex>
-                            <regex>
-                                <pattern>io.jsonwebtoken.impl.DefaultJwtBuilder</pattern>
-                                <lineRate>91</lineRate>
-                                <branchRate>85</branchRate>
-                            </regex>
-                            <regex>
-                                <pattern>io.jsonwebtoken.impl.DefaultJwtParser</pattern>
-                                <lineRate>97</lineRate>
-                                <branchRate>88</branchRate>
-                            </regex>
-                            <regex>
-                                <pattern>io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator</pattern>
-                                <lineRate>95</lineRate>
-                                <branchRate>100</branchRate>
-                            </regex>
-                            <regex>
-                                <pattern>io.jsonwebtoken.impl.crypto.RsaSignatureValidator</pattern>
-                                <lineRate>93</lineRate>
-                                <branchRate>100</branchRate>
-                            </regex>
-                        </regexes>
-                    </check>
-                    <formats>
-                        <format>xml</format>
-                        <format>html</format>
-                    </formats>
+                    <excludes>
+                        <exclude>**/io/jsonwebtoken/lang/*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
-                            <goal>clean</goal>
-                            <goal>check</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -355,7 +308,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.5</version>
+                <version>3.0.1</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -366,6 +319,17 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <instructions>
+                        <Import-Package><![CDATA[
+                            android.util;resolution:=optional,
+                            org.bouncycastle.jce;resolution:=optional,
+                            org.bouncycastle.jce.spec;resolution:=optional,
+                            *
+                        ]]>
+                        </Import-Package>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
@@ -374,7 +338,6 @@
             </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
             <id>jdk8</id>
@@ -441,5 +404,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>

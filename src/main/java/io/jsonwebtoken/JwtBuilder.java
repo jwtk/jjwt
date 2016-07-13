@@ -356,12 +356,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
      * certain length.  Using compression can help ensure the compact JWT fits within that length.  However, NOTE:</p>
      *
-     * <p><b>WARNING:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
-     * (including JJWT versions < 0.6.0) are able to consume a compressed JWT body correctly.  Only use this method
-     * if you are sure that you will consume the JWT with JJWT >= 0.6.0 or another library that you know implements
-     * the same behavior.</p>
+     * <h5>Compatibility Warning</h5>
      *
-     * @see io.jsonwebtoken.impl.compression.CompressionCodecs
+     * <p>The JWT family of specifications defines compression only for JWE (Json Web Encryption)
+     * tokens.  Even so, JJWT will also support compression for JWS tokens as well if you choose to use it.
+     * However, be aware that <b>if you use compression when creating a JWS token, other libraries may not be able to
+     * parse that JWS token</b>.  When using compression for JWS tokens, be sure that that all parties accessing the
+     * JWS token support compression for JWS.</p>
+     *
+     * <p>Compression when creating JWE tokens however should be universally accepted for any
+     * library that supports JWE.</p>
+     *
+     * @see io.jsonwebtoken.CompressionCodecs
      *
      * @param codec implementation of the {@link CompressionCodec} to be used.
      * @return the builder for method chaining.
