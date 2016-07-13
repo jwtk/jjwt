@@ -10,6 +10,8 @@ JJWT is a Java implementation based on the [JWT](https://tools.ietf.org/html/rfc
 The library was created by [Stormpath's](http://www.stormpath.com) CTO, [Les Hazlewood](https://github.com/lhazlewood)
 and is now maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
 
+[Stormpath](https://stormpath.com/) is a complete authentication and user management API for developers.
+
 We've also added some convenience extensions that are not part of the specification, such as JWT compression and claim enforcement.
 
 ## What's a JSON Web Token?
