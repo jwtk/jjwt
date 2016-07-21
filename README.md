@@ -153,7 +153,7 @@ try {
     * PS512: RSASSA-PSS using SHA-512 and MGF1 with SHA-512
     * ES256: ECDSA using P-256 and SHA-256
     * ES384: ECDSA using P-384 and SHA-384
-    * ES512: ECDSA using P-512 and SHA-512
+    * ES512: ECDSA using P-521 and SHA-512
 
 ### Enhancements Beyond the Specification:
 
