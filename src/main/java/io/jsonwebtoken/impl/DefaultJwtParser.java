@@ -213,7 +213,8 @@ public class DefaultJwtParser implements JwtParser {
 
             if (c == SEPARATOR_CHAR) {
 
-                String token = Strings.clean(sb.toString());
+                CharSequence tokenSeq = Strings.clean(sb);
+                String token = tokenSeq!=null?tokenSeq.toString():null;
 
                 if (delimiterCount == 0) {
                     base64UrlEncodedHeader = token;
@@ -222,7 +223,7 @@ public class DefaultJwtParser implements JwtParser {
                 }
 
                 delimiterCount++;
-                sb = new StringBuilder(128);
+                sb.setLength(0);
             } else {
                 sb.append(c);
             }
