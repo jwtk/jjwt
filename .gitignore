@@ -17,3 +17,6 @@ target/
 *.iml
 *.iws
 
+.classpath
+.project
+.settings
