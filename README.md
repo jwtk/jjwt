@@ -178,7 +178,7 @@ try {
     
     JJWT automatically detects that compression was used by examining the header and will automatically decompress when parsing. No extra coding is needed on your part for decompression.
 
-* **Require Claims.** When parsing, you can specify that certain calims *must* be present and set to a certain value.
+* **Require Claims.** When parsing, you can specify that certain claims *must* be present and set to a certain value.
 
     ```java
     try {
