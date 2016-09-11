@@ -56,7 +56,7 @@ import java.util.Map;
 public class DefaultJwtParser implements JwtParser {
 
     //don't need millis since JWT date fields are only second granularity:
-    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
