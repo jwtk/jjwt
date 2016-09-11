@@ -888,7 +888,7 @@ class JwtParserTest {
         // system converts to seconds (lopping off millis precision), then returns millis
         def issuedAtMillis = ((long)issuedAt.getTime() / 1000) * 1000
 
-        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis
+        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis, 0
     }
 
     @Test
@@ -1212,7 +1212,7 @@ class JwtParserTest {
         // system converts to seconds (lopping off millis precision), then returns millis
         def expirationMillis = ((long)expiration.getTime() / 1000) * 1000
 
-        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis
+        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
     }
 
     @Test
@@ -1280,7 +1280,7 @@ class JwtParserTest {
         // system converts to seconds (lopping off millis precision), then returns millis
         def notBeforeMillis = ((long)notBefore.getTime() / 1000) * 1000
 
-        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis
+        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
     }
 
     @Test
