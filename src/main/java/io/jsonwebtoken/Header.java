@@ -52,7 +52,8 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     public static final String COMPRESSION_ALGORITHM = "zip";
 
     /** JJWT legacy/deprecated compression algorithm header parameter name: <code>"calg"</code>
-     * @deprecated use {@link #COMPRESSION_ALGORITHM} instead. */
+     * @deprecated use {@link #COMPRESSION_ALGORITHM} instead.
+     * This will be removed just prior to the 1.0 release. */
     @Deprecated
     public static final String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 

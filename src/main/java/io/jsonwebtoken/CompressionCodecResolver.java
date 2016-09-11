@@ -16,7 +16,7 @@
 package io.jsonwebtoken;
 
 /**
- * Looks for a JWT {@code calg} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+ * Looks for a JWT {@code zip} header, and if found, returns the corresponding {@link CompressionCodec} the parser
  * can use to decompress the JWT body.
  *
  * <p>JJWT's default {@link JwtParser} implementation supports both the
