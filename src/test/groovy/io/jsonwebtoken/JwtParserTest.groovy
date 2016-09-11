@@ -175,6 +175,9 @@ class JwtParserTest {
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
+
+            //https://github.com/jwtk/jjwt/issues/107 :
+            assertTrue e.getMessage().endsWith('Z')
         }
     }
 
@@ -190,6 +193,9 @@ class JwtParserTest {
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+
+            //https://github.com/jwtk/jjwt/issues/107 :
+            assertTrue e.getMessage().endsWith('Z')
         }
     }
 
