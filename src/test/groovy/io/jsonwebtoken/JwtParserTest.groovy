@@ -206,7 +206,7 @@ class JwtParserTest {
         String subject = 'Joe'
         String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
 
-        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewInSeconds(10).parse(compact)
+        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
     }
@@ -218,7 +218,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
-            Jwts.parser().setAllowedClockSkewInSeconds(1).parse(compact)
+            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
@@ -232,7 +232,7 @@ class JwtParserTest {
         String subject = 'Joe'
         String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
 
-        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewInSeconds(10).parse(compact)
+        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
     }
@@ -244,7 +244,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
 
         try {
-            Jwts.parser().setAllowedClockSkewInSeconds(1).parse(compact)
+            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
