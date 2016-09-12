@@ -176,8 +176,8 @@ class JwtParserTest {
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
 
-            //https://github.com/jwtk/jjwt/issues/107 :
-            assertTrue e.getMessage().endsWith('Z')
+            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            assertTrue e.getMessage().contains('Z, a difference of ')
         }
     }
 
@@ -194,8 +194,8 @@ class JwtParserTest {
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
 
-            //https://github.com/jwtk/jjwt/issues/107 :
-            assertTrue e.getMessage().endsWith('Z')
+            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            assertTrue e.getMessage().contains('Z, a difference of ')
         }
     }
 
