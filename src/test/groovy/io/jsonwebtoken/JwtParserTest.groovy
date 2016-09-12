@@ -176,8 +176,8 @@ class JwtParserTest {
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
 
-            //https://github.com/jwtk/jjwt/issues/107 :
-            assertTrue e.getMessage().endsWith('Z')
+            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            assertTrue e.getMessage().contains('Z, a difference of ')
         }
     }
 
@@ -194,8 +194,60 @@ class JwtParserTest {
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
 
-            //https://github.com/jwtk/jjwt/issues/107 :
-            assertTrue e.getMessage().endsWith('Z')
+            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            assertTrue e.getMessage().contains('Z, a difference of ')
+        }
+    }
+
+    @Test
+    void testParseWithExpiredJwtWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String subject = 'Joe'
+        String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseWithExpiredJwtNotWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        try {
+            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
+    @Test
+    void testParseWithPrematureJwtWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() + 3000)
+
+        String subject = 'Joe'
+        String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseWithPrematureJwtNotWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() + 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
+
+        try {
+            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
+            fail()
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
     }
 
