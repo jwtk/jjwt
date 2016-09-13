@@ -1,5 +1,59 @@
 ## Release Notes
 
+### 0.7.0
+
+This is a minor feature enhancement and bugfix release.  One of the bug fixes is particularly important if using
+elliptic curve signatures.
+
+#### Elliptic Curve Signature Length Bug Fix
+
+Previous versions of JJWT safely calculated and verified Elliptic Curve signatures (no security risks), however, the
+ signatures were encoded using the JVM's default ASN.1/DER format.  The JWS specification however 
+requires EC signatures to be in a R + S format.  JJWT >= 0.7.0 now correctly represents newly computed EC signatures in 
+this spec-compliant format.
+
+What does this mean for you?
+
+Signatures created from previous JJWT versions can still be verified, so your existing tokens will still be parsed 
+correctly. HOWEVER, new JWTs with EC signatures created by JJWT >= 0.7.0 are now spec compliant and therefore can only 
+be verified by JJWT >= 0.7.0 (or any other spec compliant library).
+
+**This means that if you generate JWTs using Elliptic Curve Signatures after upgrading to JJWT >= 0.7.0, you _must_ 
+also upgrade any applications that parse these JWTs to upgrade to JJWT >= 0.7.0 as well.**
+
+#### Clock Skew Support
+
+When parsing a JWT, you might find that `exp` or `nbf` claims fail because the clock on the parsing machine is not 
+perfectly in sync with the clock on the machine that created the JWT.  You can now account for these differences 
+(usually no more than a few minutes) when parsing using the new `setAllowedClockSkewSeconds` method on the parser.
+For example:
+
+```java
+long seconds = 3 * 60; //3 minutes
+Jwts.parser().setAllowedClockSkewSeconds(seconds).setSigningKey(key).parseClaimsJws(jwt);
+```
+
+This ensures that clock differences between machines can be ignored.  Two or three minutes should be more than enough; it
+would be very strange if a machine's clock was more than 5 minutes difference from most atomic clocks around the world.
+
+#### Custom Clock Support
+
+Timestamps created during parsing can now be obtained via a custom time source via an implementation of
+ the new `io.jsonwebtoken.Clock` interface.  The default implementation simply returns `new Date()` to reflect the time
+  when parsing occurs, as most would expect.  However, supplying your own clock could be useful, especially during test 
+  cases to guarantee deterministic behavior.
+
+#### Android RSA Private Key Support
+
+Previous versions of JJWT required RSA private keys to implement `java.security.interfaces.RSAPrivateKey`, but Android 
+6 RSA private keys do not implement this interface.  JJWT now asserts that RSA keys are instances of both 
+`java.security.interfaces.RSAKey` and `java.security.PrivateKey` which should work fine on both Android and all other
+'standard' JVMs as well.
+
+#### Library version updates
+
+The few dependencies JWWT has (e.g. Jackson) have been updated to their latest stable versions at the time of release.
+
 ### 0.6.0
 
 #### Enforce JWT Claims when Parsing
