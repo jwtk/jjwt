@@ -54,6 +54,10 @@ Previous versions of JJWT required RSA private keys to implement `java.security.
 
 The few dependencies JWWT has (e.g. Jackson) have been updated to their latest stable versions at the time of release.
 
+#### Issue List
+
+For all completed issues, please see the [0.7.0 Milestone List](https://github.com/jwtk/jjwt/milestone/7?closed=1)
+
 ### 0.6.0
 
 #### Enforce JWT Claims when Parsing
