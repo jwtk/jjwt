@@ -3,7 +3,7 @@
 ### 0.7.0
 
 This is a minor feature enhancement and bugfix release.  One of the bug fixes is particularly important if using
-elliptic curve signatures.
+elliptic curve signatures, please see below.
 
 #### Elliptic Curve Signature Length Bug Fix
 
