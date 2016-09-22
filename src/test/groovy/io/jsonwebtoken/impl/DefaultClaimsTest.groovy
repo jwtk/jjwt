@@ -52,11 +52,103 @@ class DefaultClaimsTest {
     }
 
     @Test
-    void testGetClaimWithRequiredType_Success() {
-        claims.put("anInteger", new Integer(5))
+    void testGetClaimWithRequiredType_Integer_Success() {
+        def expected = new Integer(5)
+        claims.put("anInteger", expected)
         Object result = claims.get("anInteger", Integer.class)
+        assertEquals(expected, result)
+    }
 
-        assertTrue(result instanceof Integer)
+    @Test
+    void testGetClaimWithRequiredType_Long_Success() {
+        def expected = new Long(123)
+        claims.put("aLong", expected)
+        Object result = claims.get("aLong", Long.class)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_LongWithInteger_Success() {
+        // long value that fits inside an Integer
+        def expected = new Long(Integer.MAX_VALUE - 100)
+        // deserialized as an Integer from JSON
+        // (type information is not available during parsing)
+        claims.put("smallLong", expected.intValue())
+        // should still be available as Long
+        Object result = claims.get("smallLong", Long.class)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_ShortWithInteger_Success() {
+        def expected = new Short((short) 42)
+        claims.put("short", expected.intValue())
+        Object result = claims.get("short", Short.class)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_ShortWithBigInteger_Exception() {
+        claims.put("tooBigForShort", ((int) Short.MAX_VALUE) + 42)
+        try {
+            claims.get("tooBigForShort", Short.class)
+            fail("getClaim() shouldn't silently lose precision.")
+        } catch (RequiredTypeException e) {
+            assertEquals(
+                    e.getMessage(),
+                    "Expected value to be of type: class java.lang.Short, but was class java.lang.Integer"
+            )
+        }
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_ShortWithSmallInteger_Exception() {
+        claims.put("tooSmallForShort", ((int) Short.MIN_VALUE) - 42)
+        try {
+            claims.get("tooSmallForShort", Short.class)
+            fail("getClaim() shouldn't silently lose precision.")
+        } catch (RequiredTypeException e) {
+            assertEquals(
+                    e.getMessage(),
+                    "Expected value to be of type: class java.lang.Short, but was class java.lang.Integer"
+            )
+        }
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_ByteWithInteger_Success() {
+        def expected = new Byte((byte) 42)
+        claims.put("byte", expected.intValue())
+        Object result = claims.get("byte", Byte.class)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_ByteWithBigInteger_Exception() {
+        claims.put("tooBigForByte", ((int) Byte.MAX_VALUE) + 42)
+        try {
+            claims.get("tooBigForByte", Byte.class)
+            fail("getClaim() shouldn't silently lose precision.")
+        } catch (RequiredTypeException e) {
+            assertEquals(
+                    e.getMessage(),
+                    "Expected value to be of type: class java.lang.Byte, but was class java.lang.Integer"
+            )
+        }
+    }
+
+    @Test
+    void testGetClaimWithRequiredType_ByteWithSmallInteger_Exception() {
+        claims.put("tooSmallForByte", ((int) Byte.MIN_VALUE) - 42)
+        try {
+            claims.get("tooSmallForByte", Byte.class)
+            fail("getClaim() shouldn't silently lose precision.")
+        } catch (RequiredTypeException e) {
+            assertEquals(
+                    e.getMessage(),
+                    "Expected value to be of type: class java.lang.Byte, but was class java.lang.Integer"
+            )
+        }
     }
 
     @Test

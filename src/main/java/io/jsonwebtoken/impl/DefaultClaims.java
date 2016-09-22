@@ -120,8 +120,23 @@ public class DefaultClaims extends JwtMap implements Claims {
             value = getDate(claimName);
         }
 
+        return castClaimValue(value, requiredType);
+    }
+
+    private <T> T castClaimValue(Object value, Class<T> requiredType) {
         if (requiredType == Date.class && value instanceof Long) {
             value = new Date((Long)value);
+        }
+
+        if (value instanceof Integer) {
+            int intValue = (Integer) value;
+            if (requiredType == Long.class) {
+                value = (long) intValue;
+            } else if (requiredType == Short.class && Short.MIN_VALUE <= intValue && intValue <= Short.MAX_VALUE) {
+                value = (short) intValue;
+            } else if (requiredType == Byte.class && Byte.MIN_VALUE <= intValue && intValue <= Byte.MAX_VALUE) {
+                value = (byte) intValue;
+            }
         }
 
         if (!requiredType.isInstance(value)) {

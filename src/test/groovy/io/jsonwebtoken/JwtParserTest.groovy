@@ -716,6 +716,37 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseClaimsJwsWithNumericTypes() {
+        byte[] key = randomKey()
+
+        def b = (byte) 42
+        def s = (short) 42
+        def i = 42
+
+        def smallLong = (long) 42
+        def bigLong = ((long) Integer.MAX_VALUE) + 42
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                claim("byte", b).
+                claim("short", s).
+                claim("int", i).
+                claim("long_small", smallLong).
+                claim("long_big", bigLong).
+                compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+
+        Claims claims = jwt.getBody()
+
+        assertEquals(b, claims.get("byte", Byte.class))
+        assertEquals(s, claims.get("short", Short.class))
+        assertEquals(i, claims.get("int", Integer.class))
+        assertEquals(smallLong, claims.get("long_small", Long.class))
+        assertEquals(bigLong, claims.get("long_big", Long.class))
+    }
+
+
     // ========================================================================
     // parsePlaintextJws with signingKey resolver.
     // ========================================================================
