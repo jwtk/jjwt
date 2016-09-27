@@ -244,11 +244,6 @@ public class DefaultJwtParser implements JwtParser {
 	private void validateClaims(Header header, Claims claims) {
 		if (claims != null) {
 
-            SimpleDateFormat sdf;
-
-            final Date now = this.clock.now();
-            long nowTime = now.getTime();
-
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
             validateExpiration(header, claims, this.allowedClockSkewMillis, this.clock);
@@ -280,7 +275,7 @@ public class DefaultJwtParser implements JwtParser {
 		        String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal +
 		            ", a difference of " +
 		            differenceMillis + " milliseconds.  Allowed clock skew: " +
-		            this.allowedClockSkewMillis + " milliseconds.";
+		            allowedClockSkewMillis + " milliseconds.";
 		        throw new PrematureJwtException(header, claims, msg);
 		    }
 		}
