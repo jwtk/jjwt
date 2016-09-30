@@ -261,7 +261,36 @@ public interface JwtParser {
      * otherwise.
      */
     boolean isSigned(String jwt);
+    
+    /**
+     * Do not validate the {@code exp} claim when parsing the JWT.
+     * <p>
+     * <p>Note that this circumvents security features of JWT.</p>
+     *
+     * @return the parser for method chaining.
+     * @see ExpiredJwtException
+     */
+    JwtParser ignoreExpiry();
 
+    /**
+     * Do not validate the {@code nbf} claim when parsing the JWT.
+     * <p>
+     * <p>Note that this circumvents security features of JWT.</p>
+     * @return the parser for method chaining.
+     * @see PrematureJwtException
+     */
+    JwtParser ignoreNotBefore();
+
+    /**
+     * Do not validate the JWS digital signature.
+     * <p>
+     * <p>Note that this circumvents security features of JWT and JWS.</p>
+     *
+     * @return the parser for method chaining.
+     * @see SignatureException
+     */
+    JwtParser ignoreSignature();
+    
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
      * returns the resulting JWT or JWS instance.

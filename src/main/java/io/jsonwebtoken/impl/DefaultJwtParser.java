@@ -15,7 +15,15 @@
  */
 package io.jsonwebtoken.impl;
 
+import java.io.IOException;
+import java.security.Key;
+import java.util.Date;
+import java.util.Map;
+
+import javax.crypto.spec.SecretKeySpec;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
@@ -34,7 +42,6 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
-import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.SigningKeyResolver;
@@ -46,18 +53,10 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
-import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
-import java.security.Key;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser implements JwtParser {
 
     //don't need millis since JWT date fields are only second granularity:
-    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -75,6 +74,10 @@ public class DefaultJwtParser implements JwtParser {
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
+
+	private boolean ignoreExpiry = false;
+	private boolean ignoreNotBefore = false;
+	private boolean ignoreSignature = false;
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
@@ -199,6 +202,24 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser ignoreExpiry() {
+        ignoreExpiry = true;
+        return this;
+    }
+
+    @Override
+    public JwtParser ignoreNotBefore() {
+        ignoreNotBefore = true;
+        return this;
+    }
+
+    @Override
+    public JwtParser ignoreSignature() {
+        ignoreSignature = true;
+        return this;
+    }
+
+	@Override
     public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
@@ -220,15 +241,15 @@ public class DefaultJwtParser implements JwtParser {
 
         Object body = claims != null ? claims : payload;
 
-        if (jwtParts.getBase64UrlEncodedDigest() != null) {
-            return new DefaultJws<Object>((JwsHeader) header, body, jwtParts.getBase64UrlEncodedDigest());
+        if (jwtParts.getBase64UrlEncodedSignature() != null) {
+            return new DefaultJws<Object>((JwsHeader) header, body, jwtParts.getBase64UrlEncodedSignature());
         } else {
             return new DefaultJwt<Object>(header, body);
         }
     }
 
 	private void validateSignature(JwtParts jwtParts, Header header, String payload, Claims claims) {
-		if (jwtParts.getBase64UrlEncodedDigest() != null) { //it is signed - validate the signature
+		if (!this.ignoreSignature && jwtParts.getBase64UrlEncodedSignature() != null) { //it is signed - validate the signature
 
             SignatureAlgorithm algorithm = parseSignatureAlgorithm(header);
 
@@ -244,65 +265,20 @@ public class DefaultJwtParser implements JwtParser {
 	private void validateClaims(Header header, Claims claims) {
 		if (claims != null) {
 
-            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
-            //token MUST NOT be accepted on or after any specified exp time:
-            validateExpiration(header, claims, this.allowedClockSkewMillis, this.clock);
-
-            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
-            //token MUST NOT be accepted before any specified nbf time:
-            validateNotBefore(header, claims, this.allowedClockSkewMillis, this.clock);
-
+			if (!this.ignoreExpiry) {
+	            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
+	            //token MUST NOT be accepted on or after any specified exp time:
+	            ValidationHelper.validateExpiration(header, claims, this.allowedClockSkewMillis, this.clock);
+			}
+			
+			if (!this.ignoreNotBefore) {
+	            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
+	            //token MUST NOT be accepted before any specified nbf time:
+	            ValidationHelper.validateNotBefore(header, claims, this.allowedClockSkewMillis, this.clock);
+			}
+			
             validateExpectedClaims(header, claims);
         }
-	}
-
-	private void validateNotBefore(Header header, Claims claims, long allowedClockSkewMillis, Clock clock) {
-		SimpleDateFormat sdf;
-		Date nbf = claims.getNotBefore();
-		if (nbf != null) {
-			final Date now = clock.now();
-            long nowTime = now.getTime();
-            final boolean allowSkew = allowedClockSkewMillis > 0;
-		    long minTime = nowTime + allowedClockSkewMillis;
-		    Date min = allowSkew ? new Date(minTime) : now;
-		    if (min.before(nbf)) {
-		        sdf = new SimpleDateFormat(ISO_8601_FORMAT);
-		        String nbfVal = sdf.format(nbf);
-		        String nowVal = sdf.format(now);
-
-		        long differenceMillis = nbf.getTime() - minTime;
-
-		        String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal +
-		            ", a difference of " +
-		            differenceMillis + " milliseconds.  Allowed clock skew: " +
-		            allowedClockSkewMillis + " milliseconds.";
-		        throw new PrematureJwtException(header, claims, msg);
-		    }
-		}
-	}
-
-	private void validateExpiration(Header header, Claims claims, long allowedClockSkewMillis, Clock clock) {
-		SimpleDateFormat sdf;
-		Date exp = claims.getExpiration();
-		if (exp != null) {
-			final Date now = clock.now();
-            long nowTime = now.getTime();
-            final boolean allowSkew = allowedClockSkewMillis > 0;
-		    long maxTime = nowTime - allowedClockSkewMillis;
-		    Date max = allowSkew ? new Date(maxTime) : now;
-		    if (max.after(exp)) {
-		        sdf = new SimpleDateFormat(ISO_8601_FORMAT);
-		        String expVal = sdf.format(exp);
-		        String nowVal = sdf.format(now);
-
-		        long differenceMillis = maxTime - exp.getTime();
-
-		        String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of " +
-		            differenceMillis + " milliseconds.  Allowed clock skew: " +
-		            allowedClockSkewMillis + " milliseconds.";
-		        throw new ExpiredJwtException(header, claims, msg);
-		    }
-		}
 	}
 
 	private void validateSignatureWithSignatureValidator(JwtParts jwtParts, SignatureAlgorithm algorithm, Key key) {
@@ -324,7 +300,7 @@ public class DefaultJwtParser implements JwtParser {
         //re-create the jwt part without the signature.  This is what needs to be signed for verification:
         String jwtWithoutSignature = jwtParts.getBase64UrlEncodedHeader() + SEPARATOR_CHAR + jwtParts.getBase64UrlEncodedPayload();
 		
-		if (!validator.isValid(jwtWithoutSignature, jwtParts.getBase64UrlEncodedDigest())) {
+		if (!validator.isValid(jwtWithoutSignature, jwtParts.getBase64UrlEncodedSignature())) {
 		    String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
 		                 "asserted and should not be trusted.";
 		    throw new SignatureException(msg);
@@ -422,7 +398,7 @@ public class DefaultJwtParser implements JwtParser {
 	private Header parseHeader(JwtParts jwtParts) {
 		Header header = null;
         String base64UrlEncodedHeader = jwtParts.getBase64UrlEncodedHeader();
-        String base64UrlEncodedDigest = jwtParts.getBase64UrlEncodedDigest();
+        String base64UrlEncodedDigest = jwtParts.getBase64UrlEncodedSignature();
 		if (base64UrlEncodedHeader != null) {			
 			String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
 			Map<String, Object> m = readValue(origValue);
@@ -468,7 +444,7 @@ public class DefaultJwtParser implements JwtParser {
             throw new MalformedJwtException(msg);
         }
         if (sb.length() > 0) {
-        	jwtParts.setBase64UrlEncodedDigest(sb.toString());
+        	jwtParts.setBase64UrlEncodedSignature(sb.toString());
         }
 
         if (jwtParts.getBase64UrlEncodedPayload() == null) {
