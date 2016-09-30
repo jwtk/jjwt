@@ -125,6 +125,24 @@ class JwtParserTest {
         }
 
     }
+	
+	@Test
+	void testParseWithInvalidSignatureApplyingIgnoreSignature() {
+
+		String header = '{"alg":"HS256"}'
+
+		String payload = '{"subject":"Joe"}'
+
+		String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
+
+		String bad = TextCodec.BASE64.encode(header) + '.' +
+				TextCodec.BASE64.encode(payload) + '.' +
+				TextCodec.BASE64.encode(badSig)
+
+		Jwt jwt = Jwts.parser().ignoreSignature().setSigningKey(randomKey()).parse(bad)
+	
+		assertNotNull jwt
+	}
 
     @Test
     void testParsePlaintextJwsWithIncorrectAlg() {
@@ -180,6 +198,18 @@ class JwtParserTest {
             assertTrue e.getMessage().contains('Z, a difference of ')
         }
     }
+	
+	@Test()
+	void testParseWithExpiredJwtApplyingIgnoreExpiry() {
+		def Date recent = new Date(System.currentTimeMillis() - 1000)
+
+		String compact = Jwts.builder().setExpiration(recent).compact()
+
+		Jwt jwt = Jwts.parser().ignoreExpiry().
+			parse(compact)
+
+		assertNotNull jwt
+	}
 
     @Test
     void testParseWithPrematureJwt() {
@@ -199,6 +229,18 @@ class JwtParserTest {
         }
     }
 
+	@Test()
+	void testParseWithPrematureJwtApplyingIgnoreNotBefore() {
+		def Date future = new Date(System.currentTimeMillis() + 100000)
+
+		String compact = Jwts.builder().setNotBefore(future).compact()
+
+		Jwt jwt = Jwts.parser().ignoreNotBefore().
+			parse(compact)
+
+		assertNotNull jwt
+	}
+	
     @Test
     void testParseWithExpiredJwtWithinAllowedClockSkew() {
         Date exp = new Date(System.currentTimeMillis() - 3000)
@@ -1518,4 +1560,7 @@ class JwtParserTest {
             assertTrue e.getMessage().startsWith('JWT expired at ')
         }
     }
+    
+    
+    
 }
