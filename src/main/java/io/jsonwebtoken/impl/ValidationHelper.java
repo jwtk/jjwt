@@ -19,17 +19,15 @@ public class ValidationHelper {
 	/**
 	 * Check if JWT expired.
 	 * 
-	 * @param header
-	 *            Parsed header part of JWT.
 	 * @param claims
 	 *            Parsed claims value of JWT.
 	 * @return {@code true} if current time is later than given {@code exp}
 	 *         claim.
 	 */
-	public static boolean isExpired(Header header, Claims claims) {
+	public static boolean isExpired(Claims claims) {
 		boolean expired = false;
 		try {
-			validateExpiration(header, claims);
+			validateExpiration(claims);
 		} catch (ExpiredJwtException e) {
 			expired = true;
 		}
@@ -39,34 +37,30 @@ public class ValidationHelper {
 	/**
 	 * Check if JWT is premature.
 	 * 
-	 * @param header
-	 *            Parsed header part of JWT.
 	 * @param claims
 	 *            Parsed claims value of JWT.
 	 * @return {@code true} if current time is earlier than given {@code nbf}
 	 *         claim.
 	 */
-	public static boolean isPremature(Header header, Claims claims) {
-		boolean expired = false;
+	public static boolean isPremature(Claims claims) {
+		boolean premature = false;
 		try {
-			validateExpiration(header, claims);
-		} catch (ExpiredJwtException e) {
-			expired = true;
+			validateNotBefore(claims);
+		} catch (PrematureJwtException e) {
+			premature = true;
 		}
-		return expired;
+		return premature;
 	}
 
 	/**
 	 * Validate {@code exp} (expires) claim. If current time is later than given
 	 * {@code exp}, a {@link ExpiredJwtException} will be thrown.
 	 * 
-	 * @param header
-	 *            Parsed header part of JWT.
 	 * @param claims
 	 *            Parsed claims value of JWT.
 	 */
-	public static void validateExpiration(Header header, Claims claims) {
-		validateExpiration(header, claims, 0, DefaultClock.INSTANCE);
+	public static void validateExpiration(Claims claims) {
+		validateExpiration(claims, 0, DefaultClock.INSTANCE);
 	}
 
 	/**
@@ -74,7 +68,26 @@ public class ValidationHelper {
 	 * {@code exp}, a {@link ExpiredJwtException} will be thrown.
 	 * 
 	 * @param header
-	 *            Parsed header part of JWT.
+	 *            Parsed header value of JWT.
+	 * @param claims
+	 *            Parsed claims value of JWT.
+	 * @param allowedClockSkewMillis
+	 *            The number of seconds to tolerate for clock skew when
+	 *            verifying {@code exp} claim.
+	 * @param clock
+	 *            a {@code Clock} object to return the timestamp to use when
+	 *            validating the parsed JWT.
+	 */
+	public static void validateExpiration(Claims claims, long allowedClockSkewMillis, Clock clock) {
+		validateExpiration(null, claims, allowedClockSkewMillis, clock);
+	}
+
+	/**
+	 * Validate {@code exp} (expires) claim. If current time is later than given
+	 * {@code exp}, a {@link ExpiredJwtException} will be thrown.
+	 * 
+	 * @param header
+	 *            Parsed header value of JWT.
 	 * @param claims
 	 *            Parsed claims value of JWT.
 	 * @param allowedClockSkewMillis
@@ -112,21 +125,38 @@ public class ValidationHelper {
 	 * Validate {@code nbf} (not before) claim. If current time is earlier than
 	 * given {@code nbf}, a {@link PrematureJwtException} will be thrown.
 	 * 
-	 * @param heade
-	 *            Parsed header part of JWT.
 	 * @param claims
 	 *            Parsed claims value of JWT.
 	 */
-	public static void validateNotBefore(Header header, Claims claims) {
-		validateExpiration(header, claims, 0, DefaultClock.INSTANCE);
+	public static void validateNotBefore(Claims claims) {
+		validateNotBefore(claims, 0, DefaultClock.INSTANCE);
 	}
 
 	/**
 	 * Validate {@code nbf} (not before) claim. If current time is earlier than
 	 * given {@code nbf}, a {@link PrematureJwtException} will be thrown.
-	 *
+	 * 
 	 * @param header
-	 *            Parsed header part of JWT.
+	 *            Parsed header value of JWT.
+	 * @param claims
+	 *            Parsed claims value of JWT.
+	 * @param allowedClockSkewMillis
+	 *            The number of seconds to tolerate for clock skew when
+	 *            verifying {@code nbf} claim.
+	 * @param clock
+	 *            a {@code Clock} object to return the timestamp to use when
+	 *            validating the parsed JWT.
+	 */
+	public static void validateNotBefore(Claims claims, long allowedClockSkewMillis, Clock clock) {
+		validateNotBefore(null, claims, allowedClockSkewMillis, clock);
+	}
+	
+	/**
+	 * Validate {@code nbf} (not before) claim. If current time is earlier than
+	 * given {@code nbf}, a {@link PrematureJwtException} will be thrown.
+	 * 
+	 * @param header
+	 *            Parsed header value of JWT.
 	 * @param claims
 	 *            Parsed claims value of JWT.
 	 * @param allowedClockSkewMillis
