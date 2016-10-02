@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import java.io.IOException;
 import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -35,13 +36,14 @@ import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.InvalidClaimException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwsParts;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.JwtParts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
+import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.SigningKeyResolver;
@@ -53,283 +55,411 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
+
 public class DefaultJwtParser implements JwtParser {
 
-    //don't need millis since JWT date fields are only second granularity:
-    private static final int MILLISECONDS_PER_SECOND = 1000;
+	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+	// don't need millis since JWT date fields are only second granularity:
+	private static final int MILLISECONDS_PER_SECOND = 1000;
 
-    private byte[] keyBytes;
+	private ObjectMapper objectMapper = new ObjectMapper();
 
-    private Key key;
+	private byte[] keyBytes;
 
-    private SigningKeyResolver signingKeyResolver;
+	private Key key;
 
-    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+	private SigningKeyResolver signingKeyResolver;
 
-    Claims expectedClaims = new DefaultClaims();
+	private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
-    private Clock clock = DefaultClock.INSTANCE;
+	Claims expectedClaims = new DefaultClaims();
 
-    private long allowedClockSkewMillis = 0;
+	private Clock clock = DefaultClock.INSTANCE;
+
+	private long allowedClockSkewMillis = 0;
 
 	private boolean ignoreExpiry = false;
 	private boolean ignoreNotBefore = false;
-	private boolean ignoreSignature = false;
-
-    @Override
-    public JwtParser requireIssuedAt(Date issuedAt) {
-        expectedClaims.setIssuedAt(issuedAt);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireIssuer(String issuer) {
-        expectedClaims.setIssuer(issuer);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireAudience(String audience) {
-        expectedClaims.setAudience(audience);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireSubject(String subject) {
-        expectedClaims.setSubject(subject);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireId(String id) {
-        expectedClaims.setId(id);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireExpiration(Date expiration) {
-        expectedClaims.setExpiration(expiration);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireNotBefore(Date notBefore) {
-        expectedClaims.setNotBefore(notBefore);
-        return this;
-    }
-
-    @Override
-    public JwtParser require(String claimName, Object value) {
-        Assert.hasText(claimName, "claim name cannot be null or empty.");
-        Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.put(claimName, value);
-        return this;
-    }
-
-    @Override
-    public JwtParser setClock(Clock clock) {
-        Assert.notNull(clock, "Clock instance cannot be null.");
-        this.clock = clock;
-        return this;
-    }
-
-    @Override
-    public JwtParser setAllowedClockSkewSeconds(long seconds) {
-        this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
-        return this;
-    }
-
-    @Override
-    public JwtParser setSigningKey(byte[] key) {
-        Assert.notEmpty(key, "signing key cannot be null or empty.");
-        this.keyBytes = key;
-        return this;
-    }
-
-    @Override
-    public JwtParser setSigningKey(String base64EncodedKeyBytes) {
-        Assert.hasText(base64EncodedKeyBytes, "signing key cannot be null or empty.");
-        this.keyBytes = TextCodec.BASE64.decode(base64EncodedKeyBytes);
-        return this;
-    }
-
-    @Override
-    public JwtParser setSigningKey(Key key) {
-        Assert.notNull(key, "signing key cannot be null.");
-        this.key = key;
-        return this;
-    }
-
-    @Override
-    public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
-        Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
-        this.signingKeyResolver = signingKeyResolver;
-        return this;
-    }
-
-    @Override
-    public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
-        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
-        this.compressionCodecResolver = compressionCodecResolver;
-        return this;
-    }
-
-    @Override
-    public boolean isSigned(String jwt) {
-
-        if (jwt == null) {
-            return false;
-        }
-
-        int delimiterCount = 0;
-
-        for (int i = 0; i < jwt.length(); i++) {
-            char c = jwt.charAt(i);
-
-            if (delimiterCount == 2) {
-                return !Character.isWhitespace(c) && c != SEPARATOR_CHAR;
-            }
-
-            if (c == SEPARATOR_CHAR) {
-                delimiterCount++;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public JwtParser ignoreExpiry() {
-        ignoreExpiry = true;
-        return this;
-    }
-
-    @Override
-    public JwtParser ignoreNotBefore() {
-        ignoreNotBefore = true;
-        return this;
-    }
-
-    @Override
-    public JwtParser ignoreSignature() {
-        ignoreSignature = true;
-        return this;
-    }
 
 	@Override
-    public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+	public JwtParser requireIssuedAt(Date issuedAt) {
+		expectedClaims.setIssuedAt(issuedAt);
+		return this;
+	}
 
-        Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
+	@Override
+	public JwtParser requireIssuer(String issuer) {
+		expectedClaims.setIssuer(issuer);
+		return this;
+	}
 
-        JwtParts jwtParts = splitJwt(jwt);
+	@Override
+	public JwtParser requireAudience(String audience) {
+		expectedClaims.setAudience(audience);
+		return this;
+	}
 
-        // =============== Header =================
-        Header header = parseHeader(jwtParts);
+	@Override
+	public JwtParser requireSubject(String subject) {
+		expectedClaims.setSubject(subject);
+		return this;
+	}
 
-        // =============== Body =================
-        String payload = parsePayload(jwtParts, header);
-        Claims claims = parseClaims(payload);
+	@Override
+	public JwtParser requireId(String id) {
+		expectedClaims.setId(id);
+		return this;
+	}
 
-        // =============== Signature =================
-        validateSignature(jwtParts, header, payload, claims);
+	@Override
+	public JwtParser requireExpiration(Date expiration) {
+		expectedClaims.setExpiration(expiration);
+		return this;
+	}
 
-        //since 0.3:
-        validateClaims(header, claims);
+	@Override
+	public JwtParser requireNotBefore(Date notBefore) {
+		expectedClaims.setNotBefore(notBefore);
+		return this;
+	}
 
-        Object body = claims != null ? claims : payload;
+	@Override
+	public JwtParser require(String claimName, Object value) {
+		Assert.hasText(claimName, "claim name cannot be null or empty.");
+		Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
+		expectedClaims.put(claimName, value);
+		return this;
+	}
 
-        if (jwtParts.getBase64UrlEncodedSignature() != null) {
-            return new DefaultJws<Object>((JwsHeader) header, body, jwtParts.getBase64UrlEncodedSignature());
-        } else {
-            return new DefaultJwt<Object>(header, body);
-        }
-    }
+	@Override
+	public JwtParser setClock(Clock clock) {
+		Assert.notNull(clock, "Clock instance cannot be null.");
+		this.clock = clock;
+		return this;
+	}
 
-	private void validateSignature(JwtParts jwtParts, Header header, String payload, Claims claims) {
-		if (!this.ignoreSignature && jwtParts.getBase64UrlEncodedSignature() != null) { //it is signed - validate the signature
+	@Override
+	public JwtParser setAllowedClockSkewSeconds(long seconds) {
+		this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
+		return this;
+	}
 
-            SignatureAlgorithm algorithm = parseSignatureAlgorithm(header);
+	@Override
+	public JwtParser setSigningKey(byte[] key) {
+		Assert.notEmpty(key, "signing key cannot be null or empty.");
+		this.keyBytes = key;
+		return this;
+	}
 
-            checkSigningKey();
+	@Override
+	public JwtParser setSigningKey(String base64EncodedKeyBytes) {
+		Assert.hasText(base64EncodedKeyBytes, "signing key cannot be null or empty.");
+		this.keyBytes = TextCodec.BASE64.decode(base64EncodedKeyBytes);
+		return this;
+	}
 
-            //digitally signed, let's assert the signature:
-            Key key = resolveKey(header, payload, claims, algorithm);
+	@Override
+	public JwtParser setSigningKey(Key key) {
+		Assert.notNull(key, "signing key cannot be null.");
+		this.key = key;
+		return this;
+	}
 
-            validateSignatureWithSignatureValidator(jwtParts, algorithm, key);
-        }
+	@Override
+	public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
+		Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
+		this.signingKeyResolver = signingKeyResolver;
+		return this;
+	}
+
+	@Override
+	public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
+		Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
+		this.compressionCodecResolver = compressionCodecResolver;
+		return this;
+	}
+
+	@Override
+	public boolean isSigned(String jwt) {
+
+		if (jwt == null) {
+			return false;
+		}
+
+		int delimiterCount = 0;
+
+		for (int i = 0; i < jwt.length(); i++) {
+			char c = jwt.charAt(i);
+
+			if (delimiterCount == 2) {
+				return !Character.isWhitespace(c) && c != SEPARATOR_CHAR;
+			}
+
+			if (c == SEPARATOR_CHAR) {
+				delimiterCount++;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public JwtParser ignoreExpiry() {
+		ignoreExpiry = true;
+		return this;
+	}
+
+	@Override
+	public JwtParser ignoreNotBefore() {
+		ignoreNotBefore = true;
+		return this;
+	}
+
+	@Override
+	public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+
+		Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
+
+		JwsParts jwsParts = getJwsParts(jwt);
+
+		// =============== Header =================
+		Header header = parseHeader(jwsParts);
+
+		// =============== Body =================
+		String payload = parsePayload(jwsParts, header);
+		Claims claims = parseClaims(payload);
+
+		// =============== Signature =================
+		validateSignature(jwsParts, header, payload, claims);
+
+		// since 0.3:
+		validateClaims(header, claims);
+
+		Object body = claims != null ? claims : payload;
+
+		if (jwsParts.getBase64UrlEncodedSignature() != null) {
+			return new DefaultJws<Object>((JwsHeader) header, body, jwsParts.getBase64UrlEncodedSignature());
+		} else {
+			return new DefaultJwt<Object>(header, body);
+		}
+	}
+
+	@Override
+	public Header parseHeader(String jwt) {
+		JwsParts jwsParts = getJwsParts(jwt);
+		return parseHeader(jwsParts);
+	}
+
+	@Override
+	public boolean isExpired(String jwt) {
+		boolean expired = false;
+		try {
+			validateExpiration(jwt);
+		} catch (ExpiredJwtException e) {
+			expired = true;
+		}
+
+		return expired;
+	}
+
+	@Override
+	public boolean isPremature(String jwt) {
+		boolean premature = false;
+		try {
+			validateNotBefore(jwt);
+		} catch (PrematureJwtException e) {
+			premature = true;
+		}
+
+		return premature;
+	}
+
+	@Override
+	public void validateExpiration(String jwt) {
+		Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
+
+		JwsParts jwsParts = getJwsParts(jwt);
+
+		// =============== Header =================
+		Header header = parseHeader(jwsParts);
+
+		// =============== Body =================
+		String payload = parsePayload(jwsParts, header);
+		Claims claims = parseClaims(payload);
+
+		validateExpiration(header, claims);
+	}
+
+	public void validateNotBefore(String jwt) {
+		Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
+
+		JwsParts jwsParts = getJwsParts(jwt);
+
+		// =============== Header =================
+		Header header = parseHeader(jwsParts);
+
+		// =============== Body =================
+		String payload = parsePayload(jwsParts, header);
+		Claims claims = parseClaims(payload);
+
+		validateNotBefore(header, claims);
+	}
+
+	private void validateSignature(JwsParts jwsParts, Header header, String payload, Claims claims) {
+		if (jwsParts.getBase64UrlEncodedSignature() != null) { // it is signed validate the signature
+
+			SignatureAlgorithm algorithm = parseSignatureAlgorithm(header);
+
+			checkSigningKey();
+
+			// digitally signed, let's assert the signature:
+			Key key = resolveKey(header, payload, claims, algorithm);
+
+			validateSignatureWithSignatureValidator(jwsParts, algorithm, key);
+		}
 	}
 
 	private void validateClaims(Header header, Claims claims) {
 		if (claims != null) {
 
 			if (!this.ignoreExpiry) {
-	            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
-	            //token MUST NOT be accepted on or after any specified exp time:
-	            ValidationHelper.validateExpiration(header, claims, this.allowedClockSkewMillis, this.clock);
+				// https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
+				// token MUST NOT be accepted on or after any specified exp
+				// time:
+				validateExpiration(header, claims);
 			}
-			
+
 			if (!this.ignoreNotBefore) {
-	            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
-	            //token MUST NOT be accepted before any specified nbf time:
-	            ValidationHelper.validateNotBefore(header, claims, this.allowedClockSkewMillis, this.clock);
+				// https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
+				// token MUST NOT be accepted before any specified nbf time:
+				validateNotBefore(header, claims);
 			}
-			
-            validateExpectedClaims(header, claims);
-        }
+
+			validateExpectedClaims(header, claims);
+		}
 	}
 
-	private void validateSignatureWithSignatureValidator(JwtParts jwtParts, SignatureAlgorithm algorithm, Key key) {
+	/**
+	 * Validate {@code exp} (expires) claim. If current time is later than given
+	 * {@code exp}, a {@link ExpiredJwtException} will be thrown.
+	 * 
+	 * @param header
+	 *            Parsed header value of JWT.
+	 * @param claims
+	 *            Parsed claims value of JWT.
+	 */
+	private void validateExpiration(Header header, Claims claims) {
+		SimpleDateFormat sdf;
+		Date exp = claims.getExpiration();
+		if (exp != null) {
+			final Date now = clock.now();
+			long nowTime = now.getTime();
+			final boolean allowSkew = allowedClockSkewMillis > 0;
+			long maxTime = nowTime - allowedClockSkewMillis;
+			Date max = allowSkew ? new Date(maxTime) : now;
+			if (max.after(exp)) {
+				sdf = new SimpleDateFormat(ISO_8601_FORMAT);
+				String expVal = sdf.format(exp);
+				String nowVal = sdf.format(now);
+
+				long differenceMillis = maxTime - exp.getTime();
+
+				String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of "
+						+ differenceMillis + " milliseconds.  Allowed clock skew: " + allowedClockSkewMillis
+						+ " milliseconds.";
+				throw new ExpiredJwtException(header, claims, msg);
+			}
+		}
+	}
+
+	/**
+	 * Validate {@code nbf} (not before) claim. If current time is earlier than
+	 * given {@code nbf}, a {@link PrematureJwtException} will be thrown.
+	 * 
+	 * @param header
+	 *            Parsed header value of JWT.
+	 * @param claims
+	 *            Parsed claims value of JWT.
+	 */
+	private void validateNotBefore(Header header, Claims claims) {
+		SimpleDateFormat sdf;
+		Date nbf = claims.getNotBefore();
+		if (nbf != null) {
+			final Date now = clock.now();
+			long nowTime = now.getTime();
+			final boolean allowSkew = allowedClockSkewMillis > 0;
+			long minTime = nowTime + allowedClockSkewMillis;
+			Date min = allowSkew ? new Date(minTime) : now;
+			if (min.before(nbf)) {
+				sdf = new SimpleDateFormat(ISO_8601_FORMAT);
+				String nbfVal = sdf.format(nbf);
+				String nowVal = sdf.format(now);
+
+				long differenceMillis = nbf.getTime() - minTime;
+
+				String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal
+						+ ", a difference of " + differenceMillis + " milliseconds.  Allowed clock skew: "
+						+ allowedClockSkewMillis + " milliseconds.";
+				throw new PrematureJwtException(header, claims, msg);
+			}
+		}
+	}
+
+	private void validateSignatureWithSignatureValidator(JwsParts jwsParts, SignatureAlgorithm algorithm, Key key) {
 		JwtSignatureValidator validator = null;
 		try {
-		    validator = createSignatureValidator(algorithm, key);
+			validator = createSignatureValidator(algorithm, key);
 		} catch (IllegalArgumentException e) {
-		    String algName = algorithm.getValue();
-		    String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
-		                 "algorithm, but the specified signing key of type " + key.getClass().getName() +
-		                 " may not be used to validate " + algName + " signatures.  Because the specified " +
-		                 "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
-		                 "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-		                 "trusted.  Another possibility is that the parser was configured with the incorrect " +
-		                 "signing key, but this cannot be assumed for security reasons.";
-		    throw new UnsupportedJwtException(msg, e);
+			String algName = algorithm.getValue();
+			String msg = "The parsed JWT indicates it was signed with the " + algName + " signature "
+					+ "algorithm, but the specified signing key of type " + key.getClass().getName()
+					+ " may not be used to validate " + algName + " signatures.  Because the specified "
+					+ "signing key reflects a specific and expected algorithm, and the JWT does not reflect "
+					+ "this algorithm, it is likely that the JWT was not expected and therefore should not be "
+					+ "trusted.  Another possibility is that the parser was configured with the incorrect "
+					+ "signing key, but this cannot be assumed for security reasons.";
+			throw new UnsupportedJwtException(msg, e);
 		}
 
-        //re-create the jwt part without the signature.  This is what needs to be signed for verification:
-        String jwtWithoutSignature = jwtParts.getBase64UrlEncodedHeader() + SEPARATOR_CHAR + jwtParts.getBase64UrlEncodedPayload();
-		
-		if (!validator.isValid(jwtWithoutSignature, jwtParts.getBase64UrlEncodedSignature())) {
-		    String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
-		                 "asserted and should not be trusted.";
-		    throw new SignatureException(msg);
+		// re-create the jwt part without the signature. This is what needs to
+		// be signed for verification:
+		String jwtWithoutSignature = jwsParts.getBase64UrlEncodedHeader() + SEPARATOR_CHAR
+				+ jwsParts.getBase64UrlEncodedPayload();
+
+		if (!validator.isValid(jwtWithoutSignature, jwsParts.getBase64UrlEncodedSignature())) {
+			String msg = "JWT signature does not match locally computed signature. JWT validity cannot be "
+					+ "asserted and should not be trusted.";
+			throw new SignatureException(msg);
 		}
 	}
 
 	private Key resolveKey(Header header, String payload, Claims claims, SignatureAlgorithm algorithm) {
 		Key key = this.key;
 
-		if (key == null) { //fall back to keyBytes
+		if (key == null) { // fall back to keyBytes
 
-		    byte[] keyBytes = this.keyBytes;
+			byte[] keyBytes = this.keyBytes;
 
-		    if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
-		    	JwsHeader jwsHeader = (JwsHeader) header;
-		    	if (claims != null) {
-		            key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
-		        } else {
-		            key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
-		        }
-		    }
+			if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { // use
+																			// the
+																			// signingKeyResolver
+				JwsHeader jwsHeader = (JwsHeader) header;
+				if (claims != null) {
+					key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+				} else {
+					key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+				}
+			}
 
-		    if (!Objects.isEmpty(keyBytes)) {
+			if (!Objects.isEmpty(keyBytes)) {
 
-		        Assert.isTrue(algorithm.isHmac(),
-		                      "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
+				Assert.isTrue(algorithm.isHmac(),
+						"Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
 
-		        key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
-		    }
+				key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
+			}
 		}
 
 		Assert.notNull(key, "A signing key must be specified if the specified JWT is digitally signed.");
@@ -338,71 +468,77 @@ public class DefaultJwtParser implements JwtParser {
 
 	private void checkSigningKey() {
 		if (key != null && keyBytes != null) {
-		    throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
+			throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
 		} else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
-		    String object = key != null ? "a key object" : "key bytes";
-		    throw new IllegalStateException("A signing key resolver and " + object + " cannot both be specified. Choose either.");
+			String object = key != null ? "a key object" : "key bytes";
+			throw new IllegalStateException(
+					"A signing key resolver and " + object + " cannot both be specified. Choose either.");
 		}
 	}
 
 	private SignatureAlgorithm parseSignatureAlgorithm(Header header) {
 		SignatureAlgorithm algorithm = null;
-		
+
 		if (header != null) {
 			JwsHeader jwsHeader = (JwsHeader) header;
-		    String alg = jwsHeader.getAlgorithm();
-		    if (Strings.hasText(alg)) {
-		        algorithm = SignatureAlgorithm.forName(alg);
-		    }
+			String alg = jwsHeader.getAlgorithm();
+			if (Strings.hasText(alg)) {
+				algorithm = SignatureAlgorithm.forName(alg);
+			}
 		}
-		
-        if (algorithm == null || algorithm == SignatureAlgorithm.NONE) {
-            //it is plaintext, but it has a signature.  This is invalid:
-            String msg = "JWT string has a digest/signature, but the header does not reference a valid signature " +
-                         "algorithm.";
-            throw new MalformedJwtException(msg);
-        }else{
-        	return algorithm;        	
-        }
-		
+
+		if (algorithm == null || algorithm == SignatureAlgorithm.NONE) {
+			// it is plaintext, but it has a signature. This is invalid:
+			String msg = "JWT string has a digest/signature, but the header does not reference a valid signature "
+					+ "algorithm.";
+			throw new MalformedJwtException(msg);
+		} else {
+			return algorithm;
+		}
+
 	}
 
 	private Claims parseClaims(String payload) {
 		Claims claims = null;
-		if (payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
-            Map<String, Object> claimsMap = readValue(payload);
-            claims = new DefaultClaims(claimsMap);
-        }
+		if (payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { // likely
+																						// to
+																						// be
+																						// json,
+																						// parse
+																						// it:
+			Map<String, Object> claimsMap = readValue(payload);
+			claims = new DefaultClaims(claimsMap);
+		}
 		return claims;
 	}
 
-	private String parsePayload(JwtParts jwtParts, Header header) {
+	private String parsePayload(JwsParts jwsParts, Header header) {
 		String payload;
 		CompressionCodec compressionCodec = null;
-		
-        String base64UrlEncodedPayload = jwtParts.getBase64UrlEncodedPayload();
-		
-        if (header != null) {
-            compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
-        }
-		
+
+		String base64UrlEncodedPayload = jwsParts.getBase64UrlEncodedPayload();
+
+		if (header != null) {
+			compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
+		}
+
 		if (compressionCodec != null) {
-            byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
-            payload = new String(decompressed, Strings.UTF_8);
-        } else {
-            payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
-        }
+			byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
+			payload = new String(decompressed, Strings.UTF_8);
+		} else {
+			payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+		}
 		return payload;
 	}
 
-	private Header parseHeader(JwtParts jwtParts) {
+	private Header parseHeader(JwsParts jwsParts) {
 		Header header = null;
-        String base64UrlEncodedHeader = jwtParts.getBase64UrlEncodedHeader();
-        String base64UrlEncodedDigest = jwtParts.getBase64UrlEncodedSignature();
-		if (base64UrlEncodedHeader != null) {			
+		String base64UrlEncodedHeader = jwsParts.getBase64UrlEncodedHeader();
+		String base64UrlEncodedDigest = jwsParts.getBase64UrlEncodedSignature();
+		if (base64UrlEncodedHeader != null) {
 			String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
 			Map<String, Object> m = readValue(origValue);
-			
+
 			if (base64UrlEncodedDigest != null) {
 				header = new DefaultJwsHeader(m);
 			} else {
@@ -412,181 +548,169 @@ public class DefaultJwtParser implements JwtParser {
 		return header;
 	}
 
-    private JwtParts splitJwt(String jwt) {
-		JwtParts jwtParts = new JwtParts();
-		
-    	int delimiterCount = 0;
+	private JwsParts getJwsParts(String jwt) {
+		JwsParts jwsParts = new JwsParts();
 
-        StringBuilder sb = new StringBuilder(128);
+		int delimiterCount = 0;
 
-        for (char c : jwt.toCharArray()) {
+		StringBuilder sb = new StringBuilder(128);
 
-            if (c == SEPARATOR_CHAR) {
+		for (char c : jwt.toCharArray()) {
 
-                CharSequence tokenSeq = Strings.clean(sb);
-                String token = tokenSeq!=null?tokenSeq.toString():null;
+			if (c == SEPARATOR_CHAR) {
 
-                if (delimiterCount == 0) {
-                	jwtParts.setBase64UrlEncodedHeader(token);
-                } else if (delimiterCount == 1) {
-                	jwtParts.setBase64UrlEncodedPayload(token);
-                }
+				CharSequence tokenSeq = Strings.clean(sb);
+				String token = tokenSeq != null ? tokenSeq.toString() : null;
 
-                delimiterCount++;
-                sb.setLength(0);
-            } else {
-                sb.append(c);
-            }
-        }
+				if (delimiterCount == 0) {
+					jwsParts.setBase64UrlEncodedHeader(token);
+				} else if (delimiterCount == 1) {
+					jwsParts.setBase64UrlEncodedPayload(token);
+				}
 
-        if (delimiterCount != 2) {
-            String msg = "JWT strings must contain exactly 2 period characters. Found: " + delimiterCount;
-            throw new MalformedJwtException(msg);
-        }
-        if (sb.length() > 0) {
-        	jwtParts.setBase64UrlEncodedSignature(sb.toString());
-        }
+				delimiterCount++;
+				sb.setLength(0);
+			} else {
+				sb.append(c);
+			}
+		}
 
-        if (jwtParts.getBase64UrlEncodedPayload() == null) {
-            throw new MalformedJwtException("JWT string '" + jwt + "' is missing a body/payload.");
-        }
+		if (delimiterCount != 2) {
+			String msg = "JWT strings must contain exactly 2 period characters. Found: " + delimiterCount;
+			throw new MalformedJwtException(msg);
+		}
+		if (sb.length() > 0) {
+			jwsParts.setBase64UrlEncodedSignature(sb.toString());
+		}
 
-    	
-		return jwtParts;
+		if (jwsParts.getBase64UrlEncodedPayload() == null) {
+			throw new MalformedJwtException("JWT string '" + jwt + "' is missing a body/payload.");
+		}
+
+		return jwsParts;
 	}
 
 	private void validateExpectedClaims(Header header, Claims claims) {
-        for (String expectedClaimName : expectedClaims.keySet()) {
+		for (String expectedClaimName : expectedClaims.keySet()) {
 
-            Object expectedClaimValue = expectedClaims.get(expectedClaimName);
-            Object actualClaimValue = claims.get(expectedClaimName);
+			Object expectedClaimValue = expectedClaims.get(expectedClaimName);
+			Object actualClaimValue = claims.get(expectedClaimName);
 
-            if (
-                Claims.ISSUED_AT.equals(expectedClaimName) ||
-                Claims.EXPIRATION.equals(expectedClaimName) ||
-                Claims.NOT_BEFORE.equals(expectedClaimName)
-            ) {
-                expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
-                actualClaimValue = claims.get(expectedClaimName, Date.class);
-            } else if (
-                expectedClaimValue instanceof Date &&
-                actualClaimValue != null &&
-                actualClaimValue instanceof Long
-            ) {
-                actualClaimValue = new Date((Long)actualClaimValue);
-            }
+			if (Claims.ISSUED_AT.equals(expectedClaimName) || Claims.EXPIRATION.equals(expectedClaimName)
+					|| Claims.NOT_BEFORE.equals(expectedClaimName)) {
+				expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
+				actualClaimValue = claims.get(expectedClaimName, Date.class);
+			} else if (expectedClaimValue instanceof Date && actualClaimValue != null
+					&& actualClaimValue instanceof Long) {
+				actualClaimValue = new Date((Long) actualClaimValue);
+			}
 
-            InvalidClaimException invalidClaimException = null;
+			InvalidClaimException invalidClaimException = null;
 
-            if (actualClaimValue == null) {
-                String msg = String.format(
-                    ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
-                    expectedClaimName, expectedClaimValue
-                );
-                invalidClaimException = new MissingClaimException(header, claims, msg);
-            } else if (!expectedClaimValue.equals(actualClaimValue)) {
-                String msg = String.format(
-                    ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
-                    expectedClaimName, expectedClaimValue, actualClaimValue
-                );
-                invalidClaimException = new IncorrectClaimException(header, claims, msg);
-            }
+			if (actualClaimValue == null) {
+				String msg = String.format(ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, expectedClaimName,
+						expectedClaimValue);
+				invalidClaimException = new MissingClaimException(header, claims, msg);
+			} else if (!expectedClaimValue.equals(actualClaimValue)) {
+				String msg = String.format(ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+						expectedClaimName, expectedClaimValue, actualClaimValue);
+				invalidClaimException = new IncorrectClaimException(header, claims, msg);
+			}
 
-            if (invalidClaimException != null) {
-                invalidClaimException.setClaimName(expectedClaimName);
-                invalidClaimException.setClaimValue(expectedClaimValue);
-                throw invalidClaimException;
-            }
-        }
-    }
+			if (invalidClaimException != null) {
+				invalidClaimException.setClaimName(expectedClaimName);
+				invalidClaimException.setClaimValue(expectedClaimValue);
+				throw invalidClaimException;
+			}
+		}
+	}
 
-    /*
-     * @since 0.5 mostly to allow testing overrides
-     */
-    protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
-        return new DefaultJwtSignatureValidator(alg, key);
-    }
+	/*
+	 * @since 0.5 mostly to allow testing overrides
+	 */
+	protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
+		return new DefaultJwtSignatureValidator(alg, key);
+	}
 
-    @Override
-    public <T> T parse(String compact, JwtHandler<T> handler)
-        throws ExpiredJwtException, MalformedJwtException, SignatureException {
-        Assert.notNull(handler, "JwtHandler argument cannot be null.");
-        Assert.hasText(compact, "JWT String argument cannot be null or empty.");
+	@Override
+	public <T> T parse(String compact, JwtHandler<T> handler)
+			throws ExpiredJwtException, MalformedJwtException, SignatureException {
+		Assert.notNull(handler, "JwtHandler argument cannot be null.");
+		Assert.hasText(compact, "JWT String argument cannot be null or empty.");
 
-        Jwt jwt = parse(compact);
+		Jwt jwt = parse(compact);
 
-        if (jwt instanceof Jws) {
-            Jws jws = (Jws) jwt;
-            Object body = jws.getBody();
-            if (body instanceof Claims) {
-                return handler.onClaimsJws((Jws<Claims>) jws);
-            } else {
-                return handler.onPlaintextJws((Jws<String>) jws);
-            }
-        } else {
-            Object body = jwt.getBody();
-            if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
-            } else {
-                return handler.onPlaintextJwt((Jwt<Header, String>) jwt);
-            }
-        }
-    }
+		if (jwt instanceof Jws) {
+			Jws jws = (Jws) jwt;
+			Object body = jws.getBody();
+			if (body instanceof Claims) {
+				return handler.onClaimsJws((Jws<Claims>) jws);
+			} else {
+				return handler.onPlaintextJws((Jws<String>) jws);
+			}
+		} else {
+			Object body = jwt.getBody();
+			if (body instanceof Claims) {
+				return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
+			} else {
+				return handler.onPlaintextJwt((Jwt<Header, String>) jwt);
+			}
+		}
+	}
 
-    @Override
-    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
-        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
-            @Override
-            public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
-                return jwt;
-            }
-        });
-    }
+	@Override
+	public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
+		return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
+			@Override
+			public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
+				return jwt;
+			}
+		});
+	}
 
-    @Override
-    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
-        try {
-            return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
-                @Override
-                public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
-                    return jwt;
-                }
-            });
-        } catch (IllegalArgumentException iae) {
-            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
-        }
-    }
+	@Override
+	public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
+		try {
+			return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
+				@Override
+				public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
+					return jwt;
+				}
+			});
+		} catch (IllegalArgumentException iae) {
+			throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
+		}
+	}
 
-    @Override
-    public Jws<String> parsePlaintextJws(String plaintextJws) {
-        try {
-            return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
-                @Override
-                public Jws<String> onPlaintextJws(Jws<String> jws) {
-                    return jws;
-                }
-            });
-        } catch (IllegalArgumentException iae) {
-            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
-        }
-    }
+	@Override
+	public Jws<String> parsePlaintextJws(String plaintextJws) {
+		try {
+			return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
+				@Override
+				public Jws<String> onPlaintextJws(Jws<String> jws) {
+					return jws;
+				}
+			});
+		} catch (IllegalArgumentException iae) {
+			throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
+		}
+	}
 
-    @Override
-    public Jws<Claims> parseClaimsJws(String claimsJws) {
-        return parse(claimsJws, new JwtHandlerAdapter<Jws<Claims>>() {
-            @Override
-            public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
-                return jws;
-            }
-        });
-    }
+	@Override
+	public Jws<Claims> parseClaimsJws(String claimsJws) {
+		return parse(claimsJws, new JwtHandlerAdapter<Jws<Claims>>() {
+			@Override
+			public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
+				return jws;
+			}
+		});
+	}
 
-    @SuppressWarnings("unchecked")
-    protected Map<String, Object> readValue(String val) {
-        try {
-            return objectMapper.readValue(val, Map.class);
-        } catch (IOException e) {
-            throw new MalformedJwtException("Unable to read JSON value: " + val, e);
-        }
-    }
+	protected Map<String, Object> readValue(String val) {
+		try {
+			return objectMapper.readValue(val, Map.class);
+		} catch (IOException e) {
+			throw new MalformedJwtException("Unable to read JSON value: " + val, e);
+		}
+	}
 }

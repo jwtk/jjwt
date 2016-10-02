@@ -125,24 +125,6 @@ class JwtParserTest {
         }
 
     }
-	
-	@Test
-	void testParseWithInvalidSignatureApplyingIgnoreSignature() {
-
-		String header = '{"alg":"HS256"}'
-
-		String payload = '{"subject":"Joe"}'
-
-		String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
-
-		String bad = TextCodec.BASE64.encode(header) + '.' +
-				TextCodec.BASE64.encode(payload) + '.' +
-				TextCodec.BASE64.encode(badSig)
-
-		Jwt jwt = Jwts.parser().ignoreSignature().setSigningKey(randomKey()).parse(bad)
-	
-		assertNotNull jwt
-	}
 
     @Test
     void testParsePlaintextJwsWithIncorrectAlg() {

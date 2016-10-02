@@ -276,20 +276,11 @@ public interface JwtParser {
      * Do not validate the {@code nbf} claim when parsing the JWT.
      * <p>
      * <p>Note that this circumvents security features of JWT.</p>
+     * 
      * @return the parser for method chaining.
      * @see PrematureJwtException
      */
     JwtParser ignoreNotBefore();
-
-    /**
-     * Do not validate the JWS digital signature.
-     * <p>
-     * <p>Note that this circumvents security features of JWT and JWS.</p>
-     *
-     * @return the parser for method chaining.
-     * @see SignatureException
-     */
-    JwtParser ignoreSignature();
     
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -367,6 +358,60 @@ public interface JwtParser {
     <T> T parse(String jwt, JwtHandler<T> handler)
             throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
+    
+    /**
+     * Parses the header part of the specified compact serialized JWT string.
+     * 
+     * <p>Note that while parsing header no validation or security check will be applied.</p>
+     * 
+     * @param jwt the compact serialized JWT to parse
+     * @return Deserialized {@link Header} part of specified compact JWT string.
+     */
+	Header parseHeader(String jwt);
+
+	/**
+	 * Checks if the specified compact serialized JWT string is expired based on the builder's current configuration state. 
+     * <p>
+     * <p>Note that you need this method probably only then, if the parser is configured to by pass 'expiration time' ({@code exp}) claim validation (by calling builder's {@link #ignoreExpiry()} method).</p>
+     *
+     * @param jwt the compact serialized JWT to check
+     * @return {@code true} if the specified JWT compact string is expired, {@code false} otherwise.
+	 */
+	boolean isExpired(String jwt);
+	
+	/**
+	 * Checks if the specified compact serialized JWT string is premature based on the builder's current configuration state. 
+     * <p>
+     * <p>Note that you need this method probably only then, if the parser is configured to by pass 'not before' ({@code nbf}) claim validation (by calling builder's {@link #ignoreNotBefore()} method).</p>
+     *
+     * @param jwt the compact serialized JWT to check
+     * @return {@code true} if the specified JWT compact string is premature, {@code false} otherwise.
+	 */
+	boolean isPremature(String jwt);
+	
+	
+	/**
+	 * Validates 'expiration time' ({@code exp}) claim of the specified compact serialized JWT string based on the builder's current configuration state. 
+     * <p>
+     * <p>Note that you need this validation method probably only then, if the parser is configured to by pass 'expiration time' ({@code exp}) claim validation (by calling builder's {@link #ignoreExpiry()} method).</p>
+     *
+     * @param jwt the compact serialized JWT to check
+     * 
+     * @throws ExpiredJwtException if the validation of 'expiration time' ({@code exp}) claim is failed.
+	 */
+	void validateExpiration(String jwt);
+
+	/**
+	 * Validates 'not before' ({@code nbf}) claim of the specified compact serialized JWT string based on the builder's current configuration state. 
+     * <p>
+     * <p>Note that you need this validation method probably only then, if the parser is configured to by pass 'not before' ({@code nbf}) claim (by calling builder's {@link #ignoreNotBefore()} method).</p>
+     *
+     * @param jwt the compact serialized JWT to check
+     * 
+     * @throws PrematureJwtException if the validation of 'not before' ({@code nbf}) claim is failed.
+	 */
+	void validateNotBefore(String jwt);
+    
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
      * returns
