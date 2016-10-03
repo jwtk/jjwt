@@ -16,6 +16,7 @@
 package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultClock
+import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.TextCodec
 import org.junit.Test
@@ -332,6 +333,37 @@ class JwtParserTest {
         }
     }
 
+	
+	@Test
+	void testParseHeaderJwt() {
+
+		String type = 'someType'
+		String subject = 'Joe'
+
+		Header header = Jwts.header()
+		header.setType(type);
+		String compact = Jwts.builder().setHeader(header).setSubject(subject).compact()
+
+		Header parsedHeader = Jwts.parser().parseHeader(compact);
+
+		assertEquals type, parsedHeader.getType()
+	}
+
+	@Test
+	void testParseHeaderJws() {
+
+		String keyId = 'someID'
+		String subject = 'Joe'
+
+		DefaultJwsHeader header = (DefaultJwsHeader)Jwts.header()
+		header.setKeyId(keyId);
+		String compact = Jwts.builder().setHeader(header).setSubject(subject).compact()
+		
+		DefaultJwsHeader parsedHeader = (DefaultJwsHeader) Jwts.parser().parseHeader(compact)
+
+		assertEquals keyId, parsedHeader.getKeyId()
+	}
+	
     // ========================================================================
     // parseClaimsJwt tests
     // ========================================================================
@@ -532,7 +564,64 @@ class JwtParserTest {
             assertEquals e.getHeader().getAlgorithm(),  "HS256"
         }
     }
+	
+	@Test
+	void testValidationOfClaimsWithExpiredJws() {
 
+		String sub = 'Joe'
+
+		byte[] key = randomKey()
+
+		long nowMillis = System.currentTimeMillis()
+		//some time in the past:
+		Date exp = new Date(nowMillis - 1000)
+
+		String compact = Jwts.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).setExpiration(exp).compact()
+
+		try {
+			Jwts.parser().setSigningKey(key).validateExpiration(compact)
+			fail()
+		} catch (ExpiredJwtException e) {
+			assertTrue e.getMessage().startsWith('JWT expired at ')
+			assertEquals e.getClaims().getSubject(), sub
+			assertEquals e.getHeader().getAlgorithm(),  "HS256"
+		}
+	}
+
+	@Test
+	void testExpiredCheckWithExpiredJws() {
+
+		String sub = 'Joe'
+
+		byte[] key = randomKey()
+
+		Date exp = new Date(System.currentTimeMillis() -1)
+
+		String compact = Jwts.builder().setSubject(sub).setExpiration(exp).signWith(SignatureAlgorithm.HS256, key).compact()
+
+		boolean expired = Jwts.parser().setSigningKey(key).isExpired(compact)
+		
+		assertTrue expired
+
+	}
+	
+	@Test
+	void testExpiredCheckWithNotExpiredJws() {
+
+		String sub = 'Joe'
+
+		byte[] key = randomKey()
+
+		Date exp = new Date(System.currentTimeMillis() + 100000)
+
+		String compact = Jwts.builder().setSubject(sub).setExpiration(exp).signWith(SignatureAlgorithm.HS256, key).compact()
+
+		boolean expired = Jwts.parser().setSigningKey(key).isExpired(compact)
+		
+		assertFalse expired
+
+	}
+	
     @Test
     void testParseClaimsJwsWithPrematureJws() {
 
@@ -553,6 +642,61 @@ class JwtParserTest {
             assertEquals e.getHeader().getAlgorithm(),  "HS256"
         }
     }
+	
+	@Test
+	void testValidationOfClaimsWithPrematureJws() {
+
+		String sub = 'Joe'
+
+        byte[] key = randomKey()
+
+        Date nbf = new Date(System.currentTimeMillis() + 100000)
+
+        String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
+
+		try {
+			Jwts.parser().setSigningKey(key).validateNotBefore(compact)
+			fail()
+		} catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+            assertEquals e.getClaims().getSubject(), sub
+            assertEquals e.getHeader().getAlgorithm(),  "HS256"
+        }
+	}
+	
+	@Test
+	void testPrematureCheckWithPrematureJws() {
+
+		String sub = 'Joe'
+
+		byte[] key = randomKey()
+
+		Date nbf = new Date(System.currentTimeMillis() + 100000)
+
+		String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
+
+		boolean premature = Jwts.parser().setSigningKey(key).isPremature(compact)
+		
+		assertTrue premature
+
+	}
+	
+	@Test
+	void testPrematureCheckWithNotPrematureJws() {
+
+		String sub = 'Joe'
+
+		byte[] key = randomKey()
+
+		Date nbf = new Date(System.currentTimeMillis() - 1)
+
+		String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
+
+		boolean premature = Jwts.parser().setSigningKey(key).isPremature(compact)
+		
+		assertFalse premature
+
+	}
 
     @Test
     void testParseClaimsJwsWithPlaintextJwt() {
