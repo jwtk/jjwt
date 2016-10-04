@@ -23,7 +23,7 @@ class SignatureAlgorithmTest {
     @Test
     void testNames() {
         def algNames = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512',
-                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE', 'HmacSHA256']
+                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE']
 
         for( String name : algNames ) {
             testName(name)
