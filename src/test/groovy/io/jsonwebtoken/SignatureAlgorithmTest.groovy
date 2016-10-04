@@ -65,7 +65,7 @@ class SignatureAlgorithmTest {
     @Test
     void testJcaName() {
         for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
-            if (alg.getJcaName().startsWith("HmacSHA256")) {
+            if ("HmacSHA256".equals(alg.getJcaName())) {
                 assertEquals alg.getFamilyName(), "HMAC"
             }
         }
