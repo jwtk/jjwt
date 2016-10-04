@@ -23,7 +23,7 @@ class SignatureAlgorithmTest {
     @Test
     void testNames() {
         def algNames = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512',
-                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE']
+                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE', 'HmacSHA256']
 
         for( String name : algNames ) {
             testName(name)
@@ -57,6 +57,15 @@ class SignatureAlgorithmTest {
     void testHmacFamilyName() {
         for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("HS")) {
+                assertEquals alg.getFamilyName(), "HMAC"
+            }
+        }
+    }
+
+    @Test
+    void testJcaName() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if (alg.getJcaName().startsWith("HmacSHA256")) {
                 assertEquals alg.getFamilyName(), "HMAC"
             }
         }
