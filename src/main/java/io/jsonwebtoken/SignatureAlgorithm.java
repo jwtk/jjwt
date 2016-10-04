@@ -264,7 +264,7 @@ public enum SignatureAlgorithm {
             if (alg.getValue().equalsIgnoreCase(value)) {
                 return alg;
             }
-            if (alg.getJcaName().equalsIgnoreCase(value)) {
+            if (alg.getJcaName() != null && alg.getJcaName().equalsIgnoreCase(value)) {
               return alg;
           }
         }
