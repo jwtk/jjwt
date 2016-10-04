@@ -264,6 +264,9 @@ public enum SignatureAlgorithm {
             if (alg.getValue().equalsIgnoreCase(value)) {
                 return alg;
             }
+            if (alg.getJcaName().equalsIgnoreCase(value)) {
+              return alg;
+          }
         }
 
         throw new SignatureException("Unsupported signature algorithm '" + value + "'");
