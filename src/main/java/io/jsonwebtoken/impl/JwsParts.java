@@ -1,4 +1,4 @@
-package io.jsonwebtoken;
+package io.jsonwebtoken.impl;
 
 /**
  * Container class which contains (base64 encoded) header, payload and signature parts of
