@@ -1,7 +1,9 @@
 package io.jsonwebtoken.lang
 
-import groovy.json.internal.Charsets
 import org.junit.Test
+
+import java.nio.charset.StandardCharsets
+
 import static org.junit.Assert.*
 
 class ArraysTest {
@@ -18,7 +20,7 @@ class ArraysTest {
 
     @Test
     void testCleanWithElements() {
-        byte[] bytes = "hello".getBytes(Charsets.UTF_8)
+        byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8)
         assertSame bytes, Arrays.clean(bytes)
     }
 
@@ -34,7 +36,7 @@ class ArraysTest {
 
     @Test
     void testByteArrayLengthWithElements() {
-        byte[] bytes = "hello".getBytes(Charsets.UTF_8)
+        byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8)
         assertEquals 5, Arrays.length(bytes)
     }
 }
