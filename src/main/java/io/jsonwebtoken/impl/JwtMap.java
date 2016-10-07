@@ -47,10 +47,16 @@ public class JwtMap implements Map<String,Object> {
         } else if (v instanceof Date) {
             return (Date) v;
         } else if (v instanceof Number) {
+            // https://github.com/jwtk/jjwt/issues/122:
+            // The JWT RFC *mandates* NumericDate values are represented as seconds.
+            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = ((Number) v).longValue();
             long millis = seconds * 1000;
             return new Date(millis);
         } else if (v instanceof String) {
+            // https://github.com/jwtk/jjwt/issues/122
+            // The JWT RFC *mandates* NumericDate values are represented as seconds.
+            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = Long.parseLong((String) v);
             long millis = seconds * 1000;
             return new Date(millis);
@@ -154,5 +160,15 @@ public class JwtMap implements Map<String,Object> {
     @Override
     public String toString() {
         return map.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return map.equals(obj);
     }
 }

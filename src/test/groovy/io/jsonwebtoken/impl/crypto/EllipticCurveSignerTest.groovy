@@ -15,15 +15,16 @@
  */
 package io.jsonwebtoken.impl.crypto
 
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.SignatureException
+import org.junit.Test
 
 import java.security.InvalidKeyException
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
 
-import org.junit.Test
 import static org.junit.Assert.*
 
 class EllipticCurveSignerTest {
@@ -75,6 +76,35 @@ class EllipticCurveSignerTest {
             fail();
         } catch (SignatureException se) {
             assertEquals se.message, 'Invalid Elliptic Curve PrivateKey. ' + msg
+            assertSame se.cause, ex
+        }
+    }
+
+    @Test
+    void testDoSignWithJoseSignatureFormatException() {
+
+        KeyPair kp = EllipticCurveProvider.generateKeyPair()
+        PublicKey publicKey = kp.getPublic();
+        PrivateKey privateKey = kp.getPrivate();
+
+        String msg = 'foo'
+        final JwtException ex = new JwtException(msg)
+
+        def signer = new EllipticCurveSigner(SignatureAlgorithm.ES256, privateKey) {
+            @Override
+            protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException, JwtException {
+                throw ex
+            }
+        }
+
+        byte[] bytes = new byte[16]
+        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
+
+        try {
+            signer.sign(bytes)
+            fail();
+        } catch (SignatureException se) {
+            assertEquals se.message, 'Unable to convert signature to JOSE format. ' + msg
             assertSame se.cause, ex
         }
     }

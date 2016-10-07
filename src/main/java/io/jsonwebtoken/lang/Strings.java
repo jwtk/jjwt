@@ -159,22 +159,38 @@ public final class Strings {
      * @see java.lang.Character#isWhitespace
      */
     public static String trimWhitespace(String str) {
+        return (String) trimWhitespace((CharSequence)str);
+    }
+    
+    
+    private static CharSequence trimWhitespace(CharSequence str) {
         if (!hasLength(str)) {
             return str;
         }
-        StringBuilder sb = new StringBuilder(str);
-        while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
-            sb.deleteCharAt(0);
+        final int length = str.length();
+
+        int start = 0;
+		while (start < length && Character.isWhitespace(str.charAt(start))) {
+            start++;
         }
-        while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
-            sb.deleteCharAt(sb.length() - 1);
+        
+		int end = length;
+        while (start < length && Character.isWhitespace(str.charAt(end - 1))) {
+            end--;
         }
-        return sb.toString();
+        
+        return ((start > 0) || (end < length)) ? str.subSequence(start, end) : str;
     }
 
     public static String clean(String str) {
+    	CharSequence result = clean((CharSequence) str);
+        
+        return result!=null?result.toString():null;
+    }
+    
+    public static CharSequence clean(CharSequence str) {
         str = trimWhitespace(str);
-        if ("".equals(str)) {
+        if (!hasLength(str)) {
             return null;
         }
         return str;

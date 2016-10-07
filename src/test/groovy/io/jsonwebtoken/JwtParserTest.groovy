@@ -175,6 +175,9 @@ class JwtParserTest {
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
+
+            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            assertTrue e.getMessage().contains('Z, a difference of ')
         }
     }
 
@@ -187,6 +190,61 @@ class JwtParserTest {
 
         try {
             Jwts.parser().parse(compact)
+            fail()
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+
+            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            assertTrue e.getMessage().contains('Z, a difference of ')
+        }
+    }
+
+    @Test
+    void testParseWithExpiredJwtWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String subject = 'Joe'
+        String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseWithExpiredJwtNotWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        try {
+            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
+    @Test
+    void testParseWithPrematureJwtWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() + 3000)
+
+        String subject = 'Joe'
+        String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseWithPrematureJwtNotWithinAllowedClockSkew() {
+        Date exp = new Date(System.currentTimeMillis() + 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
+
+        try {
+            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
@@ -658,6 +716,37 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseClaimsJwsWithNumericTypes() {
+        byte[] key = randomKey()
+
+        def b = (byte) 42
+        def s = (short) 42
+        def i = 42
+
+        def smallLong = (long) 42
+        def bigLong = ((long) Integer.MAX_VALUE) + 42
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                claim("byte", b).
+                claim("short", s).
+                claim("int", i).
+                claim("long_small", smallLong).
+                claim("long_big", bigLong).
+                compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+
+        Claims claims = jwt.getBody()
+
+        assertEquals(b, claims.get("byte", Byte.class))
+        assertEquals(s, claims.get("short", Short.class))
+        assertEquals(i, claims.get("int", Integer.class))
+        assertEquals(smallLong, claims.get("long_small", Long.class))
+        assertEquals(bigLong, claims.get("long_big", Long.class))
+    }
+
+
     // ========================================================================
     // parsePlaintextJws with signingKey resolver.
     // ========================================================================
@@ -888,7 +977,7 @@ class JwtParserTest {
         // system converts to seconds (lopping off millis precision), then returns millis
         def issuedAtMillis = ((long)issuedAt.getTime() / 1000) * 1000
 
-        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis
+        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis, 0
     }
 
     @Test
@@ -1212,7 +1301,7 @@ class JwtParserTest {
         // system converts to seconds (lopping off millis precision), then returns millis
         def expirationMillis = ((long)expiration.getTime() / 1000) * 1000
 
-        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis
+        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
     }
 
     @Test
@@ -1280,7 +1369,7 @@ class JwtParserTest {
         // system converts to seconds (lopping off millis precision), then returns millis
         def notBeforeMillis = ((long)notBefore.getTime() / 1000) * 1000
 
-        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis
+        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
     }
 
     @Test

@@ -124,4 +124,28 @@ class JwtMapTest {
         def s = ['b', 'd']
         assertTrue m.values().containsAll(s) && s.containsAll(m.values())
     }
+
+    @Test
+    public void testEquals() throws Exception {
+        def m1 = new JwtMap();
+        m1.put("a", "a");
+
+        def m2 = new JwtMap();
+        m2.put("a", "a");
+
+        assertEquals(m1, m2);
+    }
+
+    @Test
+    public void testHashcode() throws Exception {
+        def m = new JwtMap();
+        def hashCodeEmpty = m.hashCode();
+
+        m.put("a", "b");
+        def hashCodeNonEmpty = m.hashCode();
+        assertTrue(hashCodeEmpty != hashCodeNonEmpty);
+
+        def identityHash = System.identityHashCode(m);
+        assertTrue(hashCodeNonEmpty != identityHash);
+    }
 }

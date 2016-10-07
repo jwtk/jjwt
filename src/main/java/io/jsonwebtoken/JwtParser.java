@@ -131,10 +131,20 @@ public interface JwtParser {
      * The parser uses a {@link DefaultClock DefaultClock} instance by default.
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
-     * @return the builder instance for method chaining.
+     * @return the parser for method chaining.
      * @since 0.7.0
      */
     JwtParser setClock(Clock clock);
+
+    /**
+     * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
+     * and {@code nbf} claims.
+     *
+     * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
+     * @return the parser for method chaining.
+     * @since 0.7.0
+     */
+    JwtParser setAllowedClockSkewSeconds(long seconds);
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
