@@ -287,7 +287,7 @@ public interface JwtParser {
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      */
-    Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+    Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, Exception;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -336,7 +336,7 @@ public interface JwtParser {
      * @since 0.2
      */
     <T> T parse(String jwt, JwtHandler<T> handler)
-            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, Exception;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -366,7 +366,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)
-            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, Exception;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -397,7 +397,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jwt<Header, Claims> parseClaimsJwt(String claimsJwt)
-            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, Exception;
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -425,7 +425,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jws<String> parsePlaintextJws(String plaintextJws)
-            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, Exception;
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -454,5 +454,5 @@ public interface JwtParser {
      * @since 0.2
      */
     Jws<Claims> parseClaimsJws(String claimsJws)
-            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException, Exception;
 }
