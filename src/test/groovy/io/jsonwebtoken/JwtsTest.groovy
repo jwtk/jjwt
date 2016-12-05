@@ -755,7 +755,7 @@ class JwtsTest {
 				.setCryptoProvider(cryptoProvider)
 				.setConfigParams(config)
 				.compact();
-		
+				
 		//verify the token
 		Claims claims = Jwts.parser()
 				.setCryptoProvider(cryptoProvider)
@@ -769,6 +769,20 @@ class JwtsTest {
 			res = false;
 		}
 		assertTrue res;
+		
+		//corrupt the token
+		jwtToken = jwtToken + 'X';
+		
+		try {
+			claims = Jwts.parser()
+				.setCryptoProvider(cryptoProvider)
+				.setConfigParams(config)
+				.parseClaimsJws(jwtToken)
+				.getBody();
+		} catch (SignatureException e) {
+			assertTrue e.getMessage().startsWith("JWT signature does not match locally computed signature. JWT validity cannot be " +
+                            "asserted and should not be trusted.");
+        }
     }
 
     static void testRsa(SignatureAlgorithm alg, int keySize=1024, boolean verifyWithPrivateKey=false) {
