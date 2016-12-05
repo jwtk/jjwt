@@ -37,8 +37,9 @@ import java.security.PublicKey
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import java.util.Base64;
+
 import java.util.Map;
+import javax.xml.bind.DatatypeConverter;
 
 import static org.junit.Assert.*
 
@@ -716,7 +717,8 @@ class JwtsTest {
 				try {
 					MessageDigest md = MessageDigest.getInstance((String)config.get("algo"));
 					byte[] signValue = md.digest(plain.getBytes());
-					String res = Base64.getEncoder().encodeToString(signValue);
+					//String res = Base64.getEncoder().encodeToString(signValue);
+					String res = DatatypeConverter.printBase64Binary(signValue);
 					return res;
 				} catch (NoSuchAlgorithmException e) {
 					e.printStackTrace();
@@ -728,7 +730,8 @@ class JwtsTest {
 				try{
 					MessageDigest md = MessageDigest.getInstance((String)config.get("algo"));
 					byte[] signValue = md.digest(plain.getBytes());
-					String signString = Base64.getEncoder().encodeToString(signValue);
+					//String signString = Base64.getEncoder().encodeToString(signValue);
+					String signString = DatatypeConverter.printBase64Binary(signValue);
 					if (signString.equals(sign)) return true;
 					return false;
 				} catch (NoSuchAlgorithmException e) {
