@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.CryptoProvider;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
@@ -50,6 +51,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private byte[]             keyBytes;
 
     private CompressionCodec compressionCodec;
+    
+    private CryptoProvider cryptoProvider;
+    private Map<String, Object> config;
 
     @Override
     public JwtBuilder setHeader(Header header) {
@@ -252,6 +256,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         return this;
     }
+    
+    @Override 
+    public JwtBuilder setCryptoProvider(CryptoProvider cryptoProvider) {
+    	this.cryptoProvider = cryptoProvider;
+    	return this;
+    }
+    
+    @Override 
+    public JwtBuilder setConfigParams(Map<String, Object> config) {
+    	this.config = config;
+    	return this;
+    }
 
     @Override
     public String compact() {
@@ -316,7 +332,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
-        if (key != null) { //jwt must be signed:
+        if (cryptoProvider != null) {
+        	String base64UrlSignature = cryptoProvider.sign(jwt,  this.config);
+        	jwt += JwtParser.SEPARATOR_CHAR + base64UrlSignature;
+        } else if (key != null) { //jwt must be signed:
 
             JwtSigner signer = createSigner(algorithm, key);
 

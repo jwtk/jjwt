@@ -21,6 +21,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.CryptoProvider;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.IncorrectClaimException;
@@ -68,6 +69,9 @@ public class DefaultJwtParser implements JwtParser {
     private SigningKeyResolver signingKeyResolver;
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+    
+    private CryptoProvider cryptoProvider;
+    private Map<String, Object> config;
 
     Claims expectedClaims = new DefaultClaims();
 
@@ -171,6 +175,18 @@ public class DefaultJwtParser implements JwtParser {
         Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
         this.compressionCodecResolver = compressionCodecResolver;
         return this;
+    }
+    
+    @Override
+    public JwtParser setCryptoProvider(CryptoProvider cryptoProvider) {
+    	this.cryptoProvider = cryptoProvider;
+    	return this;
+    }
+    
+    @Override
+    public JwtParser setConfigParams(Map<String, Object> config) {
+    	this.config = config;
+    	return this;
     }
 
     @Override
@@ -278,83 +294,97 @@ public class DefaultJwtParser implements JwtParser {
 
         // =============== Signature =================
         if (base64UrlEncodedDigest != null) { //it is signed - validate the signature
-
-            JwsHeader jwsHeader = (JwsHeader) header;
-
-            SignatureAlgorithm algorithm = null;
-
-            if (header != null) {
-                String alg = jwsHeader.getAlgorithm();
-                if (Strings.hasText(alg)) {
-                    algorithm = SignatureAlgorithm.forName(alg);
-                }
-            }
-
-            if (algorithm == null || algorithm == SignatureAlgorithm.NONE) {
-                //it is plaintext, but it has a signature.  This is invalid:
-                String msg = "JWT string has a digest/signature, but the header does not reference a valid signature " +
-                             "algorithm.";
-                throw new MalformedJwtException(msg);
-            }
-
-            if (key != null && keyBytes != null) {
-                throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
-            } else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
-                String object = key != null ? "a key object" : "key bytes";
-                throw new IllegalStateException("A signing key resolver and " + object + " cannot both be specified. Choose either.");
-            }
-
-            //digitally signed, let's assert the signature:
-            Key key = this.key;
-
-            if (key == null) { //fall back to keyBytes
-
-                byte[] keyBytes = this.keyBytes;
-
-                if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
-                    if (claims != null) {
-                        key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
-                    } else {
-                        key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
-                    }
-                }
-
-                if (!Objects.isEmpty(keyBytes)) {
-
-                    Assert.isTrue(algorithm.isHmac(),
-                                  "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
-
-                    key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
-                }
-            }
-
-            Assert.notNull(key, "A signing key must be specified if the specified JWT is digitally signed.");
-
-            //re-create the jwt part without the signature.  This is what needs to be signed for verification:
+        	
+        	//re-create the jwt part without the signature.  This is what needs to be signed for verification:
             String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR + base64UrlEncodedPayload;
-
-            JwtSignatureValidator validator;
-            try {
-                validator = createSignatureValidator(algorithm, key);
-            } catch (IllegalArgumentException e) {
-                String algName = algorithm.getValue();
-                String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
-                             "algorithm, but the specified signing key of type " + key.getClass().getName() +
-                             " may not be used to validate " + algName + " signatures.  Because the specified " +
-                             "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
-                             "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                             "trusted.  Another possibility is that the parser was configured with the incorrect " +
-                             "signing key, but this cannot be assumed for security reasons.";
-                throw new UnsupportedJwtException(msg, e);
-            }
-
-            if (!validator.isValid(jwtWithoutSignature, base64UrlEncodedDigest)) {
-                String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
-                             "asserted and should not be trusted.";
-                throw new SignatureException(msg);
-            }
+            
+            if (cryptoProvider != null) {
+            	/*
+            	 * If the cryptoProvider is set then use it verify the signature, all args required for verify in 
+            	 * this.config. Parsing left for the implementing class of CryptoProvider.
+            	 * 
+            	 * This is implemented before everything so that using custom keywords for algorithm does not fail
+            	 * on the valid Signature Algorithm.
+            	 */
+            	if (!cryptoProvider.verify(jwtWithoutSignature, base64UrlEncodedDigest, this.config)) {
+            		String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
+                            "asserted and should not be trusted.";
+            		throw new SignatureException(msg);
+            	}
+            } else {
+	            JwsHeader jwsHeader = (JwsHeader) header;
+	
+	            SignatureAlgorithm algorithm = null;
+	
+	            if (header != null) {
+	                String alg = jwsHeader.getAlgorithm();
+	                if (Strings.hasText(alg)) {
+	                    algorithm = SignatureAlgorithm.forName(alg);
+	                }
+	            }
+	
+	            if (algorithm == null || algorithm == SignatureAlgorithm.NONE) {
+	                //it is plaintext, but it has a signature.  This is invalid:
+	                String msg = "JWT string has a digest/signature, but the header does not reference a valid signature " +
+	                             "algorithm.";
+	                throw new MalformedJwtException(msg);
+	            }
+	
+	            if (key != null && keyBytes != null) {
+	                throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
+	            } else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
+	                String object = key != null ? "a key object" : "key bytes";
+	                throw new IllegalStateException("A signing key resolver and " + object + " cannot both be specified. Choose either.");
+	            }
+	
+	            //digitally signed, let's assert the signature:
+	            Key key = this.key;
+	
+	            if (key == null) { //fall back to keyBytes
+	
+	                byte[] keyBytes = this.keyBytes;
+	
+	                if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
+	                    if (claims != null) {
+	                        key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+	                    } else {
+	                        key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+	                    }
+	                }
+	
+	                if (!Objects.isEmpty(keyBytes)) {
+	
+	                    Assert.isTrue(algorithm.isHmac(),
+	                                  "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
+	
+	                    key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
+	                }
+	            }
+	
+	            Assert.notNull(key, "A signing key must be specified if the specified JWT is digitally signed.");
+	
+	            JwtSignatureValidator validator;
+	            try {
+	                validator = createSignatureValidator(algorithm, key);
+	            } catch (IllegalArgumentException e) {
+	                String algName = algorithm.getValue();
+	                String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
+	                             "algorithm, but the specified signing key of type " + key.getClass().getName() +
+	                             " may not be used to validate " + algName + " signatures.  Because the specified " +
+	                             "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
+	                             "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
+	                             "trusted.  Another possibility is that the parser was configured with the incorrect " +
+	                             "signing key, but this cannot be assumed for security reasons.";
+	                throw new UnsupportedJwtException(msg, e);
+	            }
+	
+	            if (!validator.isValid(jwtWithoutSignature, base64UrlEncodedDigest)) {
+	                String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
+	                             "asserted and should not be trusted.";
+	                throw new SignatureException(msg);
+	            }
+	        }
         }
-
         final boolean allowSkew = this.allowedClockSkewMillis > 0;
 
         //since 0.3:

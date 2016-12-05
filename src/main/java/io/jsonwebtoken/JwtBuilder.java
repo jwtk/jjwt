@@ -382,5 +382,30 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @return A compact URL-safe JWT string.
      */
+    
+    /**
+     * Sets the {@link CryptoProvider} used to implement custom crypto features. The default builder requires the keys to
+     * be extracted and then passed to the lib by the application. But for some applications used in PCI, getting the keys are
+     * not an option. They use some sort of Hardware security module that gives out handles to the keys stored in them and never
+     * the actual keys. The keys have several layers of encryption on it using multiple keys. The default implementation does not 
+     * support custom crypto. This can be used to override the default and use you own Crypto Implementation by implementing the 
+     * {@link CryptoProvider} interface.
+     * @param cryptoProvider	the cryptoProvider object for implementing custom sign and verify
+     * @return the builder for method chaining.
+     */
+    JwtBuilder setCryptoProvider(CryptoProvider cryptoProvider);
+    
+    /**
+     * Sets the {@link config}, used to provide the custom crypto Implementation all the information it needs to execute it's
+     * functions. 
+     * <p>
+     * 	Eg. for a crypto module it accepts blob / token for the original key but some other case it might accept the actual key
+     * but encrypted. So we can pass the identifier for such cases in the config map with the info of our keys / tokens.
+     * </p> 
+     * @param config	hashmap that contains all the secondary information required for the custom Crypto Implementation to work.
+     * @return the builder for method chaining.
+     */
+    JwtBuilder setConfigParams(Map<String, Object> config);
+    
     String compact();
 }
