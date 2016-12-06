@@ -13,7 +13,7 @@ public interface CryptoProvider {
 	 * 
 	 * Parsing of the config map is left for the implementation
 	 */
-	public String sign(String plain, Map<String, Object> config);
+	public String sign(String plain, Map<String, Object> config) throws SignatureException;
 	
 	/**
 	 * 
@@ -24,6 +24,6 @@ public interface CryptoProvider {
 	 * 		an instance for using jjwt. 
 	 * @return Boolean value identifying if the sign is valid or not
 	 */
-	public Boolean verify(String plain, String sign, Map<String, Object> config);
+	public Boolean verify(String plain, String sign, Map<String, Object> config) throws SignatureException;
 	
 }
