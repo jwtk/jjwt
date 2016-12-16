@@ -34,6 +34,12 @@ import java.nio.charset.Charset
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+
+import java.util.Map;
+import javax.xml.bind.DatatypeConverter;
 
 import static org.junit.Assert.*
 
@@ -699,6 +705,83 @@ class JwtsTest {
             fail("Forged token must not be successfully parsed.")
         } catch (UnsupportedJwtException expected) {
             assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
+        }
+    }
+    
+    @Test
+    void customCryptoImpl() {
+    	//Simple MD5 check can be any algorithm
+    	CryptoProvider cryptoProvider = new CryptoProvider() {
+    		@Override
+    		public String sign(String plain, Map<String, Object> config) {
+				try {
+					MessageDigest md = MessageDigest.getInstance((String)config.get("algo"));
+					byte[] signValue = md.digest(plain.getBytes());
+					//String res = Base64.getEncoder().encodeToString(signValue);
+					String res = DatatypeConverter.printBase64Binary(signValue);
+					return res;
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+
+			public Boolean verify(String plain, String sign, Map<String, Object> config) {
+				try{
+					MessageDigest md = MessageDigest.getInstance((String)config.get("algo"));
+					byte[] signValue = md.digest(plain.getBytes());
+					//String signString = Base64.getEncoder().encodeToString(signValue);
+					String signString = DatatypeConverter.printBase64Binary(signValue);
+					if (signString.equals(sign)) return true;
+					return false;
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+		};
+		
+		// Building a token
+		Date generatedTime = now();
+		Date expirationTime = laterDate(180);
+		Map<String, Object> config = new HashMap<String, Object>();
+		config.put("algo", "MD5");
+		
+		String jwtToken = Jwts.builder()
+				.setSubject("sampleUser")
+				.setIssuer("SampleApp")
+				.setIssuedAt(generatedTime)
+				.setExpiration(expirationTime)
+				.setCryptoProvider(cryptoProvider)
+				.setConfigParams(config)
+				.compact();
+				
+		//verify the token
+		Claims claims = Jwts.parser()
+				.setCryptoProvider(cryptoProvider)
+				.setConfigParams(config)
+				.parseClaimsJws(jwtToken)
+				.getBody();
+				
+		Date now = now();
+		Boolean res = true;
+		if (claims.getExpiration().before(now) || claims.getIssuedAt().after(now) || !claims.getIssuer().equals("SampleApp")) {
+			res = false;
+		}
+		assertTrue res;
+		
+		//corrupt the token
+		jwtToken = jwtToken + 'X';
+		
+		try {
+			claims = Jwts.parser()
+				.setCryptoProvider(cryptoProvider)
+				.setConfigParams(config)
+				.parseClaimsJws(jwtToken)
+				.getBody();
+		} catch (SignatureException e) {
+			assertTrue e.getMessage().startsWith("JWT signature does not match locally computed signature. JWT validity cannot be " +
+                            "asserted and should not be trusted.");
         }
     }
 
