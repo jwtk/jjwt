@@ -187,9 +187,6 @@ public interface JwtParser {
      * (as the {@code alg} header parameter).</p>
      * <p>
      * <p>This method overwrites any previously set key.</p>
-     * <p>
-     * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
-     * byte array is used to invoke {@link #setSigningKey(byte[])}.</p>
      *
      * @param key the algorithm-specific signature verification key to use to validate any discovered JWS digital
      *            signature.
