@@ -193,7 +193,7 @@ try {
     
         // we get here if the required claim is not present
     
-    } catch (IncorrectClaimException) {
+    } catch (IncorrectClaimException e) {
     
         // we get here if the required claim has the wrong value
     
