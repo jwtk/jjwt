@@ -21,6 +21,8 @@ import io.jsonwebtoken.RequiredTypeException;
 import java.util.Date;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class DefaultClaims extends JwtMap implements Claims {
 
     public DefaultClaims() {
@@ -140,7 +142,11 @@ public class DefaultClaims extends JwtMap implements Claims {
         }
 
         if (!requiredType.isInstance(value)) {
-            throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
+        	try {
+        		return new ObjectMapper().convertValue(value, requiredType);
+        	} catch (IllegalArgumentException e) {
+        		throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
+        	}
         }
 
         return requiredType.cast(value);
