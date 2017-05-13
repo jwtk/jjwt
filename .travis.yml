@@ -1,6 +1,7 @@
 # https://travis-ci.org/jwtk/jjwt
 
 dist: trusty
+
 sudo: required
 
 language: java
@@ -12,7 +13,6 @@ matrix:
       apt:
         packages:
           - oracle-java8-installer
-  include:
     - jdk: oraclejdk7
       addons:
       apt:
