@@ -102,6 +102,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setClaims(Map<String, Object> claims);
 
     /**
+     * Adds all given name/value pairs to the JSON Claims in the payload. If a Claims instance does not yet exist at the
+     * time this method is called, one will be created automatically before applying the name/value pairs.
+     *
+     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     *
+     * @param claims the JWT claims to be added to the JWT body.
+     * @return the builder for method chaining.
+     * @since 0.8
+     */
+    JwtBuilder addClaims(Map<String, Object> claims);
+
+    /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">
      * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
      *
