@@ -162,7 +162,7 @@ class DefaultClaimsTest {
         } catch (RequiredTypeException e) {
             assertEquals(
                     e.getMessage(),
-                    "Expected value to be of type: class java.util.HashMap, but was class java.util.List"
+                    "Expected value to be of type: class java.util.HashMap, but was class java.util.ArrayList"
             )
         }
     }
