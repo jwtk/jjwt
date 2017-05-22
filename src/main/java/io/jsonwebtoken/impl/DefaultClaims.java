@@ -128,9 +128,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     private <T> T castClaimValue(Object value, Class<T> requiredType) {
         if (requiredType == Date.class && value instanceof Long) {
             value = new Date((Long)value);
-        }
-
-        if (value instanceof Integer) {
+        } else if (value instanceof Integer) {
             int intValue = (Integer) value;
             if (requiredType == Long.class) {
                 value = (long) intValue;
@@ -139,9 +137,7 @@ public class DefaultClaims extends JwtMap implements Claims {
             } else if (requiredType == Byte.class && Byte.MIN_VALUE <= intValue && intValue <= Byte.MAX_VALUE) {
                 value = (byte) intValue;
             }
-        }
-
-        if (!requiredType.isInstance(value)) {
+        } else if (!requiredType.isInstance(value)) {
         	try {
         		return new ObjectMapper().convertValue(value, requiredType);
         	} catch (IllegalArgumentException e) {
