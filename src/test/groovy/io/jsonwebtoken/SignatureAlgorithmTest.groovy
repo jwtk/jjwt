@@ -63,6 +63,15 @@ class SignatureAlgorithmTest {
     }
 
     @Test
+    void testJcaName() {
+        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+            if ("HmacSHA256".equals(alg.getJcaName())) {
+                assertEquals alg.getFamilyName(), "HMAC"
+            }
+        }
+    }
+
+    @Test
     void testIsRsa() {
         for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.getDescription().startsWith("RSASSA")) {
