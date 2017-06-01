@@ -19,7 +19,7 @@ import io.jsonwebtoken.lang.RuntimeEnvironment;
 
 /**
  * Type-safe representation of standard JWT signature algorithm names as defined in the
- * <a href="https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31">JSON Web Algorithms</a> specification.
+ * <a href="https://tools.ietf.org/html/rfc7518">JSON Web Algorithms</a> specification.
  *
  * @since 0.1
  */
@@ -267,5 +267,11 @@ public enum SignatureAlgorithm {
         }
 
         throw new SignatureException("Unsupported signature algorithm '" + value + "'");
+    }
+
+
+    @Override
+    public String toString() {
+        return value;
     }
 }
