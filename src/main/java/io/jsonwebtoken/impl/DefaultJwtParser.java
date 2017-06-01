@@ -198,7 +198,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, Exception {
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
 
@@ -474,7 +474,7 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public <T> T parse(String compact, JwtHandler<T> handler)
-        throws ExpiredJwtException, MalformedJwtException, SignatureException {
+        throws ExpiredJwtException, MalformedJwtException, SignatureException, Exception {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
 
@@ -499,7 +499,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
+    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) throws Exception {
         return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
             @Override
             public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
@@ -509,7 +509,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
+    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) throws Exception {
         try {
             return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
                 @Override
@@ -523,7 +523,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jws<String> parsePlaintextJws(String plaintextJws) {
+    public Jws<String> parsePlaintextJws(String plaintextJws) throws Exception {
         try {
             return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
                 @Override
@@ -537,7 +537,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jws<Claims> parseClaimsJws(String claimsJws) {
+    public Jws<Claims> parseClaimsJws(String claimsJws)  throws Exception {
         return parse(claimsJws, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {

@@ -58,7 +58,7 @@ public interface SigningKeyResolver {
      * @return the signing key that should be used to validate a digital signature for the Claims JWS with the specified
      * header and claims.
      */
-    Key resolveSigningKey(JwsHeader header, Claims claims);
+    Key resolveSigningKey(JwsHeader header, Claims claims) throws Exception;
 
     /**
      * Returns the signing key that should be used to validate a digital signature for the Plaintext JWS with the
@@ -69,5 +69,5 @@ public interface SigningKeyResolver {
      * @return the signing key that should be used to validate a digital signature for the Plaintext JWS with the
      * specified header and plaintext payload.
      */
-    Key resolveSigningKey(JwsHeader header, String plaintext);
+    Key resolveSigningKey(JwsHeader header, String plaintext) throws Exception;
 }
