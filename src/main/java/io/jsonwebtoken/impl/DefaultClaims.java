@@ -54,12 +54,17 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public String getAudience() {
-        return getString(AUDIENCE);
+    public String[] getAudience() {
+        Object v = get(AUDIENCE);
+        try {
+        	return (String[]) v;
+        } catch (ClassCastException e) {
+        	return null;
+        }
     }
 
     @Override
-    public Claims setAudience(String aud) {
+    public Claims setAudience(String ... aud) {
         setValue(AUDIENCE, aud);
         return this;
     }
@@ -145,4 +150,10 @@ public class DefaultClaims extends JwtMap implements Claims {
 
         return requiredType.cast(value);
     }
+
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> m) {
+		// TODO Auto-generated method stub
+		
+	}
 }

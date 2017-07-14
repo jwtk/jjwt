@@ -51,8 +51,8 @@ public interface ClaimsMutator<T extends ClaimsMutator> {
      *
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     */
-    T setAudience(String aud);
+     */    
+    T setAudience(String ... aud);
 
     /**
      * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">

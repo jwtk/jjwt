@@ -63,7 +63,7 @@ public interface JwtParser {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParser requireAudience(String audience);
+    JwtParser requireAudience(String ... audience);
 
     /**
      * Ensures that the specified {@code iss} exists in the parsed JWT.  If missing or if the parsed

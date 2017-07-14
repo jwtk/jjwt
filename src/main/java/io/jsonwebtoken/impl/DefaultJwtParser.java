@@ -88,7 +88,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public JwtParser requireAudience(String audience) {
+    public JwtParser requireAudience(String ... audience) {
         expectedClaims.setAudience(audience);
         return this;
     }

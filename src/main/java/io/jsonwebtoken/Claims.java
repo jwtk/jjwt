@@ -95,13 +95,13 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      *
      * @return the JWT {@code aud} value or {@code null} if not present.
      */
-    String getAudience();
+    String[] getAudience();
 
     /**
      * {@inheritDoc}
      */
     @Override //only for better/targeted JavaDoc
-    Claims setAudience(String aud);
+    Claims setAudience(String ... aud);
 
     /**
      * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">
