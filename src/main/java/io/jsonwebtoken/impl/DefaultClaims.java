@@ -60,13 +60,9 @@ public class DefaultClaims extends JwtMap implements Claims {
         if (v == null) {
             return null;
         }
-        try {
-            List<String> aud = (List<String>) v;
-            String[] audience = aud.toArray(new String[0]);
-            return audience;
-        } catch (ClassCastException e) {
-        	return null;
-        }
+        List<String> aud = (List<String>) v;
+        String[] audience = aud.toArray(new String[0]);
+        return audience;
     }
 
     @Override
