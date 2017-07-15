@@ -235,7 +235,7 @@ class JwtsTest {
     void testConvenienceAudience() {
         String compact = Jwts.builder().setAudience("You").compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
-        assertEquals claims.getAudience(), "You"
+        assertEquals claims.getAudience()[0], "You"
 
         compact = Jwts.builder().setIssuer("Me")
                 .setAudience("You") //set it
@@ -352,7 +352,7 @@ class JwtsTest {
         assertNull jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an audience", claims.getAudience()[0]
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -373,7 +373,7 @@ class JwtsTest {
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an audience", claims.getAudience()[0]
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -394,7 +394,7 @@ class JwtsTest {
         assertEquals "GZIP", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an audience", claims.getAudience()[0]
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -429,7 +429,7 @@ class JwtsTest {
         assertEquals "CUSTOM", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an audience", claims.getAudience()[0]
         assertEquals "hello this is an amazing jwt", claims.state
 
     }

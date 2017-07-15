@@ -1093,7 +1093,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireSingleAudience_Success() {
-        String audience = 'A Most Awesome Audience'
+        def audience = 'A Most Awesome Audience'
 
         byte[] key = randomKey()
 
@@ -1105,7 +1105,7 @@ class JwtParserTest {
             requireAudience(audience).
             parseClaimsJws(compact)
 
-        assertEquals jwt.getBody().getAudience(), audience
+        assertEquals jwt.getBody().getAudience()[0], audience
     }
     
     @Test
@@ -1143,8 +1143,56 @@ class JwtParserTest {
             fail()
         } catch(IncorrectClaimException e) {
             assertEquals(
-                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, goodAudience, badAudience),
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, [goodAudience], [badAudience]),
                 e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireMultipleAudience_Incorrect_Fail() {
+        String[] goodAudience = ['A Most Awesome Audience', 'Another Most Awesome Audience']
+        String[] badAudience = ['A Most Bogus Audience', 'Another Most Bogus Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setAudience(badAudience).
+                compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                    requireAudience(goodAudience).
+                    parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                    String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, "[A Most Awesome Audience, Another Most Awesome Audience]", "[A Most Bogus Audience, Another Most Bogus Audience]"),
+                    e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireIncompleteMultipleAudience_Incorrect_Fail() {
+        String[] goodAudience = ['A Most Awesome Audience', 'Another Most Awesome Audience']
+        def badAudience = 'A Most Awesome Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setAudience(badAudience).
+                compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                    requireAudience(goodAudience).
+                    parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            assertEquals(
+                    String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, "[A Most Awesome Audience, Another Most Awesome Audience]", [badAudience]),
+                    e.getMessage()
             )
         }
     }
@@ -1166,8 +1214,31 @@ class JwtParserTest {
             fail()
         } catch(MissingClaimException e) {
             assertEquals(
-                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, audience),
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, [audience]),
                 e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireMultipleAudience_Missing_Fail() {
+        String[] audience = ['A Most Awesome Audience', 'Another Most Awesome Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setId('id').
+                compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                    requireAudience(audience).
+                    parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, "[A Most Awesome Audience, Another Most Awesome Audience]"),
+                    e.getMessage()
             )
         }
     }

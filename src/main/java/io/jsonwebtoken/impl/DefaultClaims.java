@@ -19,6 +19,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.RequiredTypeException;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class DefaultClaims extends JwtMap implements Claims {
@@ -56,8 +57,13 @@ public class DefaultClaims extends JwtMap implements Claims {
     @Override
     public String[] getAudience() {
         Object v = get(AUDIENCE);
+        if (v == null) {
+            return null;
+        }
         try {
-        	return (String[]) v;
+            List<String> aud = (List<String>) v;
+            String[] audience = aud.toArray(new String[0]);
+            return audience;
         } catch (ClassCastException e) {
         	return null;
         }
@@ -150,10 +156,4 @@ public class DefaultClaims extends JwtMap implements Claims {
 
         return requiredType.cast(value);
     }
-
-	@Override
-	public void putAll(Map<? extends String, ? extends Object> m) {
-		// TODO Auto-generated method stub
-		
-	}
 }

@@ -49,7 +49,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -439,6 +441,9 @@ public class DefaultJwtParser implements JwtParser {
                 actualClaimValue instanceof Long
             ) {
                 actualClaimValue = new Date((Long)actualClaimValue);
+            } else if (Claims.AUDIENCE.equals(expectedClaimName)) {
+                expectedClaimValue = Arrays.toString((String[]) expectedClaimValue);
+                actualClaimValue = actualClaimValue == null ? null :((List) actualClaimValue).toString();
             }
 
             InvalidClaimException invalidClaimException = null;
