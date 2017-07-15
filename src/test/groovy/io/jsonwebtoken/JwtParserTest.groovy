@@ -1107,6 +1107,25 @@ class JwtParserTest {
 
         assertEquals jwt.getBody().getAudience()[0], audience
     }
+
+    @Test
+    void testParseRequireSingleAudience2_Success() {
+        String requiredAudience = 'A Most Awesome Audience'
+
+        String[] audience = [requiredAudience, 'Another Awesome Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setAudience(audience).
+                compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+                requireAudience(requiredAudience).
+                parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
     
     @Test
     void testParseRequireMultipleAudience_Success() {
@@ -1121,6 +1140,26 @@ class JwtParserTest {
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
             requireAudience(audience).
             parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
+
+    @Test
+    void testParseRequireMultipleAudience2_Success() {
+
+        String requiredAudience = ['A Most Awesome Audience', 'Other Awesome Audience']
+
+        String[] audience = [requiredAudience, 'Another Awesome Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setAudience(audience).
+                compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+                requireAudience(audience).
+                parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getAudience(), audience
     }

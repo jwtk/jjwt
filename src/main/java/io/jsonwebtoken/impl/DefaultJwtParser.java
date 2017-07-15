@@ -435,15 +435,15 @@ public class DefaultJwtParser implements JwtParser {
             ) {
                 expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
                 actualClaimValue = claims.get(expectedClaimName, Date.class);
-            } else if (
+            } else if (Claims.AUDIENCE.equals(expectedClaimName)) {
+                expectedClaimValue = Arrays.asList((String[]) expectedClaimValue);
+            }
+            else if (
                 expectedClaimValue instanceof Date &&
                 actualClaimValue != null &&
                 actualClaimValue instanceof Long
             ) {
                 actualClaimValue = new Date((Long)actualClaimValue);
-            } else if (Claims.AUDIENCE.equals(expectedClaimName)) {
-                expectedClaimValue = Arrays.toString((String[]) expectedClaimValue);
-                actualClaimValue = actualClaimValue == null ? null :((List) actualClaimValue).toString();
             }
 
             InvalidClaimException invalidClaimException = null;
@@ -454,7 +454,17 @@ public class DefaultJwtParser implements JwtParser {
                     expectedClaimName, expectedClaimValue
                 );
                 invalidClaimException = new MissingClaimException(header, claims, msg);
-            } else if (!expectedClaimValue.equals(actualClaimValue)) {
+            } else if (Claims.AUDIENCE.equals(expectedClaimName) ) {
+                List<String> actualClaimValueList = (List) actualClaimValue;
+                if (!actualClaimValueList.containsAll((List) expectedClaimValue)){
+                    String msg = String.format(
+                            ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                            expectedClaimName, expectedClaimValue, actualClaimValueList
+                    );
+                    invalidClaimException = new IncorrectClaimException(header, claims, msg);
+                }
+            }
+            else if (!expectedClaimValue.equals(actualClaimValue)) {
                 String msg = String.format(
                     ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
                     expectedClaimName, expectedClaimValue, actualClaimValue
