@@ -49,6 +49,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -59,11 +61,11 @@ public class DefaultJwtParser implements JwtParser {
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private byte[] keyBytes;
+    private Collection<byte[]> keyBytes;
 
-    private Key key;
+    private Collection<Key> keys;
 
     private SigningKeyResolver signingKeyResolver;
 
@@ -77,43 +79,43 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
-        expectedClaims.setIssuedAt(issuedAt);
+        this.expectedClaims.setIssuedAt(issuedAt);
         return this;
     }
 
     @Override
     public JwtParser requireIssuer(String issuer) {
-        expectedClaims.setIssuer(issuer);
+        this.expectedClaims.setIssuer(issuer);
         return this;
     }
 
     @Override
     public JwtParser requireAudience(String audience) {
-        expectedClaims.setAudience(audience);
+        this.expectedClaims.setAudience(audience);
         return this;
     }
 
     @Override
     public JwtParser requireSubject(String subject) {
-        expectedClaims.setSubject(subject);
+        this.expectedClaims.setSubject(subject);
         return this;
     }
 
     @Override
     public JwtParser requireId(String id) {
-        expectedClaims.setId(id);
+        this.expectedClaims.setId(id);
         return this;
     }
 
     @Override
     public JwtParser requireExpiration(Date expiration) {
-        expectedClaims.setExpiration(expiration);
+        this.expectedClaims.setExpiration(expiration);
         return this;
     }
 
     @Override
     public JwtParser requireNotBefore(Date notBefore) {
-        expectedClaims.setNotBefore(notBefore);
+        this.expectedClaims.setNotBefore(notBefore);
         return this;
     }
 
@@ -121,7 +123,7 @@ public class DefaultJwtParser implements JwtParser {
     public JwtParser require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.put(claimName, value);
+        this.expectedClaims.put(claimName, value);
         return this;
     }
 
@@ -141,21 +143,27 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
-        this.keyBytes = key;
+        if (this.keyBytes == null)
+            this.keyBytes = new ArrayList<>();
+        this.keyBytes.add(key);
         return this;
     }
 
     @Override
     public JwtParser setSigningKey(String base64EncodedKeyBytes) {
         Assert.hasText(base64EncodedKeyBytes, "signing key cannot be null or empty.");
-        this.keyBytes = TextCodec.BASE64.decode(base64EncodedKeyBytes);
+        if (this.keyBytes == null)
+            this.keyBytes = new ArrayList<>();
+        this.keyBytes.add(TextCodec.BASE64.decode(base64EncodedKeyBytes));
         return this;
     }
 
     @Override
     public JwtParser setSigningKey(Key key) {
         Assert.notNull(key, "signing key cannot be null.");
-        this.key = key;
+        if (this.keys == null)
+            this.keys = new ArrayList<>();
+        this.keys.add(key);
         return this;
     }
 
@@ -257,7 +265,7 @@ public class DefaultJwtParser implements JwtParser {
                 header = new DefaultHeader(m);
             }
 
-            compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
+            compressionCodec = this.compressionCodecResolver.resolveCompressionCodec(header);
         }
 
         // =============== Body =================
@@ -297,47 +305,59 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(msg);
             }
 
-            if (key != null && keyBytes != null) {
+            if (this.keys != null && this.keyBytes != null) {
                 throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
-            } else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
-                String object = key != null ? "a key object" : "key bytes";
+            } else if ((this.keys != null || this.keyBytes != null) && this.signingKeyResolver != null) {
+                String object = this.keys != null ? "a key object" : "key bytes";
                 throw new IllegalStateException("A signing key resolver and " + object + " cannot both be specified. Choose either.");
             }
 
             //digitally signed, let's assert the signature:
-            Key key = this.key;
+            Collection<Key> keys = this.keys;
 
-            if (key == null) { //fall back to keyBytes
+            if (keys == null) { //fall back to keyBytes
 
-                byte[] keyBytes = this.keyBytes;
-
-                if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
+                if (Objects.isEmpty(this.keyBytes) && this.signingKeyResolver != null) { //use the signingKeyResolver
+                    keys = new ArrayList<>();
                     if (claims != null) {
-                        key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+                        Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+                        if (key != null)
+                            keys.add(key);
+                        Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, claims);
+                        if (!Objects.isEmpty(keyList))
+                            keys.addAll(keyList);
                     } else {
-                        key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+                        Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+                        if (key != null)
+                            keys.add(key);
+                        Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, payload);
+                        if (!Objects.isEmpty(keyList))
+                            keys.addAll(keyList);
                     }
                 }
 
-                if (!Objects.isEmpty(keyBytes)) {
+                if (!Objects.isEmpty(this.keyBytes)) {
 
                     Assert.isTrue(algorithm.isHmac(),
                                   "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
 
-                    key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
+                    keys = new ArrayList<>();
+                    for (byte[] bytes: this.keyBytes)
+                        this.keys.add(new SecretKeySpec(bytes, algorithm.getJcaName()));
                 }
             }
 
-            Assert.notNull(key, "A signing key must be specified if the specified JWT is digitally signed.");
+            Assert.notNull(keys, "A signing key must be specified if the specified JWT is digitally signed.");
 
             //re-create the jwt part without the signature.  This is what needs to be signed for verification:
             String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR + base64UrlEncodedPayload;
 
             JwtSignatureValidator validator;
             try {
-                validator = createSignatureValidator(algorithm, key);
+                validator = createSignatureValidator(algorithm, keys);
             } catch (IllegalArgumentException e) {
                 String algName = algorithm.getValue();
+                Key key = keys.iterator().next();
                 String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
                              "algorithm, but the specified signing key of type " + key.getClass().getName() +
                              " may not be used to validate " + algName + " signatures.  Because the specified " +
@@ -421,9 +441,9 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private void validateExpectedClaims(Header header, Claims claims) {
-        for (String expectedClaimName : expectedClaims.keySet()) {
+        for (String expectedClaimName : this.expectedClaims.keySet()) {
 
-            Object expectedClaimValue = expectedClaims.get(expectedClaimName);
+            Object expectedClaimValue = this.expectedClaims.get(expectedClaimName);
             Object actualClaimValue = claims.get(expectedClaimName);
 
             if (
@@ -431,7 +451,7 @@ public class DefaultJwtParser implements JwtParser {
                 Claims.EXPIRATION.equals(expectedClaimName) ||
                 Claims.NOT_BEFORE.equals(expectedClaimName)
             ) {
-                expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
+                expectedClaimValue = this.expectedClaims.get(expectedClaimName, Date.class);
                 actualClaimValue = claims.get(expectedClaimName, Date.class);
             } else if (
                 expectedClaimValue instanceof Date &&
@@ -468,8 +488,8 @@ public class DefaultJwtParser implements JwtParser {
     /*
      * @since 0.5 mostly to allow testing overrides
      */
-    protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
-        return new DefaultJwtSignatureValidator(alg, key);
+    protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys) {
+        return new DefaultJwtSignatureValidator(alg, keys);
     }
 
     @Override
@@ -484,16 +504,16 @@ public class DefaultJwtParser implements JwtParser {
             Jws jws = (Jws) jwt;
             Object body = jws.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJws((Jws<Claims>) jws);
+                return handler.onClaimsJws(jws);
             } else {
-                return handler.onPlaintextJws((Jws<String>) jws);
+                return handler.onPlaintextJws(jws);
             }
         } else {
             Object body = jwt.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
+                return handler.onClaimsJwt(jwt);
             } else {
-                return handler.onPlaintextJwt((Jwt<Header, String>) jwt);
+                return handler.onPlaintextJwt(jwt);
             }
         }
     }
@@ -549,7 +569,7 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("unchecked")
     protected Map<String, Object> readValue(String val) {
         try {
-            return objectMapper.readValue(val, Map.class);
+            return this.objectMapper.readValue(val, Map.class);
         } catch (IOException e) {
             throw new MalformedJwtException("Unable to read JSON value: " + val, e);
         }
