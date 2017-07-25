@@ -63,7 +63,7 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
         Collection<byte[]> keysBytes = resolveSigningKeysBytes(header, claims);
         if (keysBytes == null)
             return null;
-        Collection<Key> keys = new ArrayList<>();
+        Collection<Key> keys = new ArrayList<Key>();
         for (byte[] keyBytes: keysBytes)
             keys.add(new SecretKeySpec(keyBytes, alg.getJcaName()));
 
@@ -91,7 +91,7 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
         Collection<byte[]> keysBytes = resolveSigningKeysBytes(header, plaintext);
         if (keysBytes == null)
             return null;
-        Collection<Key> keys = new ArrayList<>();
+        Collection<Key> keys = new ArrayList<Key>();
         for (byte[] keyBytes: keysBytes)
             keys.add(new SecretKeySpec(keyBytes, alg.getJcaName()));
 
