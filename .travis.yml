@@ -1,12 +1,10 @@
 # https://travis-ci.org/jwtk/jjwt
 
 dist: trusty
-
 sudo: required
-
 language: java
 jdk:
-  - oraclejdk7
+  - openjdk7
   - oraclejdk8
 
 before_install:
