@@ -22,8 +22,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public abstract class MacProvider extends SignatureProvider {
 
@@ -47,20 +45,6 @@ public abstract class MacProvider extends SignatureProvider {
     }
 
     /**
-     * Generates a collection of new secure-random 512 bit secret key suitable for creating and verifying HMAC signatures.  This is a
-     * convenience method that immediately delegates to {@link #generateKey(SignatureAlgorithm)} using {@link
-     * SignatureAlgorithm#HS512} as the method argument.
-     *
-     * @return a new secure-random 512 bit secret key suitable for creating and verifying HMAC signatures.
-     * @see #generateKey(SignatureAlgorithm)
-     * @see #generateKey(SignatureAlgorithm, SecureRandom)
-     * @since 0.5
-     */
-    public static Collection<SecretKey> generateKeys(int howMany) {
-        return generateKeys(SignatureAlgorithm.HS512, howMany);
-    }
-
-    /**
      * Generates a new secure-random secret key of a length suitable for creating and verifying HMAC signatures
      * according to the specified {@code SignatureAlgorithm} using JJWT's default {@link
      * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
@@ -76,27 +60,6 @@ public abstract class MacProvider extends SignatureProvider {
      */
     public static SecretKey generateKey(SignatureAlgorithm alg) {
         return generateKey(alg, SignatureProvider.DEFAULT_SECURE_RANDOM);
-    }
-
-    /**
-     * Generates a new secure-random secret key of a length suitable for creating and verifying HMAC signatures
-     * according to the specified {@code SignatureAlgorithm} using JJWT's default {@link
-     * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
-     * delegates to {@link #generateKey(SignatureAlgorithm, SecureRandom)}.
-     *
-     * @param alg the desired signature algorithm
-     * @return a new secure-random secret key of a length suitable for creating and verifying HMAC signatures according
-     * to the specified {@code SignatureAlgorithm} using JJWT's default {@link SignatureProvider#DEFAULT_SECURE_RANDOM
-     * SecureRandom instance}.
-     * @see #generateKey()
-     * @see #generateKey(SignatureAlgorithm, SecureRandom)
-     * @since 0.5
-     */
-    public static Collection<SecretKey> generateKeys(SignatureAlgorithm alg, int howMany) {
-        Collection<SecretKey> keys = new ArrayList<SecretKey>();
-        for (int i=0;i<howMany;i++)
-            keys.add(generateKey(alg, SignatureProvider.DEFAULT_SECURE_RANDOM));
-        return keys;
     }
 
     /**
