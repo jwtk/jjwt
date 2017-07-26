@@ -24,7 +24,7 @@ class DefaultSignatureValidatorFactoryTest {
     @Test
     void testNoneAlgorithm() {
         try {
-            new DefaultSignatureValidatorFactory().createSignatureValidator(SignatureAlgorithm.NONE, MacProvider.generateKey())
+            new DefaultSignatureValidatorFactory().createSignatureValidator(SignatureAlgorithm.NONE, MacProvider.generateKeys(1))
             fail()
         } catch (IllegalArgumentException iae) {
             assertEquals iae.message, "The 'NONE' algorithm cannot be used for signing."
