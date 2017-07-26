@@ -18,9 +18,8 @@ package io.jsonwebtoken.impl.crypto;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.security.Key;
-import java.util.Collection;
 
 public interface SignatureValidatorFactory {
 
-    SignatureValidator createSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys);
+    SignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key);
 }

@@ -19,27 +19,19 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.security.Key;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 
 public class MacValidator implements SignatureValidator {
 
-    private final Collection<MacSigner> signers;
+    private final MacSigner signer;
 
-    public MacValidator(SignatureAlgorithm alg, Collection<Key> keys) {
-        Collection<MacSigner> signers = new ArrayList<>();
-        for (Key key: keys)
-            signers.add(new MacSigner(alg, key));
-        this.signers = signers;
+    public MacValidator(SignatureAlgorithm alg, Key key) {
+        this.signer = new MacSigner(alg, key);
     }
 
     @Override
     public boolean isValid(byte[] data, byte[] signature) {
-        for (MacSigner signer: this.signers) {
-            byte[] computed = signer.sign(data);
-            if (MessageDigest.isEqual(computed, signature))
-                return true;
-        }
-        return false;
+        byte[] computed = this.signer.sign(data);
+        return MessageDigest.isEqual(computed, signature);
     }
 }

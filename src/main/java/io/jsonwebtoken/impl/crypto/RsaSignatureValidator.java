@@ -25,58 +25,35 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 
 public class RsaSignatureValidator extends RsaProvider implements SignatureValidator {
 
-    private final Collection<SignerAndKey> SIGNERS;
+    private final RsaSigner SIGNER;
 
-    public static final class SignerAndKey {
-
-        private final RsaSigner signer;
-        private final Key key;
-
-        public SignerAndKey(final RsaSigner signer, final Key key) {
-            this.signer = signer;
-            this.key = key;
-        }
-    }
-
-    public RsaSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys) {
-        super(alg, null);
-
-        Collection<SignerAndKey> SIGNERS = new ArrayList<>();
-        for (Key key: keys) {
-            Assert.isTrue(key instanceof RSAPrivateKey || key instanceof RSAPublicKey,
-                          "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.");
-            SIGNERS.add(new SignerAndKey(new RsaSigner(alg, key), key));
-        }
-        this.SIGNERS = SIGNERS;
+    public RsaSignatureValidator(SignatureAlgorithm alg, Key key) {
+        super(alg, key);
+        Assert.isTrue(key instanceof RSAPrivateKey || key instanceof RSAPublicKey,
+                      "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.");
+        this.SIGNER = key instanceof RSAPrivateKey ? new RsaSigner(alg, key) : null;
     }
 
     @Override
     public boolean isValid(byte[] data, byte[] signature) {
-        for (SignerAndKey signerAndKey: this.SIGNERS) {
-            if (signerAndKey.key instanceof PublicKey) {
-                Signature sig = createSignatureInstance();
-                PublicKey publicKey = (PublicKey) signerAndKey.key;
-                try {
-                    if (doVerify(sig, publicKey, data, signature))
-                        return true;
-                } catch (Exception e) {
-                    String msg = "Unable to verify RSA signature using configured PublicKey. " + e.getMessage();
-                    throw new SignatureException(msg, e);
-                }
-            } else {
-                Assert.notNull(this.SIGNERS, "RSA Signer instance cannot be null.  This is a bug.  Please report it.");
-                byte[] computed = signerAndKey.signer.sign(data);
-                if (Arrays.equals(computed, signature))
-                    return true;
+        if (key instanceof PublicKey) {
+            Signature sig = createSignatureInstance();
+            PublicKey publicKey = (PublicKey) key;
+            try {
+                return doVerify(sig, publicKey, data, signature);
+            } catch (Exception e) {
+                String msg = "Unable to verify RSA signature using configured PublicKey. " + e.getMessage();
+                throw new SignatureException(msg, e);
             }
+        } else {
+            Assert.notNull(this.SIGNER, "RSA Signer instance cannot be null.  This is a bug.  Please report it.");
+            byte[] computed = this.SIGNER.sign(data);
+            return Arrays.equals(computed, signature);
         }
-        return false;
     }
 
     protected boolean doVerify(Signature sig, PublicKey publicKey, byte[] data, byte[] signature)

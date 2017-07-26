@@ -19,8 +19,6 @@ import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * An <a href="http://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
@@ -54,23 +52,6 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
     }
 
     @Override
-    public Collection<Key> resolveSigningKeys(JwsHeader header, Claims claims) {
-        SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
-        Assert.isTrue(alg.isHmac(), "The default resolveSigningKey(JwsHeader, Claims) implementation cannot be " +
-                                    "used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
-                                    "Override the resolveSigningKey(JwsHeader, Claims) method instead and return a " +
-                                    "Key instance appropriate for the " + alg.name() + " algorithm.");
-        Collection<byte[]> keysBytes = resolveSigningKeysBytes(header, claims);
-        if (keysBytes == null)
-            return null;
-        Collection<Key> keys = new ArrayList<>();
-        for (byte[] keyBytes: keysBytes)
-            keys.add(new SecretKeySpec(keyBytes, alg.getJcaName()));
-
-        return keys;
-    }
-
-    @Override
     public Key resolveSigningKey(JwsHeader header, String plaintext) {
         SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
         Assert.isTrue(alg.isHmac(), "The default resolveSigningKey(JwsHeader, String) implementation cannot be " +
@@ -79,23 +60,6 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
                                     "Key instance appropriate for the " + alg.name() + " algorithm.");
         byte[] keyBytes = resolveSigningKeyBytes(header, plaintext);
         return new SecretKeySpec(keyBytes, alg.getJcaName());
-    }
-
-    @Override
-    public Collection<Key> resolveSigningKeys(JwsHeader header, String plaintext) {
-        SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
-        Assert.isTrue(alg.isHmac(), "The default resolveSigningKey(JwsHeader, String) implementation cannot be " +
-                                    "used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
-                                    "Override the resolveSigningKey(JwsHeader, String) method instead and return a " +
-                                    "Key instance appropriate for the " + alg.name() + " algorithm.");
-        Collection<byte[]> keysBytes = resolveSigningKeysBytes(header, plaintext);
-        if (keysBytes == null)
-            return null;
-        Collection<Key> keys = new ArrayList<>();
-        for (byte[] keyBytes: keysBytes)
-            keys.add(new SecretKeySpec(keyBytes, alg.getJcaName()));
-
-        return keys;
     }
 
     /**
@@ -118,25 +82,6 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
     }
 
     /**
-     * Convenience method invoked by {@link #resolveSigningKey(JwsHeader, Claims)} that obtains the necessary signing
-     * key bytes.  This implementation simply throws an exception: if the JWS parsed is a Claims JWS, you must
-     * override this method or the {@link #resolveSigningKey(JwsHeader, Claims)} method instead.
-     *
-     * <p><b>NOTE:</b> You cannot override this method when validating RSA signatures.  If you expect RSA signatures,
-     * you must override the {@link #resolveSigningKey(JwsHeader, Claims)} method instead.</p>
-     *
-     * @param header the parsed {@link JwsHeader}
-     * @param claims the parsed {@link Claims}
-     * @return the signing key bytes to use to verify the JWS signature.
-     */
-    public Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
-        throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
-                                          "Claims JWS signing key resolution.  Consider overriding either the " +
-                                          "resolveSigningKey(JwsHeader, Claims) method or, for HMAC algorithms, the " +
-                                          "resolveSigningKeyBytes(JwsHeader, Claims) method.");
-    }
-
-    /**
      * Convenience method invoked by {@link #resolveSigningKey(JwsHeader, String)} that obtains the necessary signing
      * key bytes.  This implementation simply throws an exception: if the JWS parsed is a plaintext JWS, you must
      * override this method or the {@link #resolveSigningKey(JwsHeader, String)} method instead.
@@ -146,22 +91,6 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
      * @return the signing key bytes to use to verify the JWS signature.
      */
     public byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
-        throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
-                                          "plaintext JWS signing key resolution.  Consider overriding either the " +
-                                          "resolveSigningKey(JwsHeader, String) method or, for HMAC algorithms, the " +
-                                          "resolveSigningKeyBytes(JwsHeader, String) method.");
-    }
-
-    /**
-     * Convenience method invoked by {@link #resolveSigningKey(JwsHeader, String)} that obtains the necessary signing
-     * key bytes.  This implementation simply throws an exception: if the JWS parsed is a plaintext JWS, you must
-     * override this method or the {@link #resolveSigningKey(JwsHeader, String)} method instead.
-     *
-     * @param header the parsed {@link JwsHeader}
-     * @param payload the parsed String plaintext payload
-     * @return the signing key bytes to use to verify the JWS signature.
-     */
-    public Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, String payload) {
         throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
                                           "plaintext JWS signing key resolution.  Consider overriding either the " +
                                           "resolveSigningKey(JwsHeader, String) method or, for HMAC algorithms, the " +

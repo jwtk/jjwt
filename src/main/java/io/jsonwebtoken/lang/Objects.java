@@ -19,7 +19,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collection;
 
 public final class Objects {
 
@@ -94,16 +93,6 @@ public final class Objects {
      */
     public static boolean isEmpty(Object[] array) {
         return (array == null || array.length == 0);
-    }
-
-    /**
-     * Determine whether the given collection is empty:
-     * i.e. <code>null</code> or of zero length.
-     *
-     * @param array the Collection to check
-     */
-    public static boolean isEmpty(Collection<?> collection) {
-        return (collection == null || collection.isEmpty());
     }
 
     /**

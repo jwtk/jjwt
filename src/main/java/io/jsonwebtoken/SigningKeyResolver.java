@@ -16,7 +16,6 @@
 package io.jsonwebtoken;
 
 import java.security.Key;
-import java.util.Collection;
 
 /**
  * A {@code SigningKeyResolver} can be used by a {@link io.jsonwebtoken.JwtParser JwtParser} to find a signing key that
@@ -62,17 +61,6 @@ public interface SigningKeyResolver {
     Key resolveSigningKey(JwsHeader header, Claims claims);
 
     /**
-     * Returns a collection signing key that should be used to attempt to validate a digital signature for the Claims JWS with the specified
-     * header and claims. This allows for a key rotation scenario to support multiple keys during an overlap period.
-     *
-     * @param header the header of the JWS to validate
-     * @param claims the claims (body) of the JWS to validate
-     * @return the signing key that should be used to validate a digital signature for the Claims JWS with the specified
-     * header and claims.
-     */
-    Collection<Key> resolveSigningKeys(JwsHeader header, Claims claims);
-
-    /**
      * Returns the signing key that should be used to validate a digital signature for the Plaintext JWS with the
      * specified header and plaintext payload.
      *
@@ -82,16 +70,4 @@ public interface SigningKeyResolver {
      * specified header and plaintext payload.
      */
     Key resolveSigningKey(JwsHeader header, String plaintext);
-
-    /**
-     * Returns the signing key that should be used to attempt to validate a digital signature for the Plaintext JWS with the
-     * specified header and plaintext payload. This allows for a key rotation scenario to support multiple keys during an overlap period.
-     *
-     * @param header    the header of the JWS to validate
-     * @param plaintext the plaintext body of the JWS to validate
-     * @return the signing key that should be used to validate a digital signature for the Plaintext JWS with the
-     * specified header and plaintext payload.
-     */
-    Collection<Key> resolveSigningKeys(JwsHeader header, String plaintext);
-
 }
