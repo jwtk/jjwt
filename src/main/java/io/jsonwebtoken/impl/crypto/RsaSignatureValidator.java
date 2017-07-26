@@ -47,7 +47,7 @@ public class RsaSignatureValidator extends RsaProvider implements SignatureValid
     public RsaSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys) {
         super(alg, null);
 
-        Collection<SignerAndKey> SIGNERS = new ArrayList<SignerAndKey>();
+        Collection<SignerAndKey> SIGNERS = new ArrayList<>();
         for (Key key: keys) {
             Assert.isTrue(key instanceof RSAPrivateKey || key instanceof RSAPublicKey,
                           "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.");

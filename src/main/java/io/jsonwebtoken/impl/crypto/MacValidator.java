@@ -27,7 +27,7 @@ public class MacValidator implements SignatureValidator {
     private final Collection<MacSigner> signers;
 
     public MacValidator(SignatureAlgorithm alg, Collection<Key> keys) {
-        Collection<MacSigner> signers = new ArrayList<MacSigner>();
+        Collection<MacSigner> signers = new ArrayList<>();
         for (Key key: keys)
             signers.add(new MacSigner(alg, key));
         this.signers = signers;
