@@ -328,6 +328,11 @@
                             *
                         ]]>
                         </Import-Package>
+                        <Export-Package>
+                            io.jsonwebtoken,
+                            io.jsonwebtoken.lang,
+                            io.jsonwebtoken.impl.crypto
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
