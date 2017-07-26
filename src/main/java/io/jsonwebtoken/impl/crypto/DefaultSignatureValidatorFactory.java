@@ -19,32 +19,33 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 
 import java.security.Key;
+import java.util.Collection;
 
 public class DefaultSignatureValidatorFactory implements SignatureValidatorFactory {
 
     public static final SignatureValidatorFactory INSTANCE = new DefaultSignatureValidatorFactory();
 
     @Override
-    public SignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
+    public SignatureValidator createSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys) {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        Assert.notNull(key, "Signing Key cannot be null.");
+        Assert.notNull(keys, "Signing Key cannot be null.");
 
         switch (alg) {
             case HS256:
             case HS384:
             case HS512:
-                return new MacValidator(alg, key);
+                return new MacValidator(alg, keys);
             case RS256:
             case RS384:
             case RS512:
             case PS256:
             case PS384:
             case PS512:
-                return new RsaSignatureValidator(alg, key);
+                return new RsaSignatureValidator(alg, keys);
             case ES256:
             case ES384:
             case ES512:
-                return new EllipticCurveSignatureValidator(alg, key);
+                return new EllipticCurveSignatureValidator(alg, keys);
             default:
                 throw new IllegalArgumentException("The '" + alg.name() + "' algorithm cannot be used for signing.");
         }
