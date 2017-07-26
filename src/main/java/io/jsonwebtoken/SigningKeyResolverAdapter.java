@@ -50,6 +50,8 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
                                     "Override the resolveSigningKey(JwsHeader, Claims) method instead and return a " +
                                     "Key instance appropriate for the " + alg.name() + " algorithm.");
         byte[] keyBytes = resolveSigningKeyBytes(header, claims);
+        if (keyBytes == null)
+            return null;
         return new SecretKeySpec(keyBytes, alg.getJcaName());
     }
 
@@ -78,6 +80,8 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
                                     "Override the resolveSigningKey(JwsHeader, String) method instead and return a " +
                                     "Key instance appropriate for the " + alg.name() + " algorithm.");
         byte[] keyBytes = resolveSigningKeyBytes(header, plaintext);
+        if (keyBytes == null)
+            return null;
         return new SecretKeySpec(keyBytes, alg.getJcaName());
     }
 
