@@ -325,16 +325,20 @@ public class DefaultJwtParser implements JwtParser {
                         Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, claims);
                         if (key != null)
                             keys.add(key);
-                        Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, claims);
-                        if (!Objects.isEmpty(keyList))
-                            keys.addAll(keyList);
+                        else {
+                            Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, claims);
+                            if (!Objects.isEmpty(keyList))
+                                keys.addAll(keyList);
+                        }
                     } else {
                         Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, payload);
                         if (key != null)
                             keys.add(key);
-                        Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, payload);
-                        if (!Objects.isEmpty(keyList))
-                            keys.addAll(keyList);
+                        else {
+                            Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, payload);
+                            if (!Objects.isEmpty(keyList))
+                                keys.addAll(keyList);
+                        }
                     }
                 }
 
