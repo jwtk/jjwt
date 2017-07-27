@@ -338,13 +338,19 @@ public class DefaultJwtParser implements JwtParser {
                             signingKeyResolverException = e;
                         }
                     } else {
-                        Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, payload);
-                        if (key != null)
-                            keys.add(key);
-                        else {
+                        try {
+                            Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, payload);
+                            if (key != null)
+                                keys.add(key);
+                        } catch (UnsupportedJwtException e) {
+                            signingKeyResolverException = e;
+                        }
+                        try {
                             Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, payload);
                             if (!Objects.isEmpty(keyList))
                                 keys.addAll(keyList);
+                        } catch (UnsupportedJwtException e) {
+                            signingKeyResolverException = e;
                         }
                     }
                     if (keys.size() == 0 && signingKeyResolverException != null)
