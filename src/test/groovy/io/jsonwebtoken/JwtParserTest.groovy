@@ -607,6 +607,35 @@ class JwtParserTest {
     }
 
     @Test
+    void testParseClaimsWithSigningKeysResolver() {
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+        byte[] key2 = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
+                ArrayList<byte[]> list = new ArrayList<byte[]>()
+                list.add(key2)
+                list.add(key)
+                return list
+            }
+        }
+
+        Jws jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+
+        assertEquals jws.getBody().getSubject(), subject
+    }
+
+    @Test
     void testParseClaimsWithSigningKeyResolverInvalidKey() {
 
         String subject = 'Joe'
@@ -619,6 +648,37 @@ class JwtParserTest {
             @Override
             byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                 return randomKey()
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (SignatureException se) {
+            assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
+        }
+    }
+
+    @Test
+    void testParseClaimsWithSigningKeyResolverInvalidKeys() {
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
+                ArrayList<byte[]> list = new ArrayList<byte[]>()
+                list.add(randomKey())
+                list.add(randomKey())
+                return list
             }
         }
 
@@ -655,6 +715,37 @@ class JwtParserTest {
     }
 
     @Test
+    void testParseClaimsWithSigningKeyResolverAndKeys() {
+
+        String subject = 'Joe'
+
+        SecretKeySpec key = new SecretKeySpec(randomKey(), "HmacSHA256")
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
+                ArrayList<byte[]> list = new ArrayList<byte[]>()
+                list.add(randomKey())
+                list.add(randomKey())
+                return list
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (IllegalStateException ise) {
+            assertEquals ise.getMessage(), 'A signing key resolver and a key object cannot both be specified. Choose either.'
+        }
+    }
+
+    @Test
     void testParseClaimsWithSigningKeyResolverAndKeyBytes() {
 
         String subject = 'Joe'
@@ -667,6 +758,37 @@ class JwtParserTest {
             @Override
             byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
                 return randomKey()
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (IllegalStateException ise) {
+            assertEquals ise.getMessage(), 'A signing key resolver and key bytes cannot both be specified. Choose either.'
+        }
+    }
+
+    @Test
+    void testParseClaimsWithSigningKeyResolverAndKeysBytes() {
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
+                ArrayList<byte[]> list = new ArrayList<byte[]>()
+                list.add(randomKey())
+                list.add(randomKey())
+                return list
             }
         }
 
@@ -706,6 +828,59 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter()
 
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
+                    'Claims JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, Claims) method ' +
+                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.'
+        }
+    }
+
+    @Test
+    void testParseClaimsWithSigningKeyResolverAdapterWithNoKey() {
+
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
+                    'Claims JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, Claims) method ' +
+                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.'
+        }
+    }
+
+    @Test
+    void testParseClaimsWithSigningKeyResolverAdapterWithNoKeys() {
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+        }
+ 
         try {
             Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
             fail()
@@ -773,6 +948,35 @@ class JwtParserTest {
     }
 
     @Test
+    void testParsePlaintextJwsWithSigningKeyResolverAdapterMultipleKeys() {
+
+        String inputPayload = 'Hello world!'
+
+        byte[] key = randomKey()
+        byte[] key2 = randomKey()
+
+        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+                return null 
+            }
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, String payload) {
+                ArrayList<byte[]> list = new ArrayList<byte[]>()
+                list.add(key2)
+                list.add(key)
+                return list
+            }
+        }
+
+        Jws<String> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+
+        assertEquals jws.getBody(), inputPayload
+    }
+
+    @Test
     void testParsePlaintextJwsWithSigningKeyResolverInvalidKey() {
 
         String inputPayload = 'Hello world!'
@@ -797,6 +1001,37 @@ class JwtParserTest {
     }
 
     @Test
+    void testParsePlaintextJwsWithSigningKeyResolverInvalidMultipleKey() {
+
+        String inputPayload = 'Hello world!'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+                return null
+            }
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, String payload) {
+                ArrayList<byte[]> list = new ArrayList<byte[]>()
+                list.add(randomKey())
+                list.add(randomKey())
+                return list
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            fail()
+        } catch (SignatureException se) {
+            assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
+        }
+    }
+
+    @Test
     void testParsePlaintextJwsWithInvalidSigningKeyResolverAdapter() {
 
         String payload = 'Hello world!'
@@ -806,6 +1041,58 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter()
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
+                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
+                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
+        }
+    }
+
+    @Test
+    void testParsePlaintextJwsWithSigningKeyResolverAdapterWithNoKey() {
+
+        String inputPayload = 'Hello world!'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+                return null
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
+                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
+                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
+        }
+    }
+
+    @Test
+    void testParsePlaintextJwsWithSigningKeyResolverAdapterWithNoKeys() {
+
+        String inputPayload = 'Hello world!'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, String payload) {
+                return null
+            }
+        }
 
         try {
             Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
@@ -1286,7 +1573,7 @@ class JwtParserTest {
     @Test
     void testParseRequireExpiration_Success() {
         // expire in the future
-        def expiration = new Date(System.currentTimeMillis() + 10000)
+        Date expiration = new Date(System.currentTimeMillis() + 10000)
 
         byte[] key = randomKey()
 
