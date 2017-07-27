@@ -314,6 +314,7 @@ public class DefaultJwtParser implements JwtParser {
 
             //digitally signed, let's assert the signature:
             Collection<Key> keys = this.keys;
+            UnsupportedJwtException signingKeyResolverException = null;
 
             if (keys == null) { //fall back to keyBytes
 
@@ -322,13 +323,19 @@ public class DefaultJwtParser implements JwtParser {
                 if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
                     keys = new ArrayList<Key>();
                     if (claims != null) {
-                        Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, claims);
-                        if (key != null)
-                            keys.add(key);
-                        else {
+                        try {
+                            Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, claims);
+                            if (key != null)
+                                keys.add(key);
+                        } catch (UnsupportedJwtException e) {
+                            signingKeyResolverException = e;
+                        }
+                        try {
                             Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, claims);
                             if (!Objects.isEmpty(keyList))
                                 keys.addAll(keyList);
+                        } catch (UnsupportedJwtException e) {
+                            signingKeyResolverException = e;
                         }
                     } else {
                         Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, payload);
@@ -340,6 +347,8 @@ public class DefaultJwtParser implements JwtParser {
                                 keys.addAll(keyList);
                         }
                     }
+                    if (keys.size() == 0 && signingKeyResolverException != null)
+                        throw signingKeyResolverException;
                 }
 
                 if (!Objects.isEmpty(keyBytes)) {
@@ -352,7 +361,7 @@ public class DefaultJwtParser implements JwtParser {
                         keys.add(new SecretKeySpec(bytes, algorithm.getJcaName()));
                 }
             }
-
+            
             Assert.notNull(keys, "A signing key must be specified if the specified JWT is digitally signed.");
 
             //re-create the jwt part without the signature.  This is what needs to be signed for verification:
