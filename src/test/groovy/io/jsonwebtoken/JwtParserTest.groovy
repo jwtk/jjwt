@@ -839,6 +839,59 @@ class JwtParserTest {
     }
 
     @Test
+    void testParseClaimsWithSigningKeyResolverAdapterWithNoKey() {
+
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
+                    'Claims JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, Claims) method ' +
+                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.'
+        }
+    }
+
+    @Test
+    void testParseClaimsWithSigningKeyResolverAdapterWithNoKeys() {
+
+        String subject = 'Joe'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, Claims claims) {
+                return null
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
+                    'Claims JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, Claims) method ' +
+                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.'
+        }
+    }
+
+    @Test
     void testParseClaimsJwsWithNumericTypes() {
         byte[] key = randomKey()
 
