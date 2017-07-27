@@ -1,23 +1,11 @@
 # https://travis-ci.org/jwtk/jjwt
 
 dist: trusty
-
 sudo: required
-
 language: java
-
-matrix:
-  include:
-    - jdk: oraclejdk8
-      addons:
-      apt:
-        packages:
-          - oracle-java8-installer
-    - jdk: oraclejdk7
-      addons:
-      apt:
-        packages:
-          - oracle-java7-installer
+jdk:
+  - openjdk7
+  - oraclejdk8
 
 before_install:
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
