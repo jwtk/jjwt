@@ -1000,6 +1000,58 @@ class JwtParserTest {
     }
 
     @Test
+    void testParsePlaintextJwsWithSigningKeyResolverAdapterWithNoKey() {
+
+        String inputPayload = 'Hello world!'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+                return null
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
+                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
+                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
+        }
+    }
+
+    @Test
+    void testParsePlaintextJwsWithSigningKeyResolverAdapterWithNoKeys() {
+
+        String inputPayload = 'Hello world!'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+
+        def signingKeyResolver = new SigningKeyResolverAdapter() {
+            @Override
+            Collection<byte[]> resolveSigningKeysBytes(JwsHeader header, String payload) {
+                return null
+            }
+        }
+
+        try {
+            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            fail()
+        } catch (UnsupportedJwtException ex) {
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
+                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
+                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
+        }
+    }
+
+    @Test
     void testParseRequireDontAllowNullClaimName() {
         def expectedClaimValue = 'A Most Awesome Claim Value'
 
