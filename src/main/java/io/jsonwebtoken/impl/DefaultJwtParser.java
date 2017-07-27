@@ -49,8 +49,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -63,9 +61,9 @@ public class DefaultJwtParser implements JwtParser {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private Collection<byte[]> keyBytes;
+    private byte[] keyBytes;
 
-    private Collection<Key> keys;
+    private Key key;
 
     private SigningKeyResolver signingKeyResolver;
 
@@ -143,27 +141,21 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
-        if (this.keyBytes == null)
-            this.keyBytes = new ArrayList<byte[]>();
-        this.keyBytes.add(key);
+        this.keyBytes = key;
         return this;
     }
 
     @Override
     public JwtParser setSigningKey(String base64EncodedKeyBytes) {
         Assert.hasText(base64EncodedKeyBytes, "signing key cannot be null or empty.");
-        if (this.keyBytes == null)
-            this.keyBytes = new ArrayList<byte[]>();
-        this.keyBytes.add(TextCodec.BASE64.decode(base64EncodedKeyBytes));
+        this.keyBytes = TextCodec.BASE64.decode(base64EncodedKeyBytes);
         return this;
     }
 
     @Override
     public JwtParser setSigningKey(Key key) {
         Assert.notNull(key, "signing key cannot be null.");
-        if (this.keys == null)
-            this.keys = new ArrayList<Key>();
-        this.keys.add(key);
+        this.key = key;
         return this;
     }
 
@@ -305,59 +297,47 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(msg);
             }
 
-            if (this.keys != null && this.keyBytes != null) {
+            if (key != null && keyBytes != null) {
                 throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either.");
-            } else if ((this.keys != null || this.keyBytes != null) && this.signingKeyResolver != null) {
-                String object = this.keys != null ? "a key object" : "key bytes";
+            } else if ((key != null || keyBytes != null) && signingKeyResolver != null) {
+                String object = key != null ? "a key object" : "key bytes";
                 throw new IllegalStateException("A signing key resolver and " + object + " cannot both be specified. Choose either.");
             }
 
             //digitally signed, let's assert the signature:
-            Collection<Key> keys = this.keys;
+            Key key = this.key;
 
-            if (keys == null) { //fall back to keyBytes
+            if (key == null) { //fall back to keyBytes
 
-                if (Objects.isEmpty(this.keyBytes) && this.signingKeyResolver != null) { //use the signingKeyResolver
-                    keys = new ArrayList<Key>();
+                byte[] keyBytes = this.keyBytes;
+
+                if (Objects.isEmpty(keyBytes) && signingKeyResolver != null) { //use the signingKeyResolver
                     if (claims != null) {
-                        Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, claims);
-                        if (key != null)
-                            keys.add(key);
-                        Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, claims);
-                        if (!Objects.isEmpty(keyList))
-                            keys.addAll(keyList);
+                        key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
                     } else {
-                        Key key = this.signingKeyResolver.resolveSigningKey(jwsHeader, payload);
-                        if (key != null)
-                            keys.add(key);
-                        Collection<Key> keyList = this.signingKeyResolver.resolveSigningKeys(jwsHeader, payload);
-                        if (!Objects.isEmpty(keyList))
-                            keys.addAll(keyList);
+                        key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
                     }
                 }
 
-                if (!Objects.isEmpty(this.keyBytes)) {
+                if (!Objects.isEmpty(keyBytes)) {
 
                     Assert.isTrue(algorithm.isHmac(),
                                   "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
 
-                    keys = new ArrayList<Key>();
-                    for (byte[] bytes: this.keyBytes)
-                        this.keys.add(new SecretKeySpec(bytes, algorithm.getJcaName()));
+                    key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
                 }
             }
 
-            Assert.notNull(keys, "A signing key must be specified if the specified JWT is digitally signed.");
+            Assert.notNull(key, "A signing key must be specified if the specified JWT is digitally signed.");
 
             //re-create the jwt part without the signature.  This is what needs to be signed for verification:
             String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR + base64UrlEncodedPayload;
 
             JwtSignatureValidator validator;
             try {
-                validator = createSignatureValidator(algorithm, keys);
+                validator = createSignatureValidator(algorithm, key);
             } catch (IllegalArgumentException e) {
                 String algName = algorithm.getValue();
-                Key key = keys.iterator().next();
                 String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
                              "algorithm, but the specified signing key of type " + key.getClass().getName() +
                              " may not be used to validate " + algName + " signatures.  Because the specified " +
@@ -488,8 +468,8 @@ public class DefaultJwtParser implements JwtParser {
     /*
      * @since 0.5 mostly to allow testing overrides
      */
-    protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys) {
-        return new DefaultJwtSignatureValidator(alg, keys);
+    protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
+        return new DefaultJwtSignatureValidator(alg, key);
     }
 
     @Override

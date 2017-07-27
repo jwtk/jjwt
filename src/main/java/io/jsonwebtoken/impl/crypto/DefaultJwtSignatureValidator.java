@@ -21,7 +21,6 @@ import io.jsonwebtoken.lang.Assert;
 
 import java.nio.charset.Charset;
 import java.security.Key;
-import java.util.Collection;
 
 public class DefaultJwtSignatureValidator implements JwtSignatureValidator {
 
@@ -29,13 +28,13 @@ public class DefaultJwtSignatureValidator implements JwtSignatureValidator {
 
     private final SignatureValidator signatureValidator;
 
-    public DefaultJwtSignatureValidator(SignatureAlgorithm alg, Collection<Key> keys) {
-        this(DefaultSignatureValidatorFactory.INSTANCE, alg, keys);
+    public DefaultJwtSignatureValidator(SignatureAlgorithm alg, Key key) {
+        this(DefaultSignatureValidatorFactory.INSTANCE, alg, key);
     }
 
-    public DefaultJwtSignatureValidator(SignatureValidatorFactory factory, SignatureAlgorithm alg, Collection<Key> keys) {
+    public DefaultJwtSignatureValidator(SignatureValidatorFactory factory, SignatureAlgorithm alg, Key key) {
         Assert.notNull(factory, "SignerFactory argument cannot be null.");
-        this.signatureValidator = factory.createSignatureValidator(alg, keys);
+        this.signatureValidator = factory.createSignatureValidator(alg, key);
     }
 
     @Override
