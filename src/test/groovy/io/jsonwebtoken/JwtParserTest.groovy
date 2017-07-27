@@ -1573,7 +1573,7 @@ class JwtParserTest {
     @Test
     void testParseRequireExpiration_Success() {
         // expire in the future
-        def expiration = new Date(System.currentTimeMillis() + 10000)
+        Date expiration = new Date(System.currentTimeMillis() + 10000)
 
         byte[] key = randomKey()
 
