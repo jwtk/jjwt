@@ -1024,7 +1024,7 @@ class JwtParserTest {
                     'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
         }
     }
-
+ 
     @Test
     void testParsePlaintextJwsWithSigningKeyResolverAdapterWithNoKeys() {
 
