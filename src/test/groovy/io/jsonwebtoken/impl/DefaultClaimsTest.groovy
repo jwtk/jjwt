@@ -158,7 +158,7 @@ class DefaultClaimsTest {
         claims.put("wrongPOJO", new ArrayList())
         try {
             claims.get("wrongPOJO", HashMap.class)
-            fail("getClaim() shouldn't silently lose precision.")
+            fail("getClaim() shouldn't map ArrayList to HashMap.")
         } catch (RequiredTypeException e) {
             assertEquals(
                     e.getMessage(),
