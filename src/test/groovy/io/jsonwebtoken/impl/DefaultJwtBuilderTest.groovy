@@ -75,6 +75,26 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testAddClaims() {
+        def b = new DefaultJwtBuilder()
+        def c = Jwts.claims([initial: 'initial'])
+        b.setClaims(c)
+        def c2 = [foo: 'bar', baz: 'buz']
+        b.addClaims(c2)
+        assertEquals 'initial', b.claims.get('initial')
+        assertEquals 'bar', b.claims.get('foo')
+    }
+
+    @Test
+    void testAddClaimsWithoutInitializing() {
+        def b = new DefaultJwtBuilder()
+        def c = [foo: 'bar', baz: 'buz']
+        b.addClaims(c)
+        assertNotNull b.claims
+        assertEquals b.claims, c
+    }
+
+    @Test
     void testClaim() {
         def b = new DefaultJwtBuilder()
         b.claim('foo', 'bar')

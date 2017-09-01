@@ -193,9 +193,9 @@ try {
     
         // we get here if the required claim is not present
     
-    } catch (IncorrectClaimException) {
+    } catch (IncorrectClaimException e) {
     
-        // we get here if ther required claim has the wrong value
+        // we get here if the required claim has the wrong value
     
     }
     ```

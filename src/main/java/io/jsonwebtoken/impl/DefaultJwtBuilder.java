@@ -17,14 +17,7 @@ package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
 import io.jsonwebtoken.lang.Assert;
@@ -145,6 +138,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder setClaims(Map<String, Object> claims) {
         this.claims = Jwts.claims(claims);
+        return this;
+    }
+
+    @Override
+    public JwtBuilder addClaims(Map<String, Object> claims) {
+        ensureClaims().putAll(claims);
         return this;
     }
 
