@@ -46,8 +46,8 @@ class EllipticCurveSignerTest {
             new EllipticCurveSigner(SignatureAlgorithm.ES256, key);
             fail('EllipticCurveSigner should reject non ECPrivateKey instances.')
         } catch (IllegalArgumentException expected) {
-            assertEquals expected.message, "Elliptic Curve signatures must be computed using an ECPrivateKey.  The specified key of " +
-            "type " + key.getClass().getName() + " is not an ECPrivateKey.";
+            assertEquals expected.message, "Elliptic Curve signatures must be computed using an EC PrivateKey.  The specified key of " +
+            "type " + key.getClass().getName() + " is not an EC PrivateKey.";
         }
     }
 

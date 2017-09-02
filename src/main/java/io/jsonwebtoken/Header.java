@@ -115,11 +115,11 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      *
      * <h5>Compatiblity Note</h5>
      *
-     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE (Json Web Encryption)
-     * specification, JJWT will also support compression for JWS as well if you choose to use it.  However,
-     * be aware that <b>if you use
-     * compression when creating a JWS token, other libraries may not be able to parse the JWS</b>. Compression when
-     * creating JWE tokens however should be universally accepted for any library that supports JWE.</p>
+     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
+     * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.
+     * However, be aware that <b>if you use compression when creating a JWS token, other libraries may not be able to
+     * parse the JWS</b>. However, compression when creating JWE tokens should be universally accepted for any library
+     * that supports JWE.</p>
      *
      * @return the {@code zip} header parameter value or {@code null} if not present.
      * @since 0.6.0
@@ -133,13 +133,14 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      *
      * <h5>Compatiblity Note</h5>
      *
-     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE (Json Web Encryption)
-     * specification, JJWT will also support compression for JWS as well if you choose to use it.  However,
-     * be aware that <b>if you use
-     * compression when creating a JWS token, other libraries may not be able to parse the JWS</b>. Compression when
-     * creating JWE tokens however should be universally accepted for any library that supports JWE.</p>
+     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
+     * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.
+     * However, be aware that <b>if you use compression when creating a JWS token, other libraries may not be able to
+     * parse the JWS</b>. However, Compression when creating JWE tokens should be universally accepted for any library
+     * that supports JWE.</p>
      *
-     * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the JSON map.
+     * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the
+     *  JSON map.
      * @since 0.6.0
      */
     T setCompressionAlgorithm(String zip);
