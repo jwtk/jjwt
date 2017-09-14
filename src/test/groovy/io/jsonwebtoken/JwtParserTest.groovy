@@ -1518,4 +1518,76 @@ class JwtParserTest {
             assertTrue e.getMessage().startsWith('JWT expired at ')
         }
     }
+
+    @Test
+    void testParseMalformedJwt() {
+
+        String header = '{"alg":"none"}'
+
+        String payload = '{"subject":"Joe"}'
+
+        String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
+
+        String bogus = 'bogus'
+
+        String bad = TextCodec.BASE64.encode(header) + '.' +
+            TextCodec.BASE64.encode(payload) + '.' +
+            TextCodec.BASE64.encode(badSig) + '.' +
+            TextCodec.BASE64.encode(bogus)
+
+
+        try {
+            Jwts.parser().setSigningKey(randomKey()).parse(bad)
+            fail()
+        } catch (MalformedJwtException se) {
+            assertEquals 'JWT strings must contain exactly 2 period characters. Found: 3', se.message
+        }
+
+    }
+
+    @Test
+    void testNoHeaderNoSig() {
+        String payload = '{"subject":"Joe"}'
+
+        String jwtStr = '.' + TextCodec.BASE64.encode(payload) + '.'
+
+        Jwt jwt = Jwts.parser().parse(jwtStr)
+
+        assertTrue jwt.header == null
+        assertEquals 'Joe', jwt.body.get('subject')
+    }
+
+    @Test
+    void testNoHeaderSig() {
+        String payload = '{"subject":"Joe"}'
+
+        String sig = ";aklsjdf;kajsd;fkjas;dklfj"
+
+        String jwtStr = '.' + TextCodec.BASE64.encode(payload) + '.' + TextCodec.BASE64.encode(sig)
+
+        try {
+            Jwt jwt = Jwts.parser().parse(jwtStr)
+            fail()
+        } catch (MalformedJwtException se) {
+            assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
+        }
+    }
+
+    @Test
+    void testBadHeaderSig() {
+        String header = '{"alg":"none"}'
+
+        String payload = '{"subject":"Joe"}'
+
+        String sig = ";aklsjdf;kajsd;fkjas;dklfj"
+
+        String jwtStr = TextCodec.BASE64.encode(payload) + '.' + TextCodec.BASE64.encode(payload) + '.' + TextCodec.BASE64.encode(sig)
+
+        try {
+            Jwt jwt = Jwts.parser().parse(jwtStr)
+            fail()
+        } catch (MalformedJwtException se) {
+            assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
+        }
+    }
 }
