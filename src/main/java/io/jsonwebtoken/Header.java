@@ -105,6 +105,7 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * an example of a Nested JWT.</p>
      *
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
+     * @return the {@code Header} instance for method chaining.
      */
     T setContentType(String cty);
 
@@ -119,12 +120,13 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
     /**
      * Sets the JWT <code>calg</code> (Compression Algorithm) header parameter value. A {@code null} value will remove
      * the property from the JSON map.
-     * <p>
+     * 
      * <p>The compression algorithm is NOT part of the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25>JWT specification</a>
      * and must be used carefully since, is not expected that other libraries (including previous versions of this one)
      * be able to deserialize a compressed JTW body correctly. </p>
      *
      * @param calg the JWT compression algorithm {@code calg} value or {@code null} to remove the property from the JSON map.
+     * @return the {@code Header} instance for method chaining.
      * @since 0.6.0
      */
     T setCompressionAlgorithm(String calg);
