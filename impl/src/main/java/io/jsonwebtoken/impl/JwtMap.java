@@ -83,13 +83,13 @@ public class JwtMap implements Map<String, Object> {
         } else if (v instanceof Number) {
             // https://github.com/jwtk/jjwt/issues/122:
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
+            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = ((Number) v).longValue();
             v = seconds * 1000;
         } else if (v instanceof String) {
             // https://github.com/jwtk/jjwt/issues/122
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
+            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
             try {
                 long seconds = Long.parseLong((String) v);
                 v = seconds * 1000;

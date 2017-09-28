@@ -480,7 +480,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>The JWT family of specifications defines compression only for JWE (Json Web Encryption)
      * tokens.  Even so, JJWT will also support compression for JWS tokens as well if you choose to use it.
      * However, be aware that <b>if you use compression when creating a JWS token, other libraries may not be able to
-     * parse that JWS token</b>.  When using compression for JWS tokens, be sure that that all parties accessing the
+     * parse that JWS token</b>.  When using compression for JWS tokens, be sure that all parties accessing the
      * JWS token support compression for JWS.</p>
      *
      * <p>Compression when creating JWE tokens however should be universally accepted for any
