@@ -25,7 +25,7 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>JSON Web Token support for the JVM</name>
     <packaging>jar</packaging>
 
@@ -52,6 +52,29 @@
         <url>https://travis-ci.org/jwtk/jjwt</url>
     </ciManagement>
 
+    <!-- temporary fix until official release of coverall-maven-plugin with clover support -->
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jwtk-coveralls-maven-plugin</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jwtk-coveralls-maven-plugin</id>
+            <name>bintray-plugins</name>
+            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <!-- temporary fix until official release of coverall-maven-plugin with clover support -->
+
     <properties>
 
         <maven.jar.version>3.0.2</maven.jar.version>
@@ -73,6 +96,7 @@
         <junit.version>4.12</junit.version>
         <powermock.version>1.6.6</powermock.version>
         <failsafe.plugin.version>2.19.1</failsafe.plugin.version>
+        <clover.version>4.2.0</clover.version>
 
     </properties>
 
@@ -151,7 +175,6 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -270,19 +293,28 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <groupId>org.openclover</groupId>
+                <artifactId>clover-maven-plugin</artifactId>
+                <version>${clover.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/io/jsonwebtoken/lang/*</exclude>
+                        <exclude>**/*Test*</exclude>
+                        <!-- leaving out lang as it mostly comes from other sources -->
+                        <exclude>io/jsonwebtoken/lang/*</exclude>
                     </excludes>
+                    <methodPercentage>100%</methodPercentage>
+                    <statementPercentage>100%</statementPercentage>
+                    <conditionalPercentage>100%</conditionalPercentage>
+                    <targetPercentage>100%</targetPercentage>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
+                        <id>clover</id>
+                        <phase>test</phase>
                         <goals>
-                            <goal>prepare-agent</goal>
+                            <goal>instrument</goal>
+                            <goal>check</goal>
+                            <goal>clover</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -331,11 +363,13 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
             <plugin>
-                <groupId>org.eluder.coveralls</groupId>
+                <groupId>org.jwtk.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
+                <version>4.4.0</version>
             </plugin>
+            <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
         </plugins>
     </build>
     <profiles>
