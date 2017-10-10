@@ -384,9 +384,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.4</version>
-                <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -414,6 +411,16 @@
             </activation>
             <properties>
                 <!-- Turn off JDK 8's lint checks: -->
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk9</id>
+            <activation>
+                <jdk>1.9</jdk>
+            </activation>
+            <properties>
+                <!-- Turn off JDK 9's lint checks: -->
                 <additionalparam>-Xdoclint:none</additionalparam>
             </properties>
         </profile>
@@ -459,9 +466,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>2.10.4</version>
-                        <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
