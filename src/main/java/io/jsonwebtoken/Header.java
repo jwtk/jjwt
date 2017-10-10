@@ -30,7 +30,7 @@ import java.util.Map;
  * header.{@link Map#put(Object, Object) put}("headerParamName", "headerParamValue");
  * </pre>
  *
- * <h4>Creation</h4>
+ * <h3>Creation</h3>
  *
  * <p>It is easiest to create a {@code Header} instance by calling one of the
  * {@link Jwts#header() JWTs.header()} factory methods.</p>
@@ -113,7 +113,7 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * Returns the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
      * (Compression Algorithm) header parameter value or {@code null} if not present.
      *
-     * <h5>Compatiblity Note</h5>
+     * <h3>Compatiblity Note</h3>
      *
      * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
      * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.
@@ -130,8 +130,12 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * Sets the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
      * (Compression Algorithm) header parameter value. A {@code null} value will remove
      * the property from the JSON map.
+     * <p>
+     * <p>The compression algorithm is NOT part of the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25">JWT specification</a>
+     * and must be used carefully since, is not expected that other libraries (including previous versions of this one)
+     * be able to deserialize a compressed JTW body correctly. </p>
      *
-     * <h5>Compatiblity Note</h5>
+     * <h3>Compatiblity Note</h3>
      *
      * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
      * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.

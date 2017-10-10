@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.9.0
+
+This is a minor release that includes changes to dependencies and plugins to allow for building jjwt with Java 9.
+Javadocs in a few classes were updated as well to support proper linting in both Java 8 and Java 9.
+
 ### 0.8.0
 
 This is a minor feature enhancement, dependency version update and build update release. We switched from Jacoco to 
