@@ -20,3 +20,4 @@ target/
 .classpath
 .project
 .settings
+.clover
