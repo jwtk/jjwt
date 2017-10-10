@@ -417,7 +417,7 @@
         <profile>
             <id>jdk9</id>
             <activation>
-                <jdk>1.9</jdk>
+                <jdk>9</jdk>
             </activation>
             <properties>
                 <!-- Turn off JDK 9's lint checks: -->
