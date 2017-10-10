@@ -438,7 +438,7 @@ public final class Strings {
      * Quote the given String with single quotes.
      * @param str the input String (e.g. "myString")
      * @return the quoted String (e.g. "'myString'"),
-     * or <code>null<code> if the input was <code>null</code>
+     * or <code>null</code> if the input was <code>null</code>
      */
     public static String quote(String str) {
         return (str != null ? "'" + str + "'" : null);
@@ -513,7 +513,7 @@ public final class Strings {
 
     /**
      * Extract the filename from the given path,
-     * e.g. "mypath/myfile.txt" -> "myfile.txt".
+     * e.g. "mypath/myfile.txt" -&gt; "myfile.txt".
      * @param path the file path (may be <code>null</code>)
      * @return the extracted filename, or <code>null</code> if none
      */
@@ -527,7 +527,7 @@ public final class Strings {
 
     /**
      * Extract the filename extension from the given path,
-     * e.g. "mypath/myfile.txt" -> "txt".
+     * e.g. "mypath/myfile.txt" -&gt; "txt".
      * @param path the file path (may be <code>null</code>)
      * @return the extracted filename extension, or <code>null</code> if none
      */
@@ -548,7 +548,7 @@ public final class Strings {
 
     /**
      * Strip the filename extension from the given path,
-     * e.g. "mypath/myfile.txt" -> "mypath/myfile".
+     * e.g. "mypath/myfile.txt" -&gt; "mypath/myfile".
      * @param path the file path (may be <code>null</code>)
      * @return the path with stripped filename extension,
      * or <code>null</code> if none
