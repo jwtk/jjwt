@@ -20,3 +20,7 @@ target/
 .classpath
 .project
 .settings
+
+.clover
+
+.java-version

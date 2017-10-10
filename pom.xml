@@ -405,16 +405,6 @@
     </build>
     <profiles>
         <profile>
-            <id>jdk8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <!-- Turn off JDK 8's lint checks: -->
-                <additionalparam>-Xdoclint:none</additionalparam>
-            </properties>
-        </profile>
-        <profile>
             <id>sign</id>
             <build>
                 <plugins>

@@ -18,10 +18,11 @@ public interface SerializationCodec {
 
     /**
      * Deserialize a {@code byte[]} to an {@code object} of an specific {@code type}
+     *
      * <pre>
      * bytes[] serialized = ...
      * Map instance = serializationCodec.deserialize(serialized, Map.class);
-     * <pre>
+     * </pre>
      *
      * @param bytes       of the serialized object.
      * @param targetClass of the instance to return.
