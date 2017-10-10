@@ -130,6 +130,7 @@ public enum SignatureAlgorithm {
      * following table:
      *
      * <table>
+     *     <caption>Crypto Family</caption>
      *     <thead>
      *         <tr>
      *             <th>SignatureAlgorithm</th>
