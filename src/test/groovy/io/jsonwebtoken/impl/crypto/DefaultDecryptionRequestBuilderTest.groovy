@@ -35,11 +35,11 @@ class DefaultDecryptionRequestBuilderTest {
         def ciphertext = generateData()
 
         def req = new DefaultDecryptionRequestBuilder()
-                .setKey(key).setInitializationVector(iv).setCiphertext(ciphertext).build()
+                .setKey(key).setInitializationValue(iv).setCiphertext(ciphertext).build()
 
         assertTrue req instanceof DefaultDecryptionRequest
         assertSame key, req.getKey()
-        assertSame iv, req.getInitializationVector()
+        assertSame iv, req.getInitializationValue()
         assertSame ciphertext, req.getCiphertext()
     }
 
@@ -55,8 +55,8 @@ class DefaultDecryptionRequestBuilderTest {
     }
 
     @Test
-    void testSetInitializationVectorWithEmptyArray() {
-        def b = new DefaultDecryptionRequestBuilder().setInitializationVector(new byte[0])
+    void testSetInitializationValueWithEmptyArray() {
+        def b = new DefaultDecryptionRequestBuilder().setInitializationValue(new byte[0])
         assertNull b.iv
     }
 

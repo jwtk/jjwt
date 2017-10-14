@@ -90,7 +90,7 @@ public class DispatchingParser {
         base64UrlEncodedTag = sb.toString();
 
         Assert.notNull(base64UrlEncodedHeader, "Invalid compact JWE: base64Url JWE Protected Header is missing.");
-        Assert.notNull(base64UrlEncodedIv, "Invalid compact JWE: base64Url JWE Initialization Vector is missing.");
+        Assert.notNull(base64UrlEncodedIv, "Invalid compact JWE: base64Url JWE Initialization Value is missing.");
         Assert.notNull(base64UrlEncodedCiphertext, "Invalid compact JWE: base64Url JWE Ciphertext is missing.");
         Assert.notNull(base64UrlEncodedTag, "Invalid compact JWE: base64Url JWE Authentication Tag is missing.");
 
@@ -113,7 +113,7 @@ public class DispatchingParser {
         DecryptionRequest dreq = DecryptionRequests.builder()
                 .setKey(secretKey.getEncoded())
                 .setAdditionalAuthenticatedData(aad)
-                .setInitializationVector(iv)
+                .setInitializationValue(iv)
                 .setCiphertext(ciphertext)
                 .setAuthenticationTag(tag)
                 .build();

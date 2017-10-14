@@ -53,7 +53,7 @@ class HmacAesEncryptionAlgorithmTest {
 
         def dreq = DecryptionRequests.builder()
                 .setKey(key)
-                .setInitializationVector(result.getInitializationVector())
+                .setInitializationValue(result.getInitializationValue())
                 .setAuthenticationTag(result.getAuthenticationTag())
                 .setCiphertext(result.getCiphertext())
                 .build()
@@ -108,7 +108,7 @@ class HmacAesEncryptionAlgorithmTest {
 
         def dreq = DecryptionRequests.builder()
                 .setKey(key)
-                .setInitializationVector(result.getInitializationVector())
+                .setInitializationValue(result.getInitializationValue())
                 .setAuthenticationTag(fakeTag)
                 .setCiphertext(result.getCiphertext())
                 .build()

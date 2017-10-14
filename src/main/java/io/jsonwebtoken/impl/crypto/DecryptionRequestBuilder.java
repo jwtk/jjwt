@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.crypto;
 
 public interface DecryptionRequestBuilder {
 
-    DecryptionRequestBuilder setInitializationVector(byte[] iv);
+    DecryptionRequestBuilder setInitializationValue(byte[] iv);
 
     DecryptionRequestBuilder setKey(byte[] key);
 

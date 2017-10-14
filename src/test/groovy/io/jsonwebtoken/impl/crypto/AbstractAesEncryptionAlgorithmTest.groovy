@@ -50,7 +50,7 @@ class AbstractAesEncryptionAlgorithmTest {
 
         def req = EncryptionRequests.builder()
                 .setAdditionalAuthenticatedData('foo'.getBytes())
-                .setInitializationVector('iv'.getBytes())
+                .setInitializationValue('iv'.getBytes())
                 .setKey(alg.generateKey().getEncoded())
                 .setPlaintext('bar'.getBytes())
                 .build();
@@ -89,7 +89,7 @@ class AbstractAesEncryptionAlgorithmTest {
 
         def req = EncryptionRequests.builder()
                 .setAdditionalAuthenticatedData('foo'.getBytes())
-                .setInitializationVector('iv'.getBytes())
+                .setInitializationValue('iv'.getBytes())
                 .setKey(alg.generateKey().getEncoded())
                 .setPlaintext('bar'.getBytes())
                 .setSecureRandom(secureRandom)

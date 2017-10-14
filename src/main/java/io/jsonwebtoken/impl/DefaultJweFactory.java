@@ -51,7 +51,7 @@ public class DefaultJweFactory {
         // so we use a 'null safe' variant:
         final byte[] encryptedKeyBytes = nullSafeBase64UrlDecode(base64UrlEncryptedKey, "Encrypted Key");
 
-        final byte[] iv = base64UrlDecode(base64UrlIv, "Initialization Vector");
+        final byte[] iv = base64UrlDecode(base64UrlIv, "Initialization Value");
 
         final byte[] ciphertext = base64UrlDecode(base64UrlCiphertext, "Ciphertext");
 

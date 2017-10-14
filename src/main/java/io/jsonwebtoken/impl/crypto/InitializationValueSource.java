@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
-public interface InitializationVectorSource {
+public interface InitializationValueSource {
 
-    byte[] getInitializationVector();
+    byte[] getInitializationValue();
 }

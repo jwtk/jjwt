@@ -53,7 +53,7 @@ class EncryptionAlgorithmsTest {
 
             def dreq = DecryptionRequests.builder()
                     .setKey(key)
-                    .setInitializationVector(result.getInitializationVector())
+                    .setInitializationValue(result.getInitializationValue())
                     .setAuthenticationTag(result.getAuthenticationTag())
                     .setCiphertext(result.getCiphertext())
                     .build()
@@ -92,7 +92,7 @@ class EncryptionAlgorithmsTest {
             def dreq = DecryptionRequests.builder()
                     .setAdditionalAuthenticatedData(AAD_BYTES)
                     .setKey(key)
-                    .setInitializationVector(result.getInitializationVector())
+                    .setInitializationValue(result.getInitializationValue())
                     .setAuthenticationTag(result.getAuthenticationTag())
                     .setCiphertext(result.getCiphertext())
                     .build()

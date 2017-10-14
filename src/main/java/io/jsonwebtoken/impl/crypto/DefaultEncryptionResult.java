@@ -31,7 +31,7 @@ public class DefaultEncryptionResult implements EncryptionResult {
     }
 
     @Override
-    public byte[] getInitializationVector() {
+    public byte[] getInitializationValue() {
         return this.iv;
     }
 

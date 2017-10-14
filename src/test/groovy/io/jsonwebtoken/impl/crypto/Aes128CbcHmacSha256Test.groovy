@@ -66,7 +66,7 @@ class Aes128CbcHmacSha256Test {
 
         EncryptionRequest request = EncryptionRequests.builder()
                 .setAdditionalAuthenticatedData(A)
-                .setInitializationVector(IV)
+                .setInitializationValue(IV)
                 .setKey(K)
                 .setPlaintext(P)
                 .build();
@@ -78,7 +78,7 @@ class Aes128CbcHmacSha256Test {
 
         byte[] resultCiphertext = result.getCiphertext()
         byte[] resultTag = result.getAuthenticationTag();
-        byte[] resultIv = result.getInitializationVector();
+        byte[] resultIv = result.getInitializationValue();
 
         assertArrayEquals E, resultCiphertext
         assertArrayEquals T, resultTag
@@ -89,7 +89,7 @@ class Aes128CbcHmacSha256Test {
         def dreq = DecryptionRequests.builder()
                 .setAdditionalAuthenticatedData(A)
                 .setCiphertext(resultCiphertext)
-                .setInitializationVector(resultIv)
+                .setInitializationValue(resultIv)
                 .setKey(K)
                 .setAuthenticationTag(resultTag)
                 .build();

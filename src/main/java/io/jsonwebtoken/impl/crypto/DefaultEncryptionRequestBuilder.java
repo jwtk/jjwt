@@ -36,7 +36,7 @@ public class DefaultEncryptionRequestBuilder implements EncryptionRequestBuilder
     }
 
     @Override
-    public EncryptionRequestBuilder setInitializationVector(byte[] iv) {
+    public EncryptionRequestBuilder setInitializationValue(byte[] iv) {
         this.iv = clean(iv);
         return this;
     }
