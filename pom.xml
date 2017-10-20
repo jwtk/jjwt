@@ -28,6 +28,7 @@
     <version>0.10.0-SNAPSHOT</version>
     <name>JSON Web Token support for the JVM</name>
     <packaging>jar</packaging>
+    <url>https://github.com/jwtk/jjwt</url>
 
     <licenses>
         <license>
