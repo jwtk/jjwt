@@ -252,8 +252,32 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this;
     }
 
+    protected String createSerializedJwt(Header header, Object body, CompressionCodec compressionCodec) {
+        String base64UrlEncodedHeader = base64UrlEncode(header, "Unable to serialize header to json.");
+
+        String base64UrlEncodedBody;
+
+        if (compressionCodec != null) {
+            byte[] bytes;
+            try {
+                bytes = body instanceof String ? ((String) body).getBytes(Strings.UTF_8) : toJson(body);
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Unable to serialize claims object to json.");
+            }
+
+            base64UrlEncodedBody = TextCodec.BASE64URL.encode(compressionCodec.compress(bytes));
+
+        } else {
+            base64UrlEncodedBody = body instanceof String ?
+                    TextCodec.BASE64URL.encode((String) body) :
+                    base64UrlEncode(body, "Unable to serialize claims object to json.");
+        }
+
+        return base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
+    }
+
     @Override
-    public String compact() {
+    public Jwt build() {
         if (payload == null && Collections.isEmpty(claims)) {
             throw new IllegalStateException("Either 'payload' or 'claims' must be specified.");
         }
@@ -292,43 +316,36 @@ public class DefaultJwtBuilder implements JwtBuilder {
             jwsHeader.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
         }
 
-        String base64UrlEncodedHeader = base64UrlEncode(jwsHeader, "Unable to serialize header to json.");
+        Object body = this.payload != null ? this.payload : claims;
 
-        String base64UrlEncodedBody;
+        String serializedJwt = createSerializedJwt(jwsHeader, body, compressionCodec);
 
-        if (compressionCodec != null) {
-
-            byte[] bytes;
-            try {
-                bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Unable to serialize claims object to json.");
-            }
-
-            base64UrlEncodedBody = TextCodec.BASE64URL.encode(compressionCodec.compress(bytes));
-
-        } else {
-            base64UrlEncodedBody = this.payload != null ?
-                    TextCodec.BASE64URL.encode(this.payload) :
-                    base64UrlEncode(claims, "Unable to serialize claims object to json.");
-        }
-
-        String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
-
-        if (key != null) { //jwt must be signed:
-
+        if (key != null) {
             JwtSigner signer = createSigner(algorithm, key);
 
-            String base64UrlSignature = signer.sign(jwt);
+            String base64UrlSignature = signer.sign(serializedJwt);
 
-            jwt += JwtParser.SEPARATOR_CHAR + base64UrlSignature;
+            return new DefaultJws<Object>(jwsHeader, body, base64UrlSignature);
+        } else {
+            return new DefaultJwt<Object>(jwsHeader, body);
+        }
+    }
+
+    @Override
+    public String compact() {
+        Jwt jwt = build();
+
+        String serializedJwt = createSerializedJwt(jwt.getHeader(), jwt.getBody(), compressionCodec);
+
+        if (jwt instanceof Jws) {
+            serializedJwt += JwtParser.SEPARATOR_CHAR + ((Jws) jwt).getSignature();
         } else {
             // no signature (plaintext), but must terminate w/ a period, see
             // https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
-            jwt += JwtParser.SEPARATOR_CHAR;
+            serializedJwt += JwtParser.SEPARATOR_CHAR;
         }
 
-        return jwt;
+        return serializedJwt;
     }
 
     /*
