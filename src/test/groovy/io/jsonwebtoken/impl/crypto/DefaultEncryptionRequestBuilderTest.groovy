@@ -21,12 +21,12 @@ class DefaultEncryptionRequestBuilderTest {
         def aad = generateData()
 
         def req = new DefaultEncryptionRequestBuilder()
-                .setKey(key).setInitializationVector(iv).setPlaintext(plaintext).setAdditionalAuthenticatedData(aad)
+                .setKey(key).setInitializationValue(iv).setPlaintext(plaintext).setAdditionalAuthenticatedData(aad)
                 .build()
 
         assertTrue req instanceof DefaultAuthenticatedEncryptionRequest
         assertSame key, req.getKey()
-        assertSame iv, req.getInitializationVector()
+        assertSame iv, req.getInitializationValue()
         assertSame plaintext, req.getPlaintext()
         assertSame aad, req.getAssociatedData()
     }
@@ -39,17 +39,17 @@ class DefaultEncryptionRequestBuilderTest {
         def plaintext = generateData()
 
         def req = new DefaultEncryptionRequestBuilder()
-                .setKey(key).setInitializationVector(iv).setPlaintext(plaintext).build()
+                .setKey(key).setInitializationValue(iv).setPlaintext(plaintext).build()
 
         assertTrue req instanceof DefaultEncryptionRequest
         assertSame key, req.getKey()
-        assertSame iv, req.getInitializationVector()
+        assertSame iv, req.getInitializationValue()
         assertSame plaintext, req.getPlaintext()
     }
 
     @Test
-    void testSetInitializationVectorWithEmptyArray() {
-        def b = new DefaultEncryptionRequestBuilder().setInitializationVector(new byte[0])
+    void testSetInitializationValueWithEmptyArray() {
+        def b = new DefaultEncryptionRequestBuilder().setInitializationValue(new byte[0])
         assertNull b.iv
     }
 

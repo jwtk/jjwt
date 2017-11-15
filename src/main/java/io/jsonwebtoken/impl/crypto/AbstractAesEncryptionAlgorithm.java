@@ -21,7 +21,7 @@ public abstract class AbstractAesEncryptionAlgorithm implements EncryptionAlgori
             "generatedIvLength must be a positive number <= " + AES_BLOCK_SIZE;
 
     protected static final String DECRYPT_NO_IV = "This EncryptionAlgorithm implementation rejects decryption " +
-            "requests that do not include initialization vectors.  AES ciphertext without an IV is weak and should " +
+            "requests that do not include initialization values.  AES ciphertext without an IV is weak and should " +
             "never be used.";
 
     private final String name;
@@ -93,7 +93,7 @@ public abstract class AbstractAesEncryptionAlgorithm implements EncryptionAlgori
         }
     }
 
-    protected byte[] generateInitializationVector(SecureRandom random) {
+    protected byte[] generateInitializationValue(SecureRandom random) {
         byte[] iv = new byte[this.generatedIvLength];
         random.nextBytes(iv);
         return iv;
@@ -124,18 +124,18 @@ public abstract class AbstractAesEncryptionAlgorithm implements EncryptionAlgori
 
         final SecureRandom random = getSecureRandom(req);
 
-        byte[] iv = req.getInitializationVector();
+        byte[] iv = req.getInitializationValue();
 
         int ivLength = length(iv);
         if (ivLength == 0) {
-            iv = generateInitializationVector(random);
+            iv = generateInitializationValue(random);
         }
 
         return iv;
     }
 
     protected byte[] assertDecryptionIv(DecryptionRequest req) throws IllegalArgumentException {
-        byte[] iv = req.getInitializationVector();
+        byte[] iv = req.getInitializationValue();
         Assert.notEmpty(iv, DECRYPT_NO_IV);
         return iv;
     }

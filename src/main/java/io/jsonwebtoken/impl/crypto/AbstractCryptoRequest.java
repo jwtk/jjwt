@@ -31,7 +31,7 @@ public abstract class AbstractCryptoRequest implements CryptoRequest {
     }
 
     @Override
-    public byte[] getInitializationVector() {
+    public byte[] getInitializationValue() {
         return this.iv;
     }
 }

@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.crypto;
 
 public interface EncryptionResult {
 
-    byte[] getInitializationVector();
+    byte[] getInitializationValue();
 
     byte[] getCiphertext();
 

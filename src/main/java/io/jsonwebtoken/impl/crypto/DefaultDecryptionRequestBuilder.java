@@ -32,7 +32,7 @@ public class DefaultDecryptionRequestBuilder implements DecryptionRequestBuilder
     private byte[] tag;
 
     @Override
-    public DecryptionRequestBuilder setInitializationVector(byte[] iv) {
+    public DecryptionRequestBuilder setInitializationValue(byte[] iv) {
         this.iv = clean(iv);
         return this;
     }

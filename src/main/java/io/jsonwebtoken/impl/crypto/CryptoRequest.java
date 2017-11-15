@@ -28,17 +28,17 @@ public interface CryptoRequest {
     byte[] getKey();
 
     /**
-     * Returns the initialization vector to use during encryption or decryption depending on the type of request.
+     * Returns the initialization value to use during encryption or decryption depending on the type of request.
      * <p>
-     * <p>If this value is {@code null} on an {@link EncryptionRequest}, a default initialization vector will be
-     * auto-generated, as it is never safe to use most cryptographic algorithms without initialization vectors
+     * <p>If this value is {@code null} on an {@link EncryptionRequest}, a default initialization value will be
+     * auto-generated, as it is never safe to use most cryptographic algorithms without initialization values
      * (such as AES).</p>
      * <p>
-     * <p>This implies that all decryption requests must always supply an initialization vector since encryption
+     * <p>This implies that all decryption requests must always supply an initialization value since encryption
      * will always have one.</p>
      *
-     * @return the initialization vector to use during encryption or decryption depending on the type of request.
+     * @return the initialization value to use during encryption or decryption depending on the type of request.
      */
-    byte[] getInitializationVector();
+    byte[] getInitializationValue();
 
 }

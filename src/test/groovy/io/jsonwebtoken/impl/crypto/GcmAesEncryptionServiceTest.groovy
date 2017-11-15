@@ -40,7 +40,7 @@ class GcmAesEncryptionServiceTest {
 
         EncryptionRequest request = EncryptionRequests.builder()
                 .setAdditionalAuthenticatedData(AAD)
-                .setInitializationVector(IV)
+                .setInitializationValue(IV)
                 .setKey(K)
                 .setPlaintext(P)
                 .build();
@@ -52,7 +52,7 @@ class GcmAesEncryptionServiceTest {
 
         byte[] resultCiphertext = result.getCiphertext()
         byte[] resultTag = result.getAuthenticationTag();
-        byte[] resultIv = result.getInitializationVector();
+        byte[] resultIv = result.getInitializationValue();
 
         assertArrayEquals E, resultCiphertext
         assertArrayEquals T, resultTag
@@ -63,7 +63,7 @@ class GcmAesEncryptionServiceTest {
         AuthenticatedDecryptionRequest decryptionRequest = DecryptionRequests.builder()
                 .setAdditionalAuthenticatedData(AAD)
                 .setCiphertext(resultCiphertext)
-                .setInitializationVector(resultIv)
+                .setInitializationValue(resultIv)
                 .setKey(K)
                 .setAuthenticationTag(resultTag)
                 .build();

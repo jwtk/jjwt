@@ -21,7 +21,7 @@ public interface EncryptionRequestBuilder {
 
     EncryptionRequestBuilder setSecureRandom(SecureRandom secureRandom);
 
-    EncryptionRequestBuilder setInitializationVector(byte[] iv);
+    EncryptionRequestBuilder setInitializationValue(byte[] iv);
 
     EncryptionRequestBuilder setKey(byte[] key);
 
