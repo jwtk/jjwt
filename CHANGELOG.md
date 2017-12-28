@@ -1,5 +1,26 @@
 ## Release Notes
 
+### 0.9.0
+
+This is a minor release that includes changes to dependencies and plugins to allow for building jjwt with Java 9.
+Javadocs in a few classes were updated as well to support proper linting in both Java 8 and Java 9.
+
+### 0.8.0
+
+This is a minor feature enhancement, dependency version update and build update release. We switched from Jacoco to 
+OpenClover as OpenClover delivers a higher quality of test metrics. As an interim measure, we introduced a new 
+repository that has an updated version of the coveralls-maven-plugin which includes support for Clover reporting to
+Coveralls. Once this change has been merged and released to the official coveralls-maven-plugin on maven central, 
+this repository will be removed. The following dependencies were updated to the latest release version: maven 
+compiler, maven enforcer, maven failsafe, maven release, maven scm provider, maven bundle, maven gpg, maven source, 
+maven javadoc, jackson, bouncy castle, groovy, logback and powermock. Of significance, is the upgrade for jackson as 
+a security issue was addressed in its latest release.
+
+An `addClaims` method is added to the `JwtBuilder` interface in this release. It adds all given name/value pairs to
+the JSON Claims in the payload.
+
+Additional tests were added to improve overall test coverage.
+
 ### 0.7.0
 
 This is a minor feature enhancement and bugfix release.  One of the bug fixes is particularly important if using

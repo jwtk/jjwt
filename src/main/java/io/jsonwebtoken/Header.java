@@ -30,7 +30,7 @@ import java.util.Map;
  * header.{@link Map#put(Object, Object) put}("headerParamName", "headerParamValue");
  * </pre>
  *
- * <h4>Creation</h4>
+ * <h3>Creation</h3>
  *
  * <p>It is easiest to create a {@code Header} instance by calling one of the
  * {@link Jwts#header() JWTs.header()} factory methods.</p>
