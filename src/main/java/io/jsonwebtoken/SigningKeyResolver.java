@@ -38,7 +38,7 @@ import java.security.Key;
  *
  * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>
  *
- * <h4>SigningKeyResolverAdapter</h4>
+ * <h3>SigningKeyResolverAdapter</h3>
  *
  * <p>If you only need to resolve a signing key for a particular JWS (either a plaintext or Claims JWS), consider using
  * the {@link io.jsonwebtoken.SigningKeyResolverAdapter} and overriding only the method you need to support instead of
