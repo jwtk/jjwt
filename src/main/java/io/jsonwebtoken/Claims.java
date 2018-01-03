@@ -31,7 +31,7 @@ import java.util.Map;
  * claims.{@link Map#put(Object, Object) put}("someKey", "someValue");
  * </pre>
  *
- * <h4>Creation</h4>
+ * <h3>Creation</h3>
  *
  * <p>It is easiest to create a {@code Claims} instance by calling one of the
  * {@link Jwts#claims() JWTs.claims()} factory methods.</p>
