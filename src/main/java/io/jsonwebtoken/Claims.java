@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -111,13 +111,13 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      *
      * @return the JWT {@code exp} value or {@code null} if not present.
      */
-    Date getExpiration();
+    Instant getExpiration();
 
     /**
      * {@inheritDoc}
      */
     @Override //only for better/targeted JavaDoc
-    Claims setExpiration(Date exp);
+    Claims setExpiration(Instant exp);
 
     /**
      * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
@@ -127,13 +127,13 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      *
      * @return the JWT {@code nbf} value or {@code null} if not present.
      */
-    Date getNotBefore();
+    Instant getNotBefore();
 
     /**
      * {@inheritDoc}
      */
     @Override //only for better/targeted JavaDoc
-    Claims setNotBefore(Date nbf);
+    Claims setNotBefore(Instant nbf);
 
     /**
      * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
@@ -143,13 +143,13 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      *
      * @return the JWT {@code nbf} value or {@code null} if not present.
      */
-    Date getIssuedAt();
+    Instant getIssuedAt();
 
     /**
      * {@inheritDoc}
      */
     @Override //only for better/targeted JavaDoc
-    Claims setIssuedAt(Date iat);
+    Claims setIssuedAt(Instant iat);
 
     /**
      * Returns the JWTs <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">

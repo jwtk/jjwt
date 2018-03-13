@@ -18,7 +18,7 @@ package io.jsonwebtoken;
 import io.jsonwebtoken.impl.DefaultClock;
 
 import java.security.Key;
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
@@ -87,7 +87,7 @@ public interface JwtParser {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParser requireIssuedAt(Date issuedAt);
+    JwtParser requireIssuedAt(Instant issuedAt);
 
     /**
      * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
@@ -99,7 +99,7 @@ public interface JwtParser {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParser requireExpiration(Date expiration);
+    JwtParser requireExpiration(Instant expiration);
 
     /**
      * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
@@ -111,7 +111,7 @@ public interface JwtParser {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParser requireNotBefore(Date notBefore);
+    JwtParser requireNotBefore(Instant notBefore);
 
     /**
      * Ensures that the specified {@code claimName} exists in the parsed JWT.  If missing or if the parsed

@@ -17,8 +17,8 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -41,27 +41,23 @@ public class JwtMap implements Map<String,Object> {
         return v != null ? String.valueOf(v) : null;
     }
 
-    protected static Date toDate(Object v, String name) {
+    protected static Instant toInstant(Object v, String name) {
         if (v == null) {
             return null;
-        } else if (v instanceof Date) {
-            return (Date) v;
+        } else if (v instanceof Instant) {
+            return (Instant) v;
         } else if (v instanceof Number) {
             // https://github.com/jwtk/jjwt/issues/122:
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = ((Number) v).longValue();
-            long millis = seconds * 1000;
-            return new Date(millis);
+            return Instant.ofEpochSecond(seconds);
         } else if (v instanceof String) {
             // https://github.com/jwtk/jjwt/issues/122
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = Long.parseLong((String) v);
-            long millis = seconds * 1000;
-            return new Date(millis);
+            return Instant.ofEpochSecond(seconds);
         } else {
-            throw new IllegalStateException("Cannot convert '" + name + "' value [" + v + "] to Date instance.");
+            throw new IllegalStateException("Cannot convert '" + name + "' value [" + v + "] to Instant instance.");
         }
     }
 
@@ -73,17 +69,16 @@ public class JwtMap implements Map<String,Object> {
         }
     }
 
-    protected Date getDate(String name) {
+    protected Instant getInstant(String name) {
         Object v = map.get(name);
-        return toDate(v, name);
+        return toInstant(v, name);
     }
 
-    protected void setDate(String name, Date d) {
-        if (d == null) {
+    protected void setInstant(String name, Instant instant) {
+        if (instant == null) {
             map.remove(name);
         } else {
-            long seconds = d.getTime() / 1000;
-            map.put(name, seconds);
+            map.put(name, instant.getEpochSecond());
         }
     }
 

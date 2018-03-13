@@ -22,6 +22,8 @@ import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import static org.junit.Assert.*
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
@@ -29,12 +31,12 @@ import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 
 class JwtParserTest {
 
-    private static final SecureRandom random = new SecureRandom(); //doesn't need to be seeded - just testing
+    private static final SecureRandom RANDOM = new SecureRandom(); //doesn't need to be seeded - just testing
 
     protected static byte[] randomKey() {
         //create random signing key for testing:
         byte[] key = new byte[64]
-        random.nextBytes(key)
+        RANDOM.nextBytes(key)
         return key
     }
 
@@ -165,8 +167,7 @@ class JwtParserTest {
 
     @Test
     void testParseWithExpiredJwt() {
-
-        Date exp = new Date(System.currentTimeMillis() - 1000)
+        Instant exp = instantFromMillis(System.currentTimeMillis()  - 1000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
@@ -183,8 +184,7 @@ class JwtParserTest {
 
     @Test
     void testParseWithPrematureJwt() {
-
-        Date nbf = new Date(System.currentTimeMillis() + 100000)
+        Instant nbf = instantFromMillis(System.currentTimeMillis() + 100000)
 
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
 
@@ -201,7 +201,7 @@ class JwtParserTest {
 
     @Test
     void testParseWithExpiredJwtWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() - 3000)
+        Instant exp = instantFromMillis(System.currentTimeMillis() - 3000)
 
         String subject = 'Joe'
         String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
@@ -213,7 +213,7 @@ class JwtParserTest {
 
     @Test
     void testParseWithExpiredJwtNotWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() - 3000)
+        Instant exp = instantFromMillis(System.currentTimeMillis() - 3000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
@@ -227,7 +227,7 @@ class JwtParserTest {
 
     @Test
     void testParseWithPrematureJwtWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() + 3000)
+        Instant exp = instantFromMillis(System.currentTimeMillis() + 3000)
 
         String subject = 'Joe'
         String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
@@ -239,7 +239,7 @@ class JwtParserTest {
 
     @Test
     void testParseWithPrematureJwtNotWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() + 3000)
+        Instant exp = instantFromMillis(System.currentTimeMillis() + 3000)
 
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
 
@@ -370,9 +370,8 @@ class JwtParserTest {
     @Test
     void testParseClaimsJwtWithExpiredJwt() {
 
-        long nowMillis = System.currentTimeMillis()
         //some time in the past:
-        Date exp = new Date(nowMillis - 1000)
+        Instant exp = instantFromMillis(System.currentTimeMillis() - 1000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
@@ -387,7 +386,7 @@ class JwtParserTest {
     @Test
     void testParseClaimsJwtWithPrematureJwt() {
 
-        Date nbf = new Date(System.currentTimeMillis() + 100000)
+        Instant nbf = instantFromMillis(System.currentTimeMillis() + 100000)
 
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
 
@@ -493,9 +492,8 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        long nowMillis = System.currentTimeMillis()
         //some time in the past:
-        Date exp = new Date(nowMillis - 1000)
+        Instant exp = instantFromMillis(System.currentTimeMillis() - 1000)
 
         String compact = Jwts.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).setExpiration(exp).compact()
 
@@ -516,7 +514,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        Date nbf = new Date(System.currentTimeMillis() + 100000)
+        Instant nbf = instantFromMillis(System.currentTimeMillis() + 100000)
 
         String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
 
@@ -962,7 +960,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireIssuedAt_Success() {
-        def issuedAt = new Date(System.currentTimeMillis())
+        Instant issuedAt = instantFromMillis(System.currentTimeMillis())
 
         byte[] key = randomKey()
 
@@ -975,15 +973,16 @@ class JwtParserTest {
             parseClaimsJws(compact)
 
         // system converts to seconds (lopping off millis precision), then returns millis
-        def issuedAtMillis = ((long)issuedAt.getTime() / 1000) * 1000
+        def issuedAtMillis = issuedAt.toEpochMilli()
 
-        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis, 0
+        assertEquals jwt.getBody().getIssuedAt().toEpochMilli(), issuedAtMillis, 0
     }
 
     @Test
     void testParseRequireIssuedAt_Incorrect_Fail() {
-        def goodIssuedAt = new Date(System.currentTimeMillis())
-        def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
+        Instant goodIssuedAt = instantFromMillis(System.currentTimeMillis())
+
+        Instant badIssuedAt = instantFromMillis(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
@@ -1006,7 +1005,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireIssuedAt_Missing_Fail() {
-        def issuedAt = new Date(System.currentTimeMillis() - 10000)
+        Instant issuedAt = instantFromMillis(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
@@ -1286,7 +1285,7 @@ class JwtParserTest {
     @Test
     void testParseRequireExpiration_Success() {
         // expire in the future
-        def expiration = new Date(System.currentTimeMillis() + 10000)
+        Instant expiration = instantFromMillis(System.currentTimeMillis() + 10000)
 
         byte[] key = randomKey()
 
@@ -1299,15 +1298,16 @@ class JwtParserTest {
             parseClaimsJws(compact)
 
         // system converts to seconds (lopping off millis precision), then returns millis
-        def expirationMillis = ((long)expiration.getTime() / 1000) * 1000
+        def expirationMillis = expiration.toEpochMilli()
 
-        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
+        assertEquals jwt.getBody().getExpiration().toEpochMilli(), expirationMillis, 0
     }
 
     @Test
     void testParseRequireExpirationAt_Incorrect_Fail() {
-        def goodExpiration = new Date(System.currentTimeMillis() + 20000)
-        def badExpiration = new Date(System.currentTimeMillis() + 10000)
+        Instant goodExpiration = instantFromMillis(System.currentTimeMillis() + 20000)
+
+        Instant badExpiration = instantFromMillis(System.currentTimeMillis() + 10000)
 
         byte[] key = randomKey()
 
@@ -1330,7 +1330,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireExpiration_Missing_Fail() {
-        def expiration = new Date(System.currentTimeMillis() + 10000)
+        Instant expiration = instantFromMillis(System.currentTimeMillis() + 10000)
 
         byte[] key = randomKey()
 
@@ -1354,7 +1354,7 @@ class JwtParserTest {
     @Test
     void testParseRequireNotBefore_Success() {
         // expire in the future
-        def notBefore = new Date(System.currentTimeMillis() - 10000)
+        Instant notBefore = instantFromMillis(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
@@ -1367,15 +1367,16 @@ class JwtParserTest {
             parseClaimsJws(compact)
 
         // system converts to seconds (lopping off millis precision), then returns millis
-        def notBeforeMillis = ((long)notBefore.getTime() / 1000) * 1000
+        def notBeforeMillis = notBefore.toEpochMilli()
 
-        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
+        assertEquals jwt.getBody().getNotBefore().toEpochMilli(), notBeforeMillis, 0
     }
 
     @Test
     void testParseRequireNotBefore_Incorrect_Fail() {
-        def goodNotBefore = new Date(System.currentTimeMillis() - 20000)
-        def badNotBefore = new Date(System.currentTimeMillis() - 10000)
+        Instant goodNotBefore = instantFromMillis(System.currentTimeMillis() - 20000)
+
+        Instant badNotBefore = instantFromMillis(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
@@ -1398,7 +1399,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireNotBefore_Missing_Fail() {
-        def notBefore = new Date(System.currentTimeMillis() - 10000)
+        Instant notBefore = instantFromMillis(System.currentTimeMillis()  - 10000)
 
         byte[] key = randomKey()
 
@@ -1421,40 +1422,41 @@ class JwtParserTest {
 
     @Test
     void testParseRequireCustomDate_Success() {
-        def aDate = new Date(System.currentTimeMillis())
+        Instant anInstant = instantFromMillis(System.currentTimeMillis())
 
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            claim("aDate", aDate).
+            claim("anInstant", anInstant).
             compact()
 
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            require("aDate", aDate).
+            require("anInstant", anInstant).
             parseClaimsJws(compact)
 
-        assertEquals jwt.getBody().get("aDate", Date.class), aDate
+        assertEquals jwt.getBody().get("anInstant", Instant.class), anInstant
     }
 
     @Test
     void testParseRequireCustomDate_Incorrect_Fail() {
-        def goodDate = new Date(System.currentTimeMillis())
-        def badDate = new Date(System.currentTimeMillis() - 10000)
+        Instant goodInstant = instantFromMillis(System.currentTimeMillis())
+
+        Instant badInstant = instantFromMillis(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            claim("aDate", badDate).
+            claim("anInstant", badInstant).
             compact()
 
         try {
             Jwts.parser().setSigningKey(key).
-                require("aDate", goodDate).
+                require("anInstant", goodInstant).
                 parseClaimsJws(compact)
             fail()
         } catch(IncorrectClaimException e) {
             assertEquals(
-                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "aDate", goodDate, badDate),
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "anInstant", goodInstant, badInstant),
                 e.getMessage()
             )
         }
@@ -1463,7 +1465,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireCustomDate_Missing_Fail() {
-        def aDate = new Date(System.currentTimeMillis())
+        Instant anInstant = instantFromMillis(System.currentTimeMillis())
 
         byte[] key = randomKey()
 
@@ -1473,12 +1475,12 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                require("aDate", aDate).
+                require("anInstant", anInstant).
                 parseClaimsJws(compact)
             fail()
         } catch(MissingClaimException e) {
             assertEquals(
-                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "aDate", aDate),
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "anInstant", anInstant),
                 e.getMessage()
             )
         }
@@ -1487,8 +1489,8 @@ class JwtParserTest {
     @Test
     void testParseClockManipulationWithFixedClock() {
         def then = System.currentTimeMillis() - 1000
-        Date expiry = new Date(then)
-        Date beforeExpiry = new Date(then - 1000)
+        Instant expiry = instantFromMillis(then)
+        Instant beforeExpiry = instantFromMillis(then - 1000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
 
@@ -1507,7 +1509,7 @@ class JwtParserTest {
 
     @Test
     void testParseClockManipulationWithDefaultClock() {
-        Date expiry = new Date(System.currentTimeMillis() - 1000)
+        Instant expiry = instantFromMillis(System.currentTimeMillis() - 1000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
 
@@ -1589,5 +1591,10 @@ class JwtParserTest {
         } catch (MalformedJwtException se) {
             assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
         }
+    }
+
+    // The JWT RFC *mandates* time claim values are represented as seconds.
+    private Instant instantFromMillis(final long millis) {
+        return  Instant.ofEpochMilli(millis).truncatedTo(ChronoUnit.SECONDS)
     }
 }

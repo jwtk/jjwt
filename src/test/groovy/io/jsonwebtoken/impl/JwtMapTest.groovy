@@ -16,47 +16,51 @@
 package io.jsonwebtoken.impl
 
 import org.junit.Test
+
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.ZoneOffset
+
 import static org.junit.Assert.*
 
 class JwtMapTest {
 
     @Test
-    void testToDateFromNull() {
-        Date actual = JwtMap.toDate(null, 'foo')
+    void testToInstantFromNull() {
+        Instant actual = JwtMap.toInstant(null, 'foo')
         assertNull actual
     }
 
     @Test
-    void testToDateFromDate() {
+    void testToInstantFromInstant() {
 
-        def d = new Date()
+        def now = Instant.now()
 
-        Date date = JwtMap.toDate(d, 'foo')
+        Instant convertedInstant = JwtMap.toInstant(now, 'foo')
 
-        assertSame date, d
-
-    }
-
-    @Test
-    void testToDateFromString() {
-
-        Date d = new Date(2015, 1, 1, 12, 0, 0)
-
-        String s = (d.getTime() / 1000) + '' //JWT timestamps are in seconds - need to strip millis
-
-        Date date = JwtMap.toDate(s, 'foo')
-
-        assertEquals date, d
+        assertSame convertedInstant, now
 
     }
 
     @Test
-    void testToDateFromNonDateObject() {
+    void testToInstantFromString() {
+
+        Instant date = LocalDateTime.of(2015, Month.JANUARY, 1, 12, 0, 0)
+                .toInstant(ZoneOffset.UTC)
+
+        Instant convertedInstant = JwtMap.toInstant(String.valueOf(date.getEpochSecond()), 'foo')
+
+        assertEquals date, convertedInstant
+    }
+
+    @Test
+    void testToInstantFromNonInstantObject() {
         try {
-            JwtMap.toDate(new Object() { @Override public String toString() {return 'hi'} }, 'foo')
+            JwtMap.toInstant(new Object() { @Override public String toString() {return 'hi'} }, 'foo')
             fail()
         } catch (IllegalStateException iae) {
-            assertEquals iae.message, "Cannot convert 'foo' value [hi] to Date instance."
+            assertEquals iae.message, "Cannot convert 'foo' value [hi] to Instant instance."
         }
     }
 

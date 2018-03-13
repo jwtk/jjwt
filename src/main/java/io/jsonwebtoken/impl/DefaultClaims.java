@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.RequiredTypeException;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 
 public class DefaultClaims extends JwtMap implements Claims {
@@ -65,35 +65,35 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Date getExpiration() {
-        return get(Claims.EXPIRATION, Date.class);
+    public Instant getExpiration() {
+        return get(Claims.EXPIRATION, Instant.class);
     }
 
     @Override
-    public Claims setExpiration(Date exp) {
-        setDate(Claims.EXPIRATION, exp);
+    public Claims setExpiration(Instant exp) {
+        setInstant(Claims.EXPIRATION, exp);
         return this;
     }
 
     @Override
-    public Date getNotBefore() {
-        return get(Claims.NOT_BEFORE, Date.class);
+    public Instant getNotBefore() {
+        return get(Claims.NOT_BEFORE, Instant.class);
     }
 
     @Override
-    public Claims setNotBefore(Date nbf) {
-        setDate(Claims.NOT_BEFORE, nbf);
+    public Claims setNotBefore(Instant nbf) {
+        setInstant(Claims.NOT_BEFORE, nbf);
         return this;
     }
 
     @Override
-    public Date getIssuedAt() {
-        return get(Claims.ISSUED_AT, Date.class);
+    public Instant getIssuedAt() {
+        return get(Claims.ISSUED_AT, Instant.class);
     }
 
     @Override
-    public Claims setIssuedAt(Date iat) {
-        setDate(Claims.ISSUED_AT, iat);
+    public Claims setIssuedAt(Instant iat) {
+        setInstant(Claims.ISSUED_AT, iat);
         return this;
     }
 
@@ -117,15 +117,15 @@ public class DefaultClaims extends JwtMap implements Claims {
             Claims.ISSUED_AT.equals(claimName) ||
             Claims.NOT_BEFORE.equals(claimName)
         ) {
-            value = getDate(claimName);
+            value = getInstant(claimName);
         }
 
         return castClaimValue(value, requiredType);
     }
 
     private <T> T castClaimValue(Object value, Class<T> requiredType) {
-        if (requiredType == Date.class && value instanceof Long) {
-            value = new Date((Long)value);
+        if (requiredType == Instant.class && value instanceof Number) {
+            value = Instant.ofEpochSecond(Long.parseLong(value.toString()));
         }
 
         if (value instanceof Integer) {

@@ -15,8 +15,13 @@
  */
 package io.jsonwebtoken.impl;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
@@ -26,13 +31,27 @@ import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 import java.security.Key;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER;
+
+    static {
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addSerializer(Instant.class, new JsonSerializer<Instant>() {
+            @Override
+            public void serialize(Instant instant, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
+                // The JWT RFC *mandates* time claim values are represented as seconds.
+                jsonGenerator.writeNumber(instant.getEpochSecond());
+            }
+        });
+        OBJECT_MAPPER = new ObjectMapper().registerModule(javaTimeModule)
+                .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+    }
 
     private Header header;
     private Claims claims;
@@ -184,7 +203,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setExpiration(Date exp) {
+    public JwtBuilder setExpiration(Instant exp) {
         if (exp != null) {
             ensureClaims().setExpiration(exp);
         } else {
@@ -197,7 +216,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setNotBefore(Date nbf) {
+    public JwtBuilder setNotBefore(Instant nbf) {
         if (nbf != null) {
             ensureClaims().setNotBefore(nbf);
         } else {
@@ -210,7 +229,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setIssuedAt(Date iat) {
+    public JwtBuilder setIssuedAt(Instant iat) {
         if (iat != null) {
             ensureClaims().setIssuedAt(iat);
         } else {

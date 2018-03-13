@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Mutation (modifications) to a {@link io.jsonwebtoken.Claims Claims} instance.
@@ -63,7 +63,7 @@ public interface ClaimsMutator<T extends ClaimsMutator> {
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      */
-    T setExpiration(Date exp);
+    T setExpiration(Instant exp);
 
     /**
      * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
@@ -74,7 +74,7 @@ public interface ClaimsMutator<T extends ClaimsMutator> {
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      */
-    T setNotBefore(Date nbf);
+    T setNotBefore(Instant nbf);
 
     /**
      * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
@@ -85,7 +85,7 @@ public interface ClaimsMutator<T extends ClaimsMutator> {
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      */
-    T setIssuedAt(Date iat);
+    T setIssuedAt(Instant iat);
 
     /**
      * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">

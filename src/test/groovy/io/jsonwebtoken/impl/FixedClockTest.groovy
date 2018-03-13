@@ -10,10 +10,10 @@ class FixedClockTest {
 
         def clock = new FixedClock()
 
-        def date1 = clock.now()
+        def now1 = clock.now()
         Thread.sleep(100)
-        def date2 = clock.now()
+        def now2 = clock.now()
 
-        assertSame date1, date2
+        assertSame now1, now2
     }
 }

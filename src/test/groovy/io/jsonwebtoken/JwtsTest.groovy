@@ -25,7 +25,6 @@ import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.impl.crypto.RsaProvider
-import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -34,6 +33,8 @@ import java.nio.charset.Charset
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import static org.junit.Assert.*
 
@@ -246,31 +247,29 @@ class JwtsTest {
         assertNull claims.getAudience()
     }
 
-    private static Date now() {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis());
+    private static Instant now() {
+        return instantWithOnlySecondPrecision(System.currentTimeMillis());
     }
 
     private static int later() {
-        return laterDate().getTime() / 1000;
+        return laterInstant().getEpochSecond();
     }
 
-    private static Date laterDate(int seconds) {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000));
+    private static Instant laterInstant(int seconds) {
+        return instantWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000));
     }
 
-    private static Date laterDate() {
-        return laterDate(10000);
+    private static Instant laterInstant() {
+        return laterInstant(10000);
     }
 
-    private static Date dateWithOnlySecondPrecision(long millis) {
-        long seconds = millis / 1000;
-        long secondOnlyPrecisionMillis = seconds * 1000;
-        return new Date(secondOnlyPrecisionMillis);
+    private static Instant instantWithOnlySecondPrecision(long millis) {
+        return Instant.ofEpochMilli(millis).truncatedTo(ChronoUnit.SECONDS)
     }
 
     @Test
     void testConvenienceExpiration() {
-        Date then = laterDate();
+        Instant then = laterInstant();
         String compact = Jwts.builder().setExpiration(then).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()
@@ -287,11 +286,11 @@ class JwtsTest {
 
     @Test
     void testConvenienceNotBefore() {
-        Date now = now() //jwt exp only supports *seconds* since epoch:
+        Instant now = now() //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setNotBefore(now).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
-        def claimedDate = claims.getNotBefore()
-        assertEquals claimedDate, now
+        def claimedInstant = claims.getNotBefore()
+        assertEquals claimedInstant, now
 
         compact = Jwts.builder().setIssuer("Me")
                 .setNotBefore(now) //set it
@@ -304,11 +303,11 @@ class JwtsTest {
 
     @Test
     void testConvenienceIssuedAt() {
-        Date now = now() //jwt exp only supports *seconds* since epoch:
+        Instant now = now() //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setIssuedAt(now).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
-        def claimedDate = claims.getIssuedAt()
-        assertEquals claimedDate, now
+        def claimedInstant = claims.getIssuedAt()
+        assertEquals claimedInstant, now
 
         compact = Jwts.builder().setIssuer("Me")
                 .setIssuedAt(now) //set it
