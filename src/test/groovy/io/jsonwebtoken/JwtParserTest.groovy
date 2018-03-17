@@ -1092,7 +1092,41 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseRequireSingleAudience_Success() {
+    void testParseRequireAudience_Success1() {
+        def audience = 'A Most Awesome Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            requireAudience(null as String).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
+
+    @Test
+    void testParseRequireAudience_Success2() {
+        def audience = 'A Most Awesome Audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            requireAudience(null as String[]).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudience(), audience
+    }
+
+    @Test
+    void testParseRequireAudience_Success3() {
         def audience = 'A Most Awesome Audience'
 
         byte[] key = randomKey()
@@ -1104,62 +1138,6 @@ class JwtParserTest {
         Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
             requireAudience(audience).
             parseClaimsJws(compact)
-
-        assertEquals jwt.getBody().getAudience()[0], audience
-    }
-
-    @Test
-    void testParseRequireSingleAudience2_Success() {
-        String requiredAudience = 'A Most Awesome Audience'
-
-        String[] audience = [requiredAudience, 'Another Awesome Audience']
-
-        byte[] key = randomKey()
-
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-                setAudience(audience).
-                compact()
-
-        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-                requireAudience(requiredAudience).
-                parseClaimsJws(compact)
-
-        assertEquals jwt.getBody().getAudience(), audience
-    }
-    
-    @Test
-    void testParseRequireMultipleAudience_Success() {
-        String[] audience = ['A Most Awesome Audience', 'Other Awesome Audience']
-
-        byte[] key = randomKey()
-
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setAudience(audience).
-            compact()
-
-        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-            requireAudience(audience).
-            parseClaimsJws(compact)
-
-        assertEquals jwt.getBody().getAudience(), audience
-    }
-
-    @Test
-    void testParseRequireMultipleAudience2_Success() {
-
-        String requiredAudience = ['A Most Awesome Audience', 'Other Awesome Audience']
-
-        String[] audience = [requiredAudience, 'Another Awesome Audience']
-
-        byte[] key = randomKey()
-
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-                setAudience(audience).
-                compact()
-
-        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
-                requireAudience(audience).
-                parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getAudience(), audience
     }
@@ -1182,10 +1160,107 @@ class JwtParserTest {
             fail()
         } catch(IncorrectClaimException e) {
             assertEquals(
-                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, [goodAudience], [badAudience]),
+                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, goodAudience, badAudience),
                 e.getMessage()
             )
         }
+    }
+
+    @Test
+    void testParseRequireAudience_Missing_Fail() {
+        def audience = 'A Most Awesome audience'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setId('id').
+            compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                requireAudience(audience).
+                parseClaimsJws(compact)
+            fail()
+        } catch(MissingClaimException e) {
+            assertEquals(
+                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, audience),
+                e.getMessage()
+            )
+        }
+    }
+
+    @Test
+    void testParseRequireSingleAudienceArray_Success() {
+        String requiredAudience = 'A Most Awesome Audience'
+        String[] audience = [requiredAudience]
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            requireAudience(requiredAudience).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudienceArray(), audience
+    }
+
+    @Test
+    void testParseRequireSingleAudience2_Success() {
+        String requiredAudience = 'A Most Awesome Audience'
+
+        String[] audience = [requiredAudience, 'Another Awesome Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setAudience(audience).
+                compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+                requireAudience(requiredAudience).
+                parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudienceArray(), audience
+    }
+    
+    @Test
+    void testParseRequireMultipleAudience_Success() {
+        String[] audience = ['A Most Awesome Audience', 'Other Awesome Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+            setAudience(audience).
+            compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+            requireAudience(audience).
+            parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudienceArray(), audience
+    }
+
+    @Test
+    void testParseRequireMultipleAudience2_Success() {
+
+        String requiredAudience = ['A Most Awesome Audience', 'Other Awesome Audience']
+
+        String[] audience = ['A Most Awesome Audience', 'Other Awesome Audience', 'Another Awesome Audience']
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                setAudience(audience).
+                compact()
+
+        Jwt<Header,Claims> jwt = Jwts.parser().setSigningKey(key).
+                requireAudience(audience).
+                parseClaimsJws(compact)
+
+        assertEquals jwt.getBody().getAudienceArray(), audience
     }
 
     @Test
@@ -1230,31 +1305,8 @@ class JwtParserTest {
             fail()
         } catch(IncorrectClaimException e) {
             assertEquals(
-                    String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, "[A Most Awesome Audience, Another Most Awesome Audience]", [badAudience]),
+                    String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, "[A Most Awesome Audience, Another Most Awesome Audience]", badAudience),
                     e.getMessage()
-            )
-        }
-    }
-
-    @Test
-    void testParseRequireAudience_Missing_Fail() {
-        def audience = 'A Most Awesome audience'
-
-        byte[] key = randomKey()
-
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setId('id').
-            compact()
-
-        try {
-            Jwts.parser().setSigningKey(key).
-                requireAudience(audience).
-                parseClaimsJws(compact)
-            fail()
-        } catch(MissingClaimException e) {
-            assertEquals(
-                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, [audience]),
-                e.getMessage()
             )
         }
     }

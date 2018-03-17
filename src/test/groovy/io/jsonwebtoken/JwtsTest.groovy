@@ -232,18 +232,71 @@ class JwtsTest {
     }
 
     @Test
-    void testConvenienceAudience() {
-        String compact = Jwts.builder().setAudience("You").compact();
+    void testConvenienceAudience1() {
+        String audience = "You";
+        String compact = Jwts.builder().setAudience(audience).compact();
         Claims claims = Jwts.parser().parse(compact).body as Claims
-        assertEquals claims.getAudience()[0], "You"
+        assertEquals claims.getAudience(), audience
 
         compact = Jwts.builder().setIssuer("Me")
-                .setAudience("You") //set it
-                .setAudience(null) //null should remove it
+                .setAudience(audience) //set it
+                .setAudience(null as String) //null should remove it
                 .compact();
 
         claims = Jwts.parser().parse(compact).body as Claims
         assertNull claims.getAudience()
+        assertNull claims.getAudienceArray()
+    }
+
+    @Test
+    void testConvenienceAudience2() {
+        String audience = "You";
+        String compact = Jwts.builder().setAudience(audience).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getAudience(), audience
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setAudience(audience) //set it
+                .setAudience(null as String[]) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getAudience()
+        assertNull claims.getAudienceArray()
+    }
+
+    @Test
+    void testConvenienceAudience3() {
+        String[] audience = ["You"];
+        String compact = Jwts.builder().setAudience(audience).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getAudienceArray(), audience
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setAudience(audience) //set it
+                .setAudience(null as String) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getAudience()
+        assertNull claims.getAudienceArray()
+    }
+
+    @Test
+    void testConvenienceAudience4() {
+        String[] audience = ["You"];
+        String compact = Jwts.builder().setAudience(audience).compact();
+        Claims claims = Jwts.parser().parse(compact).body as Claims
+        assertEquals claims.getAudienceArray(), audience
+
+        compact = Jwts.builder().setIssuer("Me")
+                .setAudience(audience) //set it
+                .setAudience(null as String[]) //null should remove it
+                .compact();
+
+        claims = Jwts.parser().parse(compact).body as Claims
+        assertNull claims.getAudience()
+        assertNull claims.getAudienceArray()
     }
 
     private static Date now() {
@@ -352,7 +405,7 @@ class JwtsTest {
         assertNull jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()[0]
+        assertEquals "an audience", claims.getAudience()
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -373,7 +426,7 @@ class JwtsTest {
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()[0]
+        assertEquals "an audience", claims.getAudience()
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -394,7 +447,7 @@ class JwtsTest {
         assertEquals "GZIP", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()[0]
+        assertEquals "an audience", claims.getAudience()
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -429,7 +482,7 @@ class JwtsTest {
         assertEquals "CUSTOM", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()[0]
+        assertEquals "an audience", claims.getAudience()
         assertEquals "hello this is an amazing jwt", claims.state
 
     }

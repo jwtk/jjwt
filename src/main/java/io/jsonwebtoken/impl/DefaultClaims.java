@@ -55,7 +55,18 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public String[] getAudience() {
+    public String getAudience() {
+    		return getString(AUDIENCE);
+    }
+
+    @Override
+    public Claims setAudience(String aud) {
+        setValue(AUDIENCE, aud);
+        return this;
+    }
+    
+    @Override
+    public String[] getAudienceArray() {
         Object v = get(AUDIENCE);
         if (v == null) {
             return null;

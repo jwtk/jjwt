@@ -171,6 +171,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this;
     }
     
+    @Override
+    public JwtBuilder setAudience(String aud) {
+    		if (Strings.hasText(aud)) {
+    			ensureClaims().setAudience(aud);
+    		} else {
+            if (this.claims != null) {
+            		claims.setAudience(aud);
+            }
+        }
+        return this;
+	}
+    
 	@Override
 	public JwtBuilder setAudience(String ... aud) {
 		if (aud != null) {

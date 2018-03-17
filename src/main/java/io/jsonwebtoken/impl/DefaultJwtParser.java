@@ -49,6 +49,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -86,6 +87,12 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser requireIssuer(String issuer) {
         expectedClaims.setIssuer(issuer);
+        return this;
+    }
+    
+    @Override
+    public JwtParser requireAudience(String audience) {
+        expectedClaims.setAudience(audience);
         return this;
     }
 
@@ -435,7 +442,7 @@ public class DefaultJwtParser implements JwtParser {
             ) {
                 expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
                 actualClaimValue = claims.get(expectedClaimName, Date.class);
-            } else if (Claims.AUDIENCE.equals(expectedClaimName)) {
+            } else if (Claims.AUDIENCE.equals(expectedClaimName) && expectedClaimValue instanceof String[]) {
                 expectedClaimValue = Arrays.asList((String[]) expectedClaimValue);
             }
             else if (
@@ -454,12 +461,21 @@ public class DefaultJwtParser implements JwtParser {
                     expectedClaimName, expectedClaimValue
                 );
                 invalidClaimException = new MissingClaimException(header, claims, msg);
-            } else if (Claims.AUDIENCE.equals(expectedClaimName) ) {
-                List<String> actualClaimValueList = (List) actualClaimValue;
-                if (!actualClaimValueList.containsAll((List) expectedClaimValue)){
+            } else if (Claims.AUDIENCE.equals(expectedClaimName)) {
+                List<String> actualClaimValueList = actualClaimValue instanceof List ? (List) actualClaimValue : null;
+                List<String> expectedClaimValueList = expectedClaimValue instanceof List ? (List) expectedClaimValue : null;
+                if (actualClaimValueList == null) {
+                		actualClaimValueList = new ArrayList<String>();
+                		actualClaimValueList.add((String) actualClaimValue);
+                }
+                if (expectedClaimValueList == null) {
+                		expectedClaimValueList = new ArrayList<String>();
+                		expectedClaimValueList.add((String) expectedClaimValue); 
+                }
+                if (!actualClaimValueList.containsAll(expectedClaimValueList)) {
                     String msg = String.format(
                             ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
-                            expectedClaimName, expectedClaimValue, actualClaimValueList
+                            expectedClaimName, expectedClaimValue, actualClaimValue
                     );
                     invalidClaimException = new IncorrectClaimException(header, claims, msg);
                 }

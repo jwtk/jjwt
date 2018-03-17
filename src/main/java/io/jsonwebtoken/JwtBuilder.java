@@ -187,7 +187,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>The method allows to insert multiple audiences if desired</p>
      * 
      * <pre>
-     * String jwt = Jwts.builder().setAudience("You", "Administrators").compact();
+     * String jwt = Jwts.builder().setAudience("You").compact();
      * </pre>
      *
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
@@ -195,8 +195,40 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.2
      */
     @Override //only for better/targeted JavaDoc
-    JwtBuilder setAudience(String ... aud);
+    JwtBuilder setAudience(String aud);
 
+    /**
+     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
+     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * the Claims {@link Claims#setAudience(String) audience} field with the specified value.  This allows you to write
+     * code like this:</p>
+     *
+     * <pre>
+     * String jwt = Jwts.builder().setAudience("You", "Administrators").compact();
+     * </pre>
+     *
+     * <p>instead of this:</p>
+     * <pre>
+     * Claims claims = Jwts.claims().setSubject("You");
+     * String jwt = Jwts.builder().setClaims(claims).compact();
+     * </pre>
+     * <p>if desired.</p>
+     * 
+     * <p>The method allows to insert multiple audiences if desired</p>
+     * 
+     * <pre>
+     * String jwt = Jwts.builder().setAudience("You", "Administrators").compact();
+     * </pre>
+     *
+     * @param aud the JWT {@code aud} values or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.2
+     */
+    @Override //only for better/targeted JavaDoc
+    JwtBuilder setAudience(String ... aud);
+    
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">
      * <code>exp</code></a> (expiration) value.  A {@code null} value will remove the property from the Claims.

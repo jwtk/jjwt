@@ -279,9 +279,16 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
-    void testSetAudienceWithNull() {
+    void testSetAudienceWithNull1() {
         def b = new DefaultJwtBuilder()
-        b.setAudience(null)
+        b.setAudience(null as String)
+        assertNull b.claims
+    }
+
+    @Test
+    void testSetAudienceWithNull2() {
+        def b = new DefaultJwtBuilder()
+        b.setAudience(null as String[])
         assertNull b.claims
     }
 

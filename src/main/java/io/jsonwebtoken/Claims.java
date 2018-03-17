@@ -89,14 +89,29 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
     @Override //only for better/targeted JavaDoc
     Claims setSubject(String sub);
 
+
     /**
      * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
      * <code>aud</code></a> (audience) value or {@code null} if not present.
      *
      * @return the JWT {@code aud} value or {@code null} if not present.
      */
-    String[] getAudience();
+    String getAudience();
+    
+    /**
+     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
+     * <code>aud</code></a> (audience) value or {@code null} if not present.
+     *
+     * @return the JWT {@code aud} values or {@code null} if not present.
+     */
+    String[] getAudienceArray();
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override //only for better/targeted JavaDoc
+    Claims setAudience(String aud);
+    
     /**
      * {@inheritDoc}
      */

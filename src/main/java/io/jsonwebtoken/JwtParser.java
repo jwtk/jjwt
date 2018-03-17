@@ -63,7 +63,19 @@ public interface JwtParser {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParser requireAudience(String ... audience);
+    JwtParser requireAudience(String audience);
+    
+    /**
+     * Ensures that the specified {@code aud} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
+     *
+     * @param audience
+     * @return the parser for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
+     */
+    JwtParser requireAudience(String ...audience);
 
     /**
      * Ensures that the specified {@code iss} exists in the parsed JWT.  If missing or if the parsed
