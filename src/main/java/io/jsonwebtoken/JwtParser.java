@@ -228,10 +228,10 @@ public interface JwtParser {
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to
      * decompress the JWT body. If the parsed JWT is not compressed, this resolver is not used.
      * <p><b>NOTE:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
-     * (including JJWT versions < 0.6.0) are able to consume a compressed JWT body correctly.  This method is only
-     * useful if the compact JWT was compressed with JJWT >= 0.6.0 or another library that you know implements
+     * (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWT body correctly.  This method is only
+     * useful if the compact JWT was compressed with JJWT &gt;= 0.6.0 or another library that you know implements
      * the same behavior.</p>
-     * <h5>Default Support</h5>
+     * <h3>Default Support</h3>
      * <p>JJWT's default {@link JwtParser} implementation supports both the
      * {@link io.jsonwebtoken.impl.compression.DeflateCompressionCodec DEFLATE}
      * and {@link io.jsonwebtoken.impl.compression.GzipCompressionCodec GZIP} algorithms by default - you do not need to

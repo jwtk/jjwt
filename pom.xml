@@ -25,9 +25,10 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
     <name>JSON Web Token support for the JVM</name>
     <packaging>jar</packaging>
+    <url>https://github.com/jwtk/jjwt</url>
 
     <licenses>
         <license>
@@ -52,12 +53,35 @@
         <url>https://travis-ci.org/jwtk/jjwt</url>
     </ciManagement>
 
+    <!-- temporary fix until official release of coverall-maven-plugin with clover support -->
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jwtk-coveralls-maven-plugin</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jwtk-coveralls-maven-plugin</id>
+            <name>bintray-plugins</name>
+            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <!-- temporary fix until official release of coverall-maven-plugin with clover support -->
+
     <properties>
 
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.compiler.version>3.6.1</maven.compiler.version>
 
-        <jdk.version>1.6</jdk.version>
+        <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
@@ -69,10 +93,12 @@
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <groovy.version>2.4.11</groovy.version>
         <logback.version>1.2.3</logback.version>
-        <easymock.version>3.4</easymock.version>
+        <easymock.version>3.5</easymock.version>
         <junit.version>4.12</junit.version>
-        <powermock.version>1.6.6</powermock.version>
-        <failsafe.plugin.version>2.19.1</failsafe.plugin.version>
+        <powermock.version>2.0.0-beta.5</powermock.version> <!-- necessary for Java 9 support -->
+        <failsafe.plugin.version>2.20.1</failsafe.plugin.version>
+        <surefire.plugin.version>2.20.1</surefire.plugin.version>
+        <clover.version>4.2.0</clover.version>
 
     </properties>
 
@@ -151,7 +177,6 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -244,10 +269,16 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <!-- Override OSS parent to support Java 9. Doesn't hurt Java 8 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.plugin.version}</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20</version>
+                <version>${failsafe.plugin.version}</version>
                 <configuration>
                     <includes>
                         <include>**/*IT.java</include>
@@ -270,19 +301,28 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <groupId>org.openclover</groupId>
+                <artifactId>clover-maven-plugin</artifactId>
+                <version>${clover.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/io/jsonwebtoken/lang/*</exclude>
+                        <exclude>**/*Test*</exclude>
+                        <!-- leaving out lang as it mostly comes from other sources -->
+                        <exclude>io/jsonwebtoken/lang/*</exclude>
                     </excludes>
+                    <methodPercentage>100%</methodPercentage>
+                    <statementPercentage>100%</statementPercentage>
+                    <conditionalPercentage>100%</conditionalPercentage>
+                    <targetPercentage>100%</targetPercentage>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
+                        <id>clover</id>
+                        <phase>test</phase>
                         <goals>
-                            <goal>prepare-agent</goal>
+                            <goal>instrument</goal>
+                            <goal>check</goal>
+                            <goal>clover</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -331,10 +371,36 @@
                     </instructions>
                 </configuration>
             </plugin>
+
+            <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
             <plugin>
-                <groupId>org.eluder.coveralls</groupId>
+                <groupId>org.jwtk.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
+                <version>4.4.0</version>
+            </plugin>
+            <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
+
+            <!-- Override OSS parent to support Java 9 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <!-- Workaround for Java 9 -->
+                    <dependency>
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                        <version>2.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -399,6 +465,14 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <!-- Workaround for Java 9 -->
+                            <dependency>
+                                <groupId>commons-lang</groupId>
+                                <artifactId>commons-lang</artifactId>
+                                <version>2.6</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                 </plugins>
             </build>

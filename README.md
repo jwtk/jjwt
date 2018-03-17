@@ -7,10 +7,10 @@ JJWT aims to be the easiest to use and understand library for creating and verif
 
 JJWT is a Java implementation based on the [JWT](https://tools.ietf.org/html/rfc7519), [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications.
 
-The library was created by [Stormpath's](http://www.stormpath.com) CTO, [Les Hazlewood](https://github.com/lhazlewood)
+The library was created by [Okta's](http://www.okta.com) Senior Architect, [Les Hazlewood](https://github.com/lhazlewood)
 and is now maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
 
-[Stormpath](https://stormpath.com/) is a complete authentication and user management API for developers.
+[Okta](https://developer.okta.com/) is a complete authentication and user management API for developers.
 
 We've also added some convenience extensions that are not part of the specification, such as JWT compression and claim enforcement.
 
@@ -68,7 +68,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.7.0</version>
+    <version>0.9.0</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.7.0'
+    compile 'io.jsonwebtoken:jjwt:0.9.0'
 }
 ```
 
@@ -225,13 +225,13 @@ JJWT depends on Jackson 2.8.x (or later).  If you are already using a Jackson ve
 <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
-    <version>2.8.2</version>
+    <version>2.8.9</version>
 </dependency>
 ```
 
 ## Author
 
-Maintained by [Stormpath](https://stormpath.com/)
+Maintained by [Okta](https://okta.com/)
 
 ## Licensing
 
