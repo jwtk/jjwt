@@ -374,7 +374,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
      * certain length.  Using compression can help ensure the compact JWT fits within that length.  However, NOTE:</p>
      *
-     * <h5>Compatibility Warning</h5>
+     * <h3>Compatibility Warning</h3>
      *
      * <p>The JWT family of specifications defines compression only for JWE (Json Web Encryption)
      * tokens.  Even so, JJWT will also support compression for JWS tokens as well if you choose to use it.

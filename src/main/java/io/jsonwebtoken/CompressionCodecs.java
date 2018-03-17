@@ -24,7 +24,7 @@ public final class CompressionCodecs {
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm.
-     * <h5>Compatibility Warning</h5>
+     * <h3>Compatibility Warning</h3>
      * <p><b>This is not a standard JWA compression algorithm</b>.  Be sure to use this only when you are confident
      * that all parties accessing the token support the gzip algorithm.</p>
      * <p>If you're concerned about compatibility, the {@link #DEFLATE DEFLATE} code is JWA standards-compliant.</p>

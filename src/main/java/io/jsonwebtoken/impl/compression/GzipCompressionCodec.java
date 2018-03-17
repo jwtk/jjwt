@@ -50,9 +50,10 @@ public class GzipCompressionCodec extends AbstractCompressionCodec implements Co
             inputStream = new ByteArrayInputStream(compressed);
             gzipInputStream = new GZIPInputStream(inputStream);
             outputStream = new ByteArrayOutputStream();
-            int read;
-            while ((read = gzipInputStream.read(buffer)) != -1) {
+            int read = gzipInputStream.read(buffer);
+            while (read != -1) {
                 outputStream.write(buffer, 0, read);
+                read = gzipInputStream.read(buffer);
             }
             return outputStream.toByteArray();
         } finally {
