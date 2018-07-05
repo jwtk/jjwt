@@ -16,7 +16,7 @@
 package io.jsonwebtoken;
 
 import java.security.Key;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -198,16 +198,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
-     * the Claims {@link Claims#setExpiration(java.util.Date) expiration} field with the specified value.  This allows
+     * the Claims {@link Claims#setExpiration(java.time.Instant) expiration} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
-     * String jwt = Jwts.builder().setExpiration(new Date(System.currentTimeMillis() + 3600000)).compact();
+     * String jwt = Jwts.builder().setExpiration(Instant.ofEpochMilli(System.currentTimeMillis() + 3600000)).compact();
      * </pre>
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setExpiration(new Date(System.currentTimeMillis() + 3600000));
+     * Claims claims = Jwts.claims().setExpiration(Instant.ofEpochMilli(System.currentTimeMillis() + 3600000));
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
@@ -217,7 +217,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.2
      */
     @Override //only for better/targeted JavaDoc
-    JwtBuilder setExpiration(Date exp);
+    JwtBuilder setExpiration(Instant exp);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
@@ -226,16 +226,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
-     * the Claims {@link Claims#setNotBefore(java.util.Date) notBefore} field with the specified value.  This allows
+     * the Claims {@link Claims#setNotBefore(java.time.Instant) notBefore} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
-     * String jwt = Jwts.builder().setNotBefore(new Date()).compact();
+     * String jwt = Jwts.builder().setNotBefore(Instant.now()).compact();
      * </pre>
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setNotBefore(new Date());
+     * Claims claims = Jwts.claims().setNotBefore(Instant.now());
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
@@ -245,7 +245,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.2
      */
     @Override //only for better/targeted JavaDoc
-    JwtBuilder setNotBefore(Date nbf);
+    JwtBuilder setNotBefore(Instant nbf);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
@@ -254,7 +254,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>The value is the timestamp when the JWT was created.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
-     * the Claims {@link Claims#setIssuedAt(java.util.Date) issuedAt} field with the specified value.  This allows
+     * the Claims {@link Claims#setIssuedAt(java.time.Instant) issuedAt} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -263,7 +263,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setIssuedAt(new Date());
+     * Claims claims = Jwts.claims().setIssuedAt(Instant.now());
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
@@ -273,7 +273,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.2
      */
     @Override //only for better/targeted JavaDoc
-    JwtBuilder setIssuedAt(Date iat);
+    JwtBuilder setIssuedAt(Instant iat);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">

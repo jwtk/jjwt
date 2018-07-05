@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
@@ -48,18 +49,15 @@ import io.jsonwebtoken.lang.Strings;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.Key;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser implements JwtParser {
 
-    //don't need millis since JWT date fields are only second granularity:
-    private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    private static final int MILLISECONDS_PER_SECOND = 1000;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     private byte[] keyBytes;
 
@@ -69,14 +67,14 @@ public class DefaultJwtParser implements JwtParser {
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
-    Claims expectedClaims = new DefaultClaims();
+    private Claims expectedClaims = new DefaultClaims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
 
     @Override
-    public JwtParser requireIssuedAt(Date issuedAt) {
+    public JwtParser requireIssuedAt(Instant issuedAt) {
         expectedClaims.setIssuedAt(issuedAt);
         return this;
     }
@@ -106,13 +104,13 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public JwtParser requireExpiration(Date expiration) {
+    public JwtParser requireExpiration(Instant expiration) {
         expectedClaims.setExpiration(expiration);
         return this;
     }
 
     @Override
-    public JwtParser requireNotBefore(Date notBefore) {
+    public JwtParser requireNotBefore(Instant notBefore) {
         expectedClaims.setNotBefore(notBefore);
         return this;
     }
@@ -134,7 +132,7 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public JwtParser setAllowedClockSkewSeconds(long seconds) {
-        this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
+        this.allowedClockSkewMillis = Math.max(0, TimeUnit.SECONDS.toMillis(seconds));
         return this;
     }
 
@@ -360,24 +358,22 @@ public class DefaultJwtParser implements JwtParser {
         //since 0.3:
         if (claims != null) {
 
-            SimpleDateFormat sdf;
-
-            final Date now = this.clock.now();
-            long nowTime = now.getTime();
+            final Instant now = this.clock.now();
+            final long nowEpochMillis = now.toEpochMilli();
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
-            Date exp = claims.getExpiration();
+            Instant exp = claims.getExpiration();
             if (exp != null) {
 
-                long maxTime = nowTime - this.allowedClockSkewMillis;
-                Date max = allowSkew ? new Date(maxTime) : now;
-                if (max.after(exp)) {
-                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
-                    String expVal = sdf.format(exp);
-                    String nowVal = sdf.format(now);
+                final long maxTime = nowEpochMillis - this.allowedClockSkewMillis;
+                Instant max = allowSkew ? Instant.ofEpochMilli(maxTime) : now;
+                if (max.isAfter(exp)) {
+                    // This returns an immutable formatter capable of formatting and parsing the ISO-8601 instant format.
+                    String expVal = DateTimeFormatter.ISO_INSTANT.format(exp);
+                    String nowVal = DateTimeFormatter.ISO_INSTANT.format(now);
 
-                    long differenceMillis = maxTime - exp.getTime();
+                    long differenceMillis = maxTime - exp.toEpochMilli();
 
                     String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of " +
                         differenceMillis + " milliseconds.  Allowed clock skew: " +
@@ -388,17 +384,17 @@ public class DefaultJwtParser implements JwtParser {
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
             //token MUST NOT be accepted before any specified nbf time:
-            Date nbf = claims.getNotBefore();
+            Instant nbf = claims.getNotBefore();
             if (nbf != null) {
 
-                long minTime = nowTime + this.allowedClockSkewMillis;
-                Date min = allowSkew ? new Date(minTime) : now;
-                if (min.before(nbf)) {
-                    sdf = new SimpleDateFormat(ISO_8601_FORMAT);
-                    String nbfVal = sdf.format(nbf);
-                    String nowVal = sdf.format(now);
+                final long minTime = nowEpochMillis + this.allowedClockSkewMillis;
+                Instant min = allowSkew ? Instant.ofEpochMilli(minTime) : now;
+                if (min.isBefore(nbf)) {
+                    // This returns an immutable formatter capable of formatting and parsing the ISO-8601 instant format.
+                    String nbfVal = DateTimeFormatter.ISO_INSTANT.format(nbf);
+                    String nowVal = DateTimeFormatter.ISO_INSTANT.format(now);
 
-                    long differenceMillis = nbf.getTime() - minTime;
+                    long differenceMillis = nbf.toEpochMilli() - minTime;
 
                     String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal +
                         ", a difference of " +
@@ -431,14 +427,14 @@ public class DefaultJwtParser implements JwtParser {
                 Claims.EXPIRATION.equals(expectedClaimName) ||
                 Claims.NOT_BEFORE.equals(expectedClaimName)
             ) {
-                expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
-                actualClaimValue = claims.get(expectedClaimName, Date.class);
+                expectedClaimValue = expectedClaims.get(expectedClaimName, Instant.class);
+                actualClaimValue = claims.get(expectedClaimName, Instant.class);
             } else if (
-                expectedClaimValue instanceof Date &&
+                expectedClaimValue instanceof Instant &&
                 actualClaimValue != null &&
-                actualClaimValue instanceof Long
+                actualClaimValue instanceof Number
             ) {
-                actualClaimValue = new Date((Long)actualClaimValue);
+                actualClaimValue = Instant.ofEpochSecond(Long.parseLong(actualClaimValue.toString()));
             }
 
             InvalidClaimException invalidClaimException = null;
@@ -549,7 +545,7 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("unchecked")
     protected Map<String, Object> readValue(String val) {
         try {
-            return objectMapper.readValue(val, Map.class);
+            return OBJECT_MAPPER.readValue(val, Map.class);
         } catch (IOException e) {
             throw new MalformedJwtException("Unable to read JSON value: " + val, e);
         }

@@ -19,6 +19,9 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.RequiredTypeException
 import org.junit.Before
 import org.junit.Test
+
+import java.time.Instant
+
 import static org.junit.Assert.*
 
 class DefaultClaimsTest {
@@ -152,43 +155,43 @@ class DefaultClaimsTest {
     }
 
     @Test
-    void testGetClaimWithRequiredType_Date_Success() {
-        def actual = new Date();
-        claims.put("aDate", actual)
-        Date expected = claims.get("aDate", Date.class);
+    void testGetClaimWithRequiredType_Instant_Success() {
+        def actual = Instant.now();
+        claims.put("anInstant", actual)
+        Instant expected = claims.get("anInstant", Instant.class);
         assertEquals(expected, actual)
     }
 
     @Test
-    void testGetClaimWithRequiredType_DateWithLong_Success() {
-        def actual = new Date();
+    void testGetClaimWithRequiredType_InstantWithLong_Success() {
+        Instant actual = Instant.ofEpochMilli(System.currentTimeMillis())
         // note that Long is stored in claim
-        claims.put("aDate", actual.getTime())
-        Date expected = claims.get("aDate", Date.class);
-        assertEquals(expected, actual)
+        claims.put("aInstant", actual.getEpochSecond())
+        Instant expected = claims.get("aInstant", Instant.class);
+        assertEquals(expected.getEpochSecond(), actual.getEpochSecond())
     }
 
     @Test
     void testGetClaimExpiration_Success() {
-        def now = new Date(System.currentTimeMillis())
+        Instant now = Instant.ofEpochMilli(System.currentTimeMillis())
         claims.setExpiration(now)
-        Date expected = claims.get("exp", Date.class)
+        Instant expected = claims.get("exp", Instant.class)
         assertEquals(expected, claims.getExpiration())
     }
 
     @Test
     void testGetClaimIssuedAt_Success() {
-        def now = new Date(System.currentTimeMillis())
+        Instant now = Instant.ofEpochMilli(System.currentTimeMillis())
         claims.setIssuedAt(now)
-        Date expected = claims.get("iat", Date.class)
+        Instant expected = claims.get("iat", Instant.class)
         assertEquals(expected, claims.getIssuedAt())
     }
 
     @Test
     void testGetClaimNotBefore_Success() {
-        def now = new Date(System.currentTimeMillis())
+        Instant now = Instant.ofEpochMilli(System.currentTimeMillis())
         claims.setNotBefore(now)
-        Date expected = claims.get("nbf", Date.class)
+        Instant expected = claims.get("nbf", Instant.class)
         assertEquals(expected, claims.getNotBefore())
     }
 

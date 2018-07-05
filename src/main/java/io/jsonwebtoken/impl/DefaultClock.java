@@ -2,7 +2,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Clock;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Default {@link Clock} implementation.
@@ -17,12 +17,12 @@ public class DefaultClock implements Clock {
     public static final Clock INSTANCE = new DefaultClock();
 
     /**
-     * Simply returns <code>new {@link Date}()</code>.
+     * Simply returns <code>new {@link Instant}()</code>.
      *
-     * @return a new {@link Date} instance.
+     * @return a new {@link Instant} instance.
      */
     @Override
-    public Date now() {
-        return new Date();
+    public Instant now() {
+        return Instant.now();
     }
 }
