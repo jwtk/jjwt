@@ -68,7 +68,7 @@ Maven:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt:0.9.0'
+    compile 'io.jsonwebtoken:jjwt:0.9.1'
 }
 ```
 

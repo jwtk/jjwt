@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.9.1
+
+This is a minor patch release that updates the Jackson dependency to 2.9.6 to address Jackson CVE-2017-17485.
+
 ### 0.9.0
 
 This is a minor release that includes changes to dependencies and plugins to allow for building jjwt with Java 9.
