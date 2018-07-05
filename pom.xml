@@ -42,7 +42,7 @@
         <connection>scm:git:https://github.com/jwtk/jjwt.git</connection>
         <developerConnection>scm:git:git@github.com:jwtk/jjwt.git</developerConnection>
         <url>git@github.com:jwtk/jjwt.git</url>
-        <tag>0.9.x</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>GitHub Issues</system>
