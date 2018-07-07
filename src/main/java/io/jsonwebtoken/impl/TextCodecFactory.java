@@ -15,6 +15,10 @@
  */
 package io.jsonwebtoken.impl;
 
+/**
+ * @deprecated since 0.10.0
+ */
+@Deprecated
 public interface TextCodecFactory {
 
     TextCodec getTextCodec();

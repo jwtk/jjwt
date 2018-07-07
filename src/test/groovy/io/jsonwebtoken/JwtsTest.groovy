@@ -16,9 +16,9 @@
 package io.jsonwebtoken
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.codec.Encoder
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
-import io.jsonwebtoken.impl.TextCodec
 import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
@@ -38,6 +38,11 @@ import java.security.PublicKey
 import static org.junit.Assert.*
 
 class JwtsTest {
+
+    protected static String base64Url(String s) {
+        byte[] bytes = s.getBytes(Strings.UTF_8)
+        return Encoder.BASE64URL.encode(bytes)
+    }
 
     @Test
     void testSubclass() {
@@ -613,8 +618,8 @@ class JwtsTest {
         PrivateKey privateKey = kp.getPrivate();
 
         ObjectMapper om = new ObjectMapper()
-        String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
-        String body = TextCodec.BASE64URL.encode(om.writeValueAsString('foo'))
+        String header = base64Url(om.writeValueAsString(['alg': 'HS256']))
+        String body = base64Url(om.writeValueAsString('foo'))
         String compact = header + '.' + body + '.'
 
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
@@ -622,7 +627,7 @@ class JwtsTest {
         Mac mac = Mac.getInstance('HmacSHA256');
         mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
-        String encodedSignature = TextCodec.BASE64URL.encode(signatureBytes);
+        String encodedSignature = Encoder.BASE64URL.encode(signatureBytes)
 
         //Finally, the forged token is the header + body + forged signature:
         String forged = compact + encodedSignature;
@@ -646,8 +651,8 @@ class JwtsTest {
         //PrivateKey privateKey = kp.getPrivate();
 
         ObjectMapper om = new ObjectMapper()
-        String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
-        String body = TextCodec.BASE64URL.encode(om.writeValueAsString('foo'))
+        String header = base64Url(om.writeValueAsString(['alg': 'HS256']))
+        String body = base64Url(om.writeValueAsString('foo'))
         String compact = header + '.' + body + '.'
 
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
@@ -655,7 +660,7 @@ class JwtsTest {
         Mac mac = Mac.getInstance('HmacSHA256');
         mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
-        String encodedSignature = TextCodec.BASE64URL.encode(signatureBytes);
+        String encodedSignature = Encoder.BASE64URL.encode(signatureBytes);
 
         //Finally, the forged token is the header + body + forged signature:
         String forged = compact + encodedSignature;
@@ -679,8 +684,8 @@ class JwtsTest {
         //PrivateKey privateKey = kp.getPrivate();
 
         ObjectMapper om = new ObjectMapper()
-        String header = TextCodec.BASE64URL.encode(om.writeValueAsString(['alg': 'HS256']))
-        String body = TextCodec.BASE64URL.encode(om.writeValueAsString('foo'))
+        String header = base64Url(om.writeValueAsString(['alg': 'HS256']))
+        String body = base64Url(om.writeValueAsString('foo'))
         String compact = header + '.' + body + '.'
 
         // Now for the forgery: simulate an attacker using the Elliptic Curve public key to sign a token, but
@@ -688,7 +693,7 @@ class JwtsTest {
         Mac mac = Mac.getInstance('HmacSHA256');
         mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
-        String encodedSignature = TextCodec.BASE64URL.encode(signatureBytes);
+        String encodedSignature = Encoder.BASE64URL.encode(signatureBytes);
 
         //Finally, the forged token is the header + body + forged signature:
         String forged = compact + encodedSignature;

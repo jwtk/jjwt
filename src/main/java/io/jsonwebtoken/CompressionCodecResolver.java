@@ -16,7 +16,7 @@
 package io.jsonwebtoken;
 
 /**
- * Looks for a JWT {@code calg} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+ * Looks for a JWT {@code zip} header, and if found, returns the corresponding {@link CompressionCodec} the parser
  * can use to decompress the JWT body.
  *
  * <p>JJWT's default {@link JwtParser} implementation supports both the
@@ -34,12 +34,12 @@ package io.jsonwebtoken;
 public interface CompressionCodecResolver {
 
     /**
-     * Looks for a JWT {@code calg} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+     * Looks for a JWT {@code zip} header, and if found, returns the corresponding {@link CompressionCodec} the parser
      * can use to decompress the JWT body.
      *
      * @param header of the JWT
-     * @return CompressionCodec matching the {@code calg} header, or null if there is no {@code calg} header.
-     * @throws CompressionException if a {@code calg} header value is found and not supported.
+     * @return CompressionCodec matching the {@code zip} header, or null if there is no {@code zip} header.
+     * @throws CompressionException if a {@code zip} header value is found and not supported.
      */
     CompressionCodec resolveCompressionCodec(Header header) throws CompressionException;
 

@@ -15,6 +15,14 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.codec.Decoder;
+import io.jsonwebtoken.codec.Encoder;
+
+/**
+ * @deprecated since 0.10.0 - will be removed before 1.0.0. Use {@link Encoder#BASE64 Encoder.BASE64}
+ * or {@link Decoder#BASE64 Decoder.BASE64} instead.
+ */
+@Deprecated
 public class AndroidBase64Codec extends AbstractTextCodec {
 
     @Override

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.codec.Decoder;
 import io.jsonwebtoken.impl.DefaultClock;
 
 import java.security.Key;
@@ -164,20 +165,43 @@ public interface JwtParser {
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
-     * <p>
+     *
      * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
      * (as the {@code alg} header parameter).</p>
-     * <p>
+     *
      * <p>This method overwrites any previously set key.</p>
-     * <p>
+     *
      * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
      * byte array is used to invoke {@link #setSigningKey(byte[])}.</p>
      *
-     * @param base64EncodedKeyBytes the BASE64-encoded algorithm-specific signature verification key to use to validate
+     * <h4>Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0</h4>
+     *
+     * <p>This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
+     * cryptographic operations are always binary (byte arrays), and many people were confused as to how bytes were
+     * obtained from the String argument.</p>
+     *
+     * <p>This method always expected a String argument that was effectively the same as the result of the following
+     * (pseudocode):</p>
+     *
+     * <p>{@code String base64EncodedSecretKey = base64Encode(secretKeyBytes);}</p>
+     *
+     * <p>However, a non-trivial number of JJWT users were confused by the method signature and attempted to
+     * use raw password strings as the key argument - for example {@code setSigningKey(myPassword)} - which is
+     * almost always incorrect for cryptographic hashes and can produce erroneous or insecure results.</p>
+     *
+     * <p>See this
+     * <a href="https://stackoverflow.com/questions/40252903/static-secret-as-byte-key-or-string/40274325#40274325">
+     * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
+     * signature operations.</p>
+     *
+     * <p>Finally, please use the {@link #setSigningKey(Key) setSigningKey(Key)} instead, as this method and the
+     * {@code byte[]} variant will be removed before the 1.0.0 release.</p>
+     *
+     * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signature verification key to use to validate
      *                              any discovered JWS digital signature.
      * @return the parser for method chaining.
      */
-    JwtParser setSigningKey(String base64EncodedKeyBytes);
+    JwtParser setSigningKey(String base64EncodedSecretKey);
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
@@ -245,6 +269,18 @@ public interface JwtParser {
      * @since 0.6.0
      */
     JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
+
+    /**
+     * Perform Base64Url decoding with the specified Decoder
+     *
+     * <p>JJWT uses a spec-compliant decoder that works on all supported JDK versions, but you may call this method
+     * to specify a different decoder if you desire.</p>
+     *
+     * @param base64UrlDecoder the decoder to use when Base64Url-decoding
+     * @return the parser for method chaining.
+     * @since 0.10.0
+     */
+    JwtParser base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder);
 
     /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}

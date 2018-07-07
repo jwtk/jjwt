@@ -38,6 +38,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.codec.Decoder;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
@@ -69,11 +70,20 @@ public class DefaultJwtParser implements JwtParser {
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
-    Claims expectedClaims = new DefaultClaims();
+    private Decoder<String, byte[]> base64UrlDecoder = Decoder.BASE64URL;
+
+    private Claims expectedClaims = new DefaultClaims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
+
+    @Override
+    public JwtParser base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder) {
+        Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
+        this.base64UrlDecoder = base64UrlDecoder;
+        return this;
+    }
 
     @Override
     public JwtParser requireIssuedAt(Date issuedAt) {
@@ -146,9 +156,9 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public JwtParser setSigningKey(String base64EncodedKeyBytes) {
-        Assert.hasText(base64EncodedKeyBytes, "signing key cannot be null or empty.");
-        this.keyBytes = TextCodec.BASE64.decode(base64EncodedKeyBytes);
+    public JwtParser setSigningKey(String base64EncodedSecretKey) {
+        Assert.hasText(base64EncodedSecretKey, "signing key cannot be null or empty.");
+        this.keyBytes = Decoder.BASE64.decode(base64EncodedSecretKey);
         return this;
     }
 
@@ -215,7 +225,7 @@ public class DefaultJwtParser implements JwtParser {
             if (c == SEPARATOR_CHAR) {
 
                 CharSequence tokenSeq = Strings.clean(sb);
-                String token = tokenSeq!=null?tokenSeq.toString():null;
+                String token = tokenSeq != null ? tokenSeq.toString() : null;
 
                 if (delimiterCount == 0) {
                     base64UrlEncodedHeader = token;
@@ -248,7 +258,8 @@ public class DefaultJwtParser implements JwtParser {
         CompressionCodec compressionCodec = null;
 
         if (base64UrlEncodedHeader != null) {
-            String origValue = TextCodec.BASE64URL.decodeToString(base64UrlEncodedHeader);
+            byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedHeader);
+            String origValue = new String(bytes, Strings.UTF_8);
             Map<String, Object> m = readValue(origValue);
 
             if (base64UrlEncodedDigest != null) {
@@ -261,13 +272,11 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Body =================
-        String payload;
+        byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedPayload);
         if (compressionCodec != null) {
-            byte[] decompressed = compressionCodec.decompress(TextCodec.BASE64URL.decode(base64UrlEncodedPayload));
-            payload = new String(decompressed, Strings.UTF_8);
-        } else {
-            payload = TextCodec.BASE64URL.decodeToString(base64UrlEncodedPayload);
+            bytes = compressionCodec.decompress(bytes);
         }
+        String payload = new String(bytes, Strings.UTF_8);
 
         Claims claims = null;
 
@@ -293,7 +302,7 @@ public class DefaultJwtParser implements JwtParser {
             if (algorithm == null || algorithm == SignatureAlgorithm.NONE) {
                 //it is plaintext, but it has a signature.  This is invalid:
                 String msg = "JWT string has a digest/signature, but the header does not reference a valid signature " +
-                             "algorithm.";
+                    "algorithm.";
                 throw new MalformedJwtException(msg);
             }
 
@@ -322,7 +331,7 @@ public class DefaultJwtParser implements JwtParser {
                 if (!Objects.isEmpty(keyBytes)) {
 
                     Assert.isTrue(algorithm.isHmac(),
-                                  "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
+                        "Key bytes can only be specified for HMAC signatures. Please specify a PublicKey or PrivateKey instance.");
 
                     key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
                 }
@@ -338,19 +347,19 @@ public class DefaultJwtParser implements JwtParser {
                 validator = createSignatureValidator(algorithm, key);
             } catch (IllegalArgumentException e) {
                 String algName = algorithm.getValue();
-                String msg = "The parsed JWT indicates it was signed with the " +  algName + " signature " +
-                             "algorithm, but the specified signing key of type " + key.getClass().getName() +
-                             " may not be used to validate " + algName + " signatures.  Because the specified " +
-                             "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
-                             "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                             "trusted.  Another possibility is that the parser was configured with the incorrect " +
-                             "signing key, but this cannot be assumed for security reasons.";
+                String msg = "The parsed JWT indicates it was signed with the " + algName + " signature " +
+                    "algorithm, but the specified signing key of type " + key.getClass().getName() +
+                    " may not be used to validate " + algName + " signatures.  Because the specified " +
+                    "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                    "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
+                    "trusted.  Another possibility is that the parser was configured with the incorrect " +
+                    "signing key, but this cannot be assumed for security reasons.";
                 throw new UnsupportedJwtException(msg, e);
             }
 
             if (!validator.isValid(jwtWithoutSignature, base64UrlEncodedDigest)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
-                             "asserted and should not be trusted.";
+                    "asserted and should not be trusted.";
                 throw new SignatureException(msg);
             }
         }
@@ -426,34 +435,31 @@ public class DefaultJwtParser implements JwtParser {
             Object expectedClaimValue = expectedClaims.get(expectedClaimName);
             Object actualClaimValue = claims.get(expectedClaimName);
 
-            if (
-                Claims.ISSUED_AT.equals(expectedClaimName) ||
-                Claims.EXPIRATION.equals(expectedClaimName) ||
-                Claims.NOT_BEFORE.equals(expectedClaimName)
-            ) {
+            if (Claims.ISSUED_AT.equals(expectedClaimName) || Claims.EXPIRATION.equals(expectedClaimName) ||
+                Claims.NOT_BEFORE.equals(expectedClaimName)) {
+
                 expectedClaimValue = expectedClaims.get(expectedClaimName, Date.class);
                 actualClaimValue = claims.get(expectedClaimName, Date.class);
-            } else if (
-                expectedClaimValue instanceof Date &&
-                actualClaimValue != null &&
-                actualClaimValue instanceof Long
-            ) {
-                actualClaimValue = new Date((Long)actualClaimValue);
+
+            } else if (expectedClaimValue instanceof Date && actualClaimValue instanceof Long) {
+
+                actualClaimValue = new Date((Long) actualClaimValue);
             }
 
             InvalidClaimException invalidClaimException = null;
 
             if (actualClaimValue == null) {
-                String msg = String.format(
-                    ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
-                    expectedClaimName, expectedClaimValue
-                );
+
+                String msg = String.format(ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                    expectedClaimName, expectedClaimValue);
+
                 invalidClaimException = new MissingClaimException(header, claims, msg);
+
             } else if (!expectedClaimValue.equals(actualClaimValue)) {
-                String msg = String.format(
-                    ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
-                    expectedClaimName, expectedClaimValue, actualClaimValue
-                );
+
+                String msg = String.format(ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                    expectedClaimName, expectedClaimValue, actualClaimValue);
+
                 invalidClaimException = new IncorrectClaimException(header, claims, msg);
             }
 
@@ -469,7 +475,7 @@ public class DefaultJwtParser implements JwtParser {
      * @since 0.5 mostly to allow testing overrides
      */
     protected JwtSignatureValidator createSignatureValidator(SignatureAlgorithm alg, Key key) {
-        return new DefaultJwtSignatureValidator(alg, key);
+        return new DefaultJwtSignatureValidator(alg, key, base64UrlDecoder);
     }
 
     @Override
