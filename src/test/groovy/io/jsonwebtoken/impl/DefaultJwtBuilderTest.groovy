@@ -19,6 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.codec.Encoder
+import io.jsonwebtoken.codec.EncodingException
 import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.crypto.MacProvider
 import org.junit.Test
@@ -165,21 +167,6 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
-    void testCompactWithBothKeyAndKeyBytes() {
-        def b = new DefaultJwtBuilder()
-        b.setPayload('foo')
-        def key = MacProvider.generateKey()
-        b.signWith(SignatureAlgorithm.HS256, key)
-        b.signWith(SignatureAlgorithm.HS256, key.encoded)
-        try {
-            b.compact()
-            fail()
-        } catch (IllegalStateException ise) {
-            assertEquals ise.message, "A key object and key bytes cannot both be specified. Choose either one."
-        }
-    }
-
-    @Test
     void testCompactWithJwsHeader() {
         def b = new DefaultJwtBuilder()
         b.setHeader(Jwts.jwsHeader().setKeyId('a'))
@@ -318,6 +305,23 @@ class DefaultJwtBuilderTest {
         def b = new DefaultJwtBuilder()
         b.setIssuedAt(null)
         assertNull b.claims
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testBase64UrlEncodeWithNullArgument() {
+        new DefaultJwtBuilder().base64UrlEncodeWith(null)
+    }
+
+    @Test
+    void testBase64UrlEncodeWithCustomEncoder() {
+        def encoder = new Encoder() {
+            @Override
+            Object encode(Object o) throws EncodingException {
+                return null
+            }
+        }
+        def b = new DefaultJwtBuilder().base64UrlEncodeWith(encoder)
+        assertSame encoder, b.base64UrlEncoder
     }
 
 }

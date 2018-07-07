@@ -136,7 +136,7 @@ Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compact();
 ```
 
-This will set a new `calg` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
+This will set a new `zip` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
 
 The default parser implementation will automatically decompress DEFLATE or GZIP compressed bodies, so you don't need to set anything on the parser - it looks like normal:
 
@@ -155,7 +155,7 @@ Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compact();
 ```
 
-You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `calg` header and return your custom codec when discovered:
+You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `zip` header and return your custom codec when discovered:
 
 ```java
 Jwts.parser().setSigningKey(key)

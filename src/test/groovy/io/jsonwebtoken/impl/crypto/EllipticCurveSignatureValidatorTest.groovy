@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.crypto
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.SignatureException
+import io.jsonwebtoken.codec.Decoder
 import io.jsonwebtoken.impl.TextCodec
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test
@@ -64,13 +65,13 @@ class EllipticCurveSignatureValidatorTest {
     void ecdsaSignatureComplianceTest() {
         def fact = KeyFactory.getInstance("ECDSA", "BC");
         def publicKey = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="
-        def pub = fact.generatePublic(new X509EncodedKeySpec(TextCodec.BASE64.decode(publicKey)))
+        def pub = fact.generatePublic(new X509EncodedKeySpec(Decoder.BASE64.decode(publicKey)))
         def v = new EllipticCurveSignatureValidator(SignatureAlgorithm.ES512, pub)
         def verifier = { token ->
             def signatureStart = token.lastIndexOf('.')
             def withoutSignature = token.substring(0, signatureStart)
             def signature = token.substring(signatureStart + 1)
-            assert v.isValid(withoutSignature.getBytes("US-ASCII"), TextCodec.BASE64URL.decode(signature)), "Signature do not match that of other implementations"
+            assert v.isValid(withoutSignature.getBytes("US-ASCII"), Decoder.BASE64URL.decode(signature)), "Signature do not match that of other implementations"
         }
         //Test verification for token created using https://github.com/auth0/node-jsonwebtoken/tree/v7.0.1
         verifier("eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30.Aab4x7HNRzetjgZ88AMGdYV2Ml7kzFbl8Ql2zXvBores7iRqm2nK6810ANpVo5okhHa82MQf2Q_Zn4tFyLDR9z4GAcKFdcAtopxq1h8X58qBWgNOc0Bn40SsgUc8wOX4rFohUCzEtnUREePsvc9EfXjjAH78WD2nq4tn-N94vf14SncQ")
@@ -146,7 +147,7 @@ class EllipticCurveSignatureValidatorTest {
     @Test
     void edgeCaseSignatureToConcatLengthTest() {
         try {
-            def signature = TextCodec.BASE64.decode("MIEAAGg3OVb/ZeX12cYrhK3c07TsMKo7Kc6SiqW++4CAZWCX72DkZPGTdCv2duqlupsnZL53hiG3rfdOLj8drndCU+KHGrn5EotCATdMSLCXJSMMJoHMM/ZPG+QOHHPlOWnAvpC1v4lJb32WxMFNz1VAIWrl9Aa6RPG1GcjCTScKjvEE")
+            def signature = Decoder.BASE64.decode("MIEAAGg3OVb/ZeX12cYrhK3c07TsMKo7Kc6SiqW++4CAZWCX72DkZPGTdCv2duqlupsnZL53hiG3rfdOLj8drndCU+KHGrn5EotCATdMSLCXJSMMJoHMM/ZPG+QOHHPlOWnAvpC1v4lJb32WxMFNz1VAIWrl9Aa6RPG1GcjCTScKjvEE")
             EllipticCurveProvider.transcodeSignatureToConcat(signature, 132)
             fail()
         } catch (JwtException e) {
@@ -157,7 +158,7 @@ class EllipticCurveSignatureValidatorTest {
     @Test
     void edgeCaseSignatureToConcatInvalidSignatureTest() {
         try {
-            def signature = TextCodec.BASE64.decode("MIGBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            def signature = Decoder.BASE64.decode("MIGBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             EllipticCurveProvider.transcodeSignatureToConcat(signature, 132)
             fail()
         } catch (JwtException e) {
@@ -168,7 +169,7 @@ class EllipticCurveSignatureValidatorTest {
     @Test
     void edgeCaseSignatureToConcatInvalidSignatureBranchTest() {
         try {
-            def signature = TextCodec.BASE64.decode("MIGBAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            def signature = Decoder.BASE64.decode("MIGBAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             EllipticCurveProvider.transcodeSignatureToConcat(signature, 132)
             fail()
         } catch (JwtException e) {
@@ -179,7 +180,7 @@ class EllipticCurveSignatureValidatorTest {
     @Test
     void edgeCaseSignatureToConcatInvalidSignatureBranch2Test() {
         try {
-            def signature = TextCodec.BASE64.decode("MIGBAj4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            def signature = Decoder.BASE64.decode("MIGBAj4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             EllipticCurveProvider.transcodeSignatureToConcat(signature, 132)
             fail()
         } catch (JwtException e) {

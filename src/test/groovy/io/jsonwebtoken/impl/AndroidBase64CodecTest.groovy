@@ -27,6 +27,7 @@ import static org.powermock.api.easymock.PowerMock.mockStatic
 import static org.powermock.api.easymock.PowerMock.replayAll
 import static org.powermock.api.easymock.PowerMock.verifyAll
 
+@Deprecated //remove just before 1.0.0 release
 @RunWith(PowerMockRunner.class)
 @PrepareForTest([Base64.class])
 class AndroidBase64CodecTest {

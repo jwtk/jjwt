@@ -26,11 +26,11 @@ import io.jsonwebtoken.lang.Strings;
  * Default implementation of {@link CompressionCodecResolver} that supports the following:
  * <p>
  * <ul>
- * <li>If the specified JWT {@link Header} does not have a {@code calg} header, this implementation does
+ * <li>If the specified JWT {@link Header} does not have a {@code zip} header, this implementation does
  * nothing and returns {@code null} to the caller, indicating no compression was used.</li>
- * <li>If the header has a {@code calg} value of {@code DEF}, a {@link DeflateCompressionCodec} will be returned.</li>
- * <li>If the header has a {@code calg} value of {@code GZIP}, a {@link GzipCompressionCodec} will be returned.</li>
- * <li>If the header has any other {@code calg} value, a {@link CompressionException} is thrown to reflect an
+ * <li>If the header has a {@code zip} value of {@code DEF}, a {@link DeflateCompressionCodec} will be returned.</li>
+ * <li>If the header has a {@code zip} value of {@code GZIP}, a {@link GzipCompressionCodec} will be returned.</li>
+ * <li>If the header has any other {@code zip} value, a {@link CompressionException} is thrown to reflect an
  * unrecognized algorithm.</li>
  * </ul>
  *

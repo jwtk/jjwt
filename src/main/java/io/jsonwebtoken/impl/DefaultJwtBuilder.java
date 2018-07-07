@@ -17,12 +17,20 @@ package io.jsonwebtoken.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.codec.Decoder;
+import io.jsonwebtoken.codec.Encoder;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -39,10 +47,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private String payload;
 
     private SignatureAlgorithm algorithm;
-    private Key                key;
-    private byte[]             keyBytes;
+    private Key key;
+
+    private Encoder<byte[], String> base64UrlEncoder = Encoder.BASE64URL;
 
     private CompressionCodec compressionCodec;
+
+    @Override
+    public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder) {
+        Assert.notNull(base64UrlEncoder, "base64UrlEncoder cannot be null.");
+        this.base64UrlEncoder = base64UrlEncoder;
+        return this;
+    }
 
     @Override
     public JwtBuilder setHeader(Header header) {
@@ -88,7 +104,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.notEmpty(secretKey, "secret key byte array cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         this.algorithm = alg;
-        this.keyBytes = secretKey;
+        this.key = new SecretKeySpec(secretKey, alg.getJcaName());
         return this;
     }
 
@@ -96,7 +112,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
-        byte[] bytes = TextCodec.BASE64.decode(base64EncodedSecretKey);
+        byte[] bytes = Decoder.BASE64.decode(base64EncodedSecretKey);
         return signWith(alg, bytes);
     }
 
@@ -262,22 +278,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException("Both 'payload' and 'claims' cannot both be specified. Choose either one.");
         }
 
-        if (key != null && keyBytes != null) {
-            throw new IllegalStateException("A key object and key bytes cannot both be specified. Choose either one.");
-        }
-
         Header header = ensureHeader();
 
-        Key key = this.key;
-        if (key == null && !Objects.isEmpty(keyBytes)) {
-            key = new SecretKeySpec(keyBytes, algorithm.getJcaName());
-        }
-
         JwsHeader jwsHeader;
-
         if (header instanceof JwsHeader) {
-            jwsHeader = (JwsHeader)header;
+            jwsHeader = (JwsHeader) header;
         } else {
+            //noinspection unchecked
             jwsHeader = new DefaultJwsHeader(header);
         }
 
@@ -294,24 +301,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         String base64UrlEncodedHeader = base64UrlEncode(jwsHeader, "Unable to serialize header to json.");
 
-        String base64UrlEncodedBody;
+        byte[] bytes;
+        try {
+            bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Unable to serialize claims object to json.");
+        }
 
         if (compressionCodec != null) {
-
-            byte[] bytes;
-            try {
-                bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Unable to serialize claims object to json.");
-            }
-
-            base64UrlEncodedBody = TextCodec.BASE64URL.encode(compressionCodec.compress(bytes));
-
-        } else {
-            base64UrlEncodedBody = this.payload != null ?
-                    TextCodec.BASE64URL.encode(this.payload) :
-                    base64UrlEncode(claims, "Unable to serialize claims object to json.");
+            bytes = compressionCodec.compress(bytes);
         }
+
+        String base64UrlEncodedBody = base64UrlEncoder.encode(bytes);
 
         String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
@@ -335,7 +336,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
      * @since 0.5 mostly to allow testing overrides
      */
     protected JwtSigner createSigner(SignatureAlgorithm alg, Key key) {
-        return new DefaultJwtSigner(alg, key);
+        return new DefaultJwtSigner(alg, key, base64UrlEncoder);
     }
 
     protected String base64UrlEncode(Object o, String errMsg) {
@@ -346,11 +347,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException(errMsg, e);
         }
 
-        return TextCodec.BASE64URL.encode(bytes);
+        return base64UrlEncoder.encode(bytes);
     }
 
-
-    protected byte[] toJson(Object object) throws  JsonProcessingException {
+    protected byte[] toJson(Object object) throws JsonProcessingException {
         return OBJECT_MAPPER.writeValueAsBytes(object);
     }
 }
