@@ -103,6 +103,10 @@ class Base64Test {
         assertEquals "Zm9vYmE=", BASE64("fooba")
 
         assertEquals "Zm9vYmFy", BASE64("foobar")
+
+        def input = 'special: [\r\n \t], ascii[32..126]: [ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~]\n'
+        def expected = "c3BlY2lhbDogWw0KIAldLCBhc2NpaVszMi4uMTI2XTogWyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+XQo="
+        assertEquals expected, BASE64(input)
     }
 
     private static String BASE64URL(String s) {
@@ -110,7 +114,7 @@ class Base64Test {
         return Base64.URL_SAFE.encodeToString(bytes, false)
     }
 
-    @Test //same test vectors above, but with padding removed
+    @Test //same test vectors above, but with padding removed & some specials swapped: https://brockallen.com/2014/10/17/base64url-encoding/
     void testRfc4648Base64UrlTestVectors() {
 
         assertEquals "", BASE64URL("")
@@ -127,5 +131,11 @@ class Base64Test {
 
         assertEquals "Zm9vYmFy", BASE64URL("foobar")
 
+        def input = 'special: [\r\n \t], ascii[32..126]: [ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~]\n'
+        def expected = "c3BlY2lhbDogWw0KIAldLCBhc2NpaVszMi4uMTI2XTogWyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+XQo="
+                        .replace("=", "")
+                        .replace("+", "-")
+                        .replace("/", "_")
+        assertEquals expected, BASE64URL(input)
     }
 }
