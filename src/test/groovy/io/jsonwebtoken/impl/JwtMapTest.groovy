@@ -15,7 +15,9 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.lang.DateFormats
 import org.junit.Test
+
 import static org.junit.Assert.*
 
 class JwtMapTest {
@@ -28,26 +30,98 @@ class JwtMapTest {
 
     @Test
     void testToDateFromDate() {
-
         def d = new Date()
-
         Date date = JwtMap.toDate(d, 'foo')
-
         assertSame date, d
-
     }
 
     @Test
-    void testToDateFromString() {
-
-        Date d = new Date(2015, 1, 1, 12, 0, 0)
-
-        String s = (d.getTime() / 1000) + '' //JWT timestamps are in seconds - need to strip millis
-
-        Date date = JwtMap.toDate(s, 'foo')
-
+    void testToDateFromCalendar() {
+        def c = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        def d = c.getTime()
+        Date date = JwtMap.toDate(c, 'foo')
         assertEquals date, d
+    }
 
+    @Test
+    void testToDateFromIso8601String() {
+        Date d = new Date(2015, 1, 1, 12, 0, 0)
+        String s = DateFormats.formatIso8601(d, false)
+        Date date = JwtMap.toDate(s, 'foo')
+        assertEquals date, d
+    }
+
+    @Test
+    void testToDateFromInvalidIso8601String() {
+        Date d = new Date(2015, 1, 1, 12, 0, 0)
+        String s = d.toString()
+        try {
+            JwtMap.toDate(d.toString(), 'foo')
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals "'foo' value does not appear to be ISO-8601-formatted: $s" as String, iae.getMessage()
+        }
+    }
+
+    @Test
+    void testToDateFromIso8601MillisString() {
+        long millis = System.currentTimeMillis();
+        Date d = new Date(millis)
+        String s = DateFormats.formatIso8601(d)
+        Date date = JwtMap.toDate(s, 'foo')
+        assertEquals date, d
+    }
+
+    @Test
+    void testToSpecDateWithNull() {
+        assertNull JwtMap.toSpecDate(null, 'exp')
+    }
+
+    @Test
+    void testToSpecDateWithLong() {
+        long millis = System.currentTimeMillis()
+        long seconds = (millis / 1000l) as long
+        Date d = new Date(seconds * 1000)
+        assertEquals d, JwtMap.toSpecDate(seconds, 'exp')
+    }
+
+    @Test
+    void testToSpecDateWithString() {
+        Date d = new Date(2015, 1, 1, 12, 0, 0)
+        String s = (d.getTime() / 1000) + '' //JWT timestamps are in seconds - need to strip millis
+        Date date = JwtMap.toSpecDate(s, 'exp')
+        assertEquals date, d
+    }
+
+    @Test
+    void testToSpecDateWithIso8601String() {
+        long millis = System.currentTimeMillis();
+        Date d = new Date(millis)
+        String s = DateFormats.formatIso8601(d)
+        Date date = JwtMap.toSpecDate(s, 'exp')
+        assertEquals date, d
+    }
+
+    @Test
+    void testToSpecDateWithDate() {
+        long millis = System.currentTimeMillis();
+        Date d = new Date(millis)
+        Date date = JwtMap.toSpecDate(d, 'exp')
+        assertSame d, date
+    }
+
+    @Deprecated //remove just before 1.0.0
+    @Test
+    void testSetDate() {
+        def m = new JwtMap()
+        m.put('foo', 'bar')
+        m.setDate('foo', null)
+        assertNull m.get('foo')
+        long millis = System.currentTimeMillis()
+        long seconds = (millis / 1000l) as long
+        Date date = new Date(millis)
+        m.setDate('foo', date)
+        assertEquals seconds, m.get('foo')
     }
 
     @Test
@@ -56,7 +130,7 @@ class JwtMapTest {
             JwtMap.toDate(new Object() { @Override public String toString() {return 'hi'} }, 'foo')
             fail()
         } catch (IllegalStateException iae) {
-            assertEquals iae.message, "Cannot convert 'foo' value [hi] to Date instance."
+            assertEquals iae.message, "Cannot create Date from 'foo' value 'hi'."
         }
     }
 
@@ -126,7 +200,7 @@ class JwtMapTest {
     }
 
     @Test
-    public void testEquals() throws Exception {
+    void testEquals() throws Exception {
         def m1 = new JwtMap();
         m1.put("a", "a");
 
@@ -137,7 +211,7 @@ class JwtMapTest {
     }
 
     @Test
-    public void testHashcode() throws Exception {
+    void testHashcode() throws Exception {
         def m = new JwtMap();
         def hashCodeEmpty = m.hashCode();
 

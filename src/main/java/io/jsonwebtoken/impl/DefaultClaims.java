@@ -71,7 +71,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setExpiration(Date exp) {
-        setDate(Claims.EXPIRATION, exp);
+        setDateAsSeconds(Claims.EXPIRATION, exp);
         return this;
     }
 
@@ -82,7 +82,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setNotBefore(Date nbf) {
-        setDate(Claims.NOT_BEFORE, nbf);
+        setDateAsSeconds(Claims.NOT_BEFORE, nbf);
         return this;
     }
 
@@ -93,7 +93,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setIssuedAt(Date iat) {
-        setDate(Claims.ISSUED_AT, iat);
+        setDateAsSeconds(Claims.ISSUED_AT, iat);
         return this;
     }
 
@@ -108,25 +108,35 @@ public class DefaultClaims extends JwtMap implements Claims {
         return this;
     }
 
+    /**
+     * @since 0.10.0
+     */
+    private static boolean isSpecDate(String claimName) {
+        return Claims.EXPIRATION.equals(claimName) ||
+            Claims.ISSUED_AT.equals(claimName) ||
+            Claims.NOT_BEFORE.equals(claimName);
+    }
+
     @Override
     public <T> T get(String claimName, Class<T> requiredType) {
-        Object value = get(claimName);
-        if (value == null) { return null; }
 
-        if (Claims.EXPIRATION.equals(claimName) ||
-            Claims.ISSUED_AT.equals(claimName) ||
-            Claims.NOT_BEFORE.equals(claimName)
-        ) {
-            value = getDate(claimName);
+        Object value = get(claimName);
+        if (value == null) {
+            return null;
+        }
+
+        if (Date.class.equals(requiredType)) {
+            if (isSpecDate(claimName)) {
+                value = toSpecDate(value, claimName);
+            } else {
+                value = toDate(value, claimName);
+            }
         }
 
         return castClaimValue(value, requiredType);
     }
 
     private <T> T castClaimValue(Object value, Class<T> requiredType) {
-        if (requiredType == Date.class && value instanceof Long) {
-            value = new Date((Long)value);
-        }
 
         if (value instanceof Integer) {
             int intValue = (Integer) value;

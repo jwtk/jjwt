@@ -17,9 +17,11 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.codec.Decoder;
 import io.jsonwebtoken.impl.DefaultClock;
+import io.jsonwebtoken.io.Deserializer;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
@@ -198,7 +200,7 @@ public interface JwtParser {
      * {@code byte[]} variant will be removed before the 1.0.0 release.</p>
      *
      * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signature verification key to use to validate
-     *                              any discovered JWS digital signature.
+     *                               any discovered JWS digital signature.
      * @return the parser for method chaining.
      */
     JwtParser setSigningKey(String base64EncodedSecretKey);
@@ -281,6 +283,22 @@ public interface JwtParser {
      * @since 0.10.0
      */
     JwtParser base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder);
+
+    /**
+     * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
+     * used by the parser after Base64Url-decoding to convert JWT/JWS/JWT JSON headers and claims into Java Map
+     * objects.
+     *
+     * <p>If this method is not called, JJWT will use whatever deserializer it can find at runtime, checking for the
+     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+     * in the runtime classpath, an exception will be thrown when one of the various {@code parse}* methods is
+     * invoked.</p>
+     *
+     * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
+     * @return the builder for method chaining.
+     * @since 0.10.0
+     */
+    JwtParser deserializeJsonWith(Deserializer<Map<String,?>> deserializer);
 
     /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
@@ -369,7 +387,7 @@ public interface JwtParser {
      * @since 0.2
      */
     <T> T parse(String jwt, JwtHandler<T> handler)
-            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -399,7 +417,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)
-            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -430,7 +448,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jwt<Header, Claims> parseClaimsJwt(String claimsJwt)
-            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -458,7 +476,7 @@ public interface JwtParser {
      * @since 0.2
      */
     Jws<String> parsePlaintextJws(String plaintextJws)
-            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -487,5 +505,5 @@ public interface JwtParser {
      * @since 0.2
      */
     Jws<Claims> parseClaimsJws(String claimsJws)
-            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 }

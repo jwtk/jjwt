@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.Header;
@@ -29,7 +27,11 @@ import io.jsonwebtoken.codec.Decoder;
 import io.jsonwebtoken.codec.Encoder;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
+import io.jsonwebtoken.io.SerializationException;
+import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.io.impl.InstanceLocator;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
@@ -40,8 +42,6 @@ import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     private Header header;
     private Claims claims;
     private String payload;
@@ -49,9 +49,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private SignatureAlgorithm algorithm;
     private Key key;
 
+    private Serializer<Map<String,?>> serializer;
+
     private Encoder<byte[], String> base64UrlEncoder = Encoder.BASE64URL;
 
     private CompressionCodec compressionCodec;
+
+    @Override
+    public JwtBuilder serializeToJsonWith(Serializer<Map<String,?>> serializer) {
+        Assert.notNull(serializer, "Serializer cannot be null.");
+        this.serializer = serializer;
+        return this;
+    }
 
     @Override
     public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder) {
@@ -270,6 +279,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public String compact() {
+
+        if (this.serializer == null) {
+            //try to find one based on the runtime environment:
+            InstanceLocator<Serializer<Map<String,?>>> locator =
+                Classes.newInstance("io.jsonwebtoken.io.impl.RuntimeClasspathSerializerLocator");
+            this.serializer = locator.getInstance();
+        }
+
         if (payload == null && Collections.isEmpty(claims)) {
             throw new IllegalStateException("Either 'payload' or 'claims' must be specified.");
         }
@@ -304,8 +321,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
         byte[] bytes;
         try {
             bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Unable to serialize claims object to json.");
+        } catch (SerializationException e) {
+            throw new IllegalArgumentException("Unable to serialize claims object to json: " + e.getMessage(), e);
         }
 
         if (compressionCodec != null) {
@@ -339,18 +356,25 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return new DefaultJwtSigner(alg, key, base64UrlEncoder);
     }
 
+    @Deprecated // remove before 1.0 - call the serializer and base64UrlEncoder directly
     protected String base64UrlEncode(Object o, String errMsg) {
+        Assert.isInstanceOf(Map.class, o, "object argument must be a map.");
+        Map m = (Map)o;
         byte[] bytes;
         try {
-            bytes = toJson(o);
-        } catch (JsonProcessingException e) {
+            bytes = toJson(m);
+        } catch (SerializationException e) {
             throw new IllegalStateException(errMsg, e);
         }
 
         return base64UrlEncoder.encode(bytes);
     }
 
-    protected byte[] toJson(Object object) throws JsonProcessingException {
-        return OBJECT_MAPPER.writeValueAsBytes(object);
+    @SuppressWarnings("unchecked")
+    @Deprecated //remove before 1.0 - call the serializer directly
+    protected byte[] toJson(Object object) throws SerializationException {
+        Assert.isInstanceOf(Map.class, object, "object argument must be a map.");
+        Map m = (Map)object;
+        return serializer.serialize(m);
     }
 }

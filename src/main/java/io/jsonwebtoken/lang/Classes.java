@@ -69,7 +69,8 @@ public final class Classes {
      * @return the located class
      * @throws UnknownClassException if the class cannot be found.
      */
-    public static Class forName(String fqcn) throws UnknownClassException {
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> forName(String fqcn) throws UnknownClassException {
 
         Class clazz = THREAD_CL_ACCESSOR.loadClass(fqcn);
 
@@ -132,13 +133,13 @@ public final class Classes {
     }
 
     @SuppressWarnings("unchecked")
-    public static Object newInstance(String fqcn) {
-        return newInstance(forName(fqcn));
+    public static <T> T newInstance(String fqcn) {
+        return (T)newInstance(forName(fqcn));
     }
 
     @SuppressWarnings("unchecked")
-    public static Object newInstance(String fqcn, Object... args) {
-        return newInstance(forName(fqcn), args);
+    public static <T> T newInstance(String fqcn, Object... args) {
+        return (T)newInstance(forName(fqcn), args);
     }
 
     public static <T> T newInstance(Class<T> clazz) {
