@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.TextCodec;
+import io.jsonwebtoken.codec.Encoder;
+import io.jsonwebtoken.codec.impl.Base64UrlEncoder;
 import io.jsonwebtoken.lang.Assert;
 
 import java.nio.charset.Charset;
@@ -27,13 +28,26 @@ public class DefaultJwtSigner implements JwtSigner {
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     private final Signer signer;
+    private final Encoder<byte[], String> base64UrlEncoder;
 
+    @Deprecated
     public DefaultJwtSigner(SignatureAlgorithm alg, Key key) {
-        this(DefaultSignerFactory.INSTANCE, alg, key);
+        this(DefaultSignerFactory.INSTANCE, alg, key, Encoder.BASE64URL);
     }
 
+    public DefaultJwtSigner(SignatureAlgorithm alg, Key key, Encoder<byte[], String> base64UrlEncoder) {
+        this(DefaultSignerFactory.INSTANCE, alg, key, base64UrlEncoder);
+    }
+
+    @Deprecated
     public DefaultJwtSigner(SignerFactory factory, SignatureAlgorithm alg, Key key) {
+        this(factory, alg, key, Encoder.BASE64URL);
+    }
+
+    public DefaultJwtSigner(SignerFactory factory, SignatureAlgorithm alg, Key key, Encoder<byte[], String> base64UrlEncoder) {
         Assert.notNull(factory, "SignerFactory argument cannot be null.");
+        Assert.notNull(base64UrlEncoder, "Base64Url Encoder cannot be null.");
+        this.base64UrlEncoder = base64UrlEncoder;
         this.signer = factory.createSigner(alg, key);
     }
 
@@ -44,6 +58,6 @@ public class DefaultJwtSigner implements JwtSigner {
 
         byte[] signature = signer.sign(bytesToSign);
 
-        return TextCodec.BASE64URL.encode(signature);
+        return base64UrlEncoder.encode(signature);
     }
 }

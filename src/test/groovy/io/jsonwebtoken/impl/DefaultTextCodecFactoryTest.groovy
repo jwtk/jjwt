@@ -27,6 +27,12 @@ import static org.junit.Assert.*
 class DefaultTextCodecFactoryTest {
 
     @Test
+    void testGetSystemProperty() {
+        def factory = new DefaultTextCodecFactory()
+        assertNotNull factory.getSystemProperty("java.version")
+    }
+
+    @Test
     void testIsAndroidByVmName() {
 
         def factory = new DefaultTextCodecFactory() {

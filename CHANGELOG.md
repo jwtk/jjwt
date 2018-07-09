@@ -1,5 +1,40 @@
 ## Release Notes
 
+### 0.10.0
+
+This is a minor feature enhancement that ensures Base64 encoding is identical and deterministic on all JDK and
+Android platforms.  JJWT previously relied on the underlying platform encoder (JAXB xml DataBinding or Android's native
+Base64), however in some cases this produced unexpected results across platforms, including when compared against the
+JDK's >= 8 Base64 implementation.
+
+JJWT now embeds a super lightweight (1 class) and *extremely* fast RFC-compliant Base64 implementation to guarantee 
+portability across all supported platforms.  It is now enabled automatically and there is nothing you need to 
+do to enable it.
+
+However, if the default implementation isn't sufficient for your purposes, you may now specify your own
+encoder during JWT building or decoder during JWT parsing as you see fit.
+
+For example, an encoder during building:
+
+```java
+Encoder<byte[], String> encoder = new MyBase64UrlEncoder(); //implement me
+
+Jwts.builder()
+    .base64UrlEncodeWith(encoder)
+    // ... etc ...
+    .compact();
+```
+
+Or a decoder during parsing:
+```java
+Decoder<String, byte[]> decoder = new MyBase64UrlDecoder(); //implement me
+
+Jwts.parser()
+    .base64UrlDecodeWith(decoder)
+    // ... etc ...
+    .parseClaimsJws(jws);
+```
+
 ### 0.9.1
 
 This is a minor patch release that updates the Jackson dependency to 2.9.6 to address Jackson CVE-2017-17485.
@@ -136,7 +171,7 @@ Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compact();
 ```
 
-This will set a new `calg` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
+This will set a new `zip` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
 
 The default parser implementation will automatically decompress DEFLATE or GZIP compressed bodies, so you don't need to set anything on the parser - it looks like normal:
 
@@ -155,7 +190,7 @@ Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compact();
 ```
 
-You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `calg` header and return your custom codec when discovered:
+You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `zip` header and return your custom codec when discovered:
 
 ```java
 Jwts.parser().setSigningKey(key)

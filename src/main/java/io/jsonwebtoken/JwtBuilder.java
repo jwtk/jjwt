@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.codec.Encoder;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -345,11 +347,36 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
      * byte array is used to invoke {@link #signWith(SignatureAlgorithm, byte[])}.</p>
      *
+     * <h4>Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0</h4>
+     *
+     * <p>This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
+     * cryptographic operations are always binary (byte arrays), and many people were confused as to how bytes were
+     * obtained from the String argument.</p>
+     *
+     * <p>This method always expected a String argument that was effectively the same as the result of the following
+     * (pseudocode):</p>
+     *
+     * <p>{@code String base64EncodedSecretKey = base64Encode(secretKeyBytes);}</p>
+     *
+     * <p>However, a non-trivial number of JJWT users were confused by the method signature and attempted to
+     * use raw password strings as the key argument - for example {@code signWith(HS256, myPassword)} - which is
+     * almost always incorrect for cryptographic hashes and can produce erroneous or insecure results.</p>
+     *
+     * <p>See this
+     * <a href="https://stackoverflow.com/questions/40252903/static-secret-as-byte-key-or-string/40274325#40274325">
+     * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
+     * signature operations.</p>
+     *
+     * <p>Finally, please use the {@link #signWith(SignatureAlgorithm, Key)} method, as this method and the
+     * {@code byte[]} variant will be removed before the 1.0.0 release.</p>
+     *
      * @param alg                    the JWS algorithm to use to digitally sign the JWT, thereby producing a JWS.
      * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signing key to use to digitally sign the
      *                               JWT.
      * @return the builder for method chaining.
+     * @deprecated as of 0.10.0 - use {@link #signWith(SignatureAlgorithm, Key)} instead.
      */
+    @Deprecated
     JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey);
 
     /**
@@ -386,6 +413,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.6.0
      */
     JwtBuilder compressWith(CompressionCodec codec);
+
+    /**
+     * Perform Base64Url encoding with the specified Encoder.
+     *
+     * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
+     * to specify a different encoder if you desire.</p>
+     *
+     * @param base64UrlEncoder the encoder to use when Base64Url-encoding
+     * @return the builder for method chaining.
+     * @since 0.10.0
+     */
+    JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

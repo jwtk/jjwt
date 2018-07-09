@@ -15,9 +15,10 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.codec.Encoder
 import io.jsonwebtoken.impl.DefaultClock
 import io.jsonwebtoken.impl.FixedClock
-import io.jsonwebtoken.impl.TextCodec
+import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -36,6 +37,11 @@ class JwtParserTest {
         byte[] key = new byte[64]
         random.nextBytes(key)
         return key
+    }
+
+    protected static String base64Url(String s) {
+        byte[] bytes = s.getBytes(Strings.UTF_8)
+        return Encoder.BASE64URL.encode(bytes)
     }
 
     @Test
@@ -70,8 +76,7 @@ class JwtParserTest {
 
         String junkPayload = '{;aklsjd;fkajsd;fkjasd;lfkj}'
 
-        String bad = TextCodec.BASE64.encode('{"alg":"none"}') + '.' +
-                     TextCodec.BASE64.encode(junkPayload) + '.'
+        String bad = base64Url('{"alg":"none"}') + '.' + base64Url(junkPayload) + '.'
 
         try {
             Jwts.parser().parse(bad)
@@ -92,9 +97,7 @@ class JwtParserTest {
 
         String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
 
-        String bad = TextCodec.BASE64.encode(header) + '.' +
-                TextCodec.BASE64.encode(payload) + '.' +
-                TextCodec.BASE64.encode(badSig)
+        String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig)
 
         try {
             Jwts.parser().setSigningKey(randomKey()).parse(bad)
@@ -113,9 +116,7 @@ class JwtParserTest {
 
         String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
 
-        String bad = TextCodec.BASE64.encode(header) + '.' +
-                TextCodec.BASE64.encode(payload) + '.' +
-                TextCodec.BASE64.encode(badSig)
+        String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig)
 
         try {
             Jwts.parser().setSigningKey(randomKey()).parse(bad)
@@ -129,15 +130,13 @@ class JwtParserTest {
     @Test
     void testParsePlaintextJwsWithIncorrectAlg() {
 
-        String header = '{"alg":"none"}'
+        def header = '{"alg":"none"}'
 
-        String payload = '{"subject":"Joe"}'
+        def payload = '{"subject":"Joe"}'
 
-        String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
+        def badSig = ";aklsjdf;kajsd;fkjas;dklfj"
 
-        String bad = TextCodec.BASE64.encode(header) + '.' +
-                TextCodec.BASE64.encode(payload) + '.' +
-                TextCodec.BASE64.encode(badSig)
+        String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig)
 
         try {
             Jwts.parser().setSigningKey(randomKey()).parse(bad)
@@ -150,8 +149,11 @@ class JwtParserTest {
 
     @Test
     void testParseWithBase64EncodedSigningKey() {
+
         byte[] key = randomKey()
-        String base64Encodedkey = TextCodec.BASE64.encode(key)
+
+        String base64Encodedkey = Encoder.BASE64.encode(key)
+
         String payload = 'Hello world!'
 
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, base64Encodedkey).compact()
@@ -1530,10 +1532,7 @@ class JwtParserTest {
 
         String bogus = 'bogus'
 
-        String bad = TextCodec.BASE64.encode(header) + '.' +
-            TextCodec.BASE64.encode(payload) + '.' +
-            TextCodec.BASE64.encode(badSig) + '.' +
-            TextCodec.BASE64.encode(bogus)
+        String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig) + '.' + base64Url(bogus)
 
 
         try {
@@ -1549,7 +1548,7 @@ class JwtParserTest {
     void testNoHeaderNoSig() {
         String payload = '{"subject":"Joe"}'
 
-        String jwtStr = '.' + TextCodec.BASE64.encode(payload) + '.'
+        String jwtStr = '.' + base64Url(payload) + '.'
 
         Jwt jwt = Jwts.parser().parse(jwtStr)
 
@@ -1559,14 +1558,15 @@ class JwtParserTest {
 
     @Test
     void testNoHeaderSig() {
+
         String payload = '{"subject":"Joe"}'
 
         String sig = ";aklsjdf;kajsd;fkjas;dklfj"
 
-        String jwtStr = '.' + TextCodec.BASE64.encode(payload) + '.' + TextCodec.BASE64.encode(sig)
+        String jwtStr = '.' + base64Url(payload) + '.' + base64Url(sig)
 
         try {
-            Jwt jwt = Jwts.parser().parse(jwtStr)
+            Jwts.parser().parse(jwtStr)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
@@ -1581,7 +1581,7 @@ class JwtParserTest {
 
         String sig = ";aklsjdf;kajsd;fkjas;dklfj"
 
-        String jwtStr = TextCodec.BASE64.encode(payload) + '.' + TextCodec.BASE64.encode(payload) + '.' + TextCodec.BASE64.encode(sig)
+        String jwtStr = base64Url(payload) + '.' + base64Url(payload) + '.' + base64Url(sig)
 
         try {
             Jwt jwt = Jwts.parser().parse(jwtStr)

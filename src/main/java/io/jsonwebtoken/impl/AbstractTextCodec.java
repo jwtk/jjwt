@@ -15,13 +15,19 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.codec.Decoder;
+import io.jsonwebtoken.codec.Encoder;
 import io.jsonwebtoken.lang.Assert;
 
 import java.nio.charset.Charset;
 
+/**
+ * @deprecated since 0.10.0 - will be removed before 1.0.0. Use {@link Encoder} orr {@link Decoder} instead.
+ */
+@Deprecated
 public abstract class AbstractTextCodec implements TextCodec {
 
-    protected static final Charset UTF8     = Charset.forName("UTF-8");
+    protected static final Charset UTF8 = Charset.forName("UTF-8");
     protected static final Charset US_ASCII = Charset.forName("US-ASCII");
 
     @Override

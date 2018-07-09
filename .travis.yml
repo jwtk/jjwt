@@ -7,6 +7,10 @@ jdk:
   - openjdk7
   - oraclejdk8
   - oraclejdk9
+  - oraclejdk10
+  - openjdk10
+  - oraclejdk-ea
+  - openjdk11
 
 before_install:
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
