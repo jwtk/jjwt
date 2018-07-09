@@ -24,13 +24,13 @@ import org.junit.Test
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
-import static org.junit.Assert.*
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
+import static org.junit.Assert.*
 
 class JwtParserTest {
 
-    private static final SecureRandom random = new SecureRandom(); //doesn't need to be seeded - just testing
+    private static final SecureRandom random = new SecureRandom() //doesn't need to be seeded - just testing
 
     protected static byte[] randomKey() {
         //create random signing key for testing:
@@ -826,15 +826,11 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         // not setting expected claim name in JWT
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setIssuer('Dummy').
-            compact()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).setIssuer('Dummy').compact()
 
         try {
             // expecting null claim name, but with value
-            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-                require(null, expectedClaimValue).
-                parseClaimsJws(compact)
+            Jwts.parser().setSigningKey(key).require(null, expectedClaimValue).parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
             assertEquals(
@@ -876,9 +872,7 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         // not setting expected claim name in JWT
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setIssuer('Dummy').
-            compact()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).setIssuer('Dummy').compact()
 
         try {
             // expecting claim name, but with null value
@@ -964,6 +958,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireIssuedAt_Success() {
+
         def issuedAt = new Date(System.currentTimeMillis())
 
         byte[] key = randomKey()
@@ -982,7 +977,7 @@ class JwtParserTest {
         assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis, 0
     }
 
-    @Test
+    @Test(expected = IncorrectClaimException)
     void testParseRequireIssuedAt_Incorrect_Fail() {
         def goodIssuedAt = new Date(System.currentTimeMillis())
         def badIssuedAt = new Date(System.currentTimeMillis() - 10000)
@@ -990,43 +985,27 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setIssuedAt(badIssuedAt).
-            compact()
+                setIssuedAt(badIssuedAt).
+                compact()
 
-        try {
-            Jwts.parser().setSigningKey(key).
+        Jwts.parser().setSigningKey(key).
                 requireIssuedAt(goodIssuedAt).
                 parseClaimsJws(compact)
-            fail()
-        } catch(IncorrectClaimException e) {
-            assertEquals(
-                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, goodIssuedAt, badIssuedAt),
-                e.getMessage()
-            )
-        }
     }
 
-    @Test
+    @Test(expected = MissingClaimException)
     void testParseRequireIssuedAt_Missing_Fail() {
         def issuedAt = new Date(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setSubject("Dummy").
-            compact()
+                setSubject("Dummy").
+                compact()
 
-        try {
-            Jwts.parser().setSigningKey(key).
+        Jwts.parser().setSigningKey(key).
                 requireIssuedAt(issuedAt).
                 parseClaimsJws(compact)
-            fail()
-        } catch(MissingClaimException e) {
-            assertEquals(
-                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUED_AT, issuedAt),
-                e.getMessage()
-            )
-        }
     }
 
     @Test
@@ -1306,7 +1285,7 @@ class JwtParserTest {
         assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
     }
 
-    @Test
+    @Test(expected = IncorrectClaimException)
     void testParseRequireExpirationAt_Incorrect_Fail() {
         def goodExpiration = new Date(System.currentTimeMillis() + 20000)
         def badExpiration = new Date(System.currentTimeMillis() + 10000)
@@ -1314,43 +1293,27 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setExpiration(badExpiration).
-            compact()
+                setExpiration(badExpiration).
+                compact()
 
-        try {
-            Jwts.parser().setSigningKey(key).
+        Jwts.parser().setSigningKey(key).
                 requireExpiration(goodExpiration).
                 parseClaimsJws(compact)
-            fail()
-        } catch(IncorrectClaimException e) {
-            assertEquals(
-                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.EXPIRATION, goodExpiration, badExpiration),
-                e.getMessage()
-            )
-        }
     }
 
-    @Test
+    @Test(expected = MissingClaimException)
     void testParseRequireExpiration_Missing_Fail() {
         def expiration = new Date(System.currentTimeMillis() + 10000)
 
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setSubject("Dummy").
-            compact()
+                setSubject("Dummy").
+                compact()
 
-        try {
-            Jwts.parser().setSigningKey(key).
+        Jwts.parser().setSigningKey(key).
                 requireExpiration(expiration).
                 parseClaimsJws(compact)
-            fail()
-        } catch(MissingClaimException e) {
-            assertEquals(
-                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.EXPIRATION, expiration),
-                e.getMessage()
-            )
-        }
     }
 
     @Test
@@ -1374,7 +1337,7 @@ class JwtParserTest {
         assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
     }
 
-    @Test
+    @Test(expected = IncorrectClaimException)
     void testParseRequireNotBefore_Incorrect_Fail() {
         def goodNotBefore = new Date(System.currentTimeMillis() - 20000)
         def badNotBefore = new Date(System.currentTimeMillis() - 10000)
@@ -1382,47 +1345,32 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setNotBefore(badNotBefore).
-            compact()
+                setNotBefore(badNotBefore).
+                compact()
 
-        try {
-            Jwts.parser().setSigningKey(key).
+        Jwts.parser().setSigningKey(key).
                 requireNotBefore(goodNotBefore).
                 parseClaimsJws(compact)
-            fail()
-        } catch(IncorrectClaimException e) {
-            assertEquals(
-                String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.NOT_BEFORE, goodNotBefore, badNotBefore),
-                e.getMessage()
-            )
-        }
     }
 
-    @Test
+    @Test(expected = MissingClaimException)
     void testParseRequireNotBefore_Missing_Fail() {
         def notBefore = new Date(System.currentTimeMillis() - 10000)
 
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-            setSubject("Dummy").
-            compact()
+                setSubject("Dummy").
+                compact()
 
-        try {
-            Jwts.parser().setSigningKey(key).
+        Jwts.parser().setSigningKey(key).
                 requireNotBefore(notBefore).
                 parseClaimsJws(compact)
-            fail()
-        } catch(MissingClaimException e) {
-            assertEquals(
-                String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.NOT_BEFORE, notBefore),
-                e.getMessage()
-            )
-        }
     }
 
     @Test
     void testParseRequireCustomDate_Success() {
+
         def aDate = new Date(System.currentTimeMillis())
 
         byte[] key = randomKey()
@@ -1438,8 +1386,33 @@ class JwtParserTest {
         assertEquals jwt.getBody().get("aDate", Date.class), aDate
     }
 
+    @Test //since 0.10.0
+    void testParseRequireCustomDateWhenClaimIsNotADate() {
+
+        def goodDate = new Date(System.currentTimeMillis())
+        def badDate = 'hello'
+
+        byte[] key = randomKey()
+
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+                claim("aDate", badDate).
+                compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).
+                    require("aDate", goodDate).
+                    parseClaimsJws(compact)
+            fail()
+        } catch(IncorrectClaimException e) {
+            String expected = 'JWT Claim \'aDate\' was expected to be a Date, but its value cannot be converted to a ' +
+                    'Date using current heuristics.  Value: hello'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
     @Test
     void testParseRequireCustomDate_Incorrect_Fail() {
+
         def goodDate = new Date(System.currentTimeMillis())
         def badDate = new Date(System.currentTimeMillis() - 10000)
 
@@ -1460,7 +1433,6 @@ class JwtParserTest {
                 e.getMessage()
             )
         }
-
     }
 
     @Test
@@ -1534,18 +1506,17 @@ class JwtParserTest {
 
         String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig) + '.' + base64Url(bogus)
 
-
         try {
             Jwts.parser().setSigningKey(randomKey()).parse(bad)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'JWT strings must contain exactly 2 period characters. Found: 3', se.message
         }
-
     }
 
     @Test
     void testNoHeaderNoSig() {
+
         String payload = '{"subject":"Joe"}'
 
         String jwtStr = '.' + base64Url(payload) + '.'
@@ -1575,16 +1546,17 @@ class JwtParserTest {
 
     @Test
     void testBadHeaderSig() {
+
         String header = '{"alg":"none"}'
 
         String payload = '{"subject":"Joe"}'
 
         String sig = ";aklsjdf;kajsd;fkjas;dklfj"
 
-        String jwtStr = base64Url(payload) + '.' + base64Url(payload) + '.' + base64Url(sig)
+        String jwtStr = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(sig)
 
         try {
-            Jwt jwt = Jwts.parser().parse(jwtStr)
+            Jwts.parser().parse(jwtStr)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message

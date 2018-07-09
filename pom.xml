@@ -86,6 +86,7 @@
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.9.6</jackson.version>
+        <orgjson.version>20180130</orgjson.version>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.56</bouncycastle.version>
@@ -98,7 +99,7 @@
         <powermock.version>2.0.0-beta.5</powermock.version> <!-- necessary for Java 9 support -->
         <failsafe.plugin.version>2.22.0</failsafe.plugin.version>
         <surefire.plugin.version>2.22.0</surefire.plugin.version>
-        <clover.version>4.2.0</clover.version>
+        <clover.version>4.2.1</clover.version>
 
     </properties>
 
@@ -109,6 +110,13 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${orgjson.version}</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
@@ -301,10 +309,10 @@
                         <!-- leaving out lang as it mostly comes from other sources -->
                         <exclude>io/jsonwebtoken/lang/*</exclude>
                     </excludes>
-                    <methodPercentage>100%</methodPercentage>
-                    <statementPercentage>100%</statementPercentage>
-                    <conditionalPercentage>100%</conditionalPercentage>
-                    <targetPercentage>100%</targetPercentage>
+                    <methodPercentage>100.000000%</methodPercentage>
+                    <statementPercentage>100.000000%</statementPercentage>
+                    <conditionalPercentage>100.000000%</conditionalPercentage>
+                    <targetPercentage>100.000000%</targetPercentage>
                 </configuration>
                 <executions>
                     <execution>
@@ -312,8 +320,8 @@
                         <phase>test</phase>
                         <goals>
                             <goal>instrument</goal>
-                            <goal>check</goal>
                             <goal>clover</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

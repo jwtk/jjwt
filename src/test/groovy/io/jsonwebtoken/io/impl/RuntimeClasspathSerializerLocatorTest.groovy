@@ -1,7 +1,9 @@
 package io.jsonwebtoken.io.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.io.impl.jackson.JacksonSerializer
+import io.jsonwebtoken.io.impl.orgjson.OrgJsonSerializer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -77,5 +79,21 @@ class RuntimeClasspathSerializerLocatorTest {
     void testJackson() {
         def serializer = new RuntimeClasspathSerializerLocator().getInstance()
         assertTrue serializer instanceof JacksonSerializer
+    }
+
+    @Test
+    void testOrgJson() {
+        def locator = new RuntimeClasspathSerializerLocator() {
+            @Override
+            protected boolean isAvailable(String fqcn) {
+                if (ObjectMapper.class.getName().equals(fqcn)) {
+                    return false //skip it to allow the OrgJson impl to be created
+                }
+                return super.isAvailable(fqcn)
+            }
+        }
+
+        def serializer = locator.getInstance()
+        assertTrue serializer instanceof OrgJsonSerializer
     }
 }

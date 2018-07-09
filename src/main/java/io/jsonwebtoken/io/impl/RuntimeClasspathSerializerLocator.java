@@ -29,6 +29,8 @@ public class RuntimeClasspathSerializerLocator implements InstanceLocator<Serial
     protected Serializer<Object> locate() {
         if (isAvailable("com.fasterxml.jackson.databind.ObjectMapper")) {
             return Classes.newInstance("io.jsonwebtoken.io.impl.jackson.JacksonSerializer");
+        } else if (isAvailable("org.json.JSONObject")) {
+            return Classes.newInstance("io.jsonwebtoken.io.impl.orgjson.OrgJsonSerializer");
         } else {
             throw new IllegalStateException("Unable to discover any JSON Serializer implementations on the classpath.");
         }

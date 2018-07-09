@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken.impl
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonMappingException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.codec.Encoder
@@ -24,7 +22,7 @@ import io.jsonwebtoken.codec.EncodingException
 import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.io.SerializationException
-import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.io.impl.orgjson.OrgJsonSerializer
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -201,7 +199,9 @@ class DefaultJwtBuilderTest {
         def b = new DefaultJwtBuilder() {
             @Override
             protected byte[] toJson(Object o) throws SerializationException {
-                if (o instanceof DefaultJwsHeader) { return super.toJson(o) }
+                if (o instanceof DefaultJwsHeader) {
+                    return super.toJson(o)
+                }
                 throw new SerializationException('dummy text', new Exception())
             }
         }
@@ -332,14 +332,17 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSerializeToJsonWithCustomSerializer() {
-        def serializer = new Serializer() {
-            @Override
-            byte[] serialize(Object o) throws SerializationException {
-                return null
-            }
-        }
+        def serializer = new OrgJsonSerializer()
         def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         assertSame serializer, b.serializer
+
+        def key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+
+        String jws = b.signWith(SignatureAlgorithm.HS256, key)
+                .claim('foo', 'bar')
+                .compact()
+
+        assertEquals 'bar', Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().get('foo')
     }
 
 }
