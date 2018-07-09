@@ -78,6 +78,8 @@ public class DefaultJwtParser implements JwtParser {
 
     private long allowedClockSkewMillis = 0;
 
+    private SignatureAlgorithm signatureAlgorithm;
+
     @Override
     public JwtParser base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder) {
         Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
@@ -132,6 +134,12 @@ public class DefaultJwtParser implements JwtParser {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
         expectedClaims.put(claimName, value);
+        return this;
+    }
+
+    @Override
+    public JwtParser requireAlgorithm(SignatureAlgorithm signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
         return this;
     }
 
@@ -341,6 +349,14 @@ public class DefaultJwtParser implements JwtParser {
 
             //re-create the jwt part without the signature.  This is what needs to be signed for verification:
             String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR + base64UrlEncodedPayload;
+
+            if (signatureAlgorithm != null &&
+                    (signatureAlgorithm.compareTo(algorithm) != 0)) {
+                String message = "The expected algorithm " + signatureAlgorithm.getValue() + " does not match " +
+                        "the algorithm specified in the JWT header (" + algorithm.getValue() + "). There is a " +
+                        "chance this JWT is trying to force algorithm selection.";
+                throw new SignatureException(message);
+            }
 
             JwtSignatureValidator validator;
             try {

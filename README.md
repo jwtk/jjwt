@@ -222,6 +222,11 @@ You can use the following rules on your Android projects (see [Proguard Exclusio
     
     }
     ```
+* **Require Algorithm.** When parsing you can specify that **only** a particular signing algorithm can be used, giving control of algorithm selection to the entity doing the parsing and not allowing the token to choose the algorithm. This provides protection against the "alg":"none" and RS256 as HS256 [attacks](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/).
+
+    ```java
+      
+    ```
 
 ## Currently Unsupported Features
 

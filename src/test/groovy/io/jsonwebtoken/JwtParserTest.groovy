@@ -23,6 +23,7 @@ import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
+import java.security.Signature
 
 import static org.junit.Assert.*
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
@@ -251,6 +252,60 @@ class JwtParserTest {
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
+    }
+
+    @Test
+    void testParseWithRequiredAlgorithmAndSigningAlgorithmDoesNotMatch(){
+        byte[] key = randomKey()
+
+        String base64Encodedkey = Encoder.BASE64.encode(key)
+
+        String payload = 'Hello world!'
+
+        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, base64Encodedkey).compact()
+
+        assertTrue Jwts.parser().isSigned(compact)
+
+        try {
+            Jwts.parser().requireAlgorithm(SignatureAlgorithm.HS512).setSigningKey(base64Encodedkey).parse(compact)
+            fail()
+        } catch (SignatureException se) {
+            assertEquals se.getMessage(), "The expected algorithm $SignatureAlgorithm.HS512 does not match the algorithm specified in the JWT header ($SignatureAlgorithm.HS256). There is a chance this JWT is trying to force algorithm selection.".toString()
+        }
+    }
+
+    @Test
+    void testParseWithRequiredAlgorithmNotSet(){
+        byte[] key = randomKey()
+
+        String base64Encodedkey = Encoder.BASE64.encode(key)
+
+        String payload = 'Hello world!'
+
+        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS512, base64Encodedkey).compact()
+
+        assertTrue Jwts.parser().isSigned(compact)
+
+        Jwt<Header,String> jwt = Jwts.parser().setSigningKey(base64Encodedkey).parse(compact)
+
+        assertEquals jwt.body, payload
+    }
+
+    @Test
+    void testParseWithRequiredAlgorithm(){
+        byte[] key = randomKey()
+
+        String base64Encodedkey = Encoder.BASE64.encode(key)
+
+        String payload = 'Hello world!'
+
+        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS512, base64Encodedkey).compact()
+
+        assertTrue Jwts.parser().isSigned(compact)
+
+        Jwt<Header,String> jwt = Jwts.parser().requireAlgorithm(SignatureAlgorithm.HS512).setSigningKey(base64Encodedkey).parse(compact)
+
+        assertEquals jwt.body, payload
     }
 
     // ========================================================================
