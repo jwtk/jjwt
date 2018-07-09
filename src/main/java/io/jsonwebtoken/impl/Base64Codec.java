@@ -15,14 +15,20 @@
  */
 package io.jsonwebtoken.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 public class Base64Codec extends AbstractTextCodec {
 
+    private static final Base64.Decoder BASE64_DECODER = Base64.getDecoder();
+    private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
+
     public String encode(byte[] data) {
-        return javax.xml.bind.DatatypeConverter.printBase64Binary(data);
+        return BASE64_ENCODER.encodeToString(data);
     }
 
     @Override
-    public byte[] decode(String encoded) {
-        return javax.xml.bind.DatatypeConverter.parseBase64Binary(encoded);
+    public byte[] decode(String src) {
+        return BASE64_DECODER.decode(src.getBytes(StandardCharsets.UTF_8));
     }
 }
