@@ -17,6 +17,8 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.RequiredTypeException
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.junit.Before
 import org.junit.Test
 import static org.junit.Assert.*
@@ -147,6 +149,20 @@ class DefaultClaimsTest {
             assertEquals(
                     e.getMessage(),
                     "Expected value to be of type: class java.lang.Byte, but was class java.lang.Integer"
+            )
+        }
+    }
+    
+    @Test
+      void testGetClaimWithRequiredType_MapWithList_Exception() {
+        claims.put("wrongPOJO", new ArrayList())
+        try {
+            claims.get("wrongPOJO", HashMap.class)
+            fail("getClaim() shouldn't map ArrayList to HashMap.")
+        } catch (RequiredTypeException e) {
+            assertEquals(
+                    e.getMessage(),
+                    "Expected value to be of type: class java.util.HashMap, but was class java.util.ArrayList"
             )
         }
     }

@@ -21,128 +21,134 @@ import io.jsonwebtoken.RequiredTypeException;
 import java.util.Date;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class DefaultClaims extends JwtMap implements Claims {
 
-    public DefaultClaims() {
-        super();
-    }
+	public DefaultClaims() {
+		super();
+	}
 
-    public DefaultClaims(Map<String, Object> map) {
-        super(map);
-    }
+	public DefaultClaims(Map<String, Object> map) {
+		super(map);
+	}
 
-    @Override
-    public String getIssuer() {
-        return getString(ISSUER);
-    }
+	@Override
+	public String getIssuer() {
+		return getString(ISSUER);
+	}
 
-    @Override
-    public Claims setIssuer(String iss) {
-        setValue(ISSUER, iss);
-        return this;
-    }
+	@Override
+	public Claims setIssuer(String iss) {
+		setValue(ISSUER, iss);
+		return this;
+	}
 
-    @Override
-    public String getSubject() {
-        return getString(SUBJECT);
-    }
+	@Override
+	public String getSubject() {
+		return getString(SUBJECT);
+	}
 
-    @Override
-    public Claims setSubject(String sub) {
-        setValue(SUBJECT, sub);
-        return this;
-    }
+	@Override
+	public Claims setSubject(String sub) {
+		setValue(SUBJECT, sub);
+		return this;
+	}
 
-    @Override
-    public String getAudience() {
-        return getString(AUDIENCE);
-    }
+	@Override
+	public String getAudience() {
+		return getString(AUDIENCE);
+	}
 
-    @Override
-    public Claims setAudience(String aud) {
-        setValue(AUDIENCE, aud);
-        return this;
-    }
+	@Override
+	public Claims setAudience(String aud) {
+		setValue(AUDIENCE, aud);
+		return this;
+	}
 
-    @Override
-    public Date getExpiration() {
-        return get(Claims.EXPIRATION, Date.class);
-    }
+	@Override
+	public Date getExpiration() {
+		return get(Claims.EXPIRATION, Date.class);
+	}
 
-    @Override
-    public Claims setExpiration(Date exp) {
-        setDate(Claims.EXPIRATION, exp);
-        return this;
-    }
+	@Override
+	public Claims setExpiration(Date exp) {
+		setDate(Claims.EXPIRATION, exp);
+		return this;
+	}
 
-    @Override
-    public Date getNotBefore() {
-        return get(Claims.NOT_BEFORE, Date.class);
-    }
+	@Override
+	public Date getNotBefore() {
+		return get(Claims.NOT_BEFORE, Date.class);
+	}
 
-    @Override
-    public Claims setNotBefore(Date nbf) {
-        setDate(Claims.NOT_BEFORE, nbf);
-        return this;
-    }
+	@Override
+	public Claims setNotBefore(Date nbf) {
+		setDate(Claims.NOT_BEFORE, nbf);
+		return this;
+	}
 
-    @Override
-    public Date getIssuedAt() {
-        return get(Claims.ISSUED_AT, Date.class);
-    }
+	@Override
+	public Date getIssuedAt() {
+		return get(Claims.ISSUED_AT, Date.class);
+	}
 
-    @Override
-    public Claims setIssuedAt(Date iat) {
-        setDate(Claims.ISSUED_AT, iat);
-        return this;
-    }
+	@Override
+	public Claims setIssuedAt(Date iat) {
+		setDate(Claims.ISSUED_AT, iat);
+		return this;
+	}
 
-    @Override
-    public String getId() {
-        return getString(ID);
-    }
+	@Override
+	public String getId() {
+		return getString(ID);
+	}
 
-    @Override
-    public Claims setId(String jti) {
-        setValue(Claims.ID, jti);
-        return this;
-    }
+	@Override
+	public Claims setId(String jti) {
+		setValue(Claims.ID, jti);
+		return this;
+	}
 
-    @Override
-    public <T> T get(String claimName, Class<T> requiredType) {
-        Object value = get(claimName);
-        if (value == null) { return null; }
+	@Override
+	public <T> T get(String claimName, Class<T> requiredType) {
+		Object value = get(claimName);
+		if (value == null) { return null; }
 
-        if (Claims.EXPIRATION.equals(claimName) ||
-            Claims.ISSUED_AT.equals(claimName) ||
-            Claims.NOT_BEFORE.equals(claimName)
-        ) {
-            value = getDate(claimName);
-        }
+		if (Claims.EXPIRATION.equals(claimName) ||
+				Claims.ISSUED_AT.equals(claimName) ||
+				Claims.NOT_BEFORE.equals(claimName)
+				) {
+			value = getDate(claimName);
+		}
 
-        return castClaimValue(value, requiredType);
-    }
+		return castClaimValue(value, requiredType);
+	}
 
-    private <T> T castClaimValue(Object value, Class<T> requiredType) {
-        if (requiredType == Date.class && value instanceof Long) {
-            value = new Date((Long)value);
-        }
+	private <T> T castClaimValue(Object value, Class<T> requiredType) {
+		if (requiredType == Date.class && value instanceof Long) {
+			value = new Date((Long)value);
+		} else if (value instanceof Integer) {
+			int intValue = (Integer) value;
+			if (requiredType == Long.class) {
+				value = (long) intValue;
+			} else if (requiredType == Short.class && Short.MIN_VALUE <= intValue && intValue <= Short.MAX_VALUE) {
+				value = (short) intValue;
+			} else if (requiredType == Byte.class && Byte.MIN_VALUE <= intValue && intValue <= Byte.MAX_VALUE) {
+				value = (byte) intValue;
+			}
+		} else {        	
+			try {
+				value = new ObjectMapper().convertValue(value,requiredType);
+			} catch (IllegalArgumentException e) {
+				//Conversion failed
+			}
+		}
 
-        if (value instanceof Integer) {
-            int intValue = (Integer) value;
-            if (requiredType == Long.class) {
-                value = (long) intValue;
-            } else if (requiredType == Short.class && Short.MIN_VALUE <= intValue && intValue <= Short.MAX_VALUE) {
-                value = (short) intValue;
-            } else if (requiredType == Byte.class && Byte.MIN_VALUE <= intValue && intValue <= Byte.MAX_VALUE) {
-                value = (byte) intValue;
-            }
-        }
+		if (!requiredType.isInstance(value)) {
+			throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
+		}
 
-        if (!requiredType.isInstance(value)) {
-            throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
-        }
-
-        return requiredType.cast(value);
-    }
+		return requiredType.cast(value);
+	}
 }
