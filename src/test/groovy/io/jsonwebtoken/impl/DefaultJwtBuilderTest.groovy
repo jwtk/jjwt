@@ -23,6 +23,8 @@ import io.jsonwebtoken.codec.Encoder
 import io.jsonwebtoken.codec.EncodingException
 import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.crypto.MacProvider
+import io.jsonwebtoken.io.SerializationException
+import io.jsonwebtoken.io.Serializer
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -181,8 +183,8 @@ class DefaultJwtBuilderTest {
 
         def b = new DefaultJwtBuilder() {
             @Override
-            protected byte[] toJson(Object o) throws JsonProcessingException {
-                throw new JsonMappingException('foo')
+            protected byte[] toJson(Object o) throws SerializationException {
+                throw new SerializationException('foo', new Exception())
             }
         }
 
@@ -192,16 +194,15 @@ class DefaultJwtBuilderTest {
         } catch (IllegalStateException ise) {
             assertEquals ise.cause.message, 'foo'
         }
-
     }
 
     @Test
     void testCompactCompressionCodecJsonProcessingException() {
         def b = new DefaultJwtBuilder() {
             @Override
-            protected byte[] toJson(Object o) throws JsonProcessingException {
+            protected byte[] toJson(Object o) throws SerializationException {
                 if (o instanceof DefaultJwsHeader) { return super.toJson(o) }
-                throw new JsonProcessingException('simulate json processing exception on claims')
+                throw new SerializationException('dummy text', new Exception())
             }
         }
 
@@ -211,7 +212,7 @@ class DefaultJwtBuilderTest {
             b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, 'Unable to serialize claims object to json.'
+            assertEquals iae.message, 'Unable to serialize claims object to json: dummy text'
         }
     }
 
@@ -322,6 +323,23 @@ class DefaultJwtBuilderTest {
         }
         def b = new DefaultJwtBuilder().base64UrlEncodeWith(encoder)
         assertSame encoder, b.base64UrlEncoder
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSerializeToJsonWithNullArgument() {
+        new DefaultJwtBuilder().serializeToJsonWith(null)
+    }
+
+    @Test
+    void testSerializeToJsonWithCustomSerializer() {
+        def serializer = new Serializer() {
+            @Override
+            byte[] serialize(Object o) throws SerializationException {
+                return null
+            }
+        }
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
+        assertSame serializer, b.serializer
     }
 
 }

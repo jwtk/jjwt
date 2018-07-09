@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
@@ -42,12 +41,15 @@ import io.jsonwebtoken.codec.Decoder;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
+import io.jsonwebtoken.io.DeserializationException;
+import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.io.impl.InstanceLocator;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.security.Key;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,8 +62,6 @@ public class DefaultJwtParser implements JwtParser {
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private byte[] keyBytes;
 
     private Key key;
@@ -72,11 +72,20 @@ public class DefaultJwtParser implements JwtParser {
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoder.BASE64URL;
 
+    private Deserializer<Map<String,?>> deserializer;
+
     private Claims expectedClaims = new DefaultClaims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
+
+    @Override
+    public JwtParser deserializeJsonWith(Deserializer<Map<String,?>> deserializer) {
+        Assert.notNull(deserializer, "deserializer cannot be null.");
+        this.deserializer = deserializer;
+        return this;
+    }
 
     @Override
     public JwtParser base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder) {
@@ -210,6 +219,13 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
+        if (this.deserializer == null) {
+            //try to find one based on the runtime environment:
+            InstanceLocator<Deserializer<Map<String,?>>> locator =
+                Classes.newInstance("io.jsonwebtoken.io.impl.RuntimeClasspathDeserializerLocator");
+            this.deserializer = locator.getInstance();
+        }
+
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
 
         String base64UrlEncodedHeader = null;
@@ -260,7 +276,7 @@ public class DefaultJwtParser implements JwtParser {
         if (base64UrlEncodedHeader != null) {
             byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedHeader);
             String origValue = new String(bytes, Strings.UTF_8);
-            Map<String, Object> m = readValue(origValue);
+            Map<String, Object> m = (Map<String, Object>) readValue(origValue);
 
             if (base64UrlEncodedDigest != null) {
                 header = new DefaultJwsHeader(m);
@@ -281,7 +297,7 @@ public class DefaultJwtParser implements JwtParser {
         Claims claims = null;
 
         if (payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
-            Map<String, Object> claimsMap = readValue(payload);
+            Map<String, Object> claimsMap = (Map<String, Object>) readValue(payload);
             claims = new DefaultClaims(claimsMap);
         }
 
@@ -423,9 +439,9 @@ public class DefaultJwtParser implements JwtParser {
         Object body = claims != null ? claims : payload;
 
         if (base64UrlEncodedDigest != null) {
-            return new DefaultJws<Object>((JwsHeader) header, body, base64UrlEncodedDigest);
+            return new DefaultJws<>((JwsHeader) header, body, base64UrlEncodedDigest);
         } else {
-            return new DefaultJwt<Object>(header, body);
+            return new DefaultJwt<>(header, body);
         }
     }
 
@@ -553,10 +569,11 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @SuppressWarnings("unchecked")
-    protected Map<String, Object> readValue(String val) {
+    protected Map<String, ?> readValue(String val) {
         try {
-            return objectMapper.readValue(val, Map.class);
-        } catch (IOException e) {
+            byte[] bytes = val.getBytes(Strings.UTF_8);
+            return deserializer.deserialize(bytes);
+        } catch (DeserializationException e) {
             throw new MalformedJwtException("Unable to read JSON value: " + val, e);
         }
     }

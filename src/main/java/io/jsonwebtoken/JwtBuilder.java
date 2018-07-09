@@ -16,6 +16,7 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.codec.Encoder;
+import io.jsonwebtoken.io.Serializer;
 
 import java.security.Key;
 import java.util.Date;
@@ -425,6 +426,20 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.10.0
      */
     JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
+
+    /**
+     * Performs object-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
+     * JWT/JWS/JWT headers and claims Maps to JSON strings as required by the JWT specification.
+     *
+     * <p>If this method is not called, JJWT will use whatever serializer it can find at runtime, checking for the
+     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+     * in the runtime classpath, an exception will be thrown when the {@link #compact()} method is invoked.</p>
+     *
+     * @param serializer the serializer to use when converting Map objects to JSON strings.
+     * @return the builder for method chaining.
+     * @since 0.10.0
+     */
+    JwtBuilder serializeToJsonWith(Serializer<Map<String,?>> serializer);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

@@ -103,13 +103,15 @@
     </properties>
 
     <dependencies>
+
+        <!-- Optional Dependencies: -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
-
-        <!-- Optional Dependencies: -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>

@@ -2,6 +2,8 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.codec.Decoder
 import io.jsonwebtoken.codec.DecodingException
+import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
 import org.junit.Test
 import static org.junit.Assert.*
 
@@ -13,11 +15,11 @@ class DefaultJwtParserTest {
 
     @Test(expected = IllegalArgumentException)
     void testBase64UrlDecodeWithNullArgument() {
-        new DefaultJwtBuilder().base64UrlEncodeWith(null)
+        new DefaultJwtParser().base64UrlDecodeWith(null)
     }
 
     @Test
-    void testBase64UrlEncodeWithCustomEncoder() {
+    void testBase64UrlEncodeWithCustomDecoder() {
         def decoder = new Decoder() {
             @Override
             Object decode(Object o) throws DecodingException {
@@ -26,5 +28,22 @@ class DefaultJwtParserTest {
         }
         def b = new DefaultJwtParser().base64UrlDecodeWith(decoder)
         assertSame decoder, b.base64UrlDecoder
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testDeserializeJsonWithNullArgument() {
+        new DefaultJwtParser().deserializeJsonWith(null)
+    }
+
+    @Test
+    void testDeserializeJsonWithCustomDeserializer() {
+        def deserializer = new Deserializer() {
+            @Override
+            Object deserialize(byte[] bytes) throws DeserializationException {
+                return null
+            }
+        }
+        def b = new DefaultJwtParser().deserializeJsonWith(deserializer)
+        assertSame deserializer, b.deserializer
     }
 }
