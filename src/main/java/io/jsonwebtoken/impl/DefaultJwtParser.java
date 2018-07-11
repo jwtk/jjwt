@@ -60,7 +60,7 @@ public class DefaultJwtParser implements JwtParser {
     private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private byte[] keyBytes;
 
