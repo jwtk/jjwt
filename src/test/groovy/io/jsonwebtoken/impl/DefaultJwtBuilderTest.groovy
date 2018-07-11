@@ -15,14 +15,14 @@
  */
 package io.jsonwebtoken.impl
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonMappingException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.codec.Encoder
 import io.jsonwebtoken.codec.EncodingException
 import io.jsonwebtoken.impl.compression.CompressionCodecs
 import io.jsonwebtoken.impl.crypto.MacProvider
+import io.jsonwebtoken.io.SerializationException
+import io.jsonwebtoken.io.impl.orgjson.OrgJsonSerializer
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -181,8 +181,8 @@ class DefaultJwtBuilderTest {
 
         def b = new DefaultJwtBuilder() {
             @Override
-            protected byte[] toJson(Object o) throws JsonProcessingException {
-                throw new JsonMappingException('foo')
+            protected byte[] toJson(Object o) throws SerializationException {
+                throw new SerializationException('foo', new Exception())
             }
         }
 
@@ -192,16 +192,17 @@ class DefaultJwtBuilderTest {
         } catch (IllegalStateException ise) {
             assertEquals ise.cause.message, 'foo'
         }
-
     }
 
     @Test
     void testCompactCompressionCodecJsonProcessingException() {
         def b = new DefaultJwtBuilder() {
             @Override
-            protected byte[] toJson(Object o) throws JsonProcessingException {
-                if (o instanceof DefaultJwsHeader) { return super.toJson(o) }
-                throw new JsonProcessingException('simulate json processing exception on claims')
+            protected byte[] toJson(Object o) throws SerializationException {
+                if (o instanceof DefaultJwsHeader) {
+                    return super.toJson(o)
+                }
+                throw new SerializationException('dummy text', new Exception())
             }
         }
 
@@ -211,7 +212,7 @@ class DefaultJwtBuilderTest {
             b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, 'Unable to serialize claims object to json.'
+            assertEquals iae.message, 'Unable to serialize claims object to json: dummy text'
         }
     }
 
@@ -322,6 +323,26 @@ class DefaultJwtBuilderTest {
         }
         def b = new DefaultJwtBuilder().base64UrlEncodeWith(encoder)
         assertSame encoder, b.base64UrlEncoder
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSerializeToJsonWithNullArgument() {
+        new DefaultJwtBuilder().serializeToJsonWith(null)
+    }
+
+    @Test
+    void testSerializeToJsonWithCustomSerializer() {
+        def serializer = new OrgJsonSerializer()
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
+        assertSame serializer, b.serializer
+
+        def key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+
+        String jws = b.signWith(SignatureAlgorithm.HS256, key)
+                .claim('foo', 'bar')
+                .compact()
+
+        assertEquals 'bar', Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().get('foo')
     }
 
 }

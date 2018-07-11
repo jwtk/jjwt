@@ -16,14 +16,17 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.DateFormats;
 
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class JwtMap implements Map<String,Object> {
+public class JwtMap implements Map<String, Object> {
 
     private final Map<String, Object> map;
 
@@ -46,23 +49,55 @@ public class JwtMap implements Map<String,Object> {
             return null;
         } else if (v instanceof Date) {
             return (Date) v;
+        } else if (v instanceof Calendar) { //since 0.10.0
+            return ((Calendar) v).getTime();
+        } else if (v instanceof Number) {
+            //assume millis:
+            long millis = ((Number) v).longValue();
+            return new Date(millis);
+        } else if (v instanceof String) {
+            return parseIso8601Date((String) v, name); //ISO-8601 parsing since 0.10.0
+        } else {
+            throw new IllegalStateException("Cannot create Date from '" + name + "' value '" + v + "'.");
+        }
+    }
+
+    /**
+     * @since 0.10.0
+     */
+    private static Date parseIso8601Date(String s, String name) throws IllegalArgumentException {
+        try {
+            return DateFormats.parseIso8601Date(s);
+        } catch (ParseException e) {
+            String msg = "'" + name + "' value does not appear to be ISO-8601-formatted: " + s;
+            throw new IllegalArgumentException(msg, e);
+        }
+    }
+
+    /**
+     * @since 0.10.0
+     */
+    protected static Date toSpecDate(Object v, String name) {
+        if (v == null) {
+            return null;
         } else if (v instanceof Number) {
             // https://github.com/jwtk/jjwt/issues/122:
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
             // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = ((Number) v).longValue();
-            long millis = seconds * 1000;
-            return new Date(millis);
+            v = seconds * 1000;
         } else if (v instanceof String) {
             // https://github.com/jwtk/jjwt/issues/122
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
             // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
-            long seconds = Long.parseLong((String) v);
-            long millis = seconds * 1000;
-            return new Date(millis);
-        } else {
-            throw new IllegalStateException("Cannot convert '" + name + "' value [" + v + "] to Date instance.");
+            try {
+                long seconds = Long.parseLong((String) v);
+                v = seconds * 1000;
+            } catch (NumberFormatException ignored) {
+            }
         }
+        //v would have been normalized to milliseconds if it was a number value, so perform normal date conversion:
+        return toDate(v, name);
     }
 
     protected void setValue(String name, Object v) {
@@ -73,12 +108,17 @@ public class JwtMap implements Map<String,Object> {
         }
     }
 
-    protected Date getDate(String name) {
-        Object v = map.get(name);
-        return toDate(v, name);
+    @Deprecated //remove just before 1.0.0
+    protected void setDate(String name, Date d) {
+        if (d == null) {
+            map.remove(name);
+        } else {
+            long seconds = d.getTime() / 1000;
+            map.put(name, seconds);
+        }
     }
 
-    protected void setDate(String name, Date d) {
+    protected void setDateAsSeconds(String name, Date d) {
         if (d == null) {
             map.remove(name);
         } else {
