@@ -130,6 +130,16 @@ public interface JwtParser {
     JwtParser require(String claimName, Object value);
 
     /**
+     * Ensures that token signatures are signed with the specified {@link SignatureAlgorithm}, this prevents attacks
+     * based on the token telling the parser to use an inappropriate SignatureAlgorithm
+     * see {@link https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/}.
+     * @param signatureAlgorithm
+     * @return the parser for method chaining.
+     * @see SignatureException
+     */
+    JwtParser requireAlgorithm(SignatureAlgorithm signatureAlgorithm);
+
+    /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
      * The parser uses a {@link DefaultClock DefaultClock} instance by default.
      *
