@@ -1,7 +1,6 @@
 # https://travis-ci.org/jwtk/jjwt
 
-dist: trusty
-sudo: required
+#sudo: required
 language: java
 jdk:
   - openjdk7
@@ -9,16 +8,15 @@ jdk:
   - oraclejdk9
   - oraclejdk10
   - openjdk10
-  - oraclejdk-ea
-  - openjdk11
+# - openjdk11
+# - oraclejdk-ea
 
 before_install:
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
 
-install: echo "No need to run mvn install -DskipTests then mvn install.  Running mvn install."
+install: true
 
 script: mvn install
 
 after_success:
-  - test -z "$BUILD_COVERAGE" || mvn clean test clover:check clover:clover coveralls:report
-
+  - test -z "$BUILD_COVERAGE" || { mvn clean clover:setup test && mvn -pl . clover:clover clover:check coveralls:report; }

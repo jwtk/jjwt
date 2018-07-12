@@ -1,4 +1,4 @@
-The io.jsonwebtoken.codec.impl.Base64 implementation is based on MigBase64 with modifications for Base64 URL support.  This
+The Base64 implementation is based on MigBase64 with modifications for Base64 URL support.  This
 class's copyright and license notice have been retained and are repeated here per that code's requirements:
 
 **** BEGIN MIGBASE64 NOTICE *****
