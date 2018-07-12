@@ -128,6 +128,23 @@ class JwtParserTest {
     }
 
     @Test
+    void testParseWithIgnoreInvalidSignature() {
+
+        String header = '{"alg":"HS256"}'
+
+        String payload = '{"subject":"Joe"}'
+
+        String badSig = ";aklsjdf;kajsd;fkjas;dklfj"
+
+        String bad = TextCodec.BASE64.encode(header) + '.' +
+                TextCodec.BASE64.encode(payload) + '.' +
+                TextCodec.BASE64.encode(badSig)
+
+        Jwts.parser().setSigningKey(randomKey()).ignoreSignature().parse(bad)
+
+    }
+
+    @Test
     void testParsePlaintextJwsWithIncorrectAlg() {
 
         def header = '{"alg":"none"}'
@@ -181,6 +198,17 @@ class JwtParserTest {
             //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
             assertTrue e.getMessage().contains('Z, a difference of ')
         }
+    }
+
+    @Test
+    void testParseWithIgnoreExpiredJwt() {
+
+        Date exp = new Date(System.currentTimeMillis() - 1000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        Jwts.parser().ignoreExpiry().parse(compact)
+
     }
 
     @Test
@@ -251,6 +279,17 @@ class JwtParserTest {
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
         }
+    }
+
+    @Test
+    void testParseWithIgnorePrematureJwt() {
+
+        Date nbf = new Date(System.currentTimeMillis() + 100000)
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
+
+        Jwts.parser().ignoreNotBefore().parse(compact)
+
     }
 
     // ========================================================================
