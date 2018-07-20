@@ -24,10 +24,11 @@
     </parent>
 
     <groupId>io.jsonwebtoken</groupId>
-    <artifactId>jjwt</artifactId>
+    <artifactId>jjwt-root</artifactId>
     <version>0.10.0-SNAPSHOT</version>
-    <name>JSON Web Token support for the JVM</name>
-    <packaging>jar</packaging>
+    <name>JJWT</name>
+    <description>JSON Web Token support for the JVM and Android</description>
+    <packaging>pom</packaging>
     <url>https://github.com/jwtk/jjwt</url>
 
     <licenses>
@@ -78,6 +79,8 @@
 
     <properties>
 
+        <jjwt.root>${basedir}</jjwt.root>
+
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.compiler.version>3.6.1</maven.compiler.version>
 
@@ -100,50 +103,66 @@
         <failsafe.plugin.version>2.22.0</failsafe.plugin.version>
         <surefire.plugin.version>2.22.0</surefire.plugin.version>
         <clover.version>4.2.1</clover.version>
+        <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
 
     </properties>
 
+    <modules>
+        <module>api</module>
+        <module>impl</module>
+        <module>extensions</module>
+        <module>core</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${project.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-orgjson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${orgjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+                <scope>compile</scope>
+                <optional>true</optional>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-
-        <!-- Optional Dependencies: -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>compile</scope>
-            <!-- TODO: make optional after project is broken up into targeted artifacts -->
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${orgjson.version}</version>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Provided scope: only used in Android environments - not downloaded as a transitive dependency.
-             This dependency is only a stub of the actual implementation, which means we can't use it at test time.
-             An Android environment is required to test for real. -->
-        <dependency>
-            <groupId>com.google.android</groupId>
-            <artifactId>android</artifactId>
-            <version>4.1.1.4</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -190,6 +209,29 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.openclover</groupId>
+                    <artifactId>clover-maven-plugin</artifactId>
+                    <version>${clover.version}</version>
+                    <configuration>
+                        <cloverDatabase>${clover.db}</cloverDatabase>
+                        <!--
+                        cloverDatabase>${user.home}/.clover/${project.groupId}/jjwt/clover.db</cloverDatabase>
+                        <snapshot>${user.home}/.clover/${project.groupId}/jjwt/clover.snapshot</snapshot>
+                        <historyDir>${user.home}/.clover/${project.groupId}/jjwt</historyDir> -->
+                        <excludes>
+                            <exclude>io/jsonwebtoken/lang/*</exclude>
+                        </excludes>
+                        <methodPercentage>100.000000%</methodPercentage>
+                        <statementPercentage>100.000000%</statementPercentage>
+                        <conditionalPercentage>100.000000%</conditionalPercentage>
+                        <targetPercentage>100.000000%</targetPercentage>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -229,6 +271,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>${maven.jar.version}</version>
+                <!--
                 <configuration>
                     <archive>
                         <manifest>
@@ -240,6 +283,7 @@
                         </manifestFile>
                     </archive>
                 </configuration>
+                -->
             </plugin>
             <!-- Allow for writing tests in Groovy: -->
             <plugin>
@@ -302,10 +346,10 @@
             <plugin>
                 <groupId>org.openclover</groupId>
                 <artifactId>clover-maven-plugin</artifactId>
-                <version>${clover.version}</version>
+                <!--
                 <configuration>
                     <excludes>
-                        <!-- leaving out lang as it mostly comes from other sources -->
+                        <!- - leaving out lang as it mostly comes from other sources - ->
                         <exclude>io/jsonwebtoken/lang/*</exclude>
                     </excludes>
                     <methodPercentage>100.000000%</methodPercentage>
@@ -319,11 +363,12 @@
                         <phase>test</phase>
                         <goals>
                             <goal>instrument</goal>
+                            <goal>aggregate</goal>
                             <goal>clover</goal>
                             <goal>check</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions> -->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

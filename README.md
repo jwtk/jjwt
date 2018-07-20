@@ -89,7 +89,7 @@ Most complexity is hidden behind a convenient and readable builder-based [fluent
 ```java
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import MacProvider; //TODO: clean up via https://github.com/jwtk/jjwt/issues/350
 import java.security.Key;
 
 // We need a signing key, so we'll create one just for this example. Usually
@@ -154,7 +154,7 @@ You can use the following rules on your Android projects (see [Proguard Exclusio
 -keepnames interface io.jsonwebtoken.* { *; }
 
 -dontwarn javax.xml.bind.DatatypeConverter
--dontwarn io.jsonwebtoken.impl.Base64Codec
+-dontwarn Base64Codec
 
 -keepnames class com.fasterxml.jackson.** { *; }
 -keepnames interface com.fasterxml.jackson.** { *; }
