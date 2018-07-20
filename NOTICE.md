@@ -1,7 +1,10 @@
-The Base64 implementation is based on MigBase64 with modifications for Base64 URL support.  This
-class's copyright and license notice have been retained and are repeated here per that code's requirements:
+## Base64 implementation
 
-**** BEGIN MIGBASE64 NOTICE *****
+JJWT's `io.jsonwebtoken.io.Base64` implementation is based on [MigBase64](https://github.com/brsanthu/migbase64) with 
+continued modifications for Base64 URL support and additional test cases. The MigBase64 copyright and license notice 
+have been retained and are repeated here per that code's requirements:
+
+```
 Licence (BSD):
 ==============
 
@@ -29,4 +32,4 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
-**** END MIGBASE64 NOTICE *****
+```
