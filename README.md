@@ -118,6 +118,8 @@ Now let's verify the JWT (you should always discard JWTs that don't match an exp
 assert Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws).getBody().getSubject().equals("Joe");
 ```
 
+Please make sure that you are calling the **correct** parse method `parseClaimsJws` (since there are many similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
+
 There are two things going on here. The `key` from before is being used to validate the signature of the JWT. If it fails to verify the JWT, a `SignatureException` is thrown. Assuming the JWT is validated, we parse out the claims and assert that that subject is set to `Joe`.
 
 You have to love code one-liners that pack a punch!
