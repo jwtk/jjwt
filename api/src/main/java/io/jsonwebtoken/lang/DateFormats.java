@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * @since 0.10.0
@@ -17,14 +18,18 @@ public class DateFormats {
     private static final ThreadLocal<DateFormat> ISO_8601 = new ThreadLocal<DateFormat>() {
         @Override
         protected DateFormat initialValue() {
-            return new SimpleDateFormat(ISO_8601_PATTERN);
+            SimpleDateFormat format = new SimpleDateFormat(ISO_8601_PATTERN);
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return format;
         }
     };
 
     private static final ThreadLocal<DateFormat> ISO_8601_MILLIS = new ThreadLocal<DateFormat>() {
         @Override
         protected DateFormat initialValue() {
-            return new SimpleDateFormat(ISO_8601_MILLIS_PATTERN);
+            SimpleDateFormat format = new SimpleDateFormat(ISO_8601_MILLIS_PATTERN);
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return format;
         }
     };
 
