@@ -27,6 +27,7 @@ final class Base64 { //final and package-protected on purpose
     private static final char[] BASE64URL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
     private static final int[] BASE64_IALPHABET = new int[256];
     private static final int[] BASE64URL_IALPHABET = new int[256];
+    private static final int IALPHABET_MAX_INDEX = BASE64_IALPHABET.length - 1;
 
     static {
         Arrays.fill(BASE64_IALPHABET, -1);
@@ -55,6 +56,10 @@ final class Base64 { //final and package-protected on purpose
     // ****************************************************************************************
     // *  char[] version
     // ****************************************************************************************
+
+    private String getName() {
+        return urlsafe ? "base64url" : "base64"; // RFC 4648 codec names are all lowercase
+    }
 
     /**
      * Encodes a raw byte array into a BASE64 <code>char[]</code> representation in accordance with RFC 2045.
@@ -194,6 +199,15 @@ final class Base64 { //final and package-protected on purpose
     }
     */
 
+    private int ctoi(char c) {
+        int i = c > IALPHABET_MAX_INDEX ? -1 : IALPHABET[c];
+        if (i < 0) {
+            String msg = "Illegal " + getName() + " character: '" + c + "'";
+            throw new DecodingException(msg);
+        }
+        return i;
+    }
+
     /**
      * Decodes a BASE64 encoded char array that is known to be reasonably well formatted. The preconditions are:<br>
      * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
@@ -237,7 +251,7 @@ final class Base64 { //final and package-protected on purpose
         for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
 
             // Assemble three bytes into an int from four "valid" characters.
-            int i = IALPHABET[sArr[sIx++]] << 18 | IALPHABET[sArr[sIx++]] << 12 | IALPHABET[sArr[sIx++]] << 6 | IALPHABET[sArr[sIx++]];
+            int i = ctoi(sArr[sIx++]) << 18 | ctoi(sArr[sIx++]) << 12 | ctoi(sArr[sIx++]) << 6 | ctoi(sArr[sIx++]);
 
             // Add the bytes
             dArr[d++] = (byte) (i >> 16);
@@ -255,7 +269,7 @@ final class Base64 { //final and package-protected on purpose
             // Decode last 1-3 bytes (incl '=') into 1-3 bytes
             int i = 0;
             for (int j = 0; sIx <= eIx - pad; j++) {
-                i |= IALPHABET[sArr[sIx++]] << (18 - j * 6);
+                i |= ctoi(sArr[sIx++]) << (18 - j * 6);
             }
 
             for (int r = 16; d < len; r -= 8) {
