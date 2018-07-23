@@ -24,6 +24,16 @@ class Base64Test {
                大た䏩䰥ぐ 郎きや楺橯 䧎キェ, 難ゞ滧 栧择 谯䧟簨訧ぎょ 椥䤥グ曣わ'''
 
     @Test
+    void testBase64Name() {
+        assertEquals 'base64', Base64.DEFAULT.getName() // RFC 4648 codec name is all lowercase
+    }
+
+    @Test
+    void testBase64UrlName() {
+        assertEquals 'base64url', Base64.URL_SAFE.getName() // RFC 4648 codec name is all lowercase
+    }
+
+    @Test
     void testEncodeToStringWithNullArgument() {
         String s = Base64.DEFAULT.encodeToString(null, false)
         assertEquals 0, s.toCharArray().length
@@ -68,6 +78,39 @@ class Base64Test {
         byte[] bytes = Base64.DEFAULT.decodeFast(encoded.toCharArray())
         String result = new String(bytes, Strings.UTF_8)
         assertEquals expected, result
+    }
+
+    @Test
+    void testDecodeFastWithIntermediateIllegalInboundCharacters() {
+        def encoded = 'SGVsbG8g*5LiW55WM'
+        try {
+            Base64.DEFAULT.decodeFast(encoded.toCharArray())
+            fail()
+        } catch (DecodingException de) {
+            assertEquals 'Illegal base64 character: \'*\'', de.getMessage()
+        }
+    }
+
+    @Test
+    void testDecodeFastWithIntermediateIllegalOutOfBoundCharacters() {
+        def encoded = 'SGVsbG8g世5LiW55WM'
+        try {
+            Base64.DEFAULT.decodeFast(encoded.toCharArray())
+            fail()
+        } catch (DecodingException de) {
+            assertEquals 'Illegal base64 character: \'世\'', de.getMessage()
+        }
+    }
+
+    @Test
+    void testDecodeFastWithIntermediateIllegalSpaceCharacters() {
+        def encoded = 'SGVsbG8g 5LiW55WM'
+        try {
+            Base64.DEFAULT.decodeFast(encoded.toCharArray())
+            fail()
+        } catch (DecodingException de) {
+            assertEquals 'Illegal base64 character: \' \'', de.getMessage()
+        }
     }
 
     @Test
