@@ -31,12 +31,13 @@ public class JwtMap implements Map<String, Object> {
     private final Map<String, Object> map;
 
     public JwtMap() {
-        this(new LinkedHashMap<String, Object>());
+        this.map = new LinkedHashMap<>();
     }
 
     public JwtMap(Map<String, Object> map) {
+        this();
         Assert.notNull(map, "Map argument cannot be null.");
-        this.map = map;
+        putAll(map);
     }
 
     protected String getString(String name) {
@@ -118,12 +119,12 @@ public class JwtMap implements Map<String, Object> {
         }
     }
 
-    protected void setDateAsSeconds(String name, Date d) {
+    protected Object setDateAsSeconds(String name, Date d) {
         if (d == null) {
-            map.remove(name);
+            return map.remove(name);
         } else {
             long seconds = d.getTime() / 1000;
-            map.put(name, seconds);
+            return map.put(name, seconds);
         }
     }
 
@@ -173,7 +174,7 @@ public class JwtMap implements Map<String, Object> {
             return;
         }
         for (String s : m.keySet()) {
-            map.put(s, m.get(s));
+            put(s, m.get(s));
         }
     }
 

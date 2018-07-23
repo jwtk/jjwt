@@ -118,6 +118,15 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
+    public Object put(String s, Object o) {
+        if (o instanceof Date && isSpecDate(s)) { //since 0.10.0
+            Date date = (Date)o;
+            return setDateAsSeconds(s, date);
+        }
+        return super.put(s, o);
+    }
+
+    @Override
     public <T> T get(String claimName, Class<T> requiredType) {
 
         Object value = get(claimName);

@@ -192,4 +192,93 @@ class DefaultClaimsTest {
         assertEquals(expected, claims.getNotBefore())
     }
 
+    @Test
+    void testPutWithIat() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        claims.put('iat', now) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('iat') //conversion should have happened
+    }
+
+    @Test
+    void testPutAllWithIat() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        claims.putAll([iat: now]) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('iat') //conversion should have happened
+    }
+
+    @Test
+    void testConstructorWithIat() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        this.claims = new DefaultClaims([iat: now]) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('iat') //conversion should have happened
+    }
+
+    @Test
+    void testPutWithNbf() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        claims.put('nbf', now) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('nbf') //conversion should have happened
+    }
+
+    @Test
+    void testPutAllWithNbf() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        claims.putAll([nbf: now]) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('nbf') //conversion should have happened
+    }
+
+    @Test
+    void testConstructorWithNbf() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        this.claims = new DefaultClaims([nbf: now]) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('nbf') //conversion should have happened
+    }
+
+    @Test
+    void testPutWithExp() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        claims.put('exp', now) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('exp') //conversion should have happened
+    }
+
+    @Test
+    void testPutAllWithExp() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        claims.putAll([exp: now]) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('exp') //conversion should have happened
+    }
+
+    @Test
+    void testConstructorWithExp() {
+        long millis = System.currentTimeMillis()
+        long seconds = millis / 1000 as long
+        Date now = new Date(millis)
+        this.claims = new DefaultClaims([exp: now]) //this should convert 'now' to seconds since epoch
+        assertEquals seconds, claims.get('exp') //conversion should have happened
+    }
+
+    @Test
+    void testPutWithNonSpecDate() {
+        long millis = System.currentTimeMillis()
+        Date now = new Date(millis)
+        claims.put('foo', now)
+        assertEquals now, claims.get('foo') //conversion should NOT have occurred
+    }
+
 }
