@@ -217,8 +217,9 @@ final class Base64 { //final and package-protected on purpose
      *
      * @param sArr The source array. Length 0 will return an empty array. <code>null</code> will throw an exception.
      * @return The decoded array of bytes. May be of length 0.
+     * @throws DecodingException on illegal input
      */
-    final byte[] decodeFast(char[] sArr) {
+    final byte[] decodeFast(char[] sArr) throws DecodingException {
 
         // Check special case
         int sLen = sArr != null ? sArr.length : 0;
