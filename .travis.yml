@@ -5,14 +5,15 @@ language: java
 jdk:
   - openjdk7
   - oraclejdk8
-  - oraclejdk9
-  - oraclejdk10
-  - openjdk10
+#  - oraclejdk9
+#  - oraclejdk10
+#  - openjdk10
 # - openjdk11
 # - oraclejdk-ea
 
 before_install:
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
+#  - if [[ "$TRAVIS_JDK_VERSION" != 'openjdk7' && "$TRAVIS_JDK_VERSION" != 'oraclejdk8' ]]; then export MAVEN_OPTS='--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED'; fi;
 
 install: true
 
