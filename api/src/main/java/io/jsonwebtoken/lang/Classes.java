@@ -17,6 +17,7 @@ package io.jsonwebtoken.lang;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * @since 0.1
@@ -182,6 +183,23 @@ public final class Classes {
         } catch (Exception e) {
             String msg = "Unable to instantiate instance with constructor [" + ctor + "]";
             throw new InstantiationException(msg, e);
+        }
+    }
+
+    /**
+     * @since 0.10.0
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeStatic(String fqcn, String methodName, Class[] argTypes, Object... args) {
+        try {
+            Class clazz = Classes.forName(fqcn);
+            Method method = clazz.getDeclaredMethod(methodName, argTypes);
+            method.setAccessible(true);
+            return(T)method.invoke(null, args);
+        } catch (Exception e) {
+            String msg = "Unable to invoke class method " + fqcn + "#" + methodName + ".  Ensure the necessary " +
+                "implementation is in the runtime classpath.";
+            throw new IllegalStateException(msg, e);
         }
     }
 

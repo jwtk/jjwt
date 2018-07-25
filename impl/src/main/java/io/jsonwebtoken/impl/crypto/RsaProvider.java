@@ -115,6 +115,36 @@ public abstract class RsaProvider extends SignatureProvider {
     }
 
     /**
+     * Generates a new RSA secure-randomly key pair suitable for the specified SignatureAlgorithm using JJWT's
+     * default {@link SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method
+     * that immediately delegates to {@link #generateKeyPair(int)} based on the relevant key size for the specified
+     * algorithm.
+     *
+     * @param alg the signature algorithm to inspect to determine a size in bits.
+     * @return a new RSA secure-random key pair of the specified size.
+     * @see #generateKeyPair()
+     * @see #generateKeyPair(int, SecureRandom)
+     * @see #generateKeyPair(String, int, SecureRandom)
+     * @since 0.10.0
+     */
+    @SuppressWarnings("unused") //used by io.jsonwebtoken.crypto.Keys
+    public static KeyPair generateKeyPair(SignatureAlgorithm alg) {
+        Assert.isTrue("RSA".equalsIgnoreCase(alg.getFamilyName()), "Only RSA algorithms are supported by this method.");
+        int keySizeInBits = 4096;
+        switch (alg) {
+            case RS256:
+            case PS256:
+                keySizeInBits = 2048;
+                break;
+            case RS384:
+            case PS384:
+                keySizeInBits = 3072;
+                break;
+        }
+        return generateKeyPair(keySizeInBits, DEFAULT_SECURE_RANDOM);
+    }
+
+    /**
      * Generates a new RSA secure-random key pair of the specified size using the given SecureRandom number generator.
      * This is a convenience method that immediately delegates to {@link #generateKeyPair(String, int, SecureRandom)}
      * using {@code RSA} as the {@code jcaAlgorithmName} argument.

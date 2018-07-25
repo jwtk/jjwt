@@ -111,7 +111,6 @@
         <module>api</module>
         <module>impl</module>
         <module>extensions</module>
-        <module>core</module>
     </modules>
 
     <dependencyManagement>
@@ -126,11 +125,6 @@
                 <artifactId>jjwt-impl</artifactId>
                 <version>${project.version}</version>
                 <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-core</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
