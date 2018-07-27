@@ -15,15 +15,15 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.SignatureException;
+
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
-
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.lang.Assert;
 
 public class EllipticCurveSignatureValidator extends EllipticCurveProvider implements SignatureValidator {
 

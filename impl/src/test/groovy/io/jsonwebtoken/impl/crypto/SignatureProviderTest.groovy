@@ -16,12 +16,12 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.SignatureException
+import io.jsonwebtoken.security.SignatureException
+import org.junit.Test
 
 import java.security.NoSuchAlgorithmException
 import java.security.Signature
 
-import org.junit.Test
 import static org.junit.Assert.*
 
 class SignatureProviderTest {

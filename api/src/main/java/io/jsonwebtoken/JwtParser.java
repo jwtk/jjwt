@@ -17,6 +17,7 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.security.SignatureException;
 
 import java.security.Key;
 import java.util.Date;

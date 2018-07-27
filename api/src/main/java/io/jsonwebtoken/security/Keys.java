@@ -1,4 +1,4 @@
-package io.jsonwebtoken.crypto;
+package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
@@ -23,6 +23,22 @@ public final class Keys {
     //prevent instantiation
     private Keys() {
     }
+
+    /*
+    public static final int bitLength(Key key) throws IllegalArgumentException {
+        Assert.notNull(key, "Key cannot be null.");
+        if (key instanceof SecretKey) {
+            byte[] encoded = key.getEncoded();
+            return Arrays.length(encoded) * 8;
+        } else if (key instanceof RSAKey) {
+            return ((RSAKey)key).getModulus().bitLength();
+        } else if (key instanceof ECKey) {
+            return ((ECKey)key).getParams().getOrder().bitLength();
+        }
+
+        throw new IllegalArgumentException("Unsupported key type: " + key.getClass().getName());
+    }
+    */
 
     /**
      * Returns a new {@link SecretKey} with a key length suitable for use with the specified {@link SignatureAlgorithm}.

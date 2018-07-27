@@ -17,8 +17,8 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.SignatureException
 import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.security.SignatureException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test
 
@@ -141,6 +141,14 @@ class EllipticCurveSignatureValidatorTest {
     void edgeCaseSignatureLengthTest() {
         def signature = new byte[1]
         EllipticCurveProvider.transcodeSignatureToDER(signature)
+    }
+
+    @Test
+    void testPaddedSignatureToDER() {
+        def signature = new byte[32]
+        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(signature)
+        signature[0] = 0 as byte
+        EllipticCurveProvider.transcodeSignatureToDER(signature) //no exception
     }
 
     @Test

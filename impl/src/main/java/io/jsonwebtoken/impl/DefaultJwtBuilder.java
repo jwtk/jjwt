@@ -22,19 +22,20 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
+import io.jsonwebtoken.impl.io.InstanceLocator;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
-import io.jsonwebtoken.impl.io.InstanceLocator;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
@@ -108,13 +109,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKey) {
+    public JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKeyBytes) {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        Assert.notEmpty(secretKey, "secret key byte array cannot be null or empty.");
+        Assert.notEmpty(secretKeyBytes, "secret key byte array cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
-        this.algorithm = alg;
-        this.key = new SecretKeySpec(secretKey, alg.getJcaName());
-        return this;
+        SecretKey key = new SecretKeySpec(secretKeyBytes, alg.getJcaName());
+        return signWith(alg, key);
     }
 
     @Override
@@ -129,6 +129,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(SignatureAlgorithm alg, Key key) {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notNull(key, "Key argument cannot be null.");
+        alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
         this.algorithm = alg;
         this.key = key;
         return this;

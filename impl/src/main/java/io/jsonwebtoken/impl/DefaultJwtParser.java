@@ -34,22 +34,24 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
+import io.jsonwebtoken.impl.io.InstanceLocator;
+import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.impl.io.InstanceLocator;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
@@ -359,8 +361,11 @@ public class DefaultJwtParser implements JwtParser {
 
             JwtSignatureValidator validator;
             try {
+                algorithm.assertValidVerificationKey(key); //since 0.10.0: https://github.com/jwtk/jjwt/issues/334
                 validator = createSignatureValidator(algorithm, key);
-            } catch (IllegalArgumentException e) {
+            } catch (WeakKeyException e) {
+                throw e;
+            } catch (InvalidKeyException | IllegalArgumentException e) {
                 String algName = algorithm.getValue();
                 String msg = "The parsed JWT indicates it was signed with the " + algName + " signature " +
                     "algorithm, but the specified signing key of type " + key.getClass().getName() +

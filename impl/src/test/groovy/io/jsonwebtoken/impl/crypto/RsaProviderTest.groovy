@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.SignatureException
+import io.jsonwebtoken.security.SignatureException
+import org.junit.Test
 
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyPair
@@ -25,7 +26,6 @@ import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.PSSParameterSpec
 
-import org.junit.Test
 import static org.junit.Assert.*
 
 class RsaProviderTest {

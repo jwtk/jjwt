@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.SignatureException;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;

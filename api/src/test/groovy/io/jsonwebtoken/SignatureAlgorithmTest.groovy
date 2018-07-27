@@ -15,17 +15,33 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
+
+import javax.crypto.SecretKey
+import java.security.Key
+import java.security.PrivateKey
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
+import java.security.spec.ECParameterSpec
+
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
 class SignatureAlgorithmTest {
+
+    private static final Random random = new Random() //does not need to be secure for testing
 
     @Test
     void testNames() {
         def algNames = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512',
                         'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE']
 
-        for( String name : algNames ) {
+        for (String name : algNames) {
             testName(name)
         }
     }
@@ -44,7 +60,7 @@ class SignatureAlgorithmTest {
 
     @Test
     void testIsHmac() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("HS")) {
                 assertTrue alg.isHmac()
             } else {
@@ -55,7 +71,7 @@ class SignatureAlgorithmTest {
 
     @Test
     void testHmacFamilyName() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("HS")) {
                 assertEquals alg.getFamilyName(), "HMAC"
             }
@@ -64,7 +80,7 @@ class SignatureAlgorithmTest {
 
     @Test
     void testIsRsa() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.getDescription().startsWith("RSASSA")) {
                 assertTrue alg.isRsa()
             } else {
@@ -75,7 +91,7 @@ class SignatureAlgorithmTest {
 
     @Test
     void testRsaFamilyName() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("RS") || alg.name().startsWith("PS")) {
                 assertEquals alg.getFamilyName(), "RSA"
             }
@@ -84,7 +100,7 @@ class SignatureAlgorithmTest {
 
     @Test
     void testIsEllipticCurve() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("ES")) {
                 assertTrue alg.isEllipticCurve()
             } else {
@@ -95,21 +111,635 @@ class SignatureAlgorithmTest {
 
     @Test
     void testEllipticCurveFamilyName() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("ES")) {
-                assertEquals alg.getFamilyName(), "Elliptic Curve"
+                assertEquals alg.getFamilyName(), "ECDSA"
             }
         }
     }
 
     @Test
     void testIsJdkStandard() {
-        for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
             if (alg.name().startsWith("ES") || alg.name().startsWith("PS") || alg == SignatureAlgorithm.NONE) {
                 assertFalse alg.isJdkStandard()
             } else {
                 assertTrue alg.isJdkStandard()
             }
+        }
+    }
+
+    @Test
+    void testAssertValidSigningKeyWithNoneAlgorithm() {
+        Key key = createMock(Key)
+        try {
+            SignatureAlgorithm.NONE.assertValidSigningKey(key)
+            fail()
+        } catch (InvalidKeyException expected) {
+            assertEquals "The 'NONE' signature algorithm does not support cryptographic keys." as String, expected.message
+        }
+    }
+
+    @Test
+    void testAssertValidHmacSigningKeyHappyPath() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.jcaName)
+
+            replay key
+
+            alg.assertValidSigningKey(key)
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacSigningKeyNotSecretKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            Key key = createMock(Key)
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'HMAC signing keys must be SecretKey instances.', expected.message
+            }
+        }
+    }
+
+    @Test
+    void testAssertValidHmacSigningKeyNullBytes() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(null)
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The signing key's encoded bytes cannot be null.", expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacSigningKeyMissingAlgorithm() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(new byte[alg.minKeyLength / 8 as int])
+            expect(key.getAlgorithm()).andReturn(null)
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The signing key's algorithm cannot be null.", expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacSigningKeyUnsupportedAlgorithm() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(new byte[alg.minKeyLength / 8 as int])
+            expect(key.getAlgorithm()).andReturn('AES')
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The signing key's algorithm 'AES' does not equal a valid HmacSHA* algorithm " +
+                        "name and cannot be used with ${alg.name()}." as String, expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacSigningKeyInsufficientKeyLength() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            int numBits = alg.minKeyLength - 8 //8 bits shorter than expected
+            int numBytes = numBits / 8 as int
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.jcaName)
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The signing key's size is $numBits bits which is not secure enough for the " +
+                        "${alg.name()} algorithm.  The JWT JWA Specification " +
+                        "(RFC 7518, Section 3.2) states that keys used with ${alg.name()} MUST have a size >= " +
+                        "${alg.minKeyLength} bits (the key size must be greater than or equal to the hash output " +
+                        "size).  Consider using the ${Keys.class.getName()} class's 'secretKeyFor(" +
+                        "SignatureAlgorithm.${alg.name()})' method to create a key guaranteed to be secure enough " +
+                        "for ${alg.name()}.  See https://tools.ietf.org/html/rfc7518#section-3.2 for " +
+                        "more information." as String, expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidECSigningKeyHappyPath() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            ECPrivateKey key = createMock(ECPrivateKey)
+            ECParameterSpec spec = createMock(ECParameterSpec)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            byte[] orderBytes = new byte[numBytes + 1]
+            random.nextBytes(orderBytes)
+            BigInteger order = new BigInteger(orderBytes)
+            expect(key.getParams()).andReturn(spec)
+            expect(spec.getOrder()).andReturn(order)
+
+            replay key, spec
+
+            alg.assertValidSigningKey(key)
+
+            verify key, spec
+        }
+    }
+
+    @Test
+    void testAssertValidECSigningNotPrivateKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            ECPublicKey key = createMock(ECPublicKey)
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'ECDSA signing keys must be PrivateKey instances.', expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidECSigningKeyNotECKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            PrivateKey key = createMock(PrivateKey)
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'ECDSA signing keys must be ECKey instances.', expected.message
+            }
+        }
+    }
+
+    @Test
+    void testAssertValidECSigningKeyInsufficientKeyLength() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            ECPrivateKey key = createMock(ECPrivateKey)
+            ECParameterSpec spec = createMock(ECParameterSpec)
+            int numBits = alg.minKeyLength - 8 // 8 bits less than expected
+            int numBytes = numBits / 8 as int
+            byte[] orderBytes = new byte[numBytes]
+            random.nextBytes(orderBytes)
+            BigInteger order = new BigInteger(orderBytes)
+            expect(key.getParams()).andReturn(spec)
+            expect(spec.getOrder()).andReturn(order)
+
+            replay key, spec
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The signing key's size (ECParameterSpec order) is ${order.bitLength()} bits " +
+                        "which is not secure enough for the ${alg.name()} algorithm.  The JWT JWA Specification " +
+                        "(RFC 7518, Section 3.4) states that keys used with ${alg.name()} MUST have a size >= " +
+                        "${alg.minKeyLength} bits.  Consider using the ${Keys.class.getName()} class's " +
+                        "'keyPairFor(SignatureAlgorithm.${alg.name()})' method to create a key pair guaranteed " +
+                        "to be secure enough for ${alg.name()}.  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-3.4 for more information." as String, expected.message
+            }
+
+            verify key, spec
+        }
+    }
+
+    @Test
+    void testAssertValidRSASigningKeyHappyPath() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            RSAPrivateKey key = createMock(RSAPrivateKey)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            byte[] modulusBytes = new byte[numBytes + 1]
+            random.nextBytes(modulusBytes)
+            BigInteger modulus = new BigInteger(modulusBytes)
+            expect(key.getModulus()).andReturn(modulus)
+
+            replay key
+
+            alg.assertValidSigningKey(key)
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidRSASigningNotPrivateKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            RSAPublicKey key = createMock(RSAPublicKey)
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'RSA signing keys must be PrivateKey instances.', expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidRSASigningKeyNotRSAKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            PrivateKey key = createMock(PrivateKey)
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'RSA signing keys must be RSAKey instances.', expected.message
+            }
+        }
+    }
+
+    @Test
+    void testAssertValidRSASigningKeyInsufficientKeyLength() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            String section = alg.name().startsWith("P") ? "3.5" : "3.3"
+
+            RSAPrivateKey key = createMock(RSAPrivateKey)
+            int numBits = alg.minKeyLength - 8
+            int numBytes = numBits / 8 as int
+            byte[] modulusBytes = new byte[numBytes]
+            random.nextBytes(modulusBytes)
+            BigInteger modulus = new BigInteger(modulusBytes)
+            expect(key.getModulus()).andReturn(modulus)
+
+            replay key
+
+            try {
+                alg.assertValidSigningKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The signing key's size is ${modulus.bitLength()} bits which is not secure " +
+                        "enough for the ${alg.name()} algorithm.  The JWT JWA Specification " +
+                        "(RFC 7518, Section ${section}) states that keys used with ${alg.name()} MUST have a size >= " +
+                        "${alg.minKeyLength} bits.  Consider using the ${Keys.class.getName()} class's " +
+                        "'keyPairFor(SignatureAlgorithm.${alg.name()})' method to create a key pair guaranteed " +
+                        "to be secure enough for ${alg.name()}.  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-${section} for more information." as String, expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidVerificationKeyWithNoneAlgorithm() {
+        Key key = createMock(Key)
+        try {
+            SignatureAlgorithm.NONE.assertValidVerificationKey(key)
+            fail()
+        } catch (InvalidKeyException expected) {
+            assertEquals "The 'NONE' signature algorithm does not support cryptographic keys." as String, expected.message
+        }
+    }
+
+    @Test
+    void testAssertValidHmacVerificationKeyHappyPath() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.jcaName)
+
+            replay key
+
+            alg.assertValidVerificationKey(key)
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacVerificationKeyNotSecretKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            Key key = createMock(Key)
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'HMAC verification keys must be SecretKey instances.', expected.message
+            }
+        }
+    }
+
+    @Test
+    void testAssertValidHmacVerificationKeyNullBytes() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(null)
+
+            replay key
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The verification key's encoded bytes cannot be null.", expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacVerificationKeyMissingAlgorithm() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(new byte[alg.minKeyLength / 8 as int])
+            expect(key.getAlgorithm()).andReturn(null)
+
+            replay key
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The verification key's algorithm cannot be null.", expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacVerificationKeyUnsupportedAlgorithm() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(new byte[alg.minKeyLength / 8 as int])
+            expect(key.getAlgorithm()).andReturn('AES')
+
+            replay key
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The verification key's algorithm 'AES' does not equal a valid HmacSHA* algorithm " +
+                        "name and cannot be used with ${alg.name()}." as String, expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidHmacVerificationKeyInsufficientKeyLength() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            int numBits = alg.minKeyLength - 8 // 8 bits (1 byte) less than required
+            int numBytes = numBits / 8 as int
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.jcaName)
+
+            replay key
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The verification key's size is $numBits bits which is not secure enough for the " +
+                        "${alg.name()} algorithm.  The JWT JWA Specification " +
+                        "(RFC 7518, Section 3.2) states that keys used with ${alg.name()} MUST have a size >= " +
+                        "${alg.minKeyLength} bits (the key size must be greater than or equal to the hash output " +
+                        "size).  Consider using the ${Keys.class.getName()} class's 'secretKeyFor(" +
+                        "SignatureAlgorithm.${alg.name()})' method to create a key guaranteed to be secure enough " +
+                        "for ${alg.name()}.  See https://tools.ietf.org/html/rfc7518#section-3.2 for " +
+                        "more information." as String, expected.message
+            }
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidECVerificationKeyHappyPath() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            ECPrivateKey key = createMock(ECPrivateKey)
+            ECParameterSpec spec = createMock(ECParameterSpec)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            byte[] orderBytes = new byte[numBytes + 1]
+            random.nextBytes(orderBytes)
+            BigInteger order = new BigInteger(orderBytes)
+            expect(key.getParams()).andReturn(spec)
+            expect(spec.getOrder()).andReturn(order)
+
+            replay key, spec
+
+            alg.assertValidVerificationKey(key)
+
+            verify key, spec
+        }
+    }
+
+    @Test
+    void testAssertValidECVerificationKeyNotECKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            PrivateKey key = createMock(PrivateKey)
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'ECDSA verification keys must be ECKey instances.', expected.message
+            }
+        }
+    }
+
+    @Test
+    void testAssertValidECVerificationKeyInsufficientKeyLength() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
+
+            ECPrivateKey key = createMock(ECPrivateKey)
+            ECParameterSpec spec = createMock(ECParameterSpec)
+            int numBits = alg.minKeyLength - 8 // 8 bits = 1 byte
+            int numBytes = numBits / 8 as int
+            byte[] orderBytes = new byte[numBytes]
+            random.nextBytes(orderBytes)
+            BigInteger order = new BigInteger(orderBytes)
+            expect(key.getParams()).andReturn(spec)
+            expect(spec.getOrder()).andReturn(order)
+
+            replay key, spec
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The verification key's size (ECParameterSpec order) is ${order.bitLength()} bits " +
+                        "which is not secure enough for the ${alg.name()} algorithm.  The JWT JWA Specification " +
+                        "(RFC 7518, Section 3.4) states that keys used with ${alg.name()} MUST have a size >= " +
+                        "${alg.minKeyLength} bits.  Consider using the ${Keys.class.getName()} class's " +
+                        "'keyPairFor(SignatureAlgorithm.${alg.name()})' method to create a key pair guaranteed " +
+                        "to be secure enough for ${alg.name()}.  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-3.4 for more information." as String, expected.message
+            }
+
+            verify key, spec
+        }
+    }
+
+    @Test
+    void testAssertValidRSAVerificationKeyHappyPath() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            RSAPrivateKey key = createMock(RSAPrivateKey)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            byte[] modulusBytes = new byte[numBytes + 1]
+            random.nextBytes(modulusBytes)
+            BigInteger modulus = new BigInteger(modulusBytes)
+            expect(key.getModulus()).andReturn(modulus)
+
+            replay key
+
+            alg.assertValidVerificationKey(key)
+
+            verify key
+        }
+    }
+
+    @Test
+    void testAssertValidRSAVerificationKeyNotRSAKey() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            PrivateKey key = createMock(PrivateKey)
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals 'RSA verification keys must be RSAKey instances.', expected.message
+            }
+        }
+    }
+
+    @Test
+    void testAssertValidRSAVerificationKeyInsufficientKeyLength() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
+
+            String section = alg.name().startsWith("P") ? "3.5" : "3.3"
+
+            RSAPrivateKey key = createMock(RSAPrivateKey)
+            int numBits = alg.minKeyLength - 8 // 8 bits = 1 byte
+            int numBytes = numBits / 8 as int
+            byte[] modulusBytes = new byte[numBytes]
+            random.nextBytes(modulusBytes)
+            BigInteger modulus = new BigInteger(modulusBytes)
+            expect(key.getModulus()).andReturn(modulus)
+
+            replay key
+
+            try {
+                alg.assertValidVerificationKey(key)
+                fail()
+            } catch (InvalidKeyException expected) {
+                assertEquals "The verification key's size is ${modulus.bitLength()} bits which is not secure enough " +
+                        "for the ${alg.name()} algorithm.  The JWT JWA Specification " +
+                        "(RFC 7518, Section ${section}) states that keys used with ${alg.name()} MUST have a size >= " +
+                        "${alg.minKeyLength} bits.  Consider using the ${Keys.class.getName()} class's " +
+                        "'keyPairFor(SignatureAlgorithm.${alg.name()})' method to create a key pair guaranteed " +
+                        "to be secure enough for ${alg.name()}.  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-${section} for more information." as String, expected.message
+            }
+
+            verify key
         }
     }
 }

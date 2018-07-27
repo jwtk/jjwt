@@ -18,9 +18,10 @@ package io.jsonwebtoken.impl.crypto;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 public abstract class MacProvider extends SignatureProvider {
@@ -31,11 +32,11 @@ public abstract class MacProvider extends SignatureProvider {
     }
 
     /**
-     * Generates a new secure-random 512 bit secret key suitable for creating and verifying HMAC signatures.  This is a
-     * convenience method that immediately delegates to {@link #generateKey(SignatureAlgorithm)} using {@link
+     * Generates a new secure-random 512 bit secret key suitable for creating and verifying HMAC-SHA signatures. This
+     * is a convenience method that immediately delegates to {@link #generateKey(SignatureAlgorithm)} using {@link
      * SignatureAlgorithm#HS512} as the method argument.
      *
-     * @return a new secure-random 512 bit secret key suitable for creating and verifying HMAC signatures.
+     * @return a new secure-random 512 bit secret key suitable for creating and verifying HMAC-SHA signatures.
      * @see #generateKey(SignatureAlgorithm)
      * @see #generateKey(SignatureAlgorithm, SecureRandom)
      * @since 0.5
@@ -78,26 +79,22 @@ public abstract class MacProvider extends SignatureProvider {
      * @see #generateKey()
      * @see #generateKey(SignatureAlgorithm)
      * @since 0.5
+     * @deprecated since 0.10.0 - use {@link #generateKey(SignatureAlgorithm)} instead.
      */
+    @Deprecated
     public static SecretKey generateKey(SignatureAlgorithm alg, SecureRandom random) {
 
         Assert.isTrue(alg.isHmac(), "SignatureAlgorithm argument must represent an HMAC algorithm.");
 
-        byte[] bytes;
+        KeyGenerator gen;
 
-        switch (alg) {
-            case HS256:
-                bytes = new byte[32];
-                break;
-            case HS384:
-                bytes = new byte[48];
-                break;
-            default:
-                bytes = new byte[64];
+        try {
+            gen = KeyGenerator.getInstance(alg.getJcaName());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("The " + alg.getJcaName() + " algorithm is not available.  " +
+                "This should never happen on JDK 7 or later - please report this to the JJWT developers.", e);
         }
 
-        random.nextBytes(bytes);
-
-        return new SecretKeySpec(bytes, alg.getJcaName());
+        return gen.generateKey();
     }
 }

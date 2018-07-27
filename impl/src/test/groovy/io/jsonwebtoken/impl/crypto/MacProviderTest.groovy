@@ -17,31 +17,39 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.Test
-import static org.junit.Assert.*
+
+import javax.crypto.SecretKey
+
+import static org.junit.Assert.assertEquals
 
 class MacProviderTest {
 
+    private void testHmac(SignatureAlgorithm alg) {
+        testHmac(alg, MacProvider.generateKey(alg))
+    }
+
+    private void testHmac(SignatureAlgorithm alg, SecretKey key) {
+        assertEquals alg.jcaName, key.algorithm
+        assertEquals alg.digestLength / 8 as int, key.encoded.length
+    }
+
     @Test
     void testDefault() {
-        byte[] bytes = MacProvider.generateKey().encoded
-        assertEquals 64, bytes.length
+        testHmac(SignatureAlgorithm.HS512, MacProvider.generateKey())
     }
 
     @Test
     void testHS256() {
-        byte[] bytes = MacProvider.generateKey(SignatureAlgorithm.HS256).encoded
-        assertEquals 32, bytes.length
+        testHmac(SignatureAlgorithm.HS256)
     }
 
     @Test
     void testHS384() {
-        byte[] bytes = MacProvider.generateKey(SignatureAlgorithm.HS384).encoded
-        assertEquals 48, bytes.length
+        testHmac(SignatureAlgorithm.HS384)
     }
 
     @Test
     void testHS512() {
-        byte[] bytes = MacProvider.generateKey(SignatureAlgorithm.HS512).encoded
-        assertEquals 64, bytes.length
+        testHmac(SignatureAlgorithm.HS512)
     }
 }

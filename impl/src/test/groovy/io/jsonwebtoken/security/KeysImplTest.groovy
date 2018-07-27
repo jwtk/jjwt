@@ -1,4 +1,4 @@
-package io.jsonwebtoken.crypto
+package io.jsonwebtoken.security
 
 import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.Test
@@ -10,6 +10,7 @@ import java.security.PublicKey
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 
 import static org.junit.Assert.*
 
@@ -27,11 +28,9 @@ class KeysImplTest {
 
             String name = alg.name()
 
-            int bitLength = name.equalsIgnoreCase("NONE") ? 0 : name.substring(2).toInteger()
-
-            if (name.startsWith('H')) {
+            if (alg.isHmac()) {
                 SecretKey key = Keys.secretKeyFor(alg)
-                assertEquals bitLength, key.getEncoded().length * 8 //convert byte count to bit count
+                assertEquals alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
                 assertEquals alg.jcaName, key.algorithm
             } else {
                 try {
@@ -51,40 +50,40 @@ class KeysImplTest {
         for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
 
             String name = alg.name()
-            int bitLength = name.equalsIgnoreCase("NONE") ? 0 : name.substring(2).toInteger()
 
-            if (name.startsWith('R') || name.startsWith('P')) {
+            if (alg.isRsa()) {
 
                 KeyPair pair = Keys.keyPairFor(alg)
                 assertNotNull pair
+
                 PublicKey pub = pair.getPublic()
+                assert pub instanceof RSAPublicKey
+                assertEquals alg.familyName, pub.algorithm
+                assertEquals alg.digestLength * 8, pub.modulus.bitLength()
+
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof RSAPrivateKey
-                assertEquals alg.familyName, pub.algorithm
                 assertEquals alg.familyName, priv.algorithm
-                assertEquals bitLength * 8, priv.modulus.bitLength()
+                assertEquals alg.digestLength * 8, priv.modulus.bitLength()
 
-            } else if (name.startsWith('E')) {
+            } else if (alg.isEllipticCurve()) {
 
                 KeyPair pair = Keys.keyPairFor(alg);
                 assertNotNull pair
 
-                if (alg == SignatureAlgorithm.ES512) {
-                    bitLength = 521
-                }
-
-                String asn1oid = "secp${bitLength}r1"
+                String asn1oid = "secp${alg.minKeyLength}r1"
 
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof ECPublicKey
                 assertEquals "ECDSA", pub.algorithm
                 assertEquals asn1oid, pub.params.name
-                assertEquals bitLength, pub.params.order.bitLength()
+                assertEquals alg.minKeyLength, pub.params.order.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof ECPrivateKey
                 assertEquals "ECDSA", priv.algorithm
                 assertEquals asn1oid, priv.params.name
+                assertEquals alg.minKeyLength, priv.params.order.bitLength()
 
             } else {
                 try {

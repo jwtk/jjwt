@@ -16,14 +16,14 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Encoder
 import io.jsonwebtoken.io.EncodingException
-import io.jsonwebtoken.CompressionCodecs
-import io.jsonwebtoken.impl.crypto.MacProvider
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -174,8 +174,9 @@ class DefaultJwtBuilderTest {
         def b = new DefaultJwtBuilder()
         b.setHeader(Jwts.jwsHeader().setKeyId('a'))
         b.setPayload('foo')
-        def key = MacProvider.generateKey()
-        b.signWith(SignatureAlgorithm.HS256, key)
+        def alg = SignatureAlgorithm.HS256
+        def key = Keys.secretKeyFor(alg)
+        b.signWith(alg, key)
         b.compact()
     }
 
@@ -338,14 +339,14 @@ class DefaultJwtBuilderTest {
         def serializer = new Serializer() {
             @Override
             byte[] serialize(Object o) throws SerializationException {
-                return objectMapper.writeValueAsBytes(o);
+                return objectMapper.writeValueAsBytes(o)
             }
         }
 
         def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         assertSame serializer, b.serializer
 
-        def key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
         String jws = b.signWith(SignatureAlgorithm.HS256, key)
                 .claim('foo', 'bar')
