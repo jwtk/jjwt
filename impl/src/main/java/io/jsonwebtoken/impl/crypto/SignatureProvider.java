@@ -15,15 +15,15 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.RuntimeEnvironment;
+import io.jsonwebtoken.security.SignatureException;
+
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Signature;
-
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.RuntimeEnvironment;
 
 abstract class SignatureProvider {
 

@@ -1,4 +1,4 @@
-package io.jsonwebtoken.crypto
+package io.jsonwebtoken.security
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.lang.Classes
@@ -13,14 +13,8 @@ import java.security.KeyPair
 import static org.easymock.EasyMock.eq
 import static org.easymock.EasyMock.expect
 import static org.easymock.EasyMock.same
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
-import static org.junit.Assert.fail
-import static org.powermock.api.easymock.PowerMock.mockStatic
-import static org.powermock.api.easymock.PowerMock.createMock
-import static org.powermock.api.easymock.PowerMock.replay
-import static org.powermock.api.easymock.PowerMock.reset
-import static org.powermock.api.easymock.PowerMock.verify
+import static org.junit.Assert.*
+import static org.powermock.api.easymock.PowerMock.*
 
 /**
  * This test class is for cursory API-level testing only (what is available to the API module at build time).

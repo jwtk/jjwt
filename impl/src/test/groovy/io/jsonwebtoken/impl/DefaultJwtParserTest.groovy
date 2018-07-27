@@ -4,13 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.io.Decoder
-import io.jsonwebtoken.io.DecodingException
-import io.jsonwebtoken.impl.crypto.MacProvider
-import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.io.*
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -60,7 +56,7 @@ class DefaultJwtParserTest {
         def p = new DefaultJwtParser().deserializeJsonWith(deserializer)
         assertSame deserializer, p.deserializer
 
-        def key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(SignatureAlgorithm.HS256, key).compact()
 
@@ -74,7 +70,7 @@ class DefaultJwtParserTest {
         String body = Encoders.BASE64URL.encode('{"hello":"world"}'.getBytes(Strings.UTF_8))
         String compact = header + '.' + body + '.'
 
-        SecretKey key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
         Mac mac = Mac.getInstance('HmacSHA256')
         mac.init(key)
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Strings.UTF_8))
@@ -92,7 +88,7 @@ class DefaultJwtParserTest {
         String body = Encoders.BASE64URL.encode('{"hello":"world"}'.getBytes(Strings.UTF_8))
         String compact = header + '.' + body + '.'
 
-        SecretKey key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
         Mac mac = Mac.getInstance('HmacSHA256')
         mac.init(key)
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Strings.UTF_8))
@@ -110,7 +106,7 @@ class DefaultJwtParserTest {
         String body = Encoders.BASE64URL.encode('{"hello":"world"}'.getBytes(Strings.UTF_8))
         String compact = header + '.' + body + '.'
 
-        SecretKey key = MacProvider.generateKey(SignatureAlgorithm.HS256)
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
         Mac mac = Mac.getInstance('HmacSHA256')
         mac.init(key)
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Strings.UTF_8))

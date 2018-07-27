@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.SignatureException
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
 import java.security.*
@@ -30,7 +31,7 @@ class RsaSignatureValidatorTest {
     @Test
     void testConstructorWithNonRsaKey() {
         try {
-            new RsaSignatureValidator(SignatureAlgorithm.RS256, MacProvider.generateKey());
+            new RsaSignatureValidator(SignatureAlgorithm.RS256, Keys.secretKeyFor(SignatureAlgorithm.HS256));
             fail()
         } catch (IllegalArgumentException iae) {
             assertEquals "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.", iae.message
@@ -40,17 +41,16 @@ class RsaSignatureValidatorTest {
     @Test
     void testDoVerifyWithInvalidKeyException() {
 
-        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(1024);
+        SignatureAlgorithm alg = SignatureAlgorithm.RS256
 
-        KeyPair kp = keyGenerator.genKeyPair();
-        PublicKey publicKey = kp.getPublic();
-        PrivateKey privateKey = kp.getPrivate();
+        KeyPair kp = Keys.keyPairFor(alg)
+        PublicKey publicKey = kp.getPublic()
+        PrivateKey privateKey = kp.getPrivate()
 
         String msg = 'foo'
         final InvalidKeyException ex = new InvalidKeyException(msg)
 
-        RsaSignatureValidator v = new RsaSignatureValidator(SignatureAlgorithm.RS256, publicKey) {
+        RsaSignatureValidator v = new RsaSignatureValidator(alg, publicKey) {
             @Override
             protected boolean doVerify(Signature sig, PublicKey pk, byte[] data, byte[] signature) throws InvalidKeyException, java.security.SignatureException {
                 throw ex;

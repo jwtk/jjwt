@@ -2,6 +2,7 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import static org.junit.Assert.assertNotNull
@@ -15,7 +16,7 @@ class DefaultJwtSignatureValidatorTest {
     void testDeprecatedTwoArgCtor() {
 
         def alg = SignatureAlgorithm.HS256
-        def key = MacProvider.generateKey(alg)
+        def key = Keys.secretKeyFor(alg)
         def validator = new DefaultJwtSignatureValidator(alg, key)
 
         assertNotNull validator.signatureValidator
@@ -28,7 +29,7 @@ class DefaultJwtSignatureValidatorTest {
     void testDeprecatedThreeArgCtor() {
 
         def alg = SignatureAlgorithm.HS256
-        def key = MacProvider.generateKey(alg)
+        def key = Keys.secretKeyFor(alg)
         def validator = new DefaultJwtSignatureValidator(DefaultSignatureValidatorFactory.INSTANCE, alg, key)
 
         assertNotNull validator.signatureValidator

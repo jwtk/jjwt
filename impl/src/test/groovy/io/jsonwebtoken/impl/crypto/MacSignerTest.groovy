@@ -16,17 +16,46 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.SignatureException
+import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
-import static org.junit.Assert.*
 
 import javax.crypto.Mac
 import java.security.InvalidKeyException
+import java.security.Key
 import java.security.NoSuchAlgorithmException
+
+import static org.junit.Assert.*
 
 class MacSignerTest {
 
     private static final Random rng = new Random(); //doesn't need to be secure - we're just testing
+
+    @Test
+    void testCtorArgNotASecretKey() {
+
+        def key = new Key() {
+            @Override
+            String getAlgorithm() {
+                return null
+            }
+
+            @Override
+            String getFormat() {
+                return null
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return new byte[0]
+            }
+        }
+
+        try {
+            new MacSigner(SignatureAlgorithm.HS256, key)
+            fail()
+        } catch (IllegalArgumentException expected) {
+        }
+    }
 
     @Test
     void testNoSuchAlgorithmException() {

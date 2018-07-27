@@ -16,17 +16,12 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.SignatureException
+import io.jsonwebtoken.security.SignatureException
+import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
-import java.security.InvalidKeyException
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.MessageDigest
-import java.security.PrivateKey
-import java.security.PublicKey
+import java.security.*
 
-import org.junit.Test
 import static org.junit.Assert.*
 
 class RsaSignerTest {

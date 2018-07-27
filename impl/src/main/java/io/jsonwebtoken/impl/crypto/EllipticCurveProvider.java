@@ -15,16 +15,16 @@
  */
 package io.jsonwebtoken.impl.crypto;
 
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.lang.Assert;
+
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.lang.Assert;
 
 /**
  * ElliptiCurve crypto provider.
@@ -172,8 +172,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      *
      * @throws JwtException If the ASN.1/DER signature format is invalid.
      */
-    public static byte[] transcodeSignatureToConcat(final byte[] derSignature, int outputLength)
-            throws JwtException {
+    public static byte[] transcodeSignatureToConcat(final byte[] derSignature, int outputLength) throws JwtException {
 
         if (derSignature.length < 8 || derSignature[0] != 48) {
             throw new JwtException("Invalid ECDSA signature format");
@@ -191,16 +190,16 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
         byte rLength = derSignature[offset + 1];
 
         int i = rLength;
-        while ((i > 0)
-                && (derSignature[(offset + 2 + rLength) - i] == 0))
+        while ((i > 0) && (derSignature[(offset + 2 + rLength) - i] == 0)) {
             i--;
+        }
 
         byte sLength = derSignature[offset + 2 + rLength + 1];
 
         int j = sLength;
-        while ((j > 0)
-                && (derSignature[(offset + 2 + rLength + 2 + sLength) - j] == 0))
+        while ((j > 0) && (derSignature[(offset + 2 + rLength + 2 + sLength) - j] == 0)) {
             j--;
+        }
 
         int rawLen = Math.max(i, j);
         rawLen = Math.max(rawLen, outputLength / 2);
@@ -234,16 +233,15 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      *
      * @throws JwtException If the ECDSA JWS signature format is invalid.
      */
-    public static byte[] transcodeSignatureToDER(byte[] jwsSignature)
-            throws JwtException {
+    public static byte[] transcodeSignatureToDER(byte[] jwsSignature) throws JwtException {
 
         int rawLen = jwsSignature.length / 2;
 
         int i = rawLen;
 
-        while((i > 0)
-                && (jwsSignature[rawLen - i] == 0))
+        while((i > 0) && (jwsSignature[rawLen - i] == 0)) {
             i--;
+        }
 
         int j = i;
 
@@ -253,9 +251,9 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
         int k = rawLen;
 
-        while ((k > 0)
-                && (jwsSignature[2 * rawLen - k] == 0))
+        while ((k > 0) && (jwsSignature[2 * rawLen - k] == 0)) {
             k--;
+        }
 
         int l = k;
 

@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.DefaultClock
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec

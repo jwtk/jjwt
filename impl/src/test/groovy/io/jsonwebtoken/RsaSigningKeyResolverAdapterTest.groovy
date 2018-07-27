@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.crypto.RsaProvider
+import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -26,9 +26,11 @@ class RsaSigningKeyResolverAdapterTest {
     @Test
     void testResolveClaimsSigningKeyWithRsaKey() {
 
-        def pair = RsaProvider.generateKeyPair(1024) //real apps should use 4096 or better.  We're only reducing the size here so the tests are fast
+        def alg = SignatureAlgorithm.RS256
 
-        def compact = Jwts.builder().claim('foo', 'bar').signWith(SignatureAlgorithm.RS256, pair.private).compact()
+        def pair = Keys.keyPairFor(alg)
+
+        def compact = Jwts.builder().claim('foo', 'bar').signWith(alg, pair.private).compact()
 
         Jws<Claims> jws = Jwts.parser().setSigningKey(pair.public).parseClaimsJws(compact)
 

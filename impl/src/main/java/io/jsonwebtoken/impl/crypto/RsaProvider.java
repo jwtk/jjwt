@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.SignatureException;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
@@ -127,9 +127,9 @@ public abstract class RsaProvider extends SignatureProvider {
      * @see #generateKeyPair(String, int, SecureRandom)
      * @since 0.10.0
      */
-    @SuppressWarnings("unused") //used by io.jsonwebtoken.crypto.Keys
+    @SuppressWarnings("unused") //used by io.jsonwebtoken.security.Keys
     public static KeyPair generateKeyPair(SignatureAlgorithm alg) {
-        Assert.isTrue("RSA".equalsIgnoreCase(alg.getFamilyName()), "Only RSA algorithms are supported by this method.");
+        Assert.isTrue(alg.isRsa(), "Only RSA algorithms are supported by this method.");
         int keySizeInBits = 4096;
         switch (alg) {
             case RS256:
