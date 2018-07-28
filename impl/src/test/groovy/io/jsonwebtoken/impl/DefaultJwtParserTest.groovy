@@ -58,7 +58,7 @@ class DefaultJwtParserTest {
 
         def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(SignatureAlgorithm.HS256, key).compact()
+        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
 
         assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getBody().get('foo')
     }

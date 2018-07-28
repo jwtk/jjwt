@@ -26,6 +26,9 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Type-safe representation of standard JWT signature algorithm names as defined in the
@@ -115,6 +118,13 @@ public enum SignatureAlgorithm {
     static {
         RuntimeEnvironment.enableBouncyCastleIfPossible();
     }
+
+    //purposefully ordered higher to lower:
+    private static final List<SignatureAlgorithm> PREFERRED_HMAC_ALGS = Collections.unmodifiableList(Arrays.asList(
+        SignatureAlgorithm.HS512, SignatureAlgorithm.HS384, SignatureAlgorithm.HS256));
+    //purposefully ordered higher to lower:
+    private static final List<SignatureAlgorithm> PREFERRED_EC_ALGS = Collections.unmodifiableList(Arrays.asList(
+        SignatureAlgorithm.ES512, SignatureAlgorithm.ES384, SignatureAlgorithm.ES256));
 
     private final String value;
     private final String description;
@@ -279,6 +289,18 @@ public enum SignatureAlgorithm {
     }
 
     /**
+     * Returns the minimum key length in bits (not bytes) that may be used with this algorithm according to the
+     * <a href="https://tools.ietf.org/html/rfc7518">JWT JWA Specification (RFC 7518)</a>.
+     *
+     * @return the minimum key length in bits (not bytes) that may be used with this algorithm according to the
+     * <a href="https://tools.ietf.org/html/rfc7518">JWT JWA Specification (RFC 7518)</a>.
+     * @since 0.10.0
+     */
+    public int getMinKeyLength() {
+        return this.minKeyLength;
+    }
+
+    /**
      * Returns quietly if the specified key is allowed to create signatures using this algorithm
      * according to the <a href="https://tools.ietf.org/html/rfc7518">JWT JWA Specification (RFC 7518)</a> or throws an
      * {@link InvalidKeyException} if the key is not allowed or not secure enough for this algorithm.
@@ -393,7 +415,7 @@ public enum SignatureAlgorithm {
                     throw new InvalidKeyException(msg);
                 }
 
-                RSAKey rsaKey = (RSAKey)key;
+                RSAKey rsaKey = (RSAKey) key;
                 int size = rsaKey.getModulus().bitLength();
                 if (size < this.minKeyLength) {
 
@@ -410,6 +432,194 @@ public enum SignatureAlgorithm {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the recommended signature algorithm to be used with the specified key according to the following
+     * heuristics:
+     *
+     * <table>
+     * <caption>Key Signature Algorithm</caption>
+     * <thead>
+     * <tr>
+     * <th>If the Key is a:</th>
+     * <th>And:</th>
+     * <th>With a key size of:</th>
+     * <th>The returned SignatureAlgorithm will be:</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td>{@link SecretKey}</td>
+     * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA256")</code><sup>1</sup></td>
+     * <td>256 &lt;= size &lt;= 383 <sup>2</sup></td>
+     * <td>{@link SignatureAlgorithm#HS256 HS256}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link SecretKey}</td>
+     * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA384")</code><sup>1</sup></td>
+     * <td>384 &lt;= size &lt;= 511</td>
+     * <td>{@link SignatureAlgorithm#HS384 HS384}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link SecretKey}</td>
+     * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA512")</code><sup>1</sup></td>
+     * <td>512 &lt;= size</td>
+     * <td>{@link SignatureAlgorithm#HS512 HS512}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link ECKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>256 &lt;= size &lt;= 383 <sup>3</sup></td>
+     * <td>{@link SignatureAlgorithm#ES256 ES256}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link ECKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>384 &lt;= size &lt;= 511</td>
+     * <td>{@link SignatureAlgorithm#ES384 ES384}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link ECKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>4096 &lt;= size</td>
+     * <td>{@link SignatureAlgorithm#ES512 ES512}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link RSAKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>2048 &lt;= size &lt;= 3071 <sup>4,5</sup></td>
+     * <td>{@link SignatureAlgorithm#RS256 RS256}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link RSAKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>3072 &lt;= size &lt;= 4095 <sup>5</sup></td>
+     * <td>{@link SignatureAlgorithm#RS384 RS384}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link RSAKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>4096 &lt;= size <sup>5</sup></td>
+     * <td>{@link SignatureAlgorithm#RS512 RS512}</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>Notes:</p>
+     * <ol>
+     * <li>{@code SecretKey} instances must have an {@link Key#getAlgorithm() algorithm} name equal
+     * to {@code HmacSHA256}, {@code HmacSHA384} or {@code HmacSHA512}.  If not, the key bytes might not be
+     * suitable for HMAC signatures will be rejected with a {@link InvalidKeyException}. </li>
+     * <li>The JWT <a href="https://tools.ietf.org/html/rfc7518#section-3.2">JWA Specification (RFC 7518,
+     * Section 3.2)</a> mandates that HMAC-SHA-* signing keys <em>MUST</em> be 256 bits or greater.
+     * {@code SecretKey}s with key lengths less than 256 bits will be rejected with an
+     * {@link WeakKeyException}.</li>
+     * <li>The JWT <a href="https://tools.ietf.org/html/rfc7518#section-3.4">JWA Specification (RFC 7518,
+     * Section 3.4)</a> mandates that ECDSA signing key lengths <em>MUST</em> be 256 bits or greater.
+     * {@code ECKey}s with key lengths less than 256 bits will be rejected with a
+     * {@link WeakKeyException}.</li>
+     * <li>The JWT <a href="https://tools.ietf.org/html/rfc7518#section-3.3">JWA Specification (RFC 7518,
+     * Section 3.3)</a> mandates that RSA signing key lengths <em>MUST</em> be 2048 bits or greater.
+     * {@code RSAKey}s with key lengths less than 2048 bits will be rejected with a
+     * {@link WeakKeyException}.</li>
+     * <li>Technically any RSA key of length >= 2048 bits may be used with the {@link #RS256}, {@link #RS384}, and
+     * {@link #RS512} algorithms, so we assume an RSA signature algorithm based on the key length to
+     * parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
+     * This is not required - just a convenience.</li>
+     * </ol>
+     * <p>This implementation does not return the {@link #PS256}, {@link #PS256}, {@link #PS256} RSA variant for any
+     * specified {@link RSAKey} because:
+     * <ul>
+     * <li>The JWT <a href="https://tools.ietf.org/html/rfc7518#section-3.1">JWA Specification (RFC 7518,
+     * Section 3.1)</a> indicates that {@link #RS256}, {@link #RS384}, and {@link #RS512} are
+     * recommended algorithms while the {@code PS}* variants are simply marked as optional.</li>
+     * <li>The {@link #RS256}, {@link #RS384}, and {@link #RS512} algorithms are available in the JDK by default
+     * while the {@code PS}* variants require an additional JCA Provider (like BouncyCastle).</li>
+     * </ul>
+     * </p>
+     *
+     * <p>Finally, this method will throw an {@link InvalidKeyException} for any key that does not match the
+     * heuristics and requirements documented above, since that inevitably means the Key is either insufficient or
+     * explicitly disallowed by the JWT specification.</p>
+     *
+     * @param key the key to inspect
+     * @return the recommended signature algorithm to be used with the specified key
+     * @throws InvalidKeyException for any key that does not match the heuristics and requirements documented above,
+     *                             since that inevitably means the Key is either insufficient or explicitly disallowed by the JWT specification.
+     * @since 0.10.0
+     */
+    public static SignatureAlgorithm forSigningKey(Key key) throws InvalidKeyException {
+
+        if (key == null) {
+            throw new InvalidKeyException("Key argument cannot be null.");
+        }
+
+        if (!(key instanceof SecretKey ||
+            (key instanceof PrivateKey && (key instanceof ECKey || key instanceof RSAKey)))) {
+            String msg = "JWT standard signing algorithms require either 1) a SecretKey for HMAC-SHA algorithms or " +
+                "2) a private RSAKey for RSA algorithms or 3) a private ECKey for Elliptic Curve algorithms.  " +
+                "The specified key is of type " + key.getClass().getName();
+            throw new InvalidKeyException(msg);
+        }
+
+        if (key instanceof SecretKey) {
+
+            SecretKey secretKey = (SecretKey)key;
+            String secretKeyAlg = secretKey.getAlgorithm();
+
+            for(SignatureAlgorithm alg : PREFERRED_HMAC_ALGS) {
+                if (alg.jcaName.equals(secretKeyAlg)) {
+                    alg.assertValidSigningKey(key);
+                    return alg;
+                }
+            }
+
+            String msg = "The specified SecretKey algorithm did not equal one of the three required JCA " +
+                "algorithm names of HmacSHA256, HmacSHA384, or HmacSHA512.";
+            throw new InvalidKeyException(msg);
+        }
+
+        if (key instanceof RSAKey) {
+
+            RSAKey rsaKey = (RSAKey) key;
+            int bitLength = rsaKey.getModulus().bitLength();
+
+            if (bitLength >= 4096) {
+                RS512.assertValidSigningKey(key);
+                return RS512;
+            } else if (bitLength >= 3072) {
+                RS384.assertValidSigningKey(key);
+                return RS384;
+            } else if (bitLength >= RS256.minKeyLength) {
+                RS256.assertValidSigningKey(key);
+                return RS256;
+            }
+
+            String msg = "The specified RSA signing key is not strong enough to be used with JWT RSA signature " +
+                "algorithms.  The JWT specification requires RSA keys to be >= 2048 bits long.  The specified RSA " +
+                "key is " + bitLength + " bits.  See https://tools.ietf.org/html/rfc7518#section-3.3 for more " +
+                "information.";
+            throw new WeakKeyException(msg);
+        }
+
+        // if we've made it this far in the method, the key is an ECKey due to the instanceof assertions at the
+        // top of the method
+
+        ECKey ecKey = (ECKey) key;
+        int bitLength = ecKey.getParams().getOrder().bitLength();
+
+        for (SignatureAlgorithm alg : PREFERRED_EC_ALGS) {
+            if (bitLength >= alg.minKeyLength) {
+                alg.assertValidSigningKey(key);
+                return alg;
+            }
+        }
+
+        String msg = "The specified Elliptic Curve signing key is not strong enough to be used with JWT ECDSA " +
+            "signature algorithms.  The JWT specification requires ECDSA keys to be >= 256 bits long.  " +
+            "The specified ECDSA key is " + bitLength + " bits.  See " +
+            "https://tools.ietf.org/html/rfc7518#section-3.4 for more information.";
+        throw new WeakKeyException(msg);
     }
 
     /**

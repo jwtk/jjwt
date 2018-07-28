@@ -579,7 +579,7 @@ class JwtsTest {
         def key = Keys.secretKeyFor(alg)
         def weakKey = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
-        String jws = Jwts.builder().setSubject("Foo").signWith(alg, key).compact()
+        String jws = Jwts.builder().setSubject("Foo").signWith(key, alg).compact()
 
         try {
             Jwts.parser().setSigningKey(weakKey).parseClaimsJws(jws)
@@ -743,7 +743,7 @@ class JwtsTest {
 
         def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
-        String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact()
+        String jwt = Jwts.builder().setClaims(claims).signWith(privateKey, alg).compact()
 
         def key = publicKey
         if (verifyWithPrivateKey) {
@@ -781,7 +781,7 @@ class JwtsTest {
 
         def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
-        String jwt = Jwts.builder().setClaims(claims).signWith(alg, privateKey).compact()
+        String jwt = Jwts.builder().setClaims(claims).signWith(privateKey, alg).compact()
 
         def key = publicKey
         if (verifyWithPrivateKey) {
