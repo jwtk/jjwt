@@ -5,7 +5,11 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Utility class for securely generating {@link SecretKey}s and {@link KeyPair}s.
@@ -19,6 +23,10 @@ public final class Keys {
     private static final String EC = "io.jsonwebtoken.impl.crypto.EllipticCurveProvider";
 
     private static final Class[] SIG_ARG_TYPES = new Class[]{SignatureAlgorithm.class};
+
+    //purposefully ordered higher to lower:
+    private static final List<SignatureAlgorithm> PREFERRED_HMAC_ALGS = Collections.unmodifiableList(Arrays.asList(
+        SignatureAlgorithm.HS512, SignatureAlgorithm.HS384, SignatureAlgorithm.HS256));
 
     //prevent instantiation
     private Keys() {
@@ -39,6 +47,39 @@ public final class Keys {
         throw new IllegalArgumentException("Unsupported key type: " + key.getClass().getName());
     }
     */
+
+    /**
+     * Creates a new SecretKey instance for use with HMAC-SHA algorithms based on the specified key byte array.
+     *
+     * @param bytes the key byte array
+     * @return a new SecretKey instance for use with HMAC-SHA algorithms based on the specified key byte array.
+     * @throws WeakKeyException if the key byte array length is less than 256 bits (32 bytes) as mandated by the
+     *                          <a href="https://tools.ietf.org/html/rfc7518#section-3.2">JWT JWA Specification
+     *                          (RFC 7518, Section 3.2)</a>
+     */
+    public static SecretKey hmacShaKeyFor(byte[] bytes) throws WeakKeyException {
+
+        if (bytes == null) {
+            throw new InvalidKeyException("SecretKey byte array cannot be null.");
+        }
+
+        int bitLength = bytes.length * 8;
+
+        for (SignatureAlgorithm alg : PREFERRED_HMAC_ALGS) {
+            if (bitLength >= alg.getMinKeyLength()) {
+                return new SecretKeySpec(bytes, alg.getJcaName());
+            }
+        }
+
+        String msg = "The specified key byte array is " + bitLength + " bits which " +
+            "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
+            "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
+            "size >= 256 bits (the key size must be greater than or equal to the hash " +
+            "output size).  Consider using the " + Keys.class.getName() + "#secretKeyFor(SignatureAlgorithm) method " +
+            "to create a key guaranteed to be secure enough for your preferred HMAC-SHA algorithm.  See " +
+            "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
+        throw new WeakKeyException(msg);
+    }
 
     /**
      * Returns a new {@link SecretKey} with a key length suitable for use with the specified {@link SignatureAlgorithm}.

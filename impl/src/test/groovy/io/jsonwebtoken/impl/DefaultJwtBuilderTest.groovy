@@ -26,6 +26,10 @@ import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKeyFactory
+import java.security.KeyFactory
+
 import static org.junit.Assert.*
 
 class DefaultJwtBuilderTest {
@@ -176,8 +180,12 @@ class DefaultJwtBuilderTest {
         b.setPayload('foo')
         def alg = SignatureAlgorithm.HS256
         def key = Keys.secretKeyFor(alg)
+        b.signWith(key, alg)
+        String s1 = b.compact()
+        //ensure deprecated signWith(alg, key) produces the same result:
         b.signWith(alg, key)
-        b.compact()
+        String s2 = b.compact()
+        assertEquals s1, s2
     }
 
     @Test
@@ -218,6 +226,25 @@ class DefaultJwtBuilderTest {
         } catch (IllegalArgumentException iae) {
             assertEquals iae.message, 'Unable to serialize claims object to json: dummy text'
         }
+    }
+
+    @Test
+    void testSignWithKeyOnly() {
+
+        def b = new DefaultJwtBuilder()
+        b.setHeader(Jwts.jwsHeader().setKeyId('a'))
+        b.setPayload('foo')
+
+        def key = KeyGenerator.getInstance('HmacSHA256').generateKey()
+
+        b.signWith(key)
+        String s1 = b.compact()
+
+        //ensure matches same result with specified algorithm:
+        b.signWith(key, SignatureAlgorithm.HS256)
+        String s2 = b.compact()
+
+        assertEquals s1, s2
     }
 
     @Test
@@ -348,7 +375,7 @@ class DefaultJwtBuilderTest {
 
         def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
-        String jws = b.signWith(SignatureAlgorithm.HS256, key)
+        String jws = b.signWith(key, SignatureAlgorithm.HS256)
                 .claim('foo', 'bar')
                 .compact()
 

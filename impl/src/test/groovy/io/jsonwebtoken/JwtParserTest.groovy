@@ -641,7 +641,7 @@ class JwtParserTest {
 
         SecretKeySpec key = new SecretKeySpec(randomKey(), "HmacSHA256")
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwts.builder().setSubject(subject).signWith(key, SignatureAlgorithm.HS256).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override

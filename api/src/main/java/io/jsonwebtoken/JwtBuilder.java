@@ -15,9 +15,13 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.Decoder;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.security.Keys;
 
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -139,7 +143,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setIssuer(String iss);
 
     /**
@@ -165,7 +170,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setSubject(String sub);
 
     /**
@@ -191,7 +197,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setAudience(String aud);
 
     /**
@@ -219,7 +226,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setExpiration(Date exp);
 
     /**
@@ -247,7 +255,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setNotBefore(Date nbf);
 
     /**
@@ -275,7 +284,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setIssuedAt(Date iat);
 
     /**
@@ -305,7 +315,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    @Override //only for better/targeted JavaDoc
+    @Override
+    //only for better/targeted JavaDoc
     JwtBuilder setId(String jti);
 
     /**
@@ -326,7 +337,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * </pre>
      * <p>if desired.</p>
      *
-     * @param name the JWT Claims property name
+     * @param name  the JWT Claims property name
      * @param value the value to set for the specified Claims property name
      * @return the builder instance for method chaining.
      * @since 0.2
@@ -334,13 +345,45 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder claim(String name, Object value);
 
     /**
+     * Signs the constructed JWT with the specified key using the key's
+     * {@link SignatureAlgorithm#forSigningKey(Key) recommended signature algorithm}, producing a JWS. If the
+     * recommended signature algorithm isn't sufficient for your needs, consider using
+     * {@link #signWith(Key, SignatureAlgorithm)} instead.
+     *
+     * <p>If you are looking to invoke this method with a byte array that you are confident may be used for HMAC-SHA
+     * algorithms, consider using {@link Keys Keys}.{@link Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor(bytes)} to
+     * convert the byte array into a valid {@code Key}.</p>
+     *
+     * @param key the key to use for signing
+     * @return the builder instance for method chaining.
+     * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification as
+     *                             described by {@link SignatureAlgorithm#forSigningKey(Key)}.
+     * @see #signWith(Key, SignatureAlgorithm)
+     * @since 0.10.0
+     */
+    JwtBuilder signWith(Key key) throws InvalidKeyException;
+
+    /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
+     *
+     * <h4>Deprecation Notice: Deprecated as of 0.10.0</h4>
+     *
+     * <p>Use {@link Keys Keys}.{@link Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor(bytes)} to
+     * obtain the {@code Key} and then invoke {@link #signWith(Key)} or {@link #signWith(Key, SignatureAlgorithm)}.</p>
+     *
+     * <p>This method will be removed in the 1.0 release.</p>
      *
      * @param alg       the JWS algorithm to use to digitally sign the JWT, thereby producing a JWS.
      * @param secretKey the algorithm-specific signing key to use to digitally sign the JWT.
      * @return the builder for method chaining.
+     * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification as
+     *                             described by {@link SignatureAlgorithm#forSigningKey(Key)}.
+     * @deprecated as of 0.10.0: use {@link Keys Keys}.{@link Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor(bytes)} to
+     * obtain the {@code Key} and then invoke {@link #signWith(Key)} or {@link #signWith(Key, SignatureAlgorithm)}.
+     * This method will be removed in the 1.0 release.
      */
-    JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKey);
+    @Deprecated
+    JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKey) throws InvalidKeyException;
 
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
@@ -348,7 +391,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
      * byte array is used to invoke {@link #signWith(SignatureAlgorithm, byte[])}.</p>
      *
-     * <h4>Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0</h4>
+     * <h4>Deprecation Notice: Deprecated as of 0.10.0, will be removed in the 1.0 release.</h4>
      *
      * <p>This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
      * cryptographic operations are always binary (byte arrays), and many people were confused as to how bytes were
@@ -368,26 +411,63 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
      * signature operations.</p>
      *
-     * <p>Finally, please use the {@link #signWith(SignatureAlgorithm, Key)} method, as this method and the
-     * {@code byte[]} variant will be removed before the 1.0.0 release.</p>
+     * <p>To perform the correct logic with base64EncodedSecretKey strings with JJWT >= 0.10.0, you may do this:
+     * <pre><code>
+     * byte[] keyBytes = {@link Decoders Decoders}.{@link Decoders#BASE64 BASE64}.{@link Decoder#decode(Object) decode(base64EncodedSecretKey)};
+     * Key key = {@link Keys Keys}.{@link Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor(keyBytes)};
+     * jwtBuilder.signWith(key); //or {@link #signWith(Key, SignatureAlgorithm)}
+     * </code></pre>
+     * </p>
+     *
+     * <p>This method will be removed in the 1.0 release.</p>
      *
      * @param alg                    the JWS algorithm to use to digitally sign the JWT, thereby producing a JWS.
      * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signing key to use to digitally sign the
      *                               JWT.
      * @return the builder for method chaining.
-     * @deprecated as of 0.10.0 - use {@link #signWith(SignatureAlgorithm, Key)} instead.
+     * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification as
+     *                             described by {@link SignatureAlgorithm#forSigningKey(Key)}.
+     * @deprecated as of 0.10.0: use {@link #signWith(Key)} or {@link #signWith(Key, SignatureAlgorithm)} instead.  This
+     * method will be removed in the 1.0 release.
      */
     @Deprecated
-    JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey);
+    JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException;
 
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
      *
+     * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
+     * However, this method can be useful if the recommended algorithm heuristics do not meet your needs or if
+     * you want explicit control over the signature algorithm used with the specified key.</p>
+     *
      * @param alg the JWS algorithm to use to digitally sign the JWT, thereby producing a JWS.
      * @param key the algorithm-specific signing key to use to digitally sign the JWT.
      * @return the builder for method chaining.
+     * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
+     *                             the specified algorithm.
+     * @see #signWith(Key)
+     * @deprecated since 0.10.0: use {@link #signWith(Key, SignatureAlgorithm)} instead.  This method will be removed
+     * in the 1.0 release.
      */
-    JwtBuilder signWith(SignatureAlgorithm alg, Key key);
+    @Deprecated
+    JwtBuilder signWith(SignatureAlgorithm alg, Key key) throws InvalidKeyException;
+
+    /**
+     * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
+     *
+     * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
+     * However, this method can be useful if the recommended algorithm heuristics do not meet your needs or if
+     * you want explicit control over the signature algorithm used with the specified key.</p>
+     *
+     * @param key the signing key to use to digitally sign the JWT.
+     * @param alg the JWS algorithm to use with the key to digitally sign the JWT, thereby producing a JWS.
+     * @return the builder for method chaining.
+     * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
+     *                             the specified algorithm.
+     * @see #signWith(Key)
+     * @since 0.10.0
+     */
+    JwtBuilder signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException;
 
     /**
      * Compresses the JWT body using the specified {@link CompressionCodec}.
@@ -407,10 +487,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>Compression when creating JWE tokens however should be universally accepted for any
      * library that supports JWE.</p>
      *
-     * @see io.jsonwebtoken.CompressionCodecs
-     *
      * @param codec implementation of the {@link CompressionCodec} to be used.
      * @return the builder for method chaining.
+     * @see io.jsonwebtoken.CompressionCodecs
      * @since 0.6.0
      */
     JwtBuilder compressWith(CompressionCodec codec);
@@ -439,7 +518,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since 0.10.0
      */
-    JwtBuilder serializeToJsonWith(Serializer<Map<String,?>> serializer);
+    JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

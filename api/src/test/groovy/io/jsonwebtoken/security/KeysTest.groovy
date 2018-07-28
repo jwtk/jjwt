@@ -31,6 +31,32 @@ class KeysTest {
     }
 
     @Test
+    void testHmacShaKeyForWithNullArgument() {
+        try {
+            Keys.hmacShaKeyFor(null)
+        } catch (InvalidKeyException expected) {
+            assertEquals 'SecretKey byte array cannot be null.', expected.message
+        }
+    }
+
+    @Test
+    void testHmacShaKeyForWithWeakKey() {
+        int numBytes = 31
+        int numBits = numBytes * 8
+        try {
+            Keys.hmacShaKeyFor(new byte[numBytes])
+        } catch (WeakKeyException expected) {
+            assertEquals "The specified key byte array is " + numBits + " bits which " +
+                    "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
+                    "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
+                    "size >= 256 bits (the key size must be greater than or equal to the hash " +
+                    "output size).  Consider using the " + Keys.class.getName() + "#secretKeyFor(SignatureAlgorithm) method " +
+                    "to create a key guaranteed to be secure enough for your preferred HMAC-SHA algorithm.  See " +
+                    "https://tools.ietf.org/html/rfc7518#section-3.2 for more information." as String, expected.message
+        }
+    }
+
+    @Test
     void testSecretKeyFor() {
 
         for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {

@@ -34,6 +34,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -109,16 +110,33 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKeyBytes) {
+    public JwtBuilder signWith(Key key) throws InvalidKeyException {
+        Assert.notNull(key, "Key argument cannot be null.");
+        SignatureAlgorithm alg = SignatureAlgorithm.forSigningKey(key);
+        return signWith(key, alg);
+    }
+
+    @Override
+    public JwtBuilder signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException {
+        Assert.notNull(key, "Key argument cannot be null.");
+        Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
+        alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
+        this.algorithm = alg;
+        this.key = key;
+        return this;
+    }
+
+    @Override
+    public JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKeyBytes) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notEmpty(secretKeyBytes, "secret key byte array cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         SecretKey key = new SecretKeySpec(secretKeyBytes, alg.getJcaName());
-        return signWith(alg, key);
+        return signWith(key, alg);
     }
 
     @Override
-    public JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) {
+    public JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
@@ -127,12 +145,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder signWith(SignatureAlgorithm alg, Key key) {
-        Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        Assert.notNull(key, "Key argument cannot be null.");
-        alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        this.algorithm = alg;
-        this.key = key;
-        return this;
+        return signWith(key, alg);
     }
 
     @Override
