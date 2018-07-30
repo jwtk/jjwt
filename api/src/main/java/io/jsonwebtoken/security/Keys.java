@@ -148,7 +148,7 @@ public final class Keys {
      * <td>3072 bits</td>
      * </tr>
      * <tr>
-     * <td>PS256</td>
+     * <td>PS384</td>
      * <td>3072 bits</td>
      * </tr>
      * <tr>
@@ -185,16 +185,14 @@ public final class Keys {
      * <tr>
      * <td>EC512</td>
      * <td>512 bits</td>
-     * <td>{@code P-512}</td>
+     * <td>{@code P-521}</td>
      * <td>{@code secp521r1}</td>
      * </tr>
      * </table>
      *
      * @param alg the {@code SignatureAlgorithm} to inspect to determine which asymmetric algorithm to use.
      * @return a new {@link KeyPair} suitable for use with the specified asymmetric algorithm.
-     * @throws IllegalArgumentException if {@code alg} equals {@link SignatureAlgorithm#HS256 HS256},
-     *                                  {@link SignatureAlgorithm#HS384 HS384}, {@link SignatureAlgorithm#HS512 HS512}
-     *                                  or {@link SignatureAlgorithm#NONE NONE}.
+     * @throws IllegalArgumentException if {@code alg} is not an asymmetric algorithm
      */
     public static KeyPair keyPairFor(SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
