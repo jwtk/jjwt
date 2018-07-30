@@ -19,9 +19,9 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
 
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
