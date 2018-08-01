@@ -2,38 +2,34 @@
 
 ### 0.10.0
 
-This is a minor feature enhancement that ensures Base64 encoding is identical and deterministic on all JDK and
-Android platforms.  JJWT previously relied on the underlying platform encoder (JAXB xml DataBinding or Android's native
-Base64), however in some cases this produced unexpected results across platforms, including when compared against the
-JDK's >= 8 Base64 implementation.
+This is a fairly large feature enhancement release that enables the following:
 
-JJWT now embeds a super lightweight (1 class) and *extremely* fast RFC-compliant Base64 implementation to guarantee 
-portability across all supported platforms.  It is now enabled automatically and there is nothing you need to 
-do to enable it.
+* Modular project structure resulting in pluggable JJWT dependencies ([Issue 348](https://github.com/jwtk/jjwt/issues/348))
+* Auto-configuration for Jackson or JSON-Java [JSON processors](https://github.com/jwtk/jjwt#json).
+* [Automatic SignatureAlgorithm selection](https://github.com/jwtk/jjwt#jws-create-key) based on specified signing Key.
+* Algorithm and Key [Strength Assertions](https://github.com/jwtk/jjwt#jws-key)
+* [Simplified Key generation](https://github.com/jwtk/jjwt#jws-key-create)
+* Deterministic [Base64(URL) support](https://github.com/jwtk/jjwt#base64) on all JDK and Android platforms
+* [Custom JSON processing](https://github.com/jwtk/jjwt#json-custom)
+* Complete [documentation](https://github.com/jwtk/jjwt)
+* and a bunch of other [minor fixes and enhancements](https://github.com/jwtk/jjwt/milestone/11).
 
-However, if the default implementation isn't sufficient for your purposes, you may now specify your own
-encoder during JWT building or decoder during JWT parsing as you see fit.
+**BACKWARDS-COMPATIBILITY NOTICE:**
 
-For example, an encoder during building:
+JJWT's new modular design utilizes distinctions between compile and runtime dependencies to ensure you only depend
+on the public APIs that are safe to use in your application.  All internal/private implementation classes have
+been moved to a new `jjwt-impl` runtime dependency.
 
-```java
-Encoder<byte[], String> encoder = new MyBase64UrlEncoder(); //implement me
+If you depended on any internal implementation classes in the past, you have two choices:
 
-Jwts.builder()
-    .base64UrlEncodeWith(encoder)
-    // ... etc ...
-    .compact();
-```
-
-Or a decoder during parsing:
-```java
-Decoder<String, byte[]> decoder = new MyBase64UrlDecoder(); //implement me
-
-Jwts.parser()
-    .base64UrlDecodeWith(decoder)
-    // ... etc ...
-    .parseClaimsJws(jws);
-```
+1. Refactor your code to use the public-only API classes and interfaces in the `jjwt-api` .jar.  Any functionality
+   you might have used in the internal implementation should be available via newer cleaner interfaces and helper 
+   classes in that .jar.
+   
+2. Specify the new `jjwt-impl` .jar not as a runtime dependency but as a compile dependency.  This would make your
+   upgrade to JJWT 0.10.0 fully backwards compatible, but you do so _at your own risk_.  JJWT will make **NO** 
+   semantic version compatibility guarantees in the `jjwt-impl` .jar moving forward.  Semantic versioning will be 
+   very carefully adhered to in all other JJWT dependencies however.
 
 ### 0.9.1
 
