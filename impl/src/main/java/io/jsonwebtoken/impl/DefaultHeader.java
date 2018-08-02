@@ -53,14 +53,26 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
         return (T)this;
     }
 
+    @Override
+    public String getAlgorithm() {
+        return getString(ALGORITHM);
+    }
+
+    @Override
+    public T setAlgorithm(String alg) {
+        setValue(ALGORITHM, alg);
+        return (T)this;
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public String getCompressionAlgorithm() {
-        String alg = getString(COMPRESSION_ALGORITHM);
-        if (!Strings.hasText(alg)) {
-            alg = getString(DEPRECATED_COMPRESSION_ALGORITHM);
+        String s = getString(COMPRESSION_ALGORITHM);
+        if (!Strings.hasText(s)) {
+            //backwards compatibility TODO: remove when releasing 1.0
+            s = getString(DEPRECATED_COMPRESSION_ALGORITHM);
         }
-        return alg;
+        return s;
     }
 
     @Override

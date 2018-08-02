@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.io.DeserializationException
@@ -28,6 +27,12 @@ import org.hamcrest.CoreMatchers
 import org.junit.Test
 
 import static org.easymock.EasyMock.niceMock
+import io.jsonwebtoken.security.SignatureAlgorithms
+import org.junit.Test
+
+import java.security.Provider
+
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertSame
 import static org.hamcrest.MatcherAssert.assertThat
@@ -39,6 +44,17 @@ import static org.hamcrest.MatcherAssert.assertThat
 class DefaultJwtParserBuilderTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+
+    @Test
+    void testSetProvider() {
+        Provider provider = createMock(Provider)
+        replay provider
+
+        def parser = new DefaultJwtParserBuilder().setProvider(provider).build()
+
+        assertSame provider, parser.jwtParser.provider
+        verify provider
+    }
 
     @Test(expected = IllegalArgumentException)
     void testBase64UrlDecodeWithNullArgument() {
@@ -73,9 +89,10 @@ class DefaultJwtParserBuilderTest {
         def p = new DefaultJwtParserBuilder().deserializeJsonWith(deserializer)
         assertSame deserializer, p.deserializer
 
-        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        def alg = SignatureAlgorithms.HS256
+        def key = alg.generateKey()
 
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
+        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
 
         assertEquals 'bar', p.setSigningKey(key).build().parseClaimsJws(jws).getBody().get('foo')
     }

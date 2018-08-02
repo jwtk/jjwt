@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-root</artifactId>
-        <version>0.11.3-SNAPSHOT</version>
+        <version>0.12.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -43,5 +43,14 @@
             <artifactId>gson</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.siom79.japicmp</groupId>
+                <artifactId>japicmp-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

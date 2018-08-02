@@ -77,6 +77,30 @@ public final class Jwts {
     }
 
     /**
+     * Returns a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's).
+     *
+     * @return a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's).
+     * @see JwtBuilder#setHeader(Header)
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static JweHeader jweHeader() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJweHeader");
+    }
+
+    /**
+     * Returns a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's), populated with the
+     * specified name/value pairs.
+     *
+     * @return a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's), populated with the
+     * specified name/value pairs.
+     * @see JwtBuilder#setHeader(Header)
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static JweHeader jweHeader(Map<String, Object> header) {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJweHeader", MAP_ARG, header);
+    }
+
+    /**
      * Returns a new {@link Claims} instance to be used as a JWT body.
      *
      * @return a new {@link Claims} instance to be used as a JWT body.

@@ -16,12 +16,13 @@
 package io.jsonwebtoken;
 
 /**
- * Exception thrown when {@link Claims#get(String, Class)} is called and the value does not match the type of the
- * {@code Class} argument.
+ * Exception thrown when attempting to obtain a value from a JWT or JWK and the existing value does not match the
+ * expected type.
  *
  * @since 0.6
  */
 public class RequiredTypeException extends JwtException {
+
     public RequiredTypeException(String message) {
         super(message);
     }

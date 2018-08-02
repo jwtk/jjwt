@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -73,7 +74,7 @@ class EllipticCurveSignerTest {
         }
 
         byte[] bytes = new byte[16]
-        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
+        Randoms.secureRandom().nextBytes(bytes)
 
         try {
             signer.sign(bytes)
@@ -102,7 +103,7 @@ class EllipticCurveSignerTest {
         }
 
         byte[] bytes = new byte[16]
-        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
+        Randoms.secureRandom().nextBytes(bytes)
 
         try {
             signer.sign(bytes)
@@ -131,7 +132,7 @@ class EllipticCurveSignerTest {
         }
 
         byte[] bytes = new byte[16]
-        SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
+        Randoms.secureRandom().nextBytes(bytes)
 
         try {
             signer.sign(bytes)

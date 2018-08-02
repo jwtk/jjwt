@@ -39,6 +39,20 @@ class RsaSignatureValidatorTest {
     }
 
     @Test
+    void testConstructorWithRsaPublicKey() {
+        def pair = RsaProvider.generateKeyPair(2048)
+        def validator = new RsaSignatureValidator(SignatureAlgorithm.RS256, pair.getPublic());
+        assertNull validator.SIGNER
+    }
+
+    @Test
+    void testConstructorWithRsaPrivateKey() {
+        def pair = RsaProvider.generateKeyPair(2048)
+        def validator = new RsaSignatureValidator(SignatureAlgorithm.RS256, pair.getPrivate());
+        assertTrue validator.SIGNER instanceof RsaSigner
+    }
+
+    @Test
     void testDoVerifyWithInvalidKeyException() {
 
         SignatureAlgorithm alg = SignatureAlgorithm.RS256

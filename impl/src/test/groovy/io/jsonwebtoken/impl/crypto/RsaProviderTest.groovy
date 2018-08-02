@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
@@ -41,7 +42,7 @@ class RsaProviderTest {
     @Test
     void testGenerateKeyPairWithInvalidProviderName() {
         try {
-            RsaProvider.generateKeyPair('foo', 1024, SignatureProvider.DEFAULT_SECURE_RANDOM)
+            RsaProvider.generateKeyPair('foo', 1024, Randoms.secureRandom())
             fail()
         } catch (IllegalStateException ise) {
             assertTrue ise.message.startsWith("Unable to obtain an RSA KeyPairGenerator: ")

@@ -45,7 +45,7 @@ class DefaultJwtParserTest {
     }
 
     @Test
-    void testBase64UrlEncodeWithCustomDecoder() {
+    void testBase64UrlDecodeWithCustomDecoder() {
         def decoder = new Decoder() {
             @Override
             Object decode(Object o) throws DecodingException {
@@ -54,6 +54,11 @@ class DefaultJwtParserTest {
         }
         def b = new DefaultJwtParser().base64UrlDecodeWith(decoder)
         assertSame decoder, b.base64UrlDecoder
+    }
+
+    @Test(expected = MalformedJwtException)
+    void testBase64UrlDecodeWithInvalidInput() {
+        new DefaultJwtParser().base64UrlDecode('20:SLDKJF;3993;----')
     }
 
     @Test(expected = IllegalArgumentException)

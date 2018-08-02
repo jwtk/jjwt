@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.security.EllipticCurveSignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.security.InvalidKeyException;
@@ -54,6 +55,6 @@ public class EllipticCurveSigner extends EllipticCurveProvider implements Signer
         Signature sig = createSignatureInstance();
         sig.initSign(privateKey);
         sig.update(data);
-        return transcodeSignatureToConcat(sig.sign(), getSignatureByteArrayLength(alg));
+        return EllipticCurveSignatureAlgorithm.transcodeSignatureToConcat(sig.sign(), getSignatureByteArrayLength(alg));
     }
 }

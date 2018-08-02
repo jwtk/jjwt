@@ -22,13 +22,14 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
+import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.impl.lang.Services;
 
 import java.security.Key;
+import java.security.Provider;
 import java.util.Date;
 import java.util.Map;
 
@@ -49,6 +50,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     static final String MAX_CLOCK_SKEW_ILLEGAL_MSG = "Illegal allowedClockSkewMillis value: multiplying this " +
         "value by 1000 to obtain the number of milliseconds would cause a numeric overflow.";
 
+    private Provider provider;
+
     private byte[] keyBytes;
 
     private Key key;
@@ -67,6 +70,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private long allowedClockSkewMillis = 0;
 
+    @Override
+    public JwtParserBuilder setProvider(Provider provider) {
+        this.provider = provider;
+        return this;
+    }
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
@@ -197,7 +205,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         }
 
         return new ImmutableJwtParser(
-                new DefaultJwtParser(signingKeyResolver,
+                new DefaultJwtParser(provider,
+                                     signingKeyResolver,
                                      key,
                                      keyBytes,
                                      clock,

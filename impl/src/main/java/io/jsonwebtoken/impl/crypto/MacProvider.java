@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.security.Randoms;
 import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.KeyGenerator;
@@ -48,19 +49,19 @@ public abstract class MacProvider extends SignatureProvider {
     /**
      * Generates a new secure-random secret key of a length suitable for creating and verifying HMAC signatures
      * according to the specified {@code SignatureAlgorithm} using JJWT's default {@link
-     * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
+     * Randoms#secureRandom() SecureRandom instance}.  This is a convenience method that immediately
      * delegates to {@link #generateKey(SignatureAlgorithm, SecureRandom)}.
      *
      * @param alg the desired signature algorithm
      * @return a new secure-random secret key of a length suitable for creating and verifying HMAC signatures according
-     * to the specified {@code SignatureAlgorithm} using JJWT's default {@link SignatureProvider#DEFAULT_SECURE_RANDOM
-     * SecureRandom instance}.
+     * to the specified {@code SignatureAlgorithm} using JJWT's default {@link
+     * Randoms#secureRandom() SecureRandom instance}.
      * @see #generateKey()
      * @see #generateKey(SignatureAlgorithm, SecureRandom)
      * @since 0.5
      */
     public static SecretKey generateKey(SignatureAlgorithm alg) {
-        return generateKey(alg, DEFAULT_SECURE_RANDOM);
+        return generateKey(alg, Randoms.secureRandom());
     }
 
     /**

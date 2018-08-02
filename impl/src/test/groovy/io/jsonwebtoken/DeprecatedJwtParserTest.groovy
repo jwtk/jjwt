@@ -17,6 +17,7 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultClock
 import io.jsonwebtoken.impl.FixedClock
+import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.SignatureException
@@ -1503,7 +1504,8 @@ class DeprecatedJwtParserTest {
             Jwts.parser().setSigningKey(randomKey()).parse(bad)
             fail()
         } catch (MalformedJwtException se) {
-            assertEquals 'JWT strings must contain exactly 2 period characters. Found: 3', se.message
+            String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '3'
+            assertEquals expected, se.message
         }
     }
 

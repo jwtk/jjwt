@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.security.Randoms;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.RuntimeEnvironment;
 import io.jsonwebtoken.security.SignatureException;
@@ -105,7 +106,7 @@ public abstract class RsaProvider extends SignatureProvider {
 
     /**
      * Generates a new RSA secure-randomly key pair of the specified size using JJWT's default {@link
-     * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
+     * Randoms#secureRandom() SecureRandom instance}.  This is a convenience method that immediately
      * delegates to {@link #generateKeyPair(int, SecureRandom)}.
      *
      * @param keySizeInBits the key size in bits (<em>NOT bytes</em>).
@@ -116,12 +117,12 @@ public abstract class RsaProvider extends SignatureProvider {
      * @since 0.5
      */
     public static KeyPair generateKeyPair(int keySizeInBits) {
-        return generateKeyPair(keySizeInBits, DEFAULT_SECURE_RANDOM);
+        return generateKeyPair(keySizeInBits, Randoms.secureRandom());
     }
 
     /**
      * Generates a new RSA secure-randomly key pair suitable for the specified SignatureAlgorithm using JJWT's
-     * default {@link SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method
+     * default {@link Randoms#secureRandom() SecureRandom instance}.  This is a convenience method
      * that immediately delegates to {@link #generateKeyPair(int)} based on the relevant key size for the specified
      * algorithm.
      *
@@ -146,7 +147,7 @@ public abstract class RsaProvider extends SignatureProvider {
                 keySizeInBits = 3072;
                 break;
         }
-        return generateKeyPair(keySizeInBits, DEFAULT_SECURE_RANDOM);
+        return generateKeyPair(keySizeInBits, Randoms.secureRandom());
     }
 
     /**
