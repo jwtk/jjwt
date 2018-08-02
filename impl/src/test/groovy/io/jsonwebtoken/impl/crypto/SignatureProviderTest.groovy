@@ -47,7 +47,7 @@ class SignatureProviderTest {
     @Test
     void testCreateSignatureInstanceNoSuchAlgorithmNonStandardAlgorithm() {
 
-        def p = new SignatureProvider(SignatureAlgorithm.ES512, EllipticCurveProvider.generateKeyPair().getPublic()) {
+        def p = new SignatureProvider(SignatureAlgorithm.PS256, RsaProvider.generateKeyPair().getPrivate()) {
             @Override
             protected Signature getSignatureInstance() throws NoSuchAlgorithmException {
                 throw new NoSuchAlgorithmException('foo')
@@ -65,7 +65,7 @@ class SignatureProviderTest {
     @Test
     void testCreateSignatureInstanceNoSuchAlgorithmNonStandardAlgorithmWithoutBouncyCastle() {
 
-        def p = new SignatureProvider(SignatureAlgorithm.ES512, EllipticCurveProvider.generateKeyPair().getPublic()) {
+        def p = new SignatureProvider(SignatureAlgorithm.PS256, RsaProvider.generateKeyPair().getPrivate()) {
             @Override
             protected Signature getSignatureInstance() throws NoSuchAlgorithmException {
                 throw new NoSuchAlgorithmException('foo')
@@ -81,7 +81,7 @@ class SignatureProviderTest {
             p.createSignatureInstance()
             fail()
         } catch (SignatureException se) {
-            assertTrue se.message.contains('Try including BouncyCastle in the runtime classpath')
+            assertTrue se.message.contains('This is not a standard JDK algorithm. Try including BouncyCastle in the runtime classpath.')
         }
     }
 }

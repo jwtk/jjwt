@@ -18,11 +18,13 @@ package io.jsonwebtoken.impl.crypto;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.security.spec.ECGenParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,10 +87,8 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * Generates a new secure-random key pair of sufficient strength for the specified Elliptic Curve {@link
      * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using the specified {@link
      * SecureRandom} random number generator.  This is a convenience method that immediately delegates to {@link
-     * #generateKeyPair(String, String, SignatureAlgorithm, SecureRandom)} using {@code "ECDSA"} as the {@code
-     * jcaAlgorithmName} and {@code "BC"} as the {@code jcaProviderName} since EllipticCurve requires the use of an
-     * external JCA provider ({@code BC stands for BouncyCastle}.  This will work as expected as long as the
-     * BouncyCastle dependency is in the runtime classpath.
+     * #generateKeyPair(String, String, SignatureAlgorithm, SecureRandom)} using {@code "EC"} as the {@code
+     * jcaAlgorithmName}.
      *
      * @param alg    alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES384} or {@code
      *               ES512}
@@ -101,7 +101,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * @see #generateKeyPair(String, String, SignatureAlgorithm, SecureRandom)
      */
     public static KeyPair generateKeyPair(SignatureAlgorithm alg, SecureRandom random) {
-        return generateKeyPair("ECDSA", "BC", alg, random);
+        return generateKeyPair("EC", null, alg, random);
     }
 
     /**
@@ -111,8 +111,8 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      *
      * @param jcaAlgorithmName the JCA name of the algorithm to use for key pair generation, for example, {@code
      *                         ECDSA}.
-     * @param jcaProviderName  the JCA provider name of the algorithm implementation, for example {@code BC} for
-     *                         BouncyCastle.
+     * @param jcaProviderName  the JCA provider name of the algorithm implementation (for example {@code "BC"} for
+     *                         BouncyCastle) or {@code null} if the default provider should be used.
      * @param alg              alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES384} or
      *                         {@code ES512}
      * @param random           the SecureRandom generator to use during key generation.
@@ -128,9 +128,17 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
         Assert.notNull(alg, "SignatureAlgorithm argument cannot be null.");
         Assert.isTrue(alg.isEllipticCurve(), "SignatureAlgorithm argument must represent an Elliptic Curve algorithm.");
         try {
-            KeyPairGenerator g = KeyPairGenerator.getInstance(jcaAlgorithmName, jcaProviderName);
+            KeyPairGenerator g;
+
+            if (Strings.hasText(jcaProviderName)) {
+                g = KeyPairGenerator.getInstance(jcaAlgorithmName, jcaProviderName);
+            } else {
+                g = KeyPairGenerator.getInstance(jcaAlgorithmName);
+            }
+
             String paramSpecCurveName = EC_CURVE_NAMES.get(alg);
-            g.initialize(org.bouncycastle.jce.ECNamedCurveTable.getParameterSpec(paramSpecCurveName), random);
+            ECGenParameterSpec spec = new ECGenParameterSpec(paramSpecCurveName);
+            g.initialize(spec, random);
             return g.generateKeyPair();
         } catch (Exception e) {
             throw new IllegalStateException("Unable to generate Elliptic Curve KeyPair: " + e.getMessage(), e);
@@ -143,18 +151,19 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      *
      * @param alg The ECDSA algorithm. Must be supported and not
      *            {@code null}.
-     *
      * @return The expected byte array length for the signature.
-     *
      * @throws JwtException If the algorithm is not supported.
      */
     public static int getSignatureByteArrayLength(final SignatureAlgorithm alg)
-            throws JwtException {
+        throws JwtException {
 
         switch (alg) {
-            case ES256: return 64;
-            case ES384: return 96;
-            case ES512: return 132;
+            case ES256:
+                return 64;
+            case ES384:
+                return 96;
+            case ES512:
+                return 132;
             default:
                 throw new JwtException("Unsupported Algorithm: " + alg.name());
         }
@@ -167,9 +176,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      *
      * @param derSignature The ASN1./DER-encoded. Must not be {@code null}.
      * @param outputLength The expected length of the ECDSA JWS signature.
-     *
      * @return The ECDSA JWS encoded signature.
-     *
      * @throws JwtException If the ASN.1/DER signature format is invalid.
      */
     public static byte[] transcodeSignatureToConcat(final byte[] derSignature, int outputLength) throws JwtException {
@@ -205,9 +212,9 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
         rawLen = Math.max(rawLen, outputLength / 2);
 
         if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset
-                || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength
-                || derSignature[offset] != 2
-                || derSignature[offset + 2 + rLength] != 2) {
+            || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength
+            || derSignature[offset] != 2
+            || derSignature[offset + 2 + rLength] != 2) {
             throw new JwtException("Invalid ECDSA signature format");
         }
 
@@ -220,7 +227,6 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
     }
 
 
-
     /**
      * Transcodes the ECDSA JWS signature into ASN.1/DER format for use by
      * the JCA verifier.
@@ -228,9 +234,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * @param jwsSignature The JWS signature, consisting of the
      *                     concatenated R and S values. Must not be
      *                     {@code null}.
-     *
      * @return The ASN.1/DER encoded signature.
-     *
      * @throws JwtException If the ECDSA JWS signature format is invalid.
      */
     public static byte[] transcodeSignatureToDER(byte[] jwsSignature) throws JwtException {
@@ -239,7 +243,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
         int i = rawLen;
 
-        while((i > 0) && (jwsSignature[rawLen - i] == 0)) {
+        while ((i > 0) && (jwsSignature[rawLen - i] == 0)) {
             i--;
         }
 

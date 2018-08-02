@@ -38,7 +38,7 @@ class EllipticCurveProviderTest {
     @Test
     void testGenerateKeyPairWithInvalidProviderName() {
         try {
-            EllipticCurveProvider.generateKeyPair("ECDSA", "Foo", SignatureAlgorithm.ES256, null)
+            EllipticCurveProvider.generateKeyPair("EC", "Foo", SignatureAlgorithm.ES256, null)
             fail()
         } catch (IllegalStateException ise) {
             assertEquals ise.message, "Unable to generate Elliptic Curve KeyPair: no such provider: Foo"
@@ -49,7 +49,7 @@ class EllipticCurveProviderTest {
     @Test
     void testGenerateKeyPairWithNullAlgorithm() {
         try {
-            EllipticCurveProvider.generateKeyPair("ECDSA", "Foo", null, null)
+            EllipticCurveProvider.generateKeyPair("EC", "Foo", null, null)
             fail()
         } catch (IllegalArgumentException ise) {
             assertEquals ise.message, "SignatureAlgorithm argument cannot be null."
@@ -59,7 +59,7 @@ class EllipticCurveProviderTest {
     @Test
     void testGenerateKeyPairWithNonEllipticCurveAlgorithm() {
         try {
-            EllipticCurveProvider.generateKeyPair("ECDSA", "Foo", SignatureAlgorithm.HS256, null)
+            EllipticCurveProvider.generateKeyPair("EC", "Foo", SignatureAlgorithm.HS256, null)
             fail()
         } catch (IllegalArgumentException ise) {
             assertEquals ise.message, "SignatureAlgorithm argument must represent an Elliptic Curve algorithm."

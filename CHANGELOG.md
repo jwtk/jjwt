@@ -1,5 +1,16 @@
 ## Release Notes
 
+### 0.10.1
+
+This is a minor point release that ensures the BouncyCastle dependency is optional and not pulled in as a transitive
+dependency into projects.
+ 
+Internal implementation code (not impacting the JJWT API) and documentation was also updated to reflect that all 
+Elliptic Curve algorithms are standard on the JDK and do not require Bouncy Castle.
+
+Bouncy Castle is only needed when using PS256, PS384, and PS512 signature algorithms on < JDK 11. 
+[JDK 11 and later](https://bugs.openjdk.java.net/browse/JDK-8146293) supports these algorithms natively.
+
 ### 0.10.0
 
 This is a fairly large feature enhancement release that enables the following:

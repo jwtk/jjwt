@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.lang.RuntimeEnvironment;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -74,25 +73,19 @@ public enum SignatureAlgorithm {
     RS512("RS512", "RSASSA-PKCS-v1_5 using SHA-512", "RSA", "SHA512withRSA", true, 512, 2048),
 
     /**
-     * JWA algorithm name for {@code ECDSA using P-256 and SHA-256}.  <b>This is not a JDK standard algorithm and
-     * requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle will be used
-     * automatically if found in the runtime classpath.
+     * JWA algorithm name for {@code ECDSA using P-256 and SHA-256}
      */
-    ES256("ES256", "ECDSA using P-256 and SHA-256", "ECDSA", "SHA256withECDSA", false, 256, 256),
+    ES256("ES256", "ECDSA using P-256 and SHA-256", "ECDSA", "SHA256withECDSA", true, 256, 256),
 
     /**
-     * JWA algorithm name for {@code ECDSA using P-384 and SHA-384}.  <b>This is not a JDK standard algorithm and
-     * requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle will be used
-     * automatically if found in the runtime classpath.
+     * JWA algorithm name for {@code ECDSA using P-384 and SHA-384}
      */
-    ES384("ES384", "ECDSA using P-384 and SHA-384", "ECDSA", "SHA384withECDSA", false, 384, 384),
+    ES384("ES384", "ECDSA using P-384 and SHA-384", "ECDSA", "SHA384withECDSA", true, 384, 384),
 
     /**
-     * JWA algorithm name for {@code ECDSA using P-521 and SHA-512}.  <b>This is not a JDK standard algorithm and
-     * requires that a JCA provider like BouncyCastle be in the runtime classpath.</b>  BouncyCastle will be used
-     * automatically if found in the runtime classpath.
+     * JWA algorithm name for {@code ECDSA using P-521 and SHA-512}
      */
-    ES512("ES512", "ECDSA using P-521 and SHA-512", "ECDSA", "SHA512withECDSA", false, 512, 521),
+    ES512("ES512", "ECDSA using P-521 and SHA-512", "ECDSA", "SHA512withECDSA", true, 512, 521),
 
     /**
      * JWA algorithm name for {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256}.  <b>This is not a JDK standard
@@ -114,10 +107,6 @@ public enum SignatureAlgorithm {
      * automatically if found in the runtime classpath.
      */
     PS512("PS512", "RSASSA-PSS using SHA-512 and MGF1 with SHA-512", "RSA", "SHA512withRSAandMGF1", false, 512, 2048);
-
-    static {
-        RuntimeEnvironment.enableBouncyCastleIfPossible();
-    }
 
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_HMAC_ALGS = Collections.unmodifiableList(Arrays.asList(
