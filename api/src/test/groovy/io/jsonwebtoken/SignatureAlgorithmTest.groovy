@@ -187,17 +187,6 @@ class SignatureAlgorithmTest {
     }
 
     @Test
-    void testForSigningKeySecretKeyInvalidAlgName() {
-        try {
-            SignatureAlgorithm.forSigningKey(new SecretKeySpec(new byte[1], 'AES'))
-            fail()
-        } catch (InvalidKeyException e) {
-            assertEquals "The specified SecretKey algorithm did not equal one of the three required JCA " +
-                    "algorithm names of HmacSHA256, HmacSHA384, or HmacSHA512.", e.message
-        }
-    }
-
-    @Test
     void testForSigningKeySecretKeyWeakKey() {
         try {
             SignatureAlgorithm.forSigningKey(new SecretKeySpec(new byte[1], 'HmacSHA256'))

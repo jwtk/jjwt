@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.10.3
+
+This is a minor patch release that fixed a key length assertion for `SignatureAlgorithm.forSigningKey` that was 
+failing in Android environments.  The Android dependencies and ProGuard exclusions documentation was updated as 
+well to reflect Android Studio 3.0 conventions.
+
 ### 0.10.2
 
 This is a minor patch release that ensures the `OrgJsonSerializer` and `OrgJsonDeserializer` implementations are 
