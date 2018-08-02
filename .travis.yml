@@ -3,13 +3,16 @@
 #sudo: required
 language: java
 jdk:
-  - openjdk7
+  - oraclejdk7
   - oraclejdk8
   - oraclejdk9
   - oraclejdk10
   - openjdk10
 
 before_install:
+  - if [ "${TRAVIS_JDK_VERSION}" == "oraclejdk7" ]; then export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"; fi
+  - if [ "${TRAVIS_JDK_VERSION}" == "oraclejdk7" ]; then export JAVA_HOME="/usr/lib/jvm/java-7-oracle"; export PATH="${JAVA_HOME}/bin:${PATH}"; fi
+  - if [ "${TRAVIS_JDK_VERSION}" == "oraclejdk7" ]; then test ! -d "${JAVA_HOME}" && (curl http://ftp.osuosl.org/pub/funtoo/distfiles/oracle-java/jdk-7u80-linux-x64.tar.gz | sudo tar xz -C /usr/lib/jvm; sudo mv /usr/lib/jvm/jdk1.7.0_80 "${JAVA_HOME}"); fi
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
 
 install: true

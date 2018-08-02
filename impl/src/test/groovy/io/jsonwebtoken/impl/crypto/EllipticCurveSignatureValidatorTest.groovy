@@ -19,7 +19,6 @@ import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.SignatureException
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test
 
 import java.security.*
@@ -28,10 +27,6 @@ import java.security.spec.X509EncodedKeySpec
 import static org.junit.Assert.*
 
 class EllipticCurveSignatureValidatorTest {
-
-    static {
-        Security.addProvider(new BouncyCastleProvider())
-    }
 
     @Test
     void testDoVerifyWithInvalidKeyException() {
@@ -62,7 +57,7 @@ class EllipticCurveSignatureValidatorTest {
 
     @Test
     void ecdsaSignatureComplianceTest() {
-        def fact = KeyFactory.getInstance("ECDSA", "BC");
+        def fact = KeyFactory.getInstance("EC");
         def publicKey = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="
         def pub = fact.generatePublic(new X509EncodedKeySpec(Decoders.BASE64.decode(publicKey)))
         def v = new EllipticCurveSignatureValidator(SignatureAlgorithm.ES512, pub)
@@ -82,7 +77,7 @@ class EllipticCurveSignatureValidatorTest {
     void legacySignatureCompatTest() {
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def keypair = EllipticCurveProvider.generateKeyPair()
-        def signature = Signature.getInstance(SignatureAlgorithm.ES512.jcaName, "BC")
+        def signature = Signature.getInstance(SignatureAlgorithm.ES512.jcaName)
         def data = withoutSignature.getBytes("US-ASCII")
         signature.initSign(keypair.private)
         signature.update(data)

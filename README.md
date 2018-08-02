@@ -84,17 +84,17 @@ enforcement.
     * HS256: HMAC using SHA-256
     * HS384: HMAC using SHA-384
     * HS512: HMAC using SHA-512
+    * ES256: ECDSA using P-256 and SHA-256
+    * ES384: ECDSA using P-384 and SHA-384
+    * ES512: ECDSA using P-521 and SHA-512
     * RS256: RSASSA-PKCS-v1_5 using SHA-256
     * RS384: RSASSA-PKCS-v1_5 using SHA-384
     * RS512: RSASSA-PKCS-v1_5 using SHA-512
     * PS256: RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup>1</sup>
     * PS384: RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup>1</sup>
     * PS512: RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup>1</sup>
-    * ES256: ECDSA using P-256 and SHA-256<sup>1</sup>
-    * ES384: ECDSA using P-384 and SHA-384<sup>1</sup>
-    * ES512: ECDSA using P-521 and SHA-512<sup>1</sup>
     
-     <sup>1. Requires a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+     <sup>1. Requires JDK 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
  * Convenience enhancements beyond the specification such as
     * Body compression for any large JWT, not just JWEs
     * Claims assertions (requiring specific values)
@@ -179,22 +179,21 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1</version>
     <scope>runtime</scope>
 </dependency>
-<!-- Uncomment this next dependency if you want to use Elliptic Curve (ES256, ES384, ES512) 
-     or RSASSA-PSS (PS256, PS384, PS512) algorithms:
+<!-- Uncomment this next dependency if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
@@ -205,18 +204,16 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```
 
-Note: The above `jjwt-jackson` dependency requires Jackson 2.x.
-
 <a name="install-jdk-gradle"></a>
 #### Gradle
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.0'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.0',
-            // Uncomment the next line if you want to use Elliptic Curve or RSASSA-PSS algorithms:
+    compile 'io.jsonwebtoken:jjwt-api:0.10.1'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.10.1',
+            // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.0'
+            'io.jsonwebtoken:jjwt-jackson:0.10.1'
 }
 ```
 
@@ -232,12 +229,12 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.0'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.0' 
-    runtime('io.jsonwebtoken:jjwt-orgjson:0.10.0') {
+    compile 'io.jsonwebtoken:jjwt-api:0.10.1'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.10.1' 
+    runtime('io.jsonwebtoken:jjwt-orgjson:0.10.1') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
-    // Uncomment the next line if you want to use Elliptic Curve or RSASSA-PSS algorithms:
+    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
     //runtime 'org.bouncycastle:bcprov-jdk15on:1.60'
 }
 ```
@@ -433,15 +430,15 @@ key algorithms - identified by the following names:
 * `HS256`: HMAC using SHA-256
 * `HS384`: HMAC using SHA-384
 * `HS512`: HMAC using SHA-512
+* `ES256`: ECDSA using P-256 and SHA-256
+* `ES384`: ECDSA using P-384 and SHA-384
+* `ES512`: ECDSA using P-521 and SHA-512
 * `RS256`: RSASSA-PKCS-v1_5 using SHA-256
 * `RS384`: RSASSA-PKCS-v1_5 using SHA-384
 * `RS512`: RSASSA-PKCS-v1_5 using SHA-512
 * `PS256`: RSASSA-PSS using SHA-256 and MGF1 with SHA-256
 * `PS384`: RSASSA-PSS using SHA-384 and MGF1 with SHA-384
 * `PS512`: RSASSA-PSS using SHA-512 and MGF1 with SHA-512
-* `ES256`: ECDSA using P-256 and SHA-256
-* `ES384`: ECDSA using P-384 and SHA-384
-* `ES512`: ECDSA using P-521 and SHA-512
 
 These are all represented in the `io.jsonwebtoken.SignatureAlgorithm` enum.
 
@@ -549,10 +546,10 @@ KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256); //or RS384, RS512, 
 You use the private key (`keyPair.getPrivate()`) to create a JWS and the public key (`keyPair.getPublic()`) to 
 parse/verify a JWS.
 
-**NOTE: The `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, and `ES512` algorithms are not provided by the JDK by 
-default.**  If you want to use them, you must enable a JCA provider in the JDK that supports those algorithms
-(such as BouncyCastle).  See the [Installation](#Installation) section to see how to enable BouncyCastle if you want
-to usse these algorithms.
+**NOTE: The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider 
+(like BouncyCastle) in the runtime classpath.**  If you are using JDK 10 or earlier and you want to use them, see 
+the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are natively 
+supported by the JDK.
 
 <a name="jws-create"></a>
 ### Creating a JWS
@@ -1195,7 +1192,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1204,7 +1201,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-jackson:0.10.0'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.10.1'
 }
 ```
 

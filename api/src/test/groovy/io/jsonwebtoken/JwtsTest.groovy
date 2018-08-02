@@ -160,16 +160,7 @@ class JwtsTest {
 
         mockStatic(Classes)
 
-        //JwtBuilder loads SignatureAlgorithm which in turn uses RuntimeEnvironment which in turn checks for BC:
-        expect(Classes.isAvailable(eq("org.bouncycastle.jce.provider.BouncyCastleProvider"))).andReturn(false)
-
-        replay Classes
-
         def instance = createMock(JwtBuilder)
-
-        verify Classes
-
-        reset Classes
 
         expect(Classes.newInstance(eq("io.jsonwebtoken.impl.DefaultJwtBuilder"))).andReturn(instance)
 

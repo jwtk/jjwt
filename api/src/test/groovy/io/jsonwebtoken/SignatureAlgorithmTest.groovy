@@ -121,7 +121,7 @@ class SignatureAlgorithmTest {
     @Test
     void testIsJdkStandard() {
         for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
-            if (alg.name().startsWith("ES") || alg.name().startsWith("PS") || alg == SignatureAlgorithm.NONE) {
+            if (alg.name().startsWith("PS") || alg == SignatureAlgorithm.NONE) {
                 assertFalse alg.isJdkStandard()
             } else {
                 assertTrue alg.isJdkStandard()

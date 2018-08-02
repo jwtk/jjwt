@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.RuntimeEnvironment;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -52,6 +53,10 @@ public abstract class RsaProvider extends SignatureProvider {
         m.put(SignatureAlgorithm.PS512, spec);
 
         return m;
+    }
+
+    static {
+        RuntimeEnvironment.enableBouncyCastleIfPossible(); //PS256, PS384, PS512 on <= JDK 10 require BC
     }
 
     protected RsaProvider(SignatureAlgorithm alg, Key key) {
