@@ -16,7 +16,9 @@
 package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultHeader
+import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.io.Encoders
@@ -78,6 +80,19 @@ class JwtsTest {
         def header = Jwts.jwsHeader([alg: "HS256"])
         assertTrue header instanceof DefaultJwsHeader
         assertEquals header.getAlgorithm(), 'HS256'
+    }
+
+    @Test
+    void testJweHeaderWithNoArgs() {
+        def header = Jwts.jweHeader()
+        assertTrue header instanceof DefaultJweHeader
+    }
+
+    @Test
+    void testJweHeaderWithMapArg() {
+        def header = Jwts.jweHeader([enc: 'foo'])
+        assertTrue header instanceof DefaultJweHeader
+        assertEquals header.getEncryptionAlgorithm(), 'foo'
     }
 
     @Test
@@ -147,7 +162,8 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('foo')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 0"
+            String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '0'
+            assertEquals expected, e.message
         }
     }
 
@@ -157,7 +173,8 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('.')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 1"
+            String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '1'
+            assertEquals expected, e.message
         }
     }
 
@@ -168,6 +185,7 @@ class JwtsTest {
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..' is missing a header."
+//            assertEquals "Required JWS Protected Header is missing.", e.message
         }
     }
 

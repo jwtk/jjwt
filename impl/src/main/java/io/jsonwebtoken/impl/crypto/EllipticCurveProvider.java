@@ -17,6 +17,8 @@ package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.security.EllipticCurveSignatureAlgorithm;
+import io.jsonwebtoken.impl.security.Randoms;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
@@ -68,19 +70,19 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
     /**
      * Generates a new secure-random key pair of sufficient strength for the specified Elliptic Curve {@link
      * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using JJWT's default {@link
-     * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
+     * Randoms#secureRandom() SecureRandom instance}.  This is a convenience method that immediately
      * delegates to {@link #generateKeyPair(SignatureAlgorithm, SecureRandom)}.
      *
      * @param alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES384} or {@code ES512}
      * @return a new secure-randomly generated key pair of sufficient strength for the specified {@link
      * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using JJWT's default {@link
-     * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.
+     * Randoms#secureRandom() SecureRandom instance}.
      * @see #generateKeyPair()
      * @see #generateKeyPair(SignatureAlgorithm, SecureRandom)
      * @see #generateKeyPair(String, String, SignatureAlgorithm, SecureRandom)
      */
     public static KeyPair generateKeyPair(SignatureAlgorithm alg) {
-        return generateKeyPair(alg, DEFAULT_SECURE_RANDOM);
+        return generateKeyPair(alg, Randoms.secureRandom());
     }
 
     /**
@@ -169,7 +171,6 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
         }
     }
 
-
     /**
      * Transcodes the JCA ASN.1/DER-encoded signature into the concatenated
      * R + S format expected by ECDSA JWS.
@@ -178,52 +179,11 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * @param outputLength The expected length of the ECDSA JWS signature.
      * @return The ECDSA JWS encoded signature.
      * @throws JwtException If the ASN.1/DER signature format is invalid.
+     * @deprecated since JJWT_RELEASE_VERSION.  Use {@code ElliptiCurveSignatureAlgorithm.transcodeSignatureToConcat} instead.
      */
+    @Deprecated
     public static byte[] transcodeSignatureToConcat(final byte[] derSignature, int outputLength) throws JwtException {
-
-        if (derSignature.length < 8 || derSignature[0] != 48) {
-            throw new JwtException("Invalid ECDSA signature format");
-        }
-
-        int offset;
-        if (derSignature[1] > 0) {
-            offset = 2;
-        } else if (derSignature[1] == (byte) 0x81) {
-            offset = 3;
-        } else {
-            throw new JwtException("Invalid ECDSA signature format");
-        }
-
-        byte rLength = derSignature[offset + 1];
-
-        int i = rLength;
-        while ((i > 0) && (derSignature[(offset + 2 + rLength) - i] == 0)) {
-            i--;
-        }
-
-        byte sLength = derSignature[offset + 2 + rLength + 1];
-
-        int j = sLength;
-        while ((j > 0) && (derSignature[(offset + 2 + rLength + 2 + sLength) - j] == 0)) {
-            j--;
-        }
-
-        int rawLen = Math.max(i, j);
-        rawLen = Math.max(rawLen, outputLength / 2);
-
-        if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset
-            || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength
-            || derSignature[offset] != 2
-            || derSignature[offset + 2 + rLength] != 2) {
-            throw new JwtException("Invalid ECDSA signature format");
-        }
-
-        final byte[] concatSignature = new byte[2 * rawLen];
-
-        System.arraycopy(derSignature, (offset + 2 + rLength) - i, concatSignature, rawLen - i, i);
-        System.arraycopy(derSignature, (offset + 2 + rLength + 2 + sLength) - j, concatSignature, 2 * rawLen - j, j);
-
-        return concatSignature;
+        return EllipticCurveSignatureAlgorithm.transcodeSignatureToConcat(derSignature, outputLength);
     }
 
 
@@ -236,68 +196,10 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      *                     {@code null}.
      * @return The ASN.1/DER encoded signature.
      * @throws JwtException If the ECDSA JWS signature format is invalid.
+     * @deprecated since JJWT_RELEASE_VERSION.  Use {@link EllipticCurveSignatureAlgorithm#transcodeSignatureToDER(byte[])} instead.
      */
+    @Deprecated
     public static byte[] transcodeSignatureToDER(byte[] jwsSignature) throws JwtException {
-
-        int rawLen = jwsSignature.length / 2;
-
-        int i = rawLen;
-
-        while ((i > 0) && (jwsSignature[rawLen - i] == 0)) {
-            i--;
-        }
-
-        int j = i;
-
-        if (jwsSignature[rawLen - i] < 0) {
-            j += 1;
-        }
-
-        int k = rawLen;
-
-        while ((k > 0) && (jwsSignature[2 * rawLen - k] == 0)) {
-            k--;
-        }
-
-        int l = k;
-
-        if (jwsSignature[2 * rawLen - k] < 0) {
-            l += 1;
-        }
-
-        int len = 2 + j + 2 + l;
-
-        if (len > 255) {
-            throw new JwtException("Invalid ECDSA signature format");
-        }
-
-        int offset;
-
-        final byte derSignature[];
-
-        if (len < 128) {
-            derSignature = new byte[2 + 2 + j + 2 + l];
-            offset = 1;
-        } else {
-            derSignature = new byte[3 + 2 + j + 2 + l];
-            derSignature[1] = (byte) 0x81;
-            offset = 2;
-        }
-
-        derSignature[0] = 48;
-        derSignature[offset++] = (byte) len;
-        derSignature[offset++] = 2;
-        derSignature[offset++] = (byte) j;
-
-        System.arraycopy(jwsSignature, rawLen - i, derSignature, (offset + j) - i, i);
-
-        offset += j;
-
-        derSignature[offset++] = 2;
-        derSignature[offset++] = (byte) l;
-
-        System.arraycopy(jwsSignature, 2 * rawLen - k, derSignature, (offset + l) - k, k);
-
-        return derSignature;
+        return EllipticCurveSignatureAlgorithm.transcodeSignatureToDER(jwsSignature);
     }
 }

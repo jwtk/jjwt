@@ -25,7 +25,7 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
@@ -86,7 +86,7 @@
     <properties>
 
         <jjwt.root>${basedir}</jjwt.root>
-        <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
+        <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
@@ -109,7 +109,7 @@
         <logback.version>1.2.3</logback.version>
         <easymock.version>3.6</easymock.version>
         <junit.version>4.12</junit.version>
-        <powermock.version>2.0.0-beta.5</powermock.version> <!-- necessary for Java 9 support -->
+        <powermock.version>2.0.7</powermock.version> <!-- necessary for Java 9 support -->
         <failsafe.plugin.version>2.22.0</failsafe.plugin.version>
         <surefire.plugin.version>2.22.0</surefire.plugin.version>
         <clover.version>4.2.1</clover.version>
@@ -295,9 +295,18 @@
                         </oldVersion>
                         <parameter>
                             <onlyModified>true</onlyModified>
-                            <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                            <!-- <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications> -->
                             <!-- TODO: enable after 1.0 -->
-                            <!-- <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
+                            <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
+
+                            <!-- All of the following can be removed after 0.11.1 is released: -->
+                            <!-- <excludes>
+                                <exclude>io.jsonwebtoken.Header#getAlgorithm()</exclude>
+                                <exclude>io.jsonwebtoken.Header#setAlgorithm(java.lang.String)</exclude>
+                                <exclude>io.jsonwebtoken.JwsHeader#getAlgorithm()</exclude>
+                                <exclude>io.jsonwebtoken.JwsHeader#setAlgorithm(java.lang.String)</exclude>
+                                <exclude>io.jsonwebtoken.lang.Assert#notNull(java.lang.Object,java.lang.String)</exclude>
+                            </excludes> -->
                         </parameter>
                     </configuration>
                     <executions>
@@ -563,7 +572,7 @@
                 <additionalparam>-Xdoclint:none</additionalparam>
                 <gmavenplus.version>1.8.1</gmavenplus.version>
                 <easymock.version>4.2</easymock.version>
-                <powermock.version>2.0.2</powermock.version>
+                <powermock.version>2.0.7</powermock.version>
             </properties>
         </profile>
         <profile>

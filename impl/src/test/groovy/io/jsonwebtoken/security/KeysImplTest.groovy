@@ -15,7 +15,8 @@
  */
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.security.EllipticCurveSignatureAlgorithm
+import io.jsonwebtoken.impl.security.RsaSignatureAlgorithm
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -37,9 +38,10 @@ class KeysImplTest {
     }
 
     @Test
-    void testSecretKeyFor() {
+    @Deprecated
+    void testDeprecatedSecretKeyFor() {
 
-        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+        for (io.jsonwebtoken.SignatureAlgorithm alg : io.jsonwebtoken.SignatureAlgorithm.values()) {
 
             String name = alg.name()
 
@@ -49,7 +51,7 @@ class KeysImplTest {
                 assertEquals alg.jcaName, key.algorithm
                 alg.assertValidSigningKey(key)
                 alg.assertValidVerificationKey(key)
-                assertEquals alg, SignatureAlgorithm.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
+                assertEquals alg, io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
             } else {
                 try {
                     Keys.secretKeyFor(alg)
@@ -63,9 +65,22 @@ class KeysImplTest {
     }
 
     @Test
-    void testKeyPairFor() {
+    void testSecretKeyFor() {
+        for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
+            if (alg instanceof SymmetricKeySignatureAlgorithm) {
+                SecretKey key = alg.generateKey()
+                assertEquals  alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
+                assertEquals alg.jcaName, key.algorithm
+                assertEquals alg, SignatureAlgorithms.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
+            }
+        }
+    }
 
-        for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
+    @Test
+    @Deprecated
+    void testDeprecatedKeyPairFor() {
+
+        for (io.jsonwebtoken.SignatureAlgorithm alg : io.jsonwebtoken.SignatureAlgorithm.values()) {
 
             String name = alg.name()
 
@@ -113,6 +128,52 @@ class KeysImplTest {
                 } catch (IllegalArgumentException expected) {
                     assertEquals "The $name algorithm does not support Key Pairs." as String, expected.message
                 }
+            }
+        }
+    }
+
+    @Test
+    void testKeyPairFor() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
+
+            if (alg instanceof RsaSignatureAlgorithm) {
+
+                KeyPair pair = alg.generateKeyPair()
+                assertNotNull pair
+
+                PublicKey pub = pair.getPublic()
+                assert pub instanceof RSAPublicKey
+                assertEquals alg.preferredKeyLength, pub.modulus.bitLength()
+
+                PrivateKey priv = pair.getPrivate()
+                assert priv instanceof RSAPrivateKey
+                assertEquals alg.preferredKeyLength, priv.modulus.bitLength()
+
+            } else if (alg instanceof EllipticCurveSignatureAlgorithm) {
+
+                KeyPair pair = alg.generateKeyPair()
+                assertNotNull pair
+
+                int len = alg.minKeyLength
+                String asn1oid = "secp${len}r1"
+                String suffix = len == 256 ? ", X9.62 prime${len}v1" : '' //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
+                String jdkParamName = "$asn1oid [NIST P-${len}${suffix}]" as String
+
+                PublicKey pub = pair.getPublic()
+                assert pub instanceof ECPublicKey
+                assertEquals "EC", pub.algorithm
+                assertEquals jdkParamName, pub.params.name
+                assertEquals alg.minKeyLength, pub.params.order.bitLength()
+
+                PrivateKey priv = pair.getPrivate()
+                assert priv instanceof ECPrivateKey
+                assertEquals "EC", priv.algorithm
+                assertEquals jdkParamName, priv.params.name
+                assertEquals alg.minKeyLength, priv.params.order.bitLength()
+
+            } else {
+                assertFalse alg instanceof AsymmetricKeySignatureAlgorithm //assert we've accounted for all asymmetric ones above
             }
         }
     }

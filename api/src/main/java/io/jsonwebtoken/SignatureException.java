@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.CryptoException;
 
 /**
  * Exception indicating that either calculating a signature or verifying an existing signature of a JWT failed.
@@ -24,7 +24,7 @@ import io.jsonwebtoken.security.SecurityException;
  * @deprecated in favor of {@link io.jsonwebtoken.security.SecurityException}; this class will be removed before 1.0
  */
 @Deprecated
-public class SignatureException extends SecurityException {
+public class SignatureException extends CryptoException {
 
     public SignatureException(String message) {
         super(message);

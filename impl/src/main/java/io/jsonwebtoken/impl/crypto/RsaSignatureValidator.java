@@ -34,16 +34,19 @@ public class RsaSignatureValidator extends RsaProvider implements SignatureValid
 
     public RsaSignatureValidator(SignatureAlgorithm alg, Key key) {
         super(alg, key);
-        Assert.isTrue(key instanceof RSAPrivateKey || key instanceof RSAPublicKey,
-                      "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.");
+        Assert.isTrue(isRsaKey(key), "RSA Signature validation requires either a RSAPublicKey or RSAPrivateKey instance.");
         this.SIGNER = key instanceof RSAPrivateKey ? new RsaSigner(alg, key) : null;
+    }
+
+    protected static boolean isRsaKey(Key key) {
+        return key instanceof RSAPrivateKey || key instanceof RSAPublicKey;
     }
 
     @Override
     public boolean isValid(byte[] data, byte[] signature) {
         if (key instanceof PublicKey) {
-            Signature sig = createSignatureInstance();
             PublicKey publicKey = (PublicKey) key;
+            Signature sig = createSignatureInstance();
             try {
                 return doVerify(sig, publicKey, data, signature);
             } catch (Exception e) {

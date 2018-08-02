@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.crypto;
 
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.security.EllipticCurveSignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -48,7 +49,7 @@ public class EllipticCurveSignatureValidator extends EllipticCurveProvider imple
              * and backwards compatibility will possibly be removed in a future version of this library.
              *
              * **/
-            byte[] derSignature = expectedSize != signature.length && signature[0] == 0x30 ? signature : EllipticCurveProvider.transcodeSignatureToDER(signature);
+            byte[] derSignature = expectedSize != signature.length && signature[0] == 0x30 ? signature : EllipticCurveSignatureAlgorithm.transcodeSignatureToDER(signature);
             return doVerify(sig, publicKey, data, derSignature);
         } catch (Exception e) {
             String msg = "Unable to verify Elliptic Curve signature using configured ECPublicKey. " + e.getMessage();

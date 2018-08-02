@@ -1,7 +1,8 @@
 package io.jsonwebtoken.impl.crypto
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.SignatureAlgorithm
+import io.jsonwebtoken.security.SignatureAlgorithms
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -31,9 +32,9 @@ class Issue542Test {
     private static String PS512_0_10_7 = 'eyJhbGciOiJQUzUxMiJ9.eyJpc3MiOiJqb2UifQ.r6sisG-FVaMoIJacMSdYZLWFBVoT6bXmf3X3humLZqzoGfsRw3q9-wJ2oIiR4ua2L_mPnJqyPcjFWoXLUzw-URFSyQEAX_S2mWTBn7avCFsmJUh2fMkplG0ynbIHCqReRDl3moQGallbl-SYgArSRI2HbpVt05xsVbk3BmxB8N8buKbBPfUqwZMicRqNpHxoOc-IXaClc7y93gFNfGBMEwXn2nK_ZFXY03pMBL_MHVsJprPmtGfQw0ZZUv29zZbZTkRb6W6bRCi3jIP8sBMnYDqG3_Oyz9sF74IeOoD9sCpgAuRnrSAXhEb3tr1uBwyT__DOI1ZdT8QGFiRRNpUZDm7g4ub7njhXQ6ppkEY6kEKCCoxSq5sAh6EzZQgAfbpKNXy5VIu8s1nR-iJ8GDpeTcpLRhbX8havNzWjc-kSnU95_D5NFoaKfIjofKideVU46lUdCk-m7q8mOoFz8UEK1cXq3t7ay2jLG_sNvv7oZPe2TC4ovQGiQP0Mt446XBuIvyXSvygD3_ACpRSfpAqVoP7Ce98NkV2QCJxYNX1cZ4Zj4HrNoNWMx81TFoyU7RoUhj4tHcgBt_3_jbCO0OCejwswAFhwYRXP3jXeE2QhLaN1QJ7p97ly8WxjkBRac3I2WAeJhOM4CWhtgDmHAER9571MWp-7n4h4bnx9tXXfV7k'
 
     private static Map<SignatureAlgorithm, String> JWS_0_10_7_VALUES = [
-            (SignatureAlgorithm.PS256): PS256_0_10_7,
-            (SignatureAlgorithm.PS384): PS384_0_10_7,
-            (SignatureAlgorithm.PS512): PS512_0_10_7
+            (SignatureAlgorithms.PS256): PS256_0_10_7,
+            (SignatureAlgorithms.PS384): PS384_0_10_7,
+            (SignatureAlgorithms.PS512): PS512_0_10_7
     ]
 
     private static JcaX509CertificateConverter X509_CERT_CONVERTER = new JcaX509CertificateConverter()
@@ -45,7 +46,7 @@ class Issue542Test {
     }
 
     private static PublicKey readTestPublicKey(SignatureAlgorithm alg) {
-        PEMParser parser = getParser(alg.name() + '.crt.pem')
+        PEMParser parser = getParser(alg.getName() + '.crt.pem')
         X509CertificateHolder holder = parser.readObject() as X509CertificateHolder
         try {
             return X509_CERT_CONVERTER.getCertificate(holder).getPublicKey()
@@ -55,7 +56,7 @@ class Issue542Test {
     }
 
     private static PrivateKey readTestPrivateKey(SignatureAlgorithm alg) {
-        PEMParser parser = getParser(alg.name() + '.key.pem')
+        PEMParser parser = getParser(alg.getName() + '.key.pem')
         PrivateKeyInfo info = parser.readObject() as PrivateKeyInfo
         try {
             return PEM_KEY_CONVERTER.getPrivateKey(info)
@@ -70,7 +71,7 @@ class Issue542Test {
     @Test
     void testRsaSsaPssBackwardsCompatibility() {
 
-        def algs = [SignatureAlgorithm.PS256, SignatureAlgorithm.PS384, SignatureAlgorithm.PS512]
+        def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
 
         for (alg in algs) {
             PublicKey key = readTestPublicKey(alg)
@@ -85,7 +86,7 @@ class Issue542Test {
      * class.  This method implementation was retained only to demonstrate how they were created for future reference.
      */
     static void main(String[] args) {
-        def algs = [SignatureAlgorithm.PS256, SignatureAlgorithm.PS384, SignatureAlgorithm.PS512]
+        def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
         for (alg in algs) {
             PrivateKey privateKey = readTestPrivateKey(alg)
             String jws = Jwts.builder().setIssuer('joe').signWith(privateKey, alg).compact()

@@ -19,6 +19,8 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
 
 import java.security.Key;
+import java.security.Provider;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Map;
 
@@ -34,6 +36,17 @@ import java.util.Map;
  * @since 0.11.0
  */
 public interface JwtParserBuilder {
+
+    /**
+     * Sets the JCA Provider to use during cryptographic signature and decryption operations, or {@code null} if the
+     * JCA subsystem preferred provider should be used.
+     *
+     * @param provider the JCA Provider to use during cryptographic signature and decryption operations, or {@code null}
+     *                 if the JCA subsystem preferred provider should be used.
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtParserBuilder setProvider(Provider provider);
 
     /**
      * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
