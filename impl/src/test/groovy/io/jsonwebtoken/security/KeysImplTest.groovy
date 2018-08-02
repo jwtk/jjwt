@@ -32,6 +32,9 @@ class KeysImplTest {
                 SecretKey key = Keys.secretKeyFor(alg)
                 assertEquals alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
                 assertEquals alg.jcaName, key.algorithm
+                alg.assertValidSigningKey(key)
+                alg.assertValidVerificationKey(key)
+                assertEquals alg, SignatureAlgorithm.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
             } else {
                 try {
                     Keys.secretKeyFor(alg)
