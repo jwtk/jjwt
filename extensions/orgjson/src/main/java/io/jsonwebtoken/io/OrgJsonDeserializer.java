@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class OrgJsonDeserializer implements Deserializer<Object> {
         if (c == '{') { //json object
             JSONObject o = new JSONObject(tokener);
             return toMap(o);
-        } else if ( c == '[' ) {
+        } else if (c == '[') {
             JSONArray a = new JSONArray(tokener);
             return toList(a);
         } else {
@@ -58,7 +59,10 @@ public class OrgJsonDeserializer implements Deserializer<Object> {
 
     private Map<String, Object> toMap(JSONObject o) {
         Map<String, Object> map = new LinkedHashMap<>();
-        for (String key : o.keySet()) {
+        // https://github.com/jwtk/jjwt/issues/380: use .keys() and *not* .keySet() for Android compatibility:
+        Iterator<String> iterator = o.keys();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
             Object value = o.get(key);
             value = convertIfNecessary(value);
             map.put(key, value);
@@ -67,8 +71,11 @@ public class OrgJsonDeserializer implements Deserializer<Object> {
     }
 
     private List<Object> toList(JSONArray a) {
-        List<Object> list = new ArrayList<>(a.length());
-        for (Object value : a.toList()) {
+        int length = a.length();
+        List<Object> list = new ArrayList<>(length);
+        // https://github.com/jwtk/jjwt/issues/380: use a.get(i) and *not* a.toList() for Android compatibility:
+        for( int i = 0; i < length; i++) {
+            Object value = a.get(i);
             value = convertIfNecessary(value);
             list.add(value);
         }

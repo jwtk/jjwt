@@ -118,7 +118,22 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
 
     @SuppressWarnings("WeakerAccess") //for testing
     protected byte[] toBytes(Object o) {
-        String s = JSONWriter.valueToString(o);
+        String s;
+        // https://github.com/jwtk/jjwt/issues/380 for Android compatibility (Android doesn't have org.json.JSONWriter):
+        // This instanceof check is a sneaky (hacky?) heuristic: A JwtBuilder only ever provides Map<String,Object>
+        // instances to its serializer instances, so by the time this method is invoked, 'o' will always be a
+        // JSONObject.
+        //
+        // This is sufficient for all JJWT-supported scenarios on Android since Android users shouldn't ever use
+        // JJWT's internal Serializer implementation for general JSON serialization.  That is, its intended use
+        // is within the context of JwtBuilder execution and not for application use outside of that.
+        if (o instanceof JSONObject) {
+            s = o.toString();
+        } else {
+            // we still call JSONWriter for all other values 'just in case', and this works for all valid JSON values
+            // This would fail on Android unless they include the newer org.json dependency and ignore Android's.
+            s = JSONWriter.valueToString(o);
+        }
         return s.getBytes(Strings.UTF_8);
     }
 }

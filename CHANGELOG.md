@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.10.2
+
+This is a minor patch release that ensures the `OrgJsonSerializer` and `OrgJsonDeserializer` implementations are 
+compatible with Android's older `org.json` API.  Previously JJWT used newer `org.json` APIs that are not 
+available on Android.
+
 ### 0.10.1
 
 This is a minor point release that ensures the BouncyCastle dependency is optional and not pulled in as a transitive
