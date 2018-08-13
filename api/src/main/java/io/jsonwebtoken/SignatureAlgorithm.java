@@ -554,18 +554,20 @@ public enum SignatureAlgorithm {
         if (key instanceof SecretKey) {
 
             SecretKey secretKey = (SecretKey)key;
-            String secretKeyAlg = secretKey.getAlgorithm();
+            int bitLength = io.jsonwebtoken.lang.Arrays.length(secretKey.getEncoded()) * Byte.SIZE;
 
             for(SignatureAlgorithm alg : PREFERRED_HMAC_ALGS) {
-                if (alg.jcaName.equals(secretKeyAlg)) {
-                    alg.assertValidSigningKey(key);
+                // ensure compatibility check is based on key length. See https://github.com/jwtk/jjwt/issues/381
+                if (bitLength >= alg.minKeyLength) {
                     return alg;
                 }
             }
 
-            String msg = "The specified SecretKey algorithm did not equal one of the three required JCA " +
-                "algorithm names of HmacSHA256, HmacSHA384, or HmacSHA512.";
-            throw new InvalidKeyException(msg);
+            String msg = "The specified SecretKey is not strong enough to be used with JWT HMAC signature " +
+                "algorithms.  The JWT specification requires HMAC keys to be >= 256 bits long.  The specified " +
+                "key is " + bitLength + " bits.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more " +
+                "information.";
+            throw new WeakKeyException(msg);
         }
 
         if (key instanceof RSAKey) {
