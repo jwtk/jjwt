@@ -245,6 +245,8 @@ dependencies {
 You can use the following [Android Proguard](https://developer.android.com/studio/build/shrink-code) exclusion rules: 
 
 ```
+-dontwarn org.json.JSONWriter
+-dontwarn org.json.JSONString
 -keepattributes InnerClasses
 
 -keep class io.jsonwebtoken.** { *; }
