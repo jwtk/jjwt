@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.10.4
+
+This patch release fixed an [outstanding issue](https://github.com/jwtk/jjwt/issues/381) with JCA name 
+case-sensitivity that impacted Android that was not caught in the 0.10.3 release.
+
 ### 0.10.3
 
 This is a minor patch release that fixed a key length assertion for `SignatureAlgorithm.forSigningKey` that was 
