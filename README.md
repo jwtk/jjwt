@@ -230,7 +230,7 @@ Add the dependencies to your project:
 ```groovy
 dependencies {
     api 'io.jsonwebtoken:jjwt-api:0.10.2'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.2' 
     runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.2') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
@@ -252,6 +252,8 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 -keep class io.jsonwebtoken.** { *; }
 -keepnames class io.jsonwebtoken.* { *; }
 -keepnames interface io.jsonwebtoken.* { *; }
+-dontwarn org.json.JSONString
+-dontwarn org.json.JSONWriter
 
 -keep class org.bouncycastle.** { *; }
 -keepnames class org.bouncycastle.** { *; }
