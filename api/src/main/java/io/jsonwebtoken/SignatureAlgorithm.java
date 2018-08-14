@@ -349,7 +349,11 @@ public enum SignatureAlgorithm {
             if (alg == null) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm cannot be null.");
             }
-            if (!HS256.jcaName.equals(alg) && !HS384.jcaName.equals(alg) && !HS512.jcaName.equals(alg)) {
+
+            // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
+            if (!HS256.jcaName.equalsIgnoreCase(alg) &&
+                !HS384.jcaName.equalsIgnoreCase(alg) &&
+                !HS512.jcaName.equalsIgnoreCase(alg)) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }

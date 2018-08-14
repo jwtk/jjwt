@@ -372,6 +372,25 @@ class SignatureAlgorithmTest {
         }
     }
 
+    @Test // https://github.com/jwtk/jjwt/issues/381
+    void testAssertValidHmacSigningKeyCaseInsensitiveJcaName() {
+
+        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isHmac() }) {
+
+            SecretKey key = createMock(SecretKey)
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.jcaName.toUpperCase()) // <-- upper case, non standard JCA name
+
+            replay key
+
+            alg.assertValidSigningKey(key)
+
+            verify key
+        }
+    }
+
     @Test
     void testAssertValidHmacSigningKeyUnsupportedAlgorithm() {
 
