@@ -1,13 +1,12 @@
 package io.jsonwebtoken.io;
 
+import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONString;
-import org.json.JSONWriter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -20,6 +19,20 @@ import java.util.Map;
  * @since 0.10.0
  */
 public class OrgJsonSerializer<T> implements Serializer<T> {
+
+    // we need reflection for these because of Android - see https://github.com/jwtk/jjwt/issues/388
+    private static final String JSON_WRITER_CLASS_NAME = "org.json.JSONWriter";
+    private static final Class[] VALUE_TO_STRING_ARG_TYPES = new Class[]{Object.class};
+    private static final String JSON_STRING_CLASS_NAME = "org.json.JSONString";
+    private static final Class JSON_STRING_CLASS;
+
+    static { // see see https://github.com/jwtk/jjwt/issues/388
+        if (Classes.isAvailable(JSON_STRING_CLASS_NAME)) {
+            JSON_STRING_CLASS = Classes.forName(JSON_STRING_CLASS_NAME);
+        } else {
+            JSON_STRING_CLASS = null;
+        }
+    }
 
     @Override
     public byte[] serialize(T t) throws SerializationException {
@@ -35,6 +48,16 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         }
     }
 
+    /**
+     * @since 0.10.5 see https://github.com/jwtk/jjwt/issues/388
+     */
+    private static boolean isJSONString(Object o) {
+        if (JSON_STRING_CLASS != null) {
+            return JSON_STRING_CLASS.isInstance(o);
+        }
+        return false;
+    }
+
     private Object toJSONInstance(Object object) {
 
         if (object == null) {
@@ -42,7 +65,7 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         }
 
         if (object instanceof JSONObject || object instanceof JSONArray
-            || JSONObject.NULL.equals(object) || object instanceof JSONString
+            || JSONObject.NULL.equals(object) || isJSONString(object)
             || object instanceof Byte || object instanceof Character
             || object instanceof Short || object instanceof Integer
             || object instanceof Long || object instanceof Boolean
@@ -132,7 +155,7 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         } else {
             // we still call JSONWriter for all other values 'just in case', and this works for all valid JSON values
             // This would fail on Android unless they include the newer org.json dependency and ignore Android's.
-            s = JSONWriter.valueToString(o);
+            s = Classes.invokeStatic(JSON_WRITER_CLASS_NAME, "valueToString", VALUE_TO_STRING_ARG_TYPES, o);
         }
         return s.getBytes(Strings.UTF_8);
     }
