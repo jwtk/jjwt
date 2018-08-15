@@ -179,18 +179,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.10.4</version>
+    <version>0.10.5</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.10.4</version>
+    <version>0.10.5</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.4</version>
+    <version>0.10.5</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -209,11 +209,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.4'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.4',
+    compile 'io.jsonwebtoken:jjwt-api:0.10.5'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.10.5',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.4'
+            'io.jsonwebtoken:jjwt-jackson:0.10.5'
 }
 ```
 
@@ -229,9 +229,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.10.4'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.4' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.4') {
+    api 'io.jsonwebtoken:jjwt-api:0.10.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.5' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.5') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -250,8 +250,6 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 -keep class io.jsonwebtoken.** { *; }
 -keepnames class io.jsonwebtoken.* { *; }
 -keepnames interface io.jsonwebtoken.* { *; }
--dontwarn org.json.JSONString
--dontwarn org.json.JSONWriter
 
 -keep class org.bouncycastle.** { *; }
 -keepnames class org.bouncycastle.** { *; }
@@ -1194,7 +1192,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.4</version>
+    <version>0.10.5</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1203,7 +1201,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-jackson:0.10.4'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.10.5'
 }
 ```
 

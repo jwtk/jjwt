@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.10.5
+
+This patch release fixed an Android `org.json` library compatibility [issue](https://github.com/jwtk/jjwt/issues/388).
+
 ### 0.10.4
 
 This patch release fixed an [outstanding issue](https://github.com/jwtk/jjwt/issues/381) with JCA name 
