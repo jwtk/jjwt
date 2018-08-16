@@ -188,7 +188,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setSubject("You");
+     * Claims claims = Jwts.claims().setAudience("You");
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
@@ -306,7 +306,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setIssuedAt(UUID.randomUUID().toString());
+     * Claims claims = Jwts.claims().setId(UUID.randomUUID().toString());
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
