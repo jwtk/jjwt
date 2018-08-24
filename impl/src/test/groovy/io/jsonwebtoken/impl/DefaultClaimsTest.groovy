@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.RequiredTypeException
+import org.apache.groovy.util.Maps
 import org.junit.Before
 import org.junit.Test
 import static org.junit.Assert.*
@@ -281,4 +282,96 @@ class DefaultClaimsTest {
         assertEquals now, claims.get('foo') //conversion should NOT have occurred
     }
 
+    @Test
+    void testGetClaimAsString() {
+        def claimName = "aString"
+        def expected = "The quick brown fox jumps over the lazy dog"
+
+        claims.put(claimName, expected)
+        String result = claims.getAsString(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsInt() {
+        def claimName = "anInt"
+        def expected = 4_8_15_16_23
+
+        claims.put(claimName, expected)
+        Integer result = claims.getAsInt(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsLong() {
+        def claimName = "aLong"
+        def expected = 4_8_15_16_23_42L
+
+        claims.put(claimName, expected)
+        Long result = claims.getAsLong(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsShort() {
+        def claimName = "aShort"
+        def expected = 4_8_15
+
+        claims.put(claimName, expected)
+        Short result = claims.getAsShort(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsByte() {
+        def claimName = "aByte"
+        def expected = 4_8
+
+        claims.put(claimName, expected)
+        Byte result = claims.getAsByte(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsDate() {
+        def claimName = "aDate"
+        def expected = new Date()
+
+        claims.put(claimName, expected)
+        Date result = claims.getAsDate(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsBoolean() {
+        def claimName = "aBoolean"
+        def expected = true
+
+        claims.put(claimName, expected)
+        Boolean result = claims.getAsBoolean(claimName)
+
+        assertEquals expected, result
+    }
+
+    @Test
+    void testGetClaimAsMap() {
+        def claimName = "aBoolean"
+        def expected = Maps.of(
+                "key1", 4_8_15_16_23_42L,
+                "key2", "abcd",
+                "key3", true,
+                "key4", new Date()
+        )
+
+        claims.put(claimName, expected)
+        Map<String, ?> result = claims.getAsMap(claimName)
+
+        assertEquals expected, result
+    }
 }

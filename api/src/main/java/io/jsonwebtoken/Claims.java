@@ -171,4 +171,20 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
     Claims setId(String jti);
 
     <T> T get(String claimName, Class<T> requiredType);
+
+    String getAsString(String claimName);
+
+    Integer getAsInt(String claimName);
+
+    Long getAsLong(String claimName);
+
+    Short getAsShort(String claimName);
+
+    Byte getAsByte(String claimName);
+
+    Date getAsDate(String claimName);
+
+    Boolean getAsBoolean(String claimName);
+
+    Map<String, ?> getAsMap(String claimName);
 }
