@@ -164,4 +164,44 @@ public class DefaultClaims extends JwtMap implements Claims {
 
         return requiredType.cast(value);
     }
+
+    @Override
+    public String getAsString(String claimName) {
+        return get(claimName, String.class);
+    }
+
+    @Override
+    public Integer getAsInt(String claimName) {
+        return get(claimName, Integer.class);
+    }
+
+    @Override
+    public Long getAsLong(String claimName) {
+        return get(claimName, Long.class);
+    }
+
+    @Override
+    public Short getAsShort(String claimName) {
+        return get(claimName, Short.class);
+    }
+
+    @Override
+    public Byte getAsByte(String claimName) {
+        return get(claimName, Byte.class);
+    }
+
+    @Override
+    public Date getAsDate(String claimName) {
+        return get(claimName, Date.class);
+    }
+
+    @Override
+    public Boolean getAsBoolean(String claimName) {
+        return get(claimName, Boolean.class);
+    }
+
+    @Override
+    public Map<String, ?> getAsMap(String claimName) {
+        return get(claimName, Map.class);
+    }
 }
