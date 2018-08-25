@@ -1197,7 +1197,7 @@ scope which is the typical JJWT default).  That is:
 </dependency>
 ```
 
-**Grade or Android**
+**Gradle or Android**
 
 ```groovy
 dependencies {
