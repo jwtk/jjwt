@@ -301,7 +301,7 @@ In this case, we are:
  
  1. *building* a JWT that will have the 
 [registered claim](https://tools.ietf.org/html/rfc7519#section-4.1) `sub` (subject) set to `Joe`. We are then
- 2. *signing* the JWT using a key suitable for the HMAC-SHA-512 algorithm.  Finally, we are
+ 2. *signing* the JWT using a key suitable for the HMAC-SHA-256 algorithm.  Finally, we are
  3. *compacting* it into its final `String` form.  A signed JWT is called a 'JWS'.
 
 The resultant `jws` String looks like this:
