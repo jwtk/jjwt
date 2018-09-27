@@ -31,9 +31,9 @@ public class RuntimeClasspathSerializerLocator implements InstanceLocator<Serial
     @SuppressWarnings("WeakerAccess") //to allow testing override
     protected Serializer<Object> locate() {
         if (isAvailable("com.fasterxml.jackson.databind.ObjectMapper")) {
-            return Classes.newInstance("io.jsonwebtoken.io.JacksonSerializer");
+            return Classes.newInstance("io.jsonwebtoken.io.serializer.JacksonSerializer");
         } else if (isAvailable("org.json.JSONObject")) {
-            return Classes.newInstance("io.jsonwebtoken.io.OrgJsonSerializer");
+            return Classes.newInstance("io.jsonwebtoken.io.serializer.OrgJsonSerializer");
         } else {
             throw new IllegalStateException("Unable to discover any JSON Serializer implementations on the classpath.");
         }

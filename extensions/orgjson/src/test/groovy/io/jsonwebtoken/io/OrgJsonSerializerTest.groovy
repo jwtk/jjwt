@@ -1,6 +1,7 @@
 package io.jsonwebtoken.io
 
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.serializer.OrgJsonSerializer
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
 import org.json.JSONObject

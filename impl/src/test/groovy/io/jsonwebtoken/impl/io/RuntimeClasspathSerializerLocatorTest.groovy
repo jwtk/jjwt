@@ -2,8 +2,8 @@ package io.jsonwebtoken.impl.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.io.JacksonSerializer
-import io.jsonwebtoken.io.OrgJsonSerializer
+import io.jsonwebtoken.io.serializer.JacksonSerializer
+import io.jsonwebtoken.io.serializer.OrgJsonSerializer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

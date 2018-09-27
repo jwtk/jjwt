@@ -1,5 +1,6 @@
 package io.jsonwebtoken.io
 
+import io.jsonwebtoken.io.serializer.OrgJsonDeserializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 import static org.junit.Assert.*

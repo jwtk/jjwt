@@ -1,5 +1,7 @@
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.io.serializer;
 
+import io.jsonwebtoken.io.DeserializationException;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import org.json.JSONArray;

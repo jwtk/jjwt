@@ -1,5 +1,6 @@
 package io.jsonwebtoken.io
 
+import io.jsonwebtoken.io.serializer.OrgJsonSerializer
 import io.jsonwebtoken.lang.Classes
 import org.junit.Test
 import org.junit.runner.RunWith

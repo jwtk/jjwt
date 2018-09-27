@@ -1,6 +1,7 @@
 package io.jsonwebtoken.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.io.serializer.JacksonDeserializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
