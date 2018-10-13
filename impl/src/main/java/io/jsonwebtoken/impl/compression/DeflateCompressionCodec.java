@@ -15,13 +15,11 @@
  */
 package io.jsonwebtoken.impl.compression;
 
-import io.jsonwebtoken.lang.Objects;
-
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.zip.Deflater;
+import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Codec implementing the <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate compression algorithm</a>.
@@ -32,43 +30,25 @@ public class DeflateCompressionCodec extends AbstractCompressionCodec {
 
     private static final String DEFLATE = "DEF";
 
+    private static final StreamWrapper WRAPPER = new StreamWrapper() {
+        @Override
+        public OutputStream wrap(OutputStream out) {
+            return new DeflaterOutputStream(out);
+        }
+    };
+
     @Override
     public String getAlgorithmName() {
         return DEFLATE;
     }
 
     @Override
-    public byte[] doCompress(byte[] payload) throws IOException {
-
-        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-
-        ByteArrayOutputStream outputStream = null;
-        DeflaterOutputStream deflaterOutputStream = null;
-        try {
-            outputStream = new ByteArrayOutputStream();
-            deflaterOutputStream = new DeflaterOutputStream(outputStream, deflater, true);
-
-            deflaterOutputStream.write(payload, 0, payload.length);
-            deflaterOutputStream.flush();
-            return outputStream.toByteArray();
-        } finally {
-            Objects.nullSafeClose(outputStream, deflaterOutputStream);
-        }
+    protected byte[] doCompress(byte[] payload) throws IOException {
+        return writeAndClose(payload, WRAPPER);
     }
 
     @Override
-    public byte[] doDecompress(byte[] compressed) throws IOException {
-        InflaterOutputStream inflaterOutputStream = null;
-        ByteArrayOutputStream decompressedOutputStream = null;
-
-        try {
-            decompressedOutputStream = new ByteArrayOutputStream();
-            inflaterOutputStream = new InflaterOutputStream(decompressedOutputStream);
-            inflaterOutputStream.write(compressed);
-            inflaterOutputStream.flush();
-            return decompressedOutputStream.toByteArray();
-        } finally {
-            Objects.nullSafeClose(decompressedOutputStream, inflaterOutputStream);
-        }
+    protected byte[] doDecompress(byte[] compressed) throws IOException {
+        return readAndClose(new InflaterInputStream(new ByteArrayInputStream(compressed)));
     }
 }

@@ -1,10 +1,14 @@
 ## Release Notes
 
+### 0.10.7
+
+This patch release fixes a [memory leak](https://github.com/jwtk/jjwt/issues/392) found in the DEFLATE compression 
+codec implementation.
+
 ### 0.10.6
 
 This patch release updates the jackson-databind version to 2.9.8 to address a critical security vulnerability in that
-library. It also updates .travis.yml to remove deprecated builds and to "trick" travis into building with Oracle
-JDK 1.7 as this library still supports that Java version even if Travis no longer does.
+library.
 
 ### 0.10.5
 
