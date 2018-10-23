@@ -1,5 +1,72 @@
 ## Release Notes
 
+### 0.10.5
+
+This patch release fixed an Android `org.json` library compatibility [issue](https://github.com/jwtk/jjwt/issues/388).
+
+### 0.10.4
+
+This patch release fixed an [outstanding issue](https://github.com/jwtk/jjwt/issues/381) with JCA name 
+case-sensitivity that impacted Android that was not caught in the 0.10.3 release.
+
+### 0.10.3
+
+This is a minor patch release that fixed a key length assertion for `SignatureAlgorithm.forSigningKey` that was 
+failing in Android environments.  The Android dependencies and ProGuard exclusions documentation was updated as 
+well to reflect Android Studio 3.0 conventions.
+
+### 0.10.2
+
+This is a minor patch release that ensures the `OrgJsonSerializer` and `OrgJsonDeserializer` implementations are 
+compatible with Android's older `org.json` API.  Previously JJWT used newer `org.json` APIs that are not 
+available on Android.
+
+### 0.10.1
+
+This is a minor point release that ensures the BouncyCastle dependency is optional and not pulled in as a transitive
+dependency into projects.
+ 
+Internal implementation code (not impacting the JJWT API) and documentation was also updated to reflect that all 
+Elliptic Curve algorithms are standard on the JDK and do not require Bouncy Castle.
+
+Bouncy Castle is only needed when using PS256, PS384, and PS512 signature algorithms on < JDK 11. 
+[JDK 11 and later](https://bugs.openjdk.java.net/browse/JDK-8146293) supports these algorithms natively.
+
+### 0.10.0
+
+This is a fairly large feature enhancement release that enables the following:
+
+* Modular project structure resulting in pluggable JJWT dependencies ([Issue 348](https://github.com/jwtk/jjwt/issues/348))
+* Auto-configuration for Jackson or JSON-Java [JSON processors](https://github.com/jwtk/jjwt#json).
+* [Automatic SignatureAlgorithm selection](https://github.com/jwtk/jjwt#jws-create-key) based on specified signing Key.
+* Algorithm and Key [Strength Assertions](https://github.com/jwtk/jjwt#jws-key)
+* [Simplified Key generation](https://github.com/jwtk/jjwt#jws-key-create)
+* Deterministic [Base64(URL) support](https://github.com/jwtk/jjwt#base64) on all JDK and Android platforms
+* [Custom JSON processing](https://github.com/jwtk/jjwt#json-custom)
+* Complete [documentation](https://github.com/jwtk/jjwt)
+* and a bunch of other [minor fixes and enhancements](https://github.com/jwtk/jjwt/milestone/11).
+
+**BACKWARDS-COMPATIBILITY NOTICE:**
+
+JJWT's new modular design utilizes distinctions between compile and runtime dependencies to ensure you only depend
+on the public APIs that are safe to use in your application.  All internal/private implementation classes have
+been moved to a new `jjwt-impl` runtime dependency.
+
+If you depended on any internal implementation classes in the past, you have two choices:
+
+1. Refactor your code to use the public-only API classes and interfaces in the `jjwt-api` .jar.  Any functionality
+   you might have used in the internal implementation should be available via newer cleaner interfaces and helper 
+   classes in that .jar.
+   
+2. Specify the new `jjwt-impl` .jar not as a runtime dependency but as a compile dependency.  This would make your
+   upgrade to JJWT 0.10.0 fully backwards compatible, but you do so _at your own risk_.  JJWT will make **NO** 
+   semantic version compatibility guarantees in the `jjwt-impl` .jar moving forward.  Semantic versioning will be 
+   very carefully adhered to in all other JJWT dependencies however.
+
+### 0.9.1
+
+This is a minor patch release that updates the Jackson dependency to 2.9.6 to address Jackson CVE-2017-17485.
+
 ### 0.9.0
 
 This is a minor release that includes changes to dependencies and plugins to allow for building jjwt with Java 9.
@@ -132,7 +199,7 @@ Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compact();
 ```
 
-This will set a new `calg` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
+This will set a new `zip` header with the name of the compression algorithm used so that parsers can see that value and decompress accordingly.
 
 The default parser implementation will automatically decompress DEFLATE or GZIP compressed bodies, so you don't need to set anything on the parser - it looks like normal:
 
@@ -151,7 +218,7 @@ Jwts.builder().claim("foo", "someReallyLongDataString...")
     .compact();
 ```
 
-You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `calg` header and return your custom codec when discovered:
+You will then need to specify a `CompressionCodecResolver` on the parser, so you can inspect the `zip` header and return your custom codec when discovered:
 
 ```java
 Jwts.parser().setSigningKey(key)
