@@ -144,4 +144,14 @@ class OrgJsonDeserializerTest {
         def expected = [hello: '世界', test: [foo: 'bar']]
         assertEquals expected, value
     }
+
+    @Test
+    void testDeprecatedSimpleObject() {
+        def d = new io.jsonwebtoken.io.OrgJsonDeserializer();
+        def b = '{"hello": "世界"}'.getBytes(Strings.UTF_8)
+        def value = d.deserialize(b)
+        assert value instanceof Map
+        def expected = [hello: '世界']
+        assertEquals expected, value
+    }
 }

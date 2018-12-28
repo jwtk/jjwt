@@ -13,7 +13,7 @@ public class JacksonSerializer<T> implements Serializer<T> {
 
     static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
 
-    private final ObjectMapper objectMapper;
+    protected final ObjectMapper objectMapper;
 
     @SuppressWarnings("unused") //used via reflection by RuntimeClasspathDeserializerLocator
     public JacksonSerializer() {

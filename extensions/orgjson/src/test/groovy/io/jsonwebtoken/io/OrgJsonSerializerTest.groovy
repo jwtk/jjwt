@@ -31,6 +31,18 @@ class OrgJsonSerializerTest {
     }
 
     @Test
+    void testDeprecatedConstructor() {
+        def serializer = new io.jsonwebtoken.io.OrgJsonSerializer()
+        def jsonString = new JSONString() {
+            @Override
+            String toJSONString() {
+                return '"foo"'
+            }
+        }
+        assertEquals '"foo"', new String(serializer.serialize(jsonString), Strings.UTF_8)
+    }
+
+    @Test
     void testToBytesFailure() {
 
         final IllegalArgumentException iae = new IllegalArgumentException("foo")

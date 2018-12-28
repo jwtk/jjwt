@@ -12,6 +12,19 @@ import static org.junit.Assert.*
 class JacksonSerializerTest {
 
     @Test
+    void testDefaultDeprecatedConstructor() {
+        def serializer = new io.jsonwebtoken.io.JacksonSerializer()
+        assertNotNull serializer.objectMapper
+    }
+
+    @Test
+    void testObjectDeprecatedMapperConstructor() {
+        def customOM = new ObjectMapper()
+        def serializer = new io.jsonwebtoken.io.JacksonSerializer(customOM)
+        assertSame customOM, serializer.objectMapper
+    }
+
+    @Test
     void testDefaultConstructor() {
         def serializer = new JacksonSerializer()
         assertNotNull serializer.objectMapper
