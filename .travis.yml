@@ -2,22 +2,31 @@
 
 #sudo: required
 language: java
-jdk:
-    ### Not really openjdk7 - we're tricking travis into using oracle jdk7, since it's technically deprecated for use with Travis
-  - openjdk7
-  - oraclejdk8
-  - oraclejdk9
-  - openjdk10
 
-before_install:
-  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"; fi
-  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then export JAVA_HOME="/usr/lib/jvm/java-7-oracle"; export PATH="${JAVA_HOME}/bin:${PATH}"; fi
-  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then test ! -d "${JAVA_HOME}" && (wget https://s3.amazonaws.com/d2fbee19-5fe2-425f-ae11-cd25b35dc99a/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz; tar xvfz /tmp/jdk-7u80-linux-x64.tar.gz -C /tmp; sudo mv /tmp/jdk1.7.0_80 "${JAVA_HOME}"); fi
-  - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
+jobs:
+    include:
+        - name: "Java 7"
+          ### Not really openjdk7 - we're tricking travis into using oracle jdk7, since it's technically deprecated for use with Travis
+          jdk: openjdk7
+          env:
+              - MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"
+              - JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+              - PATH="${JAVA_HOME}/bin:${PATH}"
+          before_install:
+              - wget https://s3.amazonaws.com/d2fbee19-5fe2-425f-ae11-cd25b35dc99a/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz
+              - tar xvfz /tmp/jdk-7u80-linux-x64.tar.gz -C /tmp
+              - sudo mv /tmp/jdk1.7.0_80 "${JAVA_HOME}"
+
+        - name: "Java 8"
+          jdk: oraclejdk8
+          after_success: mvn clean clover:setup test && mvn -pl . clover:clover clover:check coveralls:report
+
+        - name: "Java 9"
+          jdk: oraclejdk9
+
+        - name: "Java 10"
+          jdk: openjdk10
 
 install: true
 
 script: mvn install
-
-after_success:
-  - test -z "$BUILD_COVERAGE" || { mvn clean clover:setup test && mvn -pl . clover:clover clover:check coveralls:report; }
