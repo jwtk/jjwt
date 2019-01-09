@@ -30,9 +30,9 @@ public class RuntimeClasspathDeserializerLocator<T> implements InstanceLocator<D
 
     @SuppressWarnings("WeakerAccess") //to allow testing override
     protected Deserializer<T> locate() {
-        if (isAvailable("com.fasterxml.jackson.databind.ObjectMapper")) {
+        if (isAvailable("io.jsonwebtoken.io.JacksonDeserializer")) {
             return Classes.newInstance("io.jsonwebtoken.io.JacksonDeserializer");
-        } else if (isAvailable("org.json.JSONObject")) {
+        } else if (isAvailable("io.jsonwebtoken.io.OrgJsonDeserializer")) {
             return Classes.newInstance("io.jsonwebtoken.io.OrgJsonDeserializer");
         } else {
             throw new IllegalStateException("Unable to discover any JSON Deserializer implementations on the classpath.");
