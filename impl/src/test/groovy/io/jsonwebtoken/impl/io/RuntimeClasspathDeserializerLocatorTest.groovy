@@ -86,7 +86,7 @@ class RuntimeClasspathDeserializerLocatorTest {
         def locator = new RuntimeClasspathDeserializerLocator() {
             @Override
             protected boolean isAvailable(String fqcn) {
-                if (ObjectMapper.class.getName().equals(fqcn)) {
+                if (JacksonDeserializer.class.getName().equals(fqcn)) {
                     return false; //skip it to allow the OrgJson impl to be created
                 }
                 return super.isAvailable(fqcn)
