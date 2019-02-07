@@ -819,8 +819,8 @@ You read (parse) a JWS as follows:
 4. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
 
-<sup>1. If you don't which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
-which we'll cover later.</sup>
+<sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
+which [we'll cover later](#jws-read-key-resolver).</sup>
 
 For example:
 
