@@ -3,16 +3,16 @@
 #sudo: required
 language: java
 jdk:
-  - oraclejdk7
+    ### Not really openjdk7 - we're tricking travis into using oracle jdk7, since it's technically deprecated for use with Travis
+  - openjdk7
   - oraclejdk8
   - oraclejdk9
-  - oraclejdk10
   - openjdk10
 
 before_install:
-  - if [ "${TRAVIS_JDK_VERSION}" == "oraclejdk7" ]; then export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"; fi
-  - if [ "${TRAVIS_JDK_VERSION}" == "oraclejdk7" ]; then export JAVA_HOME="/usr/lib/jvm/java-7-oracle"; export PATH="${JAVA_HOME}/bin:${PATH}"; fi
-  - if [ "${TRAVIS_JDK_VERSION}" == "oraclejdk7" ]; then test ! -d "${JAVA_HOME}" && (curl http://ftp.osuosl.org/pub/funtoo/distfiles/oracle-java/jdk-7u80-linux-x64.tar.gz | sudo tar xz -C /usr/lib/jvm; sudo mv /usr/lib/jvm/jdk1.7.0_80 "${JAVA_HOME}"); fi
+  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"; fi
+  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then export JAVA_HOME="/usr/lib/jvm/java-7-oracle"; export PATH="${JAVA_HOME}/bin:${PATH}"; fi
+  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then test ! -d "${JAVA_HOME}" && (wget https://s3.amazonaws.com/d2fbee19-5fe2-425f-ae11-cd25b35dc99a/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz; tar xvfz /tmp/jdk-7u80-linux-x64.tar.gz -C /tmp; sudo mv /tmp/jdk1.7.0_80 "${JAVA_HOME}"); fi
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
 
 install: true
