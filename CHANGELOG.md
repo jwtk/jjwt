@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.10.6
+
+This patch release updates the jackson-databind version to 2.9.8 to address a critical security vulnerability in that
+library. It also updates .travis.yml to remove deprecated builds and to "trick" travis into building with Oracle
+JDK 1.7 as this library still supports that Java version even if Travis no longer does.
+
 ### 0.10.5
 
 This patch release fixed an Android `org.json` library compatibility [issue](https://github.com/jwtk/jjwt/issues/388).
