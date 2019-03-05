@@ -521,6 +521,22 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
 
     /**
+     * Disables base64 encoding for payload - https://tools.ietf.org/html/rfc7797
+     *
+     * @return the builder for method chaining.
+     * @since 0.11.0
+     */
+    JwtBuilder detached();
+
+    /**
+     * Detaches payload from the JWS - based on https://tools.ietf.org/html/rfc7515#appendix-F
+     *
+     * @return the builder for method chaining.
+     * @since 0.11.0
+     */
+    JwtBuilder unencodedPayload();
+
+    /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the
      * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-7">JWT Compact Serialization</a>
      * rules.

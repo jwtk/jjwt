@@ -189,6 +189,63 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testDetachedCompactWithJwsHeader() {
+        def b = new DefaultJwtBuilder()
+        b.setHeader(Jwts.jwsHeader().setKeyId('a'))
+        b.setPayload('foo')
+        def alg = SignatureAlgorithm.HS256
+        def key = Keys.secretKeyFor(alg)
+        b.signWith(key, alg)
+
+        String jwt = b.compact()
+        String detached = b.detached().compact()
+
+        def jwtSplit = jwt.split("\\.")
+        def detachedSplit = detached.split("\\.")
+
+        assertEquals jwtSplit[0], detachedSplit[0]
+        assertEquals detachedSplit[1], ""
+        assertEquals jwtSplit[2], detachedSplit[2]
+    }
+
+    @Test
+    void testDisableBase64EncodingWithJwsHeader() {
+        def b = new DefaultJwtBuilder()
+        b.setHeader(Jwts.jwsHeader().setKeyId('a'))
+        def payload = 'foo'
+        b.setPayload(payload)
+        def alg = SignatureAlgorithm.HS256
+        def key = Keys.secretKeyFor(alg)
+        b.signWith(key, alg)
+
+        String jwt = b.compact()
+        String unencodedPayloadJwt = b.unencodedPayload().compact()
+
+        def jwtSplit = jwt.split("\\.")
+        def unencodedPayloadJwtSplit = unencodedPayloadJwt.split("\\.")
+
+        assertEquals jwtSplit[0], unencodedPayloadJwtSplit[0]
+        assertEquals unencodedPayloadJwtSplit[1], payload
+    }
+
+    @Test
+    void testIllegalEncodedPayloadCharacter() {
+        def b = new DefaultJwtBuilder()
+        b.setHeader(Jwts.jwsHeader().setKeyId('a'))
+        b.setPayload("f.oo")
+        def alg = SignatureAlgorithm.HS256
+        def key = Keys.secretKeyFor(alg)
+        b.signWith(key, alg)
+
+        try {
+            b.unencodedPayload().compact()
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals iae.message, 'Unencoded payload cannot contain \'.\''
+        }
+    }
+
+    @Test
     void testBase64UrlEncodeError() {
 
         def b = new DefaultJwtBuilder() {

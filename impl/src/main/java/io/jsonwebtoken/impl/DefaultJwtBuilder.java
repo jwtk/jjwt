@@ -48,6 +48,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Claims claims;
     private String payload;
 
+    private boolean unencodedPayload = false;
+    private boolean isDetached = false;
+
     private SignatureAlgorithm algorithm;
     private Key key;
 
@@ -56,6 +59,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
 
     private CompressionCodec compressionCodec;
+
+    @Override
+    public JwtBuilder unencodedPayload() {
+        this.unencodedPayload = true;
+        return this;
+    }
+
+    @Override
+    public JwtBuilder detached(){
+        this.isDetached = true;
+        return this;
+    }
 
     @Override
     public JwtBuilder serializeToJsonWith(Serializer<Map<String,?>> serializer) {
@@ -332,6 +347,37 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         String base64UrlEncodedHeader = base64UrlEncode(jwsHeader, "Unable to serialize header to json.");
 
+        String payload = getJwsPayload();
+
+        String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + payload;
+
+        String signature = getSignature(jwt);
+
+        if (isDetached) {
+            return base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + JwtParser.SEPARATOR_CHAR + signature;
+        }
+
+        return jwt + JwtParser.SEPARATOR_CHAR + signature;
+    }
+
+    private String getSignature(String jwt) {
+        if (key == null) {
+            // no signature (plaintext), but must terminate w/ a period, see
+            // https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
+            return "";
+        }
+        //jwt must be signed:
+
+        JwtSigner signer = createSigner(algorithm, key);
+
+        return signer.sign(jwt);
+    }
+
+    private String getJwsPayload() {
+        if (unencodedPayload) {
+            return getUnencodedPayload();
+        }
+
         byte[] bytes;
         try {
             bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
@@ -343,25 +389,19 @@ public class DefaultJwtBuilder implements JwtBuilder {
             bytes = compressionCodec.compress(bytes);
         }
 
-        String base64UrlEncodedBody = base64UrlEncoder.encode(bytes);
-
-        String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
-
-        if (key != null) { //jwt must be signed:
-
-            JwtSigner signer = createSigner(algorithm, key);
-
-            String base64UrlSignature = signer.sign(jwt);
-
-            jwt += JwtParser.SEPARATOR_CHAR + base64UrlSignature;
-        } else {
-            // no signature (plaintext), but must terminate w/ a period, see
-            // https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
-            jwt += JwtParser.SEPARATOR_CHAR;
-        }
-
-        return jwt;
+        return base64UrlEncoder.encode(bytes);
     }
+
+    private String getUnencodedPayload() {
+        if (payload == null){
+            return new String(toJson(claims));
+        }
+        if (payload.contains(".")) {
+            throw new IllegalArgumentException("Unencoded payload cannot contain '.'");
+        }
+        return payload;
+    }
+
 
     /*
      * @since 0.5 mostly to allow testing overrides
