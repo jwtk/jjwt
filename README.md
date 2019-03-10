@@ -580,18 +580,18 @@ A JWT Header provides metadata about the contents, format and cryptographic oper
 
 If you need to set one or more JWT header parameters, such as the `kid` 
 [(Key ID) header parameter](https://tools.ietf.org/html/rfc7515#section-4.1.4), you can simply call
-`JwtBuilder` `setHeaderParameter` one or more times as needed:
+`JwtBuilder` `setHeaderParam` one or more times as needed:
 
 ```java
 String jws = Jwts.builder()
 
-    .setHeaderParameter("kid", "myKeyId")
+    .setHeaderParam("kid", "myKeyId")
     
     // ... etc ...
 
 ```
 
-Each time `setHeaderParameter` is called, it simply appends the key-value pair to an internal `Header` instance, 
+Each time `setHeaderParam` is called, it simply appends the key-value pair to an internal `Header` instance, 
 potentially overwriting any existing identically-named key/value pair.
 
 **NOTE**: You do not need to set the `alg` or `zip` header parameters as JJWT will set them automatically
