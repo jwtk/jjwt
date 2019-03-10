@@ -767,7 +767,7 @@ For example, if you call `signWith` with a `SecretKey` that is 256 bits (32 byte
 When using `signWith` JJWT will also automatically set the required `alg` header with the associated algorithm 
 identifier.
 
-Similarly, if you called `signWith` with an RSA `PrivateKey` that was 4096 bits long, JJWT will use the `R512`
+Similarly, if you called `signWith` with an RSA `PrivateKey` that was 4096 bits long, JJWT will use the `RS512`
 algorithm and automatically set the `alg` header to `RS512`.
 
 The same selection logic applies for Elliptic Curve `PrivateKey`s.
