@@ -1,24 +1,43 @@
 package io.jsonwebtoken
 
-import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.factory.JwtFactory
+import io.jsonwebtoken.factory.JwtFactoryLoader
+import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 
-import static org.easymock.EasyMock.createMock
-import static org.easymock.EasyMock.eq
 import static org.easymock.EasyMock.expect
+import static org.easymock.EasyMock.mock
+import static org.easymock.EasyMock.reset
 import static org.easymock.EasyMock.same
 import static org.junit.Assert.assertSame
+import static org.powermock.api.easymock.PowerMock.createMock
 import static org.powermock.api.easymock.PowerMock.mockStatic
 import static org.powermock.api.easymock.PowerMock.replay
-import static org.powermock.api.easymock.PowerMock.reset
 import static org.powermock.api.easymock.PowerMock.verify
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest([Classes, Jwts])
+@PrepareForTest([JwtFactoryLoader])
 class JwtsTest {
+
+    static JwtFactory factory = mock(JwtFactory)
+
+    @BeforeClass
+    static void prepareFactory() {
+        mockStatic(JwtFactoryLoader)
+
+        expect(JwtFactoryLoader.loadFactory()).andReturn(factory).anyTimes()
+
+        replay JwtFactoryLoader
+    }
+
+    @Before
+    void resetFactoryMock() {
+        reset(factory)
+    }
 
     @Test
     void testPrivateCtor() { //for code coverage only
@@ -28,146 +47,118 @@ class JwtsTest {
     @Test
     void testHeader() {
 
-        mockStatic(Classes)
-
         def instance = createMock(Header)
 
-        expect(Classes.newInstance(eq("io.jsonwebtoken.impl.DefaultHeader"))).andReturn(instance)
+        expect(factory.header()).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.header()
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testHeaderFromMap() {
 
-        mockStatic(Classes)
-
         def map = [:]
 
         def instance = createMock(Header)
 
-        expect(Classes.newInstance(
-                eq("io.jsonwebtoken.impl.DefaultHeader"),
-                same(Jwts.MAP_ARG),
-                same(map))
-        ).andReturn(instance)
+        expect(factory.header(same(map) as Map<String, Object>)).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.header(map)
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testJwsHeader() {
 
-        mockStatic(Classes)
-
         def instance = createMock(JwsHeader)
 
-        expect(Classes.newInstance(eq("io.jsonwebtoken.impl.DefaultJwsHeader"))).andReturn(instance)
+        expect(factory.jwsHeader()).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.jwsHeader()
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testJwsHeaderFromMap() {
 
-        mockStatic(Classes)
-
         def map = [:]
 
         def instance = createMock(JwsHeader)
 
-        expect(Classes.newInstance(
-                eq("io.jsonwebtoken.impl.DefaultJwsHeader"),
-                same(Jwts.MAP_ARG),
-                same(map))
-        ).andReturn(instance)
+        expect(factory.jwsHeader(same(map) as Map<String, Object>)).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.jwsHeader(map)
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testClaims() {
 
-        mockStatic(Classes)
-
         def instance = createMock(Claims)
 
-        expect(Classes.newInstance(eq("io.jsonwebtoken.impl.DefaultClaims"))).andReturn(instance)
+        expect(factory.claims()).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.claims()
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testClaimsFromMap() {
 
-        mockStatic(Classes)
-
         def map = [:]
 
         def instance = createMock(Claims)
 
-        expect(Classes.newInstance(
-                eq("io.jsonwebtoken.impl.DefaultClaims"),
-                same(Jwts.MAP_ARG),
-                same(map))
-        ).andReturn(instance)
+        expect(factory.claims(same(map) as Map<String, Object>)).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.claims(map)
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testParser() {
 
-        mockStatic(Classes)
-
         def instance = createMock(JwtParser)
 
-        expect(Classes.newInstance(eq("io.jsonwebtoken.impl.DefaultJwtParser"))).andReturn(instance)
+        expect(factory.parser()).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.parser()
 
-        verify Classes, instance
+        verify factory, instance
     }
 
     @Test
     void testBuilder() {
 
-        mockStatic(Classes)
-
         def instance = createMock(JwtBuilder)
 
-        expect(Classes.newInstance(eq("io.jsonwebtoken.impl.DefaultJwtBuilder"))).andReturn(instance)
+        expect(factory.builder()).andReturn(instance)
 
-        replay Classes, instance
+        replay factory, instance
 
         assertSame instance, Jwts.builder()
 
-        verify Classes, instance
+        verify factory, instance
     }
 }
