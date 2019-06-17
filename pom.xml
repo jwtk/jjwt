@@ -95,7 +95,7 @@
         <bouncycastle.version>1.60</bouncycastle.version>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.1</groovy.version>
+        <groovy.version>2.5.7</groovy.version>
         <logback.version>1.2.3</logback.version>
         <easymock.version>3.6</easymock.version>
         <junit.version>4.12</junit.version>
@@ -279,7 +279,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.1</version>
+                <version>1.7.1</version>
                 <executions>
                     <execution>
                         <goals>
