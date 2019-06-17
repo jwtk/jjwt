@@ -17,8 +17,9 @@ package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -43,14 +44,12 @@ public class RuntimeClasspathSerializerLocator implements InstanceLocator<Serial
         return serializer;
     }
 
-    @SuppressWarnings("WeakerAccess") //to allow testing override
+    @SuppressWarnings({"unchecked", "WeakerAccess"}) //to allow testing override
     protected Serializer<Object> locate() {
-        if (isAvailable("io.jsonwebtoken.jackson.io.JacksonSerializer")) {
-            return Classes.newInstance("io.jsonwebtoken.jackson.io.JacksonSerializer");
-        } else if (isAvailable("io.jsonwebtoken.orgjson.io.OrgJsonSerializer")) {
-            return Classes.newInstance("io.jsonwebtoken.orgjson.io.OrgJsonSerializer");
-        } else if (isAvailable("io.jsonwebtoken.gson.io.GsonSerializer")) {
-            return Classes.newInstance("io.jsonwebtoken.gson.io.GsonSerializer");
+        ServiceLoader<Serializer> serviceLoader = ServiceLoader.load(Serializer.class);
+        Iterator<Serializer> iterator = serviceLoader.iterator();
+        if(iterator.hasNext()) {
+            return  (Serializer<Object>)iterator.next();
         } else {
             throw new IllegalStateException("Unable to discover any JSON Serializer implementations on the classpath.");
         }
@@ -59,10 +58,5 @@ public class RuntimeClasspathSerializerLocator implements InstanceLocator<Serial
     @SuppressWarnings("WeakerAccess") //to allow testing override
     protected boolean compareAndSet(Serializer<Object> s) {
         return SERIALIZER.compareAndSet(null, s);
-    }
-
-    @SuppressWarnings("WeakerAccess") //to allow testing override
-    protected boolean isAvailable(String fqcn) {
-        return Classes.isAvailable(fqcn);
     }
 }

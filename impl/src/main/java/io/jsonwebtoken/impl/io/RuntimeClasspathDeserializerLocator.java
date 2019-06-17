@@ -17,8 +17,9 @@ package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -45,12 +46,10 @@ public class RuntimeClasspathDeserializerLocator<T> implements InstanceLocator<D
 
     @SuppressWarnings("WeakerAccess") //to allow testing override
     protected Deserializer<T> locate() {
-        if (isAvailable("io.jsonwebtoken.jackson.io.JacksonDeserializer")) {
-            return Classes.newInstance("io.jsonwebtoken.jackson.io.JacksonDeserializer");
-        } else if (isAvailable("io.jsonwebtoken.orgjson.io.OrgJsonDeserializer")) {
-            return Classes.newInstance("io.jsonwebtoken.orgjson.io.OrgJsonDeserializer");
-        } else if (isAvailable("io.jsonwebtoken.gson.io.GsonDeserializer")) {
-            return Classes.newInstance("io.jsonwebtoken.gson.io.GsonDeserializer");
+        ServiceLoader<Deserializer> serviceLoader = ServiceLoader.load(Deserializer.class);
+        Iterator<Deserializer> iterator = serviceLoader.iterator();
+        if(iterator.hasNext()) {
+            return  (Deserializer<T>)iterator.next();
         } else {
             throw new IllegalStateException("Unable to discover any JSON Deserializer implementations on the classpath.");
         }
@@ -59,10 +58,5 @@ public class RuntimeClasspathDeserializerLocator<T> implements InstanceLocator<D
     @SuppressWarnings("WeakerAccess") //to allow testing override
     protected boolean compareAndSet(Deserializer<T> d) {
         return DESERIALIZER.compareAndSet(null, d);
-    }
-
-    @SuppressWarnings("WeakerAccess") //to allow testing override
-    protected boolean isAvailable(String fqcn) {
-        return Classes.isAvailable(fqcn);
     }
 }

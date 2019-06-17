@@ -28,6 +28,10 @@ import static org.junit.Assert.*
 
 class RuntimeClasspathSerializerLocatorTest {
 
+    private static final String TEST_SERVICE_DESCRIPTOR = "io.jsonwebtoken.io.Serializer.test.orgjson"
+
+    private ClassLoader originalClassLoader
+
     @Before
     void setUp() {
         RuntimeClasspathSerializerLocator.SERIALIZER.set(null)
@@ -36,18 +40,23 @@ class RuntimeClasspathSerializerLocatorTest {
     @After
     void teardown() {
         RuntimeClasspathSerializerLocator.SERIALIZER.set(null)
+        restoreOriginalClassLoader()
+    }
+
+    private void restoreOriginalClassLoader() {
+        if(originalClassLoader != null) {
+            Thread.currentThread().setContextClassLoader(originalClassLoader)
+            originalClassLoader = null
+        }
     }
 
     @Test
     void testClassIsNotAvailable() {
-        def locator = new RuntimeClasspathSerializerLocator() {
-            @Override
-            protected boolean isAvailable(String fqcn) {
-                return false
-            }
-        }
+        prepareNoServiceDescriptorClassLoader()
+
         try {
-            locator.getInstance()
+            new RuntimeClasspathSerializerLocator().getInstance()
+            fail 'Located Deserializer class, whereas none was expected.'
         } catch (Exception ex) {
             assertEquals 'Unable to discover any JSON Serializer implementations on the classpath.', ex.message
         }
@@ -98,20 +107,12 @@ class RuntimeClasspathSerializerLocatorTest {
 
     @Test
     void testOrgJson() {
-        def locator = new RuntimeClasspathSerializerLocator() {
-            @Override
-            protected boolean isAvailable(String fqcn) {
-                if (JacksonSerializer.class.getName().equals(fqcn)) {
-                    return false //skip it to allow the OrgJson impl to be created
-                }
-                return super.isAvailable(fqcn)
-            }
-        }
+        prepareFakeServiceClassLoader()
 
-        def serializer = locator.getInstance()
+        def serializer = new RuntimeClasspathSerializerLocator().getInstance()
         assertTrue serializer instanceof OrgJsonSerializer
     }
-    
+
     @Test
     void testGson() {
         def locator = new RuntimeClasspathSerializerLocator() {
@@ -129,5 +130,15 @@ class RuntimeClasspathSerializerLocatorTest {
 
         def serializer = locator.getInstance()
         assertTrue serializer instanceof GsonSerializer
+    }
+
+    private void prepareNoServiceDescriptorClassLoader() {
+        originalClassLoader = Thread.currentThread().getContextClassLoader()
+        Thread.currentThread().setContextClassLoader(new NoServiceDescriptorClassLoader(originalClassLoader))
+    }
+
+    private void prepareFakeServiceClassLoader() {
+        originalClassLoader = Thread.currentThread().getContextClassLoader()
+        Thread.currentThread().setContextClassLoader(new FakeServiceDescriptorClassLoader(originalClassLoader, TEST_SERVICE_DESCRIPTOR))
     }
 }
