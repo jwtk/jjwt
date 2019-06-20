@@ -10,15 +10,28 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest([JwtFactoryLoader])
-class JwtFactoryLoaderTest {
+@PrepareForTest([FactoryLoader])
+class FactoryLoaderTest {
+
     @Test
-    void testSuccessfulLoading() {
-        def factory = JwtFactoryLoader.loadFactory()
+    void testSuccessfulLoadingOfJwtFactory() {
+        def factory = FactoryLoader.loadFactory()
 
         assertNotNull factory
 
         assertEquals(TestJwtFactory, factory.class)
+
+        //test coverage for private constructor:
+        new FactoryLoader()
+    }
+
+    @Test
+    void testSuccessfulLoadingOfCompressionCodecFactory() {
+        def factory = FactoryLoader.loadCompressionCodecFactory()
+
+        assertNotNull factory
+
+        assertEquals(TestComptressionCodecFactory, factory.class)
     }
 
     @Test(expected = ImplementationNotFoundException)
@@ -27,7 +40,7 @@ class JwtFactoryLoaderTest {
 
         Thread.currentThread().setContextClassLoader(new NoServicesClassLoader(cl))
 
-        JwtFactoryLoader.loadFactory()
+        FactoryLoader.loadFactory()
     }
 
     static class NoServicesClassLoader extends ClassLoader {
