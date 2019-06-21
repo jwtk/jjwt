@@ -1,4 +1,4 @@
-package io.jsonwebtoken.impl.factory;
+package io.jsonwebtoken.impl;
 
 import java.util.Map;
 
@@ -6,7 +6,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.factory.JwtFactory;
+import io.jsonwebtoken.JwtFactory;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultHeader;

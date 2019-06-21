@@ -1,6 +1,4 @@
-package io.jsonwebtoken.factory;
-
-import io.jsonwebtoken.CompressionCodec;
+package io.jsonwebtoken;
 
 /**
  * Factory for {@link CompressionCodec} implementations. Backs the {@link io.jsonwebtoken.CompressionCodecs} constants

@@ -1,37 +1,25 @@
-package io.jsonwebtoken.factory
+package io.jsonwebtoken.lang
 
-
+import io.jsonwebtoken.JwtFactory
+import io.jsonwebtoken.TestJwtFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 
-import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest([FactoryLoader])
-class FactoryLoaderTest {
+@PrepareForTest([Services])
+class ServicesTest {
 
     @Test
-    void testSuccessfulLoadingOfJwtFactory() {
-        def factory = FactoryLoader.loadFactory()
+    void testSuccessfulLoading() {
+        def factory = Services.loadFirst(JwtFactory.class)
 
         assertNotNull factory
 
-        assertEquals(TestJwtFactory, factory.class)
-
-        //test coverage for private constructor:
-        new FactoryLoader()
-    }
-
-    @Test
-    void testSuccessfulLoadingOfCompressionCodecFactory() {
-        def factory = FactoryLoader.loadCompressionCodecFactory()
-
-        assertNotNull factory
-
-        assertEquals(TestComptressionCodecFactory, factory.class)
+        org.junit.Assert.assertEquals(TestJwtFactory, factory.class)
     }
 
     @Test(expected = ImplementationNotFoundException)
@@ -40,7 +28,7 @@ class FactoryLoaderTest {
 
         Thread.currentThread().setContextClassLoader(new NoServicesClassLoader(cl))
 
-        FactoryLoader.loadFactory()
+        Services.loadFirst(JwtFactory.class)
     }
 
     static class NoServicesClassLoader extends ClassLoader {
@@ -50,8 +38,8 @@ class FactoryLoaderTest {
 
         @Override
         Enumeration<URL> getResources(String name) throws IOException {
-            if(name.startsWith("META-INF/services/")) {
-                return Collections.emptyEnumeration()
+            if (name.startsWith("META-INF/services/")) {
+                return java.util.Collections.emptyEnumeration()
             } else {
                 return super.getResources(name)
             }

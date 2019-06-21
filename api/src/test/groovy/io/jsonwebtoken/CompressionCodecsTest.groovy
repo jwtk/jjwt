@@ -1,7 +1,6 @@
 package io.jsonwebtoken
 
-import io.jsonwebtoken.factory.CompressionCodecFactory
-import io.jsonwebtoken.factory.FactoryLoader
+import io.jsonwebtoken.lang.Services
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -12,17 +11,17 @@ import static org.junit.Assert.assertSame
 import static org.powermock.api.easymock.PowerMock.*
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest([FactoryLoader, CompressionCodecs])
+@PrepareForTest([Services, CompressionCodecs])
 class CompressionCodecsTest {
 
     @Test
     void testStatics() {
 
-        mockStatic(FactoryLoader)
+        mockStatic(Services)
 
         def factory = createMock(CompressionCodecFactory)
 
-        expect(FactoryLoader.loadCompressionCodecFactory()).andReturn(factory)
+        expect(Services.loadFirst(CompressionCodecFactory)).andReturn(factory)
 
         def deflate = createMock(CompressionCodec)
         def gzip = createMock(CompressionCodec)
@@ -30,12 +29,12 @@ class CompressionCodecsTest {
         expect(factory.deflateCodec()).andReturn(deflate)
         expect(factory.gzipCodec()).andReturn(gzip)
 
-        replay FactoryLoader, factory, deflate, gzip
+        replay Services, factory, deflate, gzip
 
         assertSame deflate, CompressionCodecs.DEFLATE
         assertSame gzip, CompressionCodecs.GZIP
 
-        verify FactoryLoader, factory, deflate, gzip
+        verify Services, factory, deflate, gzip
 
         //test coverage for private constructor:
         new CompressionCodecs()

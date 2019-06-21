@@ -1,7 +1,6 @@
 package io.jsonwebtoken
 
-import io.jsonwebtoken.factory.JwtFactory
-import io.jsonwebtoken.factory.FactoryLoader
+import io.jsonwebtoken.lang.Services
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
@@ -20,18 +19,18 @@ import static org.powermock.api.easymock.PowerMock.replay
 import static org.powermock.api.easymock.PowerMock.verify
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest([FactoryLoader])
+@PrepareForTest([Services])
 class JwtsTest {
 
     static JwtFactory factory = mock(JwtFactory)
 
     @BeforeClass
     static void prepareFactory() {
-        mockStatic(FactoryLoader)
+        mockStatic(Services)
 
-        expect(FactoryLoader.loadFactory()).andReturn(factory).anyTimes()
+        expect(Services.loadFirst(JwtFactory)).andReturn(factory).anyTimes()
 
-        replay FactoryLoader
+        replay Services
     }
 
     @Before

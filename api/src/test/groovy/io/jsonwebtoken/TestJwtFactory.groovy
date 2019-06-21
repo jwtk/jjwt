@@ -1,10 +1,4 @@
-package io.jsonwebtoken.factory
-
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Header
-import io.jsonwebtoken.JwsHeader
-import io.jsonwebtoken.JwtBuilder
-import io.jsonwebtoken.JwtParser
+package io.jsonwebtoken
 
 class TestJwtFactory implements JwtFactory {
     @Override

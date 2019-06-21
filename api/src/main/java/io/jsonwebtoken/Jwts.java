@@ -15,8 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.factory.JwtFactory;
-import io.jsonwebtoken.factory.FactoryLoader;
+import io.jsonwebtoken.lang.Services;
 
 import java.util.Map;
 
@@ -28,7 +27,7 @@ import java.util.Map;
  */
 public final class Jwts {
 
-    private static final JwtFactory FACTORY = FactoryLoader.loadFactory();
+    private static final JwtFactory FACTORY = Services.loadFirst(JwtFactory.class);
 
     private Jwts() {
     }
