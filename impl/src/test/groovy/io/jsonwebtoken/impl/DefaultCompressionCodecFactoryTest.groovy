@@ -1,5 +1,6 @@
-package io.jsonwebtoken.impl.factory
+package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.impl.DefaultCompressionCodecFactory
 import io.jsonwebtoken.impl.compression.DeflateCompressionCodec
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import org.junit.Test

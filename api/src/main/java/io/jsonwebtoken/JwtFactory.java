@@ -1,12 +1,6 @@
-package io.jsonwebtoken.factory;
+package io.jsonwebtoken;
 
 import java.util.Map;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
 
 /**
  * Factory for creating instances of JWT interfaces. Backs the {@link io.jsonwebtoken.Jwts} factory class.

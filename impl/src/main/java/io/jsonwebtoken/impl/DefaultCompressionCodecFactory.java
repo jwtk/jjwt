@@ -1,7 +1,7 @@
-package io.jsonwebtoken.impl.factory;
+package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.factory.CompressionCodecFactory;
+import io.jsonwebtoken.CompressionCodecFactory;
 import io.jsonwebtoken.impl.compression.DeflateCompressionCodec;
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec;
 

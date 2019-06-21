@@ -1,9 +1,9 @@
-package io.jsonwebtoken.factory;
+package io.jsonwebtoken.lang;
 
 import io.jsonwebtoken.JwtException;
 
 /**
- * Exception indicating that no implementation of jjwt-api was found on the classpath.
+ * Exception indicating that no implementation of an jjwt-api SPI was found on the classpath.
  */
 public class ImplementationNotFoundException extends JwtException {
 
