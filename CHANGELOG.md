@@ -5,6 +5,12 @@
 This patch release fixes a [memory leak](https://github.com/jwtk/jjwt/issues/392) found in the DEFLATE compression 
 codec implementation.
 
+It also updates the Jackson dependency version to [2.9.9.1](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
+to address three security vulnerabilities in Jackson:
+[CVE-2019-12086](https://nvd.nist.gov/vuln/detail/CVE-2019-12086),
+[CVE-2019-12384](https://nvd.nist.gov/vuln/detail/CVE-2019-12384), and
+[CVE-2019-12814](https://nvd.nist.gov/vuln/detail/CVE-2019-12814).
+
 ### 0.10.6
 
 This patch release updates the jackson-databind version to 2.9.8 to address a critical security vulnerability in that
