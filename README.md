@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
 [![Coverage Status](https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/github/jwtk/jjwt?branch=master)
+[![Gitter](https://badges.gitter.im/jwtk/jjwt.svg)](https://gitter.im/jwtk/jjwt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Java JWT: JSON Web Token for Java and Android
 
@@ -17,13 +18,20 @@ and is supported and maintained by a [community](https://github.com/jwtk/jjwt/gr
 
 [Okta](https://developer.okta.com/) is a complete authentication and user management API for developers.
 
-We've also added some convenience extensions that are not part of the specification, such as JWT compression and claim 
+We've also added some convenience extensions that are not part of the specification, such as JWS compression and claim 
 enforcement.
 
 ## Table of Contents
 
 * [Features](#features)
   * [Currently Unsupported Features](#features-unsupported)
+* [Community](#community)
+  * [Getting Help](#help)
+    * [Questions](#help-questions)
+    * [Bugs and Feature Requests](#help-issues)
+  * [Contributing](#contributing)
+    * [Pull Requests](#contributing-pull-requests)
+    * [Help Wanted](#contributing-help-wanted)
 * [What is a JSON Web Token?](#overview)
 * [Installation](#install)
   * [JDK Projects](#install-jdk)
@@ -110,6 +118,79 @@ enforcement.
 
 These features will be implemented in a future release.  Community contributions are welcome!
 
+<a name="community"></a>
+## Community
+
+<a name="help"></a>
+### Getting Help
+
+If you have trouble using JJWT, please first read the documentation on this page before asking questions.  We try 
+very hard to ensure JJWT's documentation is robust, categorized with a table of contents, and up to date for each release.
+
+<a name="help-questions"></a>
+#### Questions
+
+If the documentation or the API JavaDoc isn't sufficient, and you either have usability questions or are confused
+about something, please [ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false).
+
+After asking your question, you may wish to join our [Slack](https://jwtk.slack.com/messages/CBNACTN3A) or
+[Gittr](https://gitter.im/jwtk/jjwt) chat rooms, but note that they may not always be attended. You will usually
+have a better chance of having your question answered by 
+[asking your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false).
+   
+If you believe you have found a bug or would like to suggest a feature enhancement, please create a new GitHub issue, 
+however:
+
+**Please do not create a GitHub issue to ask a question.**  
+
+We use GitHub Issues to track actionable work that requires changes to JJWT's design and/or codebase.  If you have a 
+usability question, instead please 
+[ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false), or try Slack or Gittr as 
+described above.
+
+**If a GitHub Issue is created that does not represent actionable work for JJWT's codebase, it will be promptly closed.**
+
+<a name="help-issues"></a>
+#### Bugs and Feature Requests
+
+If you do not have a usability question and believe you have a legitimate bug or feature request, 
+please do [create a new JJWT issue](https://github.com/jwtk/jjwt/issues/new).
+
+If you feel like you'd like to help fix a bug or implement the new feature yourself, please read the Contributing 
+section next before starting any work.
+
+<a name="contributing"></a>
+### Contributing
+
+<a name="contributing-pull-requests"></a>
+#### Pull Requests
+
+Simple Pull Requests that fix anything other than JJWT core code (documentation, JavaDoc, typos, test cases, etc) are 
+always appreciated and have a high likelihood of being merged quickly. Please send them!
+
+However, if you want or feel the need to change JJWT's functionality or core code, please do not issue a pull request 
+without [creating a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) and discussing your desired 
+changes **first**, _before you start working on it_.
+
+It would be a shame to reject your earnest and genuinely appreciated pull request if it might not not align with the 
+project's goals, design expectations or planned functionality.  We've sadly had to reject large PRs in the past because
+they were out of sync with project or design expectations - all because the PR author didn't first check in with 
+the team first before working on a solution.
+
+So, please [create a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) first to discuss, and then we can see if
+(or how) a PR is warranted.  Thank you!
+
+<a name="contributing-help-wanted"></a>
+#### Help Wanted
+
+If you would like to help, but don't know where to start, please visit the 
+[Help Wanted Issues](https://github.com/jwtk/jjwt/labels/help%20wanted) page and pick any of the 
+ones there, and we'll be happy to discuss and answer questions in the issue comments.
+
+If any of those don't appeal to you, no worries! Any help you would like to offer would be 
+appreciated based on the above caveats concerning [contributing pull reqeuests](#contributing-pull-requests). Feel free
+to discuss or ask questions first if you're not sure. :)
+
 <a name="overview"></a>
 ## What is a JSON Web Token?
 
@@ -179,18 +260,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.10.5</version>
+    <version>0.10.7</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.10.5</version>
+    <version>0.10.7</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.5</version>
+    <version>0.10.7</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -209,11 +290,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.5'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.5',
+    compile 'io.jsonwebtoken:jjwt-api:0.10.7'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.5'
+            'io.jsonwebtoken:jjwt-jackson:0.10.7'
 }
 ```
 
@@ -229,9 +310,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.10.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.5' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.5') {
+    api 'io.jsonwebtoken:jjwt-api:0.10.7'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.7' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.7') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -580,18 +661,18 @@ A JWT Header provides metadata about the contents, format and cryptographic oper
 
 If you need to set one or more JWT header parameters, such as the `kid` 
 [(Key ID) header parameter](https://tools.ietf.org/html/rfc7515#section-4.1.4), you can simply call
-`JwtBuilder` `setHeaderParameter` one or more times as needed:
+`JwtBuilder` `setHeaderParam` one or more times as needed:
 
 ```java
 String jws = Jwts.builder()
 
-    .setHeaderParameter("kid", "myKeyId")
+    .setHeaderParam("kid", "myKeyId")
     
     // ... etc ...
 
 ```
 
-Each time `setHeaderParameter` is called, it simply appends the key-value pair to an internal `Header` instance, 
+Each time `setHeaderParam` is called, it simply appends the key-value pair to an internal `Header` instance, 
 potentially overwriting any existing identically-named key/value pair.
 
 **NOTE**: You do not need to set the `alg` or `zip` header parameters as JJWT will set them automatically
@@ -767,7 +848,7 @@ For example, if you call `signWith` with a `SecretKey` that is 256 bits (32 byte
 When using `signWith` JJWT will also automatically set the required `alg` header with the associated algorithm 
 identifier.
 
-Similarly, if you called `signWith` with an RSA `PrivateKey` that was 4096 bits long, JJWT will use the `R512`
+Similarly, if you called `signWith` with an RSA `PrivateKey` that was 4096 bits long, JJWT will use the `RS512`
 algorithm and automatically set the `alg` header to `RS512`.
 
 The same selection logic applies for Elliptic Curve `PrivateKey`s.
@@ -819,8 +900,8 @@ You read (parse) a JWS as follows:
 4. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
 
-<sup>1. If you don't which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
-which we'll cover later.</sup>
+<sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
+which [we'll cover later](#jws-read-key-resolver).</sup>
 
 For example:
 
@@ -1192,7 +1273,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.5</version>
+    <version>0.10.7</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1201,7 +1282,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-jackson:0.10.5'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.10.7'
 }
 ```
 

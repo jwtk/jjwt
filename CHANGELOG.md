@@ -1,5 +1,26 @@
 ## Release Notes
 
+### 0.10.7
+
+This patch release:
+ 
+* Adds a new [Community section](https://github.com/jwtk/jjwt#community) in the documentation discussing asking 
+  questions, using Slack and Gittr, and opening new issues and pull requests. 
+* Fixes a [memory leak](https://github.com/jwtk/jjwt/issues/392) found in the DEFLATE compression 
+codec implementation.
+* Updates the Jackson dependency version to [2.9.9.1](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
+to address three security vulnerabilities in Jackson:
+[CVE-2019-12086](https://nvd.nist.gov/vuln/detail/CVE-2019-12086),
+[CVE-2019-12384](https://nvd.nist.gov/vuln/detail/CVE-2019-12384), and
+[CVE-2019-12814](https://nvd.nist.gov/vuln/detail/CVE-2019-12814).
+* Fixes a [bug](https://github.com/jwtk/jjwt/issues/397) when Jackson is in the classpath but the `jjwt-jackson` .jar is not.
+* Fixes various documentation and typo fixes.
+
+### 0.10.6
+
+This patch release updates the jackson-databind version to 2.9.8 to address a critical security vulnerability in that
+library.
+
 ### 0.10.5
 
 This patch release fixed an Android `org.json` library compatibility [issue](https://github.com/jwtk/jjwt/issues/388).

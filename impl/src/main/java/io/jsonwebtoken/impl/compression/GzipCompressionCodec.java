@@ -16,11 +16,10 @@
 package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -33,43 +32,25 @@ public class GzipCompressionCodec extends AbstractCompressionCodec implements Co
 
     private static final String GZIP = "GZIP";
 
+    private static final StreamWrapper WRAPPER = new StreamWrapper() {
+        @Override
+        public OutputStream wrap(OutputStream out) throws IOException {
+            return new GZIPOutputStream(out);
+        }
+    };
+
     @Override
     public String getAlgorithmName() {
         return GZIP;
     }
 
     @Override
-    protected byte[] doDecompress(byte[] compressed) throws IOException {
-        byte[] buffer = new byte[512];
-
-        ByteArrayOutputStream outputStream = null;
-        GZIPInputStream gzipInputStream = null;
-        ByteArrayInputStream inputStream = null;
-
-        try {
-            inputStream = new ByteArrayInputStream(compressed);
-            gzipInputStream = new GZIPInputStream(inputStream);
-            outputStream = new ByteArrayOutputStream();
-            int read = gzipInputStream.read(buffer);
-            while (read != -1) {
-                outputStream.write(buffer, 0, read);
-                read = gzipInputStream.read(buffer);
-            }
-            return outputStream.toByteArray();
-        } finally {
-            Objects.nullSafeClose(inputStream, gzipInputStream, outputStream);
-        }
+    protected byte[] doCompress(byte[] payload) throws IOException {
+        return writeAndClose(payload, WRAPPER);
     }
 
-    protected byte[] doCompress(byte[] payload) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        GZIPOutputStream compressorOutputStream = new GZIPOutputStream(outputStream, true);
-        try {
-            compressorOutputStream.write(payload, 0, payload.length);
-            compressorOutputStream.finish();
-            return outputStream.toByteArray();
-        } finally {
-            Objects.nullSafeClose(compressorOutputStream, outputStream);
-        }
+    @Override
+    protected byte[] doDecompress(byte[] compressed) throws IOException {
+        return readAndClose(new GZIPInputStream(new ByteArrayInputStream(compressed)));
     }
 }

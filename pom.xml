@@ -25,7 +25,7 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.10.8-SNAPSHOT</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
@@ -88,7 +88,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.9.6</jackson.version>
+        <jackson.version>2.9.9.1</jackson.version>
         <orgjson.version>20180130</orgjson.version>
 
         <!-- Optional Runtime Dependencies: -->
