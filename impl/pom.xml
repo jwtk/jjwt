@@ -57,7 +57,7 @@
 	<dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-gson</artifactId>
-	   <version>${project.version}</version>
+	    <scope>test</scope>
 	</dependency>
     </dependencies>
 
