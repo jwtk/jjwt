@@ -175,7 +175,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setClaims(Map<String, Object> claims) {
+    public JwtBuilder setClaims(Map<String, ?> claims) {
         this.claims = new DefaultClaims(claims);
         return this;
     }
