@@ -69,7 +69,7 @@
         <pluginRepository>
             <snapshots>
                 <enabled>false</enabled>
-           </snapshots>
+            </snapshots>
             <id>bintray-jwtk-coveralls-maven-plugin</id>
             <name>bintray-plugins</name>
             <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
