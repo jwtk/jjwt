@@ -1,6 +1,7 @@
-package io.jsonwebtoken.io
+package io.jsonwebtoken.gson.io
 
 import com.google.gson.Gson
+import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 

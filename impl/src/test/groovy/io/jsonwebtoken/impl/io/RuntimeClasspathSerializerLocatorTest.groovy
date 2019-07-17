@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl.io
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.io.JacksonSerializer
 import io.jsonwebtoken.io.OrgJsonSerializer
-import io.jsonwebtoken.io.GsonSerializer
+import io.jsonwebtoken.gson.io.GsonSerializer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

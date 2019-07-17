@@ -1,4 +1,4 @@
-package io.jsonwebtoken.io
+package io.jsonwebtoken.gson.io
 
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test

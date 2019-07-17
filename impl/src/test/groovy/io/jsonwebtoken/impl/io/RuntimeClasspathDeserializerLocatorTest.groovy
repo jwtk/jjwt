@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.JacksonDeserializer
 import io.jsonwebtoken.io.OrgJsonDeserializer
-import io.jsonwebtoken.io.GsonDeserializer
+import io.jsonwebtoken.gson.io.GsonDeserializer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
