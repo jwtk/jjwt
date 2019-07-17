@@ -6,6 +6,7 @@ import org.junit.Test
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 import com.google.gson.Gson
+import io.jsonwebtoken.io.SerializationException
 
 class GsonSerializerTest {
 
@@ -69,31 +70,31 @@ class GsonSerializerTest {
         assertTrue Arrays.equals(expected, result)
     }
 
-//THIS IS COMMENTED OUT BECAUSE GSN NEVER THROWS ANY SERIALIZATION EXCEPTION    
-//    @Test
-//    void testSerializeFailsWithJsonProcessingException() {
-//
-//        def ex = createMock(JsonProcessingException)
-//
-//        expect(ex.getMessage()).andReturn('foo')
-//
-//        def serializer = new GsonSerializer() {
-//            @Override
-//            protected byte[] writeValueAsBytes(Object o) throws JsonProcessingException {
-//                throw ex
-//            }
-//        }
-//
-//        replay ex
-//
-//        try {
-//            serializer.serialize([hello: 'world'])
-//            fail()
-//        } catch (SerializationException se) {
-//            assertEquals 'Unable to serialize object: foo', se.getMessage()
-//            assertSame ex, se.getCause()
-//        }
-//
-//        verify ex
-//    }
+  
+    @Test
+    void testSerializeFailsWithJsonProcessingException() {
+
+        def ex = createMock(SerializationException)
+
+        expect(ex.getMessage()).andReturn('foo')
+
+        def serializer = new GsonSerializer() {
+            @Override
+            protected byte[] writeValueAsBytes(Object o) throws SerializationException {
+                throw ex
+            }
+        }
+
+        replay ex
+
+        try {
+            serializer.serialize([hello: 'world'])
+            fail()
+        } catch (SerializationException se) {
+            assertEquals 'Unable to serialize object: foo', se.getMessage()
+            assertSame ex, se.getCause()
+        }
+
+        verify ex
+    }
 }
