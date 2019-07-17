@@ -54,11 +54,11 @@
             <artifactId>jjwt-orgjson</artifactId>
             <scope>test</scope>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-gson</artifactId>
-	    <scope>test</scope>
-	</dependency>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

@@ -1,7 +1,10 @@
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.gson.io;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.jsonwebtoken.io.Encoders;
+import io.jsonwebtoken.io.SerializationException;
+import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
@@ -24,8 +27,12 @@ public class GsonSerializer<T> implements Serializer<T> {
     @Override
     public byte[] serialize(T t) throws SerializationException {
         Assert.notNull(t, "Object to serialize cannot be null.");
-        //Gson never throws any serialization exception 
-        return writeValueAsBytes(t);
+        try {
+            return writeValueAsBytes(t);
+        } catch (Exception e) {
+            String msg = "Unable to serialize object: " + e.getMessage();
+            throw new SerializationException(msg, e);
+        }
     }
 
     @SuppressWarnings("WeakerAccess") //for testing

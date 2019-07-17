@@ -1,6 +1,8 @@
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.gson.io;
 
 import com.google.gson.Gson;
+import io.jsonwebtoken.io.DeserializationException;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import java.io.IOException;
 
