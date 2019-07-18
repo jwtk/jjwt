@@ -76,6 +76,7 @@ enforcement.
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
     * [Custom Claim Types](#json-jackson-custom-types)
+  * [Gson](#json-gson)
 * [Base64 Codec](#base64)
   * [Custom Base64 Codec](#base64-custom)
 
@@ -261,21 +262,22 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.10.7</version>
+    <version>0.11.0-SNAPSHOT</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.10.7</version>
+    <version>0.11.0-SNAPSHOT</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
-    <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.7</version>
+    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+    <version>0.11.0-SNAPSHOT</version>
     <scope>runtime</scope>
 </dependency>
-<!-- Uncomment this next dependency if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+<!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
+     RSASSA-PSS (PS256, PS384, PS512) algorithms.  JDK 11 or later does not require it for those algorithms:
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
@@ -291,11 +293,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
+    compile 'io.jsonwebtoken:jjwt-api:0.11.0-SNAPSHOT'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.0-SNAPSHOT',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+            'io.jsonwebtoken:jjwt-jackson:0.11.0-SNAPSHOT' // or 'io.jsonwebtoken:jjwt-gson:0.11.0-SNAPSHOT' for gson
 }
 ```
 
@@ -311,9 +313,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.7' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.7') {
+    api 'io.jsonwebtoken:jjwt-api:0.11.0-SNAPSHOT'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.0-SNAPSHOT' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.0-SNAPSHOT') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -1223,16 +1225,20 @@ They are checked in order, and the first one found is used:
 1. Jackson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-jackson` as a project runtime 
    dependency.  Jackson supports POJOs as claims with full marshaling/unmarshaling as necessary.
    
-2. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
+2. Gson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-gson` as a project runtime dependency.
+   Gson also supports POJOs as claims with full marshaling/unmarshaling as necessary. 
+   
+3. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
    project runtime dependency.
    
    **NOTE:** `org.json` APIs are natively enabled in Android environments so this is the recommended JSON processor for 
    Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple 
    Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshalling.
 
-**If you want to use POJOs as claim values, use the `io.jsonwebtoken:jjwt-jackson` dependency** (or implement your own
-Serializer and Deserializer if desired).  **But beware**, Jackson will force a sizable (> 1 MB) dependency to an 
-Android application thus increasing the app download size for mobile users.
+**If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or 
+`io.jsonwebtoken:jjwt-gson` dependency** (or implement your own Serializer and Deserializer if desired). **But beware**, 
+Jackson will force a sizable (> 1 MB) dependency to an Android application thus increasing the app download size for 
+mobile users.
 
 <a name="json-custom"></a>
 ### Custom JSON Processor
@@ -1268,8 +1274,16 @@ Jwts.parserBuilder()
 <a name="json-jackson"></a>
 ### Jackson JSON Processor
 
-If you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), you can 
-eliminate the overhead of JJWT constructing its own `ObjectMapper` by using yours instead.
+If you want to use Jackson for JSON processing, just including the `io.jsonwebtoken:jjwt-jackson` dependency as a
+runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
+the necessary Jackson dependencies as well.
+
+After including this dependency, JJWT will automatically find the Jackson implementation on the runtime classpath and 
+use it internally for JSON parsing.  There is nothing else you need to do - JJWT will automatically create a new
+Jackson ObjectMapper for its needs as required.
+
+However, if you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), 
+you can configure JJWT to use your own `ObjectMapper` instead.
 
 You do this by declaring the `io.jsonwebtoken:jjwt-jackson` dependency with **compile** scope (not runtime 
 scope which is the typical JJWT default).  That is:
@@ -1280,7 +1294,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.7</version>
+    <version>0.11.0-SNAPSHOT</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1289,7 +1303,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-jackson:0.10.7'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.11.0-SNAPSHOT'
 }
 ```
 
@@ -1318,7 +1332,7 @@ Jwts.parserBuilder()
 ```
 
 <a name="json-jackson-custom-types"></a>
-### Parsing of Custom Claim Types
+#### Parsing of Custom Claim Types
 
 By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in through a constructor. For example:
 
@@ -1354,7 +1368,77 @@ Jwts.parserBuilder()
     .get("user", User.class) // <-----
 ```
 
-**NOTE:** Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor [described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced parsing options, [configure the mapper directly](#json-jackson).
+**NOTE:** Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor 
+[described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative 
+consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced 
+parsing options, [configure the mapper directly](#json-jackson).
+
+<a name="json-gson"></a>
+### Gson JSON Processor
+
+If you want to use Gson for JSON processing, just including the `io.jsonwebtoken:jjwt-gson` dependency as a
+runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
+the necessary Gson dependencies as well.
+
+After including this dependency, JJWT will automatically find the Gson implementation on the runtime classpath and 
+use it internally for JSON parsing.  There is nothing else you need to do - just declaring the dependency is 
+all that is required, no code or config is necessary.
+
+If you're curious, JJWT will automatically create an internal default Gson instance for its own needs as follows:
+
+```java
+new GsonBuilder().disableHtmlEscaping().create();
+```
+
+However, if you prefer to use a different Gson instance instead of JJWT's default, you can configure JJWT to use your 
+own. 
+
+You do this by declaring the `io.jsonwebtoken:jjwt-gson` dependency with **compile** scope (not runtime 
+scope which is the typical JJWT default).  That is:
+
+**Maven**
+
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-gson</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <scope>compile</scope> <!-- Not runtime -->
+</dependency>
+```
+
+**Gradle or Android**
+
+```groovy
+dependencies {
+    compile 'io.jsonwebtoken:jjwt-gson:0.11.0-SNAPSHOT'
+}
+```
+
+And then you can specify the `GsonSerializer` using your own `Gson` instance on the `JwtBuilder`:
+
+```java
+
+Gson gson = getGson(); //implement me
+
+String jws = Jwts.builder()
+
+    .serializeToJsonWith(new GsonSerializer(gson))
+    
+    // ... etc ...
+```
+
+and the `GsonDeserializer` using your `Gson` instance on the `JwtParser`:
+
+```java
+Gson gson = getGson(); //implement me
+
+Jwts.parser()
+
+    .deserializeJsonWith(new GsonDeserializer(gson))
+    
+    // ... etc ...
+```
 
 <a name="base64"></a>
 ## Base64 Support

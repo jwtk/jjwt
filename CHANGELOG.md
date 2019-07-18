@@ -4,9 +4,11 @@
 
 This minor release:
 
+* Adds [Google's Gson](https://github.com/google/gson) as a natively supported JSON parser. Installation instructions 
+  have been updated and new [JJWT Gson usage guidelines](https://github.com/jwtk/jjwt#json-gson) have been added.
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
 to address three security vulnerabilities in Jackson.
-* A new JwtParserBuilder interface has been added and is the recommended way of creating an immutable and thread-safe JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
+* A new `JwtParserBuilder` interface has been added and is the recommended way of creating an immutable and thread-safe JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
     Migration to the new signatures is straightforward, for example:
     
     Previous Version:
@@ -22,8 +24,15 @@ to address three security vulnerabilities in Jackson.
         .build()
         .parse(jwtString)
     ```
-* Adds support for custom types when deserializing with Jackson. To use configure your parser with `Jwts.parserBuilder().deserializeJsonWith(new JacksonDeserializer(Maps.of("claimName", YourType.class).build())).build()`.
-* Adds `io.jsonwebtoken.lang.Maps` utility class to make creation of maps fluent.
+* Adds `io.jsonwebtoken.lang.Maps` utility class to make creation of maps fluent, as demonstrated next.
+* Adds support for custom types when deserializing with Jackson. To use configure your parser:
+    ```java
+    Jwts.parserBuilder().deserializeJsonWith(
+        new JacksonDeserializer(
+            Maps.of("claimName", YourType.class).build() // <--
+        )
+    ).build()
+  ```
 * Moves JSON Serializer/Deserializer implementations to a different package name.
   - `io.jsonwebtoken.io.JacksonSerializer` -> `io.jsonwebtoken.jackson.io.JacksonSerializer`
   - `io.jsonwebtoken.io.JacksonDeserializer` -> `io.jsonwebtoken.jackson.io.JacksonDeserializer`
