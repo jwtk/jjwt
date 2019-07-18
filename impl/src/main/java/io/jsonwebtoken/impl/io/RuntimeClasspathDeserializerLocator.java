@@ -34,6 +34,8 @@ public class RuntimeClasspathDeserializerLocator<T> implements InstanceLocator<D
             return Classes.newInstance("io.jsonwebtoken.io.JacksonDeserializer");
         } else if (isAvailable("io.jsonwebtoken.io.OrgJsonDeserializer")) {
             return Classes.newInstance("io.jsonwebtoken.io.OrgJsonDeserializer");
+        } else if (isAvailable("io.jsonwebtoken.gson.io.GsonDeserializer")) {
+            return Classes.newInstance("io.jsonwebtoken.gson.io.GsonDeserializer");
         } else {
             throw new IllegalStateException("Unable to discover any JSON Deserializer implementations on the classpath.");
         }

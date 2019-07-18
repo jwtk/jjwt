@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl.io
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.io.JacksonSerializer
 import io.jsonwebtoken.io.OrgJsonSerializer
+import io.jsonwebtoken.gson.io.GsonSerializer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -94,5 +95,24 @@ class RuntimeClasspathSerializerLocatorTest {
 
         def serializer = locator.getInstance()
         assertTrue serializer instanceof OrgJsonSerializer
+    }
+    
+    @Test
+    void testGson() {
+        def locator = new RuntimeClasspathSerializerLocator() {
+            @Override
+            protected boolean isAvailable(String fqcn) {
+                if (JacksonSerializer.class.getName().equals(fqcn)) {
+                    return false //skip it to allow the Gson impl to be created
+                }
+                if (OrgJsonSerializer.class.getName().equals(fqcn)) {
+                    return false //skip it to allow the Gson impl to be created
+                }
+                return super.isAvailable(fqcn)
+            }
+        }
+
+        def serializer = locator.getInstance()
+        assertTrue serializer instanceof GsonSerializer
     }
 }
