@@ -1,6 +1,7 @@
 # https://travis-ci.org/jwtk/jjwt
 
 #sudo: required
+dist: trusty
 language: java
 jdk:
   - openjdk7 # not really openjdk7 - we're just using this travis placeholder for our own Oracle JDK 7 installation
