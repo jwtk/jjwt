@@ -26,7 +26,7 @@ class DefaultJwtTest {
     @Test
     void testToString() {
         String compact = Jwts.builder().setHeaderParam('foo', 'bar').setAudience('jsmith').compact();
-        Jwt jwt = Jwts.parser().parseClaimsJwt(compact);
+        Jwt jwt = Jwts.parserBuilder().build().parseClaimsJwt(compact);
         assertEquals 'header={foo=bar, alg=none},body={aud=jsmith}', jwt.toString()
     }
 

@@ -33,4 +33,21 @@
         <jjwt.root>${basedir}/..</jjwt.root>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.siom79.japicmp</groupId>
+                <artifactId>japicmp-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>japicmp</id>
+                        <goals>
+                            <goal>cmp</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
