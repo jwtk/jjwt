@@ -11,6 +11,7 @@ jdk:
 
 before_install:
   - echo "TRAVIS_JDK_VERSION is ${TRAVIS_JDK_VERSION}"
+  - export MVN_CMD="./mvnw --no-transfer-progress" # hide verbose download messages (log spam)
   - |
     if [[ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]]; then
       
@@ -33,8 +34,9 @@ before_install:
   # If on JDK 8, ensure build coverage assertions are run (we only need to run this on one JDK to reduce overall build times):
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
 
-install: true
+# prints the Maven, Java, and OS info/version
+install: $MVN_CMD --version
 
 script:
-  - mvn install
-  - test -z "$BUILD_COVERAGE" || { mvn clean clover:setup test && mvn -pl . clover:clover clover:check coveralls:report; }
+  - $MVN_CMD install
+  - test -z "$BUILD_COVERAGE" || { $MVN_CMD clean clover:setup test && $MVN_CMD -pl . clover:clover clover:check coveralls:report; }
