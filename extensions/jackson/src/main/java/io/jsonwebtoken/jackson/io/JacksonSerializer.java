@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.jackson.io;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.io.SerializationException;
+import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
 
 /**

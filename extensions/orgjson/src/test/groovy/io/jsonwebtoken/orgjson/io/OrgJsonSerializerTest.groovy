@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io
+package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
 import org.json.JSONObject
 import org.json.JSONString
 import org.junit.Before

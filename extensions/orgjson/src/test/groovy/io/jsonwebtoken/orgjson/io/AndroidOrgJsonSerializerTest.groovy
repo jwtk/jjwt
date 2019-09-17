@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io
+package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest

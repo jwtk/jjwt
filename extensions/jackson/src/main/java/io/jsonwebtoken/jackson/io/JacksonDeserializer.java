@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.jackson.io;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.io.DeserializationException;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.IOException;
