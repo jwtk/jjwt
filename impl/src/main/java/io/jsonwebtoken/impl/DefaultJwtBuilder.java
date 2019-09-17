@@ -297,7 +297,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (this.serializer == null) {
             //try to find one based on the runtime environment:
             InstanceLocator<Serializer<Map<String,?>>> locator =
-                Classes.newInstance("io.jsonwebtoken.impl.io.RuntimeClasspathSerializerLocator");
+                Classes.newInstance("io.jsonwebtoken.impl.io.ServiceLoaderSerializerLocator");
             this.serializer = locator.getInstance();
         }
 

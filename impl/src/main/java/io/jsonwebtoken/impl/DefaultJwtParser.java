@@ -223,7 +223,7 @@ public class DefaultJwtParser implements JwtParser {
         if (this.deserializer == null) {
             //try to find one based on the runtime environment:
             InstanceLocator<Deserializer<Map<String, ?>>> locator =
-                Classes.newInstance("io.jsonwebtoken.impl.io.RuntimeClasspathDeserializerLocator");
+                Classes.newInstance("io.jsonwebtoken.impl.io.ServiceLoaderDeserializerLocator");
             this.deserializer = locator.getInstance();
         }
 
