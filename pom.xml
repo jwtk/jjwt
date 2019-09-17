@@ -31,6 +31,12 @@
     <packaging>pom</packaging>
     <url>https://github.com/jwtk/jjwt</url>
 
+    <organization>
+        <name>jsonwebtoken.io</name>
+        <url>https://github.com/jwtk/jjwt</url>
+    </organization>
+    <inceptionYear>2014</inceptionYear>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -229,6 +235,30 @@
                         <statementPercentage>100.000000%</statementPercentage>
                         <conditionalPercentage>100.000000%</conditionalPercentage>
                         <targetPercentage>100.000000%</targetPercentage>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>3.0</version>
+                    <configuration>
+                        <aggregate>true</aggregate>
+                        <skipExistingHeaders>true</skipExistingHeaders>
+                        <header>${jjwt.root}/src/license/header.txt</header>
+                        <headerDefinitions>
+                            <headerDefinition>${jjwt.root}/src/license/header_format.xml</headerDefinition>
+                        </headerDefinitions>
+                        <properties>
+                            <organization.name>${project.organization.name}</organization.name>
+                            <year>2019</year>
+                        </properties>
+                        <excludes>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>LICENSE</exclude>
+                            <exclude>**/lombok.config</exclude>
+                            <exclude>**/mvnw</exclude>
+                            <exclude>.gitattributes</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
             </plugins>
