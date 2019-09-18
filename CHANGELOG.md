@@ -2,8 +2,12 @@
 
 ### 0.11.0
 
+This minor release:
+
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
 to address three security vulnerabilities in Jackson.
+* Adds support for custom types when deserializing with Jackson. To use configure your parser with `Jwts.parserBuilder().deserializeJsonWith(new JacksonDeserializer(Maps.of("claimName", YourType.class).build())).build()`.
+* Adds `io.jsonwebtoken.lang.Maps` utility class to make creation of maps fluent.
 * Moves JSON Serializer/Deserializer implementations to a different package name.
   - `io.jsonwebtoken.io.JacksonSerializer` -> `io.jsonwebtoken.jackson.io.JacksonSerializer`
   - `io.jsonwebtoken.io.JacksonDeserializer` -> `io.jsonwebtoken.jackson.io.JacksonDeserializer`

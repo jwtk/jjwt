@@ -45,7 +45,7 @@ class DefaultClaimsTest {
             fail()
         } catch (RequiredTypeException e) {
             assertEquals(
-                "Expected value to be of type: class java.lang.String, but was class java.lang.Integer",
+                String.format(DefaultClaims.CONVERSION_ERROR_MSG, 'class java.lang.Integer', 'class java.lang.String'),
                 e.getMessage()
             )
         }
@@ -96,7 +96,7 @@ class DefaultClaimsTest {
         } catch (RequiredTypeException e) {
             assertEquals(
                     e.getMessage(),
-                    "Expected value to be of type: class java.lang.Short, but was class java.lang.Integer"
+                    String.format(DefaultClaims.CONVERSION_ERROR_MSG, 'class java.lang.Integer', 'class java.lang.Short')
             )
         }
     }
@@ -110,7 +110,7 @@ class DefaultClaimsTest {
         } catch (RequiredTypeException e) {
             assertEquals(
                     e.getMessage(),
-                    "Expected value to be of type: class java.lang.Short, but was class java.lang.Integer"
+                    String.format(DefaultClaims.CONVERSION_ERROR_MSG, 'class java.lang.Integer', 'class java.lang.Short')
             )
         }
     }
@@ -132,7 +132,7 @@ class DefaultClaimsTest {
         } catch (RequiredTypeException e) {
             assertEquals(
                     e.getMessage(),
-                    "Expected value to be of type: class java.lang.Byte, but was class java.lang.Integer"
+                    String.format(DefaultClaims.CONVERSION_ERROR_MSG, 'class java.lang.Integer', 'class java.lang.Byte')
             )
         }
     }
@@ -146,7 +146,7 @@ class DefaultClaimsTest {
         } catch (RequiredTypeException e) {
             assertEquals(
                     e.getMessage(),
-                    "Expected value to be of type: class java.lang.Byte, but was class java.lang.Integer"
+                    String.format(DefaultClaims.CONVERSION_ERROR_MSG, 'class java.lang.Integer', 'class java.lang.Byte')
             )
         }
     }
