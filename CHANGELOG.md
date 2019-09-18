@@ -3,7 +3,16 @@
 ### 0.11.0
 
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
-to address three security vulnerabilities in Jackson:
+to address three security vulnerabilities in Jackson.
+* Moves JSON Serializer/Deserializer implementations to a different package name.
+  - `io.jsonwebtoken.io.JacksonSerializer` -> `io.jsonwebtoken.jackson.io.JacksonSerializer`
+  - `io.jsonwebtoken.io.JacksonDeserializer` -> `io.jsonwebtoken.jackson.io.JacksonDeserializer`
+  - `io.jsonwebtoken.io.OrgJsonSerializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonSerializer`
+  - `io.jsonwebtoken.io.OrgJsonDeserializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonDeserializer`
+
+  A backward compatibility module has been created `io.jsonwebtoken:jjwt-deprecated`, if you are compiling against 
+  these classes directly, otherwise you will be unaffected.
+
 
 ### 0.10.7
 
