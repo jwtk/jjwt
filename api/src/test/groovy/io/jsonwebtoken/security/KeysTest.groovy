@@ -16,9 +16,7 @@
 package io.jsonwebtoken.security
 
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.lang.Services
-import org.junit.Before
-import org.junit.BeforeClass
+import io.jsonwebtoken.lang.Classes
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -27,8 +25,8 @@ import org.powermock.modules.junit4.PowerMockRunner
 import javax.crypto.SecretKey
 import java.security.KeyPair
 
+import static org.easymock.EasyMock.eq
 import static org.easymock.EasyMock.expect
-import static org.easymock.EasyMock.mock
 import static org.easymock.EasyMock.same
 import static org.junit.Assert.*
 import static org.powermock.api.easymock.PowerMock.*
@@ -39,27 +37,8 @@ import static org.powermock.api.easymock.PowerMock.*
  * The actual implementation assertions are done in KeysImplTest in the impl module.
  */
 @RunWith(PowerMockRunner)
-@PrepareForTest([Keys, Services])
+@PrepareForTest([Classes, Keys])
 class KeysTest {
-
-    static KeyGenerator keyGenerator = mock(KeyGenerator)
-    static KeyPairGenerator keyPairGenerator = mock(KeyPairGenerator)
-
-    @BeforeClass
-    static void prepareServices() {
-        mockStatic(Services)
-
-        expect(Services.loadAllAvailableImplementations(KeyGenerator)).andReturn([keyGenerator]).anyTimes()
-        expect(Services.loadAllAvailableImplementations(KeyPairGenerator)).andReturn([keyPairGenerator]).anyTimes()
-
-        replay Services
-    }
-
-    @Before
-    void reset() {
-        reset keyGenerator
-        reset keyPairGenerator
-    }
 
     @Test
     void testPrivateCtor() { //for code coverage only
@@ -101,30 +80,27 @@ class KeysTest {
 
             if (name.startsWith('H')) {
 
-                def key = createMock(SecretKey)
-                expect(keyGenerator.supports(same(alg))).andReturn(true)
-                expect(keyGenerator.generateKey(same(alg))).andReturn(key)
+                mockStatic(Classes)
 
-                replay keyGenerator, key
+                def key = createMock(SecretKey)
+                expect(Classes.invokeStatic(eq(Keys.MAC), eq("generateKey"), same(Keys.SIG_ARG_TYPES), same(alg))).andReturn(key)
+
+                replay Classes, key
 
                 assertSame key, Keys.secretKeyFor(alg)
 
-                verify keyGenerator, key
+                verify Classes, key
 
-                reset keyGenerator, key
+                reset Classes, key
 
             } else {
-                expect(keyGenerator.supports(same(alg))).andReturn(false)
-
-                replay(keyGenerator)
-
                 try {
                     Keys.secretKeyFor(alg)
                     fail()
                 } catch (IllegalArgumentException expected) {
                     assertEquals "The $name algorithm does not support shared secret keys." as String, expected.message
-                    reset keyGenerator
                 }
+
             }
         }
 
@@ -138,29 +114,27 @@ class KeysTest {
             String name = alg.name()
 
             if (name.equals('NONE') || name.startsWith('H')) {
-                expect(keyPairGenerator.supports(alg)).andReturn(false)
-
-                replay keyPairGenerator
-
                 try {
                     Keys.keyPairFor(alg)
                     fail()
                 } catch (IllegalArgumentException expected) {
                     assertEquals "The $name algorithm does not support Key Pairs." as String, expected.message
-                    reset keyPairGenerator
                 }
             } else {
-                def pair = createMock(KeyPair)
-                expect(keyPairGenerator.supports(same(alg))).andReturn(true)
-                expect(keyPairGenerator.generateKeyPair(same(alg))).andReturn(pair)
+                String fqcn = name.startsWith('E') ? Keys.EC : Keys.RSA
 
-                replay keyPairGenerator, pair
+                mockStatic Classes
+
+                def pair = createMock(KeyPair)
+                expect(Classes.invokeStatic(eq(fqcn), eq("generateKeyPair"), same(Keys.SIG_ARG_TYPES), same(alg))).andReturn(pair)
+
+                replay Classes, pair
 
                 assertSame pair, Keys.keyPairFor(alg)
 
-                verify keyPairGenerator, pair
+                verify Classes, pair
 
-                reset keyPairGenerator, pair
+                reset Classes, pair
             }
         }
     }

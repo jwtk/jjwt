@@ -19,8 +19,9 @@ import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
-import io.jsonwebtoken.impl.io.RuntimeClasspathSerializerLocator
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.lang.Services
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.WeakKeyException
@@ -43,7 +44,7 @@ class JwtsTest {
     }
 
     protected static String toJson(o) {
-        def serializer = new RuntimeClasspathSerializerLocator().getInstance()
+        def serializer = Services.loadFirst(Serializer)
         byte[] bytes = serializer.serialize(o)
         return new String(bytes, Strings.UTF_8)
     }

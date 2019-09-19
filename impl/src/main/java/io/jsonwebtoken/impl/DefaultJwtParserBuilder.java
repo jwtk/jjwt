@@ -26,6 +26,8 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Services;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -170,6 +172,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParser build() {
+
+        // Only lookup the deserializer IF it is null. It is possible a Deserializer implementation was set
+        // that is NOT exposed as a service and no other implementations are available for lookup.
+        if (this.deserializer == null) {
+            // try to find one based on the services available:
+            this.deserializer = Services.loadFirst(Deserializer.class);
+        }
+
         return new ImmutableJwtParser(
                 new DefaultJwtParser(signingKeyResolver,
                                      key,

@@ -1,1 +1,1 @@
-io.jsonwebtoken.io.JacksonSerializer
+io.jsonwebtoken.jackson.io.JacksonSerializer

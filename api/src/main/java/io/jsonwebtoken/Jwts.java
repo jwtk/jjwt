@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.lang.Services;
+import io.jsonwebtoken.lang.Classes;
 
 import java.util.Map;
 
@@ -23,11 +23,11 @@ import java.util.Map;
  * Factory class useful for creating instances of JWT interfaces.  Using this factory class can be a good
  * alternative to tightly coupling your code to implementation classes.
  *
- * @since 0.11
+ * @since 0.1
  */
 public final class Jwts {
 
-    private static final JwtFactory FACTORY = Services.loadFirst(JwtFactory.class);
+    private static final Class[] MAP_ARG = new Class[]{Map.class};
 
     private Jwts() {
     }
@@ -40,7 +40,7 @@ public final class Jwts {
      * @return a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.
      */
     public static Header header() {
-        return FACTORY.header();
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultHeader");
     }
 
     /**
@@ -51,7 +51,7 @@ public final class Jwts {
      * @return a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.
      */
     public static Header header(Map<String, Object> header) {
-        return FACTORY.header(header);
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultHeader", MAP_ARG, header);
     }
 
     /**
@@ -61,7 +61,7 @@ public final class Jwts {
      * @see JwtBuilder#setHeader(Header)
      */
     public static JwsHeader jwsHeader() {
-        return FACTORY.jwsHeader();
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwsHeader");
     }
 
     /**
@@ -73,7 +73,7 @@ public final class Jwts {
      * @see JwtBuilder#setHeader(Header)
      */
     public static JwsHeader jwsHeader(Map<String, Object> header) {
-        return FACTORY.jwsHeader(header);
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwsHeader", MAP_ARG, header);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class Jwts {
      * @return a new {@link Claims} instance to be used as a JWT body.
      */
     public static Claims claims() {
-        return FACTORY.claims();
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultClaims");
     }
 
     /**
@@ -92,7 +92,7 @@ public final class Jwts {
      * @return a new {@link Claims} instance populated with the specified name/value pairs.
      */
     public static Claims claims(Map<String, Object> claims) {
-        return FACTORY.claims(claims);
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultClaims", MAP_ARG, claims);
     }
 
     /**
@@ -118,7 +118,7 @@ public final class Jwts {
      */
     @Deprecated
     public static JwtParser parser() {
-        return FACTORY.parser();
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParser");
     }
 
     /**
@@ -138,6 +138,6 @@ public final class Jwts {
      * strings.
      */
     public static JwtBuilder builder() {
-        return FACTORY.builder();
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder");
     }
 }

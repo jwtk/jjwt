@@ -1,1 +1,1 @@
-io.jsonwebtoken.io.OrgJsonDeserializer
+io.jsonwebtoken.orgjson.io.OrgJsonDeserializer

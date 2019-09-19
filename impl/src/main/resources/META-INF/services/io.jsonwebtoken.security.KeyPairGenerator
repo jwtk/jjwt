@@ -1,2 +1,0 @@
-io.jsonwebtoken.impl.crypto.RsaKeyPairGenerator
-io.jsonwebtoken.impl.crypto.EllipticCurveKeyPairGenerator

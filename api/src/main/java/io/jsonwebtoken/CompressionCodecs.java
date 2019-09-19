@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.lang.Services;
+import io.jsonwebtoken.lang.Classes;
 
 /**
  * Provides default implementations of the {@link CompressionCodec} interface.
@@ -26,8 +26,6 @@ import io.jsonwebtoken.lang.Services;
  */
 public final class CompressionCodecs {
 
-    private static final CompressionCodecFactory FACTORY = Services.loadFirst(CompressionCodecFactory.class);
-
     private CompressionCodecs() {
     } //prevent external instantiation
 
@@ -35,7 +33,8 @@ public final class CompressionCodecs {
      * Codec implementing the <a href="https://tools.ietf.org/html/rfc7518">JWA</a> standard
      * <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate</a> compression algorithm
      */
-    public static final CompressionCodec DEFLATE = FACTORY.deflateCodec();
+    public static final CompressionCodec DEFLATE =
+        Classes.newInstance("io.jsonwebtoken.impl.compression.DeflateCompressionCodec");
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm.
@@ -44,6 +43,7 @@ public final class CompressionCodecs {
      * that all parties accessing the token support the gzip algorithm.</p>
      * <p>If you're concerned about compatibility, the {@link #DEFLATE DEFLATE} code is JWA standards-compliant.</p>
      */
-    public static final CompressionCodec GZIP = FACTORY.gzipCodec();
+    public static final CompressionCodec GZIP =
+        Classes.newInstance("io.jsonwebtoken.impl.compression.GzipCompressionCodec");
 
 }

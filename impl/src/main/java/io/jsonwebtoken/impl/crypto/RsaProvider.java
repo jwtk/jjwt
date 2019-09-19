@@ -132,6 +132,7 @@ public abstract class RsaProvider extends SignatureProvider {
      * @see #generateKeyPair(String, int, SecureRandom)
      * @since 0.10.0
      */
+    @SuppressWarnings("unused") //used by io.jsonwebtoken.security.Keys
     public static KeyPair generateKeyPair(SignatureAlgorithm alg) {
         Assert.isTrue(alg.isRsa(), "Only RSA algorithms are supported by this method.");
         int keySizeInBits = 4096;

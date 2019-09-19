@@ -39,13 +39,12 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
-import io.jsonwebtoken.impl.io.InstanceLocator;
+import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
@@ -107,13 +106,6 @@ public class DefaultJwtParser implements JwtParser {
         this.base64UrlDecoder = base64UrlDecoder;
         this.deserializer = deserializer;
         this.compressionCodecResolver = compressionCodecResolver;
-
-        if (this.deserializer == null) {
-            //try to find one based on the runtime environment:
-            InstanceLocator<Deserializer<Map<String, ?>>> locator =
-                Classes.newInstance("io.jsonwebtoken.impl.io.RuntimeClasspathDeserializerLocator");
-            this.deserializer = locator.getInstance();
-        }
     }
 
     @Override
@@ -255,12 +247,12 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
-        // TODO move this to constructor before 1.0
+        // TODO, this logic is only need for a now deprecated code path
+        // remove this block in v1.0 (the equivalent is already in DefaultJwtParserBuilder)
         if (this.deserializer == null) {
-            //try to find one based on the runtime environment:
-            InstanceLocator<Deserializer<Map<String, ?>>> locator =
-                Classes.newInstance("io.jsonwebtoken.impl.io.RuntimeClasspathDeserializerLocator");
-            this.deserializer = locator.getInstance();
+            // try to find one based on the services available
+            // TODO: This util class will throw a UnavailableImplementationException here to retain behavior of previous version, remove in v1.0
+            this.deserializer = LegacyServices.loadFirst(Deserializer.class);
         }
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");

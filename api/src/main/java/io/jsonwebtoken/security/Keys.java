@@ -17,7 +17,7 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Services;
+import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -32,8 +32,12 @@ import java.util.List;
  * @since 0.10.0
  */
 public final class Keys {
-    private static final List<KeyGenerator> KEY_GENERATORS = Services.loadAllAvailableImplementations(KeyGenerator.class);
-    private static final List<KeyPairGenerator> KEY_PAIR_GENERATORS = Services.loadAllAvailableImplementations(KeyPairGenerator.class);
+
+    private static final String MAC = "io.jsonwebtoken.impl.crypto.MacProvider";
+    private static final String RSA = "io.jsonwebtoken.impl.crypto.RsaProvider";
+    private static final String EC = "io.jsonwebtoken.impl.crypto.EllipticCurveProvider";
+
+    private static final Class[] SIG_ARG_TYPES = new Class[]{SignatureAlgorithm.class};
 
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_HMAC_ALGS = Collections.unmodifiableList(Arrays.asList(
@@ -125,14 +129,15 @@ public final class Keys {
      */
     public static SecretKey secretKeyFor(SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        for (KeyGenerator keyGenerator : KEY_GENERATORS) {
-            if (keyGenerator.supports(alg)) {
-                return keyGenerator.generateKey(alg);
-            }
+        switch (alg) {
+            case HS256:
+            case HS384:
+            case HS512:
+                return Classes.invokeStatic(MAC, "generateKey", SIG_ARG_TYPES, alg);
+            default:
+                String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
+                throw new IllegalArgumentException(msg);
         }
-
-        String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
-        throw new IllegalArgumentException(msg);
     }
 
     /**
@@ -206,14 +211,21 @@ public final class Keys {
      */
     public static KeyPair keyPairFor(SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-
-        for (KeyPairGenerator keyPairGenerator : KEY_PAIR_GENERATORS) {
-            if (keyPairGenerator.supports(alg)) {
-                return keyPairGenerator.generateKeyPair(alg);
-            }
+        switch (alg) {
+            case RS256:
+            case PS256:
+            case RS384:
+            case PS384:
+            case RS512:
+            case PS512:
+                return Classes.invokeStatic(RSA, "generateKeyPair", SIG_ARG_TYPES, alg);
+            case ES256:
+            case ES384:
+            case ES512:
+                return Classes.invokeStatic(EC, "generateKeyPair", SIG_ARG_TYPES, alg);
+            default:
+                String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
+                throw new IllegalArgumentException(msg);
         }
-
-        String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
-        throw new IllegalArgumentException(msg);
     }
 }
