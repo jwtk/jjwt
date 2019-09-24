@@ -75,6 +75,7 @@ enforcement.
 * [JSON Processor](#json)
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
+    * [Custom Claim Types](#json-jackson-custom-parsing)
 * [Base64 Codec](#base64)
   * [Custom Base64 Codec](#base64-custom)
 
@@ -1308,6 +1309,42 @@ Jwts.parser()
     .deserializeJsonWith(new JacksonDeserializer(objectMapper))
     
     // ... etc ...
+```
+
+<a name="json-jackson-custom-parsing"></a>
+### Parsing of Custom Claim Types
+
+By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in through a constructor. For example:
+
+```java
+new JacksonDeserializer(Maps.of("user", User.class))
+```
+
+This would trigger the value in the `user` claim to be deserialized into the custom type of `User`.  Given the claims body of:
+
+```json
+{
+    "issuer": "https://example.com/issuer",
+    "user": {
+      "firstName": "Jill",
+      "lastName": "Coder"
+    }
+}
+```
+
+The `User` object could be retrieved from the `user` claim with the following code:
+
+```java
+Jwts.parserBuilder()
+
+    .deserializeJsonWith(new JacksonDeserializer(Maps.of("user", User.class)))
+
+    .build()
+    .parseClaimsJwt(aJwtString)
+    .build()
+    .getBody()
+    
+    get("user", User.class)
 ```
 
 <a name="base64"></a>
