@@ -102,7 +102,7 @@
         <bouncycastle.version>1.60</bouncycastle.version>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.1</groovy.version>
+        <groovy.version>2.5.8</groovy.version>
         <logback.version>1.2.3</logback.version>
         <easymock.version>3.6</easymock.version>
         <junit.version>4.12</junit.version>
@@ -259,6 +259,14 @@
                             <exclude>**/mvnw</exclude>
                             <exclude>.gitattributes</exclude>
                         </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.4</version>
+                    <configuration>
+                        <source>${jdk.version}</source>
                     </configuration>
                 </plugin>
             </plugins>
@@ -460,7 +468,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -542,7 +549,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>

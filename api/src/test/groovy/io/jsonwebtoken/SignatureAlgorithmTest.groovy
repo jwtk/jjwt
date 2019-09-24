@@ -207,11 +207,10 @@ class SignatureAlgorithmTest {
     void testForSigningKeyRSAWeakKey() {
 
         RSAPrivateKey key = createMock(RSAPrivateKey)
-        BigInteger modulus = createMock(BigInteger)
+        BigInteger modulus = bigInteger(1024)
         expect(key.getModulus()).andStubReturn(modulus)
-        expect(modulus.bitLength()).andStubReturn(1024)
 
-        replay key, modulus
+        replay key
 
         try {
             SignatureAlgorithm.forSigningKey(key)
@@ -219,7 +218,7 @@ class SignatureAlgorithmTest {
         } catch (WeakKeyException expected) {
         }
 
-        verify key, modulus
+        verify key
     }
 
     @Test
@@ -230,15 +229,14 @@ class SignatureAlgorithmTest {
             int heuristicKeyLength = (alg == SignatureAlgorithm.RS512 ? 4096 : (alg == SignatureAlgorithm.RS384 ? 3072 : 2048))
 
             RSAPrivateKey key = createMock(RSAPrivateKey)
-            BigInteger modulus = createMock(BigInteger)
+            BigInteger modulus = bigInteger(heuristicKeyLength)
             expect(key.getModulus()).andStubReturn(modulus)
-            expect(modulus.bitLength()).andStubReturn(heuristicKeyLength)
 
-            replay key, modulus
+            replay key
 
             assertEquals alg, SignatureAlgorithm.forSigningKey(key)
 
-            verify key, modulus
+            verify key
         }
     }
 
@@ -247,12 +245,11 @@ class SignatureAlgorithmTest {
 
         ECPrivateKey key = createMock(ECPrivateKey)
         ECParameterSpec spec = createMock(ECParameterSpec)
-        BigInteger order = createMock(BigInteger)
+        BigInteger order = bigInteger(128)
         expect(key.getParams()).andStubReturn(spec)
         expect(spec.getOrder()).andStubReturn(order)
-        expect(order.bitLength()).andReturn(128)
 
-        replay key, spec, order
+        replay key, spec
 
         try {
             SignatureAlgorithm.forSigningKey(key)
@@ -260,7 +257,7 @@ class SignatureAlgorithmTest {
         } catch (WeakKeyException expected) {
         }
 
-        verify key, spec, order
+        verify key, spec
     }
 
     @Test
@@ -270,16 +267,15 @@ class SignatureAlgorithmTest {
 
             ECPrivateKey key = createMock(ECPrivateKey)
             ECParameterSpec spec = createMock(ECParameterSpec)
-            BigInteger order = createMock(BigInteger)
+            BigInteger order = bigInteger(alg.minKeyLength)
             expect(key.getParams()).andStubReturn(spec)
             expect(spec.getOrder()).andStubReturn(order)
-            expect(order.bitLength()).andStubReturn(alg.minKeyLength)
 
-            replay key, spec, order
+            replay key, spec
 
             assertEquals alg, SignatureAlgorithm.forSigningKey(key)
 
-            verify key, spec, order
+            verify key, spec
         }
     }
 
@@ -452,16 +448,15 @@ class SignatureAlgorithmTest {
 
             ECPrivateKey key = createMock(ECPrivateKey)
             ECParameterSpec spec = createMock(ECParameterSpec)
-            BigInteger order = createMock(BigInteger)
+            BigInteger order = bigInteger(alg.minKeyLength)
             expect(key.getParams()).andStubReturn(spec)
             expect(spec.getOrder()).andStubReturn(order)
-            expect(order.bitLength()).andStubReturn(alg.minKeyLength)
 
-            replay key, spec, order
+            replay key, spec
 
             alg.assertValidSigningKey(key)
 
-            verify key, spec, order
+            verify key, spec
         }
     }
 
@@ -508,12 +503,11 @@ class SignatureAlgorithmTest {
 
             ECPrivateKey key = createMock(ECPrivateKey)
             ECParameterSpec spec = createMock(ECParameterSpec)
-            BigInteger order = createMock(BigInteger)
+            BigInteger order = bigInteger(alg.minKeyLength - 8) //one less byte
             expect(key.getParams()).andStubReturn(spec)
             expect(spec.getOrder()).andStubReturn(order)
-            expect(order.bitLength()).andStubReturn(alg.minKeyLength - 8) //1 byte less than expected
 
-            replay key, spec, order
+            replay key, spec
 
             try {
                 alg.assertValidSigningKey(key)
@@ -528,7 +522,7 @@ class SignatureAlgorithmTest {
                         "https://tools.ietf.org/html/rfc7518#section-3.4 for more information." as String, expected.message
             }
 
-            verify key, spec, order
+            verify key, spec
         }
     }
 
@@ -538,15 +532,14 @@ class SignatureAlgorithmTest {
         for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
 
             RSAPrivateKey key = createMock(RSAPrivateKey)
-            BigInteger modulus = createMock(BigInteger)
+            BigInteger modulus = bigInteger(alg.minKeyLength)
             expect(key.getModulus()).andStubReturn(modulus)
-            expect(modulus.bitLength()).andStubReturn(alg.minKeyLength)
 
-            replay key, modulus
+            replay key
 
             alg.assertValidSigningKey(key)
 
-            verify key, modulus
+            verify key
         }
     }
 
@@ -594,11 +587,10 @@ class SignatureAlgorithmTest {
             String section = alg.name().startsWith("P") ? "3.5" : "3.3"
 
             RSAPrivateKey key = createMock(RSAPrivateKey)
-            BigInteger modulus = createMock(BigInteger)
+            BigInteger modulus = bigInteger(alg.minKeyLength - 8) // 1 less byte
             expect(key.getModulus()).andStubReturn(modulus)
-            expect(modulus.bitLength()).andStubReturn(alg.minKeyLength - 8) // 1 less byte
 
-            replay key, modulus
+            replay key
 
             try {
                 alg.assertValidSigningKey(key)
@@ -613,7 +605,7 @@ class SignatureAlgorithmTest {
                         "https://tools.ietf.org/html/rfc7518#section-${section} for more information." as String, expected.message
             }
 
-            verify key, modulus
+            verify key
         }
     }
 
@@ -767,16 +759,15 @@ class SignatureAlgorithmTest {
 
             ECPrivateKey key = createMock(ECPrivateKey)
             ECParameterSpec spec = createMock(ECParameterSpec)
-            BigInteger order = createMock(BigInteger)
+            BigInteger order = bigInteger(alg.minKeyLength)
             expect(key.getParams()).andStubReturn(spec)
             expect(spec.getOrder()).andStubReturn(order)
-            expect(order.bitLength()).andStubReturn(alg.minKeyLength)
 
-            replay key, spec, order
+            replay key, spec
 
             alg.assertValidVerificationKey(key)
 
-            verify key, spec, order
+            verify key, spec
         }
     }
 
@@ -803,12 +794,11 @@ class SignatureAlgorithmTest {
 
             ECPrivateKey key = createMock(ECPrivateKey)
             ECParameterSpec spec = createMock(ECParameterSpec)
-            BigInteger order = createMock(BigInteger)
+            BigInteger order = bigInteger(alg.minKeyLength - 8) // 1 less byte
             expect(key.getParams()).andStubReturn(spec)
             expect(spec.getOrder()).andStubReturn(order)
-            expect(order.bitLength()).andStubReturn(alg.minKeyLength - 8) // 1 less byte
 
-            replay key, spec, order
+            replay key, spec
 
             try {
                 alg.assertValidVerificationKey(key)
@@ -823,7 +813,7 @@ class SignatureAlgorithmTest {
                         "https://tools.ietf.org/html/rfc7518#section-3.4 for more information." as String, expected.message
             }
 
-            verify key, spec, order
+            verify key, spec
         }
     }
 
@@ -833,15 +823,14 @@ class SignatureAlgorithmTest {
         for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
 
             RSAPrivateKey key = createMock(RSAPrivateKey)
-            BigInteger modulus = createMock(BigInteger)
+            BigInteger modulus = bigInteger(alg.minKeyLength)
             expect(key.getModulus()).andStubReturn(modulus)
-            expect(modulus.bitLength()).andStubReturn(alg.minKeyLength)
 
-            replay key, modulus
+            replay key
 
             alg.assertValidVerificationKey(key)
 
-            verify key, modulus
+            verify key
         }
     }
 
@@ -869,11 +858,10 @@ class SignatureAlgorithmTest {
             String section = alg.name().startsWith("P") ? "3.5" : "3.3"
 
             RSAPrivateKey key = createMock(RSAPrivateKey)
-            BigInteger modulus = createMock(BigInteger)
+            BigInteger modulus = bigInteger(alg.minKeyLength - 8) //one less byte
             expect(key.getModulus()).andStubReturn(modulus)
-            expect(modulus.bitLength()).andStubReturn(alg.minKeyLength - 8) //one less byte
 
-            replay key, modulus
+            replay key
 
             try {
                 alg.assertValidVerificationKey(key)
@@ -888,7 +876,11 @@ class SignatureAlgorithmTest {
                         "https://tools.ietf.org/html/rfc7518#section-${section} for more information." as String, expected.message
             }
 
-            verify key, modulus
+            verify key
         }
+    }
+
+    private static BigInteger bigInteger(int bitLength) {
+        return new BigInteger(bitLength, 0, Random.newInstance())
     }
 }
