@@ -1,5 +1,10 @@
 ## Release Notes
 
+### 0.11.0
+
+* Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
+to address three security vulnerabilities in Jackson:
+
 ### 0.10.7
 
 This patch release:
