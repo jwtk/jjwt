@@ -37,7 +37,5 @@
         <module>jackson</module>
         <module>orgjson</module>
         <module>gson</module>
-        <module>deprecated</module>
     </modules>
-
 </project>
