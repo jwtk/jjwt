@@ -10,9 +10,7 @@ to address three security vulnerabilities in Jackson.
   - `io.jsonwebtoken.io.OrgJsonSerializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonSerializer`
   - `io.jsonwebtoken.io.OrgJsonDeserializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonDeserializer`
 
-  A backward compatibility module has been created `io.jsonwebtoken:jjwt-deprecated`, if you are compiling against 
-  these classes directly, otherwise you will be unaffected.
-
+  A backward compatibility modules has been created using the `deprecated` classifier (`io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated` and `io.jsonwebtoken:jjwt-orjson:0.11.0:deprecated`), if you are compiling against these classes directly, otherwise you will be unaffected.
 
 ### 0.10.7
 
