@@ -327,6 +327,7 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
+                    <version>0.13.1</version>
                     <executions>
                         <execution>
                             <id>japicmp</id>
