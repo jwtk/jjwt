@@ -3,7 +3,40 @@
 ### 0.11.0
 
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
-to address three security vulnerabilities in Jackson:
+to address three security vulnerabilities in Jackson.
+* Moves JSON Serializer/Deserializer implementations to a different package name.
+  - `io.jsonwebtoken.io.JacksonSerializer` -> `io.jsonwebtoken.jackson.io.JacksonSerializer`
+  - `io.jsonwebtoken.io.JacksonDeserializer` -> `io.jsonwebtoken.jackson.io.JacksonDeserializer`
+  - `io.jsonwebtoken.io.OrgJsonSerializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonSerializer`
+  - `io.jsonwebtoken.io.OrgJsonDeserializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonDeserializer`
+
+  A backward compatibility modules has been created using the `deprecated` classifier (`io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated` and `io.jsonwebtoken:jjwt-orjson:0.11.0:deprecated`), if you are compiling against these classes directly, otherwise you will be unaffected.
+
+#### Backwards Compatibility Warning
+
+Due to this package move, if you are currently using one of the above four existing (pre 0.11.0) classes with `compile` scope, you must either:
+  1. change your code to use the newer package classes (recommended), or 
+  1. change your build/dependency configuration to use the `deprecated` dependency classifier to use the existing classes, as follows:
+      
+**Maven**
+
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.0</version>
+    <classifier>deprecated</classifier>
+    <scope>compile</scope>
+</dependency>
+```
+
+**Gradle**
+
+```groovy
+compile 'io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated'
+```
+
+**Note:** that the first option is recommended since the second option will not be available starting with the 1.0 release.
 
 ### 0.10.7
 

@@ -15,10 +15,10 @@
  */
 package io.jsonwebtoken.impl.io
 
-import com.fasterxml.jackson.databind.ObjectMapper
+
 import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.io.JacksonDeserializer
-import io.jsonwebtoken.io.OrgJsonDeserializer
+import io.jsonwebtoken.jackson.io.JacksonDeserializer
+import io.jsonwebtoken.orgjson.io.OrgJsonDeserializer
 import io.jsonwebtoken.gson.io.GsonDeserializer
 import org.junit.After
 import org.junit.Before

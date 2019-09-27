@@ -86,6 +86,7 @@
     <properties>
 
         <jjwt.root>${basedir}</jjwt.root>
+        <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
 
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.compiler.version>3.6.1</maven.compiler.version>
@@ -268,6 +269,73 @@
                     <configuration>
                         <source>${jdk.version}</source>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <!-- japicmp will scan code for binary breaking changes, Open api/target/japicmp/japicmp.html
+                         for a report of the changes since ${jjwt.previousVersion} -->
+                    <groupId>com.github.siom79.japicmp</groupId>
+                    <artifactId>japicmp-maven-plugin</artifactId>
+                    <version>0.13.0</version>
+                    <configuration>
+                        <oldVersion>
+                            <dependency>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${jjwt.previousVersion}</version>
+                                <type>jar</type>
+                            </dependency>
+                        </oldVersion>
+                        <parameter>
+                            <onlyModified>true</onlyModified>
+                            <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                            <!-- TODO: enable after 1.0 -->
+                            <!-- <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
+                        </parameter>
+                    </configuration>
+                </plugin>
+
+                <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
+                     binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
+                     avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
+                <!-- TODO: remove these deprecated packages and this config before v1.0 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <configuration>
+                        <shadedClassifierName>deprecated</shadedClassifierName>
+                        <shadedArtifactAttached>true</shadedArtifactAttached>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <artifactSet>
+                            <includes>
+                                <include>${project.groupId}:${project.artifactId}</include>
+                            </includes>
+                        </artifactSet>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        </transformers>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.siom79.japicmp</groupId>
+                    <artifactId>japicmp-maven-plugin</artifactId>
+                    <version>0.13.1</version>
+                    <executions>
+                        <execution>
+                            <id>japicmp</id>
+                            <goals>
+                                <goal>cmp</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
