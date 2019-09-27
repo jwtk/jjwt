@@ -26,6 +26,7 @@ Due to this package move, if you are currently using one of the above four exist
     <artifactId>jjwt-jackson</artifactId>
     <version>0.11.0</version>
     <classifier>deprecated</classifier>
+    <scope>compile</scope>
 </dependency>
 ```
 
