@@ -1317,7 +1317,7 @@ Jwts.parser()
 By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in through a constructor. For example:
 
 ```java
-new JacksonDeserializer(Maps.of("user", User.class))
+new JacksonDeserializer(Maps.of("user", User.class).build())
 ```
 
 This would trigger the value in the `user` claim to be deserialized into the custom type of `User`.  Given the claims body of:
@@ -1337,15 +1337,18 @@ The `User` object could be retrieved from the `user` claim with the following co
 ```java
 Jwts.parserBuilder()
 
-    .deserializeJsonWith(new JacksonDeserializer(Maps.of("user", User.class)))
+    .deserializeJsonWith(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
 
     .build()
+
     .parseClaimsJwt(aJwtString)
-    .build()
+
     .getBody()
     
-    .get("user", User.class)
+    .get("user", User.class) // <-----
 ```
+
+**NOTE:** Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor [described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced parsing options, [configure the mapper directly](#json-jackson).
 
 <a name="base64"></a>
 ## Base64 Support
