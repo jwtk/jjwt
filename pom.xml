@@ -435,13 +435,7 @@
                 </executions>
                 <configuration>
                     <instructions>
-                        <Import-Package><![CDATA[
-                            android.util;resolution:=optional,
-                            org.bouncycastle.jce;resolution:=optional,
-                            org.bouncycastle.jce.spec;resolution:=optional,
-                            *
-                        ]]>
-                        </Import-Package>
+                        <_include>-bnd.bnd</_include>
                     </instructions>
                 </configuration>
             </plugin>
