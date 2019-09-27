@@ -12,6 +12,31 @@ to address three security vulnerabilities in Jackson.
 
   A backward compatibility modules has been created using the `deprecated` classifier (`io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated` and `io.jsonwebtoken:jjwt-orjson:0.11.0:deprecated`), if you are compiling against these classes directly, otherwise you will be unaffected.
 
+#### Backwards Compatibility Warning
+
+Due to this package move, if you are currently using one of the above four existing (pre 0.11.0) classes with `compile` scope, you must either:
+  1. change your code to use the newer package classes (recommended), or 
+  1. change your build/dependency configuration to use the `deprecated` dependency classifier to use the existing classes, as follows:
+      
+**Maven**
+
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.0</version>
+    <classifier>deprecated</classifier>
+</dependency>
+```
+
+**Gradle**
+
+```groovy
+compile 'io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated'
+```
+
+**Note:** that the first option is recommended since the second option will not be available starting with the 1.0 release.
+
 ### 0.10.7
 
 This patch release:
