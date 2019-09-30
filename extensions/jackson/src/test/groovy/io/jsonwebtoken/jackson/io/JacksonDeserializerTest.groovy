@@ -17,7 +17,9 @@ package io.jsonwebtoken.jackson.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.jackson.io.JacksonDeserializer
+import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.jackson.io.stubs.CustomBean
+import io.jsonwebtoken.lang.Maps
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
@@ -41,7 +43,7 @@ class JacksonDeserializerTest {
 
     @Test(expected = IllegalArgumentException)
     void testObjectMapperConstructorWithNullArgument() {
-        new JacksonDeserializer<>(null)
+        new JacksonDeserializer<>((ObjectMapper) null)
     }
 
     @Test
@@ -50,6 +52,62 @@ class JacksonDeserializerTest {
         def expected = [hello: '世界']
         def result = new JacksonDeserializer().deserialize(serialized)
         assertEquals expected, result
+    }
+
+    @Test
+    void testDeserializeWithCustomObject() {
+
+        long currentTime = System.currentTimeMillis()
+
+        byte[] serialized = """{
+                "oneKey":"oneValue", 
+                "custom": {
+                    "stringValue": "s-value",
+                    "intValue": "11",
+                    "dateValue": ${currentTime},
+                    "shortValue": 22,
+                    "longValue": 33,
+                    "byteValue": 15,
+                    "byteArrayValue": "${base64('bytes')}",
+                    "nestedValue": {
+                        "stringValue": "nested-value",
+                        "intValue": "111",
+                        "dateValue": ${currentTime + 1},
+                        "shortValue": 222,
+                        "longValue": 333,
+                        "byteValue": 10,
+                        "byteArrayValue": "${base64('bytes2')}"
+                    }
+                }
+            }
+            """.getBytes(Strings.UTF_8)
+
+        CustomBean expectedCustomBean = new CustomBean()
+            .setByteArrayValue("bytes".getBytes("UTF-8"))
+            .setByteValue(0xF as byte)
+            .setDateValue(new Date(currentTime))
+            .setIntValue(11)
+            .setShortValue(22 as short)
+            .setLongValue(33L)
+            .setStringValue("s-value")
+            .setNestedValue(new CustomBean()
+                .setByteArrayValue("bytes2".getBytes("UTF-8"))
+                .setByteValue(0xA as byte)
+                .setDateValue(new Date(currentTime+1))
+                .setIntValue(111)
+                .setShortValue(222 as short)
+                .setLongValue(333L)
+                .setStringValue("nested-value")
+            )
+
+        def expected = [oneKey: "oneValue", custom: expectedCustomBean]
+        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build()).deserialize(serialized)
+        assertEquals expected, result
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testNullClaimTypeMap() {
+        new JacksonDeserializer((Map) null)
     }
 
     @Test
@@ -77,5 +135,9 @@ class JacksonDeserializerTest {
         }
 
         verify ex
+    }
+
+    private String base64(String input) {
+        return Encoders.BASE64.encode(input.getBytes('UTF-8'))
     }
 }

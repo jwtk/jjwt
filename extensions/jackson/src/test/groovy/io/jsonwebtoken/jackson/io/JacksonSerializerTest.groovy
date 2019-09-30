@@ -18,7 +18,6 @@ package io.jsonwebtoken.jackson.io
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.SerializationException
-import io.jsonwebtoken.jackson.io.JacksonSerializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
