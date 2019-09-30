@@ -275,7 +275,7 @@
                          for a report of the changes since ${jjwt.previousVersion} -->
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.13.0</version>
+                    <version>0.13.1</version>
                     <configuration>
                         <oldVersion>
                             <dependency>
@@ -292,6 +292,14 @@
                             <!-- <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
                         </parameter>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>japicmp</id>
+                            <goals>
+                                <goal>cmp</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
@@ -320,19 +328,6 @@
                             <phase>package</phase>
                             <goals>
                                 <goal>shade</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>com.github.siom79.japicmp</groupId>
-                    <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.13.1</version>
-                    <executions>
-                        <execution>
-                            <id>japicmp</id>
-                            <goals>
-                                <goal>cmp</goal>
                             </goals>
                         </execution>
                     </executions>
