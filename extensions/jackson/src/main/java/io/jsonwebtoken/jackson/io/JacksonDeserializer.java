@@ -63,7 +63,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
      * <p>
      * If you would like to use your own {@code ObjectMapper} instance that also supports custom types for
      * JWT {@code Claims}, you will need to first customize your {@code ObjectMapper} instance by registering
-     * your custom types and then use the {@link JacksonDeserializer(ObjectMapper)} constructor instead.
+     * your custom types and then use the {@link #JacksonDeserializer(ObjectMapper)} constructor instead.
      * 
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
      */
