@@ -394,7 +394,7 @@ eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.1KP0SsvENi7Uz1oQc07aXTL7kpQG5jBNIybqr60A
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-assert Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().getSubject().equals("Joe");
+assert Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getBody().getSubject().equals("Joe");
 ```
 
 **NOTE: Ensure you call the `parseClaimsJws` method** (since there are many similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
@@ -410,7 +410,7 @@ But what if parsing or signature validation failed?  You can catch `JwtException
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws);
+    Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compactJws);
 
     //OK, we can trust this JWT
 
@@ -894,10 +894,11 @@ Please see the main [Compression](#compression) section to see how to compress a
 
 You read (parse) a JWS as follows:
 
-1. Use the `Jwts.parser()` method to create a `JwtParser` instance.  
+1. Use the `Jwts.parserBuilder()` method to create a `JwtParserBuilder` instance.  
 2. Specify the `SecretKey` or asymmetric `PublicKey` you want to use to verify the JWS signature.<sup>1</sup>
-3. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
-4. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
+3. Call the `build()` method on the `JwtParserBuilder` to return a `JwtParser`.
+4. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
+5. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
 
 <sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
@@ -909,13 +910,14 @@ For example:
 Jws<Claims> jws;
 
 try {
-    jws = Jwts.parser()         // (1)
+    jws = Jwts.parserBuilder()  // (1)
     .setSigningKey(key)         // (2)
-    .parseClaimsJws(jwsString); // (3)
+    .build()                    // (3)
+    .parseClaimsJws(jwsString); // (4)
     
     // we can safely trust the JWT
      
-catch (JwtException ex) {       // (4)
+catch (JwtException ex) {       // (5)
     
     // we *cannot* use the JWT as intended by its creator
 }
@@ -933,23 +935,25 @@ discarded.
 
 So which key do we use for verification?
 
-* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParser`.  For example:
+* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParserBuilder`.  For example:
 
   ```java
-  Jwts.parser()
+  Jwts.parserBuilder()
       
     .setSigningKey(secretKey) // <----
     
+    .build()
     .parseClaimsJws(jwsString);
   ```
 * If the jws was signed with a `PrivateKey`, that key's corresponding `PublicKey` (not the `PrivateKey`) should be 
-  specified on the `JwtParser`.  For example:
+  specified on the `JwtParserBuilder`.  For example:
 
   ```java
-  Jwts.parser()
+  Jwts.parserBuilder()
       
     .setSigningKey(publicKey) // <---- publicKey, not privateKey
     
+    .build()
     .parseClaimsJws(jwsString);
   ```
   
@@ -957,7 +961,7 @@ But you might have noticed something - what if your application doesn't use just
 if JWSs can be created with different `SecretKey`s or public/private keys, or a combination of both?  How do you
 know which key to specify if you can't inspect the JWT first?
 
-In these cases, you can't call the `JwtParser`'s `setSigningKey` method with a single key - instead, you'll need
+In these cases, you can't call the `JwtParserBuilder`'s `setSigningKey` method with a single key - instead, you'll need
 to use a `SigningKeyResolver`, covered next.
 
 <a name="jws-read-key-resolver"></a>
@@ -965,16 +969,17 @@ to use a `SigningKeyResolver`, covered next.
 
 If your application expects JWSs that can be signed with different keys, you won't call the `setSigningKey` method.
 Instead, you'll need to implement the 
-`SigningKeyResolver` interface and specify an instance on the `JwtParser` via the `setSigningKeyResolver` method.  
+`SigningKeyResolver` interface and specify an instance on the `JwtParserBuilder` via the `setSigningKeyResolver` method.  
 For example:
 
 ```java
 SigningKeyResolver signingKeyResolver = getMySigningKeyResolver();
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .setSigningKeyResolver(signingKeyResolver) // <----
     
+    .build()
     .parseClaimsJws(jwsString);
 ```
 
@@ -1051,11 +1056,11 @@ application.
 
 For example, let's say that you require that the JWS you are parsing has a specific `sub` (subject) value,
 otherwise you may not trust the token.  You can do that by using one of the various `require`* methods on the 
-`JwtParser`:
+`JwtParserBuilder`:
 
 ```java
 try {
-    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the sub field was missing or did not have a 'jsmith' value
 }
@@ -1066,7 +1071,7 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 
 ```java
 try {
-    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
 } catch(MissingClaimException mce) {
     // the parsed JWT did not have the sub field
 } catch(IncorrectClaimException ice) {
@@ -1078,14 +1083,14 @@ You can also require custom fields by using the `require(fieldName, requiredFiel
 
 ```java
 try {
-    Jwts.parser().require("myfield", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().require("myfield", "myRequiredValue").setSigningKey(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the 'myfield' field was missing or did not have a 'myRequiredValue' value
 }
 ```
 (or, again, you could catch either `MissingClaimException` or `IncorrectClaimException` instead).
 
-Please see the `JwtParser` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
+Please see the `JwtParserBuilder` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
 assertions.
 
 <a name="jws-read-clock"></a>
@@ -1096,17 +1101,18 @@ the parsing machine is not perfectly in sync with the clock on the machine that 
 obvious problems since `exp` and `nbf` are time-based assertions, and clock times need to be reliably in sync for shared
 assertions.
 
-You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParser`'s
+You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParserBuilder`'s
  `setAllowedClockSkewSeconds`. For example:
 
 ```java
 long seconds = 3 * 60; //3 minutes
 
-Jwts.parser()
+Jwts.parserBuilder()
     
     .setAllowedClockSkewSeconds(seconds) // <----
     
     // ... etc ...
+    .build()
     .parseClaimsJws(jwt);
 ```
 This ensures that clock differences between the machines can be ignored. Two or three minutes should be more than 
@@ -1117,13 +1123,13 @@ atomic clocks around the world.
 ##### Custom Clock Support
 
 If the above `setAllowedClockSkewSeconds` isn't sufficient for your needs, the timestamps created
-during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParser`'s `setClock`
+during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParserBuilder`'s `setClock`
  method with an implementation of the `io.jsonwebtoken.Clock` interface.  For example:
  
  ```java
 Clock clock = new MyClock();
 
-Jwts.parser().setClock(myClock) //... etc ...
+Jwts.parserBuilder().setClock(myClock) //... etc ...
 ``` 
 
 The `JwtParser`'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs, 
@@ -1133,7 +1139,7 @@ guarantee deterministic behavior.
 <a name="jws-read-decompression"></a>
 #### JWS Decompression
 
-If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParser`
+If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParserBuilder`
 how to resolve your `CompressionCodec` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
@@ -1172,12 +1178,12 @@ parsing or configure the `JwtParser` for compression - JJWT will automatically d
 ### Custom Compression Codec
 
 If however, you used your own custom compression codec when creating the JWT (via `JwtBuilder` `compressWith`), then
-you need to supply the codec to the `JwtParser` using the `setCompressionCodecResolver` method.  For example:
+you need to supply the codec to the `JwtParserBuilder` using the `setCompressionCodecResolver` method.  For example:
 
 ```java
 CompressionCodecResolver ccr = new MyCompressionCodecResolver();
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .setCompressionCodecResolver(ccr) // <----
     
@@ -1209,7 +1215,7 @@ A `JwtBuilder` will serialize the `Header` and `Claims` maps (and potentially an
 contain) to JSON with a `Serializer<Map<String, ?>>` instance.  Similarly, a `JwtParser` will 
 deserialize JSON into the `Header` and `Claims` using a `Deserializer<Map<String, ?>>` instance.
 
-If you don't explicitly configure a `JwtBuilder`'s `Serializer` or a `JwtParser`'s `Deserializer`, JJWT will 
+If you don't explicitly configure a `JwtBuilder`'s `Serializer` or a `JwtParserBuilder`'s `Deserializer`, JJWT will 
 automatically attempt to discover and use the following JSON implementations if found in the runtime classpath.  
 They are checked in order, and the first one found is used:
 
@@ -1232,7 +1238,7 @@ Android application thus increasing the app download size for mobile users.
 
 If you don't want to use JJWT's runtime dependency approach, or just want to customize how JSON serialization and 
 deserialization works, you can implement the `Serializer` and `Deserializer` interfaces and specify instances of
-them on the `JwtBuilder` and `JwtParser` respectively.  For example:
+them on the `JwtBuilder` and `JwtParserBuilder` respectively.  For example:
 
 When creating a JWT:
 
@@ -1251,7 +1257,7 @@ When reading a JWT:
 ```java
 Deserializer<Map<String,?>> deserializer = getMyDeserializer(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .deserializeJsonWith(deserializer)
     
@@ -1298,12 +1304,12 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParser`:
+and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParserBuilder`:
 
 ```java
 ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .deserializeJsonWith(new JacksonDeserializer(objectMapper))
     
@@ -1345,12 +1351,12 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-and the `JwtParser`'s `base64UrlDecodeWith` method to set the decoder:
+and the `JwtParserBuilder`'s `base64UrlDecodeWith` method to set the decoder:
 
 ```java
 Decoder<String, byte[]> base64UrlDecoder = getMyBase64UrlDecoder(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .base64UrlDecodeWith(base64UrlEncoder)
     
