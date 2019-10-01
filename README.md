@@ -897,7 +897,7 @@ You read (parse) a JWS as follows:
 
 1. Use the `Jwts.parserBuilder()` method to create a `JwtParserBuilder` instance.  
 2. Specify the `SecretKey` or asymmetric `PublicKey` you want to use to verify the JWS signature.<sup>1</sup>
-3. Call the `build()` method on the `JwtParserBuilder` to return a `JwtParser`.
+3. Call the `build()` method on the `JwtParserBuilder` to return a thread-safe `JwtParser`.
 4. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
 5. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
