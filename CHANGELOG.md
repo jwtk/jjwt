@@ -6,6 +6,22 @@ This minor release:
 
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
 to address three security vulnerabilities in Jackson.
+* A new JwtParserBuilder interface has been added and is the recommended way of creating a JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
+    Migration to the new signatures is straightforward, for example:
+    
+    Previous Version:
+    ```java 
+     Jwts.parser()
+         .requireAudience("string")
+         .parse(jwtString)
+    ```
+    Current Version:
+    ```java
+    Jwts.parserBuilder()
+        .requireAudience("string")
+        .build()
+        .parse(jwtString)
+    ```
 * Adds support for custom types when deserializing with Jackson. To use configure your parser with `Jwts.parserBuilder().deserializeJsonWith(new JacksonDeserializer(Maps.of("claimName", YourType.class).build())).build()`.
 * Adds `io.jsonwebtoken.lang.Maps` utility class to make creation of maps fluent.
 * Moves JSON Serializer/Deserializer implementations to a different package name.
