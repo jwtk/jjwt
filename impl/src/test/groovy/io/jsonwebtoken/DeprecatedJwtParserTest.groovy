@@ -28,6 +28,7 @@ import java.security.SecureRandom
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static org.junit.Assert.*
+import static io.jsonwebtoken.DateTestUtils.truncateMillis
 
 class DeprecatedJwtParserTest {
 
@@ -1277,10 +1278,7 @@ class DeprecatedJwtParserTest {
                 requireExpiration(expiration).
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def expirationMillis = ((long) expiration.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
+        assertEquals jwt.getBody().getExpiration().getTime(), truncateMillis(expiration)
     }
 
     @Test(expected = IncorrectClaimException)
@@ -1329,10 +1327,7 @@ class DeprecatedJwtParserTest {
                 requireNotBefore(notBefore).
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def notBeforeMillis = ((long) notBefore.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
+        assertEquals jwt.getBody().getNotBefore().getTime(), truncateMillis(notBefore)
     }
 
     @Test(expected = IncorrectClaimException)
