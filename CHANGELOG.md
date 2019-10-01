@@ -6,7 +6,7 @@ This minor release:
 
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
 to address three security vulnerabilities in Jackson.
-* A new JwtParserBuilder interface has been added and is the recommended way of creating a JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
+* A new JwtParserBuilder interface has been added and is the recommended way of creating an immutable and thread-safe JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
     Migration to the new signatures is straightforward, for example:
     
     Previous Version:

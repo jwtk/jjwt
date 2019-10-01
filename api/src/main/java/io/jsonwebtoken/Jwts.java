@@ -122,9 +122,9 @@ public final class Jwts {
     }
 
     /**
-     * Returns a new {@link JwtParserBuilder} instance that can be configured and then used to parse JWT strings.
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser).
      *
-     * @return a new {@link JwtParser} instance that can be configured and then used to parse JWT strings.
+     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser).
      */
     public static JwtParserBuilder parserBuilder() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
