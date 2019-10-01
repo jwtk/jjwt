@@ -298,8 +298,8 @@ public interface JwtParserBuilder {
     JwtParserBuilder deserializeJsonWith(Deserializer<Map<String,?>> deserializer);
 
     /**
-     * Returns a {@link JwtParser} created from the configuration from this JwtParserBuilder.
-     * @return a JwtParser created from the configuration from this JwtParserBuilder.
+     * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.
+     * @return an immutable/thread-safe JwtParser created from the configuration from this JwtParserBuilder.
      */
     JwtParser build();
 }
