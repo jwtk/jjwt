@@ -8,6 +8,7 @@ jdk:
   - oraclejdk8
   - oraclejdk9
   - openjdk10
+  - openjdk11
 
 before_install:
   - echo "TRAVIS_JDK_VERSION is ${TRAVIS_JDK_VERSION}"

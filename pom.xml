@@ -86,6 +86,7 @@
     <properties>
 
         <jjwt.root>${basedir}</jjwt.root>
+        <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
 
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.compiler.version>3.6.1</maven.compiler.version>
@@ -94,7 +95,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.9.9.3</jackson.version>
+        <jackson.version>2.9.10</jackson.version>
         <orgjson.version>20180130</orgjson.version>
         <gson.version>2.8.5</gson.version>
 
@@ -102,7 +103,7 @@
         <bouncycastle.version>1.60</bouncycastle.version>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.1</groovy.version>
+        <groovy.version>2.5.8</groovy.version>
         <logback.version>1.2.3</logback.version>
         <easymock.version>3.6</easymock.version>
         <junit.version>4.12</junit.version>
@@ -261,6 +262,76 @@
                         </excludes>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.4</version>
+                    <configuration>
+                        <source>${jdk.version}</source>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <!-- japicmp will scan code for binary breaking changes, Open api/target/japicmp/japicmp.html
+                         for a report of the changes since ${jjwt.previousVersion} -->
+                    <groupId>com.github.siom79.japicmp</groupId>
+                    <artifactId>japicmp-maven-plugin</artifactId>
+                    <version>0.13.1</version>
+                    <configuration>
+                        <oldVersion>
+                            <dependency>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${jjwt.previousVersion}</version>
+                                <type>jar</type>
+                            </dependency>
+                        </oldVersion>
+                        <parameter>
+                            <onlyModified>true</onlyModified>
+                            <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                            <!-- TODO: enable after 1.0 -->
+                            <!-- <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
+                        </parameter>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>japicmp</id>
+                            <goals>
+                                <goal>cmp</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
+                     binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
+                     avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
+                <!-- TODO: remove these deprecated packages and this config before v1.0 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <configuration>
+                        <shadedClassifierName>deprecated</shadedClassifierName>
+                        <shadedArtifactAttached>true</shadedArtifactAttached>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <artifactSet>
+                            <includes>
+                                <include>${project.groupId}:${project.artifactId}</include>
+                            </includes>
+                        </artifactSet>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        </transformers>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -302,7 +373,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>${maven.jar.version}</version>
-                <!--
                 <configuration>
                     <archive>
                         <manifest>
@@ -314,7 +384,6 @@
                         </manifestFile>
                     </archive>
                 </configuration>
-                -->
             </plugin>
             <!-- Allow for writing tests in Groovy: -->
             <plugin>
@@ -437,13 +506,7 @@
                 </executions>
                 <configuration>
                     <instructions>
-                        <Import-Package><![CDATA[
-                            android.util;resolution:=optional,
-                            org.bouncycastle.jce;resolution:=optional,
-                            org.bouncycastle.jce.spec;resolution:=optional,
-                            *
-                        ]]>
-                        </Import-Package>
+                        <_include>-bnd.bnd</_include>
                     </instructions>
                 </configuration>
             </plugin>
@@ -460,7 +523,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -542,7 +604,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>

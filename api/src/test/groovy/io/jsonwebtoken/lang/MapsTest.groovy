@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 jsonwebtoken.io
+ * Copyright (C) 2019 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl
+package io.jsonwebtoken.lang
 
-import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.CoreMatchers.is
 
-class DefaultJwtTest {
+class MapsTest {
 
     @Test
-    void testToString() {
-        String compact = Jwts.builder().setHeaderParam('foo', 'bar').setAudience('jsmith').compact();
-        Jwt jwt = Jwts.parserBuilder().build().parseClaimsJwt(compact);
-        assertEquals 'header={foo=bar, alg=none},body={aud=jsmith}', jwt.toString()
+    void testSingleMapOf() {
+        assertThat Maps.of("aKey", "aValue").build(), is([aKey: "aValue"])
     }
 
+    @Test
+    void testMapOfAnd() {
+        assertThat Maps.of("aKey1", "aValue1")
+                        .and("aKey2", "aValue2")
+                        .and("aKey3", "aValue3")
+                        .build(),
+                is([aKey1: "aValue1", aKey2: "aValue2", aKey3: "aValue3"])
+    }
 }
