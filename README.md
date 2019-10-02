@@ -915,7 +915,7 @@ try {
     
     // we can safely trust the JWT
      
-catch (JwtException ex) {       // (4)
+} catch (JwtException ex) {     // (4)
     
     // we *cannot* use the JWT as intended by its creator
 }
