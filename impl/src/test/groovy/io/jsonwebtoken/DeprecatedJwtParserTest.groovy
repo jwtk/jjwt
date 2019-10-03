@@ -28,6 +28,7 @@ import java.security.SecureRandom
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static org.junit.Assert.*
+import static io.jsonwebtoken.DateTestUtils.truncateMillis
 
 class DeprecatedJwtParserTest {
 
@@ -972,10 +973,7 @@ class DeprecatedJwtParserTest {
                 requireIssuedAt(issuedAt).
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def issuedAtMillis = ((long) issuedAt.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis, 0
+        assertEquals jwt.getBody().getIssuedAt().getTime(), truncateMillis(issuedAt)
     }
 
     @Test(expected = IncorrectClaimException)
@@ -1280,10 +1278,7 @@ class DeprecatedJwtParserTest {
                 requireExpiration(expiration).
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def expirationMillis = ((long) expiration.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
+        assertEquals jwt.getBody().getExpiration().getTime(), truncateMillis(expiration)
     }
 
     @Test(expected = IncorrectClaimException)
@@ -1332,10 +1327,7 @@ class DeprecatedJwtParserTest {
                 requireNotBefore(notBefore).
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def notBeforeMillis = ((long) notBefore.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
+        assertEquals jwt.getBody().getNotBefore().getTime(), truncateMillis(notBefore)
     }
 
     @Test(expected = IncorrectClaimException)
@@ -1563,5 +1555,17 @@ class DeprecatedJwtParserTest {
         } catch (MalformedJwtException se) {
             assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
         }
+    }
+
+    /**
+     * Date util method for lopping truncate the millis from a date.
+     * @param date input date
+     * @return The date time in millis with the precision of seconds
+     */
+    private long truncateMillis(Date date) {
+        Calendar cal = Calendar.getInstance()
+        cal.setTime(date)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.getTimeInMillis()
     }
 }
