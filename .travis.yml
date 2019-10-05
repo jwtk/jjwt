@@ -9,6 +9,10 @@ jdk:
   - oraclejdk9
   - openjdk10
   - openjdk11
+  
+cache:
+  directories:
+    - $HOME/.m2
 
 before_install:
   - echo "TRAVIS_JDK_VERSION is ${TRAVIS_JDK_VERSION}"
