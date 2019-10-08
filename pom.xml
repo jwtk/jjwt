@@ -369,22 +369,6 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven.jar.version}</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                        </manifestFile>
-                    </archive>
-                </configuration>
-            </plugin>
             <!-- Allow for writing tests in Groovy: -->
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
@@ -493,8 +477,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.3.0</version>
-                <extensions>true</extensions>
+                <version>4.2.1</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -510,7 +493,22 @@
                     </instructions>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven.jar.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        </manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
             <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
             <plugin>
                 <groupId>org.jwtk.coveralls</groupId>
