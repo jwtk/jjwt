@@ -6,6 +6,7 @@ This minor release:
 
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
 to address three security vulnerabilities in Jackson.
+* Adds a new `io.jsonwebtoken.lang.Services` utility class to load implementations of `CompressionCodec` and JSON `Serializer`/`Deserializer` automatically using a [`ServiceLoader`](https://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html).
 * A new JwtParserBuilder interface has been added and is the recommended way of creating a JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
     Migration to the new signatures is straightforward, for example:
     
