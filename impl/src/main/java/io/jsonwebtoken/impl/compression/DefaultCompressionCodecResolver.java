@@ -17,10 +17,16 @@ package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Services;
 import io.jsonwebtoken.lang.Strings;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Default implementation of {@link CompressionCodecResolver} that supports the following:
@@ -45,6 +51,22 @@ import io.jsonwebtoken.lang.Strings;
  */
 public class DefaultCompressionCodecResolver implements CompressionCodecResolver {
 
+    private static final String MISSING_COMPRESSION_MESSAGE = "Unable to find an implementation for compression algorithm [%s] using java.util.ServiceLoader. Ensure you include a backing implementation .jar in the classpath, for example jjwt-impl.jar, or your own .jar for custom implementations.";
+
+    private final Map<String, CompressionCodec> codecs;
+
+    public DefaultCompressionCodecResolver() {
+        Map<String, CompressionCodec> codecMap = new HashMap<>();
+        for (CompressionCodec codec : Services.loadAll(CompressionCodec.class)) {
+            codecMap.put(codec.getAlgorithmName().toUpperCase(), codec);
+        }
+
+        codecMap.put(CompressionCodecs.DEFLATE.getAlgorithmName().toUpperCase(), CompressionCodecs.DEFLATE);
+        codecMap.put(CompressionCodecs.GZIP.getAlgorithmName().toUpperCase(), CompressionCodecs.GZIP);
+
+        codecs = Collections.unmodifiableMap(codecMap);
+    }
+
     @Override
     public CompressionCodec resolveCompressionCodec(Header header) {
         String cmpAlg = getAlgorithmFromHeader(header);
@@ -54,19 +76,23 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         if (!hasCompressionAlgorithm) {
             return null;
         }
-        if (io.jsonwebtoken.CompressionCodecs.DEFLATE.getAlgorithmName().equalsIgnoreCase(cmpAlg)) {
-            return io.jsonwebtoken.CompressionCodecs.DEFLATE;
-        }
-        if (io.jsonwebtoken.CompressionCodecs.GZIP.getAlgorithmName().equalsIgnoreCase(cmpAlg)) {
-            return io.jsonwebtoken.CompressionCodecs.GZIP;
-        }
-
-        throw new CompressionException("Unsupported compression algorithm '" + cmpAlg + "'");
+        return byName(cmpAlg);
     }
 
     private String getAlgorithmFromHeader(Header header) {
         Assert.notNull(header, "header cannot be null.");
 
         return header.getCompressionAlgorithm();
+    }
+
+    private CompressionCodec byName(String name) {
+        Assert.hasText(name, "'name' must not be empty");
+
+        CompressionCodec codec = codecs.get(name.toUpperCase());
+        if (codec == null) {
+            throw new CompressionException(String.format(MISSING_COMPRESSION_MESSAGE, name));
+        }
+
+        return codec;
     }
 }
