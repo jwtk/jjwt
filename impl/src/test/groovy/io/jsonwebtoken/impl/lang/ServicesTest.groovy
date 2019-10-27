@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.lang
+package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.DefaultStubService
+import io.jsonwebtoken.impl.DefaultStubService
 import io.jsonwebtoken.StubService
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +48,11 @@ class ServicesTest {
         NoServicesClassLoader.runWith {
             Services.loadAll(StubService.class)
         }
+    }
+
+    @Test
+    void testPrivateConstructor() {
+        new Services(); // not allowed in Java, including here for test coverage
     }
 
     static class NoServicesClassLoader extends ClassLoader {

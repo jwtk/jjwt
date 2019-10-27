@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken
+package io.jsonwebtoken.impl
+
+import io.jsonwebtoken.StubService
 
 class DefaultStubService implements StubService {
 }

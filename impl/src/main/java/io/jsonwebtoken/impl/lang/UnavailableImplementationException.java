@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.lang;
+package io.jsonwebtoken.impl.lang;
 
 /**
  * Exception indicating that no implementation of an jjwt-api SPI was found on the classpath.
