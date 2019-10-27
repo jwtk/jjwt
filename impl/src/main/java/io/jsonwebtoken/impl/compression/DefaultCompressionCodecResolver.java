@@ -21,7 +21,7 @@ import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Services;
+import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collections;

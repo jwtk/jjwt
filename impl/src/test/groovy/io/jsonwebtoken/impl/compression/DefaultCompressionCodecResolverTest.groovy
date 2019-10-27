@@ -19,7 +19,7 @@ import io.jsonwebtoken.CompressionCodec
 import io.jsonwebtoken.CompressionException
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.io.FakeServiceDescriptorClassLoader
-import io.jsonwebtoken.lang.Services
+import io.jsonwebtoken.impl.lang.Services
 import org.junit.Assert
 import org.junit.Test
 

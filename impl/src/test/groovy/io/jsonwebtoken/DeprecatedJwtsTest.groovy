@@ -21,7 +21,7 @@ import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.lang.Services
+import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.WeakKeyException

@@ -26,7 +26,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Services;
+import io.jsonwebtoken.impl.lang.Services;
 
 import java.security.Key;
 import java.util.Date;
