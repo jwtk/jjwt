@@ -53,6 +53,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Claims expectedClaims = new DefaultClaims();
 
+    private boolean allowEmptyBody = false;
+
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
@@ -123,6 +125,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
+    public JwtParserBuilder allowEmptyBody(boolean allowEmptyBody) {
+        this.allowEmptyBody = allowEmptyBody;
+        return this;
+    }
+
+    @Override
     public JwtParserBuilder setClock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
@@ -187,6 +195,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                                      clock,
                                      allowedClockSkewMillis,
                                      expectedClaims,
+                                     allowEmptyBody,
                                      base64UrlDecoder,
                                      deserializer,
                                      compressionCodecResolver));

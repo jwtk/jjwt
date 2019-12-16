@@ -77,6 +77,8 @@ public class DefaultJwtParser implements JwtParser {
 
     private Claims expectedClaims = new DefaultClaims();
 
+    private boolean allowEmptyBody = false;
+
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
@@ -94,6 +96,7 @@ public class DefaultJwtParser implements JwtParser {
                      Clock clock,
                      long allowedClockSkewMillis,
                      Claims expectedClaims,
+                     boolean allowEmptyBody,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
                      CompressionCodecResolver compressionCodecResolver) {
@@ -103,6 +106,7 @@ public class DefaultJwtParser implements JwtParser {
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = expectedClaims;
+        this.allowEmptyBody = allowEmptyBody;
         this.base64UrlDecoder = base64UrlDecoder;
         this.deserializer = deserializer;
         this.compressionCodecResolver = compressionCodecResolver;
@@ -293,7 +297,7 @@ public class DefaultJwtParser implements JwtParser {
             base64UrlEncodedDigest = sb.toString();
         }
 
-        if (base64UrlEncodedPayload == null) {
+        if (base64UrlEncodedPayload == null && !allowEmptyBody) {
             throw new MalformedJwtException("JWT string '" + jwt + "' is missing a body/payload.");
         }
 
@@ -317,6 +321,9 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Body =================
+        if (base64UrlEncodedPayload == null) {
+            base64UrlEncodedPayload = ""; // If empty body is allowed, override the resulting null from parsing.
+        }
         byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedPayload);
         if (compressionCodec != null) {
             bytes = compressionCodec.decompress(bytes);
@@ -325,7 +332,7 @@ public class DefaultJwtParser implements JwtParser {
 
         Claims claims = null;
 
-        if (payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        if (!payload.isEmpty() && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
             Map<String, Object> claimsMap = (Map<String, Object>) readValue(payload);
             claims = new DefaultClaims(claimsMap);
         }

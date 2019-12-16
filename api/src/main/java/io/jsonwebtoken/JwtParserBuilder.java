@@ -133,6 +133,18 @@ public interface JwtParserBuilder {
     JwtParserBuilder require(String claimName, Object value);
 
     /**
+     * Allow that the body / payload part of the JWT may be empty. Some API specifications require JWT authenticated
+     * POST-AS-GET requests with an empty octet string as body part.
+     * The default value is false. If a message contains an empty body without allowing it, parsing the JWS will lead
+     * to a {@link MalformedJwtException}.
+     *
+     * @param allowEmptyBody
+     * @return the parser builder for method chaining.
+     * @see MalformedJwtException
+     */
+    JwtParserBuilder allowEmptyBody(boolean allowEmptyBody);
+
+    /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
      * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
      *
