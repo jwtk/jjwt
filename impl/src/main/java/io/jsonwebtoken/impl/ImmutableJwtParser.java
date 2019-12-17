@@ -94,6 +94,11 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser requirePayload(boolean payloadRequired) {
+        throw doNotMutate();
+    }
+
+    @Override
     public JwtParser setClock(Clock clock) {
         throw doNotMutate();
     }

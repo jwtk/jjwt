@@ -164,7 +164,7 @@ class DeprecatedJwtsTest {
     @Test
     void testParseWithTwoPeriodsOnly() {
         try {
-            Jwts.parser().parse('..')
+            Jwts.parser().requirePayload(true).parse('..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..' is missing a body/payload."
@@ -174,7 +174,7 @@ class DeprecatedJwtsTest {
     @Test
     void testParseWithHeaderOnly() {
         try {
-            Jwts.parser().parse('foo..')
+            Jwts.parser().requirePayload(true).parse('foo..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string 'foo..' is missing a body/payload."
@@ -184,7 +184,7 @@ class DeprecatedJwtsTest {
     @Test
     void testParseWithSignatureOnly() {
         try {
-            Jwts.parser().parse('..bar')
+            Jwts.parser().requirePayload(true).parse('..bar')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..bar' is missing a body/payload."
@@ -194,7 +194,7 @@ class DeprecatedJwtsTest {
     @Test
     void testParseWithHeaderAndSignatureOnly() {
         try {
-            Jwts.parser().parse('foo..bar')
+            Jwts.parser().requirePayload(true).parse('foo..bar')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string 'foo..bar' is missing a body/payload."

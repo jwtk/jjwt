@@ -154,7 +154,7 @@ class JwtsTest {
     @Test
     void testParseWithOnePeriodOnly() {
         try {
-            Jwts.parserBuilder().build().parse('.')
+            Jwts.parserBuilder().requirePayload(true).build().parse('.')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 1"
@@ -164,7 +164,7 @@ class JwtsTest {
     @Test
     void testParseWithTwoPeriodsOnly() {
         try {
-            Jwts.parserBuilder().build().parse('..')
+            Jwts.parserBuilder().requirePayload(true).build().parse('..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..' is missing a body/payload."
@@ -174,7 +174,7 @@ class JwtsTest {
     @Test
     void testParseWithHeaderOnly() {
         try {
-            Jwts.parserBuilder().build().parse('foo..')
+            Jwts.parserBuilder().requirePayload(true).build().parse('foo..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string 'foo..' is missing a body/payload."
@@ -184,7 +184,7 @@ class JwtsTest {
     @Test
     void testParseWithSignatureOnly() {
         try {
-            Jwts.parserBuilder().build().parse('..bar')
+            Jwts.parserBuilder().requirePayload(true).build().parse('..bar')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..bar' is missing a body/payload."
@@ -194,7 +194,7 @@ class JwtsTest {
     @Test
     void testParseWithHeaderAndSignatureOnly() {
         try {
-            Jwts.parserBuilder().build().parse('foo..bar')
+            Jwts.parserBuilder().requirePayload(true).build().parse('foo..bar')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string 'foo..bar' is missing a body/payload."
