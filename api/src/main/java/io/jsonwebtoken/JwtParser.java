@@ -36,7 +36,6 @@ public interface JwtParser {
      * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param id
      * @return the parser method for chaining.
@@ -54,7 +53,6 @@ public interface JwtParser {
      * Ensures that the specified {@code sub} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param subject
      * @return the parser for method chaining.
@@ -72,7 +70,6 @@ public interface JwtParser {
      * Ensures that the specified {@code aud} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param audience
      * @return the parser for method chaining.
@@ -90,7 +87,6 @@ public interface JwtParser {
      * Ensures that the specified {@code iss} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param issuer
      * @return the parser for method chaining.
@@ -108,7 +104,6 @@ public interface JwtParser {
      * Ensures that the specified {@code iat} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param issuedAt
      * @return the parser for method chaining.
@@ -126,7 +121,6 @@ public interface JwtParser {
      * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param expiration
      * @return the parser for method chaining.
@@ -144,7 +138,6 @@ public interface JwtParser {
      * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param notBefore
      * @return the parser for method chaining
@@ -162,7 +155,6 @@ public interface JwtParser {
      * Ensures that the specified {@code claimName} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
-     * Sets payload required, {@link JwtParser#requirePayload(boolean)}.
      *
      * @param claimName
      * @param value
@@ -176,17 +168,6 @@ public interface JwtParser {
      */
     @Deprecated
     JwtParser require(String claimName, Object value);
-
-    /**
-     * Require the payload of the JWT not to be empty. The default value is false. If a message contains an empty payload
-     * string but it is required per this flag, parsing the JWS will lead to a {@link MalformedJwtException}.
-     *
-     * @param payloadRequired
-     * @return the parser builder for method chaining.
-     * @see MalformedJwtException
-     */
-    @Deprecated
-    JwtParser requirePayload(boolean payloadRequired);
 
     /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.

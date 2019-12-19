@@ -25,6 +25,7 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.WeakKeyException
+import org.junit.Ignore
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -154,7 +155,7 @@ class JwtsTest {
     @Test
     void testParseWithOnePeriodOnly() {
         try {
-            Jwts.parserBuilder().requirePayload(true).build().parse('.')
+            Jwts.parserBuilder().build().parse('.')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 1"
@@ -162,9 +163,10 @@ class JwtsTest {
     }
 
     @Test
+    @Ignore("It is unclear whether JWTs with empty header, payload and signature are to be considered valid.")
     void testParseWithTwoPeriodsOnly() {
         try {
-            Jwts.parserBuilder().requirePayload(true).build().parse('..')
+            Jwts.parserBuilder().build().parse('..')
             fail()
         } catch (MalformedJwtException e) {
             assertEquals e.message, "JWT string '..' is missing a body/payload."
@@ -172,32 +174,12 @@ class JwtsTest {
     }
 
     @Test
-    void testParseWithHeaderOnly() {
-        try {
-            Jwts.parserBuilder().requirePayload(true).build().parse('foo..')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string 'foo..' is missing a body/payload."
-        }
-    }
-
-    @Test
     void testParseWithSignatureOnly() {
         try {
-            Jwts.parserBuilder().requirePayload(true).build().parse('..bar')
+            Jwts.parserBuilder().build().parse('..bar')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..bar' is missing a body/payload."
-        }
-    }
-
-    @Test
-    void testParseWithHeaderAndSignatureOnly() {
-        try {
-            Jwts.parserBuilder().requirePayload(true).build().parse('foo..bar')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string 'foo..bar' is missing a body/payload."
+            assertEquals e.message, "JWT string has a digest/signature, but the header does not reference a valid signature algorithm."
         }
     }
 

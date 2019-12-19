@@ -53,8 +53,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Claims expectedClaims = new DefaultClaims();
 
-    private boolean payloadRequired = false;
-
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
@@ -77,49 +75,42 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder requireIssuedAt(Date issuedAt) {
         expectedClaims.setIssuedAt(issuedAt);
-        requirePayload(true);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireIssuer(String issuer) {
         expectedClaims.setIssuer(issuer);
-        requirePayload(true);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireAudience(String audience) {
         expectedClaims.setAudience(audience);
-        requirePayload(true);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireSubject(String subject) {
         expectedClaims.setSubject(subject);
-        requirePayload(true);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireId(String id) {
         expectedClaims.setId(id);
-        requirePayload(true);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireExpiration(Date expiration) {
         expectedClaims.setExpiration(expiration);
-        requirePayload(true);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireNotBefore(Date notBefore) {
         expectedClaims.setNotBefore(notBefore);
-        requirePayload(true);
         return this;
     }
 
@@ -128,13 +119,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
         expectedClaims.put(claimName, value);
-        requirePayload(true);
-        return this;
-    }
-
-    @Override
-    public JwtParserBuilder requirePayload(boolean payloadRequired) {
-        this.payloadRequired = payloadRequired;
         return this;
     }
 
@@ -203,7 +187,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                                      clock,
                                      allowedClockSkewMillis,
                                      expectedClaims,
-                                     payloadRequired,
                                      base64UrlDecoder,
                                      deserializer,
                                      compressionCodecResolver));

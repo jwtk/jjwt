@@ -77,8 +77,6 @@ public class DefaultJwtParser implements JwtParser {
 
     private Claims expectedClaims = new DefaultClaims();
 
-    private boolean payloadRequired = false;
-
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
@@ -96,7 +94,6 @@ public class DefaultJwtParser implements JwtParser {
                      Clock clock,
                      long allowedClockSkewMillis,
                      Claims expectedClaims,
-                     boolean payloadRequired,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
                      CompressionCodecResolver compressionCodecResolver) {
@@ -106,7 +103,6 @@ public class DefaultJwtParser implements JwtParser {
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = expectedClaims;
-        this.payloadRequired = payloadRequired;
         this.base64UrlDecoder = base64UrlDecoder;
         this.deserializer = deserializer;
         this.compressionCodecResolver = compressionCodecResolver;
@@ -173,12 +169,6 @@ public class DefaultJwtParser implements JwtParser {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
         expectedClaims.put(claimName, value);
-        return this;
-    }
-
-    @Override
-    public JwtParser requirePayload(boolean payloadRequired) {
-        this.payloadRequired = payloadRequired;
         return this;
     }
 
@@ -303,8 +293,9 @@ public class DefaultJwtParser implements JwtParser {
             base64UrlEncodedDigest = sb.toString();
         }
 
-        if (base64UrlEncodedPayload == null && payloadRequired) {
-            throw new MalformedJwtException("JWT string '" + jwt + "' is missing a body/payload.");
+        if (base64UrlEncodedPayload == null) {
+            // Payload string is empty.
+            base64UrlEncodedPayload = "";
         }
 
         // =============== Header =================
@@ -327,9 +318,6 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Body =================
-        if (base64UrlEncodedPayload == null) {
-            base64UrlEncodedPayload = ""; // If empty payload is allowed, override the resulting null from parsing.
-        }
         byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedPayload);
         if (compressionCodec != null) {
             bytes = compressionCodec.decompress(bytes);

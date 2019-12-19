@@ -169,7 +169,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseEmptyBodyWithPayloadRequired() {
+    void testParseEmptyBody() {
 
         byte[] key = randomKey()
 
@@ -182,29 +182,7 @@ class JwtParserTest {
 
         assertTrue Jwts.parserBuilder().build().isSigned(compact)
 
-        try {
-            Jwts.parserBuilder().requirePayload(true).setSigningKey(base64Encodedkey).build().parse(compact)
-            fail()
-        } catch (MalformedJwtException se) {
-            assertEquals se.getMessage(), "JWT string \'${compact}\' is missing a body/payload.".toString()
-        }
-    }
-
-    @Test
-    void testParseEmptyBodyWithPayloadNotRequired() {
-
-        byte[] key = randomKey()
-
-        String base64Encodedkey = Encoders.BASE64.encode(key)
-
-        String payload = ''
-
-        //noinspection GrDeprecatedAPIUsage
-        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, base64Encodedkey).compact()
-
-        assertTrue Jwts.parserBuilder().build().isSigned(compact)
-
-        Jwt<Header, String> jwt = Jwts.parserBuilder().requirePayload(false).setSigningKey(base64Encodedkey).build().parse(compact)
+        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(base64Encodedkey).build().parse(compact)
 
         assertEquals jwt.body, payload
     }

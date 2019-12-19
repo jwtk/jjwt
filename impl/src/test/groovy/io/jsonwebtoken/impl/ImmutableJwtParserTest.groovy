@@ -102,11 +102,6 @@ class ImmutableJwtParserTest {
     }
 
     @Test(expected=IllegalStateException)
-    void requirePayloadTest() {
-        jwtParser().requirePayload(true)
-    }
-
-    @Test(expected=IllegalStateException)
     void setClockTest() {
         jwtParser().setClock(mock((Clock)))
     }
