@@ -163,14 +163,20 @@ class DeprecatedJwtsTest {
     }
 
     @Test
-    @Ignore("It is unclear whether JWTs with empty header, payload and signature are to be considered valid.")
     void testParseWithTwoPeriodsOnly() {
         try {
             Jwts.parser().parse('..')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..' is missing a body/payload."
+            assertEquals e.message, "JWT string '..' is missing a header."
         }
+    }
+
+    @Test
+    void testParseWithHeaderOnly() {
+        String unsecuredJwt = base64Url("{\"alg\":\"none\"}") + ".."
+        Jwt jwt = Jwts.parser().parse(unsecuredJwt)
+        assertEquals("none", jwt.getHeader().get("alg"))
     }
 
     @Test

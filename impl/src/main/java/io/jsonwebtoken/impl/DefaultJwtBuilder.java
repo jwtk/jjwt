@@ -301,7 +301,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
 
         if (payload == null && Collections.isEmpty(claims)) {
-            throw new IllegalStateException("Either 'payload' or 'claims' must be specified.");
+            payload = "";
         }
 
         if (payload != null && !Collections.isEmpty(claims)) {
