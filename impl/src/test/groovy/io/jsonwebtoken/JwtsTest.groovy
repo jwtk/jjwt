@@ -25,7 +25,6 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.WeakKeyException
-import org.junit.Ignore
 import org.junit.Test
 
 import javax.crypto.Mac
