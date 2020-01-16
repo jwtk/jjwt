@@ -322,7 +322,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
             jwsHeader.setAlgorithm(algorithm.getValue());
         } else {
             //no signature - plaintext JWT:
-            jwsHeader.setAlgorithm(SignatureAlgorithm.NONE.getValue());
+            jwsHeader.setAlgorithm(SignatureAlgorithm.none.getValue());
         }
 
         if (compressionCodec != null) {

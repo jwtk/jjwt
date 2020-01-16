@@ -40,7 +40,7 @@ public enum SignatureAlgorithm {
     /**
      * JWA name for {@code No digital signature or MAC performed}
      */
-    NONE("none", "No digital signature or MAC performed", "None", null, false, 0, 0),
+    none("none", "No digital signature or MAC performed", "None", null, false, 0, 0),
 
     /**
      * JWA algorithm name for {@code HMAC using SHA-256}
@@ -327,9 +327,9 @@ public enum SignatureAlgorithm {
      */
     private void assertValid(Key key, boolean signing) throws InvalidKeyException {
 
-        if (this == NONE) {
+        if (this == none) {
 
-            String msg = "The 'NONE' signature algorithm does not support cryptographic keys.";
+            String msg = "The 'none' signature algorithm does not support cryptographic keys.";
             throw new InvalidKeyException(msg);
 
         } else if (isHmac()) {
@@ -629,7 +629,7 @@ public enum SignatureAlgorithm {
      */
     public static SignatureAlgorithm forName(String value) throws SignatureException {
         for (SignatureAlgorithm alg : values()) {
-            if (alg.getValue().equalsIgnoreCase(value)) {
+            if (alg.getValue().equals(value)) {
                 return alg;
             }
         }

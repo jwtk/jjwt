@@ -30,10 +30,10 @@ class DefaultSignerFactoryTest {
         def factory = new DefaultSignerFactory();
 
         try {
-            factory.createSigner(SignatureAlgorithm.NONE, Keys.secretKeyFor(SignatureAlgorithm.HS256))
+            factory.createSigner(SignatureAlgorithm.none, Keys.secretKeyFor(SignatureAlgorithm.HS256))
             fail();
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, "The 'NONE' algorithm cannot be used for signing."
+            assertEquals iae.message, "The 'none' algorithm cannot be used for signing."
         }
     }
 

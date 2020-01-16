@@ -344,7 +344,7 @@ public class DefaultJwtParser implements JwtParser {
                 }
             }
 
-            if (algorithm == null || algorithm == SignatureAlgorithm.NONE) {
+            if (algorithm == null || algorithm == SignatureAlgorithm.none) {
                 //it is plaintext, but it has a signature.  This is invalid:
                 String msg = "JWT string has a digest/signature, but the header does not reference a valid signature " +
                     "algorithm.";

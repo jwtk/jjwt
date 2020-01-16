@@ -625,7 +625,7 @@ class DeprecatedJwtsTest {
         //now let's create a fake header and payload with whatever we want (without signing):
         String forged = Jwts.builder().setSubject("Not Joe").compact()
 
-        //assert that our forged header has a 'NONE' algorithm:
+        //assert that our forged header has a 'none' algorithm:
         assertEquals Jwts.parser().parseClaimsJwt(forged).getHeader().get('alg'), 'none'
 
         //now let's forge it by appending the signature the server expects:

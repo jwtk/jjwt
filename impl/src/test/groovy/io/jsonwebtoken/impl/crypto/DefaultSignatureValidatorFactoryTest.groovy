@@ -28,10 +28,10 @@ class DefaultSignatureValidatorFactoryTest {
     void testNoneAlgorithm() {
         try {
             new DefaultSignatureValidatorFactory().createSignatureValidator(
-                    SignatureAlgorithm.NONE, Keys.secretKeyFor(SignatureAlgorithm.HS256))
+                    SignatureAlgorithm.none, Keys.secretKeyFor(SignatureAlgorithm.HS256))
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, "The 'NONE' algorithm cannot be used for signing."
+            assertEquals iae.message, "The 'none' algorithm cannot be used for signing."
         }
     }
 }

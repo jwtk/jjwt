@@ -39,7 +39,7 @@ class SignatureAlgorithmTest {
     @Test
     void testNames() {
         def algNames = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512',
-                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE']
+                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'none']
 
         for (String name : algNames) {
             testName(name)
@@ -121,7 +121,7 @@ class SignatureAlgorithmTest {
     @Test
     void testIsJdkStandard() {
         for (SignatureAlgorithm alg : SignatureAlgorithm.values()) {
-            if (alg.name().startsWith("PS") || alg == SignatureAlgorithm.NONE) {
+            if (alg.name().startsWith("PS") || alg == SignatureAlgorithm.none) {
                 assertFalse alg.isJdkStandard()
             } else {
                 assertTrue alg.isJdkStandard()
@@ -132,7 +132,7 @@ class SignatureAlgorithmTest {
     @Test
     void testGetMinKeyLength() {
         for(SignatureAlgorithm alg : SignatureAlgorithm.values()) {
-            if (alg == SignatureAlgorithm.NONE) {
+            if (alg == SignatureAlgorithm.none) {
                 assertEquals 0, alg.getMinKeyLength()
             } else {
                 if (alg.isRsa()) {
@@ -283,10 +283,10 @@ class SignatureAlgorithmTest {
     void testAssertValidSigningKeyWithNoneAlgorithm() {
         Key key = createMock(Key)
         try {
-            SignatureAlgorithm.NONE.assertValidSigningKey(key)
+            SignatureAlgorithm.none.assertValidSigningKey(key)
             fail()
         } catch (InvalidKeyException expected) {
-            assertEquals "The 'NONE' signature algorithm does not support cryptographic keys." as String, expected.message
+            assertEquals "The 'none' signature algorithm does not support cryptographic keys." as String, expected.message
         }
     }
 
@@ -613,10 +613,10 @@ class SignatureAlgorithmTest {
     void testAssertValidVerificationKeyWithNoneAlgorithm() {
         Key key = createMock(Key)
         try {
-            SignatureAlgorithm.NONE.assertValidVerificationKey(key)
+            SignatureAlgorithm.none.assertValidVerificationKey(key)
             fail()
         } catch (InvalidKeyException expected) {
-            assertEquals "The 'NONE' signature algorithm does not support cryptographic keys." as String, expected.message
+            assertEquals "The 'none' signature algorithm does not support cryptographic keys." as String, expected.message
         }
     }
 

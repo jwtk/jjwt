@@ -113,7 +113,7 @@ class KeysTest {
 
             String name = alg.name()
 
-            if (name.equals('NONE') || name.startsWith('H')) {
+            if (name.equals('none') || name.startsWith('H')) {
                 try {
                     Keys.keyPairFor(alg)
                     fail()
