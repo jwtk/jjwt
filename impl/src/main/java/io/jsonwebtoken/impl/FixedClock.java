@@ -44,11 +44,11 @@ public class FixedClock implements Clock {
      * @param now the specified Date to always return from all calls to {@link #now now()}.
      */
     public FixedClock(Date now) {
-        this.now = now;
+        this.now = new Date(now.getTime()); // prevent modification
     }
 
     @Override
     public Date now() {
-        return this.now;
+        return new Date(this.now.getTime()); // return new date to prevent modification
     }
 }

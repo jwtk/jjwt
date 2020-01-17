@@ -172,8 +172,8 @@ public class JwtMap implements Map<String, Object> {
         if (m == null) {
             return;
         }
-        for (String s : m.keySet()) {
-            put(s, m.get(s));
+        for (Entry<? extends String, ?> entry : m.entrySet()) {
+            put(entry.getKey(), entry.getValue());
         }
     }
 

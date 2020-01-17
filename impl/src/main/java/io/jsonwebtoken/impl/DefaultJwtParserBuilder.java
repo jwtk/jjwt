@@ -138,7 +138,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
-        this.keyBytes = key;
+        this.keyBytes = key.clone();
         return this;
     }
 

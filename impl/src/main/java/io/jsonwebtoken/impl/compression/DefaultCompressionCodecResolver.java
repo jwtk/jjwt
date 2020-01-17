@@ -26,6 +26,7 @@ import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -58,11 +59,11 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
     public DefaultCompressionCodecResolver() {
         Map<String, CompressionCodec> codecMap = new HashMap<>();
         for (CompressionCodec codec : Services.loadAll(CompressionCodec.class)) {
-            codecMap.put(codec.getAlgorithmName().toUpperCase(), codec);
+            codecMap.put(codec.getAlgorithmName().toUpperCase(Locale.ENGLISH), codec);
         }
 
-        codecMap.put(CompressionCodecs.DEFLATE.getAlgorithmName().toUpperCase(), CompressionCodecs.DEFLATE);
-        codecMap.put(CompressionCodecs.GZIP.getAlgorithmName().toUpperCase(), CompressionCodecs.GZIP);
+        codecMap.put(CompressionCodecs.DEFLATE.getAlgorithmName().toUpperCase(Locale.ENGLISH), CompressionCodecs.DEFLATE);
+        codecMap.put(CompressionCodecs.GZIP.getAlgorithmName().toUpperCase(Locale.ENGLISH), CompressionCodecs.GZIP);
 
         codecs = Collections.unmodifiableMap(codecMap);
     }
@@ -88,7 +89,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
     private CompressionCodec byName(String name) {
         Assert.hasText(name, "'name' must not be empty");
 
-        CompressionCodec codec = codecs.get(name.toUpperCase());
+        CompressionCodec codec = codecs.get(name.toUpperCase(Locale.ENGLISH));
         if (codec == null) {
             throw new CompressionException(String.format(MISSING_COMPRESSION_MESSAGE, name));
         }

@@ -50,7 +50,7 @@ public class EllipticCurveSignatureValidator extends EllipticCurveProvider imple
              * **/
             byte[] derSignature = expectedSize != signature.length && signature[0] == 0x30 ? signature : EllipticCurveProvider.transcodeSignatureToDER(signature);
             return doVerify(sig, publicKey, data, derSignature);
-        } catch (Exception e) {
+        } catch (Exception e) { // TODO catch specific exceptions (avoid catching RuntimeException), breaking change fix in 1.0
             String msg = "Unable to verify Elliptic Curve signature using configured ECPublicKey. " + e.getMessage();
             throw new SignatureException(msg, e);
         }

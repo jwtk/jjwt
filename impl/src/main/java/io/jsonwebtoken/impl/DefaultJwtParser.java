@@ -99,7 +99,9 @@ public class DefaultJwtParser implements JwtParser {
                      CompressionCodecResolver compressionCodecResolver) {
         this.signingKeyResolver = signingKeyResolver;
         this.key = key;
-        this.keyBytes = keyBytes;
+        if (keyBytes != null) {
+            this.keyBytes = keyBytes.clone();
+        }
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = expectedClaims;
@@ -188,7 +190,7 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
-        this.keyBytes = key;
+        this.keyBytes = key.clone();
         return this;
     }
 
@@ -485,9 +487,10 @@ public class DefaultJwtParser implements JwtParser {
 
     private void validateExpectedClaims(Header header, Claims claims) {
 
-        for (String expectedClaimName : expectedClaims.keySet()) {
+        for (Map.Entry<String, ?> expectedClaimEntry : expectedClaims.entrySet()) {
 
-            Object expectedClaimValue = normalize(expectedClaims.get(expectedClaimName));
+            String expectedClaimName = expectedClaimEntry.getKey();
+            Object expectedClaimValue = normalize(expectedClaimEntry.getValue());
             Object actualClaimValue = normalize(claims.get(expectedClaimName));
 
             if (expectedClaimValue instanceof Date) {

@@ -140,7 +140,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
             ECGenParameterSpec spec = new ECGenParameterSpec(paramSpecCurveName);
             g.initialize(spec, random);
             return g.generateKeyPair();
-        } catch (Exception e) {
+        } catch (Exception e) { // TODO catch specific exceptions (avoid catching RuntimeException), breaking change fix in 1.0
             throw new IllegalStateException("Unable to generate Elliptic Curve KeyPair: " + e.getMessage(), e);
         }
     }
