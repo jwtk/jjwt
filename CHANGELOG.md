@@ -4,6 +4,7 @@
 
 This minor release:
 
+* Adds `Serializer`/`Deserializer` GSON implementation `io.jsonwebtoken:jjwt-gson`
 * Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
 to address three security vulnerabilities in Jackson.
 * A new JwtParserBuilder interface has been added and is the recommended way of creating a JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
