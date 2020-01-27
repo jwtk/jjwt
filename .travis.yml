@@ -1,23 +1,46 @@
 # https://travis-ci.org/jwtk/jjwt
 
 #sudo: required
+dist: trusty
 language: java
 jdk:
-    ### Not really openjdk7 - we're tricking travis into using oracle jdk7, since it's technically deprecated for use with Travis
-  - openjdk7
+  - openjdk7 # not really openjdk7 - we're just using this travis placeholder for our own Oracle JDK 7 installation
   - oraclejdk8
   - oraclejdk9
   - openjdk10
 
+cache:
+  directories:
+    - $HOME/.m2
+
 before_install:
-  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"; fi
-  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then export JAVA_HOME="/usr/lib/jvm/java-7-oracle"; export PATH="${JAVA_HOME}/bin:${PATH}"; fi
-  - if [ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]; then test ! -d "${JAVA_HOME}" && (wget https://s3.amazonaws.com/d2fbee19-5fe2-425f-ae11-cd25b35dc99a/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz; tar xvfz /tmp/jdk-7u80-linux-x64.tar.gz -C /tmp; sudo mv /tmp/jdk1.7.0_80 "${JAVA_HOME}"); fi
+  - echo "TRAVIS_JDK_VERSION is ${TRAVIS_JDK_VERSION}"
+  - export MVN_CMD="./mvnw --no-transfer-progress" # hide verbose download messages (log spam)
+  - |
+    if [[ "${TRAVIS_JDK_VERSION}" == "openjdk7" ]]; then
+
+      export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"
+      export JAVA_HOME="/usr/lib/jvm/java-7-oracle" # Set JAVA_HOME to where we want to install Oracle JDK 7
+      export PATH="${JAVA_HOME}/bin:${PATH}"
+
+      if [[ ! -d "${JAVA_HOME}" ]]; then
+        # Download and install Oracle JDK 7:
+        wget https://s3.amazonaws.com/d2fbee19-5fe2-425f-ae11-cd25b35dc99a/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz
+        tar xvfz /tmp/jdk-7u80-linux-x64.tar.gz -C /tmp
+        sudo mv /tmp/jdk1.7.0_80 "${JAVA_HOME}"
+      fi
+
+      # Download and install JCE Unlimited Strength Crypto policies for Oracle JDK 7:
+      curl -q -L -C - https://238dj3282as03k369.s3-us-west-1.amazonaws.com/UnlimitedJCEPolicyJDK7.zip -o /tmp/UnlimitedJCEPolicyJDK7.zip
+      sudo unzip -oj -d "$JAVA_HOME/jre/lib/security" /tmp/UnlimitedJCEPolicyJDK7.zip \*/\*.jar
+      rm /tmp/UnlimitedJCEPolicyJDK7.zip
+    fi
+  # If on JDK 8, ensure build coverage assertions are run (we only need to run this on one JDK to reduce overall build times):
   - export BUILD_COVERAGE="$([ $TRAVIS_JDK_VERSION == 'oraclejdk8' ] && echo 'true')"
 
-install: true
+# prints the Maven, Java, and OS info/version
+install: $MVN_CMD --version
 
-script: mvn install
-
-after_success:
-  - test -z "$BUILD_COVERAGE" || { mvn clean clover:setup test && mvn -pl . clover:clover clover:check coveralls:report; }
+script:
+  - $MVN_CMD install
+  - test -z "$BUILD_COVERAGE" || { $MVN_CMD clean clover:setup test && $MVN_CMD -pl . clover:clover clover:check coveralls:report; }
