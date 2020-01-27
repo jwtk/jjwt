@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.SignatureException;
 
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
@@ -52,7 +53,7 @@ public class RsaSignatureValidator extends RsaProvider implements SignatureValid
         } else {
             Assert.notNull(this.SIGNER, "RSA Signer instance cannot be null.  This is a bug.  Please report it.");
             byte[] computed = this.SIGNER.sign(data);
-            return Arrays.equals(computed, signature);
+            return MessageDigest.isEqual(computed, signature);
         }
     }
 
