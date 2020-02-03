@@ -881,6 +881,20 @@ class SignatureAlgorithmTest {
     }
 
     private static BigInteger bigInteger(int bitLength) {
-        return new BigInteger(bitLength, 0, Random.newInstance())
+        BigInteger result = null
+        // https://github.com/jwtk/jjwt/issues/552:
+        //
+        // This method just used to be simply:
+        //
+        //     return new BigInteger(bitLength, 0, Random.newInstance())
+        //
+        // However, this was unbearably slow due to the 2nd certainty argument of the BigInteger constructor. Since
+        // we don't need ideal randomness for this method (we're just using it as a mock value),
+        // the following will just loop until we get a mock value that equals the required length:
+        //
+        while (result == null || result.bitLength() != bitLength) {
+            result = new BigInteger(bitLength, Random.newInstance())
+        }
+        return result
     }
 }
