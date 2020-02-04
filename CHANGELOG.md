@@ -67,6 +67,9 @@ This patch release:
   algorithm name instead of the Java Security Standard Algorithm Name of 
   [`RSASSA-PSS`](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#signature-algorithms).
   This release ensures the standard name is used moving forward.
+  
+* Fixes a backwards-compatibility [bug](https://github.com/jwtk/jjwt/issues/536) when parsing compressed JWTs 
+  created from 0.10.6 or earlier using the `DEFLATE` compression algorithm.  
 
 ### 0.10.7
 
