@@ -9,7 +9,7 @@ jdk:
   - oraclejdk9
   - openjdk10
   - openjdk11
-  
+
 cache:
   directories:
     - $HOME/.m2
