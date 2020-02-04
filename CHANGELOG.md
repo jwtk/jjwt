@@ -58,6 +58,16 @@ compile 'io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated'
 
 **Note:** that the first option is recommended since the second option will not be available starting with the 1.0 release.
 
+### 0.10.8
+
+This patch release:
+
+* Ensures that SignatureAlgorithms `PS256`, `PS384`, and `PS512` work properly on JDK 11 and later without the need
+  for BouncyCastle.  Previous releases referenced a BouncyCastle-specific 
+  algorithm name instead of the Java Security Standard Algorithm Name of 
+  [`RSASSA-PSS`](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#signature-algorithms).
+  This release ensures the standard name is used moving forward.
+
 ### 0.10.7
 
 This patch release:

@@ -89,7 +89,9 @@
         <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
 
         <maven.jar.version>3.0.2</maven.jar.version>
-        <maven.compiler.version>3.6.1</maven.compiler.version>
+        <maven.compiler.version>3.8.0</maven.compiler.version>
+        <maven.javadoc.version>3.1.1</maven.javadoc.version>
+        <gmavenplus.version>1.6.1</gmavenplus.version>
 
         <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -103,7 +105,7 @@
         <bouncycastle.version>1.60</bouncycastle.version>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.8</groovy.version>
+        <groovy.version>2.5.9</groovy.version>
         <logback.version>1.2.3</logback.version>
         <easymock.version>3.6</easymock.version>
         <junit.version>4.12</junit.version>
@@ -164,6 +166,12 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bouncycastle.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -373,7 +381,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.1</version>
+                <version>${gmavenplus.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -521,6 +529,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.version}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -529,6 +538,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <failOnError>false</failOnError>
+                </configuration>
                 <dependencies>
                     <!-- Workaround for Java 9 -->
                     <dependency>
@@ -549,6 +561,9 @@
             <properties>
                 <!-- Turn off JDK >= 8's lint checks: -->
                 <additionalparam>-Xdoclint:none</additionalparam>
+                <gmavenplus.version>1.8.1</gmavenplus.version>
+                <easymock.version>4.2</easymock.version>
+                <powermock.version>2.0.2</powermock.version>
             </properties>
         </profile>
         <profile>
@@ -602,6 +617,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven.javadoc.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
