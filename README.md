@@ -60,6 +60,7 @@ enforcement.
       * [Claims Instance](#jws-create-claims-instance)
       * [Claims Map](#jws-create-claims-map)
     * [Signing Key](#jws-create-key)
+      * [SecretKey Formats](#jws-create-key-secret)
       * [Signature Algorithm Override](#jws-create-key-algoverride)
     * [Compression](#jws-create-compression)
   * [Read a JWS](#jws-read)
@@ -608,14 +609,15 @@ SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256); //or HS384 or HS512
 Under the hood, JJWT uses the JCA provider's `KeyGenerator` to create a secure-random key with the correct minimum
 length for the given algorithm.
 
-If you have an existing HMAC SHA `SecretKey`'s 
-[encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--), you can use 
-the `Keys.hmacShaKeyFor` helper method.  For example:
+If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
 
 ```java
-byte[] keyBytes = getSigningKeyFromApplicationConfiguration();
-SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+String secretString = Encoders.BASE64.encode(key.getEncoded());
 ```
+
+Ensure you save the resulting `secretString` somewhere safe - 
+[Base64-encoding is not encryption](#base64-not-encryption), so it's still considered sensitive information. You can 
+further encrypt it, etc, before saving to disk (for example).
 
 <a name="jws-key-create-asym"></a>
 ##### Asymmetric Keys
@@ -857,7 +859,38 @@ algorithm and automatically set the `alg` header to `RS512`.
 The same selection logic applies for Elliptic Curve `PrivateKey`s.
 
 **NOTE: You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
-`PublicKey` for signing with an `InvalidKeyException`. 
+`PublicKey` for signing with an `InvalidKeyException`.
+
+<a name="jws-create-key-secret"></a>
+##### SecretKey Formats
+
+If you want to sign a JWS using HMAC-SHA algorithms and you have a secret key `String` or 
+[encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--), you will need
+to convert it into a `SecretKey` instance to use as the `signWith` method argument.
+
+If your secret key is:
+
+* An [encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--):
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(encodedKeyBytes);
+  ```
+* A Base64-encoded string:
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
+  ```
+* A Base64URL-encoded string:
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretString));
+  ```
+* A raw (non-encoded) string (e.g. a password String):
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+  ```
+  It is always incorrect to call `secretString.getBytes()` (without providing a charset).
+  
+  However, raw password strings like this, e.g. `correcthorsebatterystaple` should be avoided whenever possible 
+  because they can inevitably result in weak or susceptible keys. Secure-random keys are almost always stronger. 
+  If you are able, prefer creating a [new secure-random secret key](#jws-key-create-secret) instead.
 
 <a name="jws-create-key-algoverride"></a>
 ##### SignatureAlgorithm Override
