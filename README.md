@@ -75,7 +75,10 @@ enforcement.
 * [JSON Processor](#json)
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
-* [Base64 Codec](#base64)
+* [Base64 Support](#base64)
+  * [Base64 in Security Contexts](#base64-security)
+    * [Base64 is not Encryption](#base64-not-encryption)
+    * [Changing Base64 Characters](#base64-changing-characters)
   * [Custom Base64 Codec](#base64-custom)
 
 <a name="features"></a>
@@ -1327,7 +1330,107 @@ utility classes.
 `io.jsonwebtoken.io.Decoders`:
 
 * `BASE64` is an RFC 4648 [Base64](https://tools.ietf.org/html/rfc4648#section-4) decoder
-* `BASE64URL` is an RFC 4648 [Base64URL](https://tools.ietf.org/html/rfc4648#section-5) decoder  
+* `BASE64URL` is an RFC 4648 [Base64URL](https://tools.ietf.org/html/rfc4648#section-5) decoder
+
+<a name="base64-security"></a>
+### Understanding Base64 in Security Contexts
+
+All cryptographic operations, like encryption and message digest calculations, result in binary data - raw byte arrays.
+
+Because raw byte arrays cannot be represented natively in JSON, the JWT
+specifications employ the Base64URL encoding scheme to represent these raw byte values in JSON documents or compound 
+structures like a JWT.
+
+This means that the Base64 and Base64URL algorithms take a raw byte array and converts the bytes into a string suitable 
+to use in text documents and protocols like HTTP.  These algorithms can also convert these strings back
+into the original raw byte arrays for decryption or signature verification as necessary.
+
+That's nice and convenient, but there are two very important properties of Base64 (and Base64URL) text strings that 
+are critical to remember when they are used in security scenarios like with JWTs:
+
+* [Base64 is not encryption](#base64-not-encryption)
+* [Changing Base64 characters](#base64-changing-characters) **does not automatically invalidate data**.
+
+<a name="base64-not-encryption"></a>
+#### Base64 is not encryption
+ 
+Base64-encoded text is _not_ encrypted. 
+
+While a byte array representation can be converted to text with the Base64 algorithms, 
+anyone in the world can take Base64-encoded text, decode it with any standard Base64 decoder, and obtain the 
+underlying raw byte array data.  No key or secret is required to decode Base64 text - anyone can do it.
+
+Based on this, when encoding sensitive byte data with Base64 - like a shared or private key - **the resulting
+string NOT is safe to expose publicly**.
+
+A base64-encoded key is still sensitive information and must
+be kept as secret and as safe as the original thing you got the bytes from (e.g. a Java `PrivateKey` or `SecretKey` 
+instance).
+
+After Base64-encoding data into a string, it is possible to then encrypt the string to keep it safe from prying 
+eyes if desired, but this is different.  Encryption is not encoding.  They are separate concepts.
+
+<a name="base64-changing-characters"></a>
+#### Changing Base64 Characters
+
+In an effort to see if signatures or encryption is truly validated correctly, some try to edit a JWT
+string - particularly the Base64-encoded signature part - to see if the edited string fails security validations.
+
+This conceptually makes sense: change the signature string, you would assume that signature validation would fail.
+
+_But this doesn't always work. Changing base64 characters is an invalid test_.
+
+Why?
+
+Because of the way the Base64 algorithm works, there are multiple Base64 strings that can represent the same raw byte 
+array.
+
+Going into the details of the Base64 algorithm is out of scope for this documentation, but there are many good 
+Stackoverflow [answers](https://stackoverflow.com/questions/33663113/multiple-strings-base64-decoded-to-same-byte-array?noredirect=1&lq=1)
+and [JJWT issue comments](https://github.com/jwtk/jjwt/issues/211#issuecomment-283076269) that explain this in detail.  
+Here's one [good answer](https://stackoverflow.com/questions/29941270/why-do-base64-decode-produce-same-byte-array-for-different-strings):
+
+> Remember that Base64 encodes each 8 bit entity into 6 bit chars. The resulting string then needs exactly 
+> 11 * 8 / 6 bytes, or 14 2/3 chars. But you can't write partial characters. Only the first 4 bits (or 2/3 of the 
+> last char) are significant. The last two bits are not decoded. Thus all of:
+>
+>     dGVzdCBzdHJpbmo
+>     dGVzdCBzdHJpbmp
+>     dGVzdCBzdHJpbmq
+>     dGVzdCBzdHJpbmr
+> All decode to the same 11 bytes (116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 106).
+
+As you can see by the above 4 examples, they all decode to the same exact 11 bytes.  So just changing one or two
+characters at the end of a Base64 string may not work and can often result in an invalid test.
+
+<a name="base64-invalid-characters"></a>
+##### Adding Invalid Characters
+
+JJWT's default Base64/Base64URL decoders automatically ignore illegal Base64 characters located in the beginning and 
+end of an encoded string. Therefore prepending or appending invalid characters like `{` or `]` or similar will also 
+not fail JJWT's signature checks either.  Why?
+
+Because such edits - whether changing a trailing character or two, or appending invalid characters - do not actually 
+change the _real_ signature, which in cryptographic contexts, is always a byte array. Instead, tests like these 
+change a text encoding of the byte array, and as we covered above, they are different things.
+
+So JJWT 'cares' more about the real byte array and less about its text encoding because that is what actually matters
+in cryptographic operations.  In this sense, JJWT follows the [Robustness Principle](https://en.wikipedia.org/wiki/Robustness_principle)
+in being _slightly_ lenient on what is accepted per the rules of Base64, but if anything in the real underlying 
+byte array is changed, then yes, JJWT's cryptographic assertions will definitely fail.
+
+To help understand JJWT's approach, we have to remember why signatures exist. From our documentation above on 
+[signing JWTs](#jws):
+
+> * guarantees it was created by someone we know (it is authentic), as well as
+> * guarantees that no-one has manipulated or changed it after it was created (its integrity is maintained).
+
+Just prepending or appending invalid text to try to 'trick' the algorithm doesn't change the integrity of the 
+underlying claims or signature byte arrays, nor the authenticity of the claims byte array, because those byte 
+arrays are still obtained intact.
+
+Please see [JJWT Issue #518](https://github.com/jwtk/jjwt/issues/518) and its referenced issues and links for more 
+information.
 
 <a name="base64-custom"></a>
 ### Custom Base64
