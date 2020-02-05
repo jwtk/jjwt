@@ -76,6 +76,8 @@ enforcement.
 * [JSON Processor](#json)
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
+    * [Custom Claim Types](#json-jackson-custom-types)
+  * [Gson](#json-gson)
 * [Base64 Support](#base64)
   * [Base64 in Security Contexts](#base64-security)
     * [Base64 is not Encryption](#base64-not-encryption)
@@ -264,21 +266,22 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.10.7</version>
+    <version>0.11.0-SNAPSHOT</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.10.7</version>
+    <version>0.11.0-SNAPSHOT</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
-    <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.7</version>
+    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+    <version>0.11.0-SNAPSHOT</version>
     <scope>runtime</scope>
 </dependency>
-<!-- Uncomment this next dependency if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+<!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
+     RSASSA-PSS (PS256, PS384, PS512) algorithms.  JDK 11 or later does not require it for those algorithms:
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
@@ -294,11 +297,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
+    compile 'io.jsonwebtoken:jjwt-api:0.11.0-SNAPSHOT'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.0-SNAPSHOT',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+            'io.jsonwebtoken:jjwt-jackson:0.11.0-SNAPSHOT' // or 'io.jsonwebtoken:jjwt-gson:0.11.0-SNAPSHOT' for gson
 }
 ```
 
@@ -314,9 +317,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.7' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.7') {
+    api 'io.jsonwebtoken:jjwt-api:0.11.0-SNAPSHOT'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.0-SNAPSHOT' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.0-SNAPSHOT') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -398,7 +401,7 @@ eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.1KP0SsvENi7Uz1oQc07aXTL7kpQG5jBNIybqr60A
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-assert Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().getSubject().equals("Joe");
+assert Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getBody().getSubject().equals("Joe");
 ```
 
 **NOTE: Ensure you call the `parseClaimsJws` method** (since there are many similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
@@ -414,7 +417,7 @@ But what if parsing or signature validation failed?  You can catch `JwtException
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws);
+    Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compactJws);
 
     //OK, we can trust this JWT
 
@@ -930,10 +933,11 @@ Please see the main [Compression](#compression) section to see how to compress a
 
 You read (parse) a JWS as follows:
 
-1. Use the `Jwts.parser()` method to create a `JwtParser` instance.  
+1. Use the `Jwts.parserBuilder()` method to create a `JwtParserBuilder` instance.  
 2. Specify the `SecretKey` or asymmetric `PublicKey` you want to use to verify the JWS signature.<sup>1</sup>
-3. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
-4. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
+3. Call the `build()` method on the `JwtParserBuilder` to return a thread-safe `JwtParser`.
+4. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
+5. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
 
 <sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
@@ -945,13 +949,14 @@ For example:
 Jws<Claims> jws;
 
 try {
-    jws = Jwts.parser()         // (1)
+    jws = Jwts.parserBuilder()  // (1)
     .setSigningKey(key)         // (2)
-    .parseClaimsJws(jwsString); // (3)
+    .build()                    // (3)
+    .parseClaimsJws(jwsString); // (4)
     
     // we can safely trust the JWT
      
-} catch (JwtException ex) {     // (4)
+catch (JwtException ex) {       // (5)
     
     // we *cannot* use the JWT as intended by its creator
 }
@@ -969,23 +974,25 @@ discarded.
 
 So which key do we use for verification?
 
-* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParser`.  For example:
+* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParserBuilder`.  For example:
 
   ```java
-  Jwts.parser()
+  Jwts.parserBuilder()
       
     .setSigningKey(secretKey) // <----
     
+    .build()
     .parseClaimsJws(jwsString);
   ```
 * If the jws was signed with a `PrivateKey`, that key's corresponding `PublicKey` (not the `PrivateKey`) should be 
-  specified on the `JwtParser`.  For example:
+  specified on the `JwtParserBuilder`.  For example:
 
   ```java
-  Jwts.parser()
+  Jwts.parserBuilder()
       
     .setSigningKey(publicKey) // <---- publicKey, not privateKey
     
+    .build()
     .parseClaimsJws(jwsString);
   ```
   
@@ -993,7 +1000,7 @@ But you might have noticed something - what if your application doesn't use just
 if JWSs can be created with different `SecretKey`s or public/private keys, or a combination of both?  How do you
 know which key to specify if you can't inspect the JWT first?
 
-In these cases, you can't call the `JwtParser`'s `setSigningKey` method with a single key - instead, you'll need
+In these cases, you can't call the `JwtParserBuilder`'s `setSigningKey` method with a single key - instead, you'll need
 to use a `SigningKeyResolver`, covered next.
 
 <a name="jws-read-key-resolver"></a>
@@ -1001,16 +1008,17 @@ to use a `SigningKeyResolver`, covered next.
 
 If your application expects JWSs that can be signed with different keys, you won't call the `setSigningKey` method.
 Instead, you'll need to implement the 
-`SigningKeyResolver` interface and specify an instance on the `JwtParser` via the `setSigningKeyResolver` method.  
+`SigningKeyResolver` interface and specify an instance on the `JwtParserBuilder` via the `setSigningKeyResolver` method.  
 For example:
 
 ```java
 SigningKeyResolver signingKeyResolver = getMySigningKeyResolver();
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .setSigningKeyResolver(signingKeyResolver) // <----
     
+    .build()
     .parseClaimsJws(jwsString);
 ```
 
@@ -1087,11 +1095,11 @@ application.
 
 For example, let's say that you require that the JWS you are parsing has a specific `sub` (subject) value,
 otherwise you may not trust the token.  You can do that by using one of the various `require`* methods on the 
-`JwtParser`:
+`JwtParserBuilder`:
 
 ```java
 try {
-    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the sub field was missing or did not have a 'jsmith' value
 }
@@ -1102,7 +1110,7 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 
 ```java
 try {
-    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
 } catch(MissingClaimException mce) {
     // the parsed JWT did not have the sub field
 } catch(IncorrectClaimException ice) {
@@ -1114,14 +1122,14 @@ You can also require custom fields by using the `require(fieldName, requiredFiel
 
 ```java
 try {
-    Jwts.parser().require("myfield", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().require("myfield", "myRequiredValue").setSigningKey(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the 'myfield' field was missing or did not have a 'myRequiredValue' value
 }
 ```
 (or, again, you could catch either `MissingClaimException` or `IncorrectClaimException` instead).
 
-Please see the `JwtParser` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
+Please see the `JwtParserBuilder` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
 assertions.
 
 <a name="jws-read-clock"></a>
@@ -1132,17 +1140,18 @@ the parsing machine is not perfectly in sync with the clock on the machine that 
 obvious problems since `exp` and `nbf` are time-based assertions, and clock times need to be reliably in sync for shared
 assertions.
 
-You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParser`'s
+You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParserBuilder`'s
  `setAllowedClockSkewSeconds`. For example:
 
 ```java
 long seconds = 3 * 60; //3 minutes
 
-Jwts.parser()
+Jwts.parserBuilder()
     
     .setAllowedClockSkewSeconds(seconds) // <----
     
     // ... etc ...
+    .build()
     .parseClaimsJws(jwt);
 ```
 This ensures that clock differences between the machines can be ignored. Two or three minutes should be more than 
@@ -1153,13 +1162,13 @@ atomic clocks around the world.
 ##### Custom Clock Support
 
 If the above `setAllowedClockSkewSeconds` isn't sufficient for your needs, the timestamps created
-during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParser`'s `setClock`
+during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParserBuilder`'s `setClock`
  method with an implementation of the `io.jsonwebtoken.Clock` interface.  For example:
  
  ```java
 Clock clock = new MyClock();
 
-Jwts.parser().setClock(myClock) //... etc ...
+Jwts.parserBuilder().setClock(myClock) //... etc ...
 ``` 
 
 The `JwtParser`'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs, 
@@ -1169,7 +1178,7 @@ guarantee deterministic behavior.
 <a name="jws-read-decompression"></a>
 #### JWS Decompression
 
-If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParser`
+If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParserBuilder`
 how to resolve your `CompressionCodec` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
@@ -1208,12 +1217,12 @@ parsing or configure the `JwtParser` for compression - JJWT will automatically d
 ### Custom Compression Codec
 
 If however, you used your own custom compression codec when creating the JWT (via `JwtBuilder` `compressWith`), then
-you need to supply the codec to the `JwtParser` using the `setCompressionCodecResolver` method.  For example:
+you need to supply the codec to the `JwtParserBuilder` using the `setCompressionCodecResolver` method.  For example:
 
 ```java
 CompressionCodecResolver ccr = new MyCompressionCodecResolver();
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .setCompressionCodecResolver(ccr) // <----
     
@@ -1245,30 +1254,34 @@ A `JwtBuilder` will serialize the `Header` and `Claims` maps (and potentially an
 contain) to JSON with a `Serializer<Map<String, ?>>` instance.  Similarly, a `JwtParser` will 
 deserialize JSON into the `Header` and `Claims` using a `Deserializer<Map<String, ?>>` instance.
 
-If you don't explicitly configure a `JwtBuilder`'s `Serializer` or a `JwtParser`'s `Deserializer`, JJWT will 
+If you don't explicitly configure a `JwtBuilder`'s `Serializer` or a `JwtParserBuilder`'s `Deserializer`, JJWT will 
 automatically attempt to discover and use the following JSON implementations if found in the runtime classpath.  
 They are checked in order, and the first one found is used:
 
 1. Jackson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-jackson` as a project runtime 
    dependency.  Jackson supports POJOs as claims with full marshaling/unmarshaling as necessary.
    
-2. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
+2. Gson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-gson` as a project runtime dependency.
+   Gson also supports POJOs as claims with full marshaling/unmarshaling as necessary. 
+   
+3. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
    project runtime dependency.
    
    **NOTE:** `org.json` APIs are natively enabled in Android environments so this is the recommended JSON processor for 
    Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple 
    Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshalling.
 
-**If you want to use POJOs as claim values, use the `io.jsonwebtoken:jjwt-jackson` dependency** (or implement your own
-Serializer and Deserializer if desired).  **But beware**, Jackson will force a sizable (> 1 MB) dependency to an 
-Android application thus increasing the app download size for mobile users.
+**If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or 
+`io.jsonwebtoken:jjwt-gson` dependency** (or implement your own Serializer and Deserializer if desired). **But beware**, 
+Jackson will force a sizable (> 1 MB) dependency to an Android application thus increasing the app download size for 
+mobile users.
 
 <a name="json-custom"></a>
 ### Custom JSON Processor
 
 If you don't want to use JJWT's runtime dependency approach, or just want to customize how JSON serialization and 
 deserialization works, you can implement the `Serializer` and `Deserializer` interfaces and specify instances of
-them on the `JwtBuilder` and `JwtParser` respectively.  For example:
+them on the `JwtBuilder` and `JwtParserBuilder` respectively.  For example:
 
 When creating a JWT:
 
@@ -1287,7 +1300,7 @@ When reading a JWT:
 ```java
 Deserializer<Map<String,?>> deserializer = getMyDeserializer(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .deserializeJsonWith(deserializer)
     
@@ -1297,8 +1310,16 @@ Jwts.parser()
 <a name="json-jackson"></a>
 ### Jackson JSON Processor
 
-If you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), you can 
-eliminate the overhead of JJWT constructing its own `ObjectMapper` by using yours instead.
+If you want to use Jackson for JSON processing, just including the `io.jsonwebtoken:jjwt-jackson` dependency as a
+runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
+the necessary Jackson dependencies as well.
+
+After including this dependency, JJWT will automatically find the Jackson implementation on the runtime classpath and 
+use it internally for JSON parsing.  There is nothing else you need to do - JJWT will automatically create a new
+Jackson ObjectMapper for its needs as required.
+
+However, if you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), 
+you can configure JJWT to use your own `ObjectMapper` instead.
 
 You do this by declaring the `io.jsonwebtoken:jjwt-jackson` dependency with **compile** scope (not runtime 
 scope which is the typical JJWT default).  That is:
@@ -1309,7 +1330,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.7</version>
+    <version>0.11.0-SNAPSHOT</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1318,7 +1339,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-jackson:0.10.7'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.11.0-SNAPSHOT'
 }
 ```
 
@@ -1334,14 +1355,123 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParser`:
+and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParserBuilder`:
 
 ```java
 ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .deserializeJsonWith(new JacksonDeserializer(objectMapper))
+    
+    // ... etc ...
+```
+
+<a name="json-jackson-custom-types"></a>
+#### Parsing of Custom Claim Types
+
+By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in through a constructor. For example:
+
+```java
+new JacksonDeserializer(Maps.of("user", User.class).build())
+```
+
+This would trigger the value in the `user` claim to be deserialized into the custom type of `User`.  Given the claims body of:
+
+```json
+{
+    "issuer": "https://example.com/issuer",
+    "user": {
+      "firstName": "Jill",
+      "lastName": "Coder"
+    }
+}
+```
+
+The `User` object could be retrieved from the `user` claim with the following code:
+
+```java
+Jwts.parserBuilder()
+
+    .deserializeJsonWith(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
+
+    .build()
+
+    .parseClaimsJwt(aJwtString)
+
+    .getBody()
+    
+    .get("user", User.class) // <-----
+```
+
+**NOTE:** Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor 
+[described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative 
+consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced 
+parsing options, [configure the mapper directly](#json-jackson).
+
+<a name="json-gson"></a>
+### Gson JSON Processor
+
+If you want to use Gson for JSON processing, just including the `io.jsonwebtoken:jjwt-gson` dependency as a
+runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
+the necessary Gson dependencies as well.
+
+After including this dependency, JJWT will automatically find the Gson implementation on the runtime classpath and 
+use it internally for JSON parsing.  There is nothing else you need to do - just declaring the dependency is 
+all that is required, no code or config is necessary.
+
+If you're curious, JJWT will automatically create an internal default Gson instance for its own needs as follows:
+
+```java
+new GsonBuilder().disableHtmlEscaping().create();
+```
+
+However, if you prefer to use a different Gson instance instead of JJWT's default, you can configure JJWT to use your 
+own. 
+
+You do this by declaring the `io.jsonwebtoken:jjwt-gson` dependency with **compile** scope (not runtime 
+scope which is the typical JJWT default).  That is:
+
+**Maven**
+
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-gson</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <scope>compile</scope> <!-- Not runtime -->
+</dependency>
+```
+
+**Gradle or Android**
+
+```groovy
+dependencies {
+    compile 'io.jsonwebtoken:jjwt-gson:0.11.0-SNAPSHOT'
+}
+```
+
+And then you can specify the `GsonSerializer` using your own `Gson` instance on the `JwtBuilder`:
+
+```java
+
+Gson gson = getGson(); //implement me
+
+String jws = Jwts.builder()
+
+    .serializeToJsonWith(new GsonSerializer(gson))
+    
+    // ... etc ...
+```
+
+and the `GsonDeserializer` using your `Gson` instance on the `JwtParser`:
+
+```java
+Gson gson = getGson(); //implement me
+
+Jwts.parser()
+
+    .deserializeJsonWith(new GsonDeserializer(gson))
     
     // ... etc ...
 ```
@@ -1481,12 +1611,12 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-and the `JwtParser`'s `base64UrlDecodeWith` method to set the decoder:
+and the `JwtParserBuilder`'s `base64UrlDecodeWith` method to set the decoder:
 
 ```java
 Decoder<String, byte[]> base64UrlDecoder = getMyBase64UrlDecoder(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .base64UrlDecodeWith(base64UrlEncoder)
     
