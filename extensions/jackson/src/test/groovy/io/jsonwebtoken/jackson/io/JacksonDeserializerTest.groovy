@@ -17,6 +17,7 @@ package io.jsonwebtoken.jackson.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.jackson.io.stubs.CustomBean
 import io.jsonwebtoken.lang.Maps
@@ -25,8 +26,14 @@ import org.junit.Test
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
+import static org.hamcrest.CoreMatchers.instanceOf
 
 class JacksonDeserializerTest {
+    @Test
+    void loadService() {
+        def deserializer = ServiceLoader.load(Deserializer).iterator().next()
+        assertThat(deserializer, instanceOf(JacksonDeserializer))
+    }
 
     @Test
     void testDefaultConstructor() {

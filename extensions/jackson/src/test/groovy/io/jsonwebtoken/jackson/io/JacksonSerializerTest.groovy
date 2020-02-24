@@ -18,13 +18,21 @@ package io.jsonwebtoken.jackson.io
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.SerializationException
+import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
+import static org.hamcrest.CoreMatchers.instanceOf
 
 class JacksonSerializerTest {
+
+    @Test
+    void loadService() {
+        def serializer = ServiceLoader.load(Serializer).iterator().next()
+        assertThat(serializer, instanceOf(JacksonSerializer))
+    }
 
     @Test
     void testDefaultConstructor() {

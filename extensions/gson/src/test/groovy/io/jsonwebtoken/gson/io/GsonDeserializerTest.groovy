@@ -17,13 +17,21 @@ package io.jsonwebtoken.gson.io
 
 import com.google.gson.Gson
 import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
+import static org.hamcrest.CoreMatchers.instanceOf
 
 class GsonDeserializerTest {
+
+    @Test
+    void loadService() {
+        def deserializer = ServiceLoader.load(Deserializer).iterator().next()
+        assertThat(deserializer, instanceOf(GsonDeserializer))
+    }
 
     @Test
     void testDefaultConstructor() {
