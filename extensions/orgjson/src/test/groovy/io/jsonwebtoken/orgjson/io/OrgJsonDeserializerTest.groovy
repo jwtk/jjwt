@@ -16,12 +16,20 @@
 package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.orgjson.io.OrgJsonDeserializer
 import org.junit.Test
+
+import static org.hamcrest.CoreMatchers.instanceOf
 import static org.junit.Assert.*
 
 class OrgJsonDeserializerTest {
+
+    @Test
+    void loadService() {
+        def deserializer = ServiceLoader.load(Deserializer).iterator().next()
+        assertThat(deserializer, instanceOf(OrgJsonDeserializer))
+    }
 
     @Test(expected=IllegalArgumentException)
     void testNullArgument() {

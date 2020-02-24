@@ -15,15 +15,24 @@
  */
 package io.jsonwebtoken.gson.io
 
+import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
+import static org.hamcrest.CoreMatchers.instanceOf
 import com.google.gson.Gson
 import io.jsonwebtoken.io.SerializationException
 
 class GsonSerializerTest {
+
+    @Test
+    void loadService() {
+        def serializer = ServiceLoader.load(Serializer).iterator().next()
+        assertThat(serializer, instanceOf(GsonSerializer))
+    }
 
     @Test
     void testDefaultConstructor() {

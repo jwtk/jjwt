@@ -17,15 +17,16 @@ package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.SerializationException
+import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
 import org.json.JSONObject
 import org.json.JSONString
 import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.*
+import static org.hamcrest.CoreMatchers.instanceOf
 
 class OrgJsonSerializerTest {
 
@@ -39,6 +40,12 @@ class OrgJsonSerializerTest {
     private String ser(Object o) {
         byte[] bytes = s.serialize(o)
         return new String(bytes, Strings.UTF_8)
+    }
+
+    @Test
+    void loadService() {
+        def serializer = ServiceLoader.load(Serializer).iterator().next()
+        assertThat(serializer, instanceOf(OrgJsonSerializer))
     }
 
     @Test(expected = SerializationException)
