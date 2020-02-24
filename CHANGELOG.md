@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.11.1
+
+This patch release:
+
+* Fixes issue when using Java 9+ `Map.of` with JacksonDeserializer which resulted in an NullPointerException
+
 ### 0.11.0
 
 This minor release:
