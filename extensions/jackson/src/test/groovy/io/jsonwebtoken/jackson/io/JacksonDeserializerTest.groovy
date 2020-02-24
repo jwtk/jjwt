@@ -105,6 +105,41 @@ class JacksonDeserializerTest {
         assertEquals expected, result
     }
 
+    /**
+     * For: https://github.com/jwtk/jjwt/issues/564
+     */
+    @Test
+    void testMappedTypeDeserializerWithMapNullCheck() {
+
+        // mimic map implementations that do NOT allow for null keys, or containsKey(null)
+        Map typeMap = new HashMap() {
+            @Override
+            boolean containsKey(Object key) {
+                if (key == null) {
+                    throw new NullPointerException("key is null, expected for this test")
+                }
+                return super.containsKey(key)
+            }
+        }
+
+        // TODO: the following does NOT work with Java 1.7
+        // when we stop supporting that version we can use a partial mock instead
+        // the `typeMap.put("custom", CustomBean)` line below results in an NPE, (only on 1.7)
+
+//        Map typeMap = partialMockBuilder(HashMap)
+//            .addMockedMethod("containsKey")
+//            .createNiceMock()
+//
+//        expect(typeMap.containsKey(null)).andThrow(new NullPointerException("key is null, expected for this test"))
+//        replay(typeMap)
+
+        typeMap.put("custom", CustomBean)
+
+        def deserializer = new JacksonDeserializer(typeMap)
+        def result = deserializer.deserialize('{"alg":"HS256"}'.getBytes("UTF-8"))
+        assertEquals(["alg": "HS256"], result)
+    }
+
     @Test(expected = IllegalArgumentException)
     void testNullClaimTypeMap() {
         new JacksonDeserializer((Map) null)

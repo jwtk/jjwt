@@ -120,8 +120,9 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
         @Override
         public Object deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             // check if the current claim key is mapped, if so traverse it's value
-            if (claimTypeMap != null && claimTypeMap.containsKey(parser.currentName())) {
-                Class type = claimTypeMap.get(parser.currentName());
+            String name = parser.currentName();
+            if (claimTypeMap != null && name != null && claimTypeMap.containsKey(name)) {
+                Class type = claimTypeMap.get(name);
                 return parser.readValueAsTree().traverse(parser.getCodec()).readValueAs(type);
             }
             // otherwise default to super
