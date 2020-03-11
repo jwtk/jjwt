@@ -22,11 +22,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import static io.jsonwebtoken.lang.Collections.arrayToList;
+
 /**
  * Helper class for loading services from the classpath, using a {@link ServiceLoader}. Decouples loading logic for
  * better separation of concerns and testability.
  */
 public final class Services {
+
+    private static final List<ClassLoaderAccessor> CLASS_LOADER_ACCESSORS = arrayToList(new ClassLoaderAccessor[] {
+            new ClassLoaderAccessor() {
+                @Override
+                public ClassLoader getClassLoader() {
+                    return Thread.currentThread().getContextClassLoader();
+                }
+            },
+            new ClassLoaderAccessor() {
+                @Override
+                public ClassLoader getClassLoader() {
+                    return Services.class.getClassLoader();
+                }
+            },
+            new ClassLoaderAccessor() {
+                @Override
+                public ClassLoader getClassLoader() {
+                    return ClassLoader.getSystemClassLoader();
+                }
+            }
+    });
 
     private Services() {}
 
@@ -40,20 +63,24 @@ public final class Services {
      */
     public static <T> List<T> loadAll(Class<T> spi) {
         Assert.notNull(spi, "Parameter 'spi' must not be null.");
-        ServiceLoader<T> serviceLoader = ServiceLoader.load(spi);
 
+        for (ClassLoaderAccessor classLoaderAccessor : CLASS_LOADER_ACCESSORS) {
+            List<T> implementations = loadAll(spi, classLoaderAccessor.getClassLoader());
+            if (!implementations.isEmpty()) {
+                return Collections.unmodifiableList(implementations);
+            }
+        }
+
+        throw new UnavailableImplementationException(spi);
+    }
+
+    private static <T> List<T> loadAll(Class<T> spi, ClassLoader classLoader) {
+        ServiceLoader<T> serviceLoader = ServiceLoader.load(spi, classLoader);
         List<T> implementations = new ArrayList<>();
-
         for (T implementation : serviceLoader) {
             implementations.add(implementation);
         }
-
-        // fail if no implementations were found
-        if (implementations.isEmpty()) {
-            throw new UnavailableImplementationException(spi);
-        }
-
-        return Collections.unmodifiableList(implementations);
+        return implementations;
     }
 
     /**
@@ -68,11 +95,25 @@ public final class Services {
      */
     public static <T> T loadFirst(Class<T> spi) {
         Assert.notNull(spi, "Parameter 'spi' must not be null.");
-        ServiceLoader<T> serviceLoader = ServiceLoader.load(spi);
+
+        for (ClassLoaderAccessor classLoaderAccessor : CLASS_LOADER_ACCESSORS) {
+            T result = loadFirst(spi, classLoaderAccessor.getClassLoader());
+            if (result != null) {
+                return result;
+            }
+        }
+        throw new UnavailableImplementationException(spi);
+    }
+
+    private static <T> T loadFirst(Class<T> spi, ClassLoader classLoader) {
+        ServiceLoader<T> serviceLoader = ServiceLoader.load(spi, classLoader);
         if (serviceLoader.iterator().hasNext()) {
             return serviceLoader.iterator().next();
-        } else {
-            throw new UnavailableImplementationException(spi);
         }
+        return null;
+    }
+
+    private interface ClassLoaderAccessor {
+        ClassLoader getClassLoader();
     }
 }

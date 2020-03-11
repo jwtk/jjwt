@@ -6,6 +6,7 @@ This patch release:
 
 * Fixes issue when using Java 9+ `Map.of` with JacksonDeserializer which resulted in an NullPointerException
 * Fixes issue preventing Gson seralizer/deserializer implementation from being detected automatically
+* Services are now loaded from the context class loader, Services.class.classLoader, and the system classloader, the first classloader with a service wins, and the others are ignored. This mimics how `Classes.forName()` works, and how JJWT attempted to auto-discover various implementations in previous versions.
 
 ### 0.11.0
 
