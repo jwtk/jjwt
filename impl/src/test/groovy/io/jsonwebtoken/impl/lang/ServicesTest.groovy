@@ -19,8 +19,11 @@ import io.jsonwebtoken.impl.DefaultStubService
 import io.jsonwebtoken.StubService
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.powermock.api.easymock.PowerMock
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+
+import java.lang.reflect.Field
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
@@ -55,6 +58,15 @@ class ServicesTest {
         new Services(); // not allowed in Java, including here for test coverage
     }
 
+    @Test
+    void testClassLoaderAccessorList() {
+        List<Services.ClassLoaderAccessor> accessorList = Services.CLASS_LOADER_ACCESSORS
+        assertEquals("Expected 3 ClassLoaderAccessor to be found", 3, accessorList.size())
+        assertEquals(Thread.currentThread().getContextClassLoader(), accessorList.get(0).getClassLoader())
+        assertEquals(Services.class.getClassLoader(), accessorList.get(1).getClassLoader())
+        assertEquals(ClassLoader.getSystemClassLoader(), accessorList.get(2).getClassLoader())
+    }
+
     static class NoServicesClassLoader extends ClassLoader {
         private NoServicesClassLoader(ClassLoader parent) {
             super(parent)
@@ -70,14 +82,22 @@ class ServicesTest {
         }
 
         static void runWith(Closure closure) {
-            ClassLoader originalClassloader = Thread.currentThread().getContextClassLoader()
+            Field field = PowerMock.field(Services.class, "CLASS_LOADER_ACCESSORS")
+            def originalValue = field.get(Services.class)
             try {
-                Thread.currentThread().setContextClassLoader(new NoServicesClassLoader(originalClassloader))
+                // use powermock to change the list of the classloaders we are using
+                List<Services.ClassLoaderAccessor> classLoaderAccessors = [
+                        new Services.ClassLoaderAccessor() {
+                            @Override
+                            ClassLoader getClassLoader() {
+                                return new NoServicesClassLoader(Thread.currentThread().getContextClassLoader())
+                            }
+                        }
+                ]
+                field.set(Services.class, classLoaderAccessors)
                 closure.run()
             } finally {
-                if (originalClassloader != null) {
-                    Thread.currentThread().setContextClassLoader(originalClassloader)
-                }
+                field.set(Services.class, originalValue)
             }
         }
     }
