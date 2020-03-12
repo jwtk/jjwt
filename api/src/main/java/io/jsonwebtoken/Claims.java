@@ -141,7 +141,7 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      *
      * <p>If present, this value is the timestamp when the JWT was created.</p>
      *
-     * @return the JWT {@code nbf} value or {@code null} if not present.
+     * @return the JWT {@code iat} value or {@code null} if not present.
      */
     Date getIssuedAt();
 
