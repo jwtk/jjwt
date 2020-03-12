@@ -4,6 +4,7 @@
 
 This patch release:
 
+* Upgrades the `jjwt-jackson` module's Jackson dependency to `2.9.10.3`.
 * Fixes an issue when using Java 9+ `Map.of` with `JacksonDeserializer` that resulted in an `NullPointerException`.
 * Fixes an issue that prevented the `jjwt-gson` .jar's seralizer/deserializer implementation from being detected automatically.
 * Ensures service implementations are now loaded from the context class loader, Services.class.classLoader, and the system classloader, the first classloader with a service wins, and the others are ignored. This mimics how `Classes.forName()` works, and how JJWT attempted to auto-discover various implementations in previous versions.
