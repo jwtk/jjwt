@@ -1,0 +1,78 @@
+/*
+ * Copyright (C) 2019 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.jsonwebtoken.impl
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.Decoder
+import io.jsonwebtoken.io.DecodingException
+import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.security.Keys
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertSame
+
+// NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParserBuilder
+// implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class
+// just fills in any remaining test gaps.
+
+class DefaultJwtParserBuilderTest {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+
+    @Test(expected = IllegalArgumentException)
+    void testBase64UrlDecodeWithNullArgument() {
+        new DefaultJwtParserBuilder().base64UrlDecodeWith(null)
+    }
+
+    @Test
+    void testBase64UrlEncodeWithCustomDecoder() {
+        def decoder = new Decoder() {
+            @Override
+            Object decode(Object o) throws DecodingException {
+                return null
+            }
+        }
+        def b = new DefaultJwtParserBuilder().base64UrlDecodeWith(decoder)
+        assertSame decoder, b.base64UrlDecoder
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testDeserializeJsonWithNullArgument() {
+        new DefaultJwtParserBuilder().deserializeJsonWith(null)
+    }
+
+    @Test
+    void testDesrializeJsonWithCustomSerializer() {
+        def deserializer = new Deserializer() {
+            @Override
+            Object deserialize(byte[] bytes) throws DeserializationException {
+                return OBJECT_MAPPER.readValue(bytes, Map.class)
+            }
+        }
+        def p = new DefaultJwtParserBuilder().deserializeJsonWith(deserializer)
+        assertSame deserializer, p.deserializer
+
+        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+
+        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
+
+        assertEquals 'bar', p.setSigningKey(key).build().parseClaimsJws(jws).getBody().get('foo')
+    }
+}

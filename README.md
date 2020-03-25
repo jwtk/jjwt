@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
 [![Coverage Status](https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/github/jwtk/jjwt?branch=master)
+[![Gitter](https://badges.gitter.im/jwtk/jjwt.svg)](https://gitter.im/jwtk/jjwt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Java JWT: JSON Web Token for Java and Android
 
@@ -17,13 +18,20 @@ and is supported and maintained by a [community](https://github.com/jwtk/jjwt/gr
 
 [Okta](https://developer.okta.com/) is a complete authentication and user management API for developers.
 
-We've also added some convenience extensions that are not part of the specification, such as JWT compression and claim 
+We've also added some convenience extensions that are not part of the specification, such as JWS compression and claim 
 enforcement.
 
 ## Table of Contents
 
 * [Features](#features)
   * [Currently Unsupported Features](#features-unsupported)
+* [Community](#community)
+  * [Getting Help](#help)
+    * [Questions](#help-questions)
+    * [Bugs and Feature Requests](#help-issues)
+  * [Contributing](#contributing)
+    * [Pull Requests](#contributing-pull-requests)
+    * [Help Wanted](#contributing-help-wanted)
 * [What is a JSON Web Token?](#overview)
 * [Installation](#install)
   * [JDK Projects](#install-jdk)
@@ -52,6 +60,7 @@ enforcement.
       * [Claims Instance](#jws-create-claims-instance)
       * [Claims Map](#jws-create-claims-map)
     * [Signing Key](#jws-create-key)
+      * [SecretKey Formats](#jws-create-key-secret)
       * [Signature Algorithm Override](#jws-create-key-algoverride)
     * [Compression](#jws-create-compression)
   * [Read a JWS](#jws-read)
@@ -67,7 +76,12 @@ enforcement.
 * [JSON Processor](#json)
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
-* [Base64 Codec](#base64)
+    * [Custom Claim Types](#json-jackson-custom-types)
+  * [Gson](#json-gson)
+* [Base64 Support](#base64)
+  * [Base64 in Security Contexts](#base64-security)
+    * [Base64 is not Encryption](#base64-not-encryption)
+    * [Changing Base64 Characters](#base64-changing-characters)
   * [Custom Base64 Codec](#base64-custom)
 
 <a name="features"></a>
@@ -109,6 +123,79 @@ enforcement.
 * JWE (Encryption for JWT)
 
 These features will be implemented in a future release.  Community contributions are welcome!
+
+<a name="community"></a>
+## Community
+
+<a name="help"></a>
+### Getting Help
+
+If you have trouble using JJWT, please first read the documentation on this page before asking questions.  We try 
+very hard to ensure JJWT's documentation is robust, categorized with a table of contents, and up to date for each release.
+
+<a name="help-questions"></a>
+#### Questions
+
+If the documentation or the API JavaDoc isn't sufficient, and you either have usability questions or are confused
+about something, please [ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false).
+
+After asking your question, you may wish to join our [Slack](https://jwtk.slack.com/messages/CBNACTN3A) or
+[Gittr](https://gitter.im/jwtk/jjwt) chat rooms, but note that they may not always be attended. You will usually
+have a better chance of having your question answered by 
+[asking your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false).
+   
+If you believe you have found a bug or would like to suggest a feature enhancement, please create a new GitHub issue, 
+however:
+
+**Please do not create a GitHub issue to ask a question.**  
+
+We use GitHub Issues to track actionable work that requires changes to JJWT's design and/or codebase.  If you have a 
+usability question, instead please 
+[ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false), or try Slack or Gittr as 
+described above.
+
+**If a GitHub Issue is created that does not represent actionable work for JJWT's codebase, it will be promptly closed.**
+
+<a name="help-issues"></a>
+#### Bugs and Feature Requests
+
+If you do not have a usability question and believe you have a legitimate bug or feature request, 
+please do [create a new JJWT issue](https://github.com/jwtk/jjwt/issues/new).
+
+If you feel like you'd like to help fix a bug or implement the new feature yourself, please read the Contributing 
+section next before starting any work.
+
+<a name="contributing"></a>
+### Contributing
+
+<a name="contributing-pull-requests"></a>
+#### Pull Requests
+
+Simple Pull Requests that fix anything other than JJWT core code (documentation, JavaDoc, typos, test cases, etc) are 
+always appreciated and have a high likelihood of being merged quickly. Please send them!
+
+However, if you want or feel the need to change JJWT's functionality or core code, please do not issue a pull request 
+without [creating a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) and discussing your desired 
+changes **first**, _before you start working on it_.
+
+It would be a shame to reject your earnest and genuinely appreciated pull request if it might not not align with the 
+project's goals, design expectations or planned functionality.  We've sadly had to reject large PRs in the past because
+they were out of sync with project or design expectations - all because the PR author didn't first check in with 
+the team first before working on a solution.
+
+So, please [create a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) first to discuss, and then we can see if
+(or how) a PR is warranted.  Thank you!
+
+<a name="contributing-help-wanted"></a>
+#### Help Wanted
+
+If you would like to help, but don't know where to start, please visit the 
+[Help Wanted Issues](https://github.com/jwtk/jjwt/labels/help%20wanted) page and pick any of the 
+ones there, and we'll be happy to discuss and answer questions in the issue comments.
+
+If any of those don't appeal to you, no worries! Any help you would like to offer would be 
+appreciated based on the above caveats concerning [contributing pull reqeuests](#contributing-pull-requests). Feel free
+to discuss or ask questions first if you're not sure. :)
 
 <a name="overview"></a>
 ## What is a JSON Web Token?
@@ -179,21 +266,22 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.10.5</version>
+    <version>0.11.1</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.10.5</version>
+    <version>0.11.1</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
-    <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.5</version>
+    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+    <version>0.11.1</version>
     <scope>runtime</scope>
 </dependency>
-<!-- Uncomment this next dependency if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+<!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
+     RSASSA-PSS (PS256, PS384, PS512) algorithms.  JDK 11 or later does not require it for those algorithms:
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
@@ -209,11 +297,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.10.5'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.5',
+    compile 'io.jsonwebtoken:jjwt-api:0.11.1'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.1',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.5'
+            'io.jsonwebtoken:jjwt-jackson:0.11.1' // or 'io.jsonwebtoken:jjwt-gson:0.11.1' for gson
 }
 ```
 
@@ -229,9 +317,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.10.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.5' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.5') {
+    api 'io.jsonwebtoken:jjwt-api:0.11.1'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.1' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.1') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -313,7 +401,7 @@ eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.1KP0SsvENi7Uz1oQc07aXTL7kpQG5jBNIybqr60A
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-assert Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().getSubject().equals("Joe");
+assert Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getBody().getSubject().equals("Joe");
 ```
 
 **NOTE: Ensure you call the `parseClaimsJws` method** (since there are many similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
@@ -329,7 +417,7 @@ But what if parsing or signature validation failed?  You can catch `JwtException
 ```java
 try {
 
-    Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws);
+    Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compactJws);
 
     //OK, we can trust this JWT
 
@@ -524,14 +612,15 @@ SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256); //or HS384 or HS512
 Under the hood, JJWT uses the JCA provider's `KeyGenerator` to create a secure-random key with the correct minimum
 length for the given algorithm.
 
-If you have an existing HMAC SHA `SecretKey`'s 
-[encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--), you can use 
-the `Keys.hmacShaKeyFor` helper method.  For example:
+If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
 
 ```java
-byte[] keyBytes = getSigningKeyFromApplicationConfiguration();
-SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+String secretString = Encoders.BASE64.encode(key.getEncoded());
 ```
+
+Ensure you save the resulting `secretString` somewhere safe - 
+[Base64-encoding is not encryption](#base64-not-encryption), so it's still considered sensitive information. You can 
+further encrypt it, etc, before saving to disk (for example).
 
 <a name="jws-key-create-asym"></a>
 ##### Asymmetric Keys
@@ -580,18 +669,18 @@ A JWT Header provides metadata about the contents, format and cryptographic oper
 
 If you need to set one or more JWT header parameters, such as the `kid` 
 [(Key ID) header parameter](https://tools.ietf.org/html/rfc7515#section-4.1.4), you can simply call
-`JwtBuilder` `setHeaderParameter` one or more times as needed:
+`JwtBuilder` `setHeaderParam` one or more times as needed:
 
 ```java
 String jws = Jwts.builder()
 
-    .setHeaderParameter("kid", "myKeyId")
+    .setHeaderParam("kid", "myKeyId")
     
     // ... etc ...
 
 ```
 
-Each time `setHeaderParameter` is called, it simply appends the key-value pair to an internal `Header` instance, 
+Each time `setHeaderParam` is called, it simply appends the key-value pair to an internal `Header` instance, 
 potentially overwriting any existing identically-named key/value pair.
 
 **NOTE**: You do not need to set the `alg` or `zip` header parameters as JJWT will set them automatically
@@ -767,13 +856,44 @@ For example, if you call `signWith` with a `SecretKey` that is 256 bits (32 byte
 When using `signWith` JJWT will also automatically set the required `alg` header with the associated algorithm 
 identifier.
 
-Similarly, if you called `signWith` with an RSA `PrivateKey` that was 4096 bits long, JJWT will use the `R512`
+Similarly, if you called `signWith` with an RSA `PrivateKey` that was 4096 bits long, JJWT will use the `RS512`
 algorithm and automatically set the `alg` header to `RS512`.
 
 The same selection logic applies for Elliptic Curve `PrivateKey`s.
 
 **NOTE: You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
-`PublicKey` for signing with an `InvalidKeyException`. 
+`PublicKey` for signing with an `InvalidKeyException`.
+
+<a name="jws-create-key-secret"></a>
+##### SecretKey Formats
+
+If you want to sign a JWS using HMAC-SHA algorithms and you have a secret key `String` or 
+[encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--), you will need
+to convert it into a `SecretKey` instance to use as the `signWith` method argument.
+
+If your secret key is:
+
+* An [encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--):
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(encodedKeyBytes);
+  ```
+* A Base64-encoded string:
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
+  ```
+* A Base64URL-encoded string:
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretString));
+  ```
+* A raw (non-encoded) string (e.g. a password String):
+  ```java
+  SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+  ```
+  It is always incorrect to call `secretString.getBytes()` (without providing a charset).
+  
+  However, raw password strings like this, e.g. `correcthorsebatterystaple` should be avoided whenever possible 
+  because they can inevitably result in weak or susceptible keys. Secure-random keys are almost always stronger. 
+  If you are able, prefer creating a [new secure-random secret key](#jws-key-create-secret) instead.
 
 <a name="jws-create-key-algoverride"></a>
 ##### SignatureAlgorithm Override
@@ -813,14 +933,15 @@ Please see the main [Compression](#compression) section to see how to compress a
 
 You read (parse) a JWS as follows:
 
-1. Use the `Jwts.parser()` method to create a `JwtParser` instance.  
+1. Use the `Jwts.parserBuilder()` method to create a `JwtParserBuilder` instance.  
 2. Specify the `SecretKey` or asymmetric `PublicKey` you want to use to verify the JWS signature.<sup>1</sup>
-3. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
-4. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
+3. Call the `build()` method on the `JwtParserBuilder` to return a thread-safe `JwtParser`.
+4. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
+5. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
 
-<sup>1. If you don't which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
-which we'll cover later.</sup>
+<sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
+which [we'll cover later](#jws-read-key-resolver).</sup>
 
 For example:
 
@@ -828,13 +949,14 @@ For example:
 Jws<Claims> jws;
 
 try {
-    jws = Jwts.parser()         // (1)
+    jws = Jwts.parserBuilder()  // (1)
     .setSigningKey(key)         // (2)
-    .parseClaimsJws(jwsString); // (3)
+    .build()                    // (3)
+    .parseClaimsJws(jwsString); // (4)
     
     // we can safely trust the JWT
      
-catch (JwtException ex) {       // (4)
+catch (JwtException ex) {       // (5)
     
     // we *cannot* use the JWT as intended by its creator
 }
@@ -852,23 +974,25 @@ discarded.
 
 So which key do we use for verification?
 
-* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParser`.  For example:
+* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParserBuilder`.  For example:
 
   ```java
-  Jwts.parser()
+  Jwts.parserBuilder()
       
     .setSigningKey(secretKey) // <----
     
+    .build()
     .parseClaimsJws(jwsString);
   ```
 * If the jws was signed with a `PrivateKey`, that key's corresponding `PublicKey` (not the `PrivateKey`) should be 
-  specified on the `JwtParser`.  For example:
+  specified on the `JwtParserBuilder`.  For example:
 
   ```java
-  Jwts.parser()
+  Jwts.parserBuilder()
       
     .setSigningKey(publicKey) // <---- publicKey, not privateKey
     
+    .build()
     .parseClaimsJws(jwsString);
   ```
   
@@ -876,7 +1000,7 @@ But you might have noticed something - what if your application doesn't use just
 if JWSs can be created with different `SecretKey`s or public/private keys, or a combination of both?  How do you
 know which key to specify if you can't inspect the JWT first?
 
-In these cases, you can't call the `JwtParser`'s `setSigningKey` method with a single key - instead, you'll need
+In these cases, you can't call the `JwtParserBuilder`'s `setSigningKey` method with a single key - instead, you'll need
 to use a `SigningKeyResolver`, covered next.
 
 <a name="jws-read-key-resolver"></a>
@@ -884,16 +1008,17 @@ to use a `SigningKeyResolver`, covered next.
 
 If your application expects JWSs that can be signed with different keys, you won't call the `setSigningKey` method.
 Instead, you'll need to implement the 
-`SigningKeyResolver` interface and specify an instance on the `JwtParser` via the `setSigningKeyResolver` method.  
+`SigningKeyResolver` interface and specify an instance on the `JwtParserBuilder` via the `setSigningKeyResolver` method.  
 For example:
 
 ```java
 SigningKeyResolver signingKeyResolver = getMySigningKeyResolver();
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .setSigningKeyResolver(signingKeyResolver) // <----
     
+    .build()
     .parseClaimsJws(jwsString);
 ```
 
@@ -970,11 +1095,11 @@ application.
 
 For example, let's say that you require that the JWS you are parsing has a specific `sub` (subject) value,
 otherwise you may not trust the token.  You can do that by using one of the various `require`* methods on the 
-`JwtParser`:
+`JwtParserBuilder`:
 
 ```java
 try {
-    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the sub field was missing or did not have a 'jsmith' value
 }
@@ -985,7 +1110,7 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 
 ```java
 try {
-    Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
 } catch(MissingClaimException mce) {
     // the parsed JWT did not have the sub field
 } catch(IncorrectClaimException ice) {
@@ -997,14 +1122,14 @@ You can also require custom fields by using the `require(fieldName, requiredFiel
 
 ```java
 try {
-    Jwts.parser().require("myfield", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parserBuilder().require("myfield", "myRequiredValue").setSigningKey(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the 'myfield' field was missing or did not have a 'myRequiredValue' value
 }
 ```
 (or, again, you could catch either `MissingClaimException` or `IncorrectClaimException` instead).
 
-Please see the `JwtParser` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
+Please see the `JwtParserBuilder` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
 assertions.
 
 <a name="jws-read-clock"></a>
@@ -1015,17 +1140,18 @@ the parsing machine is not perfectly in sync with the clock on the machine that 
 obvious problems since `exp` and `nbf` are time-based assertions, and clock times need to be reliably in sync for shared
 assertions.
 
-You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParser`'s
+You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParserBuilder`'s
  `setAllowedClockSkewSeconds`. For example:
 
 ```java
 long seconds = 3 * 60; //3 minutes
 
-Jwts.parser()
+Jwts.parserBuilder()
     
     .setAllowedClockSkewSeconds(seconds) // <----
     
     // ... etc ...
+    .build()
     .parseClaimsJws(jwt);
 ```
 This ensures that clock differences between the machines can be ignored. Two or three minutes should be more than 
@@ -1036,13 +1162,13 @@ atomic clocks around the world.
 ##### Custom Clock Support
 
 If the above `setAllowedClockSkewSeconds` isn't sufficient for your needs, the timestamps created
-during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParser`'s `setClock`
+during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParserBuilder`'s `setClock`
  method with an implementation of the `io.jsonwebtoken.Clock` interface.  For example:
  
  ```java
 Clock clock = new MyClock();
 
-Jwts.parser().setClock(myClock) //... etc ...
+Jwts.parserBuilder().setClock(myClock) //... etc ...
 ``` 
 
 The `JwtParser`'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs, 
@@ -1052,7 +1178,7 @@ guarantee deterministic behavior.
 <a name="jws-read-decompression"></a>
 #### JWS Decompression
 
-If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParser`
+If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParserBuilder`
 how to resolve your `CompressionCodec` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
@@ -1091,12 +1217,12 @@ parsing or configure the `JwtParser` for compression - JJWT will automatically d
 ### Custom Compression Codec
 
 If however, you used your own custom compression codec when creating the JWT (via `JwtBuilder` `compressWith`), then
-you need to supply the codec to the `JwtParser` using the `setCompressionCodecResolver` method.  For example:
+you need to supply the codec to the `JwtParserBuilder` using the `setCompressionCodecResolver` method.  For example:
 
 ```java
 CompressionCodecResolver ccr = new MyCompressionCodecResolver();
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .setCompressionCodecResolver(ccr) // <----
     
@@ -1128,30 +1254,34 @@ A `JwtBuilder` will serialize the `Header` and `Claims` maps (and potentially an
 contain) to JSON with a `Serializer<Map<String, ?>>` instance.  Similarly, a `JwtParser` will 
 deserialize JSON into the `Header` and `Claims` using a `Deserializer<Map<String, ?>>` instance.
 
-If you don't explicitly configure a `JwtBuilder`'s `Serializer` or a `JwtParser`'s `Deserializer`, JJWT will 
+If you don't explicitly configure a `JwtBuilder`'s `Serializer` or a `JwtParserBuilder`'s `Deserializer`, JJWT will 
 automatically attempt to discover and use the following JSON implementations if found in the runtime classpath.  
 They are checked in order, and the first one found is used:
 
 1. Jackson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-jackson` as a project runtime 
    dependency.  Jackson supports POJOs as claims with full marshaling/unmarshaling as necessary.
    
-2. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
+2. Gson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-gson` as a project runtime dependency.
+   Gson also supports POJOs as claims with full marshaling/unmarshaling as necessary. 
+   
+3. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
    project runtime dependency.
    
    **NOTE:** `org.json` APIs are natively enabled in Android environments so this is the recommended JSON processor for 
    Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple 
    Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshalling.
 
-**If you want to use POJOs as claim values, use the `io.jsonwebtoken:jjwt-jackson` dependency** (or implement your own
-Serializer and Deserializer if desired).  **But beware**, Jackson will force a sizable (> 1 MB) dependency to an 
-Android application thus increasing the app download size for mobile users.
+**If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or 
+`io.jsonwebtoken:jjwt-gson` dependency** (or implement your own Serializer and Deserializer if desired). **But beware**, 
+Jackson will force a sizable (> 1 MB) dependency to an Android application thus increasing the app download size for 
+mobile users.
 
 <a name="json-custom"></a>
 ### Custom JSON Processor
 
 If you don't want to use JJWT's runtime dependency approach, or just want to customize how JSON serialization and 
 deserialization works, you can implement the `Serializer` and `Deserializer` interfaces and specify instances of
-them on the `JwtBuilder` and `JwtParser` respectively.  For example:
+them on the `JwtBuilder` and `JwtParserBuilder` respectively.  For example:
 
 When creating a JWT:
 
@@ -1170,7 +1300,7 @@ When reading a JWT:
 ```java
 Deserializer<Map<String,?>> deserializer = getMyDeserializer(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .deserializeJsonWith(deserializer)
     
@@ -1180,8 +1310,16 @@ Jwts.parser()
 <a name="json-jackson"></a>
 ### Jackson JSON Processor
 
-If you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), you can 
-eliminate the overhead of JJWT constructing its own `ObjectMapper` by using yours instead.
+If you want to use Jackson for JSON processing, just including the `io.jsonwebtoken:jjwt-jackson` dependency as a
+runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
+the necessary Jackson dependencies as well.
+
+After including this dependency, JJWT will automatically find the Jackson implementation on the runtime classpath and 
+use it internally for JSON parsing.  There is nothing else you need to do - JJWT will automatically create a new
+Jackson ObjectMapper for its needs as required.
+
+However, if you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), 
+you can configure JJWT to use your own `ObjectMapper` instead.
 
 You do this by declaring the `io.jsonwebtoken:jjwt-jackson` dependency with **compile** scope (not runtime 
 scope which is the typical JJWT default).  That is:
@@ -1192,7 +1330,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.10.5</version>
+    <version>0.11.1</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1201,7 +1339,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-jackson:0.10.5'
+    compile 'io.jsonwebtoken:jjwt-jackson:0.11.1'
 }
 ```
 
@@ -1217,14 +1355,123 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParser`:
+and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParserBuilder`:
 
 ```java
 ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .deserializeJsonWith(new JacksonDeserializer(objectMapper))
+    
+    // ... etc ...
+```
+
+<a name="json-jackson-custom-types"></a>
+#### Parsing of Custom Claim Types
+
+By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in through a constructor. For example:
+
+```java
+new JacksonDeserializer(Maps.of("user", User.class).build())
+```
+
+This would trigger the value in the `user` claim to be deserialized into the custom type of `User`.  Given the claims body of:
+
+```json
+{
+    "issuer": "https://example.com/issuer",
+    "user": {
+      "firstName": "Jill",
+      "lastName": "Coder"
+    }
+}
+```
+
+The `User` object could be retrieved from the `user` claim with the following code:
+
+```java
+Jwts.parserBuilder()
+
+    .deserializeJsonWith(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
+
+    .build()
+
+    .parseClaimsJwt(aJwtString)
+
+    .getBody()
+    
+    .get("user", User.class) // <-----
+```
+
+**NOTE:** Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor 
+[described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative 
+consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced 
+parsing options, [configure the mapper directly](#json-jackson).
+
+<a name="json-gson"></a>
+### Gson JSON Processor
+
+If you want to use Gson for JSON processing, just including the `io.jsonwebtoken:jjwt-gson` dependency as a
+runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
+the necessary Gson dependencies as well.
+
+After including this dependency, JJWT will automatically find the Gson implementation on the runtime classpath and 
+use it internally for JSON parsing.  There is nothing else you need to do - just declaring the dependency is 
+all that is required, no code or config is necessary.
+
+If you're curious, JJWT will automatically create an internal default Gson instance for its own needs as follows:
+
+```java
+new GsonBuilder().disableHtmlEscaping().create();
+```
+
+However, if you prefer to use a different Gson instance instead of JJWT's default, you can configure JJWT to use your 
+own. 
+
+You do this by declaring the `io.jsonwebtoken:jjwt-gson` dependency with **compile** scope (not runtime 
+scope which is the typical JJWT default).  That is:
+
+**Maven**
+
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-gson</artifactId>
+    <version>0.11.1</version>
+    <scope>compile</scope> <!-- Not runtime -->
+</dependency>
+```
+
+**Gradle or Android**
+
+```groovy
+dependencies {
+    compile 'io.jsonwebtoken:jjwt-gson:0.11.1'
+}
+```
+
+And then you can specify the `GsonSerializer` using your own `Gson` instance on the `JwtBuilder`:
+
+```java
+
+Gson gson = getGson(); //implement me
+
+String jws = Jwts.builder()
+
+    .serializeToJsonWith(new GsonSerializer(gson))
+    
+    // ... etc ...
+```
+
+and the `GsonDeserializer` using your `Gson` instance on the `JwtParser`:
+
+```java
+Gson gson = getGson(); //implement me
+
+Jwts.parser()
+
+    .deserializeJsonWith(new GsonDeserializer(gson))
     
     // ... etc ...
 ```
@@ -1246,7 +1493,107 @@ utility classes.
 `io.jsonwebtoken.io.Decoders`:
 
 * `BASE64` is an RFC 4648 [Base64](https://tools.ietf.org/html/rfc4648#section-4) decoder
-* `BASE64URL` is an RFC 4648 [Base64URL](https://tools.ietf.org/html/rfc4648#section-5) decoder  
+* `BASE64URL` is an RFC 4648 [Base64URL](https://tools.ietf.org/html/rfc4648#section-5) decoder
+
+<a name="base64-security"></a>
+### Understanding Base64 in Security Contexts
+
+All cryptographic operations, like encryption and message digest calculations, result in binary data - raw byte arrays.
+
+Because raw byte arrays cannot be represented natively in JSON, the JWT
+specifications employ the Base64URL encoding scheme to represent these raw byte values in JSON documents or compound 
+structures like a JWT.
+
+This means that the Base64 and Base64URL algorithms take a raw byte array and converts the bytes into a string suitable 
+to use in text documents and protocols like HTTP.  These algorithms can also convert these strings back
+into the original raw byte arrays for decryption or signature verification as necessary.
+
+That's nice and convenient, but there are two very important properties of Base64 (and Base64URL) text strings that 
+are critical to remember when they are used in security scenarios like with JWTs:
+
+* [Base64 is not encryption](#base64-not-encryption)
+* [Changing Base64 characters](#base64-changing-characters) **does not automatically invalidate data**.
+
+<a name="base64-not-encryption"></a>
+#### Base64 is not encryption
+ 
+Base64-encoded text is _not_ encrypted. 
+
+While a byte array representation can be converted to text with the Base64 algorithms, 
+anyone in the world can take Base64-encoded text, decode it with any standard Base64 decoder, and obtain the 
+underlying raw byte array data.  No key or secret is required to decode Base64 text - anyone can do it.
+
+Based on this, when encoding sensitive byte data with Base64 - like a shared or private key - **the resulting
+string NOT is safe to expose publicly**.
+
+A base64-encoded key is still sensitive information and must
+be kept as secret and as safe as the original thing you got the bytes from (e.g. a Java `PrivateKey` or `SecretKey` 
+instance).
+
+After Base64-encoding data into a string, it is possible to then encrypt the string to keep it safe from prying 
+eyes if desired, but this is different.  Encryption is not encoding.  They are separate concepts.
+
+<a name="base64-changing-characters"></a>
+#### Changing Base64 Characters
+
+In an effort to see if signatures or encryption is truly validated correctly, some try to edit a JWT
+string - particularly the Base64-encoded signature part - to see if the edited string fails security validations.
+
+This conceptually makes sense: change the signature string, you would assume that signature validation would fail.
+
+_But this doesn't always work. Changing base64 characters is an invalid test_.
+
+Why?
+
+Because of the way the Base64 algorithm works, there are multiple Base64 strings that can represent the same raw byte 
+array.
+
+Going into the details of the Base64 algorithm is out of scope for this documentation, but there are many good 
+Stackoverflow [answers](https://stackoverflow.com/questions/33663113/multiple-strings-base64-decoded-to-same-byte-array?noredirect=1&lq=1)
+and [JJWT issue comments](https://github.com/jwtk/jjwt/issues/211#issuecomment-283076269) that explain this in detail.  
+Here's one [good answer](https://stackoverflow.com/questions/29941270/why-do-base64-decode-produce-same-byte-array-for-different-strings):
+
+> Remember that Base64 encodes each 8 bit entity into 6 bit chars. The resulting string then needs exactly 
+> 11 * 8 / 6 bytes, or 14 2/3 chars. But you can't write partial characters. Only the first 4 bits (or 2/3 of the 
+> last char) are significant. The last two bits are not decoded. Thus all of:
+>
+>     dGVzdCBzdHJpbmo
+>     dGVzdCBzdHJpbmp
+>     dGVzdCBzdHJpbmq
+>     dGVzdCBzdHJpbmr
+> All decode to the same 11 bytes (116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 106).
+
+As you can see by the above 4 examples, they all decode to the same exact 11 bytes.  So just changing one or two
+characters at the end of a Base64 string may not work and can often result in an invalid test.
+
+<a name="base64-invalid-characters"></a>
+##### Adding Invalid Characters
+
+JJWT's default Base64/Base64URL decoders automatically ignore illegal Base64 characters located in the beginning and 
+end of an encoded string. Therefore prepending or appending invalid characters like `{` or `]` or similar will also 
+not fail JJWT's signature checks either.  Why?
+
+Because such edits - whether changing a trailing character or two, or appending invalid characters - do not actually 
+change the _real_ signature, which in cryptographic contexts, is always a byte array. Instead, tests like these 
+change a text encoding of the byte array, and as we covered above, they are different things.
+
+So JJWT 'cares' more about the real byte array and less about its text encoding because that is what actually matters
+in cryptographic operations.  In this sense, JJWT follows the [Robustness Principle](https://en.wikipedia.org/wiki/Robustness_principle)
+in being _slightly_ lenient on what is accepted per the rules of Base64, but if anything in the real underlying 
+byte array is changed, then yes, JJWT's cryptographic assertions will definitely fail.
+
+To help understand JJWT's approach, we have to remember why signatures exist. From our documentation above on 
+[signing JWTs](#jws):
+
+> * guarantees it was created by someone we know (it is authentic), as well as
+> * guarantees that no-one has manipulated or changed it after it was created (its integrity is maintained).
+
+Just prepending or appending invalid text to try to 'trick' the algorithm doesn't change the integrity of the 
+underlying claims or signature byte arrays, nor the authenticity of the claims byte array, because those byte 
+arrays are still obtained intact.
+
+Please see [JJWT Issue #518](https://github.com/jwtk/jjwt/issues/518) and its referenced issues and links for more 
+information.
 
 <a name="base64-custom"></a>
 ### Custom Base64
@@ -1264,12 +1611,12 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-and the `JwtParser`'s `base64UrlDecodeWith` method to set the decoder:
+and the `JwtParserBuilder`'s `base64UrlDecodeWith` method to set the decoder:
 
 ```java
 Decoder<String, byte[]> base64UrlDecoder = getMyBase64UrlDecoder(); //implement me
 
-Jwts.parser()
+Jwts.parserBuilder()
 
     .base64UrlDecodeWith(base64UrlEncoder)
     

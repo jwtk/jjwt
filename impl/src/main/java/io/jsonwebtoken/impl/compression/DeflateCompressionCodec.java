@@ -17,10 +17,13 @@ package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.lang.Objects;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.zip.Deflater;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 import java.util.zip.InflaterOutputStream;
 
 /**
@@ -32,32 +35,47 @@ public class DeflateCompressionCodec extends AbstractCompressionCodec {
 
     private static final String DEFLATE = "DEF";
 
+    private static final StreamWrapper WRAPPER = new StreamWrapper() {
+        @Override
+        public OutputStream wrap(OutputStream out) {
+            return new DeflaterOutputStream(out);
+        }
+    };
+
     @Override
     public String getAlgorithmName() {
         return DEFLATE;
     }
 
     @Override
-    public byte[] doCompress(byte[] payload) throws IOException {
-
-        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-
-        ByteArrayOutputStream outputStream = null;
-        DeflaterOutputStream deflaterOutputStream = null;
-        try {
-            outputStream = new ByteArrayOutputStream();
-            deflaterOutputStream = new DeflaterOutputStream(outputStream, deflater, true);
-
-            deflaterOutputStream.write(payload, 0, payload.length);
-            deflaterOutputStream.flush();
-            return outputStream.toByteArray();
-        } finally {
-            Objects.nullSafeClose(outputStream, deflaterOutputStream);
-        }
+    protected byte[] doCompress(byte[] payload) throws IOException {
+        return writeAndClose(payload, WRAPPER);
     }
 
     @Override
-    public byte[] doDecompress(byte[] compressed) throws IOException {
+    protected byte[] doDecompress(final byte[] compressed) throws IOException {
+        try {
+            return readAndClose(new InflaterInputStream(new ByteArrayInputStream(compressed)));
+        } catch (IOException e1) {
+            try {
+                return doDecompressBackCompat(compressed);
+            } catch (IOException e2) {
+                throw e1; //retain/report original exception
+            }
+        }
+    }
+
+    /**
+     * This implementation was in 0.10.6 and earlier - it will be used as a fallback for backwards compatibility if
+     * {@link #readAndClose(InputStream)} fails per <a href="https://github.com/jwtk/jjwt/issues/536">Issue 536</a>.
+     *
+     * @param compressed the compressed byte array
+     * @return decompressed bytes
+     * @throws IOException if unable to decompress using the 0.10.6 and earlier logic
+     * @since 0.10.8
+     */
+    // package protected on purpose
+    byte[] doDecompressBackCompat(byte[] compressed) throws IOException {
         InflaterOutputStream inflaterOutputStream = null;
         ByteArrayOutputStream decompressedOutputStream = null;
 

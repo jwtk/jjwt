@@ -1,5 +1,116 @@
 ## Release Notes
 
+### 0.11.1
+
+This patch release:
+
+* Upgrades the `jjwt-jackson` module's Jackson dependency to `2.9.10.3`.
+* Fixes an issue when using Java 9+ `Map.of` with `JacksonDeserializer` that resulted in an `NullPointerException`.
+* Fixes an issue that prevented the `jjwt-gson` .jar's seralizer/deserializer implementation from being detected automatically.
+* Ensures service implementations are now loaded from the context class loader, Services.class.classLoader, and the system classloader, the first classloader with a service wins, and the others are ignored. This mimics how `Classes.forName()` works, and how JJWT attempted to auto-discover various implementations in previous versions.
+* Fixes a minor error in the `Claims#getIssuedAt` JavaDoc.
+
+### 0.11.0
+
+This minor release:
+
+* Adds [Google's Gson](https://github.com/google/gson) as a natively supported JSON parser. Installation instructions 
+  have been updated and new [JJWT Gson usage guidelines](https://github.com/jwtk/jjwt#json-gson) have been added.
+* Updates the Jackson dependency version to [2.9.10](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
+to address three security vulnerabilities in Jackson.
+* A new `JwtParserBuilder` interface has been added and is the recommended way of creating an immutable and thread-safe JwtParser instance.  Mutable methods in `JwtParser` will be removed before v1.0.
+    Migration to the new signatures is straightforward, for example:
+    
+    Previous Version:
+    ```java 
+     Jwts.parser()
+         .requireAudience("string")
+         .parse(jwtString)
+    ```
+    Current Version:
+    ```java
+    Jwts.parserBuilder()
+        .requireAudience("string")
+        .build()
+        .parse(jwtString)
+    ```
+* Adds `io.jsonwebtoken.lang.Maps` utility class to make creation of maps fluent, as demonstrated next.
+* Adds support for custom types when deserializing with Jackson. To use configure your parser:
+    ```java
+    Jwts.parserBuilder().deserializeJsonWith(
+        new JacksonDeserializer(
+            Maps.of("claimName", YourType.class).build() // <--
+        )
+    ).build()
+  ```
+* Moves JSON Serializer/Deserializer implementations to a different package name.
+  - `io.jsonwebtoken.io.JacksonSerializer` -> `io.jsonwebtoken.jackson.io.JacksonSerializer`
+  - `io.jsonwebtoken.io.JacksonDeserializer` -> `io.jsonwebtoken.jackson.io.JacksonDeserializer`
+  - `io.jsonwebtoken.io.OrgJsonSerializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonSerializer`
+  - `io.jsonwebtoken.io.OrgJsonDeserializer` -> `io.jsonwebtoken.orgjson.io.OrgJsonDeserializer`
+
+  A backward compatibility modules has been created using the `deprecated` classifier (`io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated` and `io.jsonwebtoken:jjwt-orjson:0.11.0:deprecated`), if you are compiling against these classes directly, otherwise you will be unaffected.
+
+#### Backwards Compatibility Warning
+
+Due to this package move, if you are currently using one of the above four existing (pre 0.11.0) classes with `compile` scope, you must either:
+  1. change your code to use the newer package classes (recommended), or 
+  1. change your build/dependency configuration to use the `deprecated` dependency classifier to use the existing classes, as follows:
+      
+**Maven**
+
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.11.0</version>
+    <classifier>deprecated</classifier>
+    <scope>compile</scope>
+</dependency>
+```
+
+**Gradle**
+
+```groovy
+compile 'io.jsonwebtoken:jjwt-jackson:0.11.0:deprecated'
+```
+
+**Note:** that the first option is recommended since the second option will not be available starting with the 1.0 release.
+
+### 0.10.8
+
+This patch release:
+
+* Ensures that SignatureAlgorithms `PS256`, `PS384`, and `PS512` work properly on JDK 11 and later without the need
+  for BouncyCastle.  Previous releases referenced a BouncyCastle-specific 
+  algorithm name instead of the Java Security Standard Algorithm Name of 
+  [`RSASSA-PSS`](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#signature-algorithms).
+  This release ensures the standard name is used moving forward.
+  
+* Fixes a backwards-compatibility [bug](https://github.com/jwtk/jjwt/issues/536) when parsing compressed JWTs 
+  created from 0.10.6 or earlier using the `DEFLATE` compression algorithm.  
+
+### 0.10.7
+
+This patch release:
+ 
+* Adds a new [Community section](https://github.com/jwtk/jjwt#community) in the documentation discussing asking 
+  questions, using Slack and Gittr, and opening new issues and pull requests. 
+* Fixes a [memory leak](https://github.com/jwtk/jjwt/issues/392) found in the DEFLATE compression 
+codec implementation.
+* Updates the Jackson dependency version to [2.9.9.1](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9#patches)
+to address three security vulnerabilities in Jackson:
+[CVE-2019-12086](https://nvd.nist.gov/vuln/detail/CVE-2019-12086),
+[CVE-2019-12384](https://nvd.nist.gov/vuln/detail/CVE-2019-12384), and
+[CVE-2019-12814](https://nvd.nist.gov/vuln/detail/CVE-2019-12814).
+* Fixes a [bug](https://github.com/jwtk/jjwt/issues/397) when Jackson is in the classpath but the `jjwt-jackson` .jar is not.
+* Fixes various documentation and typo fixes.
+
+### 0.10.6
+
+This patch release updates the jackson-databind version to 2.9.8 to address a critical security vulnerability in that
+library.
+
 ### 0.10.5
 
 This patch release fixed an Android `org.json` library compatibility [issue](https://github.com/jwtk/jjwt/issues/388).

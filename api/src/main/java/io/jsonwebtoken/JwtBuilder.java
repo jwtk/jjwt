@@ -21,7 +21,6 @@ import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -106,7 +105,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param claims the JWT claims to be set as the JWT body.
      * @return the builder for method chaining.
      */
-    JwtBuilder setClaims(Map<String, Object> claims);
+    JwtBuilder setClaims(Map<String, ?> claims);
 
     /**
      * Adds all given name/value pairs to the JSON Claims in the payload. If a Claims instance does not yet exist at the
