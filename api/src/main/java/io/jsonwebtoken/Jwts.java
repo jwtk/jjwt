@@ -99,9 +99,35 @@ public final class Jwts {
      * Returns a new {@link JwtParser} instance that can be configured and then used to parse JWT strings.
      *
      * @return a new {@link JwtParser} instance that can be configured and then used to parse JWT strings.
+     * @deprecated use {@link Jwts#parserBuilder()} instead. See {@link JwtParserBuilder} for usage details.
+     * <p>Migration to new method structure is minimal, for example:
+     * <p>Old code:
+     * <pre>{@code
+     *     Jwts.parser()
+     *         .requireAudience("string")
+     *         .parse(jwtString)
+     * }</pre>
+     * <p>New code:
+     * <pre>{@code
+     *     Jwts.parserBuilder()
+     *         .requireAudience("string")
+     *         .build()
+     *         .parse(jwtString)
+     * }</pre>
+     * <p><b>NOTE: this method will be removed before version 1.0</b>
      */
+    @Deprecated
     public static JwtParser parser() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParser");
+    }
+
+    /**
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser).
+     *
+     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser).
+     */
+    public static JwtParserBuilder parserBuilder() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
     }
 
     /**

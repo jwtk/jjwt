@@ -17,17 +17,24 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.RequiredTypeException;
-
 import java.util.Date;
 import java.util.Map;
 
 public class DefaultClaims extends JwtMap implements Claims {
 
+    private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
+            "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
+            "Anything more complex is expected to be already converted to your desired type by the JSON Deserializer " +
+            "implementation. You may specify a custom Deserializer for a JwtParser with the desired conversion " +
+            "configuration via the JwtParserBuilder.deserializeJsonWith() method. " +
+            "See https://github.com/jwtk/jjwt#custom-json-processor for more information. If using Jackson, you can " +
+            "specify custom claim POJO types as described in https://github.com/jwtk/jjwt#json-jackson-custom-types";
+
     public DefaultClaims() {
         super();
     }
 
-    public DefaultClaims(Map<String, Object> map) {
+    public DefaultClaims(Map<String, ?> map) {
         super(map);
     }
 
@@ -159,7 +166,7 @@ public class DefaultClaims extends JwtMap implements Claims {
         }
 
         if (!requiredType.isInstance(value)) {
-            throw new RequiredTypeException("Expected value to be of type: " + requiredType + ", but was " + value.getClass());
+            throw new RequiredTypeException(String.format(CONVERSION_ERROR_MSG, value.getClass(), requiredType));
         }
 
         return requiredType.cast(value);

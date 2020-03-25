@@ -24,14 +24,13 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
-import io.jsonwebtoken.impl.io.InstanceLocator;
+import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -175,7 +174,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setClaims(Map<String, Object> claims) {
+    public JwtBuilder setClaims(Map<String, ?> claims) {
         this.claims = new DefaultClaims(claims);
         return this;
     }
@@ -295,10 +294,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public String compact() {
 
         if (this.serializer == null) {
-            //try to find one based on the runtime environment:
-            InstanceLocator<Serializer<Map<String,?>>> locator =
-                Classes.newInstance("io.jsonwebtoken.impl.io.RuntimeClasspathSerializerLocator");
-            this.serializer = locator.getInstance();
+            // try to find one based on the services available
+            // TODO: This util class will throw a UnavailableImplementationException here to retain behavior of previous version, remove in v1.0
+            // use the previous commented out line instead
+            this.serializer = LegacyServices.loadFirst(Serializer.class);
         }
 
         if (payload == null && Collections.isEmpty(claims)) {

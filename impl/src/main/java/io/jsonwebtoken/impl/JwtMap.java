@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.DateFormats;
-
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collection;
@@ -34,7 +33,7 @@ public class JwtMap implements Map<String, Object> {
         this.map = new LinkedHashMap<>();
     }
 
-    public JwtMap(Map<String, Object> map) {
+    public JwtMap(Map<String, ?> map) {
         this();
         Assert.notNull(map, "Map argument cannot be null.");
         putAll(map);

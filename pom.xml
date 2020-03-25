@@ -25,11 +25,17 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
     <url>https://github.com/jwtk/jjwt</url>
+
+    <organization>
+        <name>jsonwebtoken.io</name>
+        <url>https://github.com/jwtk/jjwt</url>
+    </organization>
+    <inceptionYear>2014</inceptionYear>
 
     <licenses>
         <license>
@@ -80,22 +86,26 @@
     <properties>
 
         <jjwt.root>${basedir}</jjwt.root>
+        <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
 
         <maven.jar.version>3.0.2</maven.jar.version>
-        <maven.compiler.version>3.6.1</maven.compiler.version>
+        <maven.compiler.version>3.8.0</maven.compiler.version>
+        <maven.javadoc.version>3.1.1</maven.javadoc.version>
+        <gmavenplus.version>1.6.1</gmavenplus.version>
 
         <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.9.6</jackson.version>
+        <jackson.version>2.9.10.3</jackson.version>
         <orgjson.version>20180130</orgjson.version>
+        <gson.version>2.8.5</gson.version>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.60</bouncycastle.version>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.1</groovy.version>
+        <groovy.version>2.5.9</groovy.version>
         <logback.version>1.2.3</logback.version>
         <easymock.version>3.6</easymock.version>
         <junit.version>4.12</junit.version>
@@ -132,6 +142,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-gson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
@@ -141,11 +156,22 @@
                 <artifactId>json</artifactId>
                 <version>${orgjson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
 
             <!-- Used only during testing for PS256, PS384 and PS512 since JDK <= 10 doesn't support them: -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
                 <version>${bouncycastle.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -220,6 +246,100 @@
                         <targetPercentage>100.000000%</targetPercentage>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>3.0</version>
+                    <configuration>
+                        <aggregate>true</aggregate>
+                        <skipExistingHeaders>true</skipExistingHeaders>
+                        <header>${jjwt.root}/src/license/header.txt</header>
+                        <headerDefinitions>
+                            <headerDefinition>${jjwt.root}/src/license/header_format.xml</headerDefinition>
+                        </headerDefinitions>
+                        <properties>
+                            <organization.name>${project.organization.name}</organization.name>
+                            <year>2019</year>
+                        </properties>
+                        <excludes>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>LICENSE</exclude>
+                            <exclude>**/lombok.config</exclude>
+                            <exclude>**/mvnw</exclude>
+                            <exclude>.gitattributes</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.4</version>
+                    <configuration>
+                        <source>${jdk.version}</source>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <!-- japicmp will scan code for binary breaking changes, Open api/target/japicmp/japicmp.html
+                         for a report of the changes since ${jjwt.previousVersion} -->
+                    <groupId>com.github.siom79.japicmp</groupId>
+                    <artifactId>japicmp-maven-plugin</artifactId>
+                    <version>0.13.1</version>
+                    <configuration>
+                        <oldVersion>
+                            <dependency>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${jjwt.previousVersion}</version>
+                                <type>jar</type>
+                            </dependency>
+                        </oldVersion>
+                        <parameter>
+                            <onlyModified>true</onlyModified>
+                            <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                            <!-- TODO: enable after 1.0 -->
+                            <!-- <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
+                        </parameter>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>japicmp</id>
+                            <goals>
+                                <goal>cmp</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
+                     binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
+                     avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
+                <!-- TODO: remove these deprecated packages and this config before v1.0 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <configuration>
+                        <shadedClassifierName>deprecated</shadedClassifierName>
+                        <shadedArtifactAttached>true</shadedArtifactAttached>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <artifactSet>
+                            <includes>
+                                <include>${project.groupId}:${project.artifactId}</include>
+                            </includes>
+                        </artifactSet>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                        </transformers>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -257,29 +377,11 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven.jar.version}</version>
-                <!--
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                        </manifestFile>
-                    </archive>
-                </configuration>
-                -->
-            </plugin>
             <!-- Allow for writing tests in Groovy: -->
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.1</version>
+                <version>${gmavenplus.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -384,7 +486,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>3.3.0</version>
-                <extensions>true</extensions>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -396,17 +497,26 @@
                 </executions>
                 <configuration>
                     <instructions>
-                        <Import-Package><![CDATA[
-                            android.util;resolution:=optional,
-                            org.bouncycastle.jce;resolution:=optional,
-                            org.bouncycastle.jce.spec;resolution:=optional,
-                            *
-                        ]]>
-                        </Import-Package>
+                        <_include>-bnd.bnd</_include>
                     </instructions>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven.jar.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        </manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
             <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
             <plugin>
                 <groupId>org.jwtk.coveralls</groupId>
@@ -419,7 +529,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
+                <version>${maven.javadoc.version}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -428,6 +538,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <failOnError>false</failOnError>
+                </configuration>
                 <dependencies>
                     <!-- Workaround for Java 9 -->
                     <dependency>
@@ -448,6 +561,9 @@
             <properties>
                 <!-- Turn off JDK >= 8's lint checks: -->
                 <additionalparam>-Xdoclint:none</additionalparam>
+                <gmavenplus.version>1.8.1</gmavenplus.version>
+                <easymock.version>4.2</easymock.version>
+                <powermock.version>2.0.2</powermock.version>
             </properties>
         </profile>
         <profile>
@@ -501,7 +617,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
+                        <version>${maven.javadoc.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>

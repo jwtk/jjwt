@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-root</artifactId>
-        <version>0.11.0-SNAPSHOT</version>
+        <version>0.12.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -44,4 +44,37 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
+                 binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
+                 avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
+            <!-- TODO: remove these deprecated packages and this config before v1.0 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>io.jsonwebtoken.orgjson.io</pattern>
+                            <shadedPattern>io.jsonwebtoken.io</shadedPattern>
+                            <includes>io.jsonwebtoken.orgjson.io.*</includes>
+                        </relocation>
+                    </relocations>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.siom79.japicmp</groupId>
+                <artifactId>japicmp-maven-plugin</artifactId>
+                <configuration>
+                    <newVersion>
+                        <file>
+                            <!-- compare the previous version with the new 'deprecated' package -->
+                            <path>${project.build.directory}/${project.artifactId}-${project.version}-deprecated.${project.packaging}</path>
+                        </file>
+                    </newVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

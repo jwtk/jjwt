@@ -141,7 +141,7 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      *
      * <p>If present, this value is the timestamp when the JWT was created.</p>
      *
-     * @return the JWT {@code nbf} value or {@code null} if not present.
+     * @return the JWT {@code iat} value or {@code null} if not present.
      */
     Date getIssuedAt();
 
@@ -170,5 +170,22 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
     @Override //only for better/targeted JavaDoc
     Claims setId(String jti);
 
+    /**
+     * Returns the JWTs claim ({@code claimName}) value as a type {@code requiredType}, or {@code null} if not present.
+     *
+     * <p>JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
+     * complex is expected to be already converted to your desired type by the JSON
+     * {@link io.jsonwebtoken.io.Deserializer Deserializer} implementation. You may specify a custom Deserializer for a
+     * JwtParser with the desired conversion configuration via the {@link JwtParserBuilder#deserializeJsonWith} method.
+     * See <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a></a> for more
+     * information. If using Jackson, you can specify custom claim POJO types as described in
+     * <a href="https://github.com/jwtk/jjwt#json-jackson-custom-types">custom claim types</a>.
+     *
+     * @param claimName name of claim
+     * @param requiredType the type of the value expected to be returned
+     * @param <T> the type of the value expected to be returned
+     * @return the JWT {@code claimName} value or {@code null} if not present.
+     * @throws RequiredTypeException throw if the claim value is not null and not of type {@code requiredType}
+     */
     <T> T get(String claimName, Class<T> requiredType);
 }

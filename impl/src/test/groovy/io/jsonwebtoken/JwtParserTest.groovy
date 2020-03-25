@@ -27,6 +27,7 @@ import java.security.SecureRandom
 
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
+import static io.jsonwebtoken.DateTestUtils.truncateMillis
 import static org.junit.Assert.*
 
 class JwtParserTest {
@@ -55,7 +56,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload('Hello World!').signWith(SignatureAlgorithm.HS256, keyBytes).compact()
 
         try {
-            Jwts.parser().setSigningKey(keyBytes).setSigningKey(key).parse(compact)
+            Jwts.parserBuilder().setSigningKey(keyBytes).setSigningKey(key).build().parse(compact)
             fail()
         } catch (IllegalStateException ise) {
             assertEquals ise.getMessage(), 'A key object and key bytes cannot both be specified. Choose either.'
@@ -64,12 +65,12 @@ class JwtParserTest {
 
     @Test
     void testIsSignedWithNullArgument() {
-        assertFalse Jwts.parser().isSigned(null)
+        assertFalse Jwts.parserBuilder().build().isSigned(null)
     }
 
     @Test
     void testIsSignedWithJunkArgument() {
-        assertFalse Jwts.parser().isSigned('hello')
+        assertFalse Jwts.parserBuilder().build().isSigned('hello')
     }
 
     @Test
@@ -80,7 +81,7 @@ class JwtParserTest {
         String bad = base64Url('{"alg":"none"}') + '.' + base64Url(junkPayload) + '.'
 
         try {
-            Jwts.parser().parse(bad)
+            Jwts.parserBuilder().build().parse(bad)
             fail()
         } catch (MalformedJwtException expected) {
             assertEquals expected.getMessage(), 'Unable to read JSON value: ' + junkPayload
@@ -101,7 +102,7 @@ class JwtParserTest {
         String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig)
 
         try {
-            Jwts.parser().setSigningKey(randomKey()).parse(bad)
+            Jwts.parserBuilder().setSigningKey(randomKey()).build().parse(bad)
             fail()
         } catch (SignatureException se) {
             assertEquals se.getMessage(), "Unsupported signature algorithm '$badAlgorithmName'".toString()
@@ -120,7 +121,7 @@ class JwtParserTest {
         String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig)
 
         try {
-            Jwts.parser().setSigningKey(randomKey()).parse(bad)
+            Jwts.parserBuilder().setSigningKey(randomKey()).build().parse(bad)
             fail()
         } catch (SignatureException se) {
             assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
@@ -140,7 +141,7 @@ class JwtParserTest {
         String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig)
 
         try {
-            Jwts.parser().setSigningKey(randomKey()).parse(bad)
+            Jwts.parserBuilder().setSigningKey(randomKey()).build().parse(bad)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals se.getMessage(), 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.'
@@ -160,9 +161,9 @@ class JwtParserTest {
         //noinspection GrDeprecatedAPIUsage
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, base64Encodedkey).compact()
 
-        assertTrue Jwts.parser().isSigned(compact)
+        assertTrue Jwts.parserBuilder().build().isSigned(compact)
 
-        Jwt<Header, String> jwt = Jwts.parser().setSigningKey(base64Encodedkey).parse(compact)
+        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(base64Encodedkey).build().parse(compact)
 
         assertEquals jwt.body, payload
     }
@@ -175,7 +176,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
-            Jwts.parser().parse(compact)
+            Jwts.parserBuilder().build().parse(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
@@ -193,7 +194,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
 
         try {
-            Jwts.parser().parse(compact)
+            Jwts.parserBuilder().build().parse(compact)
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
@@ -210,7 +211,7 @@ class JwtParserTest {
         String subject = 'Joe'
         String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(10).build().parse(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
     }
@@ -222,7 +223,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
-            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
+            Jwts.parserBuilder().setAllowedClockSkewSeconds(1).build().parse(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
@@ -236,7 +237,7 @@ class JwtParserTest {
         String subject = 'Joe'
         String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setAllowedClockSkewSeconds(10).parse(compact)
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setAllowedClockSkewSeconds(10).build().parse(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
     }
@@ -248,7 +249,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
 
         try {
-            Jwts.parser().setAllowedClockSkewSeconds(1).parse(compact)
+            Jwts.parserBuilder().setAllowedClockSkewSeconds(1).build().parse(compact)
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
@@ -266,7 +267,7 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setPayload(payload).compact()
 
-        Jwt<Header, String> jwt = Jwts.parser().parsePlaintextJwt(compact)
+        Jwt<Header, String> jwt = Jwts.parserBuilder().build().parsePlaintextJwt(compact)
 
         assertEquals jwt.getBody(), payload
     }
@@ -277,7 +278,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').compact()
 
         try {
-            Jwts.parser().parsePlaintextJwt(compact)
+            Jwts.parserBuilder().build().parsePlaintextJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
@@ -292,7 +293,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parser().parsePlaintextJws(compact)
+            Jwts.parserBuilder().build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed JWSs are not supported.'
@@ -305,7 +306,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parser().parsePlaintextJws(compact)
+            Jwts.parserBuilder().build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed JWSs are not supported.'
@@ -323,7 +324,7 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setSubject(subject).compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().parseClaimsJwt(compact)
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().build().parseClaimsJwt(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
     }
@@ -336,7 +337,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).compact()
 
         try {
-            Jwts.parser().parseClaimsJwt(compact)
+            Jwts.parserBuilder().build().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
@@ -351,7 +352,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parser().parseClaimsJwt(compact)
+            Jwts.parserBuilder().build().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed JWSs are not supported.'
@@ -364,7 +365,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parser().parseClaimsJwt(compact)
+            Jwts.parserBuilder().build().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed JWSs are not supported.'
@@ -381,7 +382,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
-            Jwts.parser().parseClaimsJwt(compact)
+            Jwts.parserBuilder().build().parseClaimsJwt(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
@@ -396,7 +397,9 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
 
         try {
-            Jwts.parser().parseClaimsJwt(compact)
+            Jwts.parserBuilder().
+                    build().
+                    parseClaimsJwt(compact)
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
@@ -416,7 +419,10 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
 
-        Jwt<Header, String> jwt = Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+        Jwt<Header, String> jwt = Jwts.parserBuilder().
+                setSigningKey(key).
+                build().
+                parsePlaintextJws(compact)
 
         assertEquals jwt.getBody(), payload
     }
@@ -431,7 +437,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
@@ -448,7 +454,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
@@ -465,7 +471,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
@@ -485,7 +491,7 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getSubject(), sub
     }
@@ -504,7 +510,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).setExpiration(exp).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJwt(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJwt(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
@@ -525,7 +531,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
             fail()
         } catch (PrematureJwtException e) {
             assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
@@ -544,7 +550,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
@@ -561,7 +567,9 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).
+                    build().
+                    parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
@@ -578,7 +586,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
@@ -605,7 +613,7 @@ class JwtParserTest {
             }
         }
 
-        Jws jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+        Jws jws = Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
 
         assertEquals jws.getBody().getSubject(), subject
     }
@@ -627,7 +635,7 @@ class JwtParserTest {
         }
 
         try {
-            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
             fail()
         } catch (SignatureException se) {
             assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
@@ -651,7 +659,7 @@ class JwtParserTest {
         }
 
         try {
-            Jwts.parser().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
             fail()
         } catch (IllegalStateException ise) {
             assertEquals ise.getMessage(), 'A signing key resolver and a key object cannot both be specified. Choose either.'
@@ -675,7 +683,7 @@ class JwtParserTest {
         }
 
         try {
-            Jwts.parser().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
             fail()
         } catch (IllegalStateException ise) {
             assertEquals ise.getMessage(), 'A signing key resolver and key bytes cannot both be specified. Choose either.'
@@ -692,7 +700,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKeyResolver(null).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKeyResolver(null).build().parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException iae) {
             assertEquals iae.getMessage(), 'SigningKeyResolver cannot be null.'
@@ -711,7 +719,7 @@ class JwtParserTest {
         def signingKeyResolver = new SigningKeyResolverAdapter()
 
         try {
-            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException ex) {
             assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
@@ -739,7 +747,7 @@ class JwtParserTest {
                 claim("long_big", bigLong).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
 
         Claims claims = jwt.getBody()
 
@@ -770,7 +778,7 @@ class JwtParserTest {
             }
         }
 
-        Jws<String> jws = Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+        Jws<String> jws = Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
 
         assertEquals jws.getBody(), inputPayload
     }
@@ -792,7 +800,7 @@ class JwtParserTest {
         }
 
         try {
-            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
             fail()
         } catch (SignatureException se) {
             assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
@@ -811,7 +819,7 @@ class JwtParserTest {
         def signingKeyResolver = new SigningKeyResolverAdapter()
 
         try {
-            Jwts.parser().setSigningKeyResolver(signingKeyResolver).parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException ex) {
             assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
@@ -831,7 +839,7 @@ class JwtParserTest {
 
         try {
             // expecting null claim name, but with value
-            Jwts.parser().setSigningKey(key).require(null, expectedClaimValue).parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).require(null, expectedClaimValue).build().parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
             assertEquals(
@@ -854,8 +862,9 @@ class JwtParserTest {
 
         try {
             // expecting null claim name, but with value
-            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+            Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                     require("", expectedClaimValue).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
@@ -877,8 +886,9 @@ class JwtParserTest {
 
         try {
             // expecting claim name, but with null value
-            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+            Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                     require(expectedClaimName, null).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException e) {
@@ -900,8 +910,9 @@ class JwtParserTest {
                 claim(expectedClaimName, expectedClaimValue).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 require(expectedClaimName, expectedClaimValue).
+                build().
                 parseClaimsJws(compact)
 
         assertEquals jwt.getBody().get(expectedClaimName), expectedClaimValue
@@ -921,8 +932,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     require(goodClaimName, goodClaimValue).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -945,8 +957,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+            Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                     require(claimName, claimValue).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -968,14 +981,12 @@ class JwtParserTest {
                 setIssuedAt(issuedAt).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireIssuedAt(issuedAt).
+                build().
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def issuedAtMillis = ((long) issuedAt.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getIssuedAt().getTime(), issuedAtMillis, 0
+        assertEquals jwt.getBody().getIssuedAt().getTime(), truncateMillis(issuedAt), 0
     }
 
     @Test(expected = IncorrectClaimException)
@@ -989,8 +1000,9 @@ class JwtParserTest {
                 setIssuedAt(badIssuedAt).
                 compact()
 
-        Jwts.parser().setSigningKey(key).
+        Jwts.parserBuilder().setSigningKey(key).
                 requireIssuedAt(goodIssuedAt).
+                build().
                 parseClaimsJws(compact)
     }
 
@@ -1004,8 +1016,9 @@ class JwtParserTest {
                 setSubject("Dummy").
                 compact()
 
-        Jwts.parser().setSigningKey(key).
+        Jwts.parserBuilder().setSigningKey(key).
                 requireIssuedAt(issuedAt).
+                build().
                 parseClaimsJws(compact)
     }
 
@@ -1019,8 +1032,9 @@ class JwtParserTest {
                 setIssuer(issuer).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireIssuer(issuer).
+                build().
                 parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getIssuer(), issuer
@@ -1038,8 +1052,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireIssuer(goodIssuer).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -1061,8 +1076,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireIssuer(issuer).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -1083,8 +1099,9 @@ class JwtParserTest {
                 setAudience(audience).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireAudience(audience).
+                build().
                 parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getAudience(), audience
@@ -1102,8 +1119,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireAudience(goodAudience).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -1125,8 +1143,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireAudience(audience).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -1147,8 +1166,9 @@ class JwtParserTest {
                 setSubject(subject).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireSubject(subject).
+                build().
                 parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getSubject(), subject
@@ -1166,8 +1186,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireSubject(goodSubject).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -1189,8 +1210,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireSubject(subject).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -1211,8 +1233,9 @@ class JwtParserTest {
                 setId(id).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireId(id).
+                build().
                 parseClaimsJws(compact)
 
         assertEquals jwt.getBody().getId(), id
@@ -1230,8 +1253,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireId(goodId).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -1253,8 +1277,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     requireId(id).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -1276,14 +1301,12 @@ class JwtParserTest {
                 setExpiration(expiration).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireExpiration(expiration).
+                build().
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def expirationMillis = ((long) expiration.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getExpiration().getTime(), expirationMillis, 0
+        assertEquals jwt.getBody().getExpiration().getTime(), truncateMillis(expiration)
     }
 
     @Test(expected = IncorrectClaimException)
@@ -1297,8 +1320,9 @@ class JwtParserTest {
                 setExpiration(badExpiration).
                 compact()
 
-        Jwts.parser().setSigningKey(key).
+        Jwts.parserBuilder().setSigningKey(key).
                 requireExpiration(goodExpiration).
+                build().
                 parseClaimsJws(compact)
     }
 
@@ -1312,8 +1336,9 @@ class JwtParserTest {
                 setSubject("Dummy").
                 compact()
 
-        Jwts.parser().setSigningKey(key).
+        Jwts.parserBuilder().setSigningKey(key).
                 requireExpiration(expiration).
+                build().
                 parseClaimsJws(compact)
     }
 
@@ -1328,14 +1353,12 @@ class JwtParserTest {
                 setNotBefore(notBefore).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 requireNotBefore(notBefore).
+                build().
                 parseClaimsJws(compact)
 
-        // system converts to seconds (lopping off millis precision), then returns millis
-        def notBeforeMillis = ((long) notBefore.getTime() / 1000) * 1000
-
-        assertEquals jwt.getBody().getNotBefore().getTime(), notBeforeMillis, 0
+        assertEquals jwt.getBody().getNotBefore().getTime(), truncateMillis(notBefore)
     }
 
     @Test(expected = IncorrectClaimException)
@@ -1349,8 +1372,9 @@ class JwtParserTest {
                 setNotBefore(badNotBefore).
                 compact()
 
-        Jwts.parser().setSigningKey(key).
+        Jwts.parserBuilder().setSigningKey(key).
                 requireNotBefore(goodNotBefore).
+                build().
                 parseClaimsJws(compact)
     }
 
@@ -1364,8 +1388,9 @@ class JwtParserTest {
                 setSubject("Dummy").
                 compact()
 
-        Jwts.parser().setSigningKey(key).
+        Jwts.parserBuilder().setSigningKey(key).
                 requireNotBefore(notBefore).
+                build().
                 parseClaimsJws(compact)
     }
 
@@ -1380,8 +1405,9 @@ class JwtParserTest {
                 claim("aDate", aDate).
                 compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setSigningKey(key).
                 require("aDate", aDate).
+                build().
                 parseClaimsJws(compact)
 
         assertEquals jwt.getBody().get("aDate", Date.class), aDate
@@ -1401,8 +1427,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     require("aDate", goodDate).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -1425,8 +1452,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     require("aDate", goodDate).
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
@@ -1448,8 +1476,9 @@ class JwtParserTest {
                 compact()
 
         try {
-            Jwts.parser().setSigningKey(key).
+            Jwts.parserBuilder().setSigningKey(key).
                     require("aDate", aDate).
+                build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
@@ -1468,12 +1497,12 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
 
-        Jwts.parser().setClock(new FixedClock(beforeExpiry)).parse(compact)
+        Jwts.parserBuilder().setClock(new FixedClock(beforeExpiry)).build().parse(compact)
     }
 
     @Test
     void testParseClockManipulationWithNullClock() {
-        JwtParser parser = Jwts.parser();
+        JwtParserBuilder parser = Jwts.parserBuilder();
         try {
             parser.setClock(null)
             fail()
@@ -1488,7 +1517,7 @@ class JwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
 
         try {
-            Jwts.parser().setClock(new DefaultClock()).parse(compact)
+            Jwts.parserBuilder().setClock(new DefaultClock()).build().parse(compact)
             fail()
         } catch (ExpiredJwtException e) {
             assertTrue e.getMessage().startsWith('JWT expired at ')
@@ -1509,7 +1538,7 @@ class JwtParserTest {
         String bad = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(badSig) + '.' + base64Url(bogus)
 
         try {
-            Jwts.parser().setSigningKey(randomKey()).parse(bad)
+            Jwts.parserBuilder().setSigningKey(randomKey()).build().parse(bad)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'JWT strings must contain exactly 2 period characters. Found: 3', se.message
@@ -1523,7 +1552,7 @@ class JwtParserTest {
 
         String jwtStr = '.' + base64Url(payload) + '.'
 
-        Jwt jwt = Jwts.parser().parse(jwtStr)
+        Jwt jwt = Jwts.parserBuilder().build().parse(jwtStr)
 
         assertTrue jwt.header == null
         assertEquals 'Joe', jwt.body.get('subject')
@@ -1539,7 +1568,7 @@ class JwtParserTest {
         String jwtStr = '.' + base64Url(payload) + '.' + base64Url(sig)
 
         try {
-            Jwts.parser().parse(jwtStr)
+            Jwts.parserBuilder().build().parse(jwtStr)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
@@ -1558,7 +1587,7 @@ class JwtParserTest {
         String jwtStr = base64Url(header) + '.' + base64Url(payload) + '.' + base64Url(sig)
 
         try {
-            Jwts.parser().parse(jwtStr)
+            Jwts.parserBuilder().build().parse(jwtStr)
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.', se.message
