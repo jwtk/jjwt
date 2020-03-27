@@ -256,6 +256,58 @@ class JwtParserTest {
         }
     }
 
+    @Test
+    void testParseWithExpiredJwtWithinAllowedClockSkewMillis() {
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String subject = 'Joe'
+        String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setAllowedClockSkewMilliseconds(10000).build().parse(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseWithExpiredJwtNotWithinAllowedClockSkewMillis() {
+        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+
+        try {
+            Jwts.parserBuilder().setAllowedClockSkewMilliseconds(1000).build().parse(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
+    @Test
+    void testParseWithPrematureJwtWithinAllowedClockSkewMillis() {
+        Date exp = new Date(System.currentTimeMillis() + 3000)
+
+        String subject = 'Joe'
+        String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parserBuilder().setAllowedClockSkewMilliseconds(10000).build().parse(compact)
+
+        assertEquals jwt.getBody().getSubject(), subject
+    }
+
+    @Test
+    void testParseWithPrematureJwtNotWithinAllowedClockSkewMillis() {
+        Date exp = new Date(System.currentTimeMillis() + 3000)
+
+        String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
+
+        try {
+            Jwts.parserBuilder().setAllowedClockSkewMilliseconds(1000).build().parse(compact)
+            fail()
+        } catch (PrematureJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+        }
+    }
+
     // ========================================================================
     // parsePlaintextJwt tests
     // ========================================================================

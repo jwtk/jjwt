@@ -110,6 +110,11 @@ class ImmutableJwtParserTest {
     void setAllowedClockSkewSecondsTest() {
         jwtParser().setAllowedClockSkewSeconds(1L)
     }
+    
+    @Test(expected=IllegalStateException)
+    void setAllowedClockSkewMillisecondsTest() {
+        jwtParser().setAllowedClockSkewMilliseconds(1000L)
+    }
 
     @Test(expected=IllegalStateException)
     void setSigningKeyBytesTest() {

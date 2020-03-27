@@ -104,6 +104,11 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
+    public JwtParser setAllowedClockSkewMilliseconds(long milliseconds) {
+        return doNotMutate();
+    }
+
+    @Override
     public JwtParser setSigningKey(byte[] key) {
         throw doNotMutate();
     }
@@ -173,8 +178,4 @@ class ImmutableJwtParser implements JwtParser {
         return this.jwtParser.parseClaimsJws(claimsJws);
     }
 
-    @Override
-    public JwtParser setAllowedClockSkewMilliSeconds(long milliseconds) {
-        return this.jwtParser.setAllowedClockSkewMilliSeconds(milliseconds);
-    }
 }
