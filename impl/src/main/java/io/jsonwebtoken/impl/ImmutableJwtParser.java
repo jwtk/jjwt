@@ -172,4 +172,9 @@ class ImmutableJwtParser implements JwtParser {
     public Jws<Claims> parseClaimsJws(String claimsJws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parseClaimsJws(claimsJws);
     }
+
+    @Override
+    public JwtParser setAllowedClockSkewMilliSeconds(long milliseconds) {
+        return this.jwtParser.setAllowedClockSkewMilliSeconds(milliseconds);
+    }
 }
