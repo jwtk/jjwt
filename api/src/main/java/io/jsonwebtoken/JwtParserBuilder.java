@@ -151,6 +151,15 @@ public interface JwtParserBuilder {
     JwtParserBuilder setAllowedClockSkewSeconds(long seconds);
 
     /**
+     * Sets the amount of clock skew in milliseconds to tolerate when verifying the local time against the {@code exp}
+     * and {@code nbf} claims.
+     *
+     * @param milliseconds the number of milliseconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
+     * @return the parser builder for method chaining.
+     */
+    JwtParserBuilder setAllowedClockSkewMilliSeconds(long milliseconds);
+
+    /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
      * <p>

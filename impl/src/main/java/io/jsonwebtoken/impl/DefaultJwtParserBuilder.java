@@ -136,6 +136,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
+    public JwtParserBuilder setAllowedClockSkewMilliSeconds(long milliseconds) {
+        this.allowedClockSkewMillis = Math.max(0, milliseconds);
+        return this;
+    }
+
+    @Override
     public JwtParserBuilder setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
         this.keyBytes = key;
