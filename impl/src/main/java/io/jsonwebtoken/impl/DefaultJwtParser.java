@@ -180,8 +180,15 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
+    @Deprecated
     public JwtParser setAllowedClockSkewSeconds(long seconds) {
         this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
+        return this;
+    }
+
+    @Override
+    public JwtParser setAllowedClockSkewMilliSeconds(long milliseconds) {
+        this.allowedClockSkewMillis = Math.max(0, milliseconds);
         return this;
     }
 
