@@ -130,6 +130,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
+    @Deprecated
     public JwtParserBuilder setAllowedClockSkewSeconds(long seconds) {
         this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
         return this;

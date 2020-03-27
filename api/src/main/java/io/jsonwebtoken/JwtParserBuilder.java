@@ -142,6 +142,9 @@ public interface JwtParserBuilder {
     JwtParserBuilder setClock(Clock clock);
 
     /**
+     * @deprecated As seconds params may produce an overflow if max values are used,
+     * use {@link #setAllowedClockSkewMilliSeconds(long)} instead
+     *
      * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
      * and {@code nbf} claims.
      *
