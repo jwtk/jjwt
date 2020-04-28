@@ -24,7 +24,9 @@ import org.junit.Test
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.security.Key
+import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.cert.Certificate
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
@@ -384,6 +386,22 @@ class SignatureAlgorithmTest {
             alg.assertValidSigningKey(key)
 
             verify key
+        }
+    }
+
+    @Test // https://github.com/jwtk/jjwt/issues/588
+    void testPkcs12Names() {
+        KeyStore pkcs12 = KeyStore.getInstance("pkcs12")
+        pkcs12.load(null, "keystorepassword".toCharArray())
+        for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {it.isHmac()}) {
+            Key sk = new SecretKeySpec(new byte[alg.minKeyLength / 8], alg.jcaName)
+            pkcs12.setKeyEntry(alg.name(), sk, "keypassword".toCharArray(), new Certificate[0]);
+            Key sk2 = pkcs12.getKey(alg.name(), "keypassword".toCharArray());
+            alg.assertValidSigningKey(sk2);
+        }
+
+        for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {!it.isHmac()}) {
+            assertEquals(Collections.emptyList(), alg.alternativeNames)
         }
     }
 

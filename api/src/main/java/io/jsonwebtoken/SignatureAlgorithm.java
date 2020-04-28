@@ -45,17 +45,17 @@ public enum SignatureAlgorithm {
     /**
      * JWA algorithm name for {@code HMAC using SHA-256}
      */
-    HS256("HS256", "HMAC using SHA-256", "HMAC", "HmacSHA256", true, 256, 256),
+    HS256("HS256", "HMAC using SHA-256", "HMAC", "HmacSHA256", true, 256, 256, "1.2.840.113549.2.9"),
 
     /**
      * JWA algorithm name for {@code HMAC using SHA-384}
      */
-    HS384("HS384", "HMAC using SHA-384", "HMAC", "HmacSHA384", true, 384, 384),
+    HS384("HS384", "HMAC using SHA-384", "HMAC", "HmacSHA384", true, 384, 384, "1.2.840.113549.2.10"),
 
     /**
      * JWA algorithm name for {@code HMAC using SHA-512}
      */
-    HS512("HS512", "HMAC using SHA-512", "HMAC", "HmacSHA512", true, 512, 512),
+    HS512("HS512", "HMAC using SHA-512", "HMAC", "HmacSHA512", true, 512, 512, "1.2.840.113549.2.11"),
 
     /**
      * JWA algorithm name for {@code RSASSA-PKCS-v1_5 using SHA-256}
@@ -122,9 +122,10 @@ public enum SignatureAlgorithm {
     private final boolean jdkStandard;
     private final int digestLength;
     private final int minKeyLength;
+    private final List<String> alternativeNames;
 
     SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
-                       int digestLength, int minKeyLength) {
+                       int digestLength, int minKeyLength, String... alternativeNames) {
         this.value = value;
         this.description = description;
         this.familyName = familyName;
@@ -132,6 +133,7 @@ public enum SignatureAlgorithm {
         this.jdkStandard = jdkStandard;
         this.digestLength = digestLength;
         this.minKeyLength = minKeyLength;
+        this.alternativeNames = Collections.unmodifiableList(Arrays.asList(alternativeNames));
     }
 
     /**
@@ -290,6 +292,21 @@ public enum SignatureAlgorithm {
     }
 
     /**
+     * Returns alternative algorithm names to the {@link #getJcaName() jcaName} that may occur, e.g. when loading keys
+     * from a pkcs#12 keystore.
+     *
+     * @return alternative algorithm names to the {@link #getJcaName() jcaName} that may occur, e.g. when loading keys
+     * from a pkcs#12 keystore.
+     * @since 0.11.2
+     * @deprecated To be removed, when the corresponding JDK Bug is fixed.
+     */
+    // TODO: Link JDK Bug in documentation
+    @Deprecated()
+    public List<String> getAlternativeNames() {
+        return this.alternativeNames;
+    }
+
+    /**
      * Returns quietly if the specified key is allowed to create signatures using this algorithm
      * according to the <a href="https://tools.ietf.org/html/rfc7518">JWT JWA Specification (RFC 7518)</a> or throws an
      * {@link InvalidKeyException} if the key is not allowed or not secure enough for this algorithm.
@@ -353,7 +370,10 @@ public enum SignatureAlgorithm {
             // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
             if (!HS256.jcaName.equalsIgnoreCase(alg) &&
                 !HS384.jcaName.equalsIgnoreCase(alg) &&
-                !HS512.jcaName.equalsIgnoreCase(alg)) {
+                !HS512.jcaName.equalsIgnoreCase(alg) &&
+                !HS256.alternativeNames.contains(alg) &&
+                !HS384.alternativeNames.contains(alg) &&
+                !HS512.alternativeNames.contains(alg)) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }
