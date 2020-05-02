@@ -298,10 +298,9 @@ public enum SignatureAlgorithm {
      * @return alternative algorithm names to the {@link #getJcaName() jcaName} that may occur, e.g. when loading keys
      * from a pkcs#12 keystore.
      * @since 0.11.2
-     * @deprecated To be removed, when the corresponding JDK Bug is fixed.
+     * @deprecated To be removed, when <a href="https://bugs.openjdk.java.net/browse/JDK-8243551">JDK-8243551</a> is fixed.
      */
-    // TODO: Link JDK Bug in documentation
-    @Deprecated()
+    @Deprecated
     public List<String> getAlternativeNames() {
         return this.alternativeNames;
     }
