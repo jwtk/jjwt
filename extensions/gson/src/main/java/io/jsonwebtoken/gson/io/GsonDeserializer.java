@@ -19,6 +19,8 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
+
 import java.io.IOException;
 
 public class GsonDeserializer<T> implements Deserializer<T> {
@@ -54,6 +56,6 @@ public class GsonDeserializer<T> implements Deserializer<T> {
     }
 
     protected T readValue(byte[] bytes) throws IOException {
-        return gson.fromJson(new String(bytes), returnType);
+        return gson.fromJson(new String(bytes, Strings.UTF_8), returnType);
     }
 }
