@@ -63,7 +63,7 @@ public final class Maps {
          * @param value the value of map entry to be added
          * @return the current MapBuilder to allow for method chaining.
          */
-        MapBuilder and(K key, V value);
+        MapBuilder<K, V> and(K key, V value);
 
         /**
          * Returns a the resulting Map object from this MapBuilder.
@@ -76,7 +76,7 @@ public final class Maps {
 
         private final Map<K, V> data = new HashMap<>();
 
-        public MapBuilder and(K key, V value) {
+        public MapBuilder<K, V> and(K key, V value) {
             data.put(key, value);
             return this;
         }
