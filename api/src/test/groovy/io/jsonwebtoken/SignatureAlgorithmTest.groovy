@@ -24,9 +24,7 @@ import org.junit.Test
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.security.Key
-import java.security.KeyStore
 import java.security.PrivateKey
-import java.security.cert.Certificate
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
@@ -391,6 +389,10 @@ class SignatureAlgorithmTest {
 
     @Test // https://github.com/jwtk/jjwt/issues/588
     void assertAssertValidHmacSigningKeyCaseOidAlgorithmName() {
+        for (SignatureAlgorithm alg in EnumSet.complementOf(EnumSet.of(SignatureAlgorithm.NONE))) {
+            assertNotNull(alg.pkcs12Name)
+        }
+
         for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {it.isHmac()}) {
 
             int numBits = alg.minKeyLength
@@ -398,7 +400,7 @@ class SignatureAlgorithmTest {
 
             SecretKey key = createMock(SecretKey)
             expect(key.getEncoded()).andReturn(new byte[numBytes])
-            expect(key.getAlgorithm()).andReturn(alg.oid)
+            expect(key.getAlgorithm()).andReturn(alg.pkcs12Name)
 
             replay key
 
@@ -408,7 +410,8 @@ class SignatureAlgorithmTest {
         }
 
         for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {!it.isHmac()}) {
-            assertNull(alg.oid)
+            assertEquals("For non HmacSHA-keys the name when loaded from pkcs12 key store is identical to the jcaName",
+                    alg.jcaName, alg.pkcs12Name)
         }
     }
 

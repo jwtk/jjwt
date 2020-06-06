@@ -123,18 +123,20 @@ public enum SignatureAlgorithm {
     private final int digestLength;
     private final int minKeyLength;
     /**
+     * Algorithm name as given by {@link Key#getAlgorithm()} if the key was loaded from a pkcs12 Keystore.
+     *
      * @deprecated This is just a workaround for https://bugs.openjdk.java.net/browse/JDK-8243551
      */
     @Deprecated
-    private final String oid;
+    private final String pkcs12Name;
 
     SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
                        int digestLength, int minKeyLength) {
-        this(value, description,familyName, jcaName, jdkStandard, digestLength, minKeyLength, null);
+        this(value, description,familyName, jcaName, jdkStandard, digestLength, minKeyLength, jcaName);
     }
 
     SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
-                       int digestLength, int minKeyLength, String oid) {
+                       int digestLength, int minKeyLength, String pkcs12Name) {
         this.value = value;
         this.description = description;
         this.familyName = familyName;
@@ -142,7 +144,7 @@ public enum SignatureAlgorithm {
         this.jdkStandard = jdkStandard;
         this.digestLength = digestLength;
         this.minKeyLength = minKeyLength;
-        this.oid = oid;
+        this.pkcs12Name = pkcs12Name;
     }
 
     /**
@@ -365,9 +367,9 @@ public enum SignatureAlgorithm {
             if (!HS256.jcaName.equalsIgnoreCase(alg) &&
                 !HS384.jcaName.equalsIgnoreCase(alg) &&
                 !HS512.jcaName.equalsIgnoreCase(alg) &&
-                !HS256.oid.equals(alg) &&
-                !HS384.oid.equals(alg) &&
-                !HS512.oid.equals(alg)) {
+                !HS256.pkcs12Name.equals(alg) &&
+                !HS384.pkcs12Name.equals(alg) &&
+                !HS512.pkcs12Name.equals(alg)) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }
