@@ -122,10 +122,19 @@ public enum SignatureAlgorithm {
     private final boolean jdkStandard;
     private final int digestLength;
     private final int minKeyLength;
-    private final List<String> alternativeNames;
+    /**
+     * @deprecated This is just a workaround for https://bugs.openjdk.java.net/browse/JDK-8243551
+     */
+    @Deprecated
+    private final String oid;
 
     SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
-                       int digestLength, int minKeyLength, String... alternativeNames) {
+                       int digestLength, int minKeyLength) {
+        this(value, description,familyName, jcaName, jdkStandard, digestLength, minKeyLength, null);
+    }
+
+    SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
+                       int digestLength, int minKeyLength, String oid) {
         this.value = value;
         this.description = description;
         this.familyName = familyName;
@@ -133,7 +142,7 @@ public enum SignatureAlgorithm {
         this.jdkStandard = jdkStandard;
         this.digestLength = digestLength;
         this.minKeyLength = minKeyLength;
-        this.alternativeNames = Collections.unmodifiableList(Arrays.asList(alternativeNames));
+        this.oid = oid;
     }
 
     /**
@@ -292,20 +301,6 @@ public enum SignatureAlgorithm {
     }
 
     /**
-     * Returns alternative algorithm names to the {@link #getJcaName() jcaName} that may occur, e.g. when loading keys
-     * from a pkcs#12 keystore.
-     *
-     * @return alternative algorithm names to the {@link #getJcaName() jcaName} that may occur, e.g. when loading keys
-     * from a pkcs#12 keystore.
-     * @since 0.11.2
-     * @deprecated To be removed, when <a href="https://bugs.openjdk.java.net/browse/JDK-8243551">JDK-8243551</a> is fixed.
-     */
-    @Deprecated
-    public List<String> getAlternativeNames() {
-        return this.alternativeNames;
-    }
-
-    /**
      * Returns quietly if the specified key is allowed to create signatures using this algorithm
      * according to the <a href="https://tools.ietf.org/html/rfc7518">JWT JWA Specification (RFC 7518)</a> or throws an
      * {@link InvalidKeyException} if the key is not allowed or not secure enough for this algorithm.
@@ -370,9 +365,9 @@ public enum SignatureAlgorithm {
             if (!HS256.jcaName.equalsIgnoreCase(alg) &&
                 !HS384.jcaName.equalsIgnoreCase(alg) &&
                 !HS512.jcaName.equalsIgnoreCase(alg) &&
-                !HS256.alternativeNames.contains(alg) &&
-                !HS384.alternativeNames.contains(alg) &&
-                !HS512.alternativeNames.contains(alg)) {
+                !HS256.oid.equals(alg) &&
+                !HS384.oid.equals(alg) &&
+                !HS512.oid.equals(alg)) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }

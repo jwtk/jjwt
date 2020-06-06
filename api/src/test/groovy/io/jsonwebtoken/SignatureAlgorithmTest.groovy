@@ -396,21 +396,19 @@ class SignatureAlgorithmTest {
             int numBits = alg.minKeyLength
             int numBytes = numBits / 8 as int
 
-            for(String altName in alg.alternativeNames) {
-                SecretKey key = createMock(SecretKey)
-                expect(key.getEncoded()).andReturn(new byte[numBytes])
-                expect(key.getAlgorithm()).andReturn(altName)
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.oid)
 
-                replay key
+            replay key
 
-                alg.assertValidSigningKey(key)
+            alg.assertValidSigningKey(key)
 
-                verify key
-            }
+            verify key
         }
 
         for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {!it.isHmac()}) {
-            assertEquals(Collections.emptyList(), alg.alternativeNames)
+            assertNull(alg.oid)
         }
     }
 
