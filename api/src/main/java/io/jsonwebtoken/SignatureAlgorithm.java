@@ -45,17 +45,17 @@ public enum SignatureAlgorithm {
     /**
      * JWA algorithm name for {@code HMAC using SHA-256}
      */
-    HS256("HS256", "HMAC using SHA-256", "HMAC", "HmacSHA256", true, 256, 256),
+    HS256("HS256", "HMAC using SHA-256", "HMAC", "HmacSHA256", true, 256, 256, "1.2.840.113549.2.9"),
 
     /**
      * JWA algorithm name for {@code HMAC using SHA-384}
      */
-    HS384("HS384", "HMAC using SHA-384", "HMAC", "HmacSHA384", true, 384, 384),
+    HS384("HS384", "HMAC using SHA-384", "HMAC", "HmacSHA384", true, 384, 384, "1.2.840.113549.2.10"),
 
     /**
      * JWA algorithm name for {@code HMAC using SHA-512}
      */
-    HS512("HS512", "HMAC using SHA-512", "HMAC", "HmacSHA512", true, 512, 512),
+    HS512("HS512", "HMAC using SHA-512", "HMAC", "HmacSHA512", true, 512, 512, "1.2.840.113549.2.11"),
 
     /**
      * JWA algorithm name for {@code RSASSA-PKCS-v1_5 using SHA-256}
@@ -122,9 +122,21 @@ public enum SignatureAlgorithm {
     private final boolean jdkStandard;
     private final int digestLength;
     private final int minKeyLength;
+    /**
+     * Algorithm name as given by {@link Key#getAlgorithm()} if the key was loaded from a pkcs12 Keystore.
+     *
+     * @deprecated This is just a workaround for https://bugs.openjdk.java.net/browse/JDK-8243551
+     */
+    @Deprecated
+    private final String pkcs12Name;
 
     SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
                        int digestLength, int minKeyLength) {
+        this(value, description,familyName, jcaName, jdkStandard, digestLength, minKeyLength, jcaName);
+    }
+
+    SignatureAlgorithm(String value, String description, String familyName, String jcaName, boolean jdkStandard,
+                       int digestLength, int minKeyLength, String pkcs12Name) {
         this.value = value;
         this.description = description;
         this.familyName = familyName;
@@ -132,6 +144,7 @@ public enum SignatureAlgorithm {
         this.jdkStandard = jdkStandard;
         this.digestLength = digestLength;
         this.minKeyLength = minKeyLength;
+        this.pkcs12Name = pkcs12Name;
     }
 
     /**
@@ -353,7 +366,10 @@ public enum SignatureAlgorithm {
             // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
             if (!HS256.jcaName.equalsIgnoreCase(alg) &&
                 !HS384.jcaName.equalsIgnoreCase(alg) &&
-                !HS512.jcaName.equalsIgnoreCase(alg)) {
+                !HS512.jcaName.equalsIgnoreCase(alg) &&
+                !HS256.pkcs12Name.equals(alg) &&
+                !HS384.pkcs12Name.equals(alg) &&
+                !HS512.pkcs12Name.equals(alg)) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }

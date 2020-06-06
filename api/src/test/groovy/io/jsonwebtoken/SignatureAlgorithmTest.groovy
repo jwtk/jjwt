@@ -387,6 +387,34 @@ class SignatureAlgorithmTest {
         }
     }
 
+    @Test // https://github.com/jwtk/jjwt/issues/588
+    void assertAssertValidHmacSigningKeyCaseOidAlgorithmName() {
+        for (SignatureAlgorithm alg in EnumSet.complementOf(EnumSet.of(SignatureAlgorithm.NONE))) {
+            assertNotNull(alg.pkcs12Name)
+        }
+
+        for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {it.isHmac()}) {
+
+            int numBits = alg.minKeyLength
+            int numBytes = numBits / 8 as int
+
+            SecretKey key = createMock(SecretKey)
+            expect(key.getEncoded()).andReturn(new byte[numBytes])
+            expect(key.getAlgorithm()).andReturn(alg.pkcs12Name)
+
+            replay key
+
+            alg.assertValidSigningKey(key)
+
+            verify key
+        }
+
+        for (SignatureAlgorithm alg in SignatureAlgorithm.values().findAll {!it.isHmac()}) {
+            assertEquals("For non HmacSHA-keys the name when loaded from pkcs12 key store is identical to the jcaName",
+                    alg.jcaName, alg.pkcs12Name)
+        }
+    }
+
     @Test
     void testAssertValidHmacSigningKeyUnsupportedAlgorithm() {
 
