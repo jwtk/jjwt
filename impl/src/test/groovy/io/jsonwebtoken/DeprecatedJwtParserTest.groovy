@@ -28,7 +28,6 @@ import java.security.SecureRandom
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static org.junit.Assert.*
-import static io.jsonwebtoken.DateTestUtils.truncateMillis
 
 class DeprecatedJwtParserTest {
 

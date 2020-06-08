@@ -139,25 +139,10 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
-    void testCompactWithoutBody() {
-        def b = new DefaultJwtBuilder()
-        try {
-            b.compact()
-            fail()
-        } catch (IllegalStateException ise) {
-            assertEquals ise.message, "Either 'payload' or 'claims' must be specified."
-        }
-    }
-
-    @Test
     void testCompactWithoutPayloadOrClaims() {
-        def b = new DefaultJwtBuilder()
-        try {
-            b.compact()
-            fail()
-        } catch (IllegalStateException ise) {
-            assertEquals ise.message, "Either 'payload' or 'claims' must be specified."
-        }
+        def compact = new DefaultJwtBuilder().compact()
+
+        assertTrue compact.endsWith("..")
     }
 
     @Test

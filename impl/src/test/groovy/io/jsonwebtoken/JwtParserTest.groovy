@@ -19,9 +19,11 @@ import io.jsonwebtoken.impl.DefaultClock
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
+import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
@@ -166,6 +168,44 @@ class JwtParserTest {
         Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(base64Encodedkey).build().parse(compact)
 
         assertEquals jwt.body, payload
+    }
+
+    @Test
+    void testParseEmptyPayload() {
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+
+        String payload = ''
+
+        String compact = Jwts.builder().setPayload(payload).signWith(key).compact()
+
+        assertTrue Jwts.parserBuilder().build().isSigned(compact)
+
+        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(key).build().parse(compact)
+
+        assertEquals payload, jwt.body
+    }
+
+    @Test
+    void testParseNullPayload() {
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+
+        String compact = Jwts.builder().signWith(key).compact()
+
+        assertTrue Jwts.parserBuilder().build().isSigned(compact)
+
+        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(key).build().parse(compact)
+
+        assertEquals '', jwt.body
+    }
+
+    @Test
+    void testParseNullPayloadWithoutKey() {
+        String compact = Jwts.builder().compact()
+
+        Jwt<Header, String> jwt = Jwts.parserBuilder().build().parse(compact)
+
+        assertEquals 'none', jwt.header.alg
+        assertEquals '', jwt.body
     }
 
     @Test

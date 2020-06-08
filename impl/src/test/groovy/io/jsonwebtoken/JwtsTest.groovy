@@ -167,18 +167,15 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('..')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..' is missing a body/payload."
+            assertEquals e.message, "JWT string '..' is missing a header."
         }
     }
 
     @Test
     void testParseWithHeaderOnly() {
-        try {
-            Jwts.parserBuilder().build().parse('foo..')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string 'foo..' is missing a body/payload."
-        }
+        String unsecuredJwt = base64Url("{\"alg\":\"none\"}") + ".."
+        Jwt jwt = Jwts.parserBuilder().build().parse(unsecuredJwt)
+        assertEquals("none", jwt.getHeader().get("alg"))
     }
 
     @Test
@@ -187,17 +184,7 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('..bar')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..bar' is missing a body/payload."
-        }
-    }
-
-    @Test
-    void testParseWithHeaderAndSignatureOnly() {
-        try {
-            Jwts.parserBuilder().build().parse('foo..bar')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string 'foo..bar' is missing a body/payload."
+            assertEquals e.message, "JWT string has a digest/signature, but the header does not reference a valid signature algorithm."
         }
     }
 

@@ -257,6 +257,11 @@ public class DefaultJwtParser implements JwtParser {
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
 
+        if ("..".equals(jwt)) {
+            String msg = "JWT string '..' is missing a header.";
+            throw new MalformedJwtException(msg);
+        }
+
         String base64UrlEncodedHeader = null;
         String base64UrlEncodedPayload = null;
         String base64UrlEncodedDigest = null;
@@ -293,9 +298,6 @@ public class DefaultJwtParser implements JwtParser {
             base64UrlEncodedDigest = sb.toString();
         }
 
-        if (base64UrlEncodedPayload == null) {
-            throw new MalformedJwtException("JWT string '" + jwt + "' is missing a body/payload.");
-        }
 
         // =============== Header =================
         Header header = null;
@@ -317,15 +319,18 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Body =================
-        byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedPayload);
-        if (compressionCodec != null) {
-            bytes = compressionCodec.decompress(bytes);
+        String payload = ""; // https://github.com/jwtk/jjwt/pull/540
+        if (base64UrlEncodedPayload != null) {
+            byte[] bytes = base64UrlDecoder.decode(base64UrlEncodedPayload);
+            if (compressionCodec != null) {
+                bytes = compressionCodec.decompress(bytes);
+            }
+            payload = new String(bytes, Strings.UTF_8);
         }
-        String payload = new String(bytes, Strings.UTF_8);
 
         Claims claims = null;
 
-        if (payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        if (!payload.isEmpty() && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
             Map<String, Object> claimsMap = (Map<String, Object>) readValue(payload);
             claims = new DefaultClaims(claimsMap);
         }
@@ -385,7 +390,10 @@ public class DefaultJwtParser implements JwtParser {
             Assert.notNull(key, "A signing key must be specified if the specified JWT is digitally signed.");
 
             //re-create the jwt part without the signature.  This is what needs to be signed for verification:
-            String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR + base64UrlEncodedPayload;
+            String jwtWithoutSignature = base64UrlEncodedHeader + SEPARATOR_CHAR;
+            if (base64UrlEncodedPayload != null) {
+              jwtWithoutSignature += base64UrlEncodedPayload;
+            }
 
             JwtSignatureValidator validator;
             try {
