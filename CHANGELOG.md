@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.12.0
+
+This minor release:
+
+* Adds missing parameter type to `Maps.add()`, which removes an unchecked type warning.
+
 ### 0.11.1
 
 This patch release:
