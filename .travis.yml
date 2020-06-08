@@ -9,6 +9,7 @@ jdk:
   - oraclejdk9
   - openjdk10
   - openjdk11
+  - openjdk14
 
 cache:
   directories:
