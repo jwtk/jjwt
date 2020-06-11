@@ -13,6 +13,8 @@ This patch release:
 * Adds missing parameters type to `Maps.add()`, which removes an unchecked type warning. [Issue 591](https://github.com/jwtk/jjwt/issues/591)
 * Ensures `GsonDeserializer` always uses `UTF-8` for encoding bytes to Strings. [Pull Request 592](https://github.com/jwtk/jjwt/pull/592)
 
+All issues and PRs are listed in the Github [JJWT 0.11.2 milestone](https://github.com/jwtk/jjwt/milestone/23?closed=1).
+
 
 ### 0.11.1
 
