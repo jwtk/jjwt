@@ -147,8 +147,10 @@ public interface JwtParserBuilder {
      *
      * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
      * @return the parser builder for method chaining.
+     * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
+     * any such value would cause numeric overflow when multiplying by 1000 to obtain a millisecond value.
      */
-    JwtParserBuilder setAllowedClockSkewSeconds(long seconds);
+    JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not

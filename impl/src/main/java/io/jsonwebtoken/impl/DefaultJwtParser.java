@@ -180,7 +180,8 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public JwtParser setAllowedClockSkewSeconds(long seconds) {
+    public JwtParser setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException {
+        Assert.isTrue(seconds <= DefaultJwtParserBuilder.MAX_CLOCK_SKEW_MILLIS, DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG);
         this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
         return this;
     }
