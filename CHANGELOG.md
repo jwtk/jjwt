@@ -1,10 +1,18 @@
 ## Release Notes
 
-### 0.12.0
+### 0.11.2
 
-This minor release:
+This patch release:
 
-* Adds missing parameter type to `Maps.add()`, which removes an unchecked type warning.
+* Allows empty JWS bodies to support [RFC 8555](https://tools.ietf.org/html/rfc8555) and similar initiatives. [Pull Request 540](https://github.com/jwtk/jjwt/pull/540)
+* Ensures OSGi environments can access JJWT implementation bundles (`jjwt-jackson`, `jjwt-gson`, etc) as fragments to `jjwt-api` bundle. [Pull Request 580](https://github.com/jwtk/jjwt/pull/580)
+* Rejects `allowedClockSkewSeconds` values that would cause numeric overflow. [Issue 583](https://github.com/jwtk/jjwt/issues/583) 
+* Upgrades Jackson dependency to version `2.9.10.4` to address all known Jackson CVE vulnerabilities. [Issue 585](https://github.com/jwtk/jjwt/issues/585)
+* Updates `SecretKey` algorithm name validation to allow PKCS12 KeyStore OIDs in addition to JCA Names. [Issue 588](https://github.com/jwtk/jjwt/issues/588)
+* Enabled CI builds on JDK 14. [Pull Request 590](https://github.com/jwtk/jjwt/pull/590)
+* Adds missing parameters type to `Maps.add()`, which removes an unchecked type warning. [Issue 591](https://github.com/jwtk/jjwt/issues/591)
+* Ensures `GsonDeserializer` always uses `UTF-8` for encoding bytes to Strings. [Pull Request 592](https://github.com/jwtk/jjwt/pull/592)
+
 
 ### 0.11.1
 
