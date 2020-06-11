@@ -39,6 +39,16 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
+    /**
+     * To prevent overflow per <a href="https://github.com/jwtk/jjwt/issues/583">Issue 583</a>.
+     *
+     * Package-protected on purpose to allow use in backwards-compatible {@link DefaultJwtParser} implementation.
+     * TODO: enable private modifier on these two variables when deleting DefaultJwtParser
+     */
+    static final long MAX_CLOCK_SKEW_MILLIS = Long.MAX_VALUE / MILLISECONDS_PER_SECOND;
+    static final String MAX_CLOCK_SKEW_ILLEGAL_MSG = "Illegal allowedClockSkewMillis value: multiplying this " +
+        "value by 1000 to obtain the number of milliseconds would cause a numeric overflow.";
+
     private byte[] keyBytes;
 
     private Key key;
@@ -131,6 +141,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setAllowedClockSkewSeconds(long seconds) {
+        Assert.isTrue(seconds <= MAX_CLOCK_SKEW_MILLIS, MAX_CLOCK_SKEW_ILLEGAL_MSG);
         this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
         return this;
     }

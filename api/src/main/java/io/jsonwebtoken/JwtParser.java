@@ -191,13 +191,15 @@ public interface JwtParser {
      * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
      * @return the parser for method chaining.
      * @since 0.7.0
+     * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
+     * any such value would cause numeric overflow when multiplying by 1000 to obtain a millisecond value.
      * @deprecated see {@link JwtParserBuilder#setAllowedClockSkewSeconds(long)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
      */
     @Deprecated
-    JwtParser setAllowedClockSkewSeconds(long seconds);
+    JwtParser setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
 
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not

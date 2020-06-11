@@ -75,4 +75,21 @@ class DefaultJwtParserBuilderTest {
 
         assertEquals 'bar', p.setSigningKey(key).build().parseClaimsJws(jws).getBody().get('foo')
     }
+
+    @Test
+    void testMaxAllowedClockSkewSeconds() {
+        long max = Long.MAX_VALUE / 1000 as long
+        new DefaultJwtParserBuilder().setAllowedClockSkewSeconds(max) // no exception should be thrown
+    }
+
+    @Test
+    void testExceededAllowedClockSkewSeconds() {
+        long value = Long.MAX_VALUE / 1000 as long
+        value = value + 1L
+        try {
+            new DefaultJwtParserBuilder().setAllowedClockSkewSeconds(value)
+        } catch (IllegalArgumentException expected) {
+            assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
+        }
+    }
 }
