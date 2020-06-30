@@ -196,7 +196,7 @@ public final class Strings {
 
     /**
      * Trim <i>all</i> whitespace from the given String:
-     * leading, trailing, and inbetween characters.
+     * leading, trailing, and intermediate characters.
      * @param str the String to check
      * @return the trimmed String
      * @see java.lang.Character#isWhitespace
@@ -253,7 +253,7 @@ public final class Strings {
     }
 
     /**
-     * Trim all occurences of the supplied leading character from the given String.
+     * Trim all occurrences of the supplied leading character from the given String.
      * @param str the String to check
      * @param leadingCharacter the leading character to be trimmed
      * @return the trimmed String
@@ -270,7 +270,7 @@ public final class Strings {
     }
 
     /**
-     * Trim all occurences of the supplied trailing character from the given String.
+     * Trim all occurrences of the supplied trailing character from the given String.
      * @param str the String to check
      * @param trailingCharacter the trailing character to be trimmed
      * @return the trimmed String
@@ -369,7 +369,7 @@ public final class Strings {
     }
 
     /**
-     * Replace all occurences of a substring within a string with
+     * Replace all occurrences of a substring within a string with
      * another string.
      * @param inString String to examine
      * @param oldPattern String to replace

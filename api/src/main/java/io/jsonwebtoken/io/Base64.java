@@ -111,7 +111,7 @@ final class Base64 { //final and package-protected on purpose
         // Encode even 24-bits
         for (int s = 0, d = 0, cc = 0; s < eLen; ) {
 
-            // Copy next three bytes into lower 24 bits of int, paying attension to sign.
+            // Copy next three bytes into lower 24 bits of int, paying attention to sign.
             int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
 
             // Encode the int into four chars
@@ -339,7 +339,7 @@ final class Base64 { //final and package-protected on purpose
         // Encode even 24-bits
         for (int s = sOff, d = 0, cc = 0; s < sOff + eLen; ) {
 
-            // Copy next three bytes into lower 24 bits of int, paying attension to sign.
+            // Copy next three bytes into lower 24 bits of int, paying attention to sign.
             int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
 
             // Encode the int into four chars
