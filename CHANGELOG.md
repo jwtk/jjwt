@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.11.3
+
+This patch release:
+
+* CI is no longer running tests against Java 7. Classes are still compiled to a source/target of 1.7 to ensure compatibility with Android.
+
 ### 0.11.2
 
 This patch release:
