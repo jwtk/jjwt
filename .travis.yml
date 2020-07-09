@@ -27,7 +27,7 @@ before_install:
       
       if [[ ! -d "${JAVA_HOME}" ]]; then
         # Download and install Oracle JDK 7:
-        wget https://s3.amazonaws.com/d2fbee19-5fe2-425f-ae11-cd25b35dc99a/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz
+        wget https://238dj3282as03k369.s3-us-west-1.amazonaws.com/jdk-7u80-linux-x64.tar.gz -O /tmp/jdk-7u80-linux-x64.tar.gz
         tar xvfz /tmp/jdk-7u80-linux-x64.tar.gz -C /tmp
         sudo mv /tmp/jdk1.7.0_80 "${JAVA_HOME}"
       fi
