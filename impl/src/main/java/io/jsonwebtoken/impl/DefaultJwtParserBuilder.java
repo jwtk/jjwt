@@ -55,7 +55,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private SigningKeyResolver signingKeyResolver;
 
-    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+    private CompressionCodecResolver compressionCodecResolver;
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
@@ -189,6 +189,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         if (this.deserializer == null) {
             // try to find one based on the services available:
             this.deserializer = Services.loadFirst(Deserializer.class);
+        }
+
+        // if the compressionCodecResolver is not set default it.
+        if (this.compressionCodecResolver == null) {
+            this.compressionCodecResolver = new DefaultCompressionCodecResolver();
         }
 
         return new ImmutableJwtParser(
