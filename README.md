@@ -962,7 +962,7 @@ catch (JwtException ex) {       // (5)
 }
 ```
 
-**NOTE: If you expecting a JWS, always call `JwtParser`'s `parseClaimsJws` method** (and not one of the other similar methods 
+**NOTE: If you are expecting a JWS, always call `JwtParser`'s `parseClaimsJws` method** (and not one of the other similar methods 
 available) as this guarantees the correct security model for parsing signed JWTs.
 
 <a name="jws-read-key"></a>
