@@ -164,14 +164,9 @@ class DeprecatedJwtsTest {
         }
     }
 
-    @Test
+    @Test(expected = MalformedJwtException)
     void testParseWithTwoPeriodsOnly() {
-        try {
-            Jwts.parser().parse('..')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..' is missing a header."
-        }
+        Jwts.parser().parse('..')
     }
 
     @Test
@@ -181,24 +176,9 @@ class DeprecatedJwtsTest {
         assertEquals("none", jwt.getHeader().get("alg"))
     }
 
-    @Test
+    @Test(expected = MalformedJwtException)
     void testParseWithSignatureOnly() {
-        try {
-            Jwts.parser().parse('..bar')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string has a digest/signature, but the header does not reference a valid signature algorithm."
-        }
-    }
-
-    @Test
-    void testWithInvalidCompressionAlgorithm() {
-        try {
-
-            Jwts.builder().setHeaderParam(Header.COMPRESSION_ALGORITHM, "CUSTOM").setId("andId").compact()
-        } catch (CompressionException e) {
-            assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
-        }
+        Jwts.parser().parse('..bar')
     }
 
     @Test
@@ -616,7 +596,7 @@ class DeprecatedJwtsTest {
         String forged = Jwts.builder().setSubject("Not Joe").compact()
 
         //assert that our forged header has a 'NONE' algorithm:
-        assertEquals Jwts.parser().parseClaimsJwt(forged).getHeader().get('alg'), 'none'
+        assertEquals 'none', Jwts.parser().parseClaimsJwt(forged).getHeader().get('alg')
 
         //now let's forge it by appending the signature the server expects:
         forged += signature
@@ -626,7 +606,7 @@ class DeprecatedJwtsTest {
             Jwts.parser().setSigningKey(key).parse(forged)
             fail("Parsing must fail for a forged token.")
         } catch (MalformedJwtException expected) {
-            assertEquals expected.message, 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.'
+            assertEquals 'The JWS header references signature algorithm \'none\' yet the compact JWS string has a digest/signature. This is not permitted per https://tools.ietf.org/html/rfc7518#section-3.6.', expected.message
         }
     }
 

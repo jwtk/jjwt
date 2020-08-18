@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Classes;
@@ -7,8 +22,9 @@ import io.jsonwebtoken.lang.Classes;
  */
 public class Jwks {
 
-    public static <T extends JwkBuilderFactory> T builder() {
-        return Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkBuilderFactory");
-    }
+    private static final String CNAME = "io.jsonwebtoken.impl.security.DefaultProtoJwkBuilder";
 
+    public static ProtoJwkBuilder<?, ?, ?> builder() {
+        return Classes.newInstance(CNAME);
+    }
 }

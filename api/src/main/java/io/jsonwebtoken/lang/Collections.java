@@ -20,9 +20,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 public final class Collections {
 
@@ -32,11 +34,27 @@ public final class Collections {
         return java.util.Collections.emptyList();
     }
 
+    public static <T> Set<T> emptySet() {
+        return java.util.Collections.emptySet();
+    }
+
+    public static <K,V> Map<K,V> emptyMap() {
+        return java.util.Collections.emptyMap();
+    }
+
     public static <T> List<T> of(T... elements) {
         if (elements == null || elements.length == 0) {
             return java.util.Collections.emptyList();
         }
         return java.util.Collections.unmodifiableList(Arrays.asList(elements));
+    }
+
+    public static <T> Set<T> setOf(T... elements) {
+        if (elements == null || elements.length == 0) {
+            return java.util.Collections.emptySet();
+        }
+        Set<T> set = new LinkedHashSet<>(Arrays.asList(elements));
+        return java.util.Collections.unmodifiableSet(set);
     }
 
     /**

@@ -128,10 +128,11 @@ public final class Assert {
      * @param message the exception message to use if the assertion fails
      * @see Strings#hasText
      */
-    public static void hasText(String text, String message) {
+    public static String hasText(String text, String message) {
         if (!Strings.hasText(text)) {
             throw new IllegalArgumentException(message);
         }
+        return text;
     }
 
     /**
@@ -204,6 +205,13 @@ public final class Assert {
         return array;
     }
 
+    public static char[] notEmpty(char[] chars, String msg) {
+        if (Objects.isEmpty(chars)) {
+            throw new IllegalArgumentException(msg);
+        }
+        return chars;
+    }
+
     /**
      * Assert that an array has no null elements.
      * Note: Does not complain if the array is empty!
@@ -241,10 +249,11 @@ public final class Assert {
      * @param message the exception message to use if the assertion fails
      * @throws IllegalArgumentException if the collection is <code>null</code> or has no elements
      */
-    public static void notEmpty(Collection collection, String message) {
+    public static <T extends Collection<?>> T notEmpty(T collection, String message) {
         if (Collections.isEmpty(collection)) {
             throw new IllegalArgumentException(message);
         }
+        return collection;
     }
 
     /**
@@ -267,10 +276,11 @@ public final class Assert {
      * @param message the exception message to use if the assertion fails
      * @throws IllegalArgumentException if the map is <code>null</code> or has no entries
      */
-    public static void notEmpty(Map map, String message) {
+    public static <T extends Map<?,?>> T notEmpty(T map, String message) {
         if (Collections.isEmpty(map)) {
             throw new IllegalArgumentException(message);
         }
+        return map;
     }
 
     /**
@@ -309,13 +319,14 @@ public final class Assert {
      * @throws IllegalArgumentException if the object is not an instance of clazz
      * @see Class#isInstance
      */
-    public static void isInstanceOf(Class type, Object obj, String message) {
+    public static <T> T isInstanceOf(Class<T> type, Object obj, String message) {
         notNull(type, "Type to check against must not be null");
         if (!type.isInstance(obj)) {
             throw new IllegalArgumentException(message +
                                                "Object of class [" + (obj != null ? obj.getClass().getName() : "null") +
                                                "] must be an instance of " + type);
         }
+        return type.cast(obj);
     }
 
     /**

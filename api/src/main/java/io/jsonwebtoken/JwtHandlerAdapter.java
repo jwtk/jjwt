@@ -31,22 +31,32 @@ package io.jsonwebtoken;
 public class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
     @Override
-    public T onPlaintextJwt(Jwt<Header, String> jwt) {
+    public T onPlaintextJwt(Jwt<?, String> jwt) {
         throw new UnsupportedJwtException("Unsigned plaintext JWTs are not supported.");
     }
 
     @Override
-    public T onClaimsJwt(Jwt<Header, Claims> jwt) {
+    public T onClaimsJwt(Jwt<?, Claims> jwt) {
         throw new UnsupportedJwtException("Unsigned Claims JWTs are not supported.");
     }
 
     @Override
     public T onPlaintextJws(Jws<String> jws) {
-        throw new UnsupportedJwtException("Signed plaintext JWSs are not supported.");
+        throw new UnsupportedJwtException("Signed plaintext JWTs are not supported.");
     }
 
     @Override
     public T onClaimsJws(Jws<Claims> jws) {
-        throw new UnsupportedJwtException("Signed Claims JWSs are not supported.");
+        throw new UnsupportedJwtException("Signed Claims JWTs are not supported.");
+    }
+
+    @Override
+    public T onPlaintextJwe(Jwe<String> jwe) {
+        throw new UnsupportedJwtException("Encrypted plaintext JWEs are not supported.");
+    }
+
+    @Override
+    public T onClaimsJwe(Jwe<Claims> jwe) {
+        throw new UnsupportedJwtException("Encrypted Claims JWEs are not supported.");
     }
 }

@@ -104,11 +104,11 @@ public class JwtMap implements Map<String, Object> {
         return toDate(v, name);
     }
 
-    protected static boolean isReduceableToNull(Object v) {
+    public static boolean isReduceableToNull(Object v) {
         return v == null ||
             (v instanceof String && !Strings.hasText((String)v)) ||
-            (v instanceof Collection && Collections.isEmpty((Collection) v)) ||
-            (v instanceof Map && Collections.isEmpty((Map)v)) ||
+            (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
+            (v instanceof Map && Collections.isEmpty((Map<?,?>)v)) ||
             (v.getClass().isArray() && Array.getLength(v) == 0);
     }
 
@@ -178,7 +178,6 @@ public class JwtMap implements Map<String, Object> {
         return map.remove(o);
     }
 
-    @SuppressWarnings("NullableProblems")
     @Override
     public void putAll(Map<? extends String, ?> m) {
         if (m == null) {

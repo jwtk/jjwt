@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 jsonwebtoken.io
+ * Copyright (C) 2021 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  */
 package io.jsonwebtoken.security;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadRequest<T, K extends Key> extends CryptoRequest<T, K>, AssociatedDataSource {
-
+public interface AeadRequest extends CryptoRequest<byte[], SecretKey>, AssociatedDataSupplier {
 }

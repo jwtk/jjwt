@@ -40,13 +40,13 @@ import java.util.Map;
 public interface Header<T extends Header<T>> extends Map<String,Object> {
 
     /** JWT {@code Type} (typ) value: <code>"JWT"</code> */
-    public static final String JWT_TYPE = "JWT";
+    String JWT_TYPE = "JWT";
 
     /** JWT {@code Type} header parameter name: <code>"typ"</code> */
-    public static final String TYPE = "typ";
+    String TYPE = "typ";
 
     /** JWT {@code Content Type} header parameter name: <code>"cty"</code> */
-    public static final String CONTENT_TYPE = "cty";
+    String CONTENT_TYPE = "cty";
 
     /**
      * JWT {@code Algorithm} header parameter name: <code>"alg"</code>.
@@ -54,15 +54,15 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * @see <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">JWS Algorithm Header</a>
      * @see <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1">JWE Algorithm Header</a>
      */
-    public static final String ALGORITHM = "alg";
+    String ALGORITHM = "alg";
 
     /** JWT {@code Compression Algorithm} header parameter name: <code>"zip"</code> */
-    public static final String COMPRESSION_ALGORITHM = "zip";
+    String COMPRESSION_ALGORITHM = "zip";
 
     /** JJWT legacy/deprecated compression algorithm header parameter name: <code>"calg"</code>
      * @deprecated use {@link #COMPRESSION_ALGORITHM} instead. */
     @Deprecated
-    public static final String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
+    String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
     /**
      * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
@@ -124,13 +124,15 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      *     <li>If the JWT is a Signed JWT (a JWS), the <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">
      *      <code>alg</code></a> (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
      *      JWS.  Consider using
-     *      {@link io.jsonwebtoken.security.SignatureAlgorithms#forName(String) SignatureAlgorithms.forName} to
-     *      convert this string value to a type-safe enum instance.</li>
+     *      {@link io.jsonwebtoken.security.SignatureAlgorithms#findById(String) SignatureAlgorithms.findById} to
+     *      convert this string value to a type-safe SignatureAlgorithm instance.</li>
      *      <li>If the JWT is an Encrypted JWT (a JWE), the
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
      * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
      * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
-     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm</li>
+     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.  Consider
+     * using {@link io.jsonwebtoken.security.KeyAlgorithms#findById(String) KeyAlgorithms.findById} to convert this
+     * string value to a type-safe KeyAlgorithm instance.</li>
      * </ul>
      *
      * @return the {@code alg} header value or {@code null} if not present.  This will always be
@@ -145,14 +147,12 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * <ul>
      *     <li>If the JWT is a Signed JWT (a JWS), the <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">
      *      <code>alg</code></a> (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
-     *      JWS.  Consider using
-     *      {@link io.jsonwebtoken.security.SignatureAlgorithms#forName(String) SignatureAlgorithms.forName} to
-     *      convert this string value to a type-safe enum instance.</li>
+     *      JWS.</li>
      *      <li>If the JWT is an Encrypted JWT (a JWE), the
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
      * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
      * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
-     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm</li>
+     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.</li>
      * </ul>
      *
      * @param alg the {@code alg} header value
@@ -182,9 +182,6 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * Sets the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
      * (Compression Algorithm) header parameter value. A {@code null} value will remove
      * the property from the JSON map.
-     * <p>The compression algorithm is NOT part of the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25">JWT specification</a>
-     * and must be used carefully since, is not expected that other libraries (including previous versions of this one)
-     * be able to deserialize a compressed JWT body correctly. </p>
      *
      * <h3>Compatibility Note</h3>
      *

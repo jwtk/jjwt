@@ -7,17 +7,17 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultVerifySignatureRequest extends DefaultCryptoRequest<byte[], Key> implements VerifySignatureRequest {
+public class DefaultVerifySignatureRequest<K extends Key> extends DefaultSignatureRequest<K> implements VerifySignatureRequest<K> {
 
     private final byte[] signature;
 
-    public DefaultVerifySignatureRequest(byte[] data, Key key, Provider provider, SecureRandom secureRandom, byte[] signature) {
-        super(data, key, provider, secureRandom);
+    public DefaultVerifySignatureRequest(Provider provider, SecureRandom secureRandom, byte[] data, K key, byte[] signature) {
+        super(provider, secureRandom, data, key);
         this.signature = Assert.notEmpty(signature, "Signature byte array cannot be null or empty.");
     }
 
     @Override
-    public byte[] getSignature() {
+    public byte[] getDigest() {
         return this.signature;
     }
 }

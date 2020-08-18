@@ -1,5 +1,9 @@
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Header;
+
+import java.util.Map;
+
 class DefaultTokenizedJwe extends DefaultTokenizedJwt implements TokenizedJwe {
 
     private final String encryptedKey;
@@ -19,5 +23,10 @@ class DefaultTokenizedJwe extends DefaultTokenizedJwt implements TokenizedJwe {
     @Override
     public String getIv() {
         return this.iv;
+    }
+
+    @Override
+    public Header<?> createHeader(Map<String, ?> m) {
+        return new DefaultJweHeader(m);
     }
 }

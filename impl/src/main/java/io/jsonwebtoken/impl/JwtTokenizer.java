@@ -2,7 +2,6 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Strings;
 
 public class JwtTokenizer {
 
@@ -16,11 +15,11 @@ public class JwtTokenizer {
 
         Assert.hasText(jwt, "Argument cannot be null or empty.");
 
-        String protectedHeader = null; //Both JWS and JWE
-        String body = null; //JWS Payload or JWE Ciphertext
-        String digest = null; //JWS Signature or JWE AAD Tag
-        String encryptedKey = null; //JWE only
-        String iv = null; //JWE only
+        String protectedHeader = ""; //Both JWS and JWE
+        String body = ""; //JWS Payload or JWE Ciphertext
+        String encryptedKey = ""; //JWE only
+        String iv = ""; //JWE only
+        String digest; //JWS Signature or JWE AAD Tag
 
         int delimiterCount = 0;
 
@@ -28,12 +27,14 @@ public class JwtTokenizer {
 
         for (char c : jwt.toCharArray()) {
 
-            Assert.isTrue(!Character.isWhitespace(c), "Compact JWT strings may not contain whitespace.");
+            if (Character.isWhitespace(c)) {
+                String msg = "Compact JWT strings may not contain whitespace.";
+                throw new MalformedJwtException(msg);
+            }
 
             if (c == DELIMITER) {
 
-                CharSequence tokenSeq = Strings.clean(sb);
-                String token = tokenSeq != null ? tokenSeq.toString() : null;
+                String token = sb.toString();
 
                 switch (delimiterCount) {
                     case 0:
@@ -44,7 +45,7 @@ public class JwtTokenizer {
                         encryptedKey = token; //for JWE
                         break;
                     case 2:
-                        body = null; //clear out value set for JWS
+                        body = ""; //clear out value set for JWS
                         iv = token;
                         break;
                     case 3:
@@ -64,9 +65,7 @@ public class JwtTokenizer {
             throw new MalformedJwtException(msg);
         }
 
-        if (sb.length() > 0) {
-            digest = Strings.clean(sb.toString());
-        }
+        digest = sb.toString();
 
         if (delimiterCount == 2) {
             return (T) new DefaultTokenizedJwt(protectedHeader, body, digest);

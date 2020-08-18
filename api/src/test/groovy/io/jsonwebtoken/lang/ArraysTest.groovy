@@ -29,7 +29,7 @@ class ArraysTest {
 
     @Test
     void testByteArrayLengthWithNull() {
-        assertEquals 0, Arrays.length(null)
+        assertEquals 0, Arrays.length((byte[])null)
     }
 
     @Test

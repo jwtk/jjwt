@@ -1,9 +1,8 @@
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.impl.security.DefaultAeadIvRequest
-import io.jsonwebtoken.impl.security.DefaultAesEncryptionRequest
-import io.jsonwebtoken.impl.security.DefaultEncryptionRequest
-import io.jsonwebtoken.impl.security.GcmAesEncryptionAlgorithm
+import io.jsonwebtoken.impl.security.DefaultAeadRequest
+import io.jsonwebtoken.impl.security.DefaultAeadResult
+import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -42,60 +41,54 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithoutAad() {
 
-        for (EncryptionAlgorithm alg : EncryptionAlgorithms.symmetric()) {
-
-            assert alg instanceof AeadSymmetricEncryptionAlgorithm
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
 
             def key = alg.generateKey()
 
-            def request = new DefaultAesEncryptionRequest(PLAINTEXT_BYTES, key, null)
+            def request = new DefaultAeadRequest(PLAINTEXT_BYTES, key, null)
 
             def result = alg.encrypt(request)
-            assert result instanceof AeadIvEncryptionResult
 
-            byte[] tag = result.getAuthenticationTag() //there is always a tag, even if there is no AAD
+            byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
 
-            byte[] ciphertext = result.getCiphertext()
+            byte[] ciphertext = result.getPayload()
 
-            boolean gcm = alg instanceof GcmAesEncryptionAlgorithm
+            boolean gcm = alg instanceof GcmAesAeadAlgorithm
 
             if (gcm) { //AES GCM always results in ciphertext the same length as the plaintext:
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadIvRequest(result.getCiphertext(), key, null, null, result.getInitializationVector(), null, tag)
+            def dreq = new DefaultAeadResult(null, null, ciphertext, key, null, tag, result.getInitializationVector())
 
-            byte[] decryptedPlaintextBytes = alg.decrypt(dreq)
+            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).payload
 
-            assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes);
+            assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }
     }
 
     @Test
     void testWithAad() {
 
-        for (EncryptionAlgorithm alg : EncryptionAlgorithms.symmetric()) {
-
-            assert alg instanceof AeadSymmetricEncryptionAlgorithm
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
 
             def key = alg.generateKey()
 
-            def req = new DefaultEncryptionRequest(PLAINTEXT_BYTES, key, null, null, null, AAD_BYTES)
+            def req = new DefaultAeadRequest(null, null, PLAINTEXT_BYTES, key, AAD_BYTES)
 
             def result = alg.encrypt(req)
-            assert result instanceof AeadIvEncryptionResult
 
-            byte[] ciphertext = result.getCiphertext()
+            byte[] ciphertext = result.getPayload()
 
-            boolean gcm = alg instanceof GcmAesEncryptionAlgorithm
+            boolean gcm = alg instanceof GcmAesAeadAlgorithm
 
             if (gcm) {
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadIvRequest(result.getCiphertext(), key, null, null, result.getInitializationVector(), AAD_BYTES, result.getAuthenticationTag())
-            byte[] decryptedPlaintextBytes = alg.decrypt(dreq)
+            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getDigest(), result.getInitializationVector());
+            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }
     }

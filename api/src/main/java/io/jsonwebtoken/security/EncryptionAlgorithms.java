@@ -1,13 +1,24 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
-import io.jsonwebtoken.lang.Maps;
-import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -18,23 +29,30 @@ public final class EncryptionAlgorithms {
     private EncryptionAlgorithms() {
     }
 
-    private static final Class MAC_CLASS = Classes.forName("io.jsonwebtoken.impl.security.MacSignatureAlgorithm");
-    private static final String HMAC = "io.jsonwebtoken.impl.security.HmacAesEncryptionAlgorithm";
-    private static final Class[] HMAC_ARGS = new Class[]{String.class, MAC_CLASS};
+    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge";
+    private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
 
-    private static final String GCM = "io.jsonwebtoken.impl.security.GcmAesEncryptionAlgorithm";
-    private static final Class[] GCM_ARGS = new Class[]{String.class, int.class};
-
-    private static AeadSymmetricEncryptionAlgorithm hmac(int keyLength) {
-        int digestLength = keyLength * 2;
-        String name = "A" + keyLength + "CBC-HS" + digestLength;
-        SignatureAlgorithm macSigAlg = Classes.newInstance(SignatureAlgorithms.HMAC, SignatureAlgorithms.HMAC_ARGS, name, "HmacSHA" + digestLength, keyLength);
-        return Classes.newInstance(HMAC, HMAC_ARGS, name, macSigAlg);
+    public static Collection<AeadAlgorithm> values() {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "values", null, (Object[]) null);
     }
 
-    private static AeadSymmetricEncryptionAlgorithm gcm(int keyLength) {
-        String name = "A" + keyLength + "GCM";
-        return Classes.newInstance(GCM, GCM_ARGS, name, keyLength);
+    /**
+     * Returns the JWE Encryption Algorithm with the specified
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">{@code enc} algorithm identifier</a> or
+     * {@code null} if an algorithm for the specified {@code id} cannot be found.
+     *
+     * @param id a JWE standard {@code enc} algorithm identifier
+     * @return the associated Encryption Algorithm instance or {@code null} otherwise.
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">RFC 7518, Section 5.1</a>
+     */
+    public static AeadAlgorithm findById(String id) {
+        Assert.hasText(id, "id cannot be null or empty.");
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "findById", ID_ARG_TYPES, id);
+    }
+
+    private static AeadAlgorithm forId(String id) {
+        Assert.hasText(id, "id cannot be null or empty.");
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forId", ID_ARG_TYPES, id);
     }
 
     /**
@@ -42,64 +60,40 @@ public final class EncryptionAlgorithms {
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.3">RFC 7518, Section 5.2.3</a>.  This algorithm
      * requires a 256 bit (32 byte) key.
      */
-    public static final AeadSymmetricEncryptionAlgorithm A128CBC_HS256 = hmac(128);
+    public static final AeadAlgorithm A128CBC_HS256 = forId("A128CBC-HS256");
 
     /**
      * AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.4">RFC 7518, Section 5.2.4</a>. This algorithm
      * requires a 384 bit (48 byte) key.
      */
-    public static final AeadSymmetricEncryptionAlgorithm A192CBC_HS384 = hmac(192);
+    public static final AeadAlgorithm A192CBC_HS384 = forId("A192CBC-HS384");
 
     /**
      * AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.5">RFC 7518, Section 5.2.5</a>.  This algorithm
      * requires a 512 bit (64 byte) key.
      */
-    public static final AeadSymmetricEncryptionAlgorithm A256CBC_HS512 = hmac(256);
+    public static final AeadAlgorithm A256CBC_HS512 = forId("A256CBC-HS512");
 
     /**
      * &quot;AES GCM using 128-bit key&quot; as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This algorithm requires
      * a 128 bit (16 byte) key.
      */
-    public static final AeadSymmetricEncryptionAlgorithm A128GCM = gcm(128);
+    public static final AeadAlgorithm A128GCM = forId("A128GCM");
 
     /**
      * &quot;AES GCM using 192-bit key&quot; as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This algorithm requires
      * a 192 bit (24 byte) key.
      */
-    public static final AeadSymmetricEncryptionAlgorithm A192GCM = gcm(192);
+    public static final AeadAlgorithm A192GCM = forId("A192GCM");
 
     /**
      * &quot;AES GCM using 256-bit key&quot; as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This algorithm requires
      * a 256 bit (32 byte) key.
      */
-    public static final AeadSymmetricEncryptionAlgorithm A256GCM = gcm(256);
-
-    private static final Map<String, AeadSymmetricEncryptionAlgorithm> SYMMETRIC_VALUES_BY_NAME = Collections.unmodifiableMap(Maps
-        .of(A128CBC_HS256.getName(), A128CBC_HS256)
-        .and(A192CBC_HS384.getName(), A192CBC_HS384)
-        .and(A256CBC_HS512.getName(), A256CBC_HS512)
-        .and(A128GCM.getName(), A128GCM)
-        .and(A192GCM.getName(), A192GCM)
-        .and(A256GCM.getName(), A256GCM)
-        .build());
-
-    public static EncryptionAlgorithm forName(String name) {
-        Assert.hasText(name, "name cannot be null or empty.");
-        EncryptionAlgorithm alg = SYMMETRIC_VALUES_BY_NAME.get(name.toUpperCase());
-        if (alg == null) {
-            String msg = "'" + name + "' is not a JWE specification standard name.  The standard names are: " +
-            Strings.collectionToCommaDelimitedString(SYMMETRIC_VALUES_BY_NAME.keySet());
-            throw new IllegalArgumentException(msg);
-        }
-        return alg;
-    }
-
-    public static Collection<AeadSymmetricEncryptionAlgorithm> symmetric() {
-        return SYMMETRIC_VALUES_BY_NAME.values();
-    }
+    public static final AeadAlgorithm A256GCM = forId("A256GCM");
 }

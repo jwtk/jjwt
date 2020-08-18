@@ -25,7 +25,7 @@ public class DefaultJwsHeader extends DefaultHeader<JwsHeader> implements JwsHea
         super();
     }
 
-    public DefaultJwsHeader(Map<String, Object> map) {
+    public DefaultJwsHeader(Map<String, ?> map) {
         super(map);
     }
 

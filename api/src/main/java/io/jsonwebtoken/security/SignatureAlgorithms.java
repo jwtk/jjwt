@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Assert;
@@ -9,102 +24,51 @@ import java.security.PrivateKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
+@SuppressWarnings("rawtypes")
 public final class SignatureAlgorithms {
 
     // Prevent instantiation
     private SignatureAlgorithms() {
     }
 
-    static final String HMAC = "io.jsonwebtoken.impl.security.MacSignatureAlgorithm";
-    static final Class<?>[] HMAC_ARGS = new Class[]{String.class, String.class, int.class};
+    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge";
+    private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
 
-    private static final String RSA = "io.jsonwebtoken.impl.security.RsaSignatureAlgorithm";
-    private static final Class<?>[] RSA_ARGS = new Class[]{String.class, String.class, int.class};
-    private static final Class<?>[] PSS_ARGS = new Class[]{String.class, String.class, int.class, int.class};
-
-    private static final String EC = "io.jsonwebtoken.impl.security.EllipticCurveSignatureAlgorithm";
-    private static final Class<?>[] EC_ARGS = new Class[]{String.class, String.class, String.class, int.class, int.class};
-
-    private static SymmetricKeySignatureAlgorithm hmacSha(int minKeyLength) {
-        return Classes.newInstance(HMAC, HMAC_ARGS, "HS" + minKeyLength, "HmacSHA" + minKeyLength, minKeyLength);
+    public static Collection<SignatureAlgorithm<?,?>> values() {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "values", null, (Object[]) null);
     }
 
-    private static AsymmetricKeySignatureAlgorithm rsa(int digestLength, int preferredKeyLength) {
-        return Classes.newInstance(RSA, RSA_ARGS, "RS" + digestLength, "SHA" + digestLength + "withRSA", preferredKeyLength);
+    public static SignatureAlgorithm<?, ?> findById(String id) {
+        Assert.hasText(id, "id cannot be null or empty.");
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "findById", ID_ARG_TYPES, id);
     }
 
-    private static AsymmetricKeySignatureAlgorithm pss(int digestLength, int preferredKeyLength) {
-        return Classes.newInstance(RSA, PSS_ARGS, "PS" + digestLength, "RSASSA-PSS", preferredKeyLength, digestLength);
+    public static SignatureAlgorithm<?,?> forId(String id) {
+        return forId0(id);
     }
 
-    private static AsymmetricKeySignatureAlgorithm ec(int keySize, int signatureLength) {
-        int shaSize = keySize == 521 ? 512 : keySize;
-        return Classes.newInstance(EC, EC_ARGS, "ES" + shaSize, "SHA" + shaSize + "withECDSA", "secp" + keySize + "r1", keySize, signatureLength);
+    static <T> T forId0(String id) {
+        Assert.hasText(id, "id cannot be null or empty.");
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forId", ID_ARG_TYPES, id);
     }
 
-    public static final SignatureAlgorithm NONE = Classes.newInstance("io.jsonwebtoken.impl.security.NoneSignatureAlgorithm");
-    public static final SymmetricKeySignatureAlgorithm HS256 = hmacSha(256);
-    public static final SymmetricKeySignatureAlgorithm HS384 = hmacSha(384);
-    public static final SymmetricKeySignatureAlgorithm HS512 = hmacSha(512);
-    public static final AsymmetricKeySignatureAlgorithm RS256 = rsa(256, 2048);
-    public static final AsymmetricKeySignatureAlgorithm RS384 = rsa(384, 3072);
-    public static final AsymmetricKeySignatureAlgorithm RS512 = rsa(512, 4096);
-    public static final AsymmetricKeySignatureAlgorithm PS256 = pss(256, 2048);
-    public static final AsymmetricKeySignatureAlgorithm PS384 = pss(384, 3072);
-    public static final AsymmetricKeySignatureAlgorithm PS512 = pss(512, 4096);
-    public static final AsymmetricKeySignatureAlgorithm ES256 = ec(256, 64);
-    public static final AsymmetricKeySignatureAlgorithm ES384 = ec(384, 96);
-    public static final AsymmetricKeySignatureAlgorithm ES512 = ec(521, 132);
-
-    private static Map<String, SignatureAlgorithm> toMap(SignatureAlgorithm... algs) {
-        Map<String, SignatureAlgorithm> m = new LinkedHashMap<>();
-        for (SignatureAlgorithm alg : algs) {
-            m.put(alg.getName(), alg);
-        }
-        return Collections.unmodifiableMap(m);
-    }
-
-    private static final Map<String, SignatureAlgorithm> STANDARD_ALGORITHMS = toMap(
-        NONE, HS256, HS384, HS512, RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
-    );
-
-    public static Collection<? extends SignatureAlgorithm> values() {
-        return STANDARD_ALGORITHMS.values();
-    }
-
-    /**
-     * Looks up and returns the corresponding JWA standard {@code SignatureAlgorithm} instance based on a
-     * case-<em>insensitive</em> name comparison.
-     *
-     * @param name The case-insensitive name of the JWA standard {@code SignatureAlgorithm} instance to return
-     * @return the corresponding JWA standard {@code SignatureAlgorithm} enum instance based on a
-     * case-<em>insensitive</em> name comparison.
-     * @throws SignatureException if the specified value does not match any JWA standard {@code SignatureAlgorithm}
-     *                            name.
-     */
-    public static SignatureAlgorithm forName(String name) {
-        Assert.notNull(name, "name argument cannot be null.");
-        //try constant time lookup first.  This will satisfy 99% of invocations:
-        SignatureAlgorithm alg = STANDARD_ALGORITHMS.get(name);
-        if (alg != null) {
-            return alg;
-        }
-        //fall back to case-insensitive lookup:
-        for (SignatureAlgorithm salg : STANDARD_ALGORITHMS.values()) {
-            if (name.equalsIgnoreCase(salg.getName())) {
-                return salg;
-            }
-        }
-        // still no result - error:
-        throw new SignatureException("Unsupported signature algorithm '" + name + "'");
-    }
+    public static final SignatureAlgorithm<Key, Key> NONE = forId0("none");
+    public static final SecretKeySignatureAlgorithm HS256 = forId0("HS256");
+    public static final SecretKeySignatureAlgorithm HS384 = forId0("HS384");
+    public static final SecretKeySignatureAlgorithm HS512 = forId0("HS512");
+    public static final RsaSignatureAlgorithm RS256 = forId0("RS256");
+    public static final RsaSignatureAlgorithm RS384 = forId0("RS384");
+    public static final RsaSignatureAlgorithm RS512 = forId0("RS512");
+    public static final RsaSignatureAlgorithm PS256 = forId0("PS256");
+    public static final RsaSignatureAlgorithm PS384 = forId0("PS384");
+    public static final RsaSignatureAlgorithm PS512 = forId0("PS512");
+    public static final EllipticCurveSignatureAlgorithm ES256 = forId0("ES256");
+    public static final EllipticCurveSignatureAlgorithm ES384 = forId0("ES384");
+    public static final EllipticCurveSignatureAlgorithm ES512 = forId0("ES512");
 
     /**
      * Returns the recommended signature algorithm to be used with the specified key according to the following
@@ -216,8 +180,9 @@ public final class SignatureAlgorithms {
      * @throws InvalidKeyException for any key that does not match the heuristics and requirements documented above,
      *                             since that inevitably means the Key is either insufficient or explicitly disallowed by the JWT specification.
      */
-    public static SignatureAlgorithm forSigningKey(Key key) {
+    public static SignatureAlgorithm<?, ?> forSigningKey(Key key) {
+        @SuppressWarnings("deprecation")
         io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return forName(alg.getValue());
+        return forId(alg.getValue());
     }
 }

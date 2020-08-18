@@ -15,26 +15,28 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.WeakKeyException
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
+import java.security.Key
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.interfaces.RSAPrivateKey
 
 import static org.junit.Assert.*
 
@@ -184,8 +186,7 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('..')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..' is missing a header."
-//            assertEquals "Required JWS Protected Header is missing.", e.message
+            assertEquals 'Compact JWT strings MUST always have a Base64Url protected header per https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).', e.message
         }
     }
 
@@ -202,7 +203,21 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('..bar')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string has a digest/signature, but the header does not reference a valid signature algorithm."
+            assertEquals 'Compact JWT strings MUST always have a Base64Url protected header per https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).', e.message
+        }
+    }
+
+    @Test
+    void testParseWithMissingRequiredSignature() {
+        Key key = SignatureAlgorithms.HS256.generateKey()
+        String compact = Jwts.builder().setSubject('foo').signWith(key).compact()
+        int i = compact.lastIndexOf('.')
+        String missingSig = compact.substring(0, i + 1)
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(missingSig)
+            fail()
+        } catch (MalformedJwtException expected) {
+            assertEquals 'The JWS header references signature algorithm \'HS256\' but the compact JWS string does not have a signature token.', expected.getMessage()
         }
     }
 
@@ -641,7 +656,7 @@ class JwtsTest {
             Jwts.parserBuilder().setSigningKey(key).build().parse(forged)
             fail("Parsing must fail for a forged token.")
         } catch (MalformedJwtException expected) {
-            assertEquals expected.message, 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.'
+            assertEquals 'The JWS header references signature algorithm \'none\' yet the compact JWS string has a digest/signature. This is not permitted per https://tools.ietf.org/html/rfc7518#section-3.6.', expected.message
         }
     }
 
@@ -799,6 +814,14 @@ class JwtsTest {
         assert token.header == [alg: alg.name()]
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
+    }
+
+    void testFoo() {
+        RSAPrivateKey key;
+        Jwts.jweBuilder()
+        .encryptWith(EncryptionAlgorithms.A128GCM)
+        .usingKey(key)
+        .fromKeyAlgorithm(KeyAlgorithms.PBES2_HS256_A128KW.withIterations(1203023))
     }
 }
 

@@ -16,8 +16,10 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
+import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 
@@ -27,6 +29,10 @@ import java.security.KeyPair;
  * @since 0.10.0
  */
 public final class Keys {
+
+    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
+    @SuppressWarnings("rawtypes")
+    private static final Class[] TO_PBE_ARG_TYPES = new Class[]{PBEKey.class};
 
     //prevent instantiation
     private Keys() {
@@ -109,18 +115,18 @@ public final class Keys {
      * @return a new {@link SecretKey} instance suitable for use with the specified {@link SignatureAlgorithm}.
      * @throws IllegalArgumentException for any input value other than {@link io.jsonwebtoken.SignatureAlgorithm#HS256},
      *                                  {@link io.jsonwebtoken.SignatureAlgorithm#HS384}, or {@link io.jsonwebtoken.SignatureAlgorithm#HS512}
-     * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link SymmetricKeySignatureAlgorithm} instance's
-     * {@link SymmetricKeySignatureAlgorithm#generateKey() generateKey()} method directly.
+     * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link SecretKeySignatureAlgorithm} instance's
+     * {@link SecretKeySignatureAlgorithm#generateKey() generateKey()} method directly.
      */
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SignatureAlgorithm salg = SignatureAlgorithms.forName(alg.name());
-        if (!(salg instanceof SymmetricKeySignatureAlgorithm)) {
+        SignatureAlgorithm<?, ?> salg = SignatureAlgorithms.forId(alg.name());
+        if (!(salg instanceof SecretKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
         }
-        return ((SymmetricKeySignatureAlgorithm) salg).generateKey();
+        return ((SecretKeySignatureAlgorithm) salg).generateKey();
     }
 
     /**
@@ -210,11 +216,33 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SignatureAlgorithm salg = SignatureAlgorithms.forName(alg.name());
+        SignatureAlgorithm<?, ?> salg = SignatureAlgorithms.forId(alg.name());
         if (!(salg instanceof AsymmetricKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);
         }
-        return ((AsymmetricKeySignatureAlgorithm) salg).generateKeyPair();
+        AsymmetricKeySignatureAlgorithm<?, ?> asalg = ((AsymmetricKeySignatureAlgorithm<?, ?>) salg);
+        return asalg.generateKeyPair();
+    }
+
+    /**
+     * Returns a JJWT {@link PbeKey} directly backed by the specified JCA {@link PBEKey}.  The returned instance
+     * is directly linked to the specified {@code PBEKey} - a call to either key's {@link SecretKey#destroy() destroy}
+     * method will destroy the other to ensure correct/safe cleanup for both.
+     *
+     * @param key the {@code PBEKey} to represent as a {@code PbeKey} instance.
+     * @return a JJWT {@link PbeKey} instance that wraps the specified JCA {@link PBEKey}
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static PbeKey toPbeKey(PBEKey key) {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "toPbeKey", TO_PBE_ARG_TYPES, new Object[]{key});
+    }
+
+    /**
+     * Returns a new {@link PbeKeyBuilder} to use to construct a {@link PbeKey} instance.
+     * @return
+     */
+    public static PbeKeyBuilder<PbeKey> forPbe() {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forPbe", null, (Object[]) null);
     }
 }

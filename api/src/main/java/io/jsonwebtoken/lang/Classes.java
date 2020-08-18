@@ -189,15 +189,28 @@ public final class Classes {
     /**
      * @since 0.10.0
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T invokeStatic(String fqcn, String methodName, Class[] argTypes, Object... args) {
+    public static <T> T invokeStatic(String fqcn, String methodName, Class<?>[] argTypes, Object... args) {
         try {
-            Class clazz = Classes.forName(fqcn);
+            Class<?> clazz = Classes.forName(fqcn);
+            return invokeStatic(clazz, methodName, argTypes, args);
+        } catch (Exception e) {
+            String msg = "Unable to invoke class method " + fqcn + "#" + methodName + ".  Ensure the necessary " +
+                "implementation is in the runtime classpath.";
+            throw new IllegalStateException(msg, e);
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeStatic(Class<?> clazz, String methodName, Class<?>[] argTypes, Object... args) {
+        try {
             Method method = clazz.getDeclaredMethod(methodName, argTypes);
             method.setAccessible(true);
             return(T)method.invoke(null, args);
         } catch (Exception e) {
-            String msg = "Unable to invoke class method " + fqcn + "#" + methodName + ".  Ensure the necessary " +
+            String msg = "Unable to invoke class method " + clazz.getName() + "#" + methodName + ".  Ensure the necessary " +
                 "implementation is in the runtime classpath.";
             throw new IllegalStateException(msg, e);
         }

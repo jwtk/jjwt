@@ -18,19 +18,33 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
+import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
+import io.jsonwebtoken.impl.lang.ConstantFunction;
+import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.LocatorFunction;
 import io.jsonwebtoken.impl.lang.Services;
+import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 
 import java.security.Key;
 import java.security.Provider;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 /**
@@ -42,7 +56,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     /**
      * To prevent overflow per <a href="https://github.com/jwtk/jjwt/issues/583">Issue 583</a>.
-     *
+     * <p>
      * Package-protected on purpose to allow use in backwards-compatible {@link DefaultJwtParser} implementation.
      * TODO: enable private modifier on these two variables when deleting DefaultJwtParser
      */
@@ -52,23 +66,32 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Provider provider;
 
-    private byte[] keyBytes;
+    @SuppressWarnings({"rawtypes"})
+    private Function<Header, Key> keyLocator = ConstantFunction.forNull();
 
-    private Key key;
+    @SuppressWarnings("deprecation") //TODO: remove for 1.0
+    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator<>(null , null);
 
-    private SigningKeyResolver signingKeyResolver;
+    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
-    private CompressionCodecResolver compressionCodecResolver;
+    private final Collection<AeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
+
+    private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgorithms = new LinkedHashSet<>();
+
+    private final Collection<SignatureAlgorithm<?, ?>> extraSignatureAlgorithms = new LinkedHashSet<>();
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private Claims expectedClaims = new DefaultClaims();
+    private final Claims expectedClaims = new DefaultClaims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
+
+    private Key signatureVerificationKey;
+    private Key decryptionKey;
 
     @Override
     public JwtParserBuilder setProvider(Provider provider) {
@@ -157,28 +180,66 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder setSigningKey(byte[] key) {
         Assert.notEmpty(key, "signing key cannot be null or empty.");
-        this.keyBytes = key;
-        return this;
+        return setSigningKey(Keys.hmacShaKeyFor(key));
     }
 
     @Override
     public JwtParserBuilder setSigningKey(String base64EncodedSecretKey) {
         Assert.hasText(base64EncodedSecretKey, "signing key cannot be null or empty.");
-        this.keyBytes = Decoders.BASE64.decode(base64EncodedSecretKey);
+        byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
+        return setSigningKey(bytes);
+    }
+
+    @Override
+    public JwtParserBuilder setSigningKey(final Key key) {
+        this.signatureVerificationKey = Assert.notNull(key, "signing key cannot be null.");
+        return setSigningKeyResolver(new ConstantKeyLocator<>(key, null));
+    }
+
+    @Override
+    public JwtParserBuilder decryptWith(final Key key) {
+        this.decryptionKey = Assert.notNull(key, "decryption key cannot be null.");
         return this;
     }
 
     @Override
-    public JwtParserBuilder setSigningKey(Key key) {
-        Assert.notNull(key, "signing key cannot be null.");
-        this.key = key;
+    public JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs) {
+        Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
+        this.extraEncryptionAlgorithms.addAll(encAlgs);
         return this;
     }
 
+    @Override
+    public JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs) {
+        Assert.notEmpty(sigAlgs, "Additional SignatureAlgorithm collection cannot be null or empty.");
+        this.extraSignatureAlgorithms.addAll(sigAlgs);
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs) {
+        Assert.notEmpty(keyAlgs, "Additional KeyAlgorithm collection cannot be null or empty.");
+        this.extraKeyAlgorithms.addAll(keyAlgs);
+        return this;
+    }
+
+    @SuppressWarnings("deprecation") //TODO: remove for 1.0
     @Override
     public JwtParserBuilder setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
         Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
         this.signingKeyResolver = signingKeyResolver;
+        return this;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Function<Header, Key> coerce(Function f) {
+        return (Function<Header, Key>) f;
+    }
+
+    @Override
+    public JwtParserBuilder setKeyLocator(Locator<? extends Header<?>, Key> keyLocator) {
+        Assert.notNull(keyLocator, "Key locator cannot be null.");
+        this.keyLocator = coerce(new LocatorFunction<>(keyLocator));
         return this;
     }
 
@@ -189,6 +250,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public JwtParser build() {
 
@@ -196,24 +258,48 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         // that is NOT exposed as a service and no other implementations are available for lookup.
         if (this.deserializer == null) {
             // try to find one based on the services available:
+            //noinspection unchecked
             this.deserializer = Services.loadFirst(Deserializer.class);
         }
 
-        // if the compressionCodecResolver is not set default it.
-        if (this.compressionCodecResolver == null) {
-            this.compressionCodecResolver = new DefaultCompressionCodecResolver();
+        final Function<Header,Key> existing1 = this.keyLocator;
+        if (this.signatureVerificationKey != null) {
+            this.keyLocator = new Function<Header, Key>() {
+                @Override
+                public Key apply(Header header) {
+                    return header instanceof JwsHeader ? signatureVerificationKey : existing1.apply(header);
+                }
+            };
+        }
+        final Function<Header,Key> existing2 = this.keyLocator;
+        if (this.decryptionKey != null) {
+            this.keyLocator = new Function<Header, Key>() {
+                @Override
+                public Key apply(Header header) {
+                    return header instanceof JweHeader ? decryptionKey : existing2.apply(header);
+                }
+            };
         }
 
-        return new ImmutableJwtParser(
-                new DefaultJwtParser(provider,
-                                     signingKeyResolver,
-                                     key,
-                                     keyBytes,
-                                     clock,
-                                     allowedClockSkewMillis,
-                                     expectedClaims,
-                                     base64UrlDecoder,
-                                     new JwtDeserializer<>(deserializer),
-                                     compressionCodecResolver));
+        // Invariants.  If these are ever violated, it's an error in this class implementation
+        // (we default to non-null instances, and the setters should never allow null):
+        assert this.keyLocator != null : "Key locator should never be null.";
+        assert this.signingKeyResolver != null : "SigningKeyResolver should never be null.";
+        assert this.compressionCodecResolver != null : "CompressionCodecResolver should never be null.";
+
+        return new ImmutableJwtParser(new DefaultJwtParser(
+            provider,
+            signingKeyResolver,
+            keyLocator,
+            clock,
+            allowedClockSkewMillis,
+            expectedClaims,
+            base64UrlDecoder,
+            deserializer,
+            compressionCodecResolver,
+            extraSignatureAlgorithms,
+            extraKeyAlgorithms,
+            extraEncryptionAlgorithms
+        ));
     }
 }

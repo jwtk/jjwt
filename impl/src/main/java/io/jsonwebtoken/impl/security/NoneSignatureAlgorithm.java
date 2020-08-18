@@ -1,27 +1,40 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.security.CryptoRequest;
+import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.VerifySignatureRequest;
 
-public class NoneSignatureAlgorithm implements SignatureAlgorithm {
+import java.security.Key;
 
-    private static final String NAME = "none";
+public class NoneSignatureAlgorithm implements SignatureAlgorithm<Key, Key> {
+
+    private static final String ID = "none";
 
     @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public byte[] sign(CryptoRequest request) throws SignatureException {
-        throw new SignatureException("The 'none' algorithm cannot be used to create signatures.");
+    public String getId() {
+        return ID;
     }
 
     @Override
-    public boolean verify(VerifySignatureRequest request) throws SignatureException {
+    public byte[] sign(SignatureRequest<Key> request) throws SecurityException {
         throw new SignatureException("The 'none' algorithm cannot be used to verify signatures.");
+    }
+
+    @Override
+    public boolean verify(VerifySignatureRequest<Key> request) throws SignatureException {
+        throw new SignatureException("The 'none' algorithm cannot be used to verify signatures.");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj ||
+            (obj instanceof SignatureAlgorithm && ID.equalsIgnoreCase(((SignatureAlgorithm<?, ?>) obj).getId()));
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
     }
 }

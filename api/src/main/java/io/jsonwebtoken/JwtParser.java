@@ -30,14 +30,14 @@ import java.util.Map;
  */
 public interface JwtParser {
 
-    public static final char SEPARATOR_CHAR = '.';
+    char SEPARATOR_CHAR = '.';
 
     /**
      * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param id
+     * @param id the id to assert exists
      * @return the parser method for chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -54,7 +54,7 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param subject
+     * @param subject the subject value to assert
      * @return the parser for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -71,7 +71,7 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param audience
+     * @param audience the tag value to assert
      * @return the parser for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -88,7 +88,7 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param issuer
+     * @param issuer the issuer value to assert
      * @return the parser for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -105,7 +105,7 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param issuedAt
+     * @param issuedAt the {@code iat} value to assert.
      * @return the parser for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -122,7 +122,7 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param expiration
+     * @param expiration the {@code exp} value to assert.
      * @return the parser for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -139,7 +139,7 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param notBefore
+     * @param notBefore the {@code nbf} value to assert.
      * @return the parser for method chaining
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -156,8 +156,8 @@ public interface JwtParser {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param claimName
-     * @param value
+     * @param claimName the name of the claim to assert
+     * @param value the value of the claim to assert
      * @return the parser for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -319,7 +319,8 @@ public interface JwtParser {
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
      */
-    @Deprecated
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated // TODO: remove for 1.0
     JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
     /**
@@ -394,11 +395,11 @@ public interface JwtParser {
      * <p>Note that if you are reasonably sure that the token is signed, it is more efficient to attempt to
      * parse the token (and catching exceptions if necessary) instead of calling this method first before parsing.</p>
      *
-     * @param jwt the compact serialized JWT to check
+     * @param compact the compact serialized JWT to check
      * @return {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      */
-    boolean isSigned(String jwt);
+    boolean isSigned(String compact);
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -425,7 +426,7 @@ public interface JwtParser {
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      */
-    Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+    Jwt<?,?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -503,7 +504,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since 0.2
      */
-    Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)
+    <H extends Header<H>> Jwt<H, String> parsePlaintextJwt(String plaintextJwt)
         throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
@@ -534,7 +535,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since 0.2
      */
-    Jwt<Header, Claims> parseClaimsJwt(String claimsJwt)
+    <H extends Header<H>> Jwt<H, Claims> parseClaimsJwt(String claimsJwt)
         throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
@@ -593,4 +594,14 @@ public interface JwtParser {
      */
     Jws<Claims> parseClaimsJws(String claimsJws)
         throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    Jwe<String> parsePlaintextJwe(String plaintextJwe) throws JwtException;
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    Jwe<Claims> parseClaimsJwe(String claimsJwe) throws JwtException;
 }

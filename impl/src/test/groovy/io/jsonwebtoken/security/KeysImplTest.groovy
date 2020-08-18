@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.impl.security.EllipticCurveSignatureAlgorithm
-import io.jsonwebtoken.impl.security.RsaSignatureAlgorithm
+import io.jsonwebtoken.impl.security.DefaultEllipticCurveSignatureAlgorithm
+import io.jsonwebtoken.impl.security.DefaultRsaSignatureAlgorithm
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -67,7 +67,7 @@ class KeysImplTest {
     @Test
     void testSecretKeyFor() {
         for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
-            if (alg instanceof SymmetricKeySignatureAlgorithm) {
+            if (alg instanceof SecretKeySignatureAlgorithm) {
                 SecretKey key = alg.generateKey()
                 assertEquals  alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
                 assertEquals alg.jcaName, key.algorithm
@@ -137,7 +137,7 @@ class KeysImplTest {
 
         for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
 
-            if (alg instanceof RsaSignatureAlgorithm) {
+            if (alg instanceof DefaultRsaSignatureAlgorithm) {
 
                 KeyPair pair = alg.generateKeyPair()
                 assertNotNull pair
@@ -150,7 +150,7 @@ class KeysImplTest {
                 assert priv instanceof RSAPrivateKey
                 assertEquals alg.preferredKeyLength, priv.modulus.bitLength()
 
-            } else if (alg instanceof EllipticCurveSignatureAlgorithm) {
+            } else if (alg instanceof DefaultEllipticCurveSignatureAlgorithm) {
 
                 KeyPair pair = alg.generateKeyPair()
                 assertNotNull pair

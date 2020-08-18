@@ -1,30 +1,36 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.security;
 
-import java.net.URI;
-import java.util.List;
+import io.jsonwebtoken.Identifiable;
+
+import java.security.Key;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface Jwk<T extends Jwk> extends Map<String, Object>, JwkMutator<T> {
-
-    String getType();
-
-    String getUse();
-
-    Set<String> getOperations();
+public interface Jwk<K extends Key> extends Identifiable, Map<String,Object> {
 
     String getAlgorithm();
 
-    String getId();
+    Set<String> getOperations();
 
-    URI getX509Url();
+    String getType();
 
-    List<String> getX509CertficateChain();
-
-    String getX509CertificateSha1Thumbprint();
-
-    String getX509CertificateSha256Thumbprint();
+    K toKey();
 }

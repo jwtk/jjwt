@@ -17,19 +17,21 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Objects;
 
-public class DefaultJwt<B> implements Jwt<Header,B> {
+public class DefaultJwt<H extends Header<H>, B> implements Jwt<H,B> {
 
-    private final Header header;
+    private final H header;
     private final B body;
 
-    public DefaultJwt(Header header, B body) {
-        this.header = header;
-        this.body = body;
+    public DefaultJwt(H header, B body) {
+        this.header = Assert.notNull(header, "header cannot be null.");
+        this.body = Assert.notNull(body, "body cannot be null.");
     }
 
     @Override
-    public Header getHeader() {
+    public H getHeader() {
         return header;
     }
 
@@ -41,5 +43,23 @@ public class DefaultJwt<B> implements Jwt<Header,B> {
     @Override
     public String toString() {
         return "header=" + header + ",body=" + body;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Jwt) {
+            Jwt<?, ?> jwt = (Jwt<?,?>)obj;
+            return Objects.nullSafeEquals(header, jwt.getHeader()) &&
+                Objects.nullSafeEquals(body, jwt.getBody());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.nullSafeHashCode(header, body);
     }
 }

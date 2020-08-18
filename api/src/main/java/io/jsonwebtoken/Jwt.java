@@ -22,7 +22,7 @@ package io.jsonwebtoken;
  *
  * @since 0.1
  */
-public interface Jwt<H extends Header, B> {
+public interface Jwt<H extends Header<H>, B> {
 
     /**
      * Returns the JWT {@link Header} or {@code null} if not present.
