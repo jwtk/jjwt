@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface PrivateRsaJwkMutator<T extends PrivateRsaJwkMutator> extends RsaJwkMutator<T> {
+public interface PrivateRsaJwkMutator<T extends PrivateRsaJwkMutator<T>> extends RsaJwkMutator<T> {
 
     T setD(String d);
 

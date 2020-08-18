@@ -17,6 +17,7 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.security.KeyResolver;
 
 import java.security.Key;
 import java.security.Provider;
@@ -218,23 +219,85 @@ public interface JwtParserBuilder {
      * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signature verification key to use to validate
      *                               any discovered JWS digital signature.
      * @return the parser builder for method chaining.
+     * @deprecated as of 0.10.0.
      */
+    @Deprecated
     JwtParserBuilder setSigningKey(String base64EncodedSecretKey);
 
     /**
-     * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
-     * a JWS (no signature), this key is not used.
-     * <p>
-     * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
-     * (as the {@code alg} header parameter).</p>
-     * <p>
-     * <p>This method overwrites any previously set key.</p>
+     * Sets the signature verification key used to verify all encountered JWS signatures. If the encountered JWT
+     * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
+     * <p/>
+     * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
+     * JWSs with signatures that can always be verified by a single key.  This also implies that this key
+     * <em>MUST</em> be a valid key for the signature algorithm ({@code alg} header) used for the JWS.</p>
+     * <p/>
+     * <p>If there is any chance that the parser will encounter JWSs
+     * that need different signature verification keys based on the JWS being parsed, it is strongly
+     * recommended to configure your own {@link KeyResolver} via the
+     * {@link #setKeyResolver(KeyResolver) setKeyResolver} method instead of using this one.</p>
+     * <p/>
+     * <p>Calling this method overrides any previously set signature verification key.</p>
      *
-     * @param key the algorithm-specific signature verification key to use to validate any discovered JWS digital
+     * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
      *            signature.
      * @return the parser builder for method chaining.
      */
     JwtParserBuilder setSigningKey(Key key);
+
+    /**
+     * Sets the decryption key to be used to decrypt all encountered JWEs.  If the encountered JWT string is not a
+     * JWE (e.g. a JWS), this key is not used.
+     * <p/>
+     * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
+     * JWEs that can always be decrypted by a single key.  This also implies that this key <em>MUST</em> be a valid
+     * key for both the key management algorithm ({@code alg} header) and the content encryption algorithm
+     * ({@code enc} header) used for the JWE.</p>
+     * <p/>
+     * <p>If there is any chance that the parser will encounter JWEs
+     * that need different decryption keys based on the JWE being parsed, it is strongly recommended to configure
+     * your own {@link KeyResolver} via the {@link #setKeyResolver(KeyResolver) setKeyResolver} method instead of
+     * using this one.</p>
+     * <p/>
+     * <p>Calling this method overrides any previously set decryption key.</p>
+     * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
+     * @return the parser builder for method chaining.
+     */
+    JwtParserBuilder decryptWith(Key key);
+
+    /**
+     * Sets the {@link KeyResolver} used to acquire any signature verification or decryption key needed during parsing.
+     * <ul>
+     *     <li>If the parsed String is a JWS, the {@code KeyResolver} will be called to find the appropriate key
+     *     necessary to verify the JWS signature.</li>
+     *     <li>If the parsed String is a JWE, it will be called to find the appropriate decryption key.</li>
+     * </ul>
+     * <p>
+     * <p>Specifying a {@code KeyResolver} is necessary when the signing or decryption key is not already known before
+     * parsing the JWT and the JWT header must be inspected first to determine how to
+     * look up the verification or decryption key.  Once returned by the resolver, the JwtParser will then either
+     * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
+     * <p>
+     * <pre>
+     * Jws&lt;Claims&gt; jws = Jwts.parser().setKeyResolver(new KeyResolver() {
+     *         &#64;Override
+     *         public Key resolveKey(Header header) {
+     *             if (header instanceof JwsHeader) {
+     *                 return getSignatureVerificationKey((JwsHeader)header); // implement me
+     *             } else {
+     *                 return getDecryptionKey((JweHeader)header); // implement me
+     *             }
+     *         }})
+     *     .parseClaimsJws(compact);
+     * </pre>
+     * <p>
+     * <p>A {@code KeyResolver} is invoked once during parsing before performing decryption or signature verification.</p>
+     *
+     * @param keyResolver the key resolver used to retrieve decryption or signature verification keys.
+     * @return the parser builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtParserBuilder setKeyResolver(KeyResolver keyResolver);
 
     /**
      * Sets the {@link SigningKeyResolver} used to acquire the <code>signing key</code> that should be used to verify

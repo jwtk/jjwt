@@ -5,8 +5,8 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.EncryptionAlgorithm;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
+import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import java.util.Map;
 
@@ -15,20 +15,20 @@ import java.util.Map;
  */
 public class DefaultJweFactory {
 
-    private final Decoder<String, byte[]> base64UrlDecoder;
+    /*private final Decoder<String, byte[]> base64UrlDecoder;
 
-    private final Deserializer<Map<String, Object>> deserializer;
+    private final Deserializer<Map<String, ?>> deserializer;
 
-    private final EncryptionAlgorithm encryptionAlgorithm;
+    private final SymmetricAeadAlgorithm encryptionAlgorithm;
 
-    private static Deserializer<Map<String, Object>> loadDeserializer() {
+    private static Deserializer<Map<String, ?>> loadDeserializer() {
         Deserializer deserializer = Services.loadFirst(Deserializer.class);
         //noinspection unchecked
-        return (Deserializer<Map<String, Object>>) deserializer;
+        return deserializer;
     }
 
     public DefaultJweFactory() {
-        this(Decoders.BASE64URL, loadDeserializer(), EncryptionAlgorithms.A256GCM);
+        //this(Decoders.BASE64URL, loadDeserializer(), EncryptionAlgorithms.A256GCM);
     }
 
     public DefaultJweFactory(Decoder<String, byte[]> base64UrlDecoder,

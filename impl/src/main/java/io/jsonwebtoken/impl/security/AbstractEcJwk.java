@@ -6,8 +6,11 @@ import io.jsonwebtoken.security.CurveIds;
 import io.jsonwebtoken.security.EcJwk;
 import io.jsonwebtoken.security.MalformedKeyException;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 @SuppressWarnings("unchecked")
-class AbstractEcJwk<T extends EcJwk> extends AbstractJwk<T> implements EcJwk<T> {
+class AbstractEcJwk<T extends EcJwk<T>> extends AbstractJwk<T> implements EcJwk<T> {
 
     static final String TYPE_VALUE = "EC";
     static final String CURVE_ID = "crv";

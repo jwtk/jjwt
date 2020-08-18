@@ -4,9 +4,9 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.EncryptionAlgorithm;
 import io.jsonwebtoken.security.EncryptionAlgorithmLocator;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
+import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -14,7 +14,7 @@ import io.jsonwebtoken.security.EncryptionAlgorithms;
 public class DefaultEncryptionAlgorithmLocator implements EncryptionAlgorithmLocator {
 
     @Override
-    public EncryptionAlgorithm getEncryptionAlgorithm(JweHeader jweHeader) {
+    public SymmetricAeadAlgorithm getEncryptionAlgorithm(JweHeader jweHeader) {
 
         String enc = Strings.clean(jweHeader.getEncryptionAlgorithm());
         //TODO: this check needs to be in the parser, to be enforced regardless of the locator implementation

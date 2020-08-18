@@ -21,20 +21,23 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LegacyServices;
-import io.jsonwebtoken.impl.security.DefaultCryptoRequest;
+import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
+import io.jsonwebtoken.impl.security.DefaultSignatureRequest;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.CryptoRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithms;
+import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.SignatureRequest;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -45,115 +48,139 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Map;
 
-public class DefaultJwtBuilder implements JwtBuilder {
+@SuppressWarnings("unchecked")
+public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T> {
 
-    private static final byte[] TEST_MESSAGE_BYTES = "Test message".getBytes(StandardCharsets.UTF_8);
+    protected Provider provider;
+    protected SecureRandom secureRandom;
 
-    private Provider provider;
-    private SecureRandom secureRandom;
+    protected Header<?> header;
+    protected Claims claims;
+    protected String payload;
 
-    private Header header;
-    private Claims claims;
-    private String payload;
-
-    private SignatureAlgorithm algorithm = SignatureAlgorithms.NONE;
+    private SignatureAlgorithm<Key,?> algorithm = SignatureAlgorithms.NONE;
+    private Function<SignatureRequest<Key>, byte[]> signFunction;
 
     private Key key;
 
-    private Serializer<Map<String, ?>> serializer;
+    protected Serializer<Map<String, ?>> serializer;
+    protected Function<Map<String,?>, byte[]> headerSerializer;
+    protected Function<Map<String,?>, byte[]> claimsSerializer;
 
-    private Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
-
-    private CompressionCodec compressionCodec;
+    protected Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
+    protected CompressionCodec compressionCodec;
 
     @Override
-    public JwtBuilder setProvider(Provider provider) {
+    public T setProvider(Provider provider) {
         this.provider = provider;
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setSecureRandom(SecureRandom secureRandom) {
+    public T setSecureRandom(SecureRandom secureRandom) {
         this.secureRandom = secureRandom;
-        return this;
+        return (T)this;
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected Function<Map<String,?>, byte[]> wrap(final Serializer<Map<String,?>> serializer, String which) {
+        // TODO for 1.0 - these should throw SerializationException not IllegalArgumentException
+        // IAE is being retained for backwards pre-1.0 behavior compatibility
+        Class clazz = "header".equals(which) ? IllegalStateException.class : IllegalArgumentException.class;
+        return new PropagatingExceptionFunction<>(clazz,
+            "Unable to serialize " + which + " to JSON.",
+            new Function<Map<String, ?>, byte[]>() {
+                @Override
+                public byte[] apply(Map<String, ?> map) {
+                    return serializer.serialize(map);
+                }
+            }
+        );
     }
 
     @Override
-    public JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer) {
+    public T serializeToJsonWith(final Serializer<Map<String, ?>> serializer) {
         Assert.notNull(serializer, "Serializer cannot be null.");
         this.serializer = serializer;
-        return this;
+        this.headerSerializer = wrap(serializer, "header");
+        this.claimsSerializer = wrap(serializer, "claims");
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder) {
+    public T base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder) {
         Assert.notNull(base64UrlEncoder, "base64UrlEncoder cannot be null.");
         this.base64UrlEncoder = base64UrlEncoder;
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setHeader(Header header) {
+    public T setHeader(Header<?> header) {
         this.header = header;
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setHeader(Map<String, Object> header) {
-        this.header = new DefaultHeader(header);
-        return this;
+    public T setHeader(Map<String, Object> header) {
+        this.header = new DefaultHeader<>(header);
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setHeaderParams(Map<String, Object> params) {
+    public T setHeaderParams(Map<String, Object> params) {
         if (!Collections.isEmpty(params)) {
-
-            Header header = ensureHeader();
-
+            Header<?> header = ensureHeader();
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 header.put(entry.getKey(), entry.getValue());
             }
         }
-        return this;
+        return (T)this;
     }
 
-    protected Header ensureHeader() {
+    protected Header<?> ensureHeader() {
         if (this.header == null) {
-            this.header = new DefaultHeader();
+            this.header = new DefaultHeader<>();
         }
         return this.header;
     }
 
     @Override
-    public JwtBuilder setHeaderParam(String name, Object value) {
+    public T setHeaderParam(String name, Object value) {
         ensureHeader().put(name, value);
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder signWith(Key key) throws InvalidKeyException {
+    public T signWith(Key key) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
-        SignatureAlgorithm alg = SignatureAlgorithms.forSigningKey(key);
+        SignatureAlgorithm<?,?> alg = SignatureAlgorithms.forSigningKey(key);
         return signWith(key, alg);
     }
 
     @Override
-    public JwtBuilder signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException {
+    public T signWith(Key key, final SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        this.algorithm = alg;
         this.key = key;
-        return this;
+        this.algorithm = alg;
+        this.signFunction = new PropagatingExceptionFunction<>(SignatureException.class,
+            "Unable to compute " + alg.getId() + " signature.", new Function<SignatureRequest<Key>, byte[]>() {
+            @Override
+            public byte[] apply(SignatureRequest<Key> request) {
+                return alg.sign(request);
+            }
+        });
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
+    public T signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         return signWith(key, SignatureAlgorithms.forName(alg.getValue()));
     }
 
     @Override
-    public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, byte[] secretKeyBytes) throws InvalidKeyException {
+    public T signWith(io.jsonwebtoken.SignatureAlgorithm alg, byte[] secretKeyBytes) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notEmpty(secretKeyBytes, "secret key byte array cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
@@ -162,7 +189,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException {
+    public T signWith(io.jsonwebtoken.SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
         Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
@@ -170,21 +197,21 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, Key key) {
+    public T signWith(io.jsonwebtoken.SignatureAlgorithm alg, Key key) {
         return signWith(key, alg);
     }
 
     @Override
-    public JwtBuilder compressWith(CompressionCodec compressionCodec) {
+    public T compressWith(CompressionCodec compressionCodec) {
         Assert.notNull(compressionCodec, "compressionCodec cannot be null");
         this.compressionCodec = compressionCodec;
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setPayload(String payload) {
+    public T setPayload(String payload) {
         this.payload = payload;
-        return this;
+        return (T)this;
     }
 
     protected Claims ensureClaims() {
@@ -195,25 +222,25 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setClaims(Claims claims) {
+    public T setClaims(Claims claims) {
         this.claims = claims;
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setClaims(Map<String, ?> claims) {
+    public T setClaims(Map<String, ?> claims) {
         this.claims = new DefaultClaims(claims);
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder addClaims(Map<String, Object> claims) {
+    public T addClaims(Map<String, Object> claims) {
         ensureClaims().putAll(claims);
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setIssuer(String iss) {
+    public T setIssuer(String iss) {
         if (Strings.hasText(iss)) {
             ensureClaims().setIssuer(iss);
         } else {
@@ -221,11 +248,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 claims.setIssuer(iss);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setSubject(String sub) {
+    public T setSubject(String sub) {
         if (Strings.hasText(sub)) {
             ensureClaims().setSubject(sub);
         } else {
@@ -233,11 +260,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 claims.setSubject(sub);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setAudience(String aud) {
+    public T setAudience(String aud) {
         if (Strings.hasText(aud)) {
             ensureClaims().setAudience(aud);
         } else {
@@ -245,11 +272,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 claims.setAudience(aud);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setExpiration(Date exp) {
+    public T setExpiration(Date exp) {
         if (exp != null) {
             ensureClaims().setExpiration(exp);
         } else {
@@ -258,11 +285,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 this.claims.setExpiration(exp);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setNotBefore(Date nbf) {
+    public T setNotBefore(Date nbf) {
         if (nbf != null) {
             ensureClaims().setNotBefore(nbf);
         } else {
@@ -271,11 +298,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 this.claims.setNotBefore(nbf);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setIssuedAt(Date iat) {
+    public T setIssuedAt(Date iat) {
         if (iat != null) {
             ensureClaims().setIssuedAt(iat);
         } else {
@@ -284,11 +311,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 this.claims.setIssuedAt(iat);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder setId(String jti) {
+    public T setId(String jti) {
         if (Strings.hasText(jti)) {
             ensureClaims().setId(jti);
         } else {
@@ -296,11 +323,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 claims.setId(jti);
             }
         }
-        return this;
+        return (T)this;
     }
 
     @Override
-    public JwtBuilder claim(String name, Object value) {
+    public T claim(String name, Object value) {
         Assert.hasText(name, "Claim property name cannot be null or empty.");
         if (this.claims == null) {
             if (value != null) {
@@ -314,7 +341,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
             }
         }
 
-        return this;
+        return (T)this;
     }
 
     @Override
@@ -324,7 +351,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
             // try to find one based on the services available
             // TODO: This util class will throw a UnavailableImplementationException here to retain behavior of previous version, remove in v1.0
             // use the previous commented out line instead
-            this.serializer = LegacyServices.loadFirst(Serializer.class);
+            //noinspection deprecation
+            serializeToJsonWith(LegacyServices.loadFirst(Serializer.class));
         }
 
         if (payload == null && Collections.isEmpty(claims)) {
@@ -335,40 +363,35 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException("Both 'payload' and 'claims' cannot both be specified. Choose either one.");
         }
 
-        Header header = ensureHeader();
+        Header<?> header = ensureHeader();
 
         JwsHeader jwsHeader;
         if (header instanceof JwsHeader) {
             jwsHeader = (JwsHeader) header;
         } else {
-            //noinspection unchecked
             header = jwsHeader = new DefaultJwsHeader(header);
         }
 
         Assert.state(algorithm != null, "algorithm instance should never be null."); // invariant
-        jwsHeader.setAlgorithm(algorithm.getName());
+        jwsHeader.setAlgorithm(algorithm.getId());
 
-        byte[] bytes;
-        try {
-            bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : toJson(claims);
-        } catch (SerializationException e) {
-            throw new IllegalArgumentException("Unable to serialize claims object to json: " + e.getMessage(), e);
-        }
+        byte[] bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : claimsSerializer.apply(claims);
 
-        if (compressionCodec != null) {
+        if (Arrays.length(bytes) > 0 && compressionCodec != null) {
             header.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
             bytes = compressionCodec.compress(bytes);
         }
 
-        String base64UrlEncodedHeader = base64UrlEncode(jwsHeader, "Unable to serialize header to json.");
+        byte[] headerBytes = headerSerializer.apply(jwsHeader);
+        String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
         String base64UrlEncodedBody = base64UrlEncoder.encode(bytes);
 
         String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
         if (key != null) { //jwt must be signed:
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
-            CryptoRequest<byte[], Key> request = new DefaultCryptoRequest<>(data, key, provider, secureRandom);
-            byte[] signature = algorithm.sign(request);
+            SignatureRequest<Key> request = new DefaultSignatureRequest<>(provider, secureRandom, data, key);
+            byte[] signature = signFunction.apply(request);
             String base64UrlSignature = base64UrlEncoder.encode(signature);
             jwt += JwtParser.SEPARATOR_CHAR + base64UrlSignature;
         } else {
@@ -378,27 +401,5 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
 
         return jwt;
-    }
-
-    @Deprecated // remove before 1.0 - call the serializer and base64UrlEncoder directly
-    protected String base64UrlEncode(Object o, String errMsg) {
-        Assert.isInstanceOf(Map.class, o, "object argument must be a map.");
-        Map m = (Map) o;
-        byte[] bytes;
-        try {
-            bytes = toJson(m);
-        } catch (SerializationException e) {
-            throw new IllegalStateException(errMsg, e);
-        }
-
-        return base64UrlEncoder.encode(bytes);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Deprecated //remove before 1.0 - call the serializer directly
-    protected byte[] toJson(Object object) throws SerializationException {
-        Assert.isInstanceOf(Map.class, object, "object argument must be a map.");
-        Map m = (Map) object;
-        return serializer.serialize(m);
     }
 }

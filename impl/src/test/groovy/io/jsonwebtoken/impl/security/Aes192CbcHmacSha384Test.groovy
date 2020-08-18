@@ -1,15 +1,15 @@
 package io.jsonwebtoken.impl.security
 
 
-import io.jsonwebtoken.security.AeadIvEncryptionResult
 import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.SymmetricAeadEncryptionResult
+import io.jsonwebtoken.security.SymmetricAeadRequest
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertTrue
 
 /**
  * Test case defined in https://tools.ietf.org/html/rfc7518#appendix-B.2
@@ -41,6 +41,7 @@ class Aes192CbcHmacSha384Test {
              0x69, 0x70, 0x6c, 0x65, 0x20, 0x6f, 0x66, 0x20, 0x41, 0x75, 0x67, 0x75, 0x73, 0x74, 0x65, 0x20,
              0x4b, 0x65, 0x72, 0x63, 0x6b, 0x68, 0x6f, 0x66, 0x66, 0x73] as byte[]
 
+    @SuppressWarnings('unused')
     final byte[] AL = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x50] as byte[]
 
     final byte[] E =
@@ -54,6 +55,7 @@ class Aes192CbcHmacSha384Test {
              0xc8, 0xbb, 0x6c, 0x6b, 0x01, 0xd3, 0x5d, 0x49, 0x78, 0x7b, 0xcd, 0x57, 0xef, 0x48, 0x49, 0x27,
              0xf2, 0x80, 0xad, 0xc9, 0x1a, 0xc0, 0xc4, 0xe7, 0x9c, 0x7b, 0x11, 0xef, 0xc6, 0x00, 0x54, 0xe3] as byte[]
 
+    @SuppressWarnings('unused')
     final byte[] M =
             [0x84, 0x90, 0xac, 0x0e, 0x58, 0x94, 0x9b, 0xfe, 0x51, 0x87, 0x5d, 0x73, 0x3f, 0x93, 0xac, 0x20,
              0x75, 0x16, 0x80, 0x39, 0xcc, 0xc7, 0x33, 0xd7, 0x45, 0x94, 0xf8, 0x86, 0xb3, 0xfa, 0xaf, 0xd4,
@@ -68,27 +70,22 @@ class Aes192CbcHmacSha384Test {
 
         def alg = EncryptionAlgorithms.A192CBC_HS384
 
-        def req = new DefaultEncryptionRequest(P, KEY, null, null, IV, A);
+        SymmetricAeadRequest req = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
 
-        def r = alg.encrypt(req)
+        SymmetricAeadEncryptionResult result = alg.encrypt(req)
 
-        assertTrue r instanceof AeadIvEncryptionResult
-        AeadIvEncryptionResult result = r as AeadIvEncryptionResult;
-
-        byte[] resultCiphertext = result.getCiphertext()
-        byte[] resultTag = result.getAuthenticationTag();
-        byte[] resultIv = result.getInitializationVector();
+        byte[] resultCiphertext = result.getPayload()
+        byte[] resultTag = result.getAuthenticationTag()
+        byte[] resultIv = result.getInitializationVector()
 
         assertArrayEquals E, resultCiphertext
         assertArrayEquals T, resultTag
         assertArrayEquals IV, resultIv //shouldn't have been altered
 
         // now test decryption:
+        def dreq = new DefaultSymmetricAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv)
+        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
 
-        def dreq = new DefaultAeadIvRequest(resultCiphertext, KEY, null, null, resultIv, A, resultTag)
-
-        byte[] decryptionResult = alg.decrypt(dreq)
-
-        assertArrayEquals(P, decryptionResult);
+        assertArrayEquals(P, decryptionResult)
     }
 }

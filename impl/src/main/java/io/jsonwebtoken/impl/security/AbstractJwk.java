@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-abstract class AbstractJwk<T extends Jwk> extends JwtMap implements Jwk<T> {
+abstract class AbstractJwk<T extends Jwk<T>> extends JwtMap implements Jwk<T> {
 
     static final String TYPE = "kty";
     static final String USE = "use";

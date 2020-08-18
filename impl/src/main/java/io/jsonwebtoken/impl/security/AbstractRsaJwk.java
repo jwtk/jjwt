@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.security.RsaJwk;
 
 @SuppressWarnings("unchecked")
-public class AbstractRsaJwk<T extends RsaJwk> extends AbstractJwk<T> implements RsaJwk<T> {
+public class AbstractRsaJwk<T extends RsaJwk<T>> extends AbstractJwk<T> implements RsaJwk<T> {
 
     static final String TYPE_VALUE = "RSA";
     static final String MODULUS = "n";

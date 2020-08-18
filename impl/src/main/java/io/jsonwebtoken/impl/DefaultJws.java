@@ -17,27 +17,15 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.lang.Objects;
 
-public class DefaultJws<B> implements Jws<B> {
+public class DefaultJws<B> extends DefaultJwt<JwsHeader, B> implements Jws<B> {
 
-    private final JwsHeader header;
-    private final B body;
     private final String signature;
 
     public DefaultJws(JwsHeader header, B body, String signature) {
-        this.header = header;
-        this.body = body;
+        super(header, body);
         this.signature = signature;
-    }
-
-    @Override
-    public JwsHeader getHeader() {
-        return this.header;
-    }
-
-    @Override
-    public B getBody() {
-        return this.body;
     }
 
     @Override
@@ -47,6 +35,21 @@ public class DefaultJws<B> implements Jws<B> {
 
     @Override
     public String toString() {
-        return "header=" + header + ",body=" + body + ",signature=" + signature;
+        return super.toString() + ",signature=" + signature;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Jws) {
+            Jws<?> jws = (Jws<?>) obj;
+            return super.equals(jws) &&
+                Objects.nullSafeEquals(signature, jws.getSignature());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.nullSafeHashCode(getHeader(), getBody(), signature);
     }
 }

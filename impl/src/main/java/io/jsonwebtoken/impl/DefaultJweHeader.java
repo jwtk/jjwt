@@ -13,7 +13,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
         super();
     }
 
-    public DefaultJweHeader(Map<String, Object> map) {
+    public DefaultJweHeader(Map<String, ?> map) {
         super(map);
     }
 

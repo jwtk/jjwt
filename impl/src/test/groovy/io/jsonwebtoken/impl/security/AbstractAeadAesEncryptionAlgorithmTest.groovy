@@ -16,30 +16,30 @@ class AbstractAeadAesEncryptionAlgorithmTest {
 
     @Test(expected = IllegalArgumentException)
     void testConstructorWithIvLargerThanAesBlockSize() {
-        new TestAesEncryptionAlgorithm('foo', 'foo', 136, 128)
+        new TestAesAeadAlgorithm('foo', 'foo', 136, 128)
     }
 
     @Test(expected = IllegalArgumentException)
     void testConstructorWithoutIvLength() {
-        new TestAesEncryptionAlgorithm('foo', 'foo', 0, 128)
+        new TestAesAeadAlgorithm('foo', 'foo', 0, 128)
     }
 
     @Test(expected = IllegalArgumentException)
     void testConstructorWithoutRequiredKeyLength() {
-        new TestAesEncryptionAlgorithm('foo', 'foo', 128, 0)
+        new TestAesAeadAlgorithm('foo', 'foo', 128, 0)
     }
 
     @Test
     void testDoEncryptFailure() {
 
-        def alg = new TestAesEncryptionAlgorithm('foo', 'foo', 128, 128) {
+        def alg = new TestAesAeadAlgorithm('foo', 'foo', 128, 128) {
             @Override
-            protected AeadIvEncryptionResult doEncrypt(AeadRequest<byte[], SecretKey> req) throws Exception {
+            protected SymmetricAeadEncryptionResult doEncrypt(SymmetricAeadRequest symmetricAeadRequest) throws Exception {
                 throw new IllegalArgumentException('broken')
             }
         }
 
-        def req = new DefaultAesEncryptionRequest<>('bar'.getBytes(), alg.generateKey(), 'foo'.getBytes());
+        def req = new DefaultSymmetricAeadRequest('bar'.getBytes(), alg.generateKey(), 'foo'.getBytes());
 
         try {
             alg.encrypt(req)
@@ -54,7 +54,7 @@ class AbstractAeadAesEncryptionAlgorithmTest {
 
         def requiredKeyLength = 16
 
-        def alg = new TestAesEncryptionAlgorithm('foo', 'foo', 128, requiredKeyLength)
+        def alg = new TestAesAeadAlgorithm('foo', 'foo', 128, requiredKeyLength)
 
         byte[] bytes = new byte[requiredKeyLength + 1] //not same as requiredKeyByteLength, but it should be
         Randoms.secureRandom().nextBytes(bytes)
@@ -69,41 +69,30 @@ class AbstractAeadAesEncryptionAlgorithmTest {
     @Test
     void testGetSecureRandomWhenRequestHasSpecifiedASecureRandom() {
 
-        def alg = new TestAesEncryptionAlgorithm('foo', 'foo', 128, 128)
+        def alg = new TestAesAeadAlgorithm('foo', 'foo', 128, 128)
 
         def secureRandom = new SecureRandom()
 
-        def req = new DefaultAesEncryptionRequest('data'.getBytes(), alg.generateKey(), null, secureRandom, 'aad'.getBytes())
+        def req = new DefaultSymmetricAeadRequest(null, secureRandom, 'data'.getBytes(), alg.generateKey(), 'aad'.getBytes())
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 
         assertSame(secureRandom, returnedSecureRandom)
     }
 
-    @Test(expected = CryptoException)
-    void testDoGenerateKeyException() {
-        def alg = new TestAesEncryptionAlgorithm('foo', 'foo', 128, 128) {
-            @Override
-            protected SecretKey doGenerateKey() throws Exception {
-                throw new IllegalStateException("testmsg")
-            }
-        }
-        alg.generateKey()
-    }
+    static class TestAesAeadAlgorithm extends AesAeadAlgorithm {
 
-    static class TestAesEncryptionAlgorithm extends AbstractAeadAesEncryptionAlgorithm {
-
-        TestAesEncryptionAlgorithm(String name, String transformationString, int generatedIvLengthInBits, int requiredKeyLengthInBits) {
+        TestAesAeadAlgorithm(String name, String transformationString, int generatedIvLengthInBits, int requiredKeyLengthInBits) {
             super(name, transformationString, generatedIvLengthInBits, requiredKeyLengthInBits)
         }
 
         @Override
-        protected AeadIvEncryptionResult doEncrypt(AeadRequest<byte[], SecretKey> secretKeyAeadRequest) throws Exception {
+        protected SymmetricAeadEncryptionResult doEncrypt(SymmetricAeadRequest symmetricAeadRequest) throws Exception {
             return null
         }
 
         @Override
-        protected byte[] doDecrypt(AeadIvRequest<byte[], SecretKey> secretKeyAeadIvDecryptionRequest) throws Exception {
+        protected byte[] doDecrypt(SymmetricAeadDecryptionRequest symmetricAeadDecryptionRequest) throws Exception {
             return new byte[0]
         }
     }

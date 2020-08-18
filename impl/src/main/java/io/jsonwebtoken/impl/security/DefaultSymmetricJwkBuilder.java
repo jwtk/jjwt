@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.security.SymmetricJwk;
 import io.jsonwebtoken.security.SymmetricJwkBuilder;
 
-final class DefaultSymmetricJwkBuilder extends AbstractJwkBuilder<SymmetricJwkBuilder, SymmetricJwk> implements SymmetricJwkBuilder {
+final class DefaultSymmetricJwkBuilder extends AbstractJwkBuilder<SymmetricJwk, SymmetricJwkBuilder> implements SymmetricJwkBuilder {
 
     private static final JwkValidator<SymmetricJwk> VALIDATOR = new SymmetricJwkValidator();
 

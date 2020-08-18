@@ -115,7 +115,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SignatureAlgorithm salg = SignatureAlgorithms.forName(alg.name());
+        SignatureAlgorithm<?,?> salg = SignatureAlgorithms.forName(alg.name());
         if (!(salg instanceof SymmetricKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -210,11 +210,12 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SignatureAlgorithm salg = SignatureAlgorithms.forName(alg.name());
+        SignatureAlgorithm<?,?> salg = SignatureAlgorithms.forName(alg.name());
         if (!(salg instanceof AsymmetricKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);
         }
-        return ((AsymmetricKeySignatureAlgorithm) salg).generateKeyPair();
+        AsymmetricKeySignatureAlgorithm<?,?> asalg = ((AsymmetricKeySignatureAlgorithm<?,?>) salg);
+        return asalg.generateKeyPair();
     }
 }

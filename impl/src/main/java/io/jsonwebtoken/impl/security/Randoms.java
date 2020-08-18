@@ -1,5 +1,8 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.CryptoRequest;
+
 import java.security.SecureRandom;
 
 /**

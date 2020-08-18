@@ -27,7 +27,7 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
         super();
     }
 
-    public DefaultHeader(Map<String, Object> map) {
+    public DefaultHeader(Map<String, ?> map) {
         super(map);
     }
 

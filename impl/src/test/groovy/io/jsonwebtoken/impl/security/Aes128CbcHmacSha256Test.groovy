@@ -7,7 +7,6 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertTrue
 
 /**
  * Test case defined in https://tools.ietf.org/html/rfc7518#appendix-B.1
@@ -69,14 +68,11 @@ class Aes128CbcHmacSha256Test {
 
         def alg = EncryptionAlgorithms.A128CBC_HS256
 
-        def request = new DefaultEncryptionRequest(P, KEY, null, null, IV, A)
+        def request = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
 
-        def r = alg.encrypt(request);
+        def result = alg.encrypt(request);
 
-        assertTrue r instanceof AeadIvEncryptionResult
-        AeadIvEncryptionResult result = r as AeadIvEncryptionResult;
-
-        byte[] ciphertext = result.getCiphertext()
+        byte[] ciphertext = result.getPayload()
         byte[] tag = result.getAuthenticationTag()
         byte[] iv = result.getInitializationVector()
 
@@ -86,9 +82,9 @@ class Aes128CbcHmacSha256Test {
 
         // now test decryption:
 
-        def dreq = new DefaultAeadIvRequest(ciphertext, KEY, null, null, iv, A, tag)
+        def dreq = new DefaultSymmetricAeadResult(null, null, ciphertext, KEY, A, tag, iv)
 
-        byte[] decryptionResult = alg.decrypt(dreq)
+        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
 
         assertArrayEquals(P, decryptionResult)
     }

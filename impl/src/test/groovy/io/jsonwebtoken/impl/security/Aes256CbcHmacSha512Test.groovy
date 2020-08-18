@@ -1,15 +1,15 @@
 package io.jsonwebtoken.impl.security
 
 
-import io.jsonwebtoken.security.AeadIvEncryptionResult
 import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.SymmetricAeadEncryptionResult
+import io.jsonwebtoken.security.SymmetricAeadRequest
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertTrue
 
 /**
  * Test case defined in https://tools.ietf.org/html/rfc7518#appendix-B.3
@@ -70,14 +70,11 @@ class Aes256CbcHmacSha512Test {
 
         def alg = EncryptionAlgorithms.A256CBC_HS512
 
-        def req = new DefaultEncryptionRequest(P, KEY, null, null, IV, A)
+        SymmetricAeadRequest req = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
 
-        def r = alg.encrypt(req)
+        SymmetricAeadEncryptionResult result = alg.encrypt(req)
 
-        assertTrue r instanceof AeadIvEncryptionResult
-        AeadIvEncryptionResult result = r as AeadIvEncryptionResult;
-
-        byte[] resultCiphertext = result.getCiphertext()
+        byte[] resultCiphertext = result.getPayload()
         byte[] resultTag = result.getAuthenticationTag();
         byte[] resultIv = result.getInitializationVector();
 
@@ -86,8 +83,8 @@ class Aes256CbcHmacSha512Test {
         assertArrayEquals IV, resultIv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadIvRequest(resultCiphertext, KEY, null, null, resultIv, A, resultTag)
-        byte[] decryptionResult = alg.decrypt(dreq)
+        def dreq = new DefaultSymmetricAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv);
+        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
         assertArrayEquals(P, decryptionResult);
     }
 }

@@ -7,5 +7,5 @@ import io.jsonwebtoken.JweHeader;
  */
 public interface EncryptionAlgorithmLocator {
 
-    EncryptionAlgorithm getEncryptionAlgorithm(JweHeader jweHeader);
+    SymmetricAeadAlgorithm getEncryptionAlgorithm(JweHeader jweHeader);
 }

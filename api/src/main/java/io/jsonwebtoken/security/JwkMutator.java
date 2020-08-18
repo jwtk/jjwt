@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwkMutator<T extends JwkMutator> {
+public interface JwkMutator<T extends JwkMutator<T>> {
 
     T setUse(String use);
 

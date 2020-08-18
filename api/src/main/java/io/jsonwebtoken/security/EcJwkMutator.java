@@ -3,7 +3,7 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface EcJwkMutator<T extends EcJwkMutator> extends JwkMutator<T> {
+public interface EcJwkMutator<T extends EcJwkMutator<T>> extends JwkMutator<T> {
 
     T setCurveId(CurveId curveId);
 

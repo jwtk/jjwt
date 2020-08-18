@@ -2,18 +2,20 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.CryptoException;
+import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.CryptoRequest;
-import io.jsonwebtoken.security.EncryptionAlgorithm;
-import io.jsonwebtoken.security.EncryptionResult;
+import io.jsonwebtoken.security.KeyException;
+import io.jsonwebtoken.security.SecurityException;
 
 import java.security.Key;
 
-abstract class AbstractEncryptionAlgorithm<T, E extends Key, D extends Key, EReq extends CryptoRequest<T, E>,
-    ERes extends EncryptionResult, DReq extends CryptoRequest<T, D>>
-    extends CipherAlgorithm implements EncryptionAlgorithm<T, E, D, EReq, ERes, DReq> {
+abstract class AbstractEncryptionAlgorithm<T, E extends Key, D extends Key,
+    EReq extends CryptoRequest<T, E>, ERes extends PayloadSupplier<byte[]>,
+    DReq extends CryptoRequest<byte[], D>, DRes extends PayloadSupplier<T>>
+    extends CryptoAlgorithm implements EncryptionAlgorithm<T, E, D, EReq, ERes, DReq, DRes> {
 
-    AbstractEncryptionAlgorithm(String name, String transformationString) {
-        super(name, transformationString);
+    AbstractEncryptionAlgorithm(String id, String transformationString) {
+        super(id, transformationString);
     }
 
     @Override
@@ -21,10 +23,10 @@ abstract class AbstractEncryptionAlgorithm<T, E extends Key, D extends Key, EReq
         try {
             Assert.notNull(req, "Encryption request cannot be null.");
             return doEncrypt(req);
-        } catch (CryptoException ce) {
-            throw ce; //propagate
+        } catch (SecurityException se) {
+            throw se; //propagate
         } catch (Exception e) {
-            String msg = "Unable to perform " + getName() + " encryption: " + e.getMessage();
+            String msg = "Unable to perform " + getId() + " encryption: " + e.getMessage();
             throw new CryptoException(msg, e);
         }
     }
@@ -32,14 +34,16 @@ abstract class AbstractEncryptionAlgorithm<T, E extends Key, D extends Key, EReq
     protected abstract ERes doEncrypt(EReq req) throws Exception;
 
     @Override
-    public byte[] decrypt(DReq req) throws CryptoException {
+    public DRes decrypt(DReq req) throws CryptoException, KeyException {
         try {
             Assert.notNull(req, "Decryption request cannot be null.");
-            return doDecrypt(req);
-        } catch (CryptoException ce) {
-            throw ce; //propagate
+            byte[] bytes = doDecrypt(req);
+            //noinspection unchecked
+            return (DRes) new DefaultPayloadSupplier<>(bytes);
+        } catch (SecurityException se) {
+            throw se; //propagate
         } catch (Exception e) {
-            String msg = "Unable to perform " + getName() + " decryption: " + e.getMessage();
+            String msg = "Unable to perform " + getId() + " decryption: " + e.getMessage();
             throw new CryptoException(msg, e);
         }
     }

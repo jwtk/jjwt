@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.security.PublicEcJwk;
 import io.jsonwebtoken.security.PublicEcJwkBuilder;
 
-class DefaultPublicEcJwkBuilder extends AbstractEcJwkBuilder<PublicEcJwkBuilder, PublicEcJwk> implements PublicEcJwkBuilder {
+class DefaultPublicEcJwkBuilder extends AbstractEcJwkBuilder<PublicEcJwk, PublicEcJwkBuilder> implements PublicEcJwkBuilder {
 
     private static final JwkValidator<PublicEcJwk> VALIDATOR = new AbstractEcJwkValidator<PublicEcJwk>() {
         @Override

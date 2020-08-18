@@ -1,8 +1,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.security.CryptoException
+import io.jsonwebtoken.security.PayloadSupplier
 import io.jsonwebtoken.security.CryptoRequest
-import io.jsonwebtoken.security.EncryptionResult
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -13,11 +13,10 @@ class AbstractEncryptionAlgorithmTest {
 
     @Test
     void testDoEncryptCryptoExceptionPropagates() {
-
         final CryptoException expected = new CryptoException("foo")
 
         AbstractEncryptionAlgorithm alg = new AbstractEncryptionAlgorithm('foo', 'foo') {
-            protected EncryptionResult doEncrypt(CryptoRequest cryptoRequest) throws Exception {
+            protected PayloadSupplier<byte[]> doEncrypt(CryptoRequest cryptoRequest) throws Exception {
                 throw expected
             }
             protected byte[] doDecrypt(CryptoRequest cryptoRequest) throws Exception {
@@ -26,7 +25,7 @@ class AbstractEncryptionAlgorithmTest {
         }
 
         try {
-            alg.encrypt(new DefaultCryptoRequest(new byte[1], new SecretKeySpec(new byte[1], 'AES'), null, null))
+            alg.encrypt(new DefaultSymmetricAeadRequest(null, null, new byte[1], new SecretKeySpec(new byte[1], 'AES')))
         } catch (CryptoException thrown) {
             assertSame expected, thrown
         }
@@ -34,11 +33,10 @@ class AbstractEncryptionAlgorithmTest {
 
     @Test
     void testDecryptWithNonCryptoExceptionThrowsCryptoException() {
-
         final IllegalStateException expected = new IllegalStateException("decrypt")
 
         AbstractEncryptionAlgorithm alg = new AbstractEncryptionAlgorithm('foo', 'foo') {
-            protected EncryptionResult doEncrypt(CryptoRequest cryptoRequest) throws Exception {
+            protected PayloadSupplier<byte[]> doEncrypt(CryptoRequest cryptoRequest) throws Exception {
                 throw new IllegalStateException("should not be called")
             }
             protected byte[] doDecrypt(CryptoRequest cryptoRequest) throws Exception {
@@ -47,7 +45,7 @@ class AbstractEncryptionAlgorithmTest {
         }
 
         try {
-            alg.decrypt(new DefaultCryptoRequest(new byte[1], new SecretKeySpec(new byte[1], 'AES'), null, null))
+            alg.decrypt(new DefaultSymmetricAeadResult(null, null, new byte[1], new SecretKeySpec(new byte[1], 'AES'), null, new byte[1], new byte[1]))
         } catch (CryptoException thrown) {
             assertSame expected, thrown.getCause()
         }

@@ -7,7 +7,7 @@ import static org.junit.Assert.*
 
 class AbstractJwkTest {
 
-    class TestJwk<T extends Jwk> extends AbstractJwk<Jwk> {
+    class TestJwk extends AbstractJwk {
         TestJwk() {
             super("test")
         }

@@ -1,22 +1,13 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.security.CryptoException
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.SignatureAlgorithm
-import io.jsonwebtoken.security.SignatureException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
-import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import java.security.Key
-import java.security.NoSuchAlgorithmException
-import java.security.Provider
-import java.security.Security
 
-import static org.easymock.EasyMock.createMock
 import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertSame
 
 class MacSignatureAlgorithmTest {
 
@@ -24,51 +15,19 @@ class MacSignatureAlgorithmTest {
         return new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256)
     }
 
-    @Test(expected = UnsupportedOperationException)
+    @Test(expected = CryptoException)
     void testKeyGeneratorNoSuchAlgorithm() {
         MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'foo', 256);
         alg.generateKey()
     }
 
     @Test
-    void testDoGetMacInstanceWithProvider() {
-        Provider provider = Security.getProvider("SunJCE")
-        MacSignatureAlgorithm alg = newAlg()
-        assertNotNull alg.doGetMacInstance('HmacSHA256', provider)
-    }
+    void testKeyGeneratorKeyLength() {
+        MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256);
+        assertEquals 256, alg.generateKey().getEncoded().length * Byte.SIZE
 
-    @Test
-    void testGetMacInstanceDefault() {
-        def expected = new NoSuchAlgorithmException('test')
-        MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256) {
-            @Override
-            def Mac doGetMacInstance(String jcaName, Provider provider) throws NoSuchAlgorithmException {
-                throw expected
-            }
-        }
-        try {
-            alg.sign(new DefaultCryptoRequest<byte[], Key>(new byte[1], new SecretKeySpec(new byte[32], 'HmacSHA256'), null, null))
-        } catch (SignatureException e) {
-            assertEquals 'There is no JCA Provider available that supports MAC algorithm name \'HmacSHA256\'.', e.getMessage()
-        }
-    }
-
-    @Test
-    void testGetMacInstanceWithProvider() {
-        Provider provider = createMock(Provider)
-        String providerString = provider.toString()
-        def expected = new NoSuchAlgorithmException('test')
-        MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256) {
-            @Override
-            def Mac doGetMacInstance(String jcaName, Provider p) throws NoSuchAlgorithmException {
-                throw expected
-            }
-        }
-        try {
-            alg.sign(new DefaultCryptoRequest<byte[], Key>(new byte[1], new SecretKeySpec(new byte[32], 'HmacSHA256'), provider, null))
-        } catch (SignatureException e) {
-            assertEquals 'The specified JCA Provider {' + providerString + '} does not support MAC algorithm name \'HmacSHA256\'.', e.getMessage()
-        }
+        alg = new MacSignatureAlgorithm('A128CBC-HS256', 'HmacSHA256', 128)
+        assertEquals 128, alg.generateKey().getEncoded().length * Byte.SIZE
     }
 
     @Test(expected = IllegalArgumentException)

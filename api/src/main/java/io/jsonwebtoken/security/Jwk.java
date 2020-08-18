@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface Jwk<T extends Jwk> extends Map<String, Object>, JwkMutator<T> {
+public interface Jwk<T extends Jwk<T>> extends Map<String, Object>, JwkMutator<T>, Identifiable {
 
     String getType();
 

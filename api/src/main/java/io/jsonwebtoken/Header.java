@@ -181,9 +181,6 @@ public interface Header<T extends Header<T>> extends Map<String,Object> {
      * Sets the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
      * (Compression Algorithm) header parameter value. A {@code null} value will remove
      * the property from the JSON map.
-     * <p>The compression algorithm is NOT part of the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25">JWT specification</a>
-     * and must be used carefully since, is not expected that other libraries (including previous versions of this one)
-     * be able to deserialize a compressed JWT body correctly. </p>
      *
      * <h3>Compatibility Note</h3>
      *

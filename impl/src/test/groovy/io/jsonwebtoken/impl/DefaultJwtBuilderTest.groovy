@@ -48,7 +48,7 @@ class DefaultJwtBuilderTest {
 
         io.jsonwebtoken.security.SignatureAlgorithm alg = new io.jsonwebtoken.security.SignatureAlgorithm() {
             @Override
-            byte[] sign(CryptoRequest<byte[], Key> request) throws SignatureException, KeyException {
+            byte[] sign(SignatureRequest request) throws SignatureException, KeyException {
                 assertSame provider, request.getProvider()
                 called[0] = true
                 //simulate a digest:
@@ -63,7 +63,7 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            String getName() {
+            String getId() {
                 return "test"
             }
         }
@@ -86,7 +86,7 @@ class DefaultJwtBuilderTest {
 
         io.jsonwebtoken.security.SignatureAlgorithm alg = new io.jsonwebtoken.security.SignatureAlgorithm() {
             @Override
-            byte[] sign(CryptoRequest<byte[], Key> request) throws SignatureException, KeyException {
+            byte[] sign(SignatureRequest request) throws SignatureException, KeyException {
                 assertSame random, request.getSecureRandom()
                 called[0] = true
                 //simulate a digest:
@@ -101,7 +101,7 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            String getName() {
+            String getId() {
                 return "test"
             }
         }
@@ -252,14 +252,13 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testBase64UrlEncodeError() {
-
-        def b = new DefaultJwtBuilder() {
+        def serializer = new Serializer() {
             @Override
-            protected byte[] toJson(Object o) throws SerializationException {
+            byte[] serialize(Object o) throws SerializationException {
                 throw new SerializationException('foo', new Exception())
             }
         }
-
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         try {
             b.setPayload('foo').compact()
             fail()
@@ -270,23 +269,20 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactCompressionCodecJsonProcessingException() {
-        def b = new DefaultJwtBuilder() {
+        def serializer = new Serializer() {
             @Override
-            protected byte[] toJson(Object o) throws SerializationException {
-                if (o instanceof DefaultJwsHeader) {
-                    return super.toJson(o)
-                }
+            byte[] serialize(Object o) throws SerializationException {
                 throw new SerializationException('dummy text', new Exception())
             }
         }
-
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         def c = Jwts.claims().setSubject("Joe");
 
         try {
             b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, 'Unable to serialize claims object to json: dummy text'
+            assertEquals iae.message, 'Unable to serialize claims to JSON. Cause: dummy text'
         }
     }
 

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-abstract class AbstractJwkBuilder<T extends JwkBuilder, K extends Jwk> implements JwkBuilder<T, K> {
+abstract class AbstractJwkBuilder<K extends Jwk<K>, T extends JwkBuilder<K, T>> implements JwkBuilder<K, T> {
 
     protected final K jwk;
 

@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.CurveIds
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
@@ -35,13 +34,15 @@ class JwksTest {
 
     @Test
     void testSymmetric() {
-        println Jwks.builder().symmetric().setUse("signature").setId(UUID.randomUUID().toString()).setK("foo").build()
+        //TODO create assertions
+        //println Jwks.builder().symmetric().setUse("signature").setId(UUID.randomUUID().toString()).setK("foo").build()
     }
 
     @Test
     void testFoo() {
-        println Jwks.builder().ellipticCurve().publicKey().setCurveId(CurveIds.P256).setX("xval").setY("yval").build()
-        println Jwks.builder().ellipticCurve().publicKey().setCurveId(CurveIds.P384).setX("x").setY("y").build()
-        println Jwks.builder().ellipticCurve().privateKey().setCurveId(CurveIds.P521).setX("x").setY("y").setD("d").build()
+        //TODO: add some real tests
+        //println Jwks.builder().ellipticCurve().publicKey().setCurveId(CurveIds.P256).setX("xval").setY("yval").build()
+        //println Jwks.builder().ellipticCurve().publicKey().setCurveId(CurveIds.P384).setX("x").setY("y").build()
+        //println Jwks.builder().ellipticCurve().privateKey().setCurveId(CurveIds.P521).setX("x").setY("y").setD("d").build()
     }
 }

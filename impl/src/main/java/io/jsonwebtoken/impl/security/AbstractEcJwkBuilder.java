@@ -5,7 +5,7 @@ import io.jsonwebtoken.security.EcJwk;
 import io.jsonwebtoken.security.EcJwkBuilder;
 
 @SuppressWarnings("unchecked")
-abstract class AbstractEcJwkBuilder<T extends EcJwkBuilder, K extends EcJwk> extends AbstractJwkBuilder<T, K> implements EcJwkBuilder<T, K> {
+abstract class AbstractEcJwkBuilder<K extends EcJwk<K>, T extends EcJwkBuilder<K, T>> extends AbstractJwkBuilder<K, T> implements EcJwkBuilder<K, T> {
 
     AbstractEcJwkBuilder(JwkValidator<K> validator) {
         super(validator);

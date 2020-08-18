@@ -9,7 +9,7 @@ class NoneSignatureAlgorithmTest {
 
     @Test
     void testName() {
-        assertEquals "none", new NoneSignatureAlgorithm().getName();
+        assertEquals "none", new NoneSignatureAlgorithm().getId();
     }
 
     @Test(expected = SignatureException)
@@ -20,5 +20,10 @@ class NoneSignatureAlgorithmTest {
     @Test(expected = SignatureException)
     void testVerify() {
         new NoneSignatureAlgorithm().verify(null)
+    }
+
+    @Test
+    void testHashCode() {
+        assertEquals 'none'.hashCode(), new NoneSignatureAlgorithm().hashCode()
     }
 }

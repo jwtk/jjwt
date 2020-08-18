@@ -7,17 +7,17 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultCryptoRequest<T, K extends Key> extends DefaultCryptoMessage<T> implements CryptoRequest<T, K> {
+public class DefaultCryptoRequest<T, K extends Key> extends DefaultPayloadSupplier<T> implements CryptoRequest<T, K>{
 
     private final Provider provider;
     private final SecureRandom secureRandom;
     private final K key;
 
-    public DefaultCryptoRequest(T data, K key, Provider provider, SecureRandom secureRandom) {
+    public DefaultCryptoRequest(Provider provider, SecureRandom secureRandom, T data, K key) {
         super(data);
-        this.key = Assert.notNull(key, "key cannot be null.");
         this.provider = provider;
         this.secureRandom = secureRandom;
+        this.key = Assert.notNull(key, "key cannot be null.");
     }
 
     @Override

@@ -3,7 +3,7 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface PrivateEcJwkMutator<T extends PrivateEcJwkMutator> extends EcJwkMutator<T> {
+public interface PrivateEcJwkMutator<T extends PrivateEcJwkMutator<T>> extends EcJwkMutator<T> {
 
     T setD(String d);
 }
