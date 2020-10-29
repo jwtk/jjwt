@@ -192,7 +192,7 @@ class EllipticCurveSignatureValidatorTest {
 
     @Test
     void verifySwarmTest() {
-        for (SignatureAlgorithm algorithm : [SignatureAlgorithm.ES256, SignatureAlgorithm.ES384, SignatureAlgorithm.ES512]) {
+        for (SignatureAlgorithm algorithm : [SignatureAlgorithm.ES256, SignatureAlgorithm.ES256K, SignatureAlgorithm.ES384, SignatureAlgorithm.ES512]) {
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
             def keypair = EllipticCurveProvider.generateKeyPair()
             def data = withoutSignature.getBytes("US-ASCII")

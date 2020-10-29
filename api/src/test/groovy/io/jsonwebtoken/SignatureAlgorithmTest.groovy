@@ -39,7 +39,7 @@ class SignatureAlgorithmTest {
     @Test
     void testNames() {
         def algNames = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512',
-                        'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE']
+                        'ES256', 'ES256K', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'NONE']
 
         for (String name : algNames) {
             testName(name)
@@ -273,7 +273,12 @@ class SignatureAlgorithmTest {
 
             replay key, spec
 
-            assertEquals alg, SignatureAlgorithm.forSigningKey(key)
+            if (alg == SignatureAlgorithm.ES256K) {
+                // because the min key length of ES256K is the same as ES256, and ES256 is more preferred.
+                assertEquals SignatureAlgorithm.ES256, SignatureAlgorithm.forSigningKey(key)
+            } else {
+                assertEquals alg, SignatureAlgorithm.forSigningKey(key)
+            }
 
             verify key, spec
         }

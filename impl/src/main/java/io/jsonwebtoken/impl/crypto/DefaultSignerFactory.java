@@ -42,6 +42,7 @@ public class DefaultSignerFactory implements SignerFactory {
             case PS512:
                 return new RsaSigner(alg, key);
             case ES256:
+            case ES256K:
             case ES384:
             case ES512:
                 return new EllipticCurveSigner(alg, key);

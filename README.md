@@ -99,6 +99,7 @@ enforcement.
     * HS384: HMAC using SHA-384
     * HS512: HMAC using SHA-512
     * ES256: ECDSA using P-256 and SHA-256
+    * ES256K: ECDSA using P-256K and SHA-256
     * ES384: ECDSA using P-384 and SHA-384
     * ES512: ECDSA using P-521 and SHA-512
     * RS256: RSASSA-PKCS-v1_5 using SHA-256
@@ -519,6 +520,7 @@ key algorithms - identified by the following names:
 * `HS384`: HMAC using SHA-384
 * `HS512`: HMAC using SHA-512
 * `ES256`: ECDSA using P-256 and SHA-256
+* `ES256K`: ECDSA using P-256K and SHA-256
 * `ES384`: ECDSA using P-384 and SHA-384
 * `ES512`: ECDSA using P-521 and SHA-512
 * `RS256`: RSASSA-PKCS-v1_5 using SHA-256
@@ -582,12 +584,12 @@ for any RSA key, the requirement is the RSA key (modulus) length in bits MUST be
 <a name="jws-key-ecdsa"></a>
 #### Elliptic Curve
 
-JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all require a minimum key length
+JWT Elliptic Curve signature algorithms `ES256`, `ES256K`, `ES384`, and `ES512` all require a minimum key length
 (aka an Elliptic Curve order bit length) that is _at least_ as many bits as the algorithm signature's individual 
 `R` and `S` components per [RFC 7512 Section 3.4](https://tools.ietf.org/html/rfc7518#section-3.4).  This means:
 
-* `ES256` requires that you use a private key that is at least 256 bits (32 bytes) long.
-  
+* `ES256` and `ES256K` require that you use a private key that is at least 256 bits (32 bytes) long.
+
 * `ES384` requires that you use a private key that is at least 384 bits (48 bytes) long.
 
 * `ES512` requires that you use a private key that is at least 512 bits (64 bytes) long.
@@ -629,7 +631,7 @@ If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key
 algorithms, use the `Keys.keyPairFor(SignatureAlgorithm)` helper method:
 
 ```java
-KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
+KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256); //or RS384, RS512, PS256, PS384, PS512, ES256, ES256K, ES384, ES512
 ```
 
 You use the private key (`keyPair.getPrivate()`) to create a JWS and the public key (`keyPair.getPublic()`) to 

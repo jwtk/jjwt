@@ -42,6 +42,7 @@ public class DefaultSignatureValidatorFactory implements SignatureValidatorFacto
             case PS512:
                 return new RsaSignatureValidator(alg, key);
             case ES256:
+            case ES256K:
             case ES384:
             case ES512:
                 return new EllipticCurveSignatureValidator(alg, key);

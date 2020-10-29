@@ -40,6 +40,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
     private static Map<SignatureAlgorithm, String> createEcCurveNames() {
         Map<SignatureAlgorithm, String> m = new HashMap<SignatureAlgorithm, String>(); //alg to ASN1 OID name
         m.put(SignatureAlgorithm.ES256, "secp256r1");
+        m.put(SignatureAlgorithm.ES256K, "secp256k1");
         m.put(SignatureAlgorithm.ES384, "secp384r1");
         m.put(SignatureAlgorithm.ES512, "secp521r1");
         return m;
@@ -67,13 +68,13 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
     /**
      * Generates a new secure-random key pair of sufficient strength for the specified Elliptic Curve {@link
-     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using JJWT's default {@link
+     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}) using JJWT's default {@link
      * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.  This is a convenience method that immediately
      * delegates to {@link #generateKeyPair(SignatureAlgorithm, SecureRandom)}.
      *
-     * @param alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES384} or {@code ES512}
+     * @param alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}
      * @return a new secure-randomly generated key pair of sufficient strength for the specified {@link
-     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using JJWT's default {@link
+     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}) using JJWT's default {@link
      * SignatureProvider#DEFAULT_SECURE_RANDOM SecureRandom instance}.
      * @see #generateKeyPair()
      * @see #generateKeyPair(SignatureAlgorithm, SecureRandom)
@@ -85,16 +86,16 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
     /**
      * Generates a new secure-random key pair of sufficient strength for the specified Elliptic Curve {@link
-     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using the specified {@link
+     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}) using the specified {@link
      * SecureRandom} random number generator.  This is a convenience method that immediately delegates to {@link
      * #generateKeyPair(String, String, SignatureAlgorithm, SecureRandom)} using {@code "EC"} as the {@code
      * jcaAlgorithmName}.
      *
-     * @param alg    alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES384} or {@code
+     * @param alg    alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code
      *               ES512}
      * @param random the SecureRandom generator to use during key generation.
      * @return a new secure-randomly generated key pair of sufficient strength for the specified {@link
-     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using the specified {@link
+     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}) using the specified {@link
      * SecureRandom} random number generator.
      * @see #generateKeyPair()
      * @see #generateKeyPair(SignatureAlgorithm)
@@ -106,18 +107,18 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
     /**
      * Generates a new secure-random key pair of sufficient strength for the specified Elliptic Curve {@link
-     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using the specified {@link
+     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}) using the specified {@link
      * SecureRandom} random number generator via the specified JCA provider and algorithm name.
      *
      * @param jcaAlgorithmName the JCA name of the algorithm to use for key pair generation, for example, {@code
      *                         ECDSA}.
      * @param jcaProviderName  the JCA provider name of the algorithm implementation (for example {@code "BC"} for
      *                         BouncyCastle) or {@code null} if the default provider should be used.
-     * @param alg              alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES384} or
+     * @param alg              alg the algorithm indicating strength, must be one of {@code ES256}, {@code ES256K}, {@code ES384} or
      *                         {@code ES512}
      * @param random           the SecureRandom generator to use during key generation.
      * @return a new secure-randomly generated key pair of sufficient strength for the specified Elliptic Curve {@link
-     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES384} or {@code ES512}) using the specified {@link
+     * SignatureAlgorithm} (must be one of {@code ES256}, {@code ES256K}, {@code ES384} or {@code ES512}) using the specified {@link
      * SecureRandom} random number generator via the specified JCA provider and algorithm name.
      * @see #generateKeyPair()
      * @see #generateKeyPair(SignatureAlgorithm)
@@ -159,6 +160,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
         switch (alg) {
             case ES256:
+            case ES256K:
                 return 64;
             case ES384:
                 return 96;

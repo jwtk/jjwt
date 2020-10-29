@@ -78,6 +78,11 @@ public enum SignatureAlgorithm {
     ES256("ES256", "ECDSA using P-256 and SHA-256", "ECDSA", "SHA256withECDSA", true, 256, 256),
 
     /**
+     * JWA algorithm name for {@code ECDSA using P-256K and SHA-256}
+     */
+    ES256K("ES256K", "ECDSA using P-256K and SHA-256", "ECDSA", "SHA256withECDSA", true, 256, 256),
+
+    /**
      * JWA algorithm name for {@code ECDSA using P-384 and SHA-384}
      */
     ES384("ES384", "ECDSA using P-384 and SHA-384", "ECDSA", "SHA384withECDSA", true, 384, 384),
@@ -113,7 +118,7 @@ public enum SignatureAlgorithm {
         SignatureAlgorithm.HS512, SignatureAlgorithm.HS384, SignatureAlgorithm.HS256));
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_EC_ALGS = Collections.unmodifiableList(Arrays.asList(
-        SignatureAlgorithm.ES512, SignatureAlgorithm.ES384, SignatureAlgorithm.ES256));
+        SignatureAlgorithm.ES512, SignatureAlgorithm.ES384, SignatureAlgorithm.ES256, SignatureAlgorithm.ES256K));
 
     private final String value;
     private final String description;
@@ -217,6 +222,10 @@ public enum SignatureAlgorithm {
      * </tr>
      * <tr>
      * <td>ES256</td>
+     * <td>ECDSA</td>
+     * </tr>
+     * <tr>
+     * <td>ES256K</td>
      * <td>ECDSA</td>
      * </tr>
      * <tr>
@@ -481,6 +490,12 @@ public enum SignatureAlgorithm {
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>256 &lt;= size &lt;= 383 <sup>3</sup></td>
      * <td>{@link SignatureAlgorithm#ES256 ES256}</td>
+     * </tr>
+     * <tr>
+     * <td>{@link ECKey}</td>
+     * <td><code>instanceof {@link PrivateKey}</code></td>
+     * <td>256 &lt;= size &lt;= 383 <sup>3</sup></td>
+     * <td>{@link SignatureAlgorithm#ES256K ES256K}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>

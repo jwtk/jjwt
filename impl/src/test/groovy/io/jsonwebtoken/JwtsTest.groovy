@@ -541,6 +541,11 @@ class JwtsTest {
     }
 
     @Test
+    void testES256K() {
+        testEC(SignatureAlgorithm.ES256K)
+    }
+
+    @Test
     void testES384() {
         testEC(SignatureAlgorithm.ES384)
     }
@@ -554,6 +559,16 @@ class JwtsTest {
     void testES256WithPrivateKeyValidation() {
         try {
             testEC(SignatureAlgorithm.ES256, true)
+            fail("EC private keys cannot be used to validate EC signatures.")
+        } catch (UnsupportedJwtException e) {
+            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey instance."
+        }
+    }
+
+    @Test
+    void testES256KWithPrivateKeyValidation() {
+        try {
+            testEC(SignatureAlgorithm.ES256K, true)
             fail("EC private keys cannot be used to validate EC signatures.")
         } catch (UnsupportedJwtException e) {
             assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey instance."

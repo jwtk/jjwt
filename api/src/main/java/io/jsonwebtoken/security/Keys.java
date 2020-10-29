@@ -220,6 +220,7 @@ public final class Keys {
             case PS512:
                 return Classes.invokeStatic(RSA, "generateKeyPair", SIG_ARG_TYPES, alg);
             case ES256:
+            case ES256K:
             case ES384:
             case ES512:
                 return Classes.invokeStatic(EC, "generateKeyPair", SIG_ARG_TYPES, alg);
