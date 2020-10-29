@@ -91,19 +91,27 @@ class KeysImplTest {
 
                 int len = alg.minKeyLength
                 String asn1oid = "secp${len}r1"
-                String suffix = len == 256 ? ", X9.62 prime${len}v1" : '' //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
+                String suffix = len == 256 ? ", X9.62 prime${len}v1" : '' //the JDK only adds this extra suffix to the secp256r1 curve name and not secp256k1, secp384r1 or secp521r1 curve names
                 String jdkParamName = "$asn1oid [NIST P-${len}${suffix}]" as String
 
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof ECPublicKey
                 assertEquals "EC", pub.algorithm
-                assertEquals jdkParamName, pub.params.name
+                if (alg == SignatureAlgorithm.ES256K) {
+                    assertEquals "secp256k1", pub.params.name
+                } else {
+                    assertEquals jdkParamName, pub.params.name
+                }
                 assertEquals alg.minKeyLength, pub.params.order.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof ECPrivateKey
                 assertEquals "EC", priv.algorithm
-                assertEquals jdkParamName, priv.params.name
+                if (alg == SignatureAlgorithm.ES256K) {
+                    assertEquals "secp256k1", pub.params.name
+                } else {
+                    assertEquals jdkParamName, pub.params.name
+                }
                 assertEquals alg.minKeyLength, priv.params.order.bitLength()
 
             } else {
