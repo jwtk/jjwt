@@ -178,7 +178,7 @@ However, if you want or feel the need to change JJWT's functionality or core cod
 without [creating a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) and discussing your desired 
 changes **first**, _before you start working on it_.
 
-It would be a shame to reject your earnest and genuinely appreciated pull request if it might not not align with the 
+It would be a shame to reject your earnest and genuinely appreciated pull request if it might not align with the 
 project's goals, design expectations or planned functionality.  We've sadly had to reject large PRs in the past because
 they were out of sync with project or design expectations - all because the PR author didn't first check in with 
 the team first before working on a solution.
