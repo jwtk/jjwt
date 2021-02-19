@@ -1,10 +1,11 @@
 ## Release Notes
 
-### 0.11.3
+### 0.11.3 (pending release)
 
 This patch release:
 
 * Adds additional handling for rare JSON parsing exceptions and wraps them in a `JwtException` to allow the application to handle these conditions as JWT concerns.
+* Upgrades the `jjwt-jackson` module's Jackson dependency to `2.9.10.7`.
 
 ### 0.11.2
 
