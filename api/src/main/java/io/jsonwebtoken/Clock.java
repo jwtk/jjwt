@@ -28,6 +28,16 @@ public interface Clock {
      * Returns the clock's current timestamp at the instant the method is invoked.
      *
      * @return the clock's current timestamp at the instant the method is invoked.
+     * @deprecated
      */
     Date now();
+
+    /**
+     * Returns the clock's current timestamp at the instant the method is invoked.
+     *
+     * @return the clock's current timestamp at the instant the method is invoked.
+     */
+
+    long millis();
+
 }

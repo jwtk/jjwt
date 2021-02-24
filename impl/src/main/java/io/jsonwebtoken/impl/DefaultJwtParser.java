@@ -269,7 +269,7 @@ public class DefaultJwtParser implements JwtParser {
 
         int delimiterCount = 0;
 
-        StringBuilder sb = new StringBuilder(128);
+        StringBuilder sb = new StringBuilder(jwt.length());
 
         for (char c : jwt.toCharArray()) {
 
@@ -421,26 +421,19 @@ public class DefaultJwtParser implements JwtParser {
             }
         }
 
-        final boolean allowSkew = this.allowedClockSkewMillis > 0;
-
         //since 0.3:
         if (claims != null) {
-
-            final Date now = this.clock.now();
-            long nowTime = now.getTime();
+            final long nowTime = this.clock.millis();
 
             //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
             //token MUST NOT be accepted on or after any specified exp time:
             Date exp = claims.getExpiration();
             if (exp != null) {
-
-                long maxTime = nowTime - this.allowedClockSkewMillis;
-                Date max = allowSkew ? new Date(maxTime) : now;
-                if (max.after(exp)) {
+                if (nowTime > exp.getTime() + this.allowedClockSkewMillis) {
                     String expVal = DateFormats.formatIso8601(exp, false);
-                    String nowVal = DateFormats.formatIso8601(now, false);
+                    String nowVal = DateFormats.formatIso8601(new Date(nowTime), false);
 
-                    long differenceMillis = maxTime - exp.getTime();
+                    long differenceMillis = nowTime - exp.getTime();
 
                     String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of " +
                         differenceMillis + " milliseconds.  Allowed clock skew: " +
@@ -454,13 +447,11 @@ public class DefaultJwtParser implements JwtParser {
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
 
-                long minTime = nowTime + this.allowedClockSkewMillis;
-                Date min = allowSkew ? new Date(minTime) : now;
-                if (min.before(nbf)) {
+                if (nowTime < nbf.getTime() - this.allowedClockSkewMillis) {
                     String nbfVal = DateFormats.formatIso8601(nbf, false);
-                    String nowVal = DateFormats.formatIso8601(now, false);
+                    String nowVal = DateFormats.formatIso8601(new Date(nowTime), false);
 
-                    long differenceMillis = nbf.getTime() - minTime;
+                    long differenceMillis = nbf.getTime() - nowTime;
 
                     String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal +
                         ", a difference of " +
