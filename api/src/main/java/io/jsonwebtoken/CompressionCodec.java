@@ -25,9 +25,11 @@ package io.jsonwebtoken;
 public interface CompressionCodec {
 
     /**
-     * The compression algorithm name to use as the JWT's {@code zip} header value.
+     * The algorithm name to use as the JWT's
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
      *
-     * @return the compression algorithm name to use as the JWT's {@code zip} header value.
+     * @return the algorithm name to use as the JWT's
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
      */
     String getAlgorithmName();
 

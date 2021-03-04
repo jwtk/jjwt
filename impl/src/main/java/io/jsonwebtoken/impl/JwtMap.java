@@ -16,7 +16,11 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
+import io.jsonwebtoken.lang.Strings;
+
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collection;
@@ -100,8 +104,16 @@ public class JwtMap implements Map<String, Object> {
         return toDate(v, name);
     }
 
+    protected static boolean isReduceableToNull(Object v) {
+        return v == null ||
+            (v instanceof String && !Strings.hasText((String)v)) ||
+            (v instanceof Collection && Collections.isEmpty((Collection) v)) ||
+            (v instanceof Map && Collections.isEmpty((Map)v)) ||
+            (v.getClass().isArray() && Array.getLength(v) == 0);
+    }
+
     protected void setValue(String name, Object v) {
-        if (v == null) {
+        if (isReduceableToNull(v)) {
             map.remove(name);
         } else {
             map.put(name, v);

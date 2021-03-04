@@ -49,4 +49,14 @@ public class JwtHandlerAdapter<T> implements JwtHandler<T> {
     public T onClaimsJws(Jws<Claims> jws) {
         throw new UnsupportedJwtException("Signed Claims JWSs are not supported.");
     }
+
+    @Override
+    public T onPlaintextJwe(Jwe<String> jwe) {
+        throw new UnsupportedJwtException("Encrypted plaintext JWEs are not supported.");
+    }
+
+    @Override
+    public T onClaimsJwe(Jwe<Claims> jwe) {
+        throw new UnsupportedJwtException("Encrypted Claims JWEs are not supported.");
+    }
 }

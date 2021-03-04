@@ -347,7 +347,7 @@ public final class Objects {
      * Return a hash code based on the contents of the specified array.
      * If <code>array</code> is <code>null</code>, this method returns 0.
      */
-    public static int nullSafeHashCode(Object[] array) {
+    public static int nullSafeHashCode(Object... array) {
         if (array == null) {
             return 0;
         }

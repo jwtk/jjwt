@@ -19,22 +19,99 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.io.Encoder
 import io.jsonwebtoken.io.EncodingException
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.KeyGenerator
-import javax.crypto.SecretKeyFactory
-import java.security.KeyFactory
+import java.security.Key
+import java.security.Provider
+import java.security.SecureRandom
 
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
 class DefaultJwtBuilderTest {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void testSetProvider() {
+
+        Provider provider = createMock(Provider)
+
+        final boolean[] called = new boolean[1]
+
+        io.jsonwebtoken.security.SignatureAlgorithm alg = new io.jsonwebtoken.security.SignatureAlgorithm() {
+            @Override
+            byte[] sign(SignatureRequest request) throws SignatureException, KeyException {
+                assertSame provider, request.getProvider()
+                called[0] = true
+                //simulate a digest:
+                byte[] bytes = new byte[32]
+                Randoms.secureRandom().nextBytes(bytes)
+                return bytes
+            }
+
+            @Override
+            boolean verify(VerifySignatureRequest request) throws SignatureException, KeyException {
+                throw new IllegalStateException("should not be called during build")
+            }
+
+            @Override
+            String getId() {
+                return "test"
+            }
+        }
+
+        replay provider
+        def b = new DefaultJwtBuilder().setProvider(provider)
+                .setSubject('me').signWith(SignatureAlgorithms.HS256.generateKey(), alg)
+        assertSame provider, b.provider
+        b.compact()
+        verify provider
+        assertTrue called[0]
+    }
+
+    @Test
+    void testSetSecureRandom() {
+
+        final SecureRandom random = new SecureRandom()
+
+        final boolean[] called = new boolean[1]
+
+        io.jsonwebtoken.security.SignatureAlgorithm alg = new io.jsonwebtoken.security.SignatureAlgorithm() {
+            @Override
+            byte[] sign(SignatureRequest request) throws SignatureException, KeyException {
+                assertSame random, request.getSecureRandom()
+                called[0] = true
+                //simulate a digest:
+                byte[] bytes = new byte[32]
+                Randoms.secureRandom().nextBytes(bytes)
+                return bytes
+            }
+
+            @Override
+            boolean verify(VerifySignatureRequest request) throws SignatureException, KeyException {
+                throw new IllegalStateException("should not be called during build")
+            }
+
+            @Override
+            String getId() {
+                return "test"
+            }
+        }
+
+        def b = new DefaultJwtBuilder().setSecureRandom(random)
+                .setSubject('me').signWith(SignatureAlgorithms.HS256.generateKey(), alg)
+        assertSame random, b.secureRandom
+        b.compact()
+        assertTrue called[0]
+    }
 
     @Test
     void testSetHeader() {
@@ -167,7 +244,7 @@ class DefaultJwtBuilderTest {
         def key = Keys.secretKeyFor(alg)
         b.signWith(key, alg)
         String s1 = b.compact()
-        //ensure deprecated signWith(alg, key) produces the same result:
+        //ensure deprecated with(alg, key) produces the same result:
         b.signWith(alg, key)
         String s2 = b.compact()
         assertEquals s1, s2
@@ -175,14 +252,13 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testBase64UrlEncodeError() {
-
-        def b = new DefaultJwtBuilder() {
+        def serializer = new Serializer() {
             @Override
-            protected byte[] toJson(Object o) throws SerializationException {
+            byte[] serialize(Object o) throws SerializationException {
                 throw new SerializationException('foo', new Exception())
             }
         }
-
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         try {
             b.setPayload('foo').compact()
             fail()
@@ -193,23 +269,20 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactCompressionCodecJsonProcessingException() {
-        def b = new DefaultJwtBuilder() {
+        def serializer = new Serializer() {
             @Override
-            protected byte[] toJson(Object o) throws SerializationException {
-                if (o instanceof DefaultJwsHeader) {
-                    return super.toJson(o)
-                }
+            byte[] serialize(Object o) throws SerializationException {
                 throw new SerializationException('dummy text', new Exception())
             }
         }
-
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         def c = Jwts.claims().setSubject("Joe");
 
         try {
             b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, 'Unable to serialize claims object to json: dummy text'
+            assertEquals iae.message, 'Unable to serialize claims to JSON. Cause: dummy text'
         }
     }
 

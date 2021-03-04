@@ -17,6 +17,7 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.io.Encoders
@@ -147,7 +148,8 @@ class DeprecatedJwtsTest {
             Jwts.parser().parse('foo')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 0"
+            String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '0'
+            assertEquals expected, e.message
         }
     }
 
@@ -157,18 +159,14 @@ class DeprecatedJwtsTest {
             Jwts.parser().parse('.')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT strings must contain exactly 2 period characters. Found: 1"
+            String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '1'
+            assertEquals expected, e.message
         }
     }
 
-    @Test
+    @Test(expected = MalformedJwtException)
     void testParseWithTwoPeriodsOnly() {
-        try {
-            Jwts.parser().parse('..')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string '..' is missing a header."
-        }
+        Jwts.parser().parse('..')
     }
 
     @Test
@@ -178,24 +176,9 @@ class DeprecatedJwtsTest {
         assertEquals("none", jwt.getHeader().get("alg"))
     }
 
-    @Test
+    @Test(expected = MalformedJwtException)
     void testParseWithSignatureOnly() {
-        try {
-            Jwts.parser().parse('..bar')
-            fail()
-        } catch (MalformedJwtException e) {
-            assertEquals e.message, "JWT string has a digest/signature, but the header does not reference a valid signature algorithm."
-        }
-    }
-
-    @Test
-    void testWithInvalidCompressionAlgorithm() {
-        try {
-
-            Jwts.builder().setHeaderParam(Header.COMPRESSION_ALGORITHM, "CUSTOM").setId("andId").compact()
-        } catch (CompressionException e) {
-            assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
-        }
+        Jwts.parser().parse('..bar')
     }
 
     @Test
@@ -613,7 +596,7 @@ class DeprecatedJwtsTest {
         String forged = Jwts.builder().setSubject("Not Joe").compact()
 
         //assert that our forged header has a 'NONE' algorithm:
-        assertEquals Jwts.parser().parseClaimsJwt(forged).getHeader().get('alg'), 'none'
+        assertEquals 'none', Jwts.parser().parseClaimsJwt(forged).getHeader().get('alg')
 
         //now let's forge it by appending the signature the server expects:
         forged += signature
@@ -623,7 +606,7 @@ class DeprecatedJwtsTest {
             Jwts.parser().setSigningKey(key).parse(forged)
             fail("Parsing must fail for a forged token.")
         } catch (MalformedJwtException expected) {
-            assertEquals expected.message, 'JWT string has a digest/signature, but the header does not reference a valid signature algorithm.'
+            assertEquals 'The JWS header references signature algorithm \'none\' yet the compact JWS string has a digest/signature. This is not permitted per https://tools.ietf.org/html/rfc7518#section-3.6.', expected.message
         }
     }
 

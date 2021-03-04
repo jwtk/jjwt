@@ -23,4 +23,8 @@ public class InvalidKeyException extends KeyException {
     public InvalidKeyException(String message) {
         super(message);
     }
+
+    public InvalidKeyException(String msg, Exception cause) {
+        super(msg, cause);
+    }
 }

@@ -37,7 +37,6 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
     private final Class<T> returnType;
     private final ObjectMapper objectMapper;
 
-    @SuppressWarnings("unused") //used via reflection by RuntimeClasspathDeserializerLocator
     public JacksonDeserializer() {
         this(JacksonSerializer.DEFAULT_OBJECT_MAPPER);
     }

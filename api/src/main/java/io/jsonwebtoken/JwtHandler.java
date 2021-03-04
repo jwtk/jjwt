@@ -65,4 +65,14 @@ public interface JwtHandler<T> {
      */
     T onClaimsJws(Jws<Claims> jws);
 
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    T onPlaintextJwe(Jwe<String> jwe);
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    T onClaimsJwe(Jwe<Claims> jwe);
+
 }

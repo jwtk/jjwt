@@ -34,7 +34,9 @@ import java.util.List;
  * <a href="https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31">JSON Web Algorithms</a> specification.
  *
  * @since 0.1
+ * @deprecated since JJWT_RELEASE_VERSION; use {@link io.jsonwebtoken.security.SignatureAlgorithms} instead.
  */
+@Deprecated
 public enum SignatureAlgorithm {
 
     /**

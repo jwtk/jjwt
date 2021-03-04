@@ -23,4 +23,8 @@ public class KeyException extends SecurityException {
     public KeyException(String message) {
         super(message);
     }
+
+    public KeyException(String msg, Exception cause) {
+        super(msg, cause);
+    }
 }

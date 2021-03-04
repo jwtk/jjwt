@@ -19,25 +19,14 @@ import io.jsonwebtoken.JwsHeader;
 
 import java.util.Map;
 
-public class DefaultJwsHeader extends DefaultHeader implements JwsHeader {
+public class DefaultJwsHeader extends DefaultHeader<JwsHeader> implements JwsHeader {
 
     public DefaultJwsHeader() {
         super();
     }
 
-    public DefaultJwsHeader(Map<String, Object> map) {
+    public DefaultJwsHeader(Map<String, ?> map) {
         super(map);
-    }
-
-    @Override
-    public String getAlgorithm() {
-        return getString(ALGORITHM);
-    }
-
-    @Override
-    public JwsHeader setAlgorithm(String alg) {
-        setValue(ALGORITHM, alg);
-        return this;
     }
 
     @Override

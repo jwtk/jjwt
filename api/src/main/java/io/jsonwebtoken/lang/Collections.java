@@ -28,6 +28,17 @@ public final class Collections {
 
     private Collections(){} //prevent instantiation
 
+    public static <T> List<T> emptyList() {
+        return java.util.Collections.emptyList();
+    }
+
+    public static <T> List<T> of(T... elements) {
+        if (elements == null || elements.length == 0) {
+            return java.util.Collections.emptyList();
+        }
+        return java.util.Collections.unmodifiableList(Arrays.asList(elements));
+    }
+
     /**
      * Return <code>true</code> if the supplied Collection is <code>null</code>
      * or empty. Otherwise, return <code>false</code>.

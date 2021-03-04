@@ -46,6 +46,8 @@ import java.security.Key;
  *
  * @see io.jsonwebtoken.SigningKeyResolverAdapter
  * @since 0.4
+ * @deprecated since JJWT_RELEASE_VERSION. Implement {@link io.jsonwebtoken.security.KeyResolver KeyResolver} instead.
+ * @see io.jsonwebtoken.security.KeyResolver
  */
 public interface SigningKeyResolver {
 

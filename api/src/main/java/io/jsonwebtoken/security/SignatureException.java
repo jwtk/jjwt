@@ -18,6 +18,7 @@ package io.jsonwebtoken.security;
 /**
  * @since 0.10.0
  */
+@SuppressWarnings("deprecation")
 public class SignatureException extends io.jsonwebtoken.SignatureException {
 
     public SignatureException(String message) {

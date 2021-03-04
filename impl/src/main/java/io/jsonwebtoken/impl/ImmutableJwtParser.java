@@ -20,8 +20,10 @@ import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
@@ -139,8 +141,8 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public boolean isSigned(String jwt) {
-        return this.jwtParser.isSigned(jwt);
+    public boolean isSigned(String compact) {
+        return this.jwtParser.isSigned(compact);
     }
 
     @Override
@@ -171,5 +173,15 @@ class ImmutableJwtParser implements JwtParser {
     @Override
     public Jws<Claims> parseClaimsJws(String claimsJws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parseClaimsJws(claimsJws);
+    }
+
+    @Override
+    public Jwe<String> parsePlaintextJwe(String plaintextJwe) throws JwtException {
+        return this.jwtParser.parsePlaintextJwe(plaintextJwe);
+    }
+
+    @Override
+    public Jwe<Claims> parseClaimsJwe(String claimsJwe) throws JwtException {
+        return this.jwtParser.parseClaimsJwe(claimsJwe);
     }
 }
