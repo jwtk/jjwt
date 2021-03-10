@@ -26,7 +26,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
 
 public class RsaSignatureValidator extends RsaProvider implements SignatureValidator {
 
