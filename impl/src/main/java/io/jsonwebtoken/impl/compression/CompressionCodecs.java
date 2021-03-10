@@ -29,7 +29,6 @@ import io.jsonwebtoken.CompressionCodec;
 @Deprecated
 public final class CompressionCodecs {
 
-    private static final CompressionCodecs I = new CompressionCodecs();
 
     private CompressionCodecs(){} //prevent external instantiation
 
