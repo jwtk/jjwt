@@ -245,9 +245,14 @@ public class DefaultJwtParser implements JwtParser {
         return false;
     }
 
+    @Deprecated
     @Override
     public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+        return parseSignedOrUnsigned(jwt);
+    }
 
+    @Override
+    public Jwt parseSignedOrUnsigned(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         // TODO, this logic is only need for a now deprecated code path
         // remove this block in v1.0 (the equivalent is already in DefaultJwtParserBuilder)
         if (this.deserializer == null) {
@@ -567,8 +572,14 @@ public class DefaultJwtParser implements JwtParser {
         }
     }
 
+    @Deprecated
     @Override
-    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
+    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return parsePlaintextUnsignedJwt(plaintextJwt);
+    }
+
+    @Override
+    public Jwt<Header, String> parsePlaintextUnsignedJwt(String plaintextJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
             @Override
             public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
@@ -577,8 +588,14 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
+    @Deprecated
     @Override
-    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
+    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return parseClaimsUnsignedJwt(claimsJwt);
+    }
+
+    @Override
+    public Jwt<Header, Claims> parseClaimsUnsignedJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         try {
             return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
                 @Override

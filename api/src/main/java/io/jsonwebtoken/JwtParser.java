@@ -26,6 +26,29 @@ import java.util.Map;
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
  *
+ * <p>Several parsing methods are provided, allowing to parse signed and unsigned tokens, with JSON payload data
+ * (represented as {@link Claims}) or non-JSON payload data (represented as {@code String} and called 'plaintext'
+ * in the following):
+ * <ul>
+ * <li>Unsigned tokens:<ul>
+ * <li>{@link #parseClaimsUnsignedJwt(String)}</li>
+ * <li>{@link #parsePlaintextUnsignedJwt(String)}</li>
+ * </ul></li>
+ * <li>Signed tokens (JWS):<ul>
+ * <li>{@link #parseClaimsJws(String)}</li>
+ * <li>{@link #parsePlaintextJws(String)}</li>
+ * </ul></li>
+ * </ul>
+ *
+ * <p>If it is unknown in advance whether a token will be signed or whether its payload consists of JSON data,
+ * the following parsing methods can be used. However, when only signed tokens should be accepted, the caller
+ * is responsible for rejecting unsigned tokens, respectively has to use a {@code handler} which rejects unsigned
+ * tokens.
+ * <ul>
+ * <li>{@link #parseSignedOrUnsigned(String)}</li>
+ * <li>{@link #parse(String, JwtHandler)}</li>
+ * </ul>
+ *
  * @since 0.1
  */
 public interface JwtParser {
@@ -379,7 +402,7 @@ public interface JwtParser {
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the parser for method chaining.
      * @since 0.10.0
-     * @deprecated see {@link JwtParserBuilder#deserializeJsonWith(Deserializer)} )}.
+     * @deprecated see {@link JwtParserBuilder#deserializeJsonWith(Deserializer)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
@@ -401,16 +424,30 @@ public interface JwtParser {
     boolean isSigned(String jwt);
 
     /**
-     * Parses the specified compact serialized JWT string based on the builder's current configuration state and
-     * returns the resulting JWT or JWS instance.
-     * <p>
-     * <p>This method returns a JWT or JWS based on the parsed string.  Because it may be cumbersome to determine if it
-     * is a JWT or JWS, or if the body/payload is a Claims or String with {@code instanceof} checks, the
-     * {@link #parse(String, JwtHandler) parse(String,JwtHandler)} method allows for a type-safe callback approach that
-     * may help reduce code or instanceof checks.</p>
+     * @deprecated
+     *      Has been renamed to {@link #parseSignedOrUnsigned(String)}.<br/>
+     *      The name of this method is misleading and has lead to incorrect and unsafe usage, because it allows both
+     *      signed <b>and unsigned</b> tokens. It has been renamed to {@link #parseSignedOrUnsigned(String)}; that
+     *      method behaves exactly identical to this one.
+     */
+    @Deprecated
+    Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+
+    /**
+     * Parses the specified compact serialized JWT string based on the parser's configuration state and
+     * returns the resulting JWT or JWS instance. This method allows both signed <b>and unsigned</b> tokens,
+     * it should only be used when it is unknown in advance wether a token will be signed or which format its
+     * payload will have. If the exact format of the token is known beforehand, one of the specific parsing methods
+     * should be used instead.
+     *
+     * <p>Depending on whether the token is signed or not, either a {@link Jws} (for signed tokens) or a {@link Jwt}
+     * which is not an instance of {@code Jws} (for unsigned tokens) is returned. Because it may be cumbersome to
+     * determine if the result is a JWT or JWS, or if the body/payload is a Claims or String, the
+     * {@link #parse(String, JwtHandler)} method allows for a type-safe callback approach that may help reduce
+     * the amount of required code.</p>
      *
      * @param jwt the compact serialized JWT to parse
-     * @return the specified compact serialized JWT string based on the builder's current configuration state.
+     * @return the specified compact serialized JWT string based on the parser's configuration state.
      * @throws MalformedJwtException    if the specified JWT was incorrectly constructed (and therefore invalid).
      *                                  Invalid
      *                                  JWTs should not be trusted and should be discarded.
@@ -420,16 +457,17 @@ public interface JwtParser {
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace.
      * @see #parse(String, JwtHandler)
-     * @see #parsePlaintextJwt(String)
-     * @see #parseClaimsJwt(String)
+     * @see #parsePlaintextUnsignedJwt(String)
+     * @see #parseClaimsUnsignedJwt(String)
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      */
-    Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+    Jwt parseSignedOrUnsigned(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
-     * Parses the specified compact serialized JWT string based on the builder's current configuration state and
-     * invokes the specified {@code handler} with the resulting JWT or JWS instance.
+     * Parses the specified compact serialized JWT string based on the parser's configuration state and
+     * invokes the respective method of the specified {@code handler} with the resulting JWT or JWS instance,
+     * depending on whether the token is signed or not, and whether its payload consists of JSON data.
      * <p>
      * <p>If you are confident of the format of the JWT before parsing, you can create an anonymous subclass using the
      * {@link io.jsonwebtoken.JwtHandlerAdapter JwtHandlerAdapter} and override only the methods you know are relevant
@@ -446,15 +484,8 @@ public interface JwtParser {
      * });
      * </pre>
      * <p>
-     * <p>If you know the JWT string can be only one type of JWT, then it is even easier to invoke one of the
-     * following convenience methods instead of this one:</p>
-     * <p>
-     * <ul>
-     * <li>{@link #parsePlaintextJwt(String)}</li>
-     * <li>{@link #parseClaimsJwt(String)}</li>
-     * <li>{@link #parsePlaintextJws(String)}</li>
-     * <li>{@link #parseClaimsJws(String)}</li>
-     * </ul>
+     * <p>If the exact format of the token is known beforehand, i.e. whether the token is signed and whether its
+     * payload consists of JSON data, one of the specific {@code JwtParser} parsing methods should be used instead.
      *
      * @param jwt the compact serialized JWT to parse
      * @return the result returned by the {@code JwtHandler}
@@ -466,20 +497,30 @@ public interface JwtParser {
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace, or if the
      *                                  {@code handler} is {@code null}.
-     * @see #parsePlaintextJwt(String)
-     * @see #parseClaimsJwt(String)
+     * @see #parsePlaintextUnsignedJwtString)
+     * @see #parseClaimsUnsignedJwt(String)
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
-     * @see #parse(String)
+     * @see #parseSignedOrUnsigned(String)
      * @since 0.2
      */
     <T> T parse(String jwt, JwtHandler<T> handler)
         throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
-     * Parses the specified compact serialized JWT string based on the builder's current configuration state and
-     * returns
-     * the resulting unsigned plaintext JWT instance.
+     * @since 0.2
+     * @deprecated
+     *      Has been renamed to {@link #parsePlaintextUnsignedJwt(String)}.<br/>
+     *      The name of this method is misleading and can lead to incorrect and unsafe usage. It has been renamed to
+     *      {@link #parsePlaintextUnsignedJwt(String)}; that method behaves exactly identical to this one.
+     */
+    @Deprecated
+    Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)
+        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+
+    /**
+     * Parses the specified <b>unsigned</b> compact serialized JWT string with non-JSON payload based on the parser's
+     * configuration state and returns the resulting JWT instance.
      * <p>
      * <p>This is a convenience method that is usable if you are confident that the compact string argument reflects an
      * unsigned plaintext JWT. An unsigned plaintext JWT has a String (non-JSON) body payload and it is not
@@ -496,20 +537,30 @@ public interface JwtParser {
      * @throws SignatureException       if the {@code plaintextJwt} string is actually a JWS and signature validation
      *                                  fails
      * @throws IllegalArgumentException if the {@code plaintextJwt} string is {@code null} or empty or only whitespace
-     * @see #parseClaimsJwt(String)
+     * @see #parseClaimsUnsignedJwt(String)
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseSignedOrUnsigned(String)
      * @since 0.2
      */
-    Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)
+    Jwt<Header, String> parsePlaintextUnsignedJwt(String plaintextJwt)
         throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
-     * Parses the specified compact serialized JWT string based on the builder's current configuration state and
-     * returns
-     * the resulting unsigned plaintext JWT instance.
+     * @since 0.2
+     * @deprecated
+     *      Has been renamed to {@link #parseClaimsUnsignedJwt(String)}.<br/>
+     *      The name of this method is misleading and can lead to incorrect and unsafe usage. It has been renamed to
+     *      {@link #parseClaimsUnsignedJwt(String)}; that method behaves exactly identical to this one.
+     */
+    @Deprecated
+    Jwt<Header, Claims> parseClaimsJwt(String claimsJwt)
+        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+
+    /**
+     * Parses the specified <b>unsigned</b> compact serialized JWT string with JSON payload based on the parser's
+     * configuration state and returns the resulting JWT instance.
      * <p>
      * <p>This is a convenience method that is usable if you are confident that the compact string argument reflects an
      * unsigned Claims JWT. An unsigned Claims JWT has a {@link Claims} body and it is not cryptographically
@@ -527,20 +578,19 @@ public interface JwtParser {
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJwt} string is {@code null} or empty or only whitespace
-     * @see #parsePlaintextJwt(String)
+     * @see #parsePlaintextUnsignedJwt(String)
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseSignedOrUnsigned(String)
      * @since 0.2
      */
-    Jwt<Header, Claims> parseClaimsJwt(String claimsJwt)
+    Jwt<Header, Claims> parseClaimsUnsignedJwt(String claimsJwt)
         throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
-     * Parses the specified compact serialized JWS string based on the builder's current configuration state and
-     * returns
-     * the resulting plaintext JWS instance.
+     * Parses the specified signed compact serialized JWS string with non-JSON payload based on the parser's 
+     * configuration state and returns the resulting JWS instance.
      * <p>
      * <p>This is a convenience method that is usable if you are confident that the compact string argument reflects a
      * plaintext JWS. A plaintext JWS is a JWT with a String (non-JSON) body (payload) that has been
@@ -555,20 +605,19 @@ public interface JwtParser {
      * @throws MalformedJwtException    if the {@code plaintextJws} string is not a valid JWS
      * @throws SignatureException       if the {@code plaintextJws} JWS signature validation fails
      * @throws IllegalArgumentException if the {@code plaintextJws} string is {@code null} or empty or only whitespace
-     * @see #parsePlaintextJwt(String)
-     * @see #parseClaimsJwt(String)
+     * @see #parsePlaintextUnsignedJwt(String)
+     * @see #parseClaimsUnsignedJwt(String)
      * @see #parseClaimsJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseSignedOrUnsigned(String)
      * @since 0.2
      */
     Jws<String> parsePlaintextJws(String plaintextJws)
         throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
-     * Parses the specified compact serialized JWS string based on the builder's current configuration state and
-     * returns
-     * the resulting Claims JWS instance.
+     * Parses the specified signed compact serialized JWS string with JSON payload based on the parser's configuration
+     * state and returns the resulting JWS instance.
      * <p>
      * <p>This is a convenience method that is usable if you are confident that the compact string argument reflects a
      * Claims JWS. A Claims JWS is a JWT with a {@link Claims} body that has been cryptographically signed.</p>
@@ -584,11 +633,11 @@ public interface JwtParser {
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJws} string is {@code null} or empty or only whitespace
-     * @see #parsePlaintextJwt(String)
-     * @see #parseClaimsJwt(String)
+     * @see #parsePlaintextUnsignedJwt(String)
+     * @see #parseClaimsUnsignedJwt(String)
      * @see #parsePlaintextJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseSignedOrUnsigned(String)
      * @since 0.2
      */
     Jws<Claims> parseClaimsJws(String claimsJws)

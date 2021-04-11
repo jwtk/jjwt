@@ -143,9 +143,15 @@ class ImmutableJwtParser implements JwtParser {
         return this.jwtParser.isSigned(jwt);
     }
 
+    @Deprecated
     @Override
     public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parse(jwt);
+        return parseSignedOrUnsigned(jwt);
+    }
+
+    @Override
+    public Jwt parseSignedOrUnsigned(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parseSignedOrUnsigned(jwt);
     }
 
     @Override
@@ -153,14 +159,26 @@ class ImmutableJwtParser implements JwtParser {
         return this.jwtParser.parse(jwt, handler);
     }
 
+    @Deprecated
     @Override
     public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parsePlaintextJwt(plaintextJwt);
+        return parsePlaintextUnsignedJwt(plaintextJwt);
     }
 
     @Override
+    public Jwt<Header, String> parsePlaintextUnsignedJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parsePlaintextUnsignedJwt(plaintextJwt);
+    }
+
+    @Deprecated
+    @Override
     public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parseClaimsJwt(claimsJwt);
+        return parseClaimsUnsignedJwt(claimsJwt);
+    }
+
+    @Override
+    public Jwt<Header, Claims> parseClaimsUnsignedJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parseClaimsUnsignedJwt(claimsJwt);
     }
 
     @Override

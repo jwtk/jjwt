@@ -19,6 +19,19 @@ package io.jsonwebtoken;
  * A JwtHandler is invoked by a {@link io.jsonwebtoken.JwtParser JwtParser} after parsing a JWT to indicate the exact
  * type of JWT or JWS parsed.
  *
+ * <p>The handler differentiates between signed (JWS) and unsigned tokens, and tokens whose payload consists of JSON
+ * data (represented as {@link Claims}) or non-JSON data (represented as {@code String} and called 'plaintext' in the
+ * following):
+ * <ul>
+ * <li>Unsigned tokens:<ul>
+ * <li>{@link #onPlaintextJwt(Jwt)}</li>
+ * <li>{@link #onClaimsJwt(Jwt)}</li>
+ * </ul></li>
+ * <li>Signed tokens (JWS):<ul>
+ * <li>{@link #onPlaintextJws(Jws)}</li>
+ * <li>{@link #onClaimsJws(Jws)}</li>
+ * </ul></li>
+ *
  * @param <T> the type of object to return to the parser caller after handling the parsed JWT.
  * @since 0.2
  */
@@ -26,7 +39,7 @@ public interface JwtHandler<T> {
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * a plaintext JWT.  A plaintext JWT has a String (non-JSON) body payload and it is not cryptographically signed.
+     * a plaintext JWT.  A plaintext JWT has a String (non-JSON) body payload and it is <b>not cryptographically signed</b>.
      *
      * @param jwt the parsed plaintext JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
@@ -35,7 +48,7 @@ public interface JwtHandler<T> {
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * a Claims JWT.  A Claims JWT has a {@link Claims} body and it is not cryptographically signed.
+     * a Claims JWT.  A Claims JWT has a {@link Claims} body and it is <b>not cryptographically signed</b>.
      *
      * @param jwt the parsed claims JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
