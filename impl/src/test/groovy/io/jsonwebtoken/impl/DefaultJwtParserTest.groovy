@@ -29,6 +29,7 @@ import javax.crypto.SecretKey
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertSame
+import static org.junit.Assert.assertTrue
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParser
 // implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class
@@ -69,7 +70,8 @@ class DefaultJwtParserTest {
             }
         }
         def p = new DefaultJwtParser().deserializeJsonWith(deserializer)
-        assertSame deserializer, p.deserializer
+        assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer )
+        assertSame deserializer, p.deserializer.deserializer
 
         def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
