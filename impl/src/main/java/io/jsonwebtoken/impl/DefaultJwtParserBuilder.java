@@ -204,7 +204,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                                      allowedClockSkewMillis,
                                      expectedClaims,
                                      base64UrlDecoder,
-                                     deserializer,
+                                     new JwtDeserializer<>(deserializer),
                                      compressionCodecResolver));
     }
 }

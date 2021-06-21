@@ -83,7 +83,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().parse(bad)
             fail()
         } catch (MalformedJwtException expected) {
-            assertEquals expected.getMessage(), 'Unable to read JSON value: ' + junkPayload
+            assertEquals expected.getMessage(), 'Malformed JWT JSON: ' + junkPayload
         }
     }
 

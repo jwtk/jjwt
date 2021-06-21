@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.11.3
+
+This patch release:
+
+* Adds handling for common JSON parsing exceptions and wraps them in a `JwtException`.
+
 ### 0.11.2
 
 This patch release:

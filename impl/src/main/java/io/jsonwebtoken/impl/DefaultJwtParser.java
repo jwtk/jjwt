@@ -42,7 +42,6 @@ import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.DateFormats;
@@ -111,7 +110,7 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
         Assert.notNull(deserializer, "deserializer cannot be null.");
-        this.deserializer = deserializer;
+        this.deserializer = new JwtDeserializer<>(deserializer);
         return this;
     }
 
@@ -253,7 +252,7 @@ public class DefaultJwtParser implements JwtParser {
         if (this.deserializer == null) {
             // try to find one based on the services available
             // TODO: This util class will throw a UnavailableImplementationException here to retain behavior of previous version, remove in v1.0
-            this.deserializer = LegacyServices.loadFirst(Deserializer.class);
+            this.deserializeJsonWith(LegacyServices.loadFirst(Deserializer.class));
         }
 
         Assert.hasText(jwt, "JWT String argument cannot be null or empty.");
@@ -617,11 +616,7 @@ public class DefaultJwtParser implements JwtParser {
 
     @SuppressWarnings("unchecked")
     protected Map<String, ?> readValue(String val) {
-        try {
-            byte[] bytes = val.getBytes(Strings.UTF_8);
-            return deserializer.deserialize(bytes);
-        } catch (DeserializationException e) {
-            throw new MalformedJwtException("Unable to read JSON value: " + val, e);
-        }
+        byte[] bytes = val.getBytes(Strings.UTF_8);
+        return deserializer.deserialize(bytes);
     }
 }
