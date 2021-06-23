@@ -13,10 +13,8 @@ exclusively on the [JWT](https://tools.ietf.org/html/rfc7519),
 [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications and 
 open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 
-The library was created by [Okta's](http://www.okta.com) Senior Architect, [Les Hazlewood](https://github.com/lhazlewood)
+The library was created by [Les Hazlewood](https://github.com/lhazlewood)
 and is supported and maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
-
-[Okta](https://developer.okta.com/) is a complete authentication and user management API for developers.
 
 We've also added some convenience extensions that are not part of the specification, such as JWS compression and claim 
 enforcement.
@@ -1634,7 +1632,7 @@ Jwts.parserBuilder()
 
 ## Author
 
-Maintained by Les Hazlewood &amp; [Okta](https://okta.com/)
+Maintained by Les Hazlewood &amp; the community :heart:
 
 <a name="license"></a>
 ## License
