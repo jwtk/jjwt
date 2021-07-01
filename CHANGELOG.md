@@ -4,7 +4,7 @@
 
 This patch release:
 
-* Adds handling for common JSON parsing exceptions and wraps them in a `JwtException`.
+* Adds additional handling for rare JSON parsing exceptions and wraps them in a `JwtException` to allow the application to handle these conditions as JWT concerns.
 
 ### 0.11.2
 
