@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoder
@@ -23,10 +24,13 @@ import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.security.Keys
+import org.hamcrest.CoreMatchers
 import org.junit.Test
 
+import static org.easymock.EasyMock.niceMock
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertSame
+import static org.hamcrest.MatcherAssert.assertThat
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParserBuilder
 // implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class
@@ -91,5 +95,26 @@ class DefaultJwtParserBuilderTest {
         } catch (IllegalArgumentException expected) {
             assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
         }
+    }
+
+    @Test
+    void testDefaultDecoder() {
+        JwtParser parser = new DefaultJwtParserBuilder().build()
+        assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
+
+        // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating, something like:
+        // assertThat parser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
+    }
+
+    @Test
+    void testUserSetDecoderWrapsImplementation() {
+        Deserializer deserializer = niceMock(Deserializer)
+        JwtParser parser = new DefaultJwtParserBuilder()
+            .deserializeJsonWith(deserializer)
+            .build()
+
+        // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating
+        assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
+        assertSame deserializer, parser.jwtParser.deserializer.deserializer
     }
 }
