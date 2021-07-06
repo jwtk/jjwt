@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals
 class JwtDeserializerTest {
 
     /**
-     * It's common for JSON parser's to throw a StackOverflowError when body is deeply nested. Since it's common
+     * It's common for JSON parsers to throw a StackOverflowError when body is deeply nested. Since it's common
      * across multiple parsers, JJWT handles the exception when parsing.
      */
     @Test
@@ -54,7 +54,7 @@ class JwtDeserializerTest {
     }
 
     /**
-     * Check that a DeserializationException, is wrapped and rethrown as a MalformedJwtException with a developer friendly message.
+     * Check that a DeserializationException is wrapped and rethrown as a MalformedJwtException with a developer friendly message.
      */
     @Test
     void testDeserializationExceptionMessage() {
