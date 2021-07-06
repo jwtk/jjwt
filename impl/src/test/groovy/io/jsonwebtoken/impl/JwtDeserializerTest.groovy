@@ -38,7 +38,8 @@ class JwtDeserializerTest {
     @Test
     void testParserStackOverflowError() {
 
-        byte[] jsonBytes = '{"test": "testParserStackOverflowError"}'.getBytes(StandardCharsets.UTF_8)
+        String json = '{"test": "testParserStackOverflowError"}'
+        byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8)
 
         // create a Deserializer that will throw a StackOverflowError
         Deserializer<Map<String,?>> deserializer = mock(Deserializer)
@@ -49,7 +50,7 @@ class JwtDeserializerTest {
             new JwtDeserializer<>(deserializer).deserialize(jsonBytes)
             Assert.fail("Expected IOException")
         } catch (IOException e) {
-            assertEquals JwtDeserializer.MALFORMED_COMPLEX_ERROR + new String(jsonBytes), e.message
+            assertEquals JwtDeserializer.MALFORMED_COMPLEX_ERROR + json, e.message
         }
     }
 
@@ -59,7 +60,8 @@ class JwtDeserializerTest {
     @Test
     void testDeserializationExceptionMessage() {
 
-        byte[] jsonBytes = '{"test": "testDeserializationExceptionMessage"}'.getBytes(StandardCharsets.UTF_8)
+        String json = '{"test": "testDeserializationExceptionMessage"}'
+        byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8)
 
         // create a Deserializer that will throw a DeserializationException
         Deserializer<Map<String,?>> deserializer = mock(Deserializer)
@@ -70,7 +72,7 @@ class JwtDeserializerTest {
             new JwtDeserializer<>(deserializer).deserialize(jsonBytes)
             Assert.fail("Expected MalformedJwtException")
         } catch (MalformedJwtException e) {
-            assertEquals JwtDeserializer.MALFORMED_ERROR + new String(jsonBytes), e.message
+            assertEquals JwtDeserializer.MALFORMED_ERROR + json, e.message
         }
     }
 }
