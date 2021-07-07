@@ -98,7 +98,7 @@ class DefaultJwtParserBuilderTest {
     }
 
     @Test
-    void testDefaultDecoder() {
+    void testDefaultDeserializer() {
         JwtParser parser = new DefaultJwtParserBuilder().build()
         assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
 
@@ -107,7 +107,7 @@ class DefaultJwtParserBuilderTest {
     }
 
     @Test
-    void testUserSetDecoderWrapsImplementation() {
+    void testUserSetDeserializerWrapped() {
         Deserializer deserializer = niceMock(Deserializer)
         JwtParser parser = new DefaultJwtParserBuilder()
             .deserializeJsonWith(deserializer)
