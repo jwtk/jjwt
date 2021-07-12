@@ -18,6 +18,8 @@ package io.jsonwebtoken.lang;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * @since 0.1
@@ -193,10 +195,18 @@ public final class Classes {
     public static <T> T invokeStatic(String fqcn, String methodName, Class[] argTypes, Object... args) {
         try {
             Class clazz = Classes.forName(fqcn);
-            Method method = clazz.getDeclaredMethod(methodName, argTypes);
-            method.setAccessible(true);
+            final Method method = clazz.getDeclaredMethod(methodName, argTypes);
+
+            AccessController.doPrivileged(new PrivilegedAction<Object>() {
+                @Override
+                public Object run() {
+                    method.setAccessible(true);
+                    return null;
+                }
+            });
+
             return(T)method.invoke(null, args);
-        } catch (Exception e) {
+        } catch (Exception e) { // TODO catch specific exceptions (avoid catching RuntimeException), breaking change fix in 1.0
             String msg = "Unable to invoke class method " + fqcn + "#" + methodName + ".  Ensure the necessary " +
                 "implementation is in the runtime classpath.";
             throw new IllegalStateException(msg, e);

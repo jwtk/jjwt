@@ -29,6 +29,6 @@ class FixedClockTest {
         Thread.sleep(100)
         def date2 = clock.now()
 
-        assertSame date1, date2
+        assertEquals date1, date2
     }
 }

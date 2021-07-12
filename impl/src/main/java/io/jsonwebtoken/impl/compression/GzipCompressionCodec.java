@@ -28,7 +28,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @since 0.6.0
  */
-public class GzipCompressionCodec extends AbstractCompressionCodec implements CompressionCodec {
+public class GzipCompressionCodec extends AbstractCompressionCodec {
 
     private static final String GZIP = "GZIP";
 
