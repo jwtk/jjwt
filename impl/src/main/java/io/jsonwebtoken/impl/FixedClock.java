@@ -27,14 +27,14 @@ import java.util.Date;
  */
 public class FixedClock implements Clock {
 
-    private final Date now;
+    private final long now;
 
     /**
      * Creates a new fixed clock using <code>new {@link Date Date}()</code> as the seed timestamp.  All calls to
      * {@link #now now()} will always return this seed Date.
      */
     public FixedClock() {
-        this(new Date());
+        this(System.currentTimeMillis());
     }
 
     /**
@@ -43,12 +43,20 @@ public class FixedClock implements Clock {
      *
      * @param now the specified Date to always return from all calls to {@link #now now()}.
      */
-    public FixedClock(Date now) {
+    public FixedClock(long now) {
         this.now = now;
     }
 
-    @Override
+    public FixedClock(Date now) {
+        this(now.getTime());
+    }
+
     public Date now() {
+    	return new Date(millis());
+    }
+    
+    @Override
+    public long millis() {
         return this.now;
     }
 }

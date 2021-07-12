@@ -36,8 +36,12 @@ public class DefaultClock implements Clock {
      *
      * @return a new {@link Date} instance.
      */
-    @Override
     public Date now() {
-        return new Date();
+        return new Date(millis());
+    }
+
+    @Override
+    public long millis() {
+        return System.currentTimeMillis();
     }
 }
