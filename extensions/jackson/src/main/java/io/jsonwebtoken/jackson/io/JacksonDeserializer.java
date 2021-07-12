@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jsonwebtoken.io.DeserializationException;
@@ -35,7 +36,7 @@ import java.util.Map;
 public class JacksonDeserializer<T> implements Deserializer<T> {
 
     private final Class<T> returnType;
-    private final ObjectMapper objectMapper;
+    private final ObjectReader objectReader;
 
     @SuppressWarnings("unused") //used via reflection by RuntimeClasspathDeserializerLocator
     public JacksonDeserializer() {
@@ -68,14 +69,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
      */
     public JacksonDeserializer(Map<String, Class> claimTypeMap) {
-        // DO NOT reuse JacksonSerializer.DEFAULT_OBJECT_MAPPER as this could result in sharing the custom deserializer
-        // between instances
-        this(new ObjectMapper());
-        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
-        // register a new Deserializer
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
-        objectMapper.registerModule(module);
+        this(objectMapperWithMappedTypes(claimTypeMap));
     }
 
     @SuppressWarnings({"unchecked", "WeakerAccess", "unused"}) // for end-users providing a custom ObjectMapper
@@ -86,7 +80,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
     private JacksonDeserializer(ObjectMapper objectMapper, Class<T> returnType) {
         Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
         Assert.notNull(returnType, "Return type cannot be null.");
-        this.objectMapper = objectMapper;
+        this.objectReader = objectMapper.reader();
         this.returnType = returnType;
     }
 
@@ -101,7 +95,19 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
     }
 
     protected T readValue(byte[] bytes) throws IOException {
-        return objectMapper.readValue(bytes, returnType);
+        return objectReader.readValue(bytes, returnType);
+    }
+
+    private static ObjectMapper objectMapperWithMappedTypes(Map<String, Class> claimTypeMap) {
+        // DO NOT reuse JacksonSerializer.DEFAULT_OBJECT_MAPPER as this could result in sharing the custom deserializer
+        // between instances
+        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
+        ObjectMapper objectMapper = new ObjectMapper();
+        // register a new Deserializer
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
+        objectMapper.registerModule(module);
+        return objectMapper;
     }
 
     /**
@@ -122,7 +128,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
             // check if the current claim key is mapped, if so traverse it's value
             String name = parser.currentName();
             if (claimTypeMap != null && name != null && claimTypeMap.containsKey(name)) {
-                Class type = claimTypeMap.get(name);
+                Class<?> type = claimTypeMap.get(name);
                 return parser.readValueAsTree().traverse(parser.getCodec()).readValueAs(type);
             }
             // otherwise default to super

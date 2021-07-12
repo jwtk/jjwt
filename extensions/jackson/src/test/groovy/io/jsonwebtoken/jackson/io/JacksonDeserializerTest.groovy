@@ -38,14 +38,14 @@ class JacksonDeserializerTest {
     @Test
     void testDefaultConstructor() {
         def deserializer = new JacksonDeserializer()
-        assertNotNull deserializer.objectMapper
+        assertNotNull deserializer.objectReader
     }
 
     @Test
     void testObjectMapperConstructor() {
         def customOM = new ObjectMapper()
         def deserializer = new JacksonDeserializer(customOM)
-        assertSame customOM, deserializer.objectMapper
+        assertSame customOM.getDeserializationConfig(), deserializer.objectReader.config
     }
 
     @Test(expected = IllegalArgumentException)
