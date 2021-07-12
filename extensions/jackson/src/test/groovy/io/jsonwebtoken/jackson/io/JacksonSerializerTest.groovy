@@ -16,6 +16,7 @@
 package io.jsonwebtoken.jackson.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.ObjectWriter
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Before
@@ -47,14 +48,14 @@ class JacksonSerializerTest {
 
     @Test
     void testDefaultConstructor() {
-        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER, ser.objectMapper
+        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER.getSerializationConfig(), ser.objectWriter.config
     }
 
     @Test
     void testObjectMapperConstructor() {
         ObjectMapper customOM = new ObjectMapper()
         ser = new JacksonSerializer(customOM)
-        assertSame customOM, ser.objectMapper
+        assertSame customOM.getSerializationConfig(), ser.objectWriter.config
     }
 
     @Test(expected = IllegalArgumentException)
@@ -65,8 +66,10 @@ class JacksonSerializerTest {
     @Test
     void testObjectMapperConstructorAutoRegistersModule() {
         ObjectMapper om = createMock(ObjectMapper)
+        ObjectWriter writer = createMock(ObjectWriter)
         expect(om.registerModule(same(JacksonSerializer.MODULE))).andReturn(om)
-        replay om
+        expect(om.writer()).andReturn(writer)
+        replay om, writer
         //noinspection GroovyResultOfObjectAllocationIgnored
         new JacksonSerializer<>(om)
         verify om
