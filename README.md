@@ -11,9 +11,9 @@ JJWT is a pure Java implementation based
 exclusively on the [JWT](https://tools.ietf.org/html/rfc7519), 
 [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), 
 [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications and 
-open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
+open source under the terms of the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
 
-The library was created by [Okta's](http://www.okta.com) Senior Architect, [Les Hazlewood](https://github.com/lhazlewood)
+The library was created by [Okta's](https://www.okta.com/) Senior Architect, [Les Hazlewood](https://github.com/lhazlewood)
 and is supported and maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
 
 [Okta](https://developer.okta.com/) is a complete authentication and user management API for developers.
@@ -90,7 +90,7 @@ enforcement.
  * Fully functional on all JDKs and Android
  * Automatic security best practices and assertions
  * Easy to learn and read API
- * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE auto-completion to write code quickly
+ * Convenient and readable [fluent](https://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
  * Stable implementation with enforced 100% test code coverage.  Literally every single method, statement and 
    conditional branch variant in the entire codebase is tested and required to pass on every build.
@@ -368,7 +368,7 @@ you more quickly and efficiently.
 <a name="quickstart"></a>
 ## Quickstart
 
-Most complexity is hidden behind a convenient and readable builder-based [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface), great for relying on IDE auto-completion to write code quickly.  Here's an example:
+Most complexity is hidden behind a convenient and readable builder-based [fluent interface](https://en.wikipedia.org/wiki/Fluent_interface), great for relying on IDE auto-completion to write code quickly.  Here's an example:
 
 ```java
 import io.jsonwebtoken.Jwts;
@@ -1397,7 +1397,7 @@ Jwts.parserBuilder()
 
     .build()
 
-    .parseClaimsJwt(aJwtString)
+    .parsePlaintextUnsignedJwt(aJwtString)
 
     .getBody()
     
@@ -1639,4 +1639,4 @@ Maintained by Les Hazlewood &amp; [Okta](https://okta.com/)
 <a name="license"></a>
 ## License
 
-This project is open-source via the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
+This project is open-source via the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).

@@ -29,7 +29,7 @@ import java.util.Map;
  *         .setSigningKey(...)
  *         .requireIssuer("https://issuer.example.com")
  *         .build()
- *         .parse(jwtString)
+ *         .parseClaimsJws(jwtString)
  * }</pre>
  * @since 0.11.0
  */

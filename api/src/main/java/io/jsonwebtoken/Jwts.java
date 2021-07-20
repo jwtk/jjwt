@@ -105,14 +105,14 @@ public final class Jwts {
      * <pre>{@code
      *     Jwts.parser()
      *         .requireAudience("string")
-     *         .parse(jwtString)
+     *         .parseClaimsUnsignedJwt(jwtString)
      * }</pre>
      * <p>New code:
      * <pre>{@code
      *     Jwts.parserBuilder()
      *         .requireAudience("string")
      *         .build()
-     *         .parse(jwtString)
+     *         .parseClaimsUnsignedJwt(jwtString)
      * }</pre>
      * <p><b>NOTE: this method will be removed before version 1.0</b>
      */

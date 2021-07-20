@@ -16,7 +16,7 @@
 package io.jsonwebtoken;
 
 /**
- * An <a href="http://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
+ * An <a href="https://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
  * {@link JwtHandler} interface that allows for anonymous subclasses to process only the JWT results that are
  * known/expected for a particular use case.
  *
