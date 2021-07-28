@@ -1,7 +1,7 @@
 package io.jsonwebtoken.security
 
 import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest
-import io.jsonwebtoken.impl.security.DefaultSymmetricAeadResult
+import io.jsonwebtoken.impl.security.DefaultAeadResult
 import io.jsonwebtoken.impl.security.EncryptionAlgorithm
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import org.junit.Test
@@ -42,9 +42,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithoutAad() {
 
-        for (EncryptionAlgorithm alg : EncryptionAlgorithms.values()) {
-
-            assert alg instanceof SymmetricAeadAlgorithm
+        for (SymmetricAeadAlgorithm alg : EncryptionAlgorithms.values()) {
 
             def key = alg.generateKey()
 
@@ -63,7 +61,7 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultSymmetricAeadResult(null, null, ciphertext, key, null, tag, result.getInitializationVector())
+            def dreq = new DefaultAeadResult(null, null, ciphertext, key, null, tag, result.getInitializationVector())
 
             byte[] decryptedPlaintextBytes = alg.decrypt(dreq).payload
 
@@ -74,9 +72,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithAad() {
 
-        for (EncryptionAlgorithm alg : EncryptionAlgorithms.values()) {
-
-            assert alg instanceof SymmetricAeadAlgorithm
+        for (SymmetricAeadAlgorithm alg : EncryptionAlgorithms.values()) {
 
             def key = alg.generateKey()
 
@@ -92,7 +88,7 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultSymmetricAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getAuthenticationTag(), result.getInitializationVector());
+            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getAuthenticationTag(), result.getInitializationVector());
             byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }

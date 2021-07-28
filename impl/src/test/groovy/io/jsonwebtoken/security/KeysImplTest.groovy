@@ -67,7 +67,7 @@ class KeysImplTest {
     @Test
     void testSecretKeyFor() {
         for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
-            if (alg instanceof SymmetricKeySignatureAlgorithm) {
+            if (alg instanceof SecretKeySignatureAlgorithm) {
                 SecretKey key = alg.generateKey()
                 assertEquals  alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
                 assertEquals alg.jcaName, key.algorithm

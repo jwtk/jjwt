@@ -59,7 +59,7 @@ class GcmAesAeadAlgorithmTest {
         assertArrayEquals IV, iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultSymmetricAeadResult(null, null, ciphertext, KEY, AAD, tag, iv)
+        def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, AAD, tag, iv)
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
         assertArrayEquals(P, decryptionResult)
     }

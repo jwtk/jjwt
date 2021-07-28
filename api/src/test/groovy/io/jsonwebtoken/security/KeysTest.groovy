@@ -112,7 +112,7 @@ class KeysTest {
             if (name.startsWith('H')) {
 
                 def key = createMock(SecretKey)
-                def salg = createMock(SymmetricKeySignatureAlgorithm)
+                def salg = createMock(SecretKeySignatureAlgorithm)
 
                 expect(SignatureAlgorithms.forName(eq(name))).andReturn(salg)
                 expect(salg.generateKey()).andReturn(key)
@@ -148,7 +148,7 @@ class KeysTest {
             String name = alg.name()
 
             if (name.equals('NONE') || name.startsWith('H')) {
-                def salg = name == 'NONE' ? createMock(io.jsonwebtoken.security.SignatureAlgorithm) : createMock(SymmetricKeySignatureAlgorithm)
+                def salg = name == 'NONE' ? createMock(io.jsonwebtoken.security.SignatureAlgorithm) : createMock(SecretKeySignatureAlgorithm)
                 expect(SignatureAlgorithms.forName(eq(name))).andReturn(salg)
                 replay SignatureAlgorithms, salg
                 try {

@@ -14,48 +14,45 @@ import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 import java.security.Key;
-import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.Map;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class AesGcmKeyAlgorithm extends CryptoAlgorithm implements EncryptedKeyAlgorithm<SecretKey, SecretKey> {
+public class AesGcmKeyAlgorithm extends AesAlgorithm implements EncryptedKeyAlgorithm<SecretKey, SecretKey> {
 
     public static final String TRANSFORMATION = "AES/GCM/NoPadding";
 
     public AesGcmKeyAlgorithm(int keyLen) {
-        super("A" + keyLen + "GCMKW", TRANSFORMATION);
-        Assert.isTrue(keyLen == 128 || keyLen == 192 || keyLen == 256, "Invalid AES key length: it must equal 128, 192, or 256.");
+        super("A" + keyLen + "GCMKW", TRANSFORMATION, keyLen);
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<SecretKey, SecretKey> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, SecretKey> request) throws SecurityException {
+
         Assert.notNull(request, "request cannot be null.");
-        final SecretKey kek = Assert.notNull(request.getKey(), "Request key encryption key (request.getKey()) cannot be null.");
+        final SecretKey kek = assertKey(request);
         final SecretKey cek = Assert.notNull(request.getPayload(), "Request content encryption key (request.getPayload()) cannot be null.");
+        final byte[] iv = ensureInitializationVector(request);
+        final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        final byte[] iv = new byte[12]; // GCM IV is 96 bits (12 bytes)
-        SecureRandom random = ensureSecureRandom(request);
-        random.nextBytes(iv);
-
-        byte[] jcaResult = execute(request, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        byte[] taggedCiphertext = execute(request, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
             @Override
             public byte[] doWithInstance(Cipher cipher) throws Exception {
-                cipher.init(Cipher.WRAP_MODE, kek, new GCMParameterSpec(128, iv));
+                cipher.init(Cipher.WRAP_MODE, kek, ivSpec);
                 return cipher.wrap(cek);
             }
         });
 
-        //The JCA concatenates the ciphertext and the tag - split them:
-        int ciphertextLength = jcaResult.length - 16; //16 == AES block size in bytes (128 bits)
+        int tagByteLength = this.tagLength / Byte.SIZE;
+        // When using GCM mode, the JDK appends the authentication tag to the ciphertext, so let's extract it:
+        int ciphertextLength = taggedCiphertext.length - tagByteLength;
         byte[] ciphertext = new byte[ciphertextLength];
-        System.arraycopy(jcaResult, 0, ciphertext, 0, ciphertextLength);
-
-        byte[] tag = new byte[16];
-        System.arraycopy(jcaResult, ciphertextLength, tag, 0, 16);
+        System.arraycopy(taggedCiphertext, 0, ciphertext, 0, ciphertextLength);
+        byte[] tag = new byte[tagByteLength];
+        System.arraycopy(taggedCiphertext, ciphertextLength, tag, 0, tagByteLength);
 
         String encodedIv = Encoders.BASE64URL.encode(iv);
         String encodedTag = Encoders.BASE64URL.encode(tag);
@@ -64,7 +61,31 @@ public class AesGcmKeyAlgorithm extends CryptoAlgorithm implements EncryptedKeyA
         return new DefaultKeyResult(ciphertext, cek, extraParams);
     }
 
-    private byte[] getHeaderByteArray(JweHeader header, String name, int requiredLength) {
+    @Override
+    public SecretKey getDecryptionKey(KeyRequest<byte[], SecretKey> request) throws SecurityException {
+        Assert.notNull(request, "request cannot be null.");
+        final SecretKey kek = assertKey(request);
+        final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request payload (ciphertext) cannot be null or empty.");
+        final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
+        final byte[] tag = getHeaderByteArray(header, "tag", this.tagLength / Byte.SIZE);
+        final byte[] iv = getHeaderByteArray(header, "iv", this.ivLength / Byte.SIZE);
+        final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
+
+        //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
+        final byte[] taggedCiphertext = plus(cekBytes, tag);
+
+        return execute(request, Cipher.class, new InstanceCallback<Cipher, SecretKey>() {
+            @Override
+            public SecretKey doWithInstance(Cipher cipher) throws Exception {
+                cipher.init(Cipher.UNWRAP_MODE, kek, ivSpec);
+                Key key = cipher.unwrap(taggedCiphertext, KEY_ALG_NAME, Cipher.SECRET_KEY);
+                Assert.state(key instanceof SecretKey, "cipher.unwrap must produce a SecretKey instance.");
+                return (SecretKey)key;
+            }
+        });
+    }
+
+    private byte[] getHeaderByteArray(JweHeader header, String name, int requiredByteLength) {
         Object value = header.get(name);
         if (value == null) {
             String msg = "The " + getId() + " Key Management Algorithm requires a JweHeader '" + name + "' value.";
@@ -86,42 +107,13 @@ public class AesGcmKeyAlgorithm extends CryptoAlgorithm implements EncryptedKeyA
         }
 
         int len = Arrays.length(decoded);
-        if (len != requiredLength) {
+        if (len != requiredByteLength) {
             String msg = "The '" + getId() + "' key management algorithm requires the JweHeader '" + name +
-                "' value to be " + (requiredLength * Byte.SIZE) + " bits (" + requiredLength +
+                "' value to be " + (requiredByteLength * Byte.SIZE) + " bits (" + requiredByteLength +
                 " bytes) in length. Actual length: " + (len * Byte.SIZE) + " bits (" + len + " bytes).";
             throw new MalformedJwtException(msg);
         }
 
         return decoded;
-    }
-
-    @Override
-    public SecretKey getDecryptionKey(KeyRequest<byte[], SecretKey> request) throws SecurityException {
-        Assert.notNull(request, "request cannot be null.");
-        final SecretKey kek = Assert.notNull(request.getKey(), "Request key decryption key (request.getKey()) cannot be null.");
-        final byte[] cekBytes = Assert.notNull(request.getPayload(), "Request encrypted key (request.getPayload()) cannot be null.");
-        Assert.isTrue(cekBytes.length > 0, "Request encrypted key (request.getPayload()) cannot be empty.");
-        final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-
-        final byte[] iv = getHeaderByteArray(header, "iv", 12);
-
-        final byte[] tag = getHeaderByteArray(header, "tag", 16);
-
-        // JCA api expects the ciphertext to have the format: encrypted_bytes + authentication_tag
-        // so we need to reconstitute that format before passing in to the cipher:
-        final byte[] ciphertext = new byte[cekBytes.length + tag.length];
-        System.arraycopy(cekBytes, 0, ciphertext, 0, cekBytes.length);
-        System.arraycopy(tag, 0, ciphertext, cekBytes.length, tag.length);
-
-        return execute(request, Cipher.class, new InstanceCallback<Cipher, SecretKey>() {
-            @Override
-            public SecretKey doWithInstance(Cipher cipher) throws Exception {
-                cipher.init(Cipher.UNWRAP_MODE, kek, new GCMParameterSpec(128, iv));
-                Key key = cipher.unwrap(ciphertext, "AES", Cipher.SECRET_KEY);
-                Assert.state(key instanceof SecretKey, "cipher.unwrap must produce a SecretKey instance.");
-                return (SecretKey)key;
-            }
-        });
     }
 }

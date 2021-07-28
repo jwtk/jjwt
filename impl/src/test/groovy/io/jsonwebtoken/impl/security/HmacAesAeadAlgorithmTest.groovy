@@ -39,7 +39,7 @@ class HmacAesAeadAlgorithmTest {
         def fakeTag = new byte[realTag.length]
         Randoms.secureRandom().nextBytes(fakeTag)
 
-        def dreq = new DefaultSymmetricAeadResult(null, null, result.getPayload(), key, null, fakeTag, result.getInitializationVector())
+        def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, null, fakeTag, result.getInitializationVector())
         alg.decrypt(dreq)
     }
 

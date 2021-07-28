@@ -4,25 +4,20 @@ import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.CryptoRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
-import io.jsonwebtoken.security.SymmetricKeySignatureAlgorithm;
+import io.jsonwebtoken.security.SecretKeySignatureAlgorithm;
 import io.jsonwebtoken.security.WeakKeyException;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
 @SuppressWarnings("unused") //used via reflection in the io.jsonwebtoken.security.SignatureAlgorithms class
-public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey, SecretKey> implements SymmetricKeySignatureAlgorithm {
+public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey, SecretKey> implements SecretKeySignatureAlgorithm {
 
     private final int minKeyLength; //in bits
 
@@ -111,25 +106,26 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
 
         // We can only perform length validation if key.getEncoded() is not null or does not throw an exception
         // per https://github.com/jwtk/jjwt/issues/478 and https://github.com/jwtk/jjwt/issues/619
-        if (encoded != null) { //we can perform key length assertions
-            int size = Arrays.length(encoded) * Byte.SIZE;
-            if (size < this.minKeyLength) {
-                String msg = "The " + keyType + " key's size is " + size + " bits which " +
-                    "is not secure enough for the " + id + " algorithm.";
+        // so return early if we can't:
+        if (encoded == null) return;
 
-                if (isJwaStandard() && isJwaStandardJcaName(getJcaName())) { //JWA standard algorithm name - reference the spec:
-                    msg += " The JWT " +
-                        "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + id + " MUST have a " +
-                        "size >= " + minKeyLength + " bits (the key size must be greater than or equal to the hash " +
-                        "output size). Consider using the SignatureAlgorithms." + id + ".generateKey() " +
-                        "method to create a key guaranteed to be secure enough for " + id + ".  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
-                } else { //custom algorithm - just indicate required key length:
-                    msg += " The " + id + " algorithm requires keys to have a size >= " + minKeyLength + " bits.";
-                }
+        int size = Arrays.length(encoded) * Byte.SIZE;
+        if (size < this.minKeyLength) {
+            String msg = "The " + keyType + " key's size is " + size + " bits which " +
+                "is not secure enough for the " + id + " algorithm.";
 
-                throw new WeakKeyException(msg);
+            if (isJwaStandard() && isJwaStandardJcaName(getJcaName())) { //JWA standard algorithm name - reference the spec:
+                msg += " The JWT " +
+                    "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + id + " MUST have a " +
+                    "size >= " + minKeyLength + " bits (the key size must be greater than or equal to the hash " +
+                    "output size). Consider using the SignatureAlgorithms." + id + ".generateKey() " +
+                    "method to create a key guaranteed to be secure enough for " + id + ".  See " +
+                    "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
+            } else { //custom algorithm - just indicate required key length:
+                msg += " The " + id + " algorithm requires keys to have a size >= " + minKeyLength + " bits.";
             }
+
+            throw new WeakKeyException(msg);
         }
     }
 

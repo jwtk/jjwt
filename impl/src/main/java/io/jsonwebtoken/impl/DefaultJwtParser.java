@@ -41,7 +41,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultSymmetricAeadResult;
+import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
 import io.jsonwebtoken.impl.security.DelegatingSigningKeyResolver;
 import io.jsonwebtoken.impl.security.StaticKeyResolver;
@@ -327,7 +327,7 @@ public class DefaultJwtParser implements JwtParser {
             TokenizedJwe tokenizedJwe = (TokenizedJwe)tokenized;
             JweHeader jweHeader = (JweHeader)header;
 
-            byte[] cekBytes = new byte[1]; //ignored unless using an encrypted key algorithm
+            byte[] cekBytes = new byte[0]; //ignored unless using an encrypted key algorithm
             String base64Url = tokenizedJwe.getEncryptedKey();
             if (Strings.hasText(base64Url)) {
                 cekBytes = base64UrlDecode(base64Url, "JWE encrypted key");
@@ -373,7 +373,7 @@ public class DefaultJwtParser implements JwtParser {
             final SecretKey cek = keyAlg.getDecryptionKey(request);
 
             SymmetricAeadDecryptionRequest decryptRequest =
-                new DefaultSymmetricAeadResult(this.provider, null, bytes, cek, headerBytes, tag, iv);
+                new DefaultAeadResult(this.provider, null, bytes, cek, headerBytes, tag, iv);
             PayloadSupplier<byte[]> result = encAlg.decrypt(decryptRequest);
             bytes = result.getPayload();
         }

@@ -1,70 +1,101 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.KeyException;
-import io.jsonwebtoken.security.PublicEcJwkBuilder;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECFieldFp;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
-import java.util.HashMap;
+import java.security.spec.EllipticCurve;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EcJwkConverter extends AbstractTypedJwkConverter {
+public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<K> {
 
-    private static final Map<String,String> EC_CURVE_NAMES_BY_JWA_ID = createEcCurveNameMap();
+    static final String TYPE_VALUE = "EC";
+    static final String CURVE_ID = "crv";
+    static final String X = "x";
+    static final String Y = "y";
+    static final String D = "d";
 
-    private static Map<String, String> createEcCurveNameMap() {
-        Map<String,String> m = new HashMap<>();
-        m.put("P-256", "secp256r1");
-        m.put("P-384", "secp384r1");
-        m.put("P-521", "secp521r1");
-        return m;
-    }
+    private static final BigInteger TWO = new BigInteger("2");
+    private static final BigInteger THREE = new BigInteger("3");
+    private static final Map<String, ECParameterSpec> EC_SPECS_BY_JWA_ID;
+    private static final Map<EllipticCurve, String> JWA_IDS_BY_CURVE;
 
-    private static ECParameterSpec getStandardNameSpec(String stdName) throws KeyException {
+    private static ECParameterSpec getJcaParameterSpec(String jcaAlgorithmName) throws IllegalStateException {
         try {
             AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
-            parameters.init(new ECGenParameterSpec(stdName));
+            parameters.init(new ECGenParameterSpec(jcaAlgorithmName));
             return parameters.getParameterSpec(ECParameterSpec.class);
         } catch (Exception e) {
-            String msg = "Unable to obtain JVM ECParameterSpec for JWA curve ID '" + stdName + "'.";
-            throw new KeyException(msg, e);
+            String msg = "Unable to obtain JVM ECParameterSpec for JCA algorithm name '" + jcaAlgorithmName + "'.";
+            throw new IllegalStateException(msg, e);
         }
     }
 
-    private static ECParameterSpec getCurveIdSpec(String curveId) {
-        String stdName = EC_CURVE_NAMES_BY_JWA_ID.get(curveId);
-        if (stdName == null) {
-            String msg = "Unrecognized JWA curve id '" + curveId + "'";
+    static {
+        EC_SPECS_BY_JWA_ID = new LinkedHashMap<>();
+        JWA_IDS_BY_CURVE = new LinkedHashMap<>();
+
+        // P-256 <--> secp256r1
+        // P-384 <--> secp384r1
+        // P-521 <--> secp521r1  (yes, this is supposed to be 521 and not 512)
+        int[] sizes = new int[]{256, 384, 521};
+
+        for (int i : sizes) {
+            final String jwaId = "P-" + i;
+            final String jcaId = "secp" + i + "r1";
+            ECParameterSpec spec = getJcaParameterSpec(jcaId);
+            EC_SPECS_BY_JWA_ID.put(jwaId, spec);
+            JWA_IDS_BY_CURVE.put(spec.getCurve(), jwaId);
+        }
+    }
+
+    private static ECParameterSpec getCurveByJwaId(String jwaCurveId) {
+        ECParameterSpec spec = EC_SPECS_BY_JWA_ID.get(jwaCurveId);
+        if (spec == null) {
+            String msg = "Unrecognized JWA curve id '" + jwaCurveId + "'";
             throw new UnsupportedKeyException(msg);
         }
-        return getStandardNameSpec(stdName);
+        return spec;
+    }
+
+    private static String getJwaIdByCurve(EllipticCurve curve) {
+        String jwaCurveId = JWA_IDS_BY_CURVE.get(curve);
+        if (jwaCurveId == null) {
+            String msg = "The specified ECKey curve does not match a JWA standard curve id.";
+            throw new UnsupportedKeyException(msg);
+        }
+        return jwaCurveId;
     }
 
     /**
      * https://tools.ietf.org/html/rfc7518#section-6.2.1.2 indicates that this algorithm logic is defined in
      * http://www.secg.org/sec1-v2.pdf Section 2.3.5.
-     * @param fieldSize EC field size
+     *
+     * @param fieldSize  EC field size
      * @param coordinate EC point coordinate (e.g. x or y)
      * @return A base64Url-encoded String representing the EC field per the RFC format
      */
     // Algorithm defined in http://www.secg.org/sec1-v2.pdf Section 2.3.5
-    static String encodeCoordinate(int fieldSize, BigInteger coordinate) {
+    static String toOctetString(int fieldSize, BigInteger coordinate) {
         byte[] bytes = toUnsignedBytes(coordinate);
-        int mlen = (int)Math.ceil(fieldSize / 8d);
+        int mlen = (int) Math.ceil(fieldSize / 8d);
         if (mlen > bytes.length) {
             byte[] m = new byte[mlen];
             System.arraycopy(bytes, 0, m, mlen - bytes.length, bytes.length);
@@ -73,105 +104,222 @@ public class EcJwkConverter extends AbstractTypedJwkConverter {
         return Encoders.BASE64URL.encode(bytes);
     }
 
+    /**
+     * Returns {@code true} if a given elliptic curve contains the specified {@code point}, {@code false} otherwise.
+     * Assumes elliptic curves over finite fields adhering to the reduced (a.k.a short or narrow) Weierstrass form:
+     * <p>
+     * <code>y<sup>2</sup> = x<sup>3</sup> + ax + b</code>
+     * </p>
+     * @param curve the Elliptic Curve to check
+     * @param point a point that may or may not be defined on the specified elliptic curve
+     * @return {@code true} if a given elliptic curve contains the specified {@code point}, {@code false} otherwise.
+     */
+    static boolean contains(EllipticCurve curve, ECPoint point) {
+        final BigInteger a = curve.getA();
+        final BigInteger b = curve.getB();
+        final BigInteger x = point.getAffineX();
+        final BigInteger y = point.getAffineY();
+
+        // The reduced Weierstrass form y^2 = x^3 + ax + b reflects an elliptic curve E over any field K (e.g. all real
+        // numbers or all complex numbers, etc). For computational simplicity, cryptographic (e.g. NIST) elliptic curves
+        // restrict K to be a field of integers modulo a prime number 'p'.  As such, we apply modulo p (the field prime)
+        // to the equation to account for the restricted field.  For a nice overview of the math behind EC curves and
+        // their application in cryptography, see
+        // https://web.northeastern.edu/dummit/docs/cryptography_5_elliptic_curves_in_cryptography.pdf
+        final BigInteger p = ((ECFieldFp)curve.getField()).getP();
+        final BigInteger lhs = y.pow(2).mod(p); //mod p to account for field prime
+        final BigInteger rhs = x.pow(3).add(a.multiply(x)).add(b).mod(p); //mod p to account for field prime
+
+        return lhs.equals(rhs);
+    }
+
+    static ECPublicKey derivePublic(ECPrivateKey key) {
+        try {
+            final ECParameterSpec params = key.getParams();
+            final ECPoint w = multiply(params.getGenerator(), key.getS(), params);
+            final KeyFactory kg = KeyFactory.getInstance("EC");
+            return (ECPublicKey) kg.generatePublic(new ECPublicKeySpec(w, params));
+        } catch (Exception e) {
+            throw new UnsupportedKeyException("Unable to derive ECPublicKey from specified ECPrivateKey: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Multiply a point {@code p} by scalar {@code s} on the curve identified by {@code spec}.
+     *
+     * @param p the Elliptic Curve point to multiply
+     * @param s the scalar value to multiply
+     * @param spec the domain parameters that identify the Elliptic Curve containing point {@code p}.
+     */
+    private static ECPoint multiply(ECPoint p, BigInteger s, ECParameterSpec spec) {
+        if (ECPoint.POINT_INFINITY.equals(p)) {
+            return p;
+        }
+
+        EllipticCurve curve = spec.getCurve();
+        BigInteger n = spec.getOrder();
+        BigInteger k = s.mod(n);
+
+        ECPoint r0 = ECPoint.POINT_INFINITY;
+        ECPoint r1 = p;
+
+        // Montgomery Ladder implementation to mitigate side-channel attacks (i.e. an 'add' operation and a 'double'
+        // operation is calculated for every loop iteration, regardless if the 'add'' is needed or not)
+        // See: https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Montgomery_ladder
+        while (k.compareTo(BigInteger.ZERO) > 0) {
+            ECPoint temp = add(r0, r1, curve);
+            r0 = k.testBit(0) ? temp : r0;
+            r1 = doublePoint(r1, curve);
+            k = k.shiftRight(1);
+        }
+
+        return r0;
+    }
+
+    private static ECPoint add(ECPoint P, ECPoint Q, EllipticCurve curve) {
+
+        if (ECPoint.POINT_INFINITY.equals(P)) {
+            return Q;
+        } else if (ECPoint.POINT_INFINITY.equals(Q)) {
+            return P;
+        } else if (P.equals(Q)) {
+            return doublePoint(P, curve);
+        }
+
+        final BigInteger Px = P.getAffineX();
+        final BigInteger Py = P.getAffineY();
+        final BigInteger Qx = Q.getAffineX();
+        final BigInteger Qy = Q.getAffineY();
+        final BigInteger prime = ((ECFieldFp) curve.getField()).getP();
+        final BigInteger slope = Qy.subtract(Py).multiply(Qx.subtract(Px).modInverse(prime)).mod(prime);
+        final BigInteger Rx = (slope.modPow(TWO, prime).subtract(Px)).subtract(Qx).mod(prime);
+        final BigInteger Ry = (Qy.negate().mod(prime)).add(slope.multiply(Qx.subtract(Rx))).mod(prime);
+
+        return new ECPoint(Rx, Ry);
+    }
+
+    private static ECPoint doublePoint(ECPoint P, EllipticCurve curve) {
+
+        if (ECPoint.POINT_INFINITY.equals(P)) {
+            return P;
+        }
+
+        final BigInteger Px = P.getAffineX();
+        final BigInteger Py = P.getAffineY();
+        final BigInteger p = ((ECFieldFp) curve.getField()).getP();
+        final BigInteger a = curve.getA();
+        final BigInteger s = ((Px.pow(2)).multiply(THREE).add(a)).multiply(Py.multiply(TWO).modInverse(p));
+        final BigInteger x = s.pow(2).subtract(Px.multiply(TWO)).mod(p);
+        final BigInteger y = (Py.negate()).add(s.multiply(Px.subtract(x))).mod(p);
+
+        return new ECPoint(x, y);
+    }
+
     EcJwkConverter() {
-        super("EC");
+        super(TYPE_VALUE);
     }
 
     @Override
     public boolean supports(Key key) {
-        return key instanceof ECPrivateKey || key instanceof ECPublicKey;
+        return key instanceof ECPublicKey || key instanceof ECPrivateKey;
     }
 
     @Override
-    public Key toKey(Map<String, ?> jwk) {
-        Assert.notNull(jwk, "JWK map argument cannot be null.");
-        if (jwk.containsKey("d")) {
-            return toPrivateKey(jwk);
+    public K applyFrom(Map<String, ?> jwk) {
+        Assert.notEmpty(jwk, "JWK map argument cannot be null or empty.");
+        if (jwk.containsKey(D)) {
+            return (K) toPrivateKey(jwk);
         }
-        return toPublicKey(jwk);
+        return (K) toPublicKey(jwk);
     }
 
     @Override
-    public Map<String, String> toJwk(Key key) {
+    public Map<String, ?> applyTo(K key) {
         if (key instanceof ECPrivateKey) {
-            return toPrivateJwk((ECPrivateKey)key);
+            return toPrivateJwk((ECPrivateKey) key);
         }
         Assert.isInstanceOf(ECPublicKey.class, key, "Key argument must be an ECPublicKey or ECPrivateKey instance.");
         return toPublicJwk((ECPublicKey)key);
     }
 
-    private ECPublicKey toPublicKey(Map<String, ?> jwk) {
-        String curveId = getRequiredString(jwk, "crv");
-        BigInteger x = getRequiredBigInt(jwk, "x");
-        BigInteger y = getRequiredBigInt(jwk, "y");
+    private PublicKey toPublicKey(Map<String, ?> jwk) {
+        String curveId = getRequiredString(jwk, CURVE_ID);
+        BigInteger x = getRequiredBigInt(jwk, X, false);
+        BigInteger y = getRequiredBigInt(jwk, Y, false);
 
-        ECParameterSpec spec = getCurveIdSpec(curveId);
+        ECParameterSpec spec = getCurveByJwaId(curveId);
         ECPoint point = new ECPoint(x, y);
+
+        if (!contains(spec.getCurve(), point)) {
+            Map<String,?> msgJwk = sanitize(jwk, D);
+            String msg = "EC JWK x,y coordinates do not match a point on the '" + curveId + "' elliptic curve. This " +
+                "could be due simply to an incorrectly-created JWK or possibly an attempted Invalid Curve Attack " +
+                "(see https://safecurves.cr.yp.to/twist.html for more information). JWK: {" + msgJwk + "}.";
+            throw new InvalidKeyException(msg);
+        }
+
         ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, spec);
 
         try {
             KeyFactory kf = getKeyFactory();
-            return (ECPublicKey)kf.generatePublic(pubSpec);
+            return kf.generatePublic(pubSpec);
         } catch (Exception e) {
-            String msg = "Unable to obtain ECPublicKey for curve '" + curveId + "'.";
-            throw new KeyException(msg, e);
+            Map<String,?> msgJwk = sanitize(jwk, D);
+            String msg = "Unable to create ECPublicKey from JWK {" + msgJwk + "}: " + e.getMessage();
+            throw new InvalidKeyException(msg, e);
         }
     }
 
-    public ECPrivateKey toPrivateKey(Map<String,?> jwk) {
-        String curveId = getRequiredString(jwk, "crv");
-        BigInteger d = getRequiredBigInt(jwk, "d");
+    public PrivateKey toPrivateKey(Map<String, ?> jwk) {
+        String curveId = getRequiredString(jwk, CURVE_ID);
+        BigInteger d = getRequiredBigInt(jwk, D, true);
 
-        // We don't actually need these two values for JVM lookup, but the
+        // We don't actually need the public x,y point coordinates for JVM lookup, but the
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
         // requires them to be present and valid for the private key as well, so we assert that here:
-        getRequiredBigInt(jwk, "x");
-        getRequiredBigInt(jwk, "y");
+        toPublicKey(jwk);
 
-        ECParameterSpec spec = getCurveIdSpec(curveId);
+        ECParameterSpec spec = getCurveByJwaId(curveId);
         ECPrivateKeySpec privateSpec = new ECPrivateKeySpec(d, spec);
 
         try {
             KeyFactory kf = getKeyFactory();
-            return (ECPrivateKey)kf.generatePrivate(privateSpec);
+            return kf.generatePrivate(privateSpec);
         } catch (Exception e) {
-            String msg = "Unable to obtain ECPrivateKey from specified jwk for curve '" + curveId + "'.";
-            throw new KeyException(msg, e);
+            Map<String,?> msgJwk = sanitize(jwk, D);
+            String msg = "Unable to create ECPrivateKey from JWK {" + msgJwk + "}: " + e.getMessage();
+            throw new InvalidKeyException(msg, e);
         }
     }
 
     public Map<String, String> toPublicJwk(ECPublicKey key) {
 
-        PublicEcJwkBuilder builder = Jwks.builder().ellipticCurve().publicKey();
-
-        Map<String,String> m = newJwkMap();
-
-        System.out.println(key.getAlgorithm());
+        Map<String, String> m = newJwkMap();
 
         ECParameterSpec spec = key.getParams();
+        EllipticCurve curve = spec.getCurve();
+        ECPoint point = key.getW();
 
-        //TODO: need a ECPublicKey-to-CurveId function
+        String curveId = getJwaIdByCurve(curve);
+        m.put(CURVE_ID, curveId);
 
-        SignatureAlgorithm alg = SignatureAlgorithm.forSigningKey(key);
+        int fieldSize = curve.getField().getFieldSize();
+        String x = toOctetString(fieldSize, point.getAffineX());
+        m.put(X, x);
 
-        int bitLength = spec.getOrder().bitLength();
+        String y = toOctetString(fieldSize, point.getAffineY());
+        m.put(Y, y);
 
-        int fieldSize = spec.getCurve().getField().getFieldSize();
-
-        String x = encodeCoordinate(fieldSize, spec.getGenerator().getAffineX());
-        String y = encodeCoordinate(fieldSize, spec.getGenerator().getAffineY());
-
-
-        builder.setX(x).setY(y);
-
-        //return (Map<String,String>)builder.build();
-
-        throw new UnsupportedOperationException("Not yet implemented.");
+        return m;
     }
 
-
-
-    public Map<String, String> toPrivateJwk(ECPrivateKey key) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    public Map<String, ?> toPrivateJwk(ECPrivateKey key) {
+        ECPublicKey publicKey = derivePublic(key);
+        Map<String, String> publicJwk = toPublicJwk(publicKey);
+        Map<String, String> m = new LinkedHashMap<>(publicJwk);
+        int fieldSize = key.getParams().getCurve().getField().getFieldSize();
+        String d = toOctetString(fieldSize, key.getS());
+        m.put(D, d);
+        return m;
     }
 }

@@ -241,10 +241,11 @@ public final class Assert {
      * @param message the exception message to use if the assertion fails
      * @throws IllegalArgumentException if the collection is <code>null</code> or has no elements
      */
-    public static void notEmpty(Collection collection, String message) {
+    public static <T extends Collection<?>> T notEmpty(T collection, String message) {
         if (Collections.isEmpty(collection)) {
             throw new IllegalArgumentException(message);
         }
+        return collection;
     }
 
     /**

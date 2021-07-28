@@ -1,8 +1,7 @@
 package io.jsonwebtoken.impl.security
 
-
+import io.jsonwebtoken.security.AeadResult
 import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.SymmetricAeadEncryptionResult
 import io.jsonwebtoken.security.SymmetricAeadRequest
 import org.junit.Test
 
@@ -72,7 +71,7 @@ class Aes192CbcHmacSha384Test {
 
         SymmetricAeadRequest req = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
 
-        SymmetricAeadEncryptionResult result = alg.encrypt(req)
+        AeadResult result = alg.encrypt(req)
 
         byte[] resultCiphertext = result.getPayload()
         byte[] resultTag = result.getAuthenticationTag()
@@ -83,7 +82,7 @@ class Aes192CbcHmacSha384Test {
         assertArrayEquals IV, resultIv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultSymmetricAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv)
+        def dreq = new DefaultAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv)
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
 
         assertArrayEquals(P, decryptionResult)

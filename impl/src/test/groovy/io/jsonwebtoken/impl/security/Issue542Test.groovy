@@ -3,14 +3,8 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.SignatureAlgorithm
 import io.jsonwebtoken.security.SignatureAlgorithms
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
-import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
-import org.bouncycastle.openssl.PEMParser
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
 import java.security.PrivateKey
 import java.security.PublicKey
 
@@ -37,34 +31,6 @@ class Issue542Test {
             (SignatureAlgorithms.PS512): PS512_0_10_7
     ]
 
-    private static JcaX509CertificateConverter X509_CERT_CONVERTER = new JcaX509CertificateConverter()
-    private static JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter()
-
-    private static PEMParser getParser(String filename) {
-        InputStream is = Issue542Test.class.getResourceAsStream(filename)
-        return new PEMParser(new BufferedReader(new InputStreamReader(is, StandardCharsets.ISO_8859_1)))
-    }
-
-    private static PublicKey readTestPublicKey(SignatureAlgorithm alg) {
-        PEMParser parser = getParser(alg.getId() + '.crt.pem')
-        X509CertificateHolder holder = parser.readObject() as X509CertificateHolder
-        try {
-            return X509_CERT_CONVERTER.getCertificate(holder).getPublicKey()
-        } finally {
-            parser.close()
-        }
-    }
-
-    private static PrivateKey readTestPrivateKey(SignatureAlgorithm alg) {
-        PEMParser parser = getParser(alg.getId() + '.key.pem')
-        PrivateKeyInfo info = parser.readObject() as PrivateKeyInfo
-        try {
-            return PEM_KEY_CONVERTER.getPrivateKey(info)
-        } finally {
-            parser.close()
-        }
-    }
-
     /**
      * Asserts backwards-compatibility for https://github.com/jwtk/jjwt/issues/542
      */
@@ -74,7 +40,7 @@ class Issue542Test {
         def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
 
         for (alg in algs) {
-            PublicKey key = readTestPublicKey(alg)
+            PublicKey key = CertUtils.readTestPublicKey(alg)
             String jws = JWS_0_10_7_VALUES[alg]
             def token = Jwts.parser().setSigningKey(key).parseClaimsJws(jws)
             assert 'joe' == token.body.getIssuer()
@@ -88,7 +54,7 @@ class Issue542Test {
     static void main(String[] args) {
         def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
         for (alg in algs) {
-            PrivateKey privateKey = readTestPrivateKey(alg)
+            PrivateKey privateKey = CertUtils.readTestPrivateKey(alg)
             String jws = Jwts.builder().setIssuer('joe').signWith(privateKey, alg).compact()
             println "private static String ${alg.id()}_0_10_7 = '$jws'"
         }

@@ -26,7 +26,7 @@ public final class KeyAlgorithms {
         return Classes.newInstance(fqcn, AESWRAP_ARGS, keyLength);
     }
 
-    public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDirectKeyAlgorithm");
+    public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Classes.newInstance("io.jsonwebtoken.impl.security.DirectKeyAlgorithm");
     public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128KW = aeswrap(AESWRAP, 128);
     public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192KW = aeswrap(AESWRAP, 192);
     public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256KW = aeswrap(AESWRAP, 256);

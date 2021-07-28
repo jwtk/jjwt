@@ -109,18 +109,18 @@ public final class Keys {
      * @return a new {@link SecretKey} instance suitable for use with the specified {@link SignatureAlgorithm}.
      * @throws IllegalArgumentException for any input value other than {@link io.jsonwebtoken.SignatureAlgorithm#HS256},
      *                                  {@link io.jsonwebtoken.SignatureAlgorithm#HS384}, or {@link io.jsonwebtoken.SignatureAlgorithm#HS512}
-     * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link SymmetricKeySignatureAlgorithm} instance's
-     * {@link SymmetricKeySignatureAlgorithm#generateKey() generateKey()} method directly.
+     * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link SecretKeySignatureAlgorithm} instance's
+     * {@link SecretKeySignatureAlgorithm#generateKey() generateKey()} method directly.
      */
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         SignatureAlgorithm<?,?> salg = SignatureAlgorithms.forName(alg.name());
-        if (!(salg instanceof SymmetricKeySignatureAlgorithm)) {
+        if (!(salg instanceof SecretKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
         }
-        return ((SymmetricKeySignatureAlgorithm) salg).generateKey();
+        return ((SecretKeySignatureAlgorithm) salg).generateKey();
     }
 
     /**

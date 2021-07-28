@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.*
+
+import io.jsonwebtoken.security.EncryptionAlgorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -82,7 +83,7 @@ class Aes128CbcHmacSha256Test {
 
         // now test decryption:
 
-        def dreq = new DefaultSymmetricAeadResult(null, null, ciphertext, KEY, A, tag, iv)
+        def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, A, tag, iv)
 
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
 

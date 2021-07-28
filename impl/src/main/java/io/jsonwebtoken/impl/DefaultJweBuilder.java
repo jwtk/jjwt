@@ -21,7 +21,7 @@ import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.SymmetricAeadEncryptionResult;
+import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
@@ -35,7 +35,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     private static final SecretKey EMPTY_SECRET_KEY = new SecretKeySpec("NONE".getBytes(StandardCharsets.UTF_8), "NONE");
 
     private SymmetricAeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
-    private Function<SymmetricAeadRequest,SymmetricAeadEncryptionResult> encFunction;
+    private Function<SymmetricAeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key,?> alg;
     private Function<KeyRequest<SecretKey,Key>,KeyResult> algFunction;
@@ -70,9 +70,9 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         this.enc = Assert.notNull(enc, "EncryptionAlgorithm cannot be null.");
         Assert.hasText(enc.getId(), "EncryptionAlgorithm id cannot be null or empty.");
         String encMsg = enc.getId() + " encryption failed.";
-        this.encFunction = wrap(encMsg, new Function<SymmetricAeadRequest, SymmetricAeadEncryptionResult>() {
+        this.encFunction = wrap(encMsg, new Function<SymmetricAeadRequest, AeadResult>() {
             @Override
-            public SymmetricAeadEncryptionResult apply(SymmetricAeadRequest request) {
+            public AeadResult apply(SymmetricAeadRequest request) {
                 return enc.encrypt(request);
             }
         });
@@ -155,7 +155,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         byte[] headerBytes = this.headerSerializer.apply(jweHeader);
 
         SymmetricAeadRequest encRequest = new DefaultSymmetricAeadRequest(provider, secureRandom, plaintext, cek, headerBytes);
-        SymmetricAeadEncryptionResult encResult = encFunction.apply(encRequest);
+        AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
         byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");

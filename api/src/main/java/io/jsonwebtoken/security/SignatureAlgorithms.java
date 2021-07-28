@@ -23,8 +23,8 @@ public final class SignatureAlgorithms {
     private SignatureAlgorithms() {
     }
 
-    static final String HMAC = "io.jsonwebtoken.impl.security.MacSignatureAlgorithm";
-    static final Class<?>[] HMAC_ARGS = new Class[]{String.class, String.class, int.class};
+    private static final String HMAC = "io.jsonwebtoken.impl.security.MacSignatureAlgorithm";
+    private static final Class<?>[] HMAC_ARGS = new Class[]{String.class, String.class, int.class};
 
     private static final String RSA = "io.jsonwebtoken.impl.security.DefaultRsaSignatureAlgorithm";
     private static final Class<?>[] RSA_ARGS = new Class[]{String.class, String.class, int.class};
@@ -33,7 +33,7 @@ public final class SignatureAlgorithms {
     private static final String EC = "io.jsonwebtoken.impl.security.DefaultEllipticCurveSignatureAlgorithm";
     private static final Class<?>[] EC_ARGS = new Class[]{String.class, String.class, String.class, int.class, int.class};
 
-    private static SymmetricKeySignatureAlgorithm hmacSha(int minKeyLength) {
+    private static SecretKeySignatureAlgorithm hmacSha(int minKeyLength) {
         return Classes.newInstance(HMAC, HMAC_ARGS, "HS" + minKeyLength, "HmacSHA" + minKeyLength, minKeyLength);
     }
 
@@ -51,9 +51,9 @@ public final class SignatureAlgorithms {
     }
 
     public static final SignatureAlgorithm<Key, Key> NONE = Classes.newInstance("io.jsonwebtoken.impl.security.NoneSignatureAlgorithm");
-    public static final SymmetricKeySignatureAlgorithm HS256 = hmacSha(256);
-    public static final SymmetricKeySignatureAlgorithm HS384 = hmacSha(384);
-    public static final SymmetricKeySignatureAlgorithm HS512 = hmacSha(512);
+    public static final SecretKeySignatureAlgorithm HS256 = hmacSha(256);
+    public static final SecretKeySignatureAlgorithm HS384 = hmacSha(384);
+    public static final SecretKeySignatureAlgorithm HS512 = hmacSha(512);
     public static final RsaSignatureAlgorithm RS256 = rsa(256, 2048);
     public static final RsaSignatureAlgorithm RS384 = rsa(384, 3072);
     public static final RsaSignatureAlgorithm RS512 = rsa(512, 4096);

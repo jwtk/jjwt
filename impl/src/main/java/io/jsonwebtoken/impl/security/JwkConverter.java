@@ -1,11 +1,12 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Converter;
+import io.jsonwebtoken.security.Identifiable;
+
 import java.security.Key;
 import java.util.Map;
 
-public interface JwkConverter {
+public interface JwkConverter<K extends Key> extends Identifiable, Converter<K, Map<String,?>> {
 
-    Key toKey(Map<String,?> jwk);
-
-    Map<String, String> toJwk(Key key);
+    boolean supports(Key key);
 }
