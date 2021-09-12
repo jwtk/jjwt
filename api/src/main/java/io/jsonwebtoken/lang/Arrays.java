@@ -15,12 +15,22 @@
  */
 package io.jsonwebtoken.lang;
 
+import java.util.List;
+
 /**
  * @since 0.6
  */
 public final class Arrays {
 
     private Arrays(){} //prevent instantiation
+
+    public static <T> int length(T[] a) {
+        return a == null ? 0 : a.length;
+    }
+
+    public static <T> List<T> asList(T[] a) {
+        return a == null ? Collections.<T>emptyList() : java.util.Arrays.asList(a);
+    }
 
     public static int length(byte[] bytes) {
         return bytes != null ? bytes.length : 0;

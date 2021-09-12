@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
+import java.security.Key
 import java.security.interfaces.RSAPrivateKey
 
 /**
@@ -48,8 +49,8 @@ class RsaesPkcsv15Aes128CbcHmacSha256Test {
                     "ngs4iLEFk6eALoUS4vIWEwcL4txw9LsWH_zKI-hwoReoP77cOdSL4AVcra" +
                     "Hawlkpyd2TWjE5evgbhWtOxnZee3cXJBkAi64Ik6jZxbvk-RR3pEhnCs",
             "dq" : "o_8V14SezckO6CNLKs_btPdFiO9_kC1DsuUTd2LAfIIVeMZ7jn1Gus_Ff" +
-                    "7 B7IVx3p5KuBGOVF8L-qifLb6nQnLysgHDh132NDioZkhH7mI7hPG-PYE_" +
-                    "odApKdnqECHWw0J-F0JWnUd6D2B_1TvF9mXA2Qx-iGYn8OVV1Bsmp6qU ",
+                    "7B7IVx3p5KuBGOVF8L-qifLb6nQnLysgHDh132NDioZkhH7mI7hPG-PYE_" +
+                    "odApKdnqECHWw0J-F0JWnUd6D2B_1TvF9mXA2Qx-iGYn8OVV1Bsmp6qU",
             "qi" : "eNho5yRBEBxhGBtQRww9QirZsB66TrfFReG_CcteI1aCneT0ELGhYlRlC" +
                     "tUkTRclIfuEPmNsNDPbLoLqqCVznFbvdB7x-Tl-m0l_eFTj2KiqwGqE9PZ" +
                     "B9nNTwMVvH3VRRSLWACvPnSiwP8N5Usy-WRXS-V7TbpxIhvepTfE0NNo"
@@ -58,7 +59,9 @@ class RsaesPkcsv15Aes128CbcHmacSha256Test {
     @Test
     void test() {
 
-        Jwk<RSAPrivateKey,?> jwk = Jwks.forValues(kek);
+        def jwk = Jwks.builder().putAll(kek).build();
+
+        println "JWK: " + jwk.toString()
 
         final Map<String, Object> claims = Collections.unmodifiableMap(Maps.of('my-claim', 'my-map').build());
         final String subject = "admin";

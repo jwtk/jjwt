@@ -11,13 +11,12 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Map;
 
-public class SymmetricJwkConverter extends AbstractJwkConverter<SecretKey> {
+public class SecretJwkConverter extends AbstractJwkConverter<SecretKey> {
 
-    static final String TYPE_VALUE = "oct";
-    static final String K = "k";
+    static final SecretJwkConverter DEFAULT_INSTANCE = new SecretJwkConverter();
 
-    public SymmetricJwkConverter() {
-        super(TYPE_VALUE);
+    public SecretJwkConverter() {
+        super(DefaultSecretJwk.TYPE_VALUE);
     }
 
     @Override
@@ -43,14 +42,14 @@ public class SymmetricJwkConverter extends AbstractJwkConverter<SecretKey> {
 
         assert k != null : "k value is mandatory.";
 
-        Map<String, String> m = newJwkMap();
-        m.put(K, k);
+        Map<String, Object> m = newJwkMap();
+        m.put(DefaultSecretJwk.K, k);
         return m;
     }
 
     @Override
     public SecretKey applyFrom(Map<String, ?> jwk) {
-        String encoded = getRequiredString(jwk, K);
+        String encoded = getRequiredString(jwk, DefaultSecretJwk.K);
         byte[] bytes;
         try {
             bytes = Decoders.BASE64URL.decode(encoded);
@@ -58,7 +57,7 @@ public class SymmetricJwkConverter extends AbstractJwkConverter<SecretKey> {
                 throw new IllegalArgumentException("JWK 'k' member does not have any encoded bytes. JWK: {" + jwk + "}");
             }
         } catch (Exception e) {
-            Map<String,?> msgJwk = sanitize(jwk, K);
+            Map<String,?> msgJwk = sanitize(jwk, DefaultSecretJwk.PRIVATE_NAMES);
             String msg = "Unable to Base64Url-decode 'oct' JWK 'k' member value. JWK: {" + msgJwk + "}";
             throw new MalformedKeyException(msg, e);
         }

@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwkBuilder<K extends Key, J extends Jwk<?, K>, T extends JwkBuilder<K, J, T>> {
+public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> {
 
     T put(String name, Object value);
 

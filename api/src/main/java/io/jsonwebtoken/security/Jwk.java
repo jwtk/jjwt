@@ -7,15 +7,13 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface Jwk<V, K extends Key> extends Identifiable, Map<String,V> {
-
-    String getType();
-
-    Set<String> getOperations();
+public interface Jwk<K extends Key> extends Identifiable, Map<String,Object> {
 
     String getAlgorithm();
 
-    String getId();
-    
+    Set<String> getOperations();
+
+    String getType();
+
     K toKey();
 }

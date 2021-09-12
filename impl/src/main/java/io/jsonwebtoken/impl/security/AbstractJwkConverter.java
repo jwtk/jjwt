@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,19 +21,19 @@ abstract class AbstractJwkConverter<K extends Key> implements JwkConverter<K> {
         throw new MalformedKeyException(msg);
     }
 
-    protected static Map<String,?> sanitize(Map<String,?> jwk, String sensitiveKey) {
+    protected static Map<String, ?> sanitize(final Map<String, ?> jwk, Collection<String> sensitiveKeys) {
         //remove any sensitive value that may exist so we don't include it in the exception message
         //(which may be printed to logs or the console):
-        Map<String,?> msgJwk = jwk;
-        if (jwk.containsKey(sensitiveKey)) {
-            Map<String,Object> sanitized = new LinkedHashMap<>(jwk);
-            sanitized.put(sensitiveKey, "<redacted>");
-            msgJwk = sanitized;
+        Map<String, Object> msgJwk = new LinkedHashMap<>(jwk);
+        for(String sensitiveKey : sensitiveKeys) {
+            if (jwk.containsKey(sensitiveKey)) {
+                msgJwk.put(sensitiveKey, AbstractJwk.REDACTED_VALUE);
+            }
         }
         return msgJwk;
     }
 
-    static String getRequiredString(Map<String, ?> m, String name) {
+    static String getRequiredString(Map<?, ?> m, String name) {
         Assert.notEmpty(m, "JWK map cannot be null or empty.");
         Object value = m.get(name);
         if (value == null) {
@@ -45,13 +46,13 @@ abstract class AbstractJwkConverter<K extends Key> implements JwkConverter<K> {
         return s;
     }
 
-    static BigInteger getRequiredBigInt(Map<String, ?> m, String name, boolean sensitive) {
+    static BigInteger getRequiredBigInt(Map<?, ?> m, String name, boolean sensitive) {
         String s = getRequiredString(m, name);
         try {
             byte[] bytes = Decoders.BASE64URL.decode(s);
             return new BigInteger(1, bytes);
         } catch (Exception e) {
-            String val = sensitive ? "<redacted>" : s;
+            String val = sensitive ? AbstractJwk.REDACTED_VALUE : s;
             String msg = "Unable to decode JWK member '" + name + "' to BigInteger from value: " + val;
             throw new MalformedKeyException(msg, e);
         }
@@ -108,10 +109,9 @@ abstract class AbstractJwkConverter<K extends Key> implements JwkConverter<K> {
         }
     }
 
-    Map<String,String> newJwkMap() {
-        Map<String,String> m = new HashMap<>();
-        m.put("kty", getId());
+    Map<String, Object> newJwkMap() {
+        Map<String, Object> m = new HashMap<>();
+        m.put(AbstractJwk.TYPE, getId());
         return m;
     }
-
 }

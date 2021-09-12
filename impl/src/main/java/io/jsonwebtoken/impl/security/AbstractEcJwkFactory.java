@@ -1,16 +1,14 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -18,19 +16,12 @@ import java.security.spec.ECFieldFp;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<K> {
-
-    static final String TYPE_VALUE = "EC";
-    static final String CURVE_ID = "crv";
-    static final String X = "x";
-    static final String Y = "y";
-    static final String D = "d";
+abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> extends AbstractFamilyJwkFactory<K, J> {
 
     private static final BigInteger TWO = new BigInteger("2");
     private static final BigInteger THREE = new BigInteger("3");
@@ -66,7 +57,7 @@ public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<
         }
     }
 
-    private static ECParameterSpec getCurveByJwaId(String jwaCurveId) {
+    protected static ECParameterSpec getCurveByJwaId(String jwaCurveId) {
         ECParameterSpec spec = EC_SPECS_BY_JWA_ID.get(jwaCurveId);
         if (spec == null) {
             String msg = "Unrecognized JWA curve id '" + jwaCurveId + "'";
@@ -75,7 +66,7 @@ public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<
         return spec;
     }
 
-    private static String getJwaIdByCurve(EllipticCurve curve) {
+    protected static String getJwaIdByCurve(EllipticCurve curve) {
         String jwaCurveId = JWA_IDS_BY_CURVE.get(curve);
         if (jwaCurveId == null) {
             String msg = "The specified ECKey curve does not match a JWA standard curve id.";
@@ -110,6 +101,7 @@ public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<
      * <p>
      * <code>y<sup>2</sup> = x<sup>3</sup> + ax + b</code>
      * </p>
+     *
      * @param curve the Elliptic Curve to check
      * @param point a point that may or may not be defined on the specified elliptic curve
      * @return {@code true} if a given elliptic curve contains the specified {@code point}, {@code false} otherwise.
@@ -126,29 +118,36 @@ public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<
         // to the equation to account for the restricted field.  For a nice overview of the math behind EC curves and
         // their application in cryptography, see
         // https://web.northeastern.edu/dummit/docs/cryptography_5_elliptic_curves_in_cryptography.pdf
-        final BigInteger p = ((ECFieldFp)curve.getField()).getP();
+        final BigInteger p = ((ECFieldFp) curve.getField()).getP();
         final BigInteger lhs = y.pow(2).mod(p); //mod p to account for field prime
         final BigInteger rhs = x.pow(3).add(a.multiply(x)).add(b).mod(p); //mod p to account for field prime
 
         return lhs.equals(rhs);
     }
 
-    static ECPublicKey derivePublic(ECPrivateKey key) {
-        try {
-            final ECParameterSpec params = key.getParams();
-            final ECPoint w = multiply(params.getGenerator(), key.getS(), params);
-            final KeyFactory kg = KeyFactory.getInstance("EC");
-            return (ECPublicKey) kg.generatePublic(new ECPublicKeySpec(w, params));
-        } catch (Exception e) {
-            throw new UnsupportedKeyException("Unable to derive ECPublicKey from specified ECPrivateKey: " + e.getMessage(), e);
-        }
+    protected ECPublicKey derivePublic(final JwkContext<ECPrivateKey> ctx) {
+        final ECPrivateKey key = ctx.getKey();
+        final ECParameterSpec params = key.getParams();
+        final ECPoint w = multiply(params.getGenerator(), key.getS(), params);
+        final ECPublicKeySpec spec = new ECPublicKeySpec(w, params);
+        return generateKey(ctx, ECPublicKey.class, new CheckedFunction<KeyFactory, ECPublicKey>() {
+            @Override
+            public ECPublicKey apply(KeyFactory kf) {
+                try {
+                    return (ECPublicKey) kf.generatePublic(spec);
+                } catch (Exception e) {
+                    String msg = "Unable to derive ECPublicKey from ECPrivateKey {" + ctx + "}.";
+                    throw new UnsupportedKeyException(msg);
+                }
+            }
+        });
     }
 
     /**
      * Multiply a point {@code p} by scalar {@code s} on the curve identified by {@code spec}.
      *
-     * @param p the Elliptic Curve point to multiply
-     * @param s the scalar value to multiply
+     * @param p    the Elliptic Curve point to multiply
+     * @param s    the scalar value to multiply
      * @param spec the domain parameters that identify the Elliptic Curve containing point {@code p}.
      */
     private static ECPoint multiply(ECPoint p, BigInteger s, ECParameterSpec spec) {
@@ -215,111 +214,7 @@ public class EcJwkConverter<K extends Key & ECKey> extends AbstractJwkConverter<
         return new ECPoint(x, y);
     }
 
-    EcJwkConverter() {
-        super(TYPE_VALUE);
-    }
-
-    @Override
-    public boolean supports(Key key) {
-        return key instanceof ECPublicKey || key instanceof ECPrivateKey;
-    }
-
-    @Override
-    public K applyFrom(Map<String, ?> jwk) {
-        Assert.notEmpty(jwk, "JWK map argument cannot be null or empty.");
-        if (jwk.containsKey(D)) {
-            return (K) toPrivateKey(jwk);
-        }
-        return (K) toPublicKey(jwk);
-    }
-
-    @Override
-    public Map<String, ?> applyTo(K key) {
-        if (key instanceof ECPrivateKey) {
-            return toPrivateJwk((ECPrivateKey) key);
-        }
-        Assert.isInstanceOf(ECPublicKey.class, key, "Key argument must be an ECPublicKey or ECPrivateKey instance.");
-        return toPublicJwk((ECPublicKey)key);
-    }
-
-    private PublicKey toPublicKey(Map<String, ?> jwk) {
-        String curveId = getRequiredString(jwk, CURVE_ID);
-        BigInteger x = getRequiredBigInt(jwk, X, false);
-        BigInteger y = getRequiredBigInt(jwk, Y, false);
-
-        ECParameterSpec spec = getCurveByJwaId(curveId);
-        ECPoint point = new ECPoint(x, y);
-
-        if (!contains(spec.getCurve(), point)) {
-            Map<String,?> msgJwk = sanitize(jwk, D);
-            String msg = "EC JWK x,y coordinates do not match a point on the '" + curveId + "' elliptic curve. This " +
-                "could be due simply to an incorrectly-created JWK or possibly an attempted Invalid Curve Attack " +
-                "(see https://safecurves.cr.yp.to/twist.html for more information). JWK: {" + msgJwk + "}.";
-            throw new InvalidKeyException(msg);
-        }
-
-        ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, spec);
-
-        try {
-            KeyFactory kf = getKeyFactory();
-            return kf.generatePublic(pubSpec);
-        } catch (Exception e) {
-            Map<String,?> msgJwk = sanitize(jwk, D);
-            String msg = "Unable to create ECPublicKey from JWK {" + msgJwk + "}: " + e.getMessage();
-            throw new InvalidKeyException(msg, e);
-        }
-    }
-
-    public PrivateKey toPrivateKey(Map<String, ?> jwk) {
-        String curveId = getRequiredString(jwk, CURVE_ID);
-        BigInteger d = getRequiredBigInt(jwk, D, true);
-
-        // We don't actually need the public x,y point coordinates for JVM lookup, but the
-        // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
-        // requires them to be present and valid for the private key as well, so we assert that here:
-        toPublicKey(jwk);
-
-        ECParameterSpec spec = getCurveByJwaId(curveId);
-        ECPrivateKeySpec privateSpec = new ECPrivateKeySpec(d, spec);
-
-        try {
-            KeyFactory kf = getKeyFactory();
-            return kf.generatePrivate(privateSpec);
-        } catch (Exception e) {
-            Map<String,?> msgJwk = sanitize(jwk, D);
-            String msg = "Unable to create ECPrivateKey from JWK {" + msgJwk + "}: " + e.getMessage();
-            throw new InvalidKeyException(msg, e);
-        }
-    }
-
-    public Map<String, String> toPublicJwk(ECPublicKey key) {
-
-        Map<String, String> m = newJwkMap();
-
-        ECParameterSpec spec = key.getParams();
-        EllipticCurve curve = spec.getCurve();
-        ECPoint point = key.getW();
-
-        String curveId = getJwaIdByCurve(curve);
-        m.put(CURVE_ID, curveId);
-
-        int fieldSize = curve.getField().getFieldSize();
-        String x = toOctetString(fieldSize, point.getAffineX());
-        m.put(X, x);
-
-        String y = toOctetString(fieldSize, point.getAffineY());
-        m.put(Y, y);
-
-        return m;
-    }
-
-    public Map<String, ?> toPrivateJwk(ECPrivateKey key) {
-        ECPublicKey publicKey = derivePublic(key);
-        Map<String, String> publicJwk = toPublicJwk(publicKey);
-        Map<String, String> m = new LinkedHashMap<>(publicJwk);
-        int fieldSize = key.getParams().getCurve().getField().getFieldSize();
-        String d = toOctetString(fieldSize, key.getS());
-        m.put(D, d);
-        return m;
+    AbstractEcJwkFactory(Class<K> keyType) {
+        super(DefaultEcPublicJwk.TYPE_VALUE, keyType);
     }
 }

@@ -5,9 +5,9 @@ import java.security.Key;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-public interface AsymmetricJwk<V, K extends Key> extends Jwk<V, K> {
+public interface AsymmetricJwk<K extends Key> extends Jwk<K> {
 
-    String getUse();
+    String getPublicKeyUse();
 
     URI getX509Url();
 

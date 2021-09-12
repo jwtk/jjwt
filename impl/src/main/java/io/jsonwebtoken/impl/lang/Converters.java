@@ -28,8 +28,4 @@ public final class Converters {
     public static <T> Converter<T, Object> forEncoded(Class<T> elementType, Converter<T, String> elementConverter) {
         return new EncodedObjectConverter<T>(elementType, elementConverter);
     }
-
-    public static <T> Converter<List<T>, Object> forEncodedList(Class<T> elementType, Converter<T, String> elementConverter) {
-        return forList(forEncoded(elementType, elementConverter));
-    }
 }

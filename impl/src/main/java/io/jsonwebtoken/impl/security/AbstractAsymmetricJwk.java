@@ -6,49 +6,42 @@ import java.net.URI;
 import java.security.Key;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-public abstract class AbstractAsymmetricJwk<V, K extends Key> extends DefaultJwk<K> implements AsymmetricJwk<Object, K> {
+abstract class AbstractAsymmetricJwk<K extends Key> extends AbstractJwk<K> implements AsymmetricJwk<K> {
 
-    private final String use;
-    private final URI x509Url;
-    private final List<X509Certificate> certChain;
-    private final byte[] x509Sha1Thumbprint;
-    private final byte[] x509Sha256Thumbprint;
+    static final String PUBLIC_KEY_USE = "use";
+    static final String X509_URL = "x5u";
+    static final String X509_CERT_CHAIN = "x5c";
+    static final String X509_SHA1_THUMBPRINT = "x5t";
+    static final String X509_SHA256_THUMBPRINT = "x5t#S256";
 
-    AbstractAsymmetricJwk(String type, String use, Set<String> operations, String algorithm, String id, URI x509Url, List<X509Certificate> certChain, byte[] x509Sha1Thumbprint, byte[] x509Sha256Thumbprint, K key, Map<String, ?> values) {
-        super(type, operations, algorithm, id, key, values);
-        this.use = use;
-        this.x509Url = x509Url;
-        this.certChain = certChain;
-        this.x509Sha1Thumbprint = x509Sha1Thumbprint;
-        this.x509Sha256Thumbprint = x509Sha256Thumbprint;
+    AbstractAsymmetricJwk(JwkContext<K> ctx) {
+        super(ctx);
     }
 
     @Override
-    public String getUse() {
-        return this.use;
+    public String getPublicKeyUse() {
+        return this.context.getPublicKeyUse();
     }
 
     @Override
     public URI getX509Url() {
-        return this.x509Url;
+        return this.context.getX509Url();
     }
 
     @Override
     public List<X509Certificate> getX509CertificateChain() {
-        return this.certChain;
+        return this.context.getX509CertificateChain();
     }
 
     @Override
     public byte[] getX509CertificateSha1Thumbprint() {
-        return this.x509Sha1Thumbprint;
+        return this.context.getX509CertificateSha1Thumbprint();
     }
 
     @Override
     public byte[] getX509CertificateSha256Thumbprint() {
-        return this.x509Sha256Thumbprint;
+        return this.context.getX509CertificateSha256Thumbprint();
     }
 
 }

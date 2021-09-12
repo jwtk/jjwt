@@ -1,10 +1,11 @@
 package io.jsonwebtoken.security;
 
 import java.net.URI;
+import java.security.Key;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-public interface AsymmetricJwkMutator<T extends AsymmetricJwkMutator<T>> {
+public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>, T extends AsymmetricJwkBuilder<K, J, T>> extends JwkBuilder<K, J, T> {
 
     T setPublicKeyUse(String use);
 

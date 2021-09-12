@@ -60,6 +60,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private Key signatureVerificationKey;
     private Key decryptionKey;
     private KeyResolver keyResolver;
+    @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver;
 
     private CompressionCodecResolver compressionCodecResolver;
@@ -184,6 +185,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
+    @SuppressWarnings("deprecation") //TODO: remove for 1.0
     @Override
     public JwtParserBuilder setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
         Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");

@@ -57,7 +57,7 @@ class CollectionConverter<T, C extends Collection<T>> implements Converter<C, Ob
             return null;
         }
         Collection<?> c;
-        if (value.getClass().isArray() && !value.getClass().getComponentType().isArray()) {
+        if (value.getClass().isArray() && !value.getClass().getComponentType().isPrimitive()) {
             c = Collections.arrayToList(value);
         } else if (value instanceof Collection) {
             c = (Collection<?>) value;
