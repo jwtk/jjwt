@@ -12,19 +12,20 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAKey;
+import java.security.spec.AlgorithmParameterSpec;
 
-public class Rsa15KeyAlgorithm<EK extends RSAKey & PublicKey, DK extends RSAKey & PrivateKey> extends CryptoAlgorithm implements EncryptedKeyAlgorithm<EK, DK> {
+public class DefaultRsaKeyAlgorithm<EK extends RSAKey & PublicKey, DK extends RSAKey & PrivateKey> extends CryptoAlgorithm
+    implements EncryptedKeyAlgorithm<EK, DK> {
 
-    private static final String ID = "RSA1_5";
-    private static final String TRANSFORMATION = "RSA/ECB/PKCS1Padding";
+    private final AlgorithmParameterSpec SPEC; //can be null
 
-    public Rsa15KeyAlgorithm() {
-        super(ID, TRANSFORMATION);
+    public DefaultRsaKeyAlgorithm(String id, String jcaTransformationString) {
+        this(id, jcaTransformationString, null);
     }
 
-    @Override
-    public String getId() {
-        return ID;
+    public DefaultRsaKeyAlgorithm(String id, String jcaTransformationString, AlgorithmParameterSpec spec) {
+        super(id, jcaTransformationString);
+        this.SPEC = spec; //can be null
     }
 
     @Override
@@ -36,7 +37,11 @@ public class Rsa15KeyAlgorithm<EK extends RSAKey & PublicKey, DK extends RSAKey 
         byte[] ciphertext = execute(request, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
             @Override
             public byte[] doWithInstance(Cipher cipher) throws Exception {
-                cipher.init(Cipher.ENCRYPT_MODE, kek, ensureSecureRandom(request));
+                if (SPEC == null) {
+                    cipher.init(Cipher.WRAP_MODE, kek, ensureSecureRandom(request));
+                } else {
+                    cipher.init(Cipher.WRAP_MODE, kek, SPEC, ensureSecureRandom(request));
+                }
                 return cipher.wrap(cek);
             }
         });
@@ -53,7 +58,11 @@ public class Rsa15KeyAlgorithm<EK extends RSAKey & PublicKey, DK extends RSAKey 
         return execute(request, Cipher.class, new InstanceCallback<Cipher, SecretKey>() {
             @Override
             public SecretKey doWithInstance(Cipher cipher) throws Exception {
-                cipher.init(Cipher.UNWRAP_MODE, kek);
+                if (SPEC == null) {
+                    cipher.init(Cipher.UNWRAP_MODE, kek);
+                } else {
+                    cipher.init(Cipher.UNWRAP_MODE, kek, SPEC);
+                }
                 Key key = cipher.unwrap(cekBytes, "AES", Cipher.SECRET_KEY);
                 Assert.state(key instanceof SecretKey, "Cipher unwrap must return a SecretKey instance.");
                 return (SecretKey) key;

@@ -12,7 +12,6 @@ import io.jsonwebtoken.security.RsaPublicJwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.interfaces.RSAMultiPrimePrivateCrtKey;
@@ -95,9 +94,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         // The [JWA Spec](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1)
         // requires public values to be present in private JWKs, so add them:
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>();
-        pubCtx.setKey(rsaPublicKey);
-        RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwkFromKey(pubCtx);
+        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, rsaPublicKey);
+        RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
 
         ctx.put(DefaultRsaPrivateJwk.PRIVATE_EXPONENT, encode(key.getPrivateExponent()));
@@ -133,7 +131,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         //The [JWA Spec, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(ctx, DefaultRsaPrivateJwk.PRIVATE_NAMES);
+        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, ctx);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwkFromValues(pubCtx);
         RSAPublicKey pubKey = pubJwk.toKey();
         final BigInteger modulus = pubKey.getModulus();
@@ -155,8 +153,6 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         }
 
         KeySpec spec;
-
-
 
         if (containsOptional) { //if any one optional field exists, they are all required per JWA Section 6.3.2:
             BigInteger firstPrime = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.FIRST_PRIME, true);
@@ -222,9 +218,9 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                 throw new MalformedKeyException("RSA JWK 'oth' Other Prime Info element map cannot be empty.");
             }
 
-            // Need to do add the values to a Context instance to satisfy the API contract of the getRequired* methods
-            // below.  It's less than ideal, but it works:
-            JwkContext<?> ctx = new DefaultJwkContext<>();
+            // Need to add the values to a Context instance to satisfy the API contract of the getRequired* methods
+            // called below.  It's less than ideal, but it works:
+            JwkContext<?> ctx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES);
             for (Map.Entry<?, ?> entry : m.entrySet()) {
                 String name = String.valueOf(entry.getKey());
                 ctx.put(name, entry.getValue());

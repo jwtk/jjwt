@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security
 
-
+import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.EncryptionAlgorithms
 import org.junit.Test
 
@@ -10,10 +10,12 @@ import javax.crypto.spec.SecretKeySpec
 import static org.junit.Assert.assertArrayEquals
 
 /**
- * Test case defined in https://tools.ietf.org/html/rfc7518#appendix-B.1
+ * Tests successful encryption and decryption using 'AES_128_CBC_HMAC_SHA_256' as defined in
+ * <a href="https://tools.ietf.org/html/rfc7518#appendix-B.1">RFC 7518, Appendix B.1</a>
+ *
  * @since JJWT_RELEASE_VERSION
  */
-class Aes128CbcHmacSha256Test {
+class RFC7518AppendixB1Test {
 
     final byte[] K =
             [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -88,6 +90,27 @@ class Aes128CbcHmacSha256Test {
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
 
         assertArrayEquals(P, decryptionResult)
+
+        String encryptedCek = 'UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN94nHPoltGRhWhw7Zx0-kFm' +
+                '1NJn8LE9XShH59_i8J0PH5ZZyNfGy2xGdULU7sHNF6Gp2vPLgNZ__deLKxGHZ7Pc' +
+                'HALUzoOegEI-8E66jX2E4zyJKx-YxzZIItRzC5hlRirb6Y5Cl_p-ko3YvkkysZIF' +
+                'NPccxRU7qve1WYPxqbb2Yw8kZqa2rMWI5ng8OtvzlV7elprCbuPhcCdZ6XDP0_F8' +
+                'rkXds2vE4X-ncOIM8hAYHHi29NX0mcKiRaD0-D-ljQTP-cFPgwCp6X-nZZd9OHBv' +
+                '-B3oWh2TbqmScqXMR4gp_A' as String
+
+        ciphertext = Decoders.BASE64URL.decode('KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY')
+        byte[] aad = Decoders.BASE64URL.decode('eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0')
+        tag = Decoders.BASE64URL.decode('9hH0vgRfYgPnAHOd8stkvw')
+        iv = Decoders.BASE64URL.decode('AxY8DCtDaGlsbGljb3RoZQ')
+        SecretKey key = new SecretKeySpec([4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
+                                           206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
+                                           44, 207] as byte[], "AES")
+
+        dreq = new DefaultAeadResult(null, null, ciphertext, key, aad, tag, iv)
+
+        decryptionResult = alg.decrypt(dreq).getPayload()
+
+        println decryptionResult
     }
 
 }

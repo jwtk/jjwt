@@ -9,19 +9,19 @@ import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest;
 import io.jsonwebtoken.io.SerializationException;
-import io.jsonwebtoken.security.EncryptedKeyAlgorithm;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.KeyRequest;
-import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
+import io.jsonwebtoken.security.AeadResult;
+import io.jsonwebtoken.security.EncryptedKeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
+import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.AeadResult;
+import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
@@ -149,29 +149,30 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
         jweHeader.putAll(keyResult.getHeaderParams());
-        jweHeader.setEncryptionAlgorithm(enc.getId());
         jweHeader.setAlgorithm(alg.getId());
+        jweHeader.setEncryptionAlgorithm(enc.getId());
 
         byte[] headerBytes = this.headerSerializer.apply(jweHeader);
+        final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
+        byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
-        SymmetricAeadRequest encRequest = new DefaultSymmetricAeadRequest(provider, secureRandom, plaintext, cek, headerBytes);
+        SymmetricAeadRequest encRequest = new DefaultSymmetricAeadRequest(provider, secureRandom, plaintext, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
         byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");
         byte[] tag = Assert.notEmpty(encResult.getAuthenticationTag(), "Encryption result must have a non-empty authentication tag.");
 
-        String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
-        String base64UrlEncodedEncryptedKey = base64UrlEncoder.encode(encryptedCek);
+        String base64UrlEncodedEncryptedCek = base64UrlEncoder.encode(encryptedCek);
         String base64UrlEncodedIv = base64UrlEncoder.encode(iv);
         String base64UrlEncodedCiphertext = base64UrlEncoder.encode(ciphertext);
-        String base64UrlEncodedAad = base64UrlEncoder.encode(tag);
+        String base64UrlEncodedTag = base64UrlEncoder.encode(tag);
 
         return
             base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR +
-            base64UrlEncodedEncryptedKey + JwtParser.SEPARATOR_CHAR +
+            base64UrlEncodedEncryptedCek + JwtParser.SEPARATOR_CHAR +
             base64UrlEncodedIv + JwtParser.SEPARATOR_CHAR +
             base64UrlEncodedCiphertext + JwtParser.SEPARATOR_CHAR +
-            base64UrlEncodedAad;
+            base64UrlEncodedTag;
     }
 }

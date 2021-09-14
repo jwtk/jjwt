@@ -40,8 +40,8 @@ import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.LegacyServices;
-import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
+import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
 import io.jsonwebtoken.impl.security.DelegatingSigningKeyResolver;
 import io.jsonwebtoken.impl.security.StaticKeyResolver;
@@ -346,6 +346,8 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(msg);
             }
 
+            final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
+
             base64Url = tokenizedJwe.getDigest();
             if (Strings.hasText(base64Url)) {
                 tag = base64UrlDecode(base64Url, "JWE AAD Authentication Tag");
@@ -373,7 +375,7 @@ public class DefaultJwtParser implements JwtParser {
             final SecretKey cek = keyAlg.getDecryptionKey(request);
 
             SymmetricAeadDecryptionRequest decryptRequest =
-                new DefaultAeadResult(this.provider, null, bytes, cek, headerBytes, tag, iv);
+                new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
             PayloadSupplier<byte[]> result = encAlg.decrypt(decryptRequest);
             bytes = result.getPayload();
         }

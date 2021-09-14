@@ -4,6 +4,8 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,21 +20,22 @@ public final class KeyAlgorithms {
     private KeyAlgorithms() {
     }
 
-    private static final String AESWRAP = "io.jsonwebtoken.impl.security.AesWrapKeyAlgorithm";
-    private static final String AESGCMWRAP = "io.jsonwebtoken.impl.security.AesGcmKeyAlgorithm";
-    private static final Class<?>[] AESWRAP_ARGS = new Class[]{int.class};
+    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeyAlgorithms";
 
-    private static EncryptedKeyAlgorithm<SecretKey, SecretKey> aeswrap(String fqcn, int keyLength) {
-        return Classes.newInstance(fqcn, AESWRAP_ARGS, keyLength);
+    private static <T> T lookup(String methodName) {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, methodName, null, (Object[]) null);
     }
 
-    public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Classes.newInstance("io.jsonwebtoken.impl.security.DirectKeyAlgorithm");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128KW = aeswrap(AESWRAP, 128);
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192KW = aeswrap(AESWRAP, 192);
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256KW = aeswrap(AESWRAP, 256);
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128GCMKW = aeswrap(AESGCMWRAP, 128);
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192GCMKW = aeswrap(AESGCMWRAP, 192);
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256GCMKW = aeswrap(AESGCMWRAP, 256);
+    public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = lookup("direct");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128KW = lookup("a128kw");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192KW = lookup("a192kw");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256KW = lookup("a256kw");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128GCMKW = lookup("a128gcmkw");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192GCMKW = lookup("a192gcmkw");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256GCMKW = lookup("a256gcmkw");
+    public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA1_5 = lookup("rsa1_5");
+    public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA_OAEP = lookup("rsaOaep");
+    public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA_OAEP_256 = lookup("rsaOaep256");
 
     private static Map<String,KeyAlgorithm<?,?>> toMap(KeyAlgorithm<?,?>... algs) {
         Map<String, KeyAlgorithm<?,?>> m = new LinkedHashMap<>();
@@ -43,7 +46,7 @@ public final class KeyAlgorithms {
     }
 
     private static final Map<String,KeyAlgorithm<?,?>> STANDARD_ALGORITHMS = toMap(
-        DIRECT, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
+        DIRECT, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW, RSA1_5, RSA_OAEP, RSA_OAEP_256
     );
 
     public static Collection<? extends KeyAlgorithm<?,?>> values() {

@@ -90,7 +90,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     static class DefaultSecretJwkBuilder extends AbstractJwkBuilder<SecretKey, SecretJwk, SecretJwkBuilder>
         implements SecretJwkBuilder {
         public DefaultSecretJwkBuilder(JwkContext<?> ctx, SecretKey key) {
-            super(new DefaultJwkContext<>(ctx, key, DefaultSecretJwk.PRIVATE_NAMES));
+            super(new DefaultJwkContext<>(DefaultSecretJwk.PRIVATE_NAMES, ctx, key));
         }
     }
 }

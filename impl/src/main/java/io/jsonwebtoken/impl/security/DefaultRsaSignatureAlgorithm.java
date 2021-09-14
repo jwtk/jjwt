@@ -28,7 +28,6 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
 
     private static AlgorithmParameterSpec pssParamFromSaltBitLength(int saltBitLength) {
         MGF1ParameterSpec ps = new MGF1ParameterSpec("SHA-" + saltBitLength);
-        //MGF1ParameterSpec ps = MGF1ParameterSpec.SHA256;
         int saltByteLength = saltBitLength / Byte.SIZE;
         return new PSSParameterSpec(ps.getDigestAlgorithm(), "MGF1", ps, saltByteLength, 1);
     }

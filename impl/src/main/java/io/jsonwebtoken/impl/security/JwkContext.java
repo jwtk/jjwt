@@ -34,41 +34,41 @@ public interface JwkContext<K extends Key> extends Identifiable {
 
     Object put(String name, Object value);
 
-    void putAll(Map<? extends String, ?> m);
+    JwkContext<K> putAll(Map<? extends String, ?> m);
 
-    void setId(String id);
+    JwkContext<K> setId(String id);
 
     String getType();
 
-    void setType(String type);
+    JwkContext<K> setType(String type);
 
     Set<String> getOperations();
 
-    void setOperations(Set<String> operations);
+    JwkContext<K> setOperations(Set<String> operations);
 
     String getAlgorithm();
 
-    void setAlgorithm(String algorithm);
+    JwkContext<K> setAlgorithm(String algorithm);
 
     String getPublicKeyUse();
 
-    void setPublicKeyUse(String use);
+    JwkContext<K> setPublicKeyUse(String use);
 
     URI getX509Url();
 
-    void setX509Url(URI url);
+    JwkContext<K> setX509Url(URI url);
 
     List<X509Certificate> getX509CertificateChain();
 
-    void setX509CertificateChain(List<X509Certificate> x5c);
+    JwkContext<K> setX509CertificateChain(List<X509Certificate> x5c);
 
     byte[] getX509CertificateSha1Thumbprint();
 
-    void setX509CertificateSha1Thumbprint(byte[] x5t);
+    JwkContext<K> setX509CertificateSha1Thumbprint(byte[] x5t);
 
     byte[] getX509CertificateSha256Thumbprint();
 
-    void setX509CertificateSha256Thumbprint(byte[] x5ts256);
+    JwkContext<K> setX509CertificateSha256Thumbprint(byte[] x5ts256);
 
     K getKey();
 
@@ -76,11 +76,11 @@ public interface JwkContext<K extends Key> extends Identifiable {
 
     PublicKey getPublicKey();
 
-    void setPublicKey(PublicKey publicKey);
+    JwkContext<K> setPublicKey(PublicKey publicKey);
 
     Set<String> getPrivateMemberNames();
 
     Provider getProvider();
 
-    void setProvider(Provider provider);
+    JwkContext<K> setProvider(Provider provider);
 }

@@ -21,6 +21,7 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +37,16 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     private static final Converter<URI, Object> URI_CONVERTER =
         Converters.forEncoded(URI.class, new UriStringConverter());
 
+    private static final Set<String> DEFAULT_PRIVATE_NAMES;
     private static final Map<String, Canonicalizer<?>> SETTERS;
 
     static {
+        Set<String> set = new LinkedHashSet<>();
+        set.addAll(DefaultRsaPrivateJwk.PRIVATE_NAMES);
+        set.addAll(DefaultEcPrivateJwk.PRIVATE_NAMES);
+        set.addAll(DefaultSecretJwk.PRIVATE_NAMES);
+        DEFAULT_PRIVATE_NAMES = java.util.Collections.unmodifiableSet(set);
+
         @SuppressWarnings("RedundantTypeArguments")
         List<Canonicalizer<?>> fns = Collections.<Canonicalizer<?>>of(
             Canonicalizer.forKey(AbstractJwk.ALGORITHM, "Algorithm"),
@@ -55,7 +63,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         for (Canonicalizer<?> fn : fns) {
             s.put(fn.getId(), fn);
         }
-        SETTERS = s;
+        SETTERS = java.util.Collections.unmodifiableMap(s);
     }
 
     private final Map<String, Object> values;
@@ -67,44 +75,49 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     private Provider provider;
 
     public DefaultJwkContext() {
+        // For the default constructor case, we don't know how it will be used or what values will be populated,
+        // so we can't know ahead of time what the sensitive data is.  As such, for security reasons, we assume all
+        // the known private names for all supported algorithms in case it is used for any of them:
+        this(DEFAULT_PRIVATE_NAMES);
+    }
+
+    public DefaultJwkContext(Set<String> privateMemberNames) {
+        this.privateMemberNames = Assert.notEmpty(privateMemberNames, "privateMemberNames cannot be null or empty.");
         this.values = new LinkedHashMap<>();
         this.canonicalValues = new LinkedHashMap<>();
         this.redactedValues = new LinkedHashMap<>();
-        this.privateMemberNames = Collections.emptySet();
     }
 
-//    public DefaultJwkContext(JwkContext<?> other) {
-//        //noinspection unchecked
-//        this(other,
-//            (Assert.isInstanceOf(DefaultJwkContext.class, other, "JwkContext must be a DefaultJwkContext instance.")).privateMemberNames);
-//    }
+    public DefaultJwkContext(Set<String> privateMemberNames, K key) {
+        this(privateMemberNames);
+        this.key = Assert.notNull(key, "Key cannot be null.");
+    }
 
-    public DefaultJwkContext(JwkContext<?> other, Set<String> privateMemberNames) {
+    public DefaultJwkContext(Set<String> privateMemberNames, JwkContext<?> other) {
+        this(privateMemberNames, other, true);
+    }
+
+    public DefaultJwkContext(Set<String> privateMemberNames, JwkContext<?> other, K key) {
+        //if the key is null or a PublicKey, we don't want to redact - we want to fully remove the items that are
+        //private names (public JWKs should never contain any private key fields, even if redacted):
+        this(privateMemberNames, other, (key == null || key instanceof PublicKey));
+        this.key = Assert.notNull(key, "Key cannot be null.");
+    }
+
+    private DefaultJwkContext(Set<String> privateMemberNames, JwkContext<?> other, boolean removePrivate) {
+        this.privateMemberNames = Assert.notEmpty(privateMemberNames, "privateMemberNames cannot be null or empty.");
         Assert.notNull(other, "JwkContext cannot be null.");
         Assert.isInstanceOf(DefaultJwkContext.class, other, "JwkContext must be a DefaultJwkContext instance.");
         DefaultJwkContext<?> src = (DefaultJwkContext<?>) other;
-        this.privateMemberNames = Assert.notEmpty(privateMemberNames, "privateMemberNames cannot be null or empty.");
         this.provider = other.getProvider();
         this.values = new LinkedHashMap<>(src.values);
-        this.canonicalValues = new LinkedHashMap<>(src.values);
-        this.redactedValues = new LinkedHashMap<>(this.values);
-
-        //if the key is a PublicKey, we don't even want to redact - we want to fully remove the items that are
-        //private names (public JWKs should never contain any private key fields, even if redacted):
-        final Key key = other.getKey();
-        final boolean remove = (key == null || key instanceof PublicKey);
-        for (String name : this.privateMemberNames) {
-            if (remove) {
+        this.canonicalValues = new LinkedHashMap<>(src.canonicalValues);
+        this.redactedValues = new LinkedHashMap<>(src.redactedValues);
+        if (removePrivate) {
+            for (String name : this.privateMemberNames) {
                 remove(name);
-            } else if (this.redactedValues.containsKey(name)) { //otherwise ensure redacted for toString calls:
-                this.redactedValues.put(name, AbstractJwk.REDACTED_VALUE);
             }
         }
-    }
-
-    public DefaultJwkContext(JwkContext<?> other, K key, Set<String> privateMemberNames) {
-        this(other, privateMemberNames);
-        this.key = Assert.notNull(key, "Key cannot be null.");
     }
 
     protected Object nullSafePut(String name, Object value) {
@@ -140,11 +153,12 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void putAll(Map<? extends String, ?> m) {
+    public JwkContext<K> putAll(Map<? extends String, ?> m) {
         Assert.notEmpty(m, "JWK values cannot be null or empty.");
         for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
+        return this;
     }
 
     private Object remove(String key) {
@@ -204,8 +218,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setAlgorithm(String algorithm) {
+    public JwkContext<K> setAlgorithm(String algorithm) {
         put(AbstractJwk.ALGORITHM, algorithm);
+        return this;
     }
 
     @Override
@@ -214,8 +229,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setId(String id) {
+    public JwkContext<K> setId(String id) {
         put(AbstractJwk.ID, id);
+        return this;
     }
 
     @Override
@@ -225,8 +241,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setOperations(Set<String> ops) {
+    public JwkContext<K> setOperations(Set<String> ops) {
         put(AbstractJwk.OPERATIONS, ops);
+        return this;
     }
 
     @Override
@@ -235,8 +252,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setType(String type) {
+    public JwkContext<K> setType(String type) {
         put(AbstractJwk.TYPE, type);
+        return this;
     }
 
     @Override
@@ -245,8 +263,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setPublicKeyUse(String use) {
+    public JwkContext<K> setPublicKeyUse(String use) {
         put(AbstractAsymmetricJwk.PUBLIC_KEY_USE, use);
+        return this;
     }
 
     @Override
@@ -256,8 +275,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setX509CertificateChain(List<X509Certificate> x5c) {
+    public JwkContext<K> setX509CertificateChain(List<X509Certificate> x5c) {
         put(AbstractAsymmetricJwk.X509_CERT_CHAIN, x5c);
+        return this;
     }
 
     @Override
@@ -266,8 +286,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setX509CertificateSha1Thumbprint(byte[] x5t) {
+    public JwkContext<K> setX509CertificateSha1Thumbprint(byte[] x5t) {
         put(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT, x5t);
+        return this;
     }
 
     @Override
@@ -276,8 +297,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setX509CertificateSha256Thumbprint(byte[] x5ts256) {
+    public JwkContext<K> setX509CertificateSha256Thumbprint(byte[] x5ts256) {
         put(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT, x5ts256);
+        return this;
     }
 
     @Override
@@ -286,8 +308,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setX509Url(URI url) {
+    public JwkContext<K> setX509Url(URI url) {
         put(AbstractAsymmetricJwk.X509_URL, url);
+        return this;
     }
 
     @Override
@@ -307,8 +330,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setPublicKey(PublicKey publicKey) {
+    public JwkContext<K> setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
+        return this;
     }
 
     @Override
@@ -317,8 +341,9 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public void setProvider(Provider provider) {
+    public JwkContext<K> setProvider(Provider provider) {
         this.provider = provider;
+        return this;
     }
 
     @Override
