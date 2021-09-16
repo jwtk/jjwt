@@ -16,6 +16,7 @@
 package io.jsonwebtoken.lang;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,7 +42,7 @@ public final class Strings {
 
     private static final char EXTENSION_SEPARATOR = '.';
 
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset UTF_8 = StandardCharsets.UTF_8;
 
     private Strings(){} //prevent instantiation
 
@@ -192,6 +193,34 @@ public final class Strings {
             return null;
         }
         return str;
+    }
+
+    public static String toBinary(byte b) {
+        String bString = Integer.toBinaryString(b & 0xFF);
+        return String.format("%8s", bString).replace((char)Character.SPACE_SEPARATOR, '0');
+    }
+
+    public static String toBinary(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(19); //16 characters + 3 space characters
+        for(byte b : bytes) {
+            if (sb.length() > 0) {
+                sb.append((char)Character.SPACE_SEPARATOR);
+            }
+            String val = toBinary(b);
+            sb.append(val);
+        }
+        return sb.toString();
+    }
+
+    public static String toHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte temp : bytes) {
+            if (result.length() > 0) {
+                result.append((char)Character.SPACE_SEPARATOR);
+            }
+            result.append(String.format("%02x", temp));
+        }
+        return result.toString();
     }
 
     /**

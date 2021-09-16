@@ -17,17 +17,33 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class);
     }
 
+    static byte[] getRequiredEncoded(SecretKey key, String reason) {
+        Assert.notNull(key, "SecretKey argument cannot be null.");
+        Assert.hasText(reason, "Reason string argument cannot be null or empty.");
+        byte[] encoded = null;
+        Exception cause = null;
+        try {
+            encoded = key.getEncoded();
+        } catch (Exception e) {
+            cause = e;
+        }
+
+        if (Arrays.length(encoded) == 0) {
+            String msg = "SecretKey argument does not have any encoded bytes, or the key's backing JCA Provider " +
+                "is preventing key.getEncoded() from returning any bytes.  In either case, it is not possible to " +
+                reason + ".";
+            throw new UnsupportedKeyException(msg, cause);
+        }
+
+        return encoded;
+    }
+
     @Override
     protected SecretJwk createJwkFromKey(JwkContext<SecretKey> ctx) {
         SecretKey key = Assert.notNull(ctx.getKey(), "JwkContext key cannot be null.");
         String k;
         try {
-            byte[] encoded = key.getEncoded();
-            if (Arrays.length(encoded) == 0) {
-                throw new IllegalArgumentException("SecretKey argument does not have any encoded bytes, or " +
-                    "the key's backing JCA Provider is preventing key.getEncoded() from returning any bytes.  In " +
-                    "either case, it is not possible to represent the SecretKey instance as a JWK.");
-            }
+            byte[] encoded = getRequiredEncoded(key, "represent the SecretKey instance as a JWK");
             k = Encoders.BASE64URL.encode(encoded);
         } catch (Exception e) {
             String msg = "Unable to encode SecretKey to JWK: " + e.getMessage();
