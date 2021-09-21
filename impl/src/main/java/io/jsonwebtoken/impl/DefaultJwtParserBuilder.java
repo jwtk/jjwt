@@ -18,24 +18,33 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
+import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
+import io.jsonwebtoken.impl.lang.ConstantFunction;
+import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.LocatorFunction;
 import io.jsonwebtoken.impl.lang.Services;
-import io.jsonwebtoken.impl.security.DelegatingSigningKeyResolver;
-import io.jsonwebtoken.impl.security.StaticKeyResolver;
-import io.jsonwebtoken.impl.security.StaticSigningKeyResolver;
+import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.KeyResolver;
+import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import java.security.Key;
 import java.security.Provider;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 /**
@@ -57,13 +66,18 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Provider provider;
 
-    private Key signatureVerificationKey;
-    private Key decryptionKey;
-    private KeyResolver keyResolver;
+    @SuppressWarnings({"rawtypes"})
+    private Function<Header, Key> keyLocator = ConstantFunction.forNull();
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
-    private SigningKeyResolver signingKeyResolver;
+    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator<>(null, null);
 
-    private CompressionCodecResolver compressionCodecResolver;
+    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+
+    private final Collection<SymmetricAeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
+
+    private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgorithms = new LinkedHashSet<>();
+
+    private final Collection<SignatureAlgorithm<?, ?>> extraSignatureAlgorithms = new LinkedHashSet<>();
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
@@ -172,16 +186,52 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return setSigningKey(bytes);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public JwtParserBuilder setSigningKey(Key key) {
+    public JwtParserBuilder setSigningKey(final Key key) {
         Assert.notNull(key, "signing key cannot be null.");
-        this.signatureVerificationKey = key;
-        return setSigningKeyResolver(new StaticSigningKeyResolver(key));
+        final Function<Header, Key> existing = this.keyLocator;
+        this.keyLocator = new Function<Header, Key>() {
+            @Override
+            public Key apply(Header header) {
+                return header instanceof JwsHeader ? key : existing.apply(header);
+            }
+        };
+        return setSigningKeyResolver(new ConstantKeyLocator<>(key, null));
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public JwtParserBuilder decryptWith(final Key key) {
+        Assert.notNull(key, "decryption key cannot be null.");
+        final Function<Header, Key> existing = this.keyLocator;
+        this.keyLocator = new Function<Header, Key>() {
+            @Override
+            public Key apply(Header header) {
+                return header instanceof JweHeader ? key : existing.apply(header);
+            }
+        };
+        return this;
     }
 
     @Override
-    public JwtParserBuilder decryptWith(Key key) {
-        this.decryptionKey = Assert.notNull(key, "decryption key cannot be null.");
+    public JwtParserBuilder addEncryptionAlgorithms(Collection<SymmetricAeadAlgorithm> encAlgs) {
+        Assert.notEmpty(encAlgs, "Additional EncryptionAlgorithm collection cannot be null or empty.");
+        this.extraEncryptionAlgorithms.addAll(encAlgs);
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs) {
+        Assert.notEmpty(sigAlgs, "Additional SignatureAlgorithm collection cannot be null or empty.");
+        this.extraSignatureAlgorithms.addAll(sigAlgs);
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs) {
+        Assert.notEmpty(keyAlgs, "Additional KeyAlgorithm collection cannot be null or empty.");
+        this.extraKeyAlgorithms.addAll(keyAlgs);
         return this;
     }
 
@@ -193,10 +243,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Function<Header, Key> coerce(Function f) {
+        return (Function<Header, Key>) f;
+    }
+
     @Override
-    public JwtParserBuilder setKeyResolver(KeyResolver keyResolver) {
-        Assert.notNull(keyResolver, "KeyResolver cannot be null.");
-        this.keyResolver = keyResolver;
+    public JwtParserBuilder setKeyLocator(Locator<? extends Header<?>, Key> keyLocator) {
+        Assert.notNull(keyLocator, "Key locator cannot be null.");
+        this.keyLocator = coerce(new LocatorFunction<>(keyLocator));
         return this;
     }
 
@@ -218,28 +273,25 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             this.deserializer = Services.loadFirst(Deserializer.class);
         }
 
-        // if the compressionCodecResolver is not set default it.
-        if (this.compressionCodecResolver == null) {
-            this.compressionCodecResolver = new DefaultCompressionCodecResolver();
-        }
-
-        if (this.keyResolver == null) {
-            this.keyResolver = new StaticKeyResolver(this.signatureVerificationKey, this.decryptionKey);
-        }
-
-        if (this.signingKeyResolver == null) {
-            this.signingKeyResolver = new DelegatingSigningKeyResolver(this.keyResolver);
-        }
+        // Invariants.  If these are ever violated, it's an error in this class implementation
+        // (we default to non-null instances, and the setters should never allow null):
+        assert this.keyLocator != null : "Key locator should never be null.";
+        assert this.signingKeyResolver != null : "SigningKeyResolver should never be null.";
+        assert this.compressionCodecResolver != null : "CompressionCodecResolver should never be null.";
 
         return new ImmutableJwtParser(new DefaultJwtParser(
             provider,
             signingKeyResolver,
-            keyResolver,
+            keyLocator,
             clock,
             allowedClockSkewMillis,
             expectedClaims,
             base64UrlDecoder,
             deserializer,
-            compressionCodecResolver));
+            compressionCodecResolver,
+            extraSignatureAlgorithms,
+            extraKeyAlgorithms,
+            extraEncryptionAlgorithms
+        ));
     }
 }

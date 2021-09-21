@@ -17,7 +17,6 @@ import java.security.Signature;
 import java.security.interfaces.ECKey;
 import java.security.spec.ECGenParameterSpec;
 
-@SuppressWarnings("unused") //used via reflection in the io.jsonwebtoken.security.SignatureAlgorithms class
 public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKey, VK extends ECKey & PublicKey> extends AbstractSignatureAlgorithm<SK, VK> implements EllipticCurveSignatureAlgorithm<SK, VK> {
 
     private static final String EC_PUBLIC_KEY_REQD_MSG =
@@ -30,6 +29,14 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     private final int minKeyLength; //in bits
 
     private final int signatureLength;
+
+    private static int shaSize(int keyBitLength) {
+        return keyBitLength == 521 ? 512 : keyBitLength;
+    }
+
+    public DefaultEllipticCurveSignatureAlgorithm(int keyBitLength, int signatureLength) {
+        this("ES" + shaSize(keyBitLength), "SHA" + shaSize(keyBitLength) + "withECDSA", "secp" + keyBitLength + "r1", keyBitLength, signatureLength);
+    }
 
     public DefaultEllipticCurveSignatureAlgorithm(String name, String jcaName, String curveName, int minKeyLength, int signatureLength) {
         super(name, jcaName);

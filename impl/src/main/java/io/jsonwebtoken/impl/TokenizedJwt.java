@@ -1,9 +1,14 @@
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Header;
+
+import java.util.Map;
+
 public interface TokenizedJwt {
 
     /**
      * Protected header.
+     *
      * @return protected header.
      */
     String getProtected();
@@ -17,4 +22,6 @@ public interface TokenizedJwt {
      * Signature for JWS, AAD Tag for JWE.
      */
     String getDigest();
+
+    Header<?> createHeader(Map<String, ?> m);
 }

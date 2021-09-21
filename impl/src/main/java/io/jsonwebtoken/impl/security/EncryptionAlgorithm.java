@@ -1,8 +1,8 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.security.CryptoException;
 import io.jsonwebtoken.security.CryptoRequest;
-import io.jsonwebtoken.security.Identifiable;
 import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.PayloadSupplier;
 

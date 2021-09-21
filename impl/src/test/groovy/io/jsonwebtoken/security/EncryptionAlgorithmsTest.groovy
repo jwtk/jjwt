@@ -1,8 +1,7 @@
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
-import io.jsonwebtoken.impl.security.EncryptionAlgorithm
+import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import org.junit.Test
 

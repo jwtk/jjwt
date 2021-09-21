@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.security.Identifiable;
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.SecurityRequest;
 

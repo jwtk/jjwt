@@ -1,5 +1,11 @@
 package io.jsonwebtoken.impl;
 
+
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.lang.Strings;
+
+import java.util.Map;
+
 class DefaultTokenizedJwt implements TokenizedJwt {
 
     private final String protectedHeader;
@@ -25,5 +31,13 @@ class DefaultTokenizedJwt implements TokenizedJwt {
     @Override
     public String getDigest() {
         return this.digest;
+    }
+
+    @Override
+    public Header<?> createHeader(Map<String, ?> m) {
+        if (Strings.hasText(getDigest())) {
+            return new DefaultJwsHeader(m);
+        }
+        return new DefaultHeader<>(m);
     }
 }

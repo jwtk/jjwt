@@ -67,8 +67,8 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
     @Override
     public JweBuilder encryptWith(final SymmetricAeadAlgorithm enc) {
-        this.enc = Assert.notNull(enc, "EncryptionAlgorithm cannot be null.");
-        Assert.hasText(enc.getId(), "EncryptionAlgorithm id cannot be null or empty.");
+        this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
+        Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
         String encMsg = enc.getId() + " encryption failed.";
         this.encFunction = wrap(encMsg, new Function<SymmetricAeadRequest, AeadResult>() {
             @Override
@@ -115,7 +115,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         }
 
         Assert.state(key != null, "Key is required.");
-        Assert.state(enc != null, "EncryptionAlgorithm is required.");
+        Assert.state(enc != null, "Encryption algorithm is required.");
         assert alg != null : "KeyAlgorithm is required."; //always set by withKey calling withKeyFrom
 
         if (this.serializer == null) { // try to find one based on the services available

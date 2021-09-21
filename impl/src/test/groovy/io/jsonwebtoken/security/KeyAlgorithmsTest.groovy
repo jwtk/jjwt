@@ -4,9 +4,7 @@ import org.junit.Test
 
 import java.security.Key
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 class KeyAlgorithmsTest {
 
@@ -33,22 +31,12 @@ class KeyAlgorithmsTest {
     }
 
     @Test
-    void testForNameExactId() {
-        assertSame KeyAlgorithms.A128KW, KeyAlgorithms.forName('A128KW')
+    void testFindByExactId() {
+        assertSame KeyAlgorithms.A128KW, KeyAlgorithms.findById('A128KW')
     }
 
     @Test
-    void testForNameCaseInsensitive() {
-        assertSame KeyAlgorithms.A128GCMKW, KeyAlgorithms.forName('a128GcMkW')
-    }
-
-    @Test
-    void testForNameUnrecognizedId() {
-        try {
-            KeyAlgorithms.forName('foo')
-        } catch (IllegalArgumentException iae) {
-            String msg = "Unrecognized key algorithm id 'foo'"
-            assertEquals msg, iae.getMessage()
-        }
+    void testFindByIdCaseInsensitive() {
+        assertSame KeyAlgorithms.A128GCMKW, KeyAlgorithms.findById('a128GcMkW')
     }
 }

@@ -1,5 +1,7 @@
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.Identifiable;
+
 import java.security.Key;
 
 /**

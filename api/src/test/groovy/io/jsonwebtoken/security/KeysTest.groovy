@@ -114,7 +114,7 @@ class KeysTest {
                 def key = createMock(SecretKey)
                 def salg = createMock(SecretKeySignatureAlgorithm)
 
-                expect(SignatureAlgorithms.forName(eq(name))).andReturn(salg)
+                expect(SignatureAlgorithms.forId(eq(name))).andReturn(salg)
                 expect(salg.generateKey()).andReturn(key)
                 replay SignatureAlgorithms, salg, key
 
@@ -125,7 +125,7 @@ class KeysTest {
 
             } else {
                 def salg = name == 'NONE' ? createMock(io.jsonwebtoken.security.SignatureAlgorithm) : createMock(AsymmetricKeySignatureAlgorithm)
-                expect(SignatureAlgorithms.forName(eq(name))).andReturn(salg)
+                expect(SignatureAlgorithms.forId(eq(name))).andReturn(salg)
                 replay SignatureAlgorithms, salg
                 try {
                     Keys.secretKeyFor(alg)
@@ -149,7 +149,7 @@ class KeysTest {
 
             if (name.equals('NONE') || name.startsWith('H')) {
                 def salg = name == 'NONE' ? createMock(io.jsonwebtoken.security.SignatureAlgorithm) : createMock(SecretKeySignatureAlgorithm)
-                expect(SignatureAlgorithms.forName(eq(name))).andReturn(salg)
+                expect(SignatureAlgorithms.forId(eq(name))).andReturn(salg)
                 replay SignatureAlgorithms, salg
                 try {
                     Keys.keyPairFor(alg)
@@ -163,7 +163,7 @@ class KeysTest {
                 def pair = createMock(KeyPair)
                 def salg = createMock(AsymmetricKeySignatureAlgorithm)
 
-                expect(SignatureAlgorithms.forName(eq(name))).andReturn(salg)
+                expect(SignatureAlgorithms.forId(eq(name))).andReturn(salg)
                 expect(salg.generateKeyPair()).andReturn(pair)
                 replay SignatureAlgorithms, pair, salg
 

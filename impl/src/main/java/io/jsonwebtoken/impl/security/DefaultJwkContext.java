@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.JwtMap;
 import io.jsonwebtoken.impl.io.CodecConverter;
 import io.jsonwebtoken.impl.lang.BiFunction;
@@ -11,7 +12,6 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.Identifiable;
 import io.jsonwebtoken.security.MalformedKeyException;
 
 import java.net.URI;

@@ -25,6 +25,7 @@ import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.impl.security.DefaultSignatureRequest;
+import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
@@ -130,9 +131,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     public T setHeaderParams(Map<String, Object> params) {
         if (!Collections.isEmpty(params)) {
             Header<?> header = ensureHeader();
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
-                header.put(entry.getKey(), entry.getValue());
-            }
+            header.putAll(params);
         }
         return (T)this;
     }
@@ -153,32 +152,34 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     @Override
     public T signWith(Key key) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
-        SignatureAlgorithm<?,?> alg = SignatureAlgorithms.forSigningKey(key);
+        SignatureAlgorithm<Key,?> alg = (SignatureAlgorithm<Key,?>)SignatureAlgorithms.forSigningKey(key);
         return signWith(key, alg);
     }
 
     @Override
-    public T signWith(Key key, final SignatureAlgorithm alg) throws InvalidKeyException {
+    public <K extends Key> T signWith(K key, final SignatureAlgorithm<K,?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         this.key = key;
-        this.algorithm = alg;
+        this.algorithm = (SignatureAlgorithm<Key,?>)alg;
         this.signFunction = new PropagatingExceptionFunction<>(SignatureException.class,
             "Unable to compute " + alg.getId() + " signature.", new Function<SignatureRequest<Key>, byte[]>() {
             @Override
             public byte[] apply(SignatureRequest<Key> request) {
-                return alg.sign(request);
+                return algorithm.sign(request);
             }
         });
         return (T)this;
     }
 
+    @SuppressWarnings("deprecation") // TODO: remove method for 1.0
     @Override
     public T signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        return signWith(key, SignatureAlgorithms.forName(alg.getValue()));
+        return signWith(key, (SignatureAlgorithm<Key,?>)SignatureAlgorithmsBridge.forId(alg.getValue()));
     }
 
+    @SuppressWarnings("deprecation") // TODO: remove method for 1.0
     @Override
     public T signWith(io.jsonwebtoken.SignatureAlgorithm alg, byte[] secretKeyBytes) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
@@ -188,6 +189,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         return signWith(key, alg);
     }
 
+    @SuppressWarnings("deprecation") // TODO: remove method for 1.0
     @Override
     public T signWith(io.jsonwebtoken.SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
@@ -196,6 +198,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         return signWith(alg, bytes);
     }
 
+    @SuppressWarnings("deprecation") // TODO: remove method for 1.0
     @Override
     public T signWith(io.jsonwebtoken.SignatureAlgorithm alg, Key key) {
         return signWith(key, alg);

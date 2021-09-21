@@ -70,9 +70,7 @@ class RFC7518AppendixB2Test {
     void test() {
 
         def alg = EncryptionAlgorithms.A192CBC_HS384
-
         SymmetricAeadRequest req = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
-
         AeadResult result = alg.encrypt(req)
 
         byte[] resultCiphertext = result.getPayload()
@@ -86,7 +84,6 @@ class RFC7518AppendixB2Test {
         // now test decryption:
         def dreq = new DefaultAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv)
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-
         assertArrayEquals(P, decryptionResult)
     }
 }

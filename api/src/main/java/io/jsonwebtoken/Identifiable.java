@@ -1,4 +1,4 @@
-package io.jsonwebtoken.security;
+package io.jsonwebtoken;
 
 /**
  * @since JJWT_RELEASE_VERSION

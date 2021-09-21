@@ -178,7 +178,6 @@ public class JwtMap implements Map<String, Object> {
         return map.remove(o);
     }
 
-    @SuppressWarnings("NullableProblems")
     @Override
     public void putAll(Map<? extends String, ?> m) {
         if (m == null) {

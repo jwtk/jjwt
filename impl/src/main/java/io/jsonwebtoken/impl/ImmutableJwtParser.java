@@ -156,12 +156,12 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public <H extends Header<H>> Jwt<H, String> parsePlaintextJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parsePlaintextJwt(plaintextJwt);
     }
 
     @Override
-    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public <H extends Header<H>> Jwt<H, Claims> parseClaimsJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parseClaimsJwt(claimsJwt);
     }
 

@@ -31,7 +31,7 @@ public interface JwtHandler<T> {
      * @param jwt the parsed plaintext JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
      */
-    T onPlaintextJwt(Jwt<Header, String> jwt);
+    T onPlaintextJwt(Jwt<?, String> jwt);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
@@ -40,7 +40,7 @@ public interface JwtHandler<T> {
      * @param jwt the parsed claims JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
      */
-    T onClaimsJwt(Jwt<Header, Claims> jwt);
+    T onClaimsJwt(Jwt<?, Claims> jwt);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is

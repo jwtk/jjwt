@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.security.Identifiable;
+import io.jsonwebtoken.Identifiable;
 
 import java.net.URI;
 import java.security.Key;

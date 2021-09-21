@@ -22,6 +22,7 @@ import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.InvalidClaimException;
 import io.jsonwebtoken.Jwe;
@@ -39,13 +40,16 @@ import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
+import io.jsonwebtoken.impl.lang.ConstantFunction;
+import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LegacyServices;
+import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
-import io.jsonwebtoken.impl.security.DelegatingSigningKeyResolver;
-import io.jsonwebtoken.impl.security.StaticKeyResolver;
-import io.jsonwebtoken.impl.security.StaticSigningKeyResolver;
+import io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge;
+import io.jsonwebtoken.impl.security.KeyAlgorithmsBridge;
+import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DecodingException;
@@ -53,14 +57,12 @@ import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyRequest;
-import io.jsonwebtoken.security.KeyResolver;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SignatureAlgorithm;
@@ -75,6 +77,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.Provider;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -85,14 +88,62 @@ public class DefaultJwtParser implements JwtParser {
 
     private static final JwtTokenizer jwtTokenizer = new JwtTokenizer();
 
-    // TODO: make the folling fields final for v1.0
+    public static final String MISSING_JWS_ALG_MSG =
+        "JWS header does not contain a required 'alg' (Algorithm) header parameter.  " +
+            "This header parameter is mandatory per the JWS Specification, Section 4.1.1. See " +
+            "https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1 for more information.";
+
+    public static final String MISSING_JWE_ALG_MSG =
+        "JWE header does not contain a required 'alg' (Algorithm) header parameter.  " +
+            "This header parameter is mandatory per the JWE Specification, Section 4.1.1. See " +
+            "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.1 for more information.";
+
+    private static final String MISSING_ENC_MSG =
+        "JWE header does not contain a required 'enc' (Encryption Algorithm) header parameter.  " +
+            "This header parameter is mandatory per the JWE Specification, Section 4.1.2. See " +
+            "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2 for more information.";
+
+    private static <H extends Header<H>, R extends Identifiable> Function<H, R> backup(String id, String msg, Collection<R> extras) {
+        if (Collections.isEmpty(extras)) {
+            return ConstantFunction.forNull();
+        } else {
+            return new IdLocator<>(id, msg, new IdRegistry<>(extras), ConstantFunction.<H, R>forNull());
+        }
+    }
+
+    private static <H extends Header<H>, R extends Identifiable> Function<H, R> locFn(String id, String msg, Function<String, R> reg, Collection<R> extras) {
+        Function<H,R> backup = backup(id, msg, extras);
+        return new IdLocator<>(id, msg, reg, backup);
+    }
+
+    private static Function<JwsHeader, SignatureAlgorithm<?, ?>> sigFn(Collection<SignatureAlgorithm<?, ?>> extras) {
+        return locFn(JwsHeader.ALGORITHM, MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
+    }
+
+    private static Function<JweHeader, SymmetricAeadAlgorithm> encFn(Collection<SymmetricAeadAlgorithm> extras) {
+        return locFn(JweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, EncryptionAlgorithmsBridge.REGISTRY, extras);
+    }
+
+    private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
+        return locFn(JweHeader.ALGORITHM, MISSING_JWE_ALG_MSG, KeyAlgorithmsBridge.REGISTRY, extras);
+    }
+
+    // TODO: make the following fields final for v1.0
     private Provider provider;
 
+    @SuppressWarnings("deprecation") // will remove for 1.0
     private SigningKeyResolver signingKeyResolver;
 
-    private KeyResolver keyResolver;
+    @SuppressWarnings("rawtypes")
+    private Function<Header, CompressionCodec> compressionCodecLocator;
 
-    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+    private final Function<JwsHeader, SignatureAlgorithm<?, ?>> signatureAlgorithmLocator;
+
+    private final Function<JweHeader, SymmetricAeadAlgorithm> encryptionAlgorithmLocator;
+
+    private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
+
+    private final Function<?, Key> keyLocator;
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
@@ -109,30 +160,43 @@ public class DefaultJwtParser implements JwtParser {
      *
      * @deprecated for backward compatibility only, see other constructors.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed") // will remove before 1.0
     @Deprecated
     public DefaultJwtParser() {
-        this.keyResolver = new StaticKeyResolver(null, null);
-        this.signingKeyResolver = new DelegatingSigningKeyResolver(this.keyResolver);
+        ConstantKeyLocator<?> constantKeyLocator = new ConstantKeyLocator<>(null, null);
+        this.keyLocator = constantKeyLocator;
+        this.signingKeyResolver = constantKeyLocator;
+        this.signatureAlgorithmLocator = sigFn(Collections.<SignatureAlgorithm<?, ?>>emptyList());
+        this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
+        this.encryptionAlgorithmLocator = encFn(Collections.<SymmetricAeadAlgorithm>emptyList());
+        this.compressionCodecLocator = new CompressionCodecLocator<>(new DefaultCompressionCodecResolver());
     }
 
+    @SuppressWarnings("deprecation") //SigningKeyResolver will be removed for 1.0
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
-                     KeyResolver keyResolver,
+                     Function<?,Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
                      Claims expectedClaims,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
-                     CompressionCodecResolver compressionCodecResolver) {
+                     CompressionCodecResolver compressionCodecResolver,
+                     Collection<SignatureAlgorithm<?, ?>> extraSigAlgs,
+                     Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
+                     Collection<SymmetricAeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
         this.signingKeyResolver = Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
-        this.keyResolver = Assert.notNull(keyResolver, "KeyResolver cannot be null.");
+        this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = expectedClaims;
         this.base64UrlDecoder = base64UrlDecoder;
         this.deserializer = deserializer;
-        this.compressionCodecResolver = compressionCodecResolver;
+        this.signatureAlgorithmLocator = sigFn(extraSigAlgs);
+        this.keyAlgorithmLocator = keyFn(extraKeyAlgs);
+        this.encryptionAlgorithmLocator = encFn(extraEncAlgs);
+        this.compressionCodecLocator = new CompressionCodecLocator<>(compressionCodecResolver);
     }
 
     @Override
@@ -229,10 +293,11 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setSigningKey(final Key key) {
         Assert.notNull(key, "signing key cannot be null.");
-        setSigningKeyResolver(new StaticSigningKeyResolver(key));
+        setSigningKeyResolver(new ConstantKeyLocator<>(key, null));
         return this;
     }
 
+    @SuppressWarnings("deprecation") // required until 1.0
     @Override
     public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
         Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
@@ -243,7 +308,7 @@ public class DefaultJwtParser implements JwtParser {
     @Override
     public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
         Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
-        this.compressionCodecResolver = compressionCodecResolver;
+        this.compressionCodecLocator = new CompressionCodecLocator<>(compressionCodecResolver);
         return this;
     }
 
@@ -271,13 +336,14 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<?,?> parse(String compact) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    public Jwt<?, ?> parse(String compact) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
         // TODO, this logic is only need for a now deprecated code path
         // remove this block in v1.0 (the equivalent is already in DefaultJwtParserBuilder)
         if (this.deserializer == null) {
             // try to find one based on the services available
             // TODO: This util class will throw a UnavailableImplementationException here to retain behavior of previous version, remove in v1.0
+            //noinspection deprecation
             this.deserializer = LegacyServices.loadFirst(Deserializer.class);
         }
 
@@ -293,9 +359,8 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Header =================
         final byte[] headerBytes = base64UrlDecode(base64UrlHeader, "protected header");
         String origValue = new String(headerBytes, Strings.UTF_8);
-        Map<String, ?> m = readValue(origValue, "protected header" );
-        @SuppressWarnings("rawtypes")
-        Header header = tokenized instanceof TokenizedJwe ? new DefaultJweHeader(m) : new DefaultJwsHeader(m);
+        Map<String, ?> m = readValue(origValue, "protected header");
+        Header<?> header = tokenized.createHeader(m);
 
         // https://tools.ietf.org/html/rfc7515#section-10.7 , second-to-last bullet point, note the use of 'always':
         //
@@ -303,14 +368,17 @@ public class DefaultJwtParser implements JwtParser {
         //      Protected Header.  (This is always the case when using the JWS
         //      Compact Serialization and is the approach taken by CMS [RFC6211].)
         //
-        final String alg = header.getAlgorithm();
+        final String alg = Strings.clean(header.getAlgorithm());
         if (!Strings.hasText(alg)) {
-            String msg = "Compact JWT strings MUST always have an Algorithm ('alg') header value per https://tools.ietf.org/html/rfc7515#section-4.1.1 and https://tools.ietf.org/html/rfc7516#section-4.1.1. Also see https://tools.ietf.org/html/rfc7515#section-10.7 for more information.";
+            String msg = "Compact JWT strings MUST always have an 'alg' (Algorithm) header value per " +
+                "https://tools.ietf.org/html/rfc7515#section-4.1.1 and " +
+                "https://tools.ietf.org/html/rfc7516#section-4.1.1. Also see " +
+                "https://tools.ietf.org/html/rfc7515#section-10.7 for more information.";
             throw new MalformedJwtException(msg);
         }
 
         // =============== Body =================
-        CompressionCodec compressionCodec = compressionCodecResolver.resolveCompressionCodec(header);
+        CompressionCodec compressionCodec = compressionCodecLocator.apply(header);
         byte[] bytes = base64UrlDecode(tokenized.getBody(), "payload"); // Only JWS body can be empty per https://github.com/jwtk/jjwt/pull/540
         if (tokenized instanceof TokenizedJwe && Arrays.length(bytes) == 0) {
             String msg = "Compact JWE strings MUST always contain a payload (ciphertext).";
@@ -324,8 +392,8 @@ public class DefaultJwtParser implements JwtParser {
         byte[] tag = null;
         if (tokenized instanceof TokenizedJwe) { //need to decrypt the ciphertext
 
-            TokenizedJwe tokenizedJwe = (TokenizedJwe)tokenized;
-            JweHeader jweHeader = (JweHeader)header;
+            TokenizedJwe tokenizedJwe = (TokenizedJwe) tokenized;
+            JweHeader jweHeader = (JweHeader) header;
 
             byte[] cekBytes = new byte[0]; //ignored unless using an encrypted key algorithm
             String base64Url = tokenizedJwe.getEncryptedKey();
@@ -346,6 +414,9 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(msg);
             }
 
+            // This is intentional - the AAD (Additional Authenticated Data) scheme for compact JWEs is to use
+            // the ASCII bytes of the raw base64url text as the AAD, and *not* the base64url-decoded bytes per
+            // https://datatracker.ietf.org/doc/html/rfc7516#section-5.1, Step 14.
             final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
 
             base64Url = tokenizedJwe.getDigest();
@@ -359,19 +430,28 @@ public class DefaultJwtParser implements JwtParser {
 
             String enc = jweHeader.getEncryptionAlgorithm();
             if (!Strings.hasText(enc)) {
-                String msg = "JWE header does not contain the required 'enc' (Encryption Algorithm) header value";
-                throw new MalformedJwtException(msg);
+                throw new MalformedJwtException(MISSING_ENC_MSG);
             }
-            final SymmetricAeadAlgorithm encAlg = EncryptionAlgorithms.forName(enc); //TODO: ensure lookup goes through a resolver
-            final KeyAlgorithm<?,Key> keyAlg = (KeyAlgorithm<?,Key>)KeyAlgorithms.forName(alg); //TODO: ensure lookup goes through a resolver
-            final Key key = this.keyResolver.resolveKey(jweHeader);
-            if (key == null) {
-                String msg = "Unable to locate decryption key for encryption algorithm '" + encAlg.getId() +
-                    "' using key management algorithm '" + keyAlg.getId() + "'.";
+            final SymmetricAeadAlgorithm encAlg = this.encryptionAlgorithmLocator.apply(jweHeader);
+            if (encAlg == null) {
+                String msg = "Unrecognized JWE encryption algorithm identifier: " + enc;
                 throw new UnsupportedJwtException(msg);
             }
 
-            KeyRequest<byte[],Key> request = new DefaultKeyRequest<>(this.provider, null, cekBytes, key, jweHeader);
+            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgorithmLocator.apply(jweHeader);
+            if (keyAlg == null) {
+                String msg = "Unrecognized JWE key management algorithm: " + alg;
+                throw new UnsupportedJwtException(msg);
+            }
+
+            final Key key = ((Function<JweHeader,Key>)this.keyLocator).apply(jweHeader);
+            if (key == null) {
+                String msg = "No key available for the '" + keyAlg.getId() + "' key management algorithm. Unable to " +
+                    "perform '" + encAlg + "' decryption.";
+                throw new UnsupportedJwtException(msg);
+            }
+
+            KeyRequest<byte[], ?> request = new DefaultKeyRequest<>(this.provider, null, cekBytes, key, jweHeader);
             final SecretKey cek = keyAlg.getDecryptionKey(request);
 
             SymmetricAeadDecryptionRequest decryptRequest =
@@ -388,13 +468,14 @@ public class DefaultJwtParser implements JwtParser {
             claims = new DefaultClaims(claimsMap);
         }
 
-        Jwt<?,?> jwt;
+        Jwt<?, ?> jwt;
         Object body = claims != null ? claims : payload;
-        if (tokenized instanceof TokenizedJwe) {
+        if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader)header, body, iv, tag);
         } else { // JWS
             if (!Strings.hasText(tokenized.getDigest()) && SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
-                jwt = new DefaultJwt<>(header, body);
+                //noinspection rawtypes
+                jwt = new DefaultJwt(header, body);
             } else {
                 jwt = new DefaultJws<>((JwsHeader)header, body, tokenized.getDigest());
             }
@@ -403,12 +484,15 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Signature =================
         if (jwt instanceof Jws) { // it's a JWS, validate the signature
 
-            Jws<?> jws = (Jws<?>)jwt;
+            Jws<?> jws = (Jws<?>) jwt;
 
             final JwsHeader jwsHeader = jws.getHeader();
 
-            //TODO: ensure lookup goes through resolver (to support custom algorithms):
-            SignatureAlgorithm algorithm = SignatureAlgorithms.forName(alg);
+            SignatureAlgorithm<?,Key> algorithm = (SignatureAlgorithm<?,Key>)signatureAlgorithmLocator.apply(jwsHeader);
+            if (algorithm == null) {
+                String msg = "Unrecognized JWS algorithm identifier: " + alg;
+                throw new UnsupportedJwtException(msg);
+            }
 
             String digest = tokenized.getDigest();
 
@@ -575,7 +659,7 @@ public class DefaultJwtParser implements JwtParser {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
 
-        Jwt<?,?> jwt = parse(compact);
+        Jwt<?, ?> jwt = parse(compact);
 
         if (jwt instanceof Jws) {
             Jws<?> jws = (Jws<?>) jwt;
@@ -586,39 +670,39 @@ public class DefaultJwtParser implements JwtParser {
                 return handler.onPlaintextJws((Jws<String>) jws);
             }
         } else if (jwt instanceof Jwe) {
-            Jwe<?> jwe = (Jwe<?>)jwt;
+            Jwe<?> jwe = (Jwe<?>) jwt;
             Object body = jwe.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJwe((Jwe<Claims>)jwe);
+                return handler.onClaimsJwe((Jwe<Claims>) jwe);
             } else {
                 return handler.onPlaintextJwe((Jwe<String>) jwe);
             }
         } else {
             Object body = jwt.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
+                return handler.onClaimsJwt((Jwt<?, Claims>) jwt);
             } else {
-                return handler.onPlaintextJwt((Jwt<Header, String>) jwt);
+                return handler.onPlaintextJwt((Jwt<?, String>) jwt);
             }
         }
     }
 
     @Override
-    public Jwt<Header, String> parsePlaintextJwt(String plaintextJwt) {
-        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<Header, String>>() {
+    public Jwt<?, String> parsePlaintextJwt(String plaintextJwt) {
+        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<?, String>>() {
             @Override
-            public Jwt<Header, String> onPlaintextJwt(Jwt<Header, String> jwt) {
+            public Jwt<?, String> onPlaintextJwt(Jwt<?, String> jwt) {
                 return jwt;
             }
         });
     }
 
     @Override
-    public Jwt<Header, Claims> parseClaimsJwt(String claimsJwt) {
+    public Jwt<?, Claims> parseClaimsJwt(String claimsJwt) {
         try {
-            return parse(claimsJwt, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
+            return parse(claimsJwt, new JwtHandlerAdapter<Jwt<?, Claims>>() {
                 @Override
-                public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
+                public Jwt<?, Claims> onClaimsJwt(Jwt<?, Claims> jwt) {
                     return jwt;
                 }
             });
@@ -680,7 +764,6 @@ public class DefaultJwtParser implements JwtParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected Map<String, ?> readValue(String val, final String name) {
         try {
             byte[] bytes = val.getBytes(Strings.UTF_8);

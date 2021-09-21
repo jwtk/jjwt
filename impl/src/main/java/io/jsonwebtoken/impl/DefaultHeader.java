@@ -20,7 +20,6 @@ import io.jsonwebtoken.lang.Strings;
 
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
 public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header<T> {
 
     public DefaultHeader() {
@@ -31,6 +30,11 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
         super(map);
     }
 
+    @SuppressWarnings("unchecked")
+    protected T tthis() {
+        return (T)this;
+    }
+
     @Override
     public String getType() {
         return getString(TYPE);
@@ -39,7 +43,7 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     @Override
     public T setType(String typ) {
         setValue(TYPE, typ);
-        return (T)this;
+        return tthis();
     }
 
     @Override
@@ -50,7 +54,7 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     @Override
     public T setContentType(String cty) {
         setValue(CONTENT_TYPE, cty);
-        return (T)this;
+        return tthis();
     }
 
     @Override
@@ -61,7 +65,7 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     @Override
     public T setAlgorithm(String alg) {
         setValue(ALGORITHM, alg);
-        return (T)this;
+        return tthis();
     }
 
     @SuppressWarnings("deprecation")
@@ -78,7 +82,6 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     @Override
     public T setCompressionAlgorithm(String compressionAlgorithm) {
         setValue(COMPRESSION_ALGORITHM, compressionAlgorithm);
-        return (T) this;
+        return tthis();
     }
-
 }

@@ -5,8 +5,8 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.SecretKeySignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Mac;
@@ -16,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
-@SuppressWarnings("unused") //used via reflection in the io.jsonwebtoken.security.SignatureAlgorithms class
 public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey, SecretKey> implements SecretKeySignatureAlgorithm {
 
     private final int minKeyLength; //in bits
@@ -36,6 +35,10 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
         VALID_HS384_JCA_NAMES.addAll(HS512_JCA_NAMES);
         VALID_HS256_JCA_NAMES = new LinkedHashSet<>(HS256_JCA_NAMES);
         VALID_HS256_JCA_NAMES.addAll(VALID_HS384_JCA_NAMES);
+    }
+
+    public MacSignatureAlgorithm(int digestBitLength) {
+        this("HS" + digestBitLength, "HmacSHA" + digestBitLength, digestBitLength);
     }
 
     public MacSignatureAlgorithm(String id, String jcaName, int minKeyLength) {

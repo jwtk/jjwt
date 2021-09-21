@@ -17,7 +17,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-@SuppressWarnings("unused") //used via reflection in the io.jsonwebtoken.security.SignatureAlgorithms class
 public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK extends RSAKey & PublicKey> extends AbstractSignatureAlgorithm<SK, VK> implements RsaSignatureAlgorithm<SK, VK> {
 
     static {
@@ -44,6 +43,14 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
         }
         this.preferredKeyLength = preferredKeyLengthBits;
         this.algorithmParameterSpec = algParam;
+    }
+
+    public DefaultRsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength) {
+        this("RS" + digestBitLength, "SHA" + digestBitLength + "withRSA", preferredKeyBitLength);
+    }
+
+    public DefaultRsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength, int pssSaltBitLength) {
+        this("PS" + digestBitLength, "RSASSA-PSS", preferredKeyBitLength, pssSaltBitLength);
     }
 
     public DefaultRsaSignatureAlgorithm(String name, String jcaName, int preferredKeyLengthBits) {

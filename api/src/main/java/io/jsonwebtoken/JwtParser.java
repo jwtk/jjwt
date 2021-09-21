@@ -319,7 +319,8 @@ public interface JwtParser {
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
      */
-    @Deprecated
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated // TODO: remove for 1.0
     JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
     /**

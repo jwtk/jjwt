@@ -10,17 +10,17 @@ import javax.crypto.spec.SecretKeySpec
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertSame
 
-class StaticKeyResolverTest {
+class ConstantKeyLocatorTest {
 
     @Test
     void testSignatureVerificationKey() {
         def key = new SecretKeySpec(new byte[1], 'AES') //dummy key for testing
-        assertSame key, new StaticKeyResolver(key, null).resolveKey(new DefaultJwsHeader())
+        assertSame key, new ConstantKeyLocator(key, null).resolveKey(new DefaultJwsHeader())
     }
 
     @Test
     void testSignatureVerificationKeyMissing() {
-        def resolver = new StaticKeyResolver(null, null)
+        def resolver = new ConstantKeyLocator(null, null)
         try {
             resolver.resolveKey(new DefaultJwsHeader())
         } catch (UnsupportedJwtException uje) {
@@ -34,12 +34,12 @@ class StaticKeyResolverTest {
     @Test
     void testDecryptionKey() {
         def key = new SecretKeySpec(new byte[1], 'AES') //dummy key for testing
-        assertSame key, new StaticKeyResolver(null, key).resolveKey(new DefaultJweHeader())
+        assertSame key, new ConstantKeyLocator(null, key).resolveKey(new DefaultJweHeader())
     }
 
     @Test
     void testDecryptionKeyMissing() {
-        def resolver = new StaticKeyResolver(null, null)
+        def resolver = new ConstantKeyLocator(null, null)
         try {
             resolver.resolveKey(new DefaultJweHeader())
         } catch (UnsupportedJwtException uje) {
