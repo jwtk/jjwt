@@ -570,7 +570,7 @@ JWT RSA signature algorithms `RS256`, `RS384`, `RS512`, `PS256`, `PS384` and `PS
 Anything smaller than this (such as 1024 bits) will be rejected with an `InvalidKeyException`.
 
 That said, in keeping with best practices and increasing key lengths for security longevity, JJWT 
-recoommends that you use:
+recommends that you use:
 
 * at least 2048 bit keys with `RS256` and `PS256`
 * at least 3072 bit keys with `RS384` and `PS384`
