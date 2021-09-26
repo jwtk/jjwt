@@ -37,14 +37,14 @@ class JacksonSerializerTest {
     @Test
     void testDefaultConstructor() {
         def serializer = new JacksonSerializer()
-        assertNotNull serializer.objectMapper
+        assertNotNull serializer.objectWriter
     }
 
     @Test
     void testObjectMapperConstructor() {
         def customOM = new ObjectMapper()
         def serializer = new JacksonSerializer<>(customOM)
-        assertSame customOM, serializer.objectMapper
+        assertSame customOM.getSerializationConfig(), serializer.objectWriter.config
     }
 
     @Test(expected = IllegalArgumentException)
