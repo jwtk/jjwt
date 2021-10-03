@@ -205,6 +205,13 @@ public final class Assert {
         return array;
     }
 
+    public static char[] notEmpty(char[] chars, String msg) {
+        if (Objects.isEmpty(chars)) {
+            throw new IllegalArgumentException(msg);
+        }
+        return chars;
+    }
+
     /**
      * Assert that an array has no null elements.
      * Note: Does not complain if the array is empty!

@@ -7,6 +7,7 @@ import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
+import io.jsonwebtoken.impl.security.DefaultPBEKey;
 import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
@@ -37,12 +38,12 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     private SymmetricAeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
     private Function<SymmetricAeadRequest, AeadResult> encFunction;
 
-    private KeyAlgorithm<Key,?> alg;
-    private Function<KeyRequest<SecretKey,Key>,KeyResult> algFunction;
+    private KeyAlgorithm<Key, ?> alg;
+    private Function<KeyRequest<SecretKey, Key>, KeyResult> algFunction;
 
     private Key key;
 
-    protected <I,O> Function<I,O> wrap(String msg, Function<I,O> fn) {
+    protected <I, O> Function<I, O> wrap(String msg, Function<I, O> fn) {
         return new PropagatingExceptionFunction<>(SecurityException.class, msg, fn);
     }
 
@@ -51,11 +52,11 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     protected Function<Map<String, ?>, byte[]> wrap(final Serializer<Map<String, ?>> serializer, String which) {
         return new PropagatingExceptionFunction<>(SerializationException.class,
             "Unable to serialize " + which + " to JSON.", new Function<Map<String, ?>, byte[]>() {
-                @Override
-                public byte[] apply(Map<String, ?> map) {
-                    return serializer.serialize(map);
-                }
+            @Override
+            public byte[] apply(Map<String, ?> map) {
+                return serializer.serialize(map);
             }
+        }
         );
     }
 
@@ -89,7 +90,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         this.key = Assert.notNull(key, "key cannot be null.");
         //noinspection unchecked
         this.alg = (KeyAlgorithm<Key, ?>) Assert.notNull(alg, "KeyAlgorithm cannot be null.");
-        final KeyAlgorithm<Key,?> keyAlg = this.alg;
+        final KeyAlgorithm<Key, ?> keyAlg = this.alg;
         Assert.hasText(alg.getId(), "KeyAlgorithm id cannot be null or empty.");
 
         String cekMsg = "Unable to obtain content encryption key from key management algorithm '" + alg.getId() + "'.";
@@ -101,6 +102,11 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         });
 
         return this;
+    }
+
+    @Override
+    public JweBuilder withKeyFrom(char[] password, int iterations, EncryptedKeyAlgorithm<SecretKey, SecretKey> alg) {
+        return withKeyFrom(new DefaultPBEKey(password, iterations, alg.getId()), alg);
     }
 
     @Override
@@ -170,9 +176,9 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
         return
             base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR +
-            base64UrlEncodedEncryptedCek + JwtParser.SEPARATOR_CHAR +
-            base64UrlEncodedIv + JwtParser.SEPARATOR_CHAR +
-            base64UrlEncodedCiphertext + JwtParser.SEPARATOR_CHAR +
-            base64UrlEncodedTag;
+                base64UrlEncodedEncryptedCek + JwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedIv + JwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedCiphertext + JwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedTag;
     }
 }

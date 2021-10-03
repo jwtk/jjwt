@@ -22,16 +22,17 @@ import java.util.Arrays;
 
 public final class Objects {
 
-    private Objects(){} //prevent instantiation
+    private Objects() {
+    } //prevent instantiation
 
     private static final int INITIAL_HASH = 7;
-    private static final int MULTIPLIER   = 31;
+    private static final int MULTIPLIER = 31;
 
-    private static final String EMPTY_STRING            = "";
-    private static final String NULL_STRING             = "null";
-    private static final String ARRAY_START             = "{";
-    private static final String ARRAY_END               = "}";
-    private static final String EMPTY_ARRAY             = ARRAY_START + ARRAY_END;
+    private static final String EMPTY_STRING = "";
+    private static final String NULL_STRING = "null";
+    private static final String ARRAY_START = "{";
+    private static final String ARRAY_END = "}";
+    private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
     private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 
     /**
@@ -103,6 +104,16 @@ public final class Objects {
     }
 
     /**
+     * Returns {@code true} if the specified character array is null or of zero length, {@code false} otherwise.
+     *
+     * @param chars the character array to check
+     * @return {@code true} if the specified character array is null or of zero length, {@code false} otherwise.
+     */
+    public static boolean isEmpty(char[] chars) {
+        return chars == null || chars.length == 0;
+    }
+
+    /**
      * Check whether the given array contains the given element.
      *
      * @param array   the array to check (may be <code>null</code>,
@@ -171,7 +182,7 @@ public final class Objects {
         }
         throw new IllegalArgumentException(
             String.format("constant [%s] does not exist in enum type %s",
-                          constant, enumValues.getClass().getComponentType().getName()));
+                constant, enumValues.getClass().getComponentType().getName()));
     }
 
     /**

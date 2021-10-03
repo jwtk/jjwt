@@ -5,6 +5,8 @@ import io.jsonwebtoken.lang.Assert;
 
 public final class Bytes {
 
+    public static final byte[] EMPTY = new byte[0];
+
     private static final int LONG_BYTE_LENGTH = Long.SIZE / Byte.SIZE;
     private static final int INT_BYTE_LENGTH = Integer.SIZE / Byte.SIZE;
     public static final String LONG_REQD_MSG = "Long byte arrays must be " + LONG_BYTE_LENGTH + " bytes in length.";
@@ -54,6 +56,34 @@ public final class Bytes {
             ((bytes[1] & 0xFF) << 16) |
             ((bytes[2] & 0xFF) << 8) |
             (bytes[3] & 0xFF);
+    }
+
+    public static int[] toInts(byte[] bytes) {
+        int[] ints = new int[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            ints[i] = bytes[i] & 0xFF;
+        }
+        return ints;
+    }
+
+    public static byte[] plus(byte[]... arrays) {
+        int len = 0;
+        int count = Arrays.length(arrays);
+        for(int i = 0; i < count; i++) {
+            len += arrays[i].length;
+        }
+        byte[] output = new byte[len];
+        int position = 0;
+        if (len > 0) {
+            for(byte[] array : arrays) {
+                int alen = Arrays.length(array);
+                if (alen > 0) {
+                    System.arraycopy(array, 0, output, position, alen);
+                    position += alen;
+                }
+            }
+        }
+        return output;
     }
 
     public static long bitLength(byte[] bytes) {

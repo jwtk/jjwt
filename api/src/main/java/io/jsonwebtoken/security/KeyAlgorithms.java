@@ -58,4 +58,7 @@ public final class KeyAlgorithms {
     public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA1_5 = forId0("RSA1_5");
     public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA_OAEP = forId0("RSA-OAEP");
     public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA_OAEP_256 = forId0("RSA-OAEP-256");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
+    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
 }

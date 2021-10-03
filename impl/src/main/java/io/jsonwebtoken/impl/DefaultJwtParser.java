@@ -335,6 +335,10 @@ public class DefaultJwtParser implements JwtParser {
         return false;
     }
 
+    private static boolean hasContentType(Header<?> header) {
+        return header != null && Strings.hasText(header.getContentType());
+    }
+
     @Override
     public Jwt<?, ?> parse(String compact) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
@@ -463,7 +467,7 @@ public class DefaultJwtParser implements JwtParser {
         String payload = new String(bytes, Strings.UTF_8);
 
         Claims claims = null;
-        if (!payload.isEmpty() && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        if (!payload.isEmpty() && !hasContentType(header) && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
             Map<String, ?> claimsMap = readValue(payload, "claims");
             claims = new DefaultClaims(claimsMap);
         }

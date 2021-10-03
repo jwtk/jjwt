@@ -20,7 +20,7 @@ public class EncodedObjectConverter<T> implements Converter<T, Object> {
     @Override
     public T applyFrom(Object value) {
         Assert.notNull(value, "Value argument cannot be null.");
-        if (type.isAssignableFrom(value.getClass())) {
+        if (type.isInstance(value)) {
             return type.cast(value);
         } else if (value instanceof String) {
             return converter.applyFrom((String) value);

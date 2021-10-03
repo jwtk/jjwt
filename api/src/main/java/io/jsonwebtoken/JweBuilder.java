@@ -1,5 +1,6 @@
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.security.EncryptedKeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
@@ -16,4 +17,6 @@ public interface JweBuilder extends JwtBuilder<JweBuilder> {
     JweBuilder withKey(SecretKey key);
 
     <K extends Key> JweBuilder withKeyFrom(K key, KeyAlgorithm<K, ?> alg);
+
+    JweBuilder withKeyFrom(char[] password, int iterations, EncryptedKeyAlgorithm<SecretKey,SecretKey> alg);
 }
