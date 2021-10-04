@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        java: [ '7', '8',  '11' ]
+    runs-on: 'ubuntu-latest'
+    env:
+      MVN_CMD: ./mvnw --no-transfer-progress -B
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'zulu'
+        cache: 'maven'
+    - name: Build
+      run: ${{env.MVN_CMD}} clean install
+    - name: Code coverage
+      if:  ${{matrix.java}} != '7'
+      run: ${{env.MVN_CMD}} clean clover:setup test && ${{env.MVN_CMD}} -pl . clover:clover clover:check coveralls:report;
