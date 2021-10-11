@@ -4,18 +4,20 @@ import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.security.EncryptionAlgorithms
 import io.jsonwebtoken.security.KeyAlgorithms
 import io.jsonwebtoken.security.Keys
+import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
 
 class Pbes2HsAkwAlgorithmTest {
 
+    @Ignore // for manual/developer testing only.  Takes a long time and there is no deterministic output to assert
     @Test
     void test() {
 
         def alg = KeyAlgorithms.PBES2_HS256_A128KW
 
-        int desiredMillis = 200
+        int desiredMillis = 100
         int iterations = KeyAlgorithms.estimateIterations(alg, desiredMillis)
         println "Estimated iterations: $iterations"
 

@@ -68,7 +68,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     private final Map<String, Object> values; // canonical values formatted per RFC requirements
     private final Map<String, Object> idiomaticValues; // the values map with any string/encoded values converted to Java type-safe values where possible
-    private final Map<String, Object> redactedValues; // the values map with any sensitive/secret values redacted.  Used in the toString implementation.
+    private final Map<String, Object> redactedValues; // the values map with any sensitive/secret values redacted. Used in the toString implementation.
     private final Set<String> privateMemberNames; // names of values that should be redacted for toString output
     private K key;
     private PublicKey publicKey;

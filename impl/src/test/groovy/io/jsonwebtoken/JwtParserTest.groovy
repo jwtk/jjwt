@@ -25,7 +25,6 @@ import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
@@ -33,6 +32,7 @@ import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static io.jsonwebtoken.DateTestUtils.truncateMillis
 import static org.junit.Assert.*
 
+@SuppressWarnings('GrDeprecatedAPIUsage')
 class JwtParserTest {
 
     private static final SecureRandom random = new SecureRandom() //doesn't need to be seeded - just testing

@@ -147,10 +147,11 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     private static char[] toChars(byte[] bytes) {
+        // use bytebuffer/charbuffer so we don't create a String that remains in the JVM string memory table (heap)
+        // the respective byte and char arrays will be cleared by the caller
         ByteBuffer buf = ByteBuffer.wrap(bytes);
         CharBuffer cbuf = StandardCharsets.UTF_8.decode(buf);
-        char[] chars = cbuf.compact().array();
-        return chars;
+        return cbuf.compact().array();
     }
 
     private char[] toPasswordChars(SecretKey key) {

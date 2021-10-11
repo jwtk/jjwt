@@ -21,10 +21,19 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 
 /**
+ * <h4>Deprecation Notice</h4>
+ * <p>As of JJWT JJWT_RELEASE_VERSION, various Resolver concepts (including the {@code SigningKeyResolver}) have been
+ * unified into a single {@link Locator} interface.  For key location, (for both signing and encryption keys),
+ * use the {@link JwtParserBuilder#setKeyLocator(Locator)} to configure a parser with your desired Key locator instead
+ * of using a {@code SigningKeyResolver}. Also see {@link LocatorAdapter} for the Adapter pattern parallel of this
+ * class. <b>This {@code SigningKeyResolverAdapter} class will be removed before the 1.0 release.</b></p>
+ *
+ * <h4>Previous Documentation</h4>
  * An <a href="http://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
  * {@link SigningKeyResolver} interface that allows subclasses to process only the type of JWS body that
  * is known/expected for a particular case.
  *
+ * <h4>Previous Documentation</h4>
  * <p>The {@link #resolveSigningKey(JwsHeader, Claims)} and {@link #resolveSigningKey(JwsHeader, String)} method
  * implementations delegate to the
  * {@link #resolveSigningKeyBytes(JwsHeader, Claims)} and {@link #resolveSigningKeyBytes(JwsHeader, String)} methods
@@ -36,17 +45,22 @@ import java.security.Key;
  * are not overridden, one (or both) of the *KeyBytes variants must be overridden depending on your expected
  * use case.  You do not have to override any method that does not represent an expected condition.</p>
  *
+ * @see io.jsonwebtoken.JwtParserBuilder#setKeyLocator(Locator)
+ * @see LocatorAdapter
  * @since 0.4
+ * @deprecated since JJWT_RELEASE_VERSION. Use {@link LocatorAdapter LocatorAdapter} with
+ * {@link JwtParserBuilder#setKeyLocator(Locator)}
  */
+@Deprecated
 public class SigningKeyResolverAdapter implements SigningKeyResolver {
 
     @Override
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
         SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
         Assert.isTrue(alg.isHmac(), "The default resolveSigningKey(JwsHeader, Claims) implementation cannot be " +
-                                    "used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
-                                    "Override the resolveSigningKey(JwsHeader, Claims) method instead and return a " +
-                                    "Key instance appropriate for the " + alg.name() + " algorithm.");
+            "used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
+            "Override the resolveSigningKey(JwsHeader, Claims) method instead and return a " +
+            "Key instance appropriate for the " + alg.name() + " algorithm.");
         byte[] keyBytes = resolveSigningKeyBytes(header, claims);
         return new SecretKeySpec(keyBytes, alg.getJcaName());
     }
@@ -55,9 +69,9 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
     public Key resolveSigningKey(JwsHeader header, String plaintext) {
         SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
         Assert.isTrue(alg.isHmac(), "The default resolveSigningKey(JwsHeader, String) implementation cannot be " +
-                                    "used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
-                                    "Override the resolveSigningKey(JwsHeader, String) method instead and return a " +
-                                    "Key instance appropriate for the " + alg.name() + " algorithm.");
+            "used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
+            "Override the resolveSigningKey(JwsHeader, String) method instead and return a " +
+            "Key instance appropriate for the " + alg.name() + " algorithm.");
         byte[] keyBytes = resolveSigningKeyBytes(header, plaintext);
         return new SecretKeySpec(keyBytes, alg.getJcaName());
     }
@@ -76,9 +90,9 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
      */
     public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
         throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
-                                          "Claims JWS signing key resolution.  Consider overriding either the " +
-                                          "resolveSigningKey(JwsHeader, Claims) method or, for HMAC algorithms, the " +
-                                          "resolveSigningKeyBytes(JwsHeader, Claims) method.");
+            "Claims JWS signing key resolution.  Consider overriding either the " +
+            "resolveSigningKey(JwsHeader, Claims) method or, for HMAC algorithms, the " +
+            "resolveSigningKeyBytes(JwsHeader, Claims) method.");
     }
 
     /**
@@ -86,14 +100,14 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
      * key bytes.  This implementation simply throws an exception: if the JWS parsed is a plaintext JWS, you must
      * override this method or the {@link #resolveSigningKey(JwsHeader, String)} method instead.
      *
-     * @param header the parsed {@link JwsHeader}
+     * @param header  the parsed {@link JwsHeader}
      * @param payload the parsed String plaintext payload
      * @return the signing key bytes to use to verify the JWS signature.
      */
     public byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
         throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
-                                          "plaintext JWS signing key resolution.  Consider overriding either the " +
-                                          "resolveSigningKey(JwsHeader, String) method or, for HMAC algorithms, the " +
-                                          "resolveSigningKeyBytes(JwsHeader, String) method.");
+            "plaintext JWS signing key resolution.  Consider overriding either the " +
+            "resolveSigningKey(JwsHeader, String) method or, for HMAC algorithms, the " +
+            "resolveSigningKeyBytes(JwsHeader, String) method.");
     }
 }

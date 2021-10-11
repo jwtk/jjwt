@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.IdRegistry;
@@ -121,6 +122,18 @@ public final class KeyAlgorithmsBridge {
         };
     }
 
+    private static char randomChar() {
+        return (char) Randoms.secureRandom().nextInt(Character.MAX_VALUE);
+    }
+
+    private static char[] randomChars(int length) {
+        char[] chars = new char[length];
+        for(int i = 0; i < length; i++) {
+            chars[i] = randomChar();
+        }
+        return chars;
+    }
+
     public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
 
         // The number of computational samples that land in our 'sweet spot' timing range matching desiredMillis.
@@ -129,17 +142,16 @@ public final class KeyAlgorithmsBridge {
         // reasonably close to desiredMillis:
         final int NUM_SAMPLES = 30;
         final int SKIP = 3;
+        // More important than the actual password (or characters) is the password length.
+        // 8 characters is a commonly-found minimum required length in many systems circa 2021.
+        final int PASSWORD_LENGTH = 8;
 
-        // This is used by `alg` to generate an encryption key during the PBE attempt.  While technically the time to
-        // generate this key during the alg call is not part of the hashing time and shouldn't be counted towards
-        // desiredMillis, in practice, this is so fast (about ~ 3 milliseconds total aggregated across all
-        // NUM_SAMPLES on a developer laptop), it is in practice negligible, so we won't need to adjust our
-        // timing logic below to account for this.
-        SymmetricAeadAlgorithm encAlg = EncryptionAlgorithms.A128GCM;
+        final JweHeader HEADER = new DefaultJweHeader(); // not used during execution, needed to satisfy API call.
+        final SymmetricAeadAlgorithm ENC_ALG = EncryptionAlgorithms.A128GCM; // not used, needed to satisfy API
 
-        // Strip away all things that cause time during computation except for the actual hashing algorithm:
         if (alg instanceof Pbes2HsAkwAlgorithm) {
-            alg = lean((Pbes2HsAkwAlgorithm) alg); //strip out everything except for the computation we care about
+            // Strip away all things that cause time during computation except for the actual hashing algorithm:
+            alg = lean((Pbes2HsAkwAlgorithm) alg);
         }
 
         int workFactor = 1000; // same as iterations for PBKDF2.  Different concept for Bcrypt/Scrypt
@@ -147,8 +159,10 @@ public final class KeyAlgorithmsBridge {
         List<Point> points = new ArrayList<>(NUM_SAMPLES);
         for (int i = 0; points.size() < NUM_SAMPLES; i++) {
 
-            PbeKey pbeKey = Keys.forPbe().setPassword("12345678").setWorkFactor(workFactor).build();
-            KeyRequest<SecretKey, PbeKey> request = new DefaultKeyRequest<>(null, null, null, pbeKey, new DefaultJweHeader(), encAlg);
+            char[] password = randomChars(PASSWORD_LENGTH);
+            PbeKey pbeKey = Keys.forPbe().setPassword(password).setWorkFactor(workFactor).build();
+            KeyRequest<SecretKey, PbeKey> request =
+                new DefaultKeyRequest<>(null, null, null, pbeKey, HEADER, ENC_ALG);
 
             long start = System.currentTimeMillis();
             alg.getEncryptionKey(request); // <-- Computation occurs here.  Don't need the result, just need to exec

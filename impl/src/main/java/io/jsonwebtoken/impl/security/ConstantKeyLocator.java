@@ -4,9 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.LocatorAdapter;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.security.LocatorAdapter;
 
 import java.security.Key;
 
