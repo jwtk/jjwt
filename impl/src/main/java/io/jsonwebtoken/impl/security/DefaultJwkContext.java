@@ -66,10 +66,10 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         SETTERS = java.util.Collections.unmodifiableMap(s);
     }
 
-    private final Map<String, Object> values;
-    private final Map<String, Object> canonicalValues;
-    private final Map<String, Object> redactedValues;
-    private final Set<String> privateMemberNames;
+    private final Map<String, Object> values; // canonical values formatted per RFC requirements
+    private final Map<String, Object> idiomaticValues; // the values map with any string/encoded values converted to Java type-safe values where possible
+    private final Map<String, Object> redactedValues; // the values map with any sensitive/secret values redacted.  Used in the toString implementation.
+    private final Set<String> privateMemberNames; // names of values that should be redacted for toString output
     private K key;
     private PublicKey publicKey;
     private Provider provider;
@@ -84,7 +84,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     public DefaultJwkContext(Set<String> privateMemberNames) {
         this.privateMemberNames = Assert.notEmpty(privateMemberNames, "privateMemberNames cannot be null or empty.");
         this.values = new LinkedHashMap<>();
-        this.canonicalValues = new LinkedHashMap<>();
+        this.idiomaticValues = new LinkedHashMap<>();
         this.redactedValues = new LinkedHashMap<>();
     }
 
@@ -111,7 +111,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         DefaultJwkContext<?> src = (DefaultJwkContext<?>) other;
         this.provider = other.getProvider();
         this.values = new LinkedHashMap<>(src.values);
-        this.canonicalValues = new LinkedHashMap<>(src.canonicalValues);
+        this.idiomaticValues = new LinkedHashMap<>(src.idiomaticValues);
         this.redactedValues = new LinkedHashMap<>(src.redactedValues);
         if (removePrivate) {
             for (String name : this.privateMemberNames) {
@@ -126,7 +126,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         } else {
             Object redactedValue = this.privateMemberNames.contains(name) ? AbstractJwk.REDACTED_VALUE : value;
             this.redactedValues.put(name, redactedValue);
-            this.canonicalValues.put(name, value);
+            this.idiomaticValues.put(name, value);
             return this.values.put(name, value);
         }
     }
@@ -139,13 +139,15 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         } else if (Objects.isArray(value) && !value.getClass().getComponentType().isPrimitive()) {
             value = Collections.arrayToList(value);
         }
-        return doPut(name, value);
+        return idiomaticPut(name, value);
     }
 
-    private Object doPut(String name, Object value) {
+    // ensures that if a property name matches an RFC-specified name, that value can be represented
+    // as an idiomatic type-safe Java value in addition to the canonical RFC/encoded value.
+    private Object idiomaticPut(String name, Object value) {
         assert name != null; //asserted by caller.
         Canonicalizer<?> fn = SETTERS.get(name);
-        if (fn != null) { //Setting a JWA-standard property - let's ensure we can represent it canonically:
+        if (fn != null) { //Setting a JWA-standard property - let's ensure we can represent it idiomatically:
             return fn.apply(this, value);
         } else { //non-standard/custom property:
             return nullSafePut(name, value);
@@ -153,17 +155,17 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public JwkContext<K> putAll(Map<? extends String, ?> m) {
+    public void putAll(Map<? extends String, ?> m) {
         Assert.notEmpty(m, "JWK values cannot be null or empty.");
         for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
-        return this;
     }
 
-    private Object remove(String key) {
+    @Override
+    public Object remove(Object key) {
         this.redactedValues.remove(key);
-        this.canonicalValues.remove(key);
+        this.idiomaticValues.remove(key);
         return this.values.remove(key);
     }
 
@@ -178,7 +180,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public boolean containsKey(String key) {
+    public boolean containsKey(Object key) {
         return this.values.containsKey(key);
     }
 
@@ -188,8 +190,13 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public Object get(String key) {
+    public Object get(Object key) {
         return this.values.get(key);
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException("Cannot clear JwkContext objects.");
     }
 
     @Override
@@ -208,13 +215,8 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     }
 
     @Override
-    public Map<String, Object> getValues() {
-        return this.values;
-    }
-
-    @Override
     public String getAlgorithm() {
-        return (String) this.canonicalValues.get(AbstractJwk.ALGORITHM);
+        return (String) this.values.get(AbstractJwk.ALGORITHM);
     }
 
     @Override
@@ -225,7 +227,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public String getId() {
-        return (String) this.canonicalValues.get(AbstractJwk.ID);
+        return (String) this.values.get(AbstractJwk.ID);
     }
 
     @Override
@@ -237,7 +239,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     @Override
     public Set<String> getOperations() {
         //noinspection unchecked
-        return (Set<String>) this.canonicalValues.get(AbstractJwk.OPERATIONS);
+        return (Set<String>) this.idiomaticValues.get(AbstractJwk.OPERATIONS);
     }
 
     @Override
@@ -248,7 +250,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public String getType() {
-        return (String) this.canonicalValues.get(AbstractJwk.TYPE);
+        return (String) this.values.get(AbstractJwk.TYPE);
     }
 
     @Override
@@ -259,7 +261,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public String getPublicKeyUse() {
-        return (String) this.canonicalValues.get(AbstractAsymmetricJwk.PUBLIC_KEY_USE);
+        return (String) this.values.get(AbstractAsymmetricJwk.PUBLIC_KEY_USE);
     }
 
     @Override
@@ -271,7 +273,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
     @Override
     public List<X509Certificate> getX509CertificateChain() {
         //noinspection unchecked
-        return (List<X509Certificate>) this.canonicalValues.get(AbstractAsymmetricJwk.X509_CERT_CHAIN);
+        return (List<X509Certificate>) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_CERT_CHAIN);
     }
 
     @Override
@@ -282,7 +284,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public byte[] getX509CertificateSha1Thumbprint() {
-        return (byte[]) this.canonicalValues.get(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT);
+        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT);
     }
 
     @Override
@@ -293,7 +295,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public byte[] getX509CertificateSha256Thumbprint() {
-        return (byte[]) this.canonicalValues.get(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT);
+        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT);
     }
 
     @Override
@@ -304,7 +306,7 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public URI getX509Url() {
-        return (URI) this.canonicalValues.get(AbstractAsymmetricJwk.X509_URL);
+        return (URI) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_URL);
     }
 
     @Override
@@ -353,18 +355,13 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = hash * 31 + Objects.nullSafeHashCode(this.key);
-        hash = hash * 31 + Objects.nullSafeHashCode(this.values);
-        return hash;
+        return this.values.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DefaultJwkContext) {
-            DefaultJwkContext<?> c = (DefaultJwkContext<?>) obj;
-            return Objects.nullSafeEquals(this.key, c.key) &&
-                Objects.nullSafeEquals(this.values, c.values);
+        if (obj instanceof Map) {
+            return this.values.equals(obj);
         }
         return false;
     }
@@ -403,23 +400,23 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         public T apply(DefaultJwkContext<?> ctx, Object rawValue) {
 
             if (JwtMap.isReduceableToNull(rawValue)) {
-                //noinspection unchecked
-                return (T) ctx.remove(id);
+                ctx.remove(id);
+                return null;
             }
 
-            T canonicalValue;
-            Object encodedValue;
+            T idiomaticValue; // preferred Java format
+            Object canonicalValue; //as required by the RFC
             try {
-                canonicalValue = converter.applyFrom(rawValue);
-                encodedValue = converter.applyTo(canonicalValue);
+                idiomaticValue = converter.applyFrom(rawValue);
+                canonicalValue = converter.applyTo(idiomaticValue);
             } catch (Exception e) {
-                String msg = "Invalid JWK " + title + "('" + id + "') value [" + rawValue + "]: " + e.getMessage();
+                String msg = "Invalid JWK '" + id + "' (" + title + ") value [" + rawValue + "]: " + e.getMessage();
                 throw new MalformedKeyException(msg, e);
             }
-            ctx.nullSafePut(id, encodedValue);
-            ctx.canonicalValues.put(id, canonicalValue);
+            ctx.nullSafePut(id, canonicalValue);
+            ctx.idiomaticValues.put(id, idiomaticValue);
             //noinspection unchecked
-            return (T) encodedValue;
+            return (T) canonicalValue;
         }
     }
 }

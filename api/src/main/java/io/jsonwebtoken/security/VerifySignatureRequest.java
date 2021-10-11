@@ -5,7 +5,5 @@ import java.security.Key;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface VerifySignatureRequest<K extends Key> extends SignatureRequest<K> {
-
-    byte[] getSignature();
+public interface VerifySignatureRequest<K extends Key> extends SignatureRequest<K>, DigestSupplier {
 }

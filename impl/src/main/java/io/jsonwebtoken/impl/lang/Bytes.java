@@ -66,7 +66,7 @@ public final class Bytes {
         return ints;
     }
 
-    public static byte[] plus(byte[]... arrays) {
+    public static byte[] concat(byte[]... arrays) {
         int len = 0;
         int count = Arrays.length(arrays);
         for(int i = 0; i < count; i++) {
@@ -88,6 +88,14 @@ public final class Bytes {
 
     public static long bitLength(byte[] bytes) {
         return bytes == null ? 0 : bytes.length * (long)Byte.SIZE;
+    }
+
+    public static String bitsMsg(long bitLength) {
+        return bitLength + " bits (" + bitLength / Byte.SIZE + " bytes)";
+    }
+
+    public static String bytesMsg(int byteArrayLength) {
+        return bitsMsg((long)byteArrayLength * Byte.SIZE);
     }
 
     public static void increment(byte[] a) {

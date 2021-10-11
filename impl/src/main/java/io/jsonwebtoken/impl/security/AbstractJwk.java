@@ -62,10 +62,7 @@ abstract class AbstractJwk<K extends Key> implements Jwk<K> {
 
     @Override
     public boolean containsKey(Object key) {
-        if (key instanceof String) {
-            return this.context.containsKey((String) key);
-        }
-        return false;
+        return this.context.containsKey(key);
     }
 
     @Override
@@ -75,10 +72,7 @@ abstract class AbstractJwk<K extends Key> implements Jwk<K> {
 
     @Override
     public Object get(Object key) {
-        if (key instanceof String) {
-            return this.context.get((String) key);
-        }
-        return null;
+        return this.context.get(key);
     }
 
     @Override
@@ -132,9 +126,8 @@ abstract class AbstractJwk<K extends Key> implements Jwk<K> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof AbstractJwk) {
-            AbstractJwk<?> other = (AbstractJwk<?>) obj;
-            return this.context.equals(other.context);
+        if (obj instanceof Map) {
+            return this.context.equals(obj);
         }
         return false;
     }

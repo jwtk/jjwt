@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.SecurityRequest;
 
@@ -30,17 +31,20 @@ abstract class CryptoAlgorithm implements Identifiable {
     }
 
     SecureRandom ensureSecureRandom(SecurityRequest request) {
-        Assert.notNull(request, "request cannot be null.");
-        SecureRandom random = request.getSecureRandom();
+        SecureRandom random = request != null ? request.getSecureRandom() : null;
         return random != null ? random : Randoms.secureRandom();
     }
 
-    protected <I, T> T execute(SecurityRequest request, Class<I> clazz, InstanceCallback<I, T> callback) {
+    protected <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) {
+        return new JcaTemplate(getJcaName(), null).execute(clazz, fn);
+    }
+
+    protected <I, T> T execute(SecurityRequest request, Class<I> clazz, CheckedFunction<I, T> fn) {
         Assert.notNull(request, "request cannot be null.");
         Provider provider = request.getProvider();
         SecureRandom random = ensureSecureRandom(request);
         JcaTemplate template = new JcaTemplate(getJcaName(), provider, random);
-        return template.execute(clazz, callback);
+        return template.execute(clazz, fn);
     }
 
     @Override

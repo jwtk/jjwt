@@ -49,7 +49,7 @@ class EncryptionAlgorithmsTest {
 
             def result = alg.encrypt(request)
 
-            byte[] tag = result.getAuthenticationTag() //there is always a tag, even if there is no AAD
+            byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
 
             byte[] ciphertext = result.getPayload()
@@ -87,7 +87,7 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getAuthenticationTag(), result.getInitializationVector());
+            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getDigest(), result.getInitializationVector());
             byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }

@@ -293,7 +293,7 @@ public interface JwtParserBuilder {
      *     .parseClaimsJws(compact);
      * </pre>
      * <p>
-     * <p>A {@code KeyResolver} is invoked once during parsing before performing decryption or signature verification.</p>
+     * <p>A Key {@code Locator} is invoked once during parsing before performing decryption or signature verification.</p>
      *
      * @param keyLocator the locator used to retrieve decryption or signature verification keys.
      * @return the parser builder for method chaining.

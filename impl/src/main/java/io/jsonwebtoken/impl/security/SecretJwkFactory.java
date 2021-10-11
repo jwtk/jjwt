@@ -1,10 +1,9 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
@@ -58,18 +57,8 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
     @Override
     protected SecretJwk createJwkFromValues(JwkContext<SecretKey> ctx) {
-        String encoded = getRequiredString(ctx, DefaultSecretJwk.K);
-        byte[] bytes;
-        try {
-            bytes = Decoders.BASE64URL.decode(encoded);
-            if (Arrays.length(bytes) == 0) {
-                throw new IllegalArgumentException("JWK 'k' member does not have any encoded bytes. JWK: {" + ctx + "}");
-            }
-        } catch (Exception e) {
-            String msg = "Unable to Base64Url-decode " + DefaultSecretJwk.TYPE_VALUE +
-                " JWK 'k' member value. JWK: {" + ctx + "}";
-            throw new MalformedKeyException(msg, e);
-        }
+        ValueGetter getter = new DefaultValueGetter(ctx);
+        byte[] bytes = getter.getRequiredBytes(DefaultSecretJwk.K);
         SecretKey key = new SecretKeySpec(bytes, "NONE"); //TODO: do we need a JCA-specific ID here?
         ctx.setKey(key);
         return new DefaultSecretJwk(ctx);

@@ -122,13 +122,13 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     }
 
     @Override
-    public T setHeader(Map<String, Object> header) {
+    public T setHeader(Map<String, ?> header) {
         this.header = new DefaultHeader<>(header);
         return (T)this;
     }
 
     @Override
-    public T setHeaderParams(Map<String, Object> params) {
+    public T setHeaderParams(Map<String, ?> params) {
         if (!Collections.isEmpty(params)) {
             Header<?> header = ensureHeader();
             header.putAll(params);
@@ -237,7 +237,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     }
 
     @Override
-    public T addClaims(Map<String, Object> claims) {
+    public T addClaims(Map<String, ?> claims) {
         ensureClaims().putAll(claims);
         return (T)this;
     }

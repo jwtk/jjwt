@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.security.CryptoException;
@@ -32,34 +33,34 @@ public class JcaTemplate {
         this.secureRandom = Assert.notNull(secureRandom, "SecureRandom cannot be null.");
     }
 
-    public <I, T> T execute(Class<I> clazz, InstanceCallback<I, T> callback) throws CryptoException {
-        return execute(new JcaInstanceSupplier<>(clazz, this.jcaName, this.provider), callback);
+    public <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws CryptoException {
+        return execute(new JcaInstanceSupplier<>(clazz, this.jcaName, this.provider), fn);
     }
 
-    public SecretKey generateSecretKey(final int keyLength) {
-        return execute(KeyGenerator.class, new InstanceCallback<KeyGenerator, SecretKey>() {
+    public SecretKey generateSecretKey(final int keyBitLength) {
+        return execute(KeyGenerator.class, new CheckedFunction<KeyGenerator, SecretKey>() {
             @Override
-            public SecretKey doWithInstance(KeyGenerator generator) {
-                generator.init(keyLength, secureRandom);
+            public SecretKey apply(KeyGenerator generator) {
+                generator.init(keyBitLength, secureRandom);
                 return generator.generateKey();
             }
         });
     }
 
-    public KeyPair generateKeyPair(final int keyLength) {
-        return execute(KeyPairGenerator.class, new InstanceCallback<KeyPairGenerator, KeyPair>() {
+    public KeyPair generateKeyPair(final int keyBitLength) {
+        return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
             @Override
-            public KeyPair doWithInstance(KeyPairGenerator generator) {
-                generator.initialize(keyLength, secureRandom);
+            public KeyPair apply(KeyPairGenerator generator) {
+                generator.initialize(keyBitLength, secureRandom);
                 return generator.generateKeyPair();
             }
         });
     }
 
-    private <I, T> T execute(JcaInstanceSupplier<I> supplier, InstanceCallback<I, T> callback) throws CryptoException {
+    private <T, R> R execute(JcaInstanceSupplier<T> supplier, CheckedFunction<T, R> callback) throws CryptoException {
         try {
-            I instance = supplier.getInstance();
-            return callback.doWithInstance(instance);
+            T instance = supplier.getInstance();
+            return callback.apply(instance);
         } catch (SecurityException se) {
             throw se; //propagate
         } catch (Exception e) {

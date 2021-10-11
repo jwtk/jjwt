@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Converters;
+import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -127,7 +128,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
     @Override
     protected RsaPrivateJwk createJwkFromValues(JwkContext<RSAPrivateKey> ctx) {
 
-        final BigInteger privateExponent = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.PRIVATE_EXPONENT, true);
+        final ValueGetter getter = new DefaultValueGetter(ctx);
+        final BigInteger privateExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.PRIVATE_EXPONENT, true);
 
         //The [JWA Spec, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
@@ -155,11 +157,11 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         KeySpec spec;
 
         if (containsOptional) { //if any one optional field exists, they are all required per JWA Section 6.3.2:
-            BigInteger firstPrime = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.FIRST_PRIME, true);
-            BigInteger secondPrime = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.SECOND_PRIME, true);
-            BigInteger firstCrtExponent = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, true);
-            BigInteger secondCrtExponent = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT, true);
-            BigInteger firstCrtCoefficient = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT, true);
+            BigInteger firstPrime = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FIRST_PRIME, true);
+            BigInteger secondPrime = getter.getRequiredBigInt(DefaultRsaPrivateJwk.SECOND_PRIME, true);
+            BigInteger firstCrtExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, true);
+            BigInteger secondCrtExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT, true);
+            BigInteger firstCrtCoefficient = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT, true);
 
             // Other Primes Info is actually optional even if the above ones are required:
             if (ctx.containsKey(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO)) {
@@ -226,9 +228,10 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                 ctx.put(name, entry.getValue());
             }
 
-            BigInteger prime = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.PRIME_FACTOR, true);
-            BigInteger primeExponent = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.FACTOR_CRT_EXPONENT, true);
-            BigInteger crtCoefficient = getRequiredBigInt(ctx, DefaultRsaPrivateJwk.FACTOR_CRT_COEFFICIENT, true);
+            final ValueGetter getter = new DefaultValueGetter(ctx);
+            BigInteger prime = getter.getRequiredBigInt(DefaultRsaPrivateJwk.PRIME_FACTOR, true);
+            BigInteger primeExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FACTOR_CRT_EXPONENT, true);
+            BigInteger crtCoefficient = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FACTOR_CRT_COEFFICIENT, true);
 
             return new RSAOtherPrimeInfo(prime, primeExponent, crtCoefficient);
         }

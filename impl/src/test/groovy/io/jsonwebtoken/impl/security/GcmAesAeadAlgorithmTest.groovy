@@ -51,7 +51,7 @@ class GcmAesAeadAlgorithmTest {
         def result = alg.encrypt(req)
 
         byte[] ciphertext = result.getPayload()
-        byte[] tag = result.getAuthenticationTag()
+        byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
         assertArrayEquals E, ciphertext

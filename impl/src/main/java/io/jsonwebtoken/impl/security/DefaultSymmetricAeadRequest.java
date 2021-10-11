@@ -1,13 +1,13 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.security.InitializationVectorSource;
+import io.jsonwebtoken.security.InitializationVectorSupplier;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultSymmetricAeadRequest extends DefaultCryptoRequest<byte[], SecretKey> implements SymmetricAeadRequest, InitializationVectorSource {
+public class DefaultSymmetricAeadRequest extends DefaultCryptoRequest<byte[], SecretKey> implements SymmetricAeadRequest, InitializationVectorSupplier {
 
     private final byte[] IV;
 

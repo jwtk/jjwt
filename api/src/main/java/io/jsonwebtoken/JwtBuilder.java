@@ -74,7 +74,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param header the header to set (and potentially replace any existing header).
      * @return the builder for method chaining.
      */
-    T setHeader(Map<String, Object> header);
+    T setHeader(Map<String, ?> header);
 
     /**
      * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method
@@ -83,7 +83,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param params the header name/value pairs to append to the header.
      * @return the builder for method chaining.
      */
-    T setHeaderParams(Map<String, Object> params);
+    T setHeaderParams(Map<String, ?> params);
 
     //sets the specified header parameter, overwriting any previous value under the same name.
 
@@ -141,7 +141,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder for method chaining.
      * @since 0.8
      */
-    T addClaims(Map<String, Object> claims);
+    T addClaims(Map<String, ?> claims);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">

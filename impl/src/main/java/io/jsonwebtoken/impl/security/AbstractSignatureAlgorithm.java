@@ -45,7 +45,7 @@ abstract class AbstractSignatureAlgorithm<SK extends Key, VK extends Key> extend
     public boolean verify(VerifySignatureRequest<VK> request) throws SecurityException {
         final VK key = Assert.notNull(request.getKey(), "Request key cannot be null.");
         Assert.notEmpty(request.getPayload(), "Request payload cannot be null or empty.");
-        Assert.notEmpty(request.getSignature(), "Request signature byte array cannot be null or empty.");
+        Assert.notEmpty(request.getDigest(), "Request signature byte array cannot be null or empty.");
         try {
             validateKey(key, false);
             return doVerify(request);
@@ -59,7 +59,7 @@ abstract class AbstractSignatureAlgorithm<SK extends Key, VK extends Key> extend
     }
 
     protected boolean doVerify(VerifySignatureRequest<VK> request) throws Exception {
-        byte[] providedSignature = request.getSignature();
+        byte[] providedSignature = request.getDigest();
         Assert.notEmpty(providedSignature, "Request signature byte array cannot be null or empty.");
         @SuppressWarnings("unchecked") byte[] computedSignature = sign((SignatureRequest<SK>)request);
         return MessageDigest.isEqual(providedSignature, computedSignature);

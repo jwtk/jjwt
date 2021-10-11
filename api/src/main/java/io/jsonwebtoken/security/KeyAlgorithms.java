@@ -4,8 +4,6 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
 
 /**
@@ -19,8 +17,9 @@ public final class KeyAlgorithms {
 
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeyAlgorithmsBridge";
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
+    private static final Class<?>[] ESTIMATE_ITERATIONS_ARG_TYPES = new Class[]{KeyAlgorithm.class, long.class};
 
-    public static Collection<SymmetricAeadAlgorithm> values() {
+    public static Collection<KeyAlgorithm<?, ?>> values() {
         return Classes.invokeStatic(BRIDGE_CLASSNAME, "values", null, (Object[]) null);
     }
 
@@ -49,16 +48,23 @@ public final class KeyAlgorithms {
     }
 
     public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = forId0("dir");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128KW = forId0("A128KW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192KW = forId0("A192KW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256KW = forId0("A256KW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A128GCMKW = forId0("A128GCMKW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A192GCMKW = forId0("A192GCMKW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> A256GCMKW = forId0("A256GCMKW");
-    public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA1_5 = forId0("RSA1_5");
-    public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA_OAEP = forId0("RSA-OAEP");
-    public static final EncryptedKeyAlgorithm<RSAPublicKey, RSAPrivateKey> RSA_OAEP_256 = forId0("RSA-OAEP-256");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
-    public static final EncryptedKeyAlgorithm<SecretKey, SecretKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
+    public static final KeyAlgorithm<SecretKey, SecretKey> A128KW = forId0("A128KW");
+    public static final KeyAlgorithm<SecretKey, SecretKey> A192KW = forId0("A192KW");
+    public static final KeyAlgorithm<SecretKey, SecretKey> A256KW = forId0("A256KW");
+    public static final KeyAlgorithm<SecretKey, SecretKey> A128GCMKW = forId0("A128GCMKW");
+    public static final KeyAlgorithm<SecretKey, SecretKey> A192GCMKW = forId0("A192GCMKW");
+    public static final KeyAlgorithm<SecretKey, SecretKey> A256GCMKW = forId0("A256GCMKW");
+    @SuppressWarnings("rawtypes")
+    public static final RsaKeyAlgorithm RSA1_5 = forId0("RSA1_5");
+    @SuppressWarnings("rawtypes")
+    public static final RsaKeyAlgorithm RSA_OAEP = forId0("RSA-OAEP");
+    @SuppressWarnings("rawtypes")
+    public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
+    public static final KeyAlgorithm<PbeKey, SecretKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
+    public static final KeyAlgorithm<PbeKey, SecretKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
+    public static final KeyAlgorithm<PbeKey, SecretKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
+
+    public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
+    }
 }

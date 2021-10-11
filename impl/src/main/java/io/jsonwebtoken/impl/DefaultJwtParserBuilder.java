@@ -216,7 +216,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder addEncryptionAlgorithms(Collection<SymmetricAeadAlgorithm> encAlgs) {
-        Assert.notEmpty(encAlgs, "Additional EncryptionAlgorithm collection cannot be null or empty.");
+        Assert.notEmpty(encAlgs, "Additional SymmetricAeadAlgorithm collection cannot be null or empty.");
         this.extraEncryptionAlgorithms.addAll(encAlgs);
         return this;
     }

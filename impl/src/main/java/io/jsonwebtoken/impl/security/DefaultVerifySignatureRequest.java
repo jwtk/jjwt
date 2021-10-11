@@ -17,7 +17,7 @@ public class DefaultVerifySignatureRequest<K extends Key> extends DefaultSignatu
     }
 
     @Override
-    public byte[] getSignature() {
+    public byte[] getDigest() {
         return this.signature;
     }
 }

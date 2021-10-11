@@ -1,13 +1,10 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.MalformedKeyException;
 
 import java.math.BigInteger;
 import java.security.Key;
@@ -16,35 +13,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> implements FamilyJwkFactory<K, J> {
-
-    static void malformed(String msg) {
-        throw new MalformedKeyException(msg);
-    }
-
-    static String getRequiredString(JwkContext<?> ctx, String name) {
-        Assert.notNull(ctx, "JWK map cannot be null or empty.");
-        Object value = ctx.get(name);
-        if (value == null) {
-            malformed("JWK is missing required case-sensitive '" + name + "' member.");
-        }
-        String s = String.valueOf(value);
-        if (!Strings.hasText(s)) {
-            malformed("JWK '" + name + "' member cannot be null or empty.");
-        }
-        return s;
-    }
-
-    static BigInteger getRequiredBigInt(JwkContext<?> ctx, String name, boolean sensitive) {
-        String s = getRequiredString(ctx, name);
-        try {
-            byte[] bytes = Decoders.BASE64URL.decode(s);
-            return new BigInteger(1, bytes);
-        } catch (Exception e) {
-            String val = sensitive ? AbstractJwk.REDACTED_VALUE : s;
-            String msg = "Unable to decode JWK member '" + name + "' to BigInteger from value: " + val;
-            throw new MalformedKeyException(msg, e);
-        }
-    }
 
     // Copied from Apache Commons Codec 1.14:
     // https://github.com/apache/commons-codec/blob/af7b94750e2178b8437d9812b28e36ac87a455f2/src/main/java/org/apache/commons/codec/binary/Base64.java#L746-L775
@@ -109,9 +77,9 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
     }
 
     protected <T extends Key> T generateKey(final JwkContext<?> ctx, final Class<T> type, final CheckedFunction<KeyFactory, T> fn) {
-        return new JcaTemplate(getId(), ctx.getProvider()).execute(KeyFactory.class, new InstanceCallback<KeyFactory, T>() {
+        return new JcaTemplate(getId(), ctx.getProvider()).execute(KeyFactory.class, new CheckedFunction<KeyFactory, T>() {
             @Override
-            public T doWithInstance(KeyFactory instance) throws Exception {
+            public T apply(KeyFactory instance) throws Exception {
                 try {
                     return fn.apply(instance);
                 } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

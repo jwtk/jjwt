@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.CryptoException;
@@ -29,9 +30,9 @@ final class ConcatKDF extends CryptoAlgorithm {
 
     ConcatKDF(String jcaName) {
         super("ConcatKDF", jcaName);
-        int hashByteLength = new JcaTemplate(jcaName, null).execute(MessageDigest.class, new InstanceCallback<MessageDigest, Integer>() {
+        int hashByteLength = execute(MessageDigest.class, new CheckedFunction<MessageDigest, Integer>() {
             @Override
-            public Integer doWithInstance(MessageDigest instance) {
+            public Integer apply(MessageDigest instance) {
                 return instance.getDigestLength();
             }
         });
@@ -74,9 +75,8 @@ final class ConcatKDF extends CryptoAlgorithm {
         }
         // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf, Section 5.8.1.1, Input requirement #2:
         if (derivedKeyBitLength > MAX_DERIVED_KEY_BIT_LENGTH) {
-            String msg = "derivedKeyBitLength for " + getJcaName() + " derived keys may not exceed " +
-                MAX_DERIVED_KEY_BIT_LENGTH + " bits (" + MAX_DERIVED_KEY_BIT_LENGTH / Byte.SIZE + " bytes).  " +
-                "Specified size: " + derivedKeyBitLength + " bits (" + derivedKeyBitLength / Byte.SIZE + " bytes).";
+            String msg = "derivedKeyBitLength for " + getJcaName() + "-derived keys may not exceed " +
+                bitsMsg(MAX_DERIVED_KEY_BIT_LENGTH) + ".  Specified size: " + bitsMsg(derivedKeyBitLength) + ".";
             throw new IllegalArgumentException(msg);
         }
 
@@ -94,11 +94,11 @@ final class ConcatKDF extends CryptoAlgorithm {
         long inputBitLength = bitLength(counter) + bitLength(Z) + bitLength(OtherInfo);
         assert inputBitLength <= MAX_HASH_INPUT_BIT_LENGTH : "Hash input is too large.";
 
-        byte[] derivedKeyBytes = new JcaTemplate(getJcaName(), null).execute(MessageDigest.class, new InstanceCallback<MessageDigest, byte[]>() {
+        byte[] derivedKeyBytes = new JcaTemplate(getJcaName(), null).execute(MessageDigest.class, new CheckedFunction<MessageDigest, byte[]>() {
             @Override
-            public byte[] doWithInstance(MessageDigest md) throws Exception {
+            public byte[] apply(MessageDigest md) throws Exception {
 
-                final ByteArrayOutputStream stream = new ByteArrayOutputStream((int)derivedKeyByteLength);
+                final ByteArrayOutputStream stream = new ByteArrayOutputStream((int) derivedKeyByteLength);
                 long kLastIndex = reps - 1;
 
                 // Section 5.8.1.1, Process step #5:
@@ -118,7 +118,7 @@ final class ConcatKDF extends CryptoAlgorithm {
                     // Section 5.8.1.1, Process step #6:
                     if (i == kLastIndex && repsd != (double) reps) { //repsd calculation above didn't result in a whole number:
                         long leftmostBitLength = derivedKeyBitLength % hashBitLength;
-                        int leftmostByteLength = (int)(leftmostBitLength / Byte.SIZE);
+                        int leftmostByteLength = (int) (leftmostBitLength / Byte.SIZE);
                         byte[] kLast = new byte[leftmostByteLength];
                         System.arraycopy(Ki, 0, kLast, 0, kLast.length);
                         Ki = kLast;

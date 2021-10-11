@@ -16,8 +16,10 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
+import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 
@@ -27,6 +29,8 @@ import java.security.KeyPair;
  * @since 0.10.0
  */
 public final class Keys {
+
+    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
 
     //prevent instantiation
     private Keys() {
@@ -115,7 +119,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SignatureAlgorithm<?,?> salg = SignatureAlgorithms.forId(alg.name());
+        SignatureAlgorithm<?, ?> salg = SignatureAlgorithms.forId(alg.name());
         if (!(salg instanceof SecretKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -210,12 +214,20 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SignatureAlgorithm<?,?> salg = SignatureAlgorithms.forId(alg.name());
+        SignatureAlgorithm<?, ?> salg = SignatureAlgorithms.forId(alg.name());
         if (!(salg instanceof AsymmetricKeySignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);
         }
-        AsymmetricKeySignatureAlgorithm<?,?> asalg = ((AsymmetricKeySignatureAlgorithm<?,?>) salg);
+        AsymmetricKeySignatureAlgorithm<?, ?> asalg = ((AsymmetricKeySignatureAlgorithm<?, ?>) salg);
         return asalg.generateKeyPair();
+    }
+
+    public static PbeKey toPbeKey(PBEKey key) {
+        return forPbe().forKey(key).build();
+    }
+
+    public static PbeKeyBuilder<PbeKey> forPbe() {
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forPbe", null, (Object[]) null);
     }
 }

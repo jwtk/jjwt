@@ -3,7 +3,7 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface InitializationVectorSource {
+public interface InitializationVectorSupplier {
 
     /**
      * Returns the secure-random initialization vector used during encryption that must be presented in order

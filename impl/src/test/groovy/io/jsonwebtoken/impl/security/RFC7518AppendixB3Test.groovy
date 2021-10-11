@@ -74,7 +74,7 @@ class RFC7518AppendixB3Test {
         AeadResult result = alg.encrypt(req)
 
         byte[] resultCiphertext = result.getPayload()
-        byte[] resultTag = result.getAuthenticationTag();
+        byte[] resultTag = result.getDigest();
         byte[] resultIv = result.getInitializationVector();
 
         assertArrayEquals E, resultCiphertext

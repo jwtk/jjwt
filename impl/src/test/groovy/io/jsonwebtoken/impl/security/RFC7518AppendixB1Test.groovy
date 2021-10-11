@@ -74,7 +74,7 @@ class RFC7518AppendixB1Test {
         def result = alg.encrypt(request);
 
         byte[] ciphertext = result.getPayload()
-        byte[] tag = result.getAuthenticationTag()
+        byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
         assertArrayEquals E, ciphertext

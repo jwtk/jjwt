@@ -13,8 +13,8 @@ public class DefaultCryptoRequest<T, K extends Key> extends DefaultPayloadSuppli
     private final SecureRandom secureRandom;
     private final K key;
 
-    public DefaultCryptoRequest(Provider provider, SecureRandom secureRandom, T data, K key) {
-        super(data);
+    public DefaultCryptoRequest(Provider provider, SecureRandom secureRandom, T payload, K key) {
+        super(payload);
         this.provider = provider;
         this.secureRandom = secureRandom;
         this.key = Assert.notNull(key, "key cannot be null.");

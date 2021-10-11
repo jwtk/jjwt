@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -134,9 +135,9 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
 
     @Override
     public byte[] doSign(final SignatureRequest<SecretKey> request) throws Exception {
-        return execute(request, Mac.class, new InstanceCallback<Mac, byte[]>() {
+        return execute(request, Mac.class, new CheckedFunction<Mac, byte[]>() {
             @Override
-            public byte[] doWithInstance(Mac mac) throws Exception {
+            public byte[] apply(Mac mac) throws Exception {
                 mac.init(request.getKey());
                 return mac.doFinal(request.getPayload());
             }

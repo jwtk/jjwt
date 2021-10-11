@@ -2,24 +2,24 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
+import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Arrays
-
-import javax.crypto.SecretKey
-import java.nio.charset.StandardCharsets
-
-import static org.junit.Assert.*
-
 import io.jsonwebtoken.security.EncryptionAlgorithms
 import org.junit.Test
 
 import javax.crypto.Cipher
+import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import java.nio.charset.StandardCharsets
+
+import static org.junit.Assert.*
 
 class AesGcmKeyAlgorithmTest {
 
     /**
-     * This tests asserts that our EncyrptionAlgorithm implementation and the JCA 'AES/GCM/NoPadding' wrap algorithm
+     * This tests asserts that our SymmetricAeadAlgorithm implementation and the JCA 'AES/GCM/NoPadding' wrap algorithm
      * produce the exact same values.  This should be the case when the transformation is identical, even though
      * one uses Cipher.WRAP_MODE and the other uses a raw plaintext byte array.
      */
@@ -35,9 +35,9 @@ class AesGcmKeyAlgorithmTest {
         def cek = alg.generateKey();
 
         JcaTemplate template = new JcaTemplate("AES/GCM/NoPadding", null)
-        byte[] jcaResult = template.execute(Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        byte[] jcaResult = template.execute(Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            byte[] doWithInstance(Cipher cipher) throws Exception {
+            byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.WRAP_MODE, kek, new GCMParameterSpec(128, iv))
                 return cipher.wrap(cek)
             }
@@ -55,7 +55,7 @@ class AesGcmKeyAlgorithmTest {
         def encRequest = new DefaultSymmetricAeadRequest(null, null, cek.getEncoded(), kek, null, iv)
         def encResult = EncryptionAlgorithms.A256GCM.encrypt(encRequest)
 
-        assertArrayEquals resultA.authenticationTag, encResult.authenticationTag
+        assertArrayEquals resultA.digest, encResult.digest
         assertArrayEquals resultA.initializationVector, encResult.initializationVector
         assertArrayEquals resultA.payload, encResult.payload
     }
@@ -70,16 +70,21 @@ class AesGcmKeyAlgorithmTest {
         def header = new DefaultJweHeader()
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
+        def enc = new GcmAesAeadAlgorithm(keyLength) {
+            @Override
+            SecretKey generateKey() {
+                return cek;
+            }
+        }
 
-        def ereq = new DefaultKeyRequest(null, null, cek, kek, header)
+        def ereq = new DefaultKeyRequest(null, null, cek, kek, header, enc)
 
         def result = alg.getEncryptionKey(ereq)
-        header.putAll(result.getHeaderParams())
 
         byte[] encryptedKeyBytes = result.getPayload()
         assertFalse "encryptedKey must be populated", Arrays.length(encryptedKeyBytes) == 0
 
-        def dcek = alg.getDecryptionKey(new DefaultKeyRequest<byte[], SecretKey>(null, null, encryptedKeyBytes, kek, header))
+        def dcek = alg.getDecryptionKey(new DefaultKeyRequest<byte[], SecretKey>(null, null, encryptedKeyBytes, kek, header, enc))
 
         //Assert the decrypted key matches the original cek
         assertEquals cek.algorithm, dcek.algorithm
@@ -100,16 +105,21 @@ class AesGcmKeyAlgorithmTest {
         def header = new DefaultJweHeader()
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
-        def ereq = new DefaultKeyRequest(null, null, cek, kek, header)
+        def enc = new GcmAesAeadAlgorithm(keyLength) {
+            @Override
+            SecretKey generateKey() {
+                return cek
+            }
+        }
+        def ereq = new DefaultKeyRequest(null, null, cek, kek, header, enc)
         def result = alg.getEncryptionKey(ereq)
-        header.putAll(result.getHeaderParams())
 
         header.put(headerName, value) //null value will remove it
 
         byte[] encryptedKeyBytes = result.getPayload()
 
         try {
-            alg.getDecryptionKey(new DefaultKeyRequest<byte[], SecretKey>(null, null, encryptedKeyBytes, kek, header))
+            alg.getDecryptionKey(new DefaultKeyRequest<byte[], SecretKey>(null, null, encryptedKeyBytes, kek, header, enc))
             fail()
         } catch (MalformedJwtException iae) {
             assertEquals exmsg, iae.getMessage()
@@ -117,17 +127,16 @@ class AesGcmKeyAlgorithmTest {
     }
 
     String missing(String name) {
-        return "The A128GCMKW Key Management Algorithm requires a JweHeader '${name}' value." as String
+        return "JWE header is missing required '${name}' value." as String
     }
-
     String type(String name) {
-        return "The A128GCMKW Key Management Algorithm requires the JweHeader '${name}' value to be a Base64URL-encoded String. Actual type: java.lang.Integer" as String
+        return "JWE header '${name}' value must be a String. Actual type: java.lang.Integer" as String
     }
     String base64Url(String name) {
-        return "JweHeader '${name}' value 'T#ZW@#' does not appear to be a valid Base64URL String: Illegal base64url character: '#'"
+        return "JWE header '${name}' value is not a valid Base64URL String: Illegal base64url character: '#'"
     }
-    String length(String name, int requiredLen) {
-        return "The 'A128GCMKW' key management algorithm requires the JweHeader '${name}' value to be ${requiredLen * Byte.SIZE} bits (${requiredLen} bytes) in length. Actual length: 16 bits (2 bytes)."
+    String length(String name, int requiredBitLength) {
+        return "JWE header '${name}' decoded byte array must be ${Bytes.bitsMsg(requiredBitLength)} long. Actual length: ${Bytes.bitsMsg(16)}."
     }
 
     @Test
@@ -151,7 +160,7 @@ class AesGcmKeyAlgorithmTest {
     @Test
     void testIncorrectLengths() {
         def value = Encoders.BASE64URL.encode("hi".getBytes(StandardCharsets.US_ASCII))
-        testDecryptionHeader('iv', value, length('iv', 12))
-        testDecryptionHeader('tag', value, length('tag', 16))
+        testDecryptionHeader('iv', value, length('iv', 96))
+        testDecryptionHeader('tag', value, length('tag', 128))
     }
 }

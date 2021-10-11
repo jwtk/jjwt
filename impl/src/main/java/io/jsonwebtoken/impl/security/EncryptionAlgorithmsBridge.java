@@ -40,7 +40,7 @@ public class EncryptionAlgorithmsBridge {
     public static SymmetricAeadAlgorithm forId(String id) {
         SymmetricAeadAlgorithm alg = findById(id);
         if (alg == null) {
-            String msg = "Unrecognized JWA EncryptionAlgorithm identifier: " + id;
+            String msg = "Unrecognized JWA SymmetricAeadAlgorithm identifier: " + id;
             throw new UnsupportedJwtException(msg);
         }
         return alg;

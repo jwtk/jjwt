@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.CryptoRequest;
@@ -46,12 +47,12 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
 
     @Override
     public SecretKey generateKey() {
-        return new JcaTemplate("AES", null).generateSecretKey(this.keyLength * 2);
+        return new JcaTemplate("AES", null).generateSecretKey(this.keyBitLength * 2);
     }
 
     byte[] assertKeyBytes(CryptoRequest<?, SecretKey> request) {
         SecretKey key = Assert.notNull(request.getKey(), "Request key cannot be null.");
-        return validateLength(key, this.keyLength * 2, true);
+        return validateLength(key, this.keyBitLength * 2, true);
     }
 
     @Override
@@ -70,9 +71,9 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        final byte[] ciphertext = execute(req, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        final byte[] ciphertext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            public byte[] doWithInstance(Cipher cipher) throws Exception {
+            public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, ivSpec);
                 return cipher.doFinal(plaintext);
             }
@@ -135,7 +136,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
 
         final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request payload (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
-        final byte[] tag = assertTag(req.getAuthenticationTag());
+        final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
@@ -147,9 +148,9 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
             throw new SignatureException(msg);
         }
 
-        byte[] plaintext = execute(req, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        byte[] plaintext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            public byte[] doWithInstance(Cipher cipher) throws Exception {
+            public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, decryptionKey, ivSpec);
                 return cipher.doFinal(ciphertext);
             }

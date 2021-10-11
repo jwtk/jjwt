@@ -96,8 +96,9 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
     }
 
     /**
-     * Returns {@code true} if a given elliptic curve contains the specified {@code point}, {@code false} otherwise.
-     * Assumes elliptic curves over finite fields adhering to the reduced (a.k.a short or narrow) Weierstrass form:
+     * Returns {@code true} if a given elliptic {@code curve} contains the specified {@code point}, {@code false}
+     * otherwise.  Assumes elliptic curves over finite fields adhering to the reduced (a.k.a short or narrow)
+     * Weierstrass form:
      * <p>
      * <code>y<sup>2</sup> = x<sup>3</sup> + ax + b</code>
      * </p>
@@ -123,24 +124,6 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         final BigInteger rhs = x.pow(3).add(a.multiply(x)).add(b).mod(p); //mod p to account for field prime
 
         return lhs.equals(rhs);
-    }
-
-    protected ECPublicKey derivePublic(final JwkContext<ECPrivateKey> ctx) {
-        final ECPrivateKey key = ctx.getKey();
-        final ECParameterSpec params = key.getParams();
-        final ECPoint w = multiply(params.getGenerator(), key.getS(), params);
-        final ECPublicKeySpec spec = new ECPublicKeySpec(w, params);
-        return generateKey(ctx, ECPublicKey.class, new CheckedFunction<KeyFactory, ECPublicKey>() {
-            @Override
-            public ECPublicKey apply(KeyFactory kf) {
-                try {
-                    return (ECPublicKey) kf.generatePublic(spec);
-                } catch (Exception e) {
-                    String msg = "Unable to derive ECPublicKey from ECPrivateKey {" + ctx + "}.";
-                    throw new UnsupportedKeyException(msg);
-                }
-            }
-        });
     }
 
     /**
@@ -216,5 +199,23 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
 
     AbstractEcJwkFactory(Class<K> keyType) {
         super(DefaultEcPublicJwk.TYPE_VALUE, keyType);
+    }
+
+    protected ECPublicKey derivePublic(final JwkContext<ECPrivateKey> ctx) {
+        final ECPrivateKey key = ctx.getKey();
+        final ECParameterSpec params = key.getParams();
+        final ECPoint w = multiply(params.getGenerator(), key.getS(), params);
+        final ECPublicKeySpec spec = new ECPublicKeySpec(w, params);
+        return generateKey(ctx, ECPublicKey.class, new CheckedFunction<KeyFactory, ECPublicKey>() {
+            @Override
+            public ECPublicKey apply(KeyFactory kf) {
+                try {
+                    return (ECPublicKey) kf.generatePublic(spec);
+                } catch (Exception e) {
+                    String msg = "Unable to derive ECPublicKey from ECPrivateKey {" + ctx + "}.";
+                    throw new UnsupportedKeyException(msg);
+                }
+            }
+        });
     }
 }

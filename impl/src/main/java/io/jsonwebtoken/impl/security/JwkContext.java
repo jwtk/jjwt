@@ -7,34 +7,11 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface JwkContext<K extends Key> extends Identifiable {
-
-    int size();
-
-    boolean isEmpty();
-
-    boolean containsKey(String key);
-
-    boolean containsValue(Object value);
-
-    Object get(String key);
-
-    Set<String> keySet();
-
-    Collection<Object> values();
-
-    Set<Map.Entry<String, Object>> entrySet();
-
-    Map<String,Object> getValues();
-
-    Object put(String name, Object value);
-
-    JwkContext<K> putAll(Map<? extends String, ?> m);
+public interface JwkContext<K extends Key> extends Identifiable, Map<String,Object> {
 
     JwkContext<K> setId(String id);
 

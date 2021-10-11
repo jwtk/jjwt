@@ -1,27 +1,26 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Maps;
-import io.jsonwebtoken.security.EncryptedKeyAlgorithm;
+import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Map;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class AesGcmKeyAlgorithm extends AesAlgorithm implements EncryptedKeyAlgorithm<SecretKey, SecretKey> {
+public class AesGcmKeyAlgorithm extends AesAlgorithm implements KeyAlgorithm<SecretKey, SecretKey> {
 
     public static final String TRANSFORMATION = "AES/GCM/NoPadding";
 
@@ -34,19 +33,20 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements EncryptedKeyAlgo
 
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request);
-        final SecretKey cek = Assert.notNull(request.getPayload(), "Request content encryption key (request.getPayload()) cannot be null.");
+        SymmetricAeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
+        final SecretKey cek = Assert.notNull(enc.generateKey(), "Request encryption algorithm cannot generate a null key.");
         final byte[] iv = ensureInitializationVector(request);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        byte[] taggedCiphertext = execute(request, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        byte[] taggedCiphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            public byte[] doWithInstance(Cipher cipher) throws Exception {
+            public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.WRAP_MODE, kek, ivSpec);
                 return cipher.wrap(cek);
             }
         });
 
-        int tagByteLength = this.tagLength / Byte.SIZE;
+        int tagByteLength = this.tagBitLength / Byte.SIZE;
         // When using GCM mode, the JDK appends the authentication tag to the ciphertext, so let's extract it:
         int ciphertextLength = taggedCiphertext.length - tagByteLength;
         byte[] ciphertext = new byte[ciphertextLength];
@@ -56,9 +56,10 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements EncryptedKeyAlgo
 
         String encodedIv = Encoders.BASE64URL.encode(iv);
         String encodedTag = Encoders.BASE64URL.encode(tag);
-        Map<String,String> extraParams = Maps.of("iv", encodedIv).and("tag", encodedTag).build();
+        request.getHeader().put("iv", encodedIv);
+        request.getHeader().put("tag", encodedTag);
 
-        return new DefaultKeyResult(ciphertext, cek, extraParams);
+        return new DefaultKeyResult(cek, ciphertext);
     }
 
     @Override
@@ -67,53 +68,22 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements EncryptedKeyAlgo
         final SecretKey kek = assertKey(request);
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request payload (ciphertext) cannot be null or empty.");
         final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        final byte[] tag = getHeaderByteArray(header, "tag", this.tagLength / Byte.SIZE);
-        final byte[] iv = getHeaderByteArray(header, "iv", this.ivLength / Byte.SIZE);
+        final ValueGetter getter = new DefaultValueGetter(header);
+        final byte[] tag = getter.getRequiredBytes("tag", this.tagBitLength / Byte.SIZE);
+        final byte[] iv = getter.getRequiredBytes("iv", this.ivBitLength / Byte.SIZE);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
-        final byte[] taggedCiphertext = plus(cekBytes, tag);
+        final byte[] taggedCiphertext = Bytes.concat(cekBytes, tag);
 
-        return execute(request, Cipher.class, new InstanceCallback<Cipher, SecretKey>() {
+        return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
             @Override
-            public SecretKey doWithInstance(Cipher cipher) throws Exception {
+            public SecretKey apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.UNWRAP_MODE, kek, ivSpec);
                 Key key = cipher.unwrap(taggedCiphertext, KEY_ALG_NAME, Cipher.SECRET_KEY);
                 Assert.state(key instanceof SecretKey, "cipher.unwrap must produce a SecretKey instance.");
-                return (SecretKey)key;
+                return (SecretKey) key;
             }
         });
-    }
-
-    private byte[] getHeaderByteArray(JweHeader header, String name, int requiredByteLength) {
-        Object value = header.get(name);
-        if (value == null) {
-            String msg = "The " + getId() + " Key Management Algorithm requires a JweHeader '" + name + "' value.";
-            throw new MalformedJwtException(msg);
-        }
-        if (!(value instanceof String)) {
-            String msg = "The " + getId() + " Key Management Algorithm requires the JweHeader '" + name + "' value to be a Base64URL-encoded String. Actual type: " + value.getClass().getName();
-            throw new MalformedJwtException(msg);
-        }
-        String encoded = (String)value;
-
-        byte[] decoded;
-        try {
-            decoded = Decoders.BASE64URL.decode(encoded);
-        } catch (Exception e) {
-            String msg = "JweHeader '" + name + "' value '" + encoded +
-                "' does not appear to be a valid Base64URL String: " + e.getMessage();
-            throw new MalformedJwtException(msg, e);
-        }
-
-        int len = Arrays.length(decoded);
-        if (len != requiredByteLength) {
-            String msg = "The '" + getId() + "' key management algorithm requires the JweHeader '" + name +
-                "' value to be " + (requiredByteLength * Byte.SIZE) + " bits (" + requiredByteLength +
-                " bytes) in length. Actual length: " + (len * Byte.SIZE) + " bits (" + len + " bytes).";
-            throw new MalformedJwtException(msg);
-        }
-
-        return decoded;
     }
 }

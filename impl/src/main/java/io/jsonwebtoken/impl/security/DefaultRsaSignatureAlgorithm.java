@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.RuntimeEnvironment;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.RsaSignatureAlgorithm;
@@ -102,10 +103,10 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
     }
 
     @Override
-    protected byte[] doSign(final SignatureRequest<SK> request) throws Exception {
-        return execute(request, Signature.class, new InstanceCallback<Signature, byte[]>() {
+    protected byte[] doSign(final SignatureRequest<SK> request) {
+        return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
             @Override
-            public byte[] doWithInstance(Signature sig) throws Exception {
+            public byte[] apply(Signature sig) throws Exception {
                 if (algorithmParameterSpec != null) {
                     sig.setParameter(algorithmParameterSpec);
                 }
@@ -122,15 +123,15 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
         if (key instanceof PrivateKey) { //legacy support only
             return super.doVerify(request);
         }
-        return execute(request, Signature.class, new InstanceCallback<Signature, Boolean>() {
+        return execute(request, Signature.class, new CheckedFunction<Signature, Boolean>() {
             @Override
-            public Boolean doWithInstance(Signature sig) throws Exception {
+            public Boolean apply(Signature sig) throws Exception {
                 if (algorithmParameterSpec != null) {
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initVerify(request.getKey());
                 sig.update(request.getPayload());
-                return sig.verify(request.getSignature());
+                return sig.verify(request.getDigest());
             }
         });
     }

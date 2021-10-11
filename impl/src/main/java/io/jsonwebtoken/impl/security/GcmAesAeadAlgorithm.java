@@ -1,14 +1,16 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.RuntimeEnvironment;
+import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.CryptoException;
 import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 import io.jsonwebtoken.security.SymmetricAeadDecryptionRequest;
-import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.Cipher;
@@ -42,9 +44,9 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        byte[] taggedCiphertext = execute(req, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        byte[] taggedCiphertext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            public byte[] doWithInstance(Cipher cipher) throws Exception {
+            public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
                 if (Arrays.length(aad) > 0) {
                     cipher.updateAAD(aad);
@@ -61,7 +63,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
         byte[] tag = new byte[BLOCK_BYTE_SIZE];
         System.arraycopy(taggedCiphertext, ciphertextLength, tag, 0, BLOCK_BYTE_SIZE);
 
-        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(),ciphertext, key, aad, tag, iv);
+        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), ciphertext, key, aad, tag, iv);
     }
 
     @Override
@@ -71,16 +73,16 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
         final SecretKey key = assertKey(req);
         final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request payload (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
-        final byte[] tag = Assert.notEmpty(req.getAuthenticationTag(), "Decryption request authentication tag cannot be null or empty.");
+        final byte[] tag = Assert.notEmpty(req.getDigest(), "Decryption request authentication tag cannot be null or empty.");
         final byte[] iv = assertDecryptionIv(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
-        final byte[] taggedCiphertext = plus(ciphertext, tag);
+        final byte[] taggedCiphertext = Bytes.concat(ciphertext, tag);
 
-        byte[] plaintext = execute(req, Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        byte[] plaintext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            public byte[] doWithInstance(Cipher cipher) throws Exception {
+            public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
                 if (Arrays.length(aad) > 0) {
                     cipher.updateAAD(aad);

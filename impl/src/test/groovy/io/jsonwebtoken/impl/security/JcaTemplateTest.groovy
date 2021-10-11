@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.security.CryptoException
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -18,9 +19,9 @@ class JcaTemplateTest {
     void testNewCipherWithExplicitProvider() {
         Provider provider = Security.getProvider('SunJCE')
         def template = new JcaTemplate('AES/CBC/PKCS5Padding', provider)
-        template.execute(Cipher.class, new InstanceCallback<Cipher, byte[]>() {
+        template.execute(Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
-            byte[] doWithInstance(Cipher cipher) throws Exception {
+            byte[] apply(Cipher cipher) throws Exception {
                 assertNotNull cipher
                 assertSame provider, cipher.provider
                 return new byte[0]
@@ -97,9 +98,9 @@ class JcaTemplateTest {
         def ex = new Exception("testing")
         def template = new JcaTemplate('AES/CBC/PKCS5Padding', null)
         try {
-            template.execute(Cipher.class, new InstanceCallback<Cipher,byte[]>() {
+            template.execute(Cipher.class, new CheckedFunction<Cipher, byte[]>() {
                 @Override
-                byte[] doWithInstance(Cipher cipher) throws Exception {
+                byte[] apply(Cipher cipher) throws Exception {
                     throw ex
                 }
             })

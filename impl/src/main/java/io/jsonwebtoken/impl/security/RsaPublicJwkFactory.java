@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.security.RsaPublicJwk;
 
 import java.math.BigInteger;
@@ -26,9 +27,9 @@ class RsaPublicJwkFactory extends AbstractFamilyJwkFactory<RSAPublicKey, RsaPubl
 
     @Override
     protected RsaPublicJwk createJwkFromValues(JwkContext<RSAPublicKey> ctx) {
-
-        BigInteger modulus = getRequiredBigInt(ctx, DefaultRsaPublicJwk.MODULUS, false);
-        BigInteger publicExponent = getRequiredBigInt(ctx, DefaultRsaPublicJwk.PUBLIC_EXPONENT, false);
+        ValueGetter getter = new DefaultValueGetter(ctx);
+        BigInteger modulus = getter.getRequiredBigInt(DefaultRsaPublicJwk.MODULUS, false);
+        BigInteger publicExponent = getter.getRequiredBigInt(DefaultRsaPublicJwk.PUBLIC_EXPONENT, false);
         final RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, publicExponent);
 
         RSAPublicKey key = generateKey(ctx, new CheckedFunction<KeyFactory, RSAPublicKey>() {

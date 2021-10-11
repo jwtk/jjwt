@@ -2,14 +2,10 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.KeyAlgorithm
-import io.jsonwebtoken.security.KeyAlgorithms
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm
 import org.junit.Test
 
-import java.security.Key
-
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 class DefaultJweBuilderTest {
 
@@ -51,7 +47,7 @@ class DefaultJweBuilderTest {
         try {
             builder().setIssuer("me").withKey(key).compact()
         } catch (IllegalStateException ise) {
-            assertEquals 'EncryptionAlgorithm is required.', ise.message
+            assertEquals 'Encryption algorithm is required.', ise.message
         }
     }
 

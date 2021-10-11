@@ -455,7 +455,7 @@ public class DefaultJwtParser implements JwtParser {
                 throw new UnsupportedJwtException(msg);
             }
 
-            KeyRequest<byte[], ?> request = new DefaultKeyRequest<>(this.provider, null, cekBytes, key, jweHeader);
+            KeyRequest<byte[], ?> request = new DefaultKeyRequest<>(this.provider, null, cekBytes, key, jweHeader, encAlg);
             final SecretKey cek = keyAlg.getDecryptionKey(request);
 
             SymmetricAeadDecryptionRequest decryptRequest =

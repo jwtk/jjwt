@@ -15,9 +15,9 @@ public abstract class LocatorAdapter<H extends Header<H>, R> implements Locator<
             return locate((JwsHeader) header);
         } else if (header instanceof JweHeader) {
             return locate((JweHeader) header);
+        } else {
+            return doLocate(header);
         }
-        String msg = "Unrecognized header type: " + header.getClass().getName();
-        throw new IllegalStateException(msg);
     }
 
     protected R locate(JweHeader header) {
@@ -25,6 +25,10 @@ public abstract class LocatorAdapter<H extends Header<H>, R> implements Locator<
     }
 
     protected R locate(JwsHeader header) {
+        return null;
+    }
+
+    protected R doLocate(Header<?> header) {
         return null;
     }
 }

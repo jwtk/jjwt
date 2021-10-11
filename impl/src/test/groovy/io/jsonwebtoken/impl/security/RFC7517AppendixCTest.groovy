@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl.security
 
-
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
@@ -8,6 +7,8 @@ import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.security.KeyRequest
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.PbeKey
 import io.jsonwebtoken.security.SecurityRequest
 import org.junit.Test
 
@@ -303,11 +304,13 @@ class RFC7517AppendixCTest {
             }
         }
 
+        PbeKey pbeKey = Keys.forPbe().setPassword(RFC_SHARED_PASSPHRASE).setWorkFactor(RFC_P2C).build()
+
         String compact = Jwts.jweBuilder()
                 .setPayload(RFC_JWK_JSON)
                 .setHeaderParam('cty', 'jwk+json')
                 .encryptWith(encAlg)
-                .withKeyFrom(RFC_SHARED_PASSPHRASE.toCharArray(), RFC_P2C, keyAlg)
+                .withKeyFrom(pbeKey, keyAlg)
                 .serializeToJsonWith(serializer) //ensure JJWT created the header as expected with an assertion serializer
                 .compact();
 

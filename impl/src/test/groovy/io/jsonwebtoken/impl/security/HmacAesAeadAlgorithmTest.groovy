@@ -33,7 +33,7 @@ class HmacAesAeadAlgorithmTest {
         def req = new DefaultSymmetricAeadRequest(null, null, plaintext, key, null)
         def result = alg.encrypt(req);
 
-        def realTag = result.getAuthenticationTag();
+        def realTag = result.getDigest();
 
         //fake it:
         def fakeTag = new byte[realTag.length]

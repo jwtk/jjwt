@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
 
@@ -45,9 +46,10 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
     @Override
     protected EcPublicJwk createJwkFromValues(final JwkContext<ECPublicKey> ctx) {
 
-        String curveId = getRequiredString(ctx, DefaultEcPublicJwk.CURVE_ID);
-        BigInteger x = getRequiredBigInt(ctx, DefaultEcPublicJwk.X, false);
-        BigInteger y = getRequiredBigInt(ctx, DefaultEcPublicJwk.Y, false);
+        ValueGetter getter = new DefaultValueGetter(ctx);
+        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CURVE_ID);
+        BigInteger x = getter.getRequiredBigInt(DefaultEcPublicJwk.X, false);
+        BigInteger y = getter.getRequiredBigInt(DefaultEcPublicJwk.Y, false);
 
         ECParameterSpec spec = getCurveByJwaId(curveId);
         ECPoint point = new ECPoint(x, y);

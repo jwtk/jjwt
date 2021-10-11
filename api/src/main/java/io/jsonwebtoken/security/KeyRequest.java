@@ -9,5 +9,7 @@ import java.security.Key;
  */
 public interface KeyRequest<T, K extends Key> extends CryptoRequest<T, K> {
 
+    SymmetricAeadAlgorithm getEncryptionAlgorithm();
+
     JweHeader getHeader();
 }

@@ -7,7 +7,7 @@ import io.jsonwebtoken.Identifiable;
  */
 public interface SymmetricAeadAlgorithm extends Identifiable, SecretKeyGenerator {
 
-    AeadResult encrypt(SymmetricAeadRequest request) throws CryptoException, KeyException;
+    AeadResult encrypt(SymmetricAeadRequest request) throws SecurityException;
 
-    PayloadSupplier<byte[]> decrypt(SymmetricAeadDecryptionRequest request) throws CryptoException, KeyException;
+    PayloadSupplier<byte[]> decrypt(SymmetricAeadDecryptionRequest request) throws SecurityException;
 }

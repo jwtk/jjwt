@@ -7,7 +7,6 @@ import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultPBEKey;
 import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
@@ -16,24 +15,23 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.EncryptedKeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.PbeKey;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.interfaces.PBEKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Map;
 
 public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements JweBuilder {
-
-    private static final SecretKey EMPTY_SECRET_KEY = new SecretKeySpec("NONE".getBytes(StandardCharsets.UTF_8), "NONE");
 
     private SymmetricAeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
     private Function<SymmetricAeadRequest, AeadResult> encFunction;
@@ -82,6 +80,12 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
     @Override
     public JweBuilder withKey(SecretKey key) {
+        if (key instanceof PBEKey) {
+            key = Keys.toPbeKey((PBEKey) key);
+        }
+        if (key instanceof PbeKey) {
+            return withKeyFrom((PbeKey) key, KeyAlgorithms.PBES2_HS512_A256KW);
+        }
         return withKeyFrom(key, KeyAlgorithms.DIRECT);
     }
 
@@ -102,11 +106,6 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         });
 
         return this;
-    }
-
-    @Override
-    public JweBuilder withKeyFrom(char[] password, int iterations, EncryptedKeyAlgorithm<SecretKey, SecretKey> alg) {
-        return withKeyFrom(new DefaultPBEKey(password, iterations, alg.getId()), alg);
     }
 
     @Override
@@ -146,15 +145,13 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
             jweHeader.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
         }
 
-        SecretKey cek = alg instanceof EncryptedKeyAlgorithm ? enc.generateKey() : EMPTY_SECRET_KEY; //for algorithms that don't need one
-        KeyRequest<SecretKey, Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, cek, this.key, jweHeader);
+        KeyRequest<SecretKey, Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, null, this.key, jweHeader, enc);
         KeyResult keyResult = algFunction.apply(keyRequest);
 
         Assert.state(keyResult != null, "KeyAlgorithm must return a KeyResult.");
-        cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
+        SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
-        jweHeader.putAll(keyResult.getHeaderParams());
         jweHeader.setAlgorithm(alg.getId());
         jweHeader.setEncryptionAlgorithm(enc.getId());
 
@@ -167,7 +164,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
         byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");
-        byte[] tag = Assert.notEmpty(encResult.getAuthenticationTag(), "Encryption result must have a non-empty authentication tag.");
+        byte[] tag = Assert.notEmpty(encResult.getDigest(), "Encryption result must have a non-empty authentication tag.");
 
         String base64UrlEncodedEncryptedCek = base64UrlEncoder.encode(encryptedCek);
         String base64UrlEncodedIv = base64UrlEncoder.encode(iv);
