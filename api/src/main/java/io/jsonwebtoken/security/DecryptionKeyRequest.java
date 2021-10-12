@@ -15,8 +15,10 @@
  */
 package io.jsonwebtoken.security;
 
+import java.security.Key;
+
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface SymmetricAeadDecryptionRequest extends SymmetricAeadRequest, InitializationVectorSupplier, DigestSupplier {
+public interface DecryptionKeyRequest<K extends Key> extends KeyRequest<K>, PayloadSupplier<byte[]> {
 }

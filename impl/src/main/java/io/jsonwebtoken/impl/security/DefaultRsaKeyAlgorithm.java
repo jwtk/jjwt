@@ -2,6 +2,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.RsaKeyAlgorithm;
@@ -31,7 +32,7 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, E> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<E> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final E kek = Assert.notNull(request.getKey(), "Request key encryption key cannot be null.");
         SymmetricAeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
@@ -53,7 +54,7 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
     }
 
     @Override
-    public SecretKey getDecryptionKey(KeyRequest<byte[], D> request) throws SecurityException {
+    public SecretKey getDecryptionKey(DecryptionKeyRequest<D> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final D kek = Assert.notNull(request.getKey(), "Request key decryption key cannot be null.");
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request encrypted key (request.getPayload()) cannot be null or empty.");

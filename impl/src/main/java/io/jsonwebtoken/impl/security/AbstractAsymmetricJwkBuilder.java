@@ -60,6 +60,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     @Override
     public T setPublicKeyUse(String use) {
+        Assert.hasText(use, "publicKeyUse cannot be null or empty.");
         return put(AbstractAsymmetricJwk.PUBLIC_KEY_USE, use);
     }
 
@@ -70,12 +71,14 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     @Override
     public T setX509CertificateChain(List<X509Certificate> chain) {
+        Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
         this.jwkContext.setX509CertificateChain(chain);
         return tthis();
     }
 
     @Override
     public T setX509Url(URI url) {
+        Assert.notNull(url, "X509Url cannot be null.");
         this.jwkContext.setX509Url(url);
         return tthis();
     }

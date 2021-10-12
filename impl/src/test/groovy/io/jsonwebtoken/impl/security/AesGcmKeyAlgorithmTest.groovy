@@ -77,14 +77,14 @@ class AesGcmKeyAlgorithmTest {
             }
         }
 
-        def ereq = new DefaultKeyRequest(null, null, cek, kek, header, enc)
+        def ereq = new DefaultKeyRequest(null, null, kek, header, enc)
 
         def result = alg.getEncryptionKey(ereq)
 
         byte[] encryptedKeyBytes = result.getPayload()
         assertFalse "encryptedKey must be populated", Arrays.length(encryptedKeyBytes) == 0
 
-        def dcek = alg.getDecryptionKey(new DefaultKeyRequest<byte[], SecretKey>(null, null, encryptedKeyBytes, kek, header, enc))
+        def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(null, null, kek, header, enc, encryptedKeyBytes))
 
         //Assert the decrypted key matches the original cek
         assertEquals cek.algorithm, dcek.algorithm
@@ -111,7 +111,7 @@ class AesGcmKeyAlgorithmTest {
                 return cek
             }
         }
-        def ereq = new DefaultKeyRequest(null, null, cek, kek, header, enc)
+        def ereq = new DefaultKeyRequest(null, null, kek, header, enc)
         def result = alg.getEncryptionKey(ereq)
 
         header.put(headerName, value) //null value will remove it
@@ -119,7 +119,7 @@ class AesGcmKeyAlgorithmTest {
         byte[] encryptedKeyBytes = result.getPayload()
 
         try {
-            alg.getDecryptionKey(new DefaultKeyRequest<byte[], SecretKey>(null, null, encryptedKeyBytes, kek, header, enc))
+            alg.getDecryptionKey(new DefaultDecryptionKeyRequest(null, null, kek, header, enc, encryptedKeyBytes))
             fail()
         } catch (MalformedJwtException iae) {
             assertEquals exmsg, iae.getMessage()

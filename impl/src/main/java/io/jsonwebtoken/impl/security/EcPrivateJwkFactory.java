@@ -42,8 +42,8 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
 
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
         // requires public values to be present in private JWKs, so add them:
-        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPrivateJwk.PRIVATE_NAMES, ecPublicKey);
-        EcPublicJwk pubJwk = EcPublicJwkFactory.DEFAULT_INSTANCE.createJwkFromKey(pubCtx);
+        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPrivateJwk.PRIVATE_NAMES, ctx, ecPublicKey);
+        EcPublicJwk pubJwk = EcPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
 
         int fieldSize = key.getParams().getCurve().getField().getFieldSize();

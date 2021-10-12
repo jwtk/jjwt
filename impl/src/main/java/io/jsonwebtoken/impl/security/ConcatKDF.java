@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.CryptoException;
+import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
@@ -53,11 +53,11 @@ final class ConcatKDF extends CryptoAlgorithm {
      * @return the derived key
      * @throws UnsupportedKeyException if unable to obtain {@code sharedSecretKey}'s
      *                                 {@link Key#getEncoded() encoded byte array}.
-     * @throws CryptoException         if unable to perform the necessary {@link MessageDigest} computations to
+     * @throws SecurityException       if unable to perform the necessary {@link MessageDigest} computations to
      *                                 generate the derived key.
      */
     public SecretKey deriveKey(SecretKey sharedSecretKey, final long derivedKeyBitLength, final byte[] OtherInfo)
-        throws UnsupportedKeyException, CryptoException {
+        throws UnsupportedKeyException, SecurityException {
 
         // OtherInfo argument assertions:
         final int otherInfoByteLength = Arrays.length(OtherInfo);

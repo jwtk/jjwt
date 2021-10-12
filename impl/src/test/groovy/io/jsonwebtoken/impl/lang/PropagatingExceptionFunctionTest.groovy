@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.security.CryptoException
 import io.jsonwebtoken.security.SecurityException
 import org.junit.Test
 
@@ -11,7 +10,7 @@ class PropagatingExceptionFunctionTest {
     @Test
     void testAssignableException() {
 
-        def ex = new CryptoException("test")
+        def ex = new SecurityException("test")
 
         def fn = new PropagatingExceptionFunction<>(SecurityException.class, "foo", new Function<Object,Object>() {
             @Override

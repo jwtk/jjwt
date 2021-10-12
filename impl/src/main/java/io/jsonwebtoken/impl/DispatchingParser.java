@@ -1,7 +1,5 @@
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.lang.Assert;
-
 /**
  * @since JJWT_RELEASE_VERSION
  */
@@ -103,7 +101,7 @@ public class DispatchingParser {
         if (secretKey == null) {
             String msg = "SecretKeyResolver did not return a secret key for headers " + headers +
                     ".  This is required for message decryption.";
-            throw new CryptoException(msg);
+            throw new SecurityException(msg);
         }
 
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);

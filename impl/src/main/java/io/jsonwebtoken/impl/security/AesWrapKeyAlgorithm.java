@@ -2,6 +2,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
@@ -24,7 +25,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements KeyAlgorithm<Se
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<SecretKey, SecretKey> request) throws SecurityException {
+    public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request);
         SymmetricAeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
@@ -43,7 +44,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements KeyAlgorithm<Se
     }
 
     @Override
-    public SecretKey getDecryptionKey(KeyRequest<byte[], SecretKey> request) throws SecurityException {
+    public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request);
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request encrypted key (request.getPayload()) cannot be null or empty.");

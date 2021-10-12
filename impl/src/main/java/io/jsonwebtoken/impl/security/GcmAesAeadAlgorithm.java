@@ -6,11 +6,9 @@ import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.RuntimeEnvironment;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.CryptoException;
-import io.jsonwebtoken.security.KeyException;
+import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
 import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadDecryptionRequest;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.Cipher;
@@ -35,7 +33,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
     }
 
     @Override
-    public AeadResult encrypt(final SymmetricAeadRequest req) throws CryptoException, KeyException {
+    public AeadResult encrypt(final SymmetricAeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
         final SecretKey key = assertKey(req);
@@ -67,7 +65,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
     }
 
     @Override
-    public PayloadSupplier<byte[]> decrypt(final SymmetricAeadDecryptionRequest req) throws CryptoException, KeyException {
+    public PayloadSupplier<byte[]> decrypt(final DecryptSymmetricAeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
         final SecretKey key = assertKey(req);

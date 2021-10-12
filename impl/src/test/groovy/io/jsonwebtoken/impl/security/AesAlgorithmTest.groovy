@@ -3,11 +3,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
-import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
-import java.nio.charset.StandardCharsets
-import java.security.Key
-import java.security.Provider
 import java.security.SecureRandom
 
 import static org.junit.Assert.*
@@ -36,7 +31,7 @@ class AesAlgorithmTest {
 
         try {
             alg.encrypt(req)
-        } catch (CryptoException expected) {
+        } catch (SecurityException expected) {
             assertTrue expected.getCause() instanceof IllegalArgumentException
             assertTrue expected.getCause().getMessage().equals('broken')
         }
@@ -47,16 +42,14 @@ class AesAlgorithmTest {
 
         def alg = new TestAesAlgorithm('foo', 'foo', 192)
 
-        key = EncryptionAlgorithms.A128GCM.generateKey() //weaker than required
-
-
+        def key = EncryptionAlgorithms.A128GCM.generateKey() //weaker than required
 
         def request = new DefaultCryptoRequest(null, null, new byte[1], key)
 
         try {
             alg.assertKey(request)
             fail()
-        } catch (CryptoException expected) {
+        } catch (SecurityException expected) {
         }
     }
 
@@ -86,7 +79,7 @@ class AesAlgorithmTest {
         }
 
         @Override
-        PayloadSupplier<byte[]> decrypt(SymmetricAeadDecryptionRequest symmetricAeadDecryptionRequest) {
+        PayloadSupplier<byte[]> decrypt(DecryptSymmetricAeadRequest symmetricAeadDecryptionRequest) {
             return null
         }
     }

@@ -37,7 +37,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     private Function<SymmetricAeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key, ?> alg;
-    private Function<KeyRequest<SecretKey, Key>, KeyResult> algFunction;
+    private Function<KeyRequest<Key>, KeyResult> algFunction;
 
     private Key key;
 
@@ -98,9 +98,9 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         Assert.hasText(alg.getId(), "KeyAlgorithm id cannot be null or empty.");
 
         String cekMsg = "Unable to obtain content encryption key from key management algorithm '" + alg.getId() + "'.";
-        this.algFunction = wrap(cekMsg, new Function<KeyRequest<SecretKey, Key>, KeyResult>() {
+        this.algFunction = wrap(cekMsg, new Function<KeyRequest<Key>, KeyResult>() {
             @Override
-            public KeyResult apply(KeyRequest<SecretKey, Key> request) {
+            public KeyResult apply(KeyRequest<Key> request) {
                 return keyAlg.getEncryptionKey(request);
             }
         });
@@ -145,7 +145,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
             jweHeader.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
         }
 
-        KeyRequest<SecretKey, Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, null, this.key, jweHeader, enc);
+        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, this.key, jweHeader, enc);
         KeyResult keyResult = algFunction.apply(keyRequest);
 
         Assert.state(keyResult != null, "KeyAlgorithm must return a KeyResult.");

@@ -1,7 +1,8 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.CryptoException
+
 import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.SecurityException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class MacSignatureAlgorithmTest {
         return new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256)
     }
 
-    @Test(expected = CryptoException)
+    @Test(expected = SecurityException)
     void testKeyGeneratorNoSuchAlgorithm() {
         MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'foo', 256);
         alg.generateKey()

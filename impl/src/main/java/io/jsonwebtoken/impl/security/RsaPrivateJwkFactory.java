@@ -95,7 +95,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         // The [JWA Spec](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1)
         // requires public values to be present in private JWKs, so add them:
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, rsaPublicKey);
+        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, ctx, rsaPublicKey);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
 

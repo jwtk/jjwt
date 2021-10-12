@@ -1,7 +1,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.CheckedFunction
-import io.jsonwebtoken.security.CryptoException
+import io.jsonwebtoken.security.SecurityException
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
@@ -42,7 +42,7 @@ class JcaTemplateTest {
 
         try {
             supplier.getInstance()
-        } catch (CryptoException ce) { //should be wrapped as crypto exception
+        } catch (SecurityException ce) { //should be wrapped as SecurityException
             String msg = ce.getMessage()
             //we check for starts-with/ends-with logic here instead of equals because the JCE provider String value
             //contains the JCE version number, and that can differ across JDK versions.  Since we use different JDK
@@ -54,7 +54,7 @@ class JcaTemplateTest {
 
     @Test
     void testGetInstanceDoesNotWrapCryptoExceptions() {
-        def ex = new CryptoException("foo")
+        def ex = new SecurityException("foo")
         def supplier = new JcaTemplate.JcaInstanceSupplier<Cipher>(Cipher.class, 'AES', null) {
             @Override
             protected Cipher doGetInstance() {
@@ -64,7 +64,7 @@ class JcaTemplateTest {
 
         try {
             supplier.getInstance()
-        } catch (CryptoException ce) {
+        } catch (SecurityException ce) {
             assertSame ex, ce
         }
     }
@@ -104,7 +104,7 @@ class JcaTemplateTest {
                     throw ex
                 }
             })
-        } catch (CryptoException e) {
+        } catch (SecurityException e) {
             assertEquals 'Cipher callback execution failed: testing', e.getMessage()
             assertSame ex, e.getCause()
         }

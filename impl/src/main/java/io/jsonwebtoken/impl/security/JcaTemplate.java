@@ -3,7 +3,6 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
-import io.jsonwebtoken.security.CryptoException;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -33,7 +32,7 @@ public class JcaTemplate {
         this.secureRandom = Assert.notNull(secureRandom, "SecureRandom cannot be null.");
     }
 
-    public <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws CryptoException {
+    public <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws SecurityException {
         return execute(new JcaInstanceSupplier<>(clazz, this.jcaName, this.provider), fn);
     }
 
@@ -57,14 +56,14 @@ public class JcaTemplate {
         });
     }
 
-    private <T, R> R execute(JcaInstanceSupplier<T> supplier, CheckedFunction<T, R> callback) throws CryptoException {
+    private <T, R> R execute(JcaInstanceSupplier<T> supplier, CheckedFunction<T, R> callback) throws SecurityException {
         try {
             T instance = supplier.getInstance();
             return callback.apply(instance);
         } catch (SecurityException se) {
             throw se; //propagate
         } catch (Exception e) {
-            throw new CryptoException(supplier.getName() + " callback execution failed: " + e.getMessage(), e);
+            throw new SecurityException(supplier.getName() + " callback execution failed: " + e.getMessage(), e);
         }
     }
 
@@ -113,13 +112,13 @@ public class JcaTemplate {
         }
 
         protected Exception wrap(String msg, Exception cause) {
-            if (cause instanceof CryptoException) {
+            if (cause instanceof SecurityException) {
                 return cause;
             }
             if (Signature.class.isAssignableFrom(clazz) || Mac.class.isAssignableFrom(clazz)) {
                 return new SignatureException(msg, cause);
             }
-            return new CryptoException(msg, cause);
+            return new SecurityException(msg, cause);
         }
 
         protected T doGetInstance() {

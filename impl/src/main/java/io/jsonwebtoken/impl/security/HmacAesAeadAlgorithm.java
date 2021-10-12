@@ -4,11 +4,11 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.CryptoRequest;
+import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
 import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadDecryptionRequest;
 import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.Cipher;
@@ -124,7 +124,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
     }
 
     @Override
-    public PayloadSupplier<byte[]> decrypt(final SymmetricAeadDecryptionRequest req) {
+    public PayloadSupplier<byte[]> decrypt(final DecryptSymmetricAeadRequest req) {
 
         Assert.notNull(req, "Request cannot be null.");
 

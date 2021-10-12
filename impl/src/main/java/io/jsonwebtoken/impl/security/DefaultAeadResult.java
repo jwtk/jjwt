@@ -2,13 +2,13 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.SymmetricAeadDecryptionRequest;
+import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultAeadResult extends DefaultSymmetricAeadRequest implements AeadResult, SymmetricAeadDecryptionRequest {
+public class DefaultAeadResult extends DefaultSymmetricAeadRequest implements AeadResult, DecryptSymmetricAeadRequest {
 
     private final byte[] TAG;
 

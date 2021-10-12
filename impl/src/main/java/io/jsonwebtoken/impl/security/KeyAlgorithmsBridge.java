@@ -7,6 +7,7 @@ import io.jsonwebtoken.impl.IdRegistry;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
@@ -99,7 +100,7 @@ public final class KeyAlgorithmsBridge {
         // hashing and not ancillary steps needed to setup the hashing/derivation
         return new KeyAlgorithm<PbeKey, SecretKey>() {
             @Override
-            public KeyResult getEncryptionKey(KeyRequest<SecretKey, PbeKey> request) throws SecurityException {
+            public KeyResult getEncryptionKey(KeyRequest<PbeKey> request) throws SecurityException {
                 int iterations = request.getKey().getWorkFactor();
                 char[] password = request.getKey().getPassword();
                 try {
@@ -111,7 +112,7 @@ public final class KeyAlgorithmsBridge {
             }
 
             @Override
-            public SecretKey getDecryptionKey(KeyRequest<byte[], SecretKey> request) throws SecurityException {
+            public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
                 throw new UnsupportedOperationException("Not intended to be called.");
             }
 
@@ -128,7 +129,7 @@ public final class KeyAlgorithmsBridge {
 
     private static char[] randomChars(int length) {
         char[] chars = new char[length];
-        for(int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             chars[i] = randomChar();
         }
         return chars;
@@ -161,8 +162,7 @@ public final class KeyAlgorithmsBridge {
 
             char[] password = randomChars(PASSWORD_LENGTH);
             PbeKey pbeKey = Keys.forPbe().setPassword(password).setWorkFactor(workFactor).build();
-            KeyRequest<SecretKey, PbeKey> request =
-                new DefaultKeyRequest<>(null, null, null, pbeKey, HEADER, ENC_ALG);
+            KeyRequest<PbeKey> request = new DefaultKeyRequest<>(null, null, pbeKey, HEADER, ENC_ALG);
 
             long start = System.currentTimeMillis();
             alg.getEncryptionKey(request); // <-- Computation occurs here.  Don't need the result, just need to exec

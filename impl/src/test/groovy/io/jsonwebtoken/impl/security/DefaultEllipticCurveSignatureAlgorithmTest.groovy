@@ -2,8 +2,8 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.security.CryptoException
 import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.SecurityException
 import io.jsonwebtoken.security.SignatureAlgorithms
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
@@ -28,7 +28,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         }
     }
 
-    @Test(expected = CryptoException)
+    @Test(expected = SecurityException)
     void testGenerateKeyPairInvalidCurveName() {
         def alg = new DefaultEllipticCurveSignatureAlgorithm('ES256', 'SHA256withECDSA', 'notreal', 256, 256)
         alg.generateKeyPair()

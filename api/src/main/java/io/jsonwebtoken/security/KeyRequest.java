@@ -22,7 +22,7 @@ import java.security.Key;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyRequest<T, K extends Key> extends CryptoRequest<T, K> {
+public interface KeyRequest<K extends Key> extends SecurityRequest, KeySupplier<K> {
 
     SymmetricAeadAlgorithm getEncryptionAlgorithm();
 

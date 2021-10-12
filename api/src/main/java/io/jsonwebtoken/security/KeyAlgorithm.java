@@ -33,7 +33,7 @@ import java.security.Key;
  */
 public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable {
 
-    KeyResult getEncryptionKey(KeyRequest<SecretKey, E> request) throws SecurityException;
+    KeyResult getEncryptionKey(KeyRequest<E> request) throws SecurityException;
 
-    SecretKey getDecryptionKey(KeyRequest<byte[], D> request) throws SecurityException;
+    SecretKey getDecryptionKey(DecryptionKeyRequest<D> request) throws SecurityException;
 }

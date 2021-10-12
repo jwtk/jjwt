@@ -18,13 +18,5 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class CryptoException extends SecurityException {
-
-    public CryptoException(String message) {
-        super(message);
-    }
-
-    public CryptoException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface DecryptSymmetricAeadRequest extends SymmetricAeadRequest, InitializationVectorSupplier, DigestSupplier {
 }

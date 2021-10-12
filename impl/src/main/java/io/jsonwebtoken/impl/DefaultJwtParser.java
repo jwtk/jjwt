@@ -40,12 +40,13 @@ import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
-import io.jsonwebtoken.impl.security.DefaultKeyRequest;
+import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
 import io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.KeyAlgorithmsBridge;
@@ -60,16 +61,16 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
+import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadDecryptionRequest;
 import io.jsonwebtoken.security.VerifySignatureRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -112,7 +113,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private static <H extends Header<H>, R extends Identifiable> Function<H, R> locFn(String id, String msg, Function<String, R> reg, Collection<R> extras) {
-        Function<H,R> backup = backup(id, msg, extras);
+        Function<H, R> backup = backup(id, msg, extras);
         return new IdLocator<>(id, msg, reg, backup);
     }
 
@@ -172,10 +173,11 @@ public class DefaultJwtParser implements JwtParser {
         this.compressionCodecLocator = new CompressionCodecLocator<>(new DefaultCompressionCodecResolver());
     }
 
-    @SuppressWarnings("deprecation") //SigningKeyResolver will be removed for 1.0
+    @SuppressWarnings("deprecation")
+        //SigningKeyResolver will be removed for 1.0
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
-                     Function<?,Key> keyLocator,
+                     Function<?, Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
                      Claims expectedClaims,
@@ -399,7 +401,7 @@ public class DefaultJwtParser implements JwtParser {
             TokenizedJwe tokenizedJwe = (TokenizedJwe) tokenized;
             JweHeader jweHeader = (JweHeader) header;
 
-            byte[] cekBytes = new byte[0]; //ignored unless using an encrypted key algorithm
+            byte[] cekBytes = Bytes.EMPTY; //ignored unless using an encrypted key algorithm
             String base64Url = tokenizedJwe.getEncryptedKey();
             if (Strings.hasText(base64Url)) {
                 cekBytes = base64UrlDecode(base64Url, "JWE encrypted key");
@@ -418,8 +420,8 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(msg);
             }
 
-            // This is intentional - the AAD (Additional Authenticated Data) scheme for compact JWEs is to use
-            // the ASCII bytes of the raw base64url text as the AAD, and *not* the base64url-decoded bytes per
+            // The AAD (Additional Authenticated Data) scheme for compact JWEs is to use the ASCII bytes of the
+            // raw base64url text as the AAD, and NOT the base64url-decoded bytes per
             // https://datatracker.ietf.org/doc/html/rfc7516#section-5.1, Step 14.
             final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
 
@@ -438,27 +440,33 @@ public class DefaultJwtParser implements JwtParser {
             }
             final SymmetricAeadAlgorithm encAlg = this.encryptionAlgorithmLocator.apply(jweHeader);
             if (encAlg == null) {
-                String msg = "Unrecognized JWE encryption algorithm identifier: " + enc;
+                String msg = "Unrecognized JWE encryption algorithm '" + enc + "'.";
                 throw new UnsupportedJwtException(msg);
             }
 
             @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgorithmLocator.apply(jweHeader);
             if (keyAlg == null) {
-                String msg = "Unrecognized JWE key management algorithm: " + alg;
+                String msg = "Unrecognized JWE key algorithm '" + alg + "'.";
                 throw new UnsupportedJwtException(msg);
             }
 
-            final Key key = ((Function<JweHeader,Key>)this.keyLocator).apply(jweHeader);
+            final Key key = ((Function<JweHeader, Key>) this.keyLocator).apply(jweHeader);
             if (key == null) {
-                String msg = "No key available for the '" + keyAlg.getId() + "' key management algorithm. Unable to " +
-                    "perform '" + encAlg + "' decryption.";
+                String msg = "No key found for use with JWE key algorithm '" + keyAlg.getId() +
+                    "'. Unable to decrypt JWE payload.";
                 throw new UnsupportedJwtException(msg);
             }
 
-            KeyRequest<byte[], ?> request = new DefaultKeyRequest<>(this.provider, null, cekBytes, key, jweHeader, encAlg);
+            DecryptionKeyRequest<Key> request =
+                new DefaultDecryptionKeyRequest<>(this.provider, null, key, jweHeader, encAlg, cekBytes);
             final SecretKey cek = keyAlg.getDecryptionKey(request);
+            if (cek == null) {
+                String msg = "The '" + keyAlg.getId() + "' JWE key algorithm did not return a decryption key. " +
+                    "Unable to perform '" + encAlg.getId() + "' decryption.";
+                throw new IllegalStateException(msg);
+            }
 
-            SymmetricAeadDecryptionRequest decryptRequest =
+            DecryptSymmetricAeadRequest decryptRequest =
                 new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
             PayloadSupplier<byte[]> result = encAlg.decrypt(decryptRequest);
             bytes = result.getPayload();
@@ -475,13 +483,13 @@ public class DefaultJwtParser implements JwtParser {
         Jwt<?, ?> jwt;
         Object body = claims != null ? claims : payload;
         if (header instanceof JweHeader) {
-            jwt = new DefaultJwe<>((JweHeader)header, body, iv, tag);
+            jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else { // JWS
             if (!Strings.hasText(tokenized.getDigest()) && SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
                 //noinspection rawtypes
                 jwt = new DefaultJwt(header, body);
             } else {
-                jwt = new DefaultJws<>((JwsHeader)header, body, tokenized.getDigest());
+                jwt = new DefaultJws<>((JwsHeader) header, body, tokenized.getDigest());
             }
         }
 
@@ -492,7 +500,7 @@ public class DefaultJwtParser implements JwtParser {
 
             final JwsHeader jwsHeader = jws.getHeader();
 
-            SignatureAlgorithm<?,Key> algorithm = (SignatureAlgorithm<?,Key>)signatureAlgorithmLocator.apply(jwsHeader);
+            SignatureAlgorithm<?, Key> algorithm = (SignatureAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
             if (algorithm == null) {
                 String msg = "Unrecognized JWS algorithm identifier: " + alg;
                 throw new UnsupportedJwtException(msg);

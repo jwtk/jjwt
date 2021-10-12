@@ -3,19 +3,16 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import java.security.KeyPair
 import java.security.MessageDigest
+import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.cert.X509Certificate
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
-import java.security.interfaces.RSAPrivateKey
-import java.security.interfaces.RSAPublicKey
+import java.security.interfaces.ECKey
 
 import static org.junit.Assert.*
 
@@ -30,16 +27,16 @@ class JwksTest {
         return Encoders.BASE64URL.encode(random);
     }
 
-    static void testProperty(String name, String id, def val) {
+    static void testProperty(String name, String id, def val, def expectedFieldValue=val) {
         String cap = "${name.capitalize()}"
-        def key = name == 'use' ? EC_PAIR.public : SKEY
+        def key = name == 'publicKeyUse' || name == 'x509CertificateChain' ? EC_PAIR.public : SKEY
 
         //test non-null value:
         def builder = Jwks.builder().setKey(key)
         builder."set${cap}"(val)
         def jwk = builder.build()
         assertEquals val, jwk."get${cap}"()
-        assertEquals val, jwk."${id}"
+        assertEquals expectedFieldValue, jwk."${id}"
 
         //test null value:
         builder = Jwks.builder().setKey(key)
@@ -112,73 +109,59 @@ class JwksTest {
     }
 
     @Test
-    void testUse() {
-        testProperty('use', 'use', srandom())
+    void testPublicKeyUse() {
+        testProperty('publicKeyUse', 'use', srandom())
     }
 
     @Test
     void testX509CertChain() {
         //get a test cert:
         X509Certificate cert = CertUtils.readTestCertificate(SignatureAlgorithms.RS256)
-        testProperty('x509CertificateChain', 'x5c', cert)
+        def sval = JwkX509StringConverter.INSTANCE.applyTo(cert)
+        testProperty('x509CertificateChain', 'x5c', [cert], [sval])
     }
 
     @Test
-    void testAPI() {
-        def pair = SignatureAlgorithms.ES256.generateKeyPair();
-        ECPublicKey ecPub = pair.getPublic() as ECPublicKey
-        ECPrivateKey ecPriv = pair.getPrivate() as ECPrivateKey
-
-        pair = SignatureAlgorithms.RS256.generateKeyPair()
-        RSAPublicKey rsaPub = pair.getPublic() as RSAPublicKey
-        RSAPrivateKey rsaPriv = pair.getPrivate() as RSAPrivateKey
-
-        SecretKey secretKey = SignatureAlgorithms.HS256.generateKey()
-
-        def ecPubJwk = Jwks.builder().setKey(ecPub).setPublicKeyUse("sig").build()
-        assertEquals ecPub, ecPubJwk.toKey()
-
-        def rsaPrivJwk = Jwks.builder().setKey(rsaPub).setPublicKeyUse("foo").setPrivateKey(rsaPriv).build();
-
-        def ecPrivJwk = Jwks.builder().setKey(ecPriv).build()
-        def pubJwk = ecPrivJwk.toPublicJwk()
-        assertEquals ecPubJwk, pubJwk
-        assertEquals ecPub, ecPrivJwk.toPublicKey()
-
-        def rsaPubJwk = Jwks.builder().setKey(rsaPub).build()
-        rsaPrivJwk = Jwks.builder().setKey(rsaPriv).setPublicKey(rsaPub).build()
-        assertEquals rsaPubJwk, rsaPrivJwk.toPublicJwk()
-    }
-
-    @Test
-    void testSecretKeyConversionHappyPath() {
-        def algs = [SignatureAlgorithms.HS256, SignatureAlgorithms.HS384, SignatureAlgorithms.HS512]
-        for (def alg : algs) {
-            SecretKey key = alg.generateKey();
-            def jwk = Jwks.builder().setKey(key).build()
-            def result = Jwks.builder().putAll(jwk).build()
-            assertArrayEquals key.encoded, result.toKey().encoded
+    void testSecretJwks() {
+        Collection<SecretKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({it instanceof SecretKeySignatureAlgorithm}) as Collection<SecretKeySignatureAlgorithm>
+        for(def alg : algs) {
+            SecretKey secretKey = alg.generateKey()
+            def jwk = Jwks.builder().setKey(secretKey).setId('id').build()
+            assertEquals 'oct', jwk.getType()
+            assertTrue jwk.containsKey('k')
+            assertEquals 'id', jwk.getId()
+            assertEquals secretKey, jwk.toKey()
         }
     }
 
     @Test
-    void testEcConversionHappyPath() {
+    void testAsymmetricJwks() {
 
-        List<EllipticCurveSignatureAlgorithm> algs = [SignatureAlgorithms.ES256, SignatureAlgorithms.ES384, SignatureAlgorithms.ES512]
+        Collection<AsymmetricKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({it instanceof AsymmetricKeySignatureAlgorithm}) as Collection<AsymmetricKeySignatureAlgorithm>
 
-        for (EllipticCurveSignatureAlgorithm alg : algs) {
+        for(def alg : algs) {
 
             def pair = alg.generateKeyPair()
-            ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
-            ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
+            PublicKey pub = pair.getPublic()
+            PrivateKey priv = pair.getPrivate()
 
-            def jwk = Jwks.builder().setKey(pubKey).build()
-            def result = Jwks.builder().putAll(jwk).build()
-            assertEquals pubKey, result.toKey()
+            // test individual keys
+            PublicJwk pubJwk = Jwks.builder().setKey(pub).setPublicKeyUse("sig").build()
+            assertEquals pub, pubJwk.toKey()
+            PrivateJwk privJwk = Jwks.builder().setKey(priv).setPublicKeyUse("sig").build()
+            assertEquals priv, privJwk.toKey()
+            PublicJwk privPubJwk = privJwk.toPublicJwk()
+            assertEquals pubJwk, privPubJwk
+            assertEquals pub, pubJwk.toKey()
 
-            jwk = Jwks.builder().setKey(privKey).build()
-            result = Jwks.builder().putAll(jwk).build()
-            assertEquals privKey, result.toKey()
+            // test pair
+            privJwk = pub instanceof ECKey ?
+                    Jwks.builder().setKeyPairEc(pair).setPublicKeyUse("sig").build() :
+                    Jwks.builder().setKeyPairRsa(pair).setPublicKeyUse("sig").build()
+            assertEquals priv, privJwk.toKey()
+            privPubJwk = privJwk.toPublicJwk()
+            assertEquals pubJwk, privPubJwk
+            assertEquals pub, pubJwk.toKey()
         }
     }
 }

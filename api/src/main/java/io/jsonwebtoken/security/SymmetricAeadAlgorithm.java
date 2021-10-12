@@ -24,5 +24,5 @@ public interface SymmetricAeadAlgorithm extends Identifiable, SecretKeyGenerator
 
     AeadResult encrypt(SymmetricAeadRequest request) throws SecurityException;
 
-    PayloadSupplier<byte[]> decrypt(SymmetricAeadDecryptionRequest request) throws SecurityException;
+    PayloadSupplier<byte[]> decrypt(DecryptSymmetricAeadRequest request) throws SecurityException;
 }

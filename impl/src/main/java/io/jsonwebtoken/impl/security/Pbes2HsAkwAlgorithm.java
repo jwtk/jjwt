@@ -6,12 +6,12 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.PbeKey;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -94,7 +94,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         }
     }
 
-    private SecretKey deriveKey(final KeyRequest<?, ?> request, final char[] password, final byte[] salt, final int iterations) {
+    private SecretKey deriveKey(final KeyRequest<?> request, final char[] password, final byte[] salt, final int iterations) {
         try {
             return execute(request, SecretKeyFactory.class, new CheckedFunction<SecretKeyFactory, SecretKey>() {
                 @Override
@@ -109,7 +109,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         }
     }
 
-    protected byte[] generateInputSalt(KeyRequest<?, ?> request) {
+    protected byte[] generateInputSalt(KeyRequest<?> request) {
         byte[] inputSalt = new byte[this.HASH_BYTE_LENGTH];
         ensureSecureRandom(request).nextBytes(inputSalt);
         return inputSalt;
@@ -121,11 +121,9 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<SecretKey, PbeKey> request) throws SecurityException {
+    public KeyResult getEncryptionKey(KeyRequest<PbeKey> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
-        SymmetricAeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
-        final SecretKey cek = Assert.notNull(enc.generateKey(), "Request encryption algorithm cannot generate a null key.");
         final PbeKey pbeKey = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
 
         final int iterations = assertIterations(pbeKey.getWorkFactor());
@@ -135,9 +133,9 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         char[] password = pbeKey.getPassword(); // will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
-        // now encrypt (wrap) the CEK with the PBE-derived key:
-        DefaultKeyRequest<SecretKey, SecretKey> wrapReq = new DefaultKeyRequest<>(request.getProvider(),
-            request.getSecureRandom(), cek, derivedKek, request.getHeader(), request.getEncryptionAlgorithm());
+        // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
+        DefaultKeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(request.getProvider(),
+            request.getSecureRandom(), derivedKek, request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 
         request.getHeader().put(SALT_HEADER_NAME, p2s);
@@ -174,7 +172,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public SecretKey getDecryptionKey(KeyRequest<byte[], SecretKey> request) throws SecurityException {
+    public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
 
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final SecretKey key = Assert.notNull(request.getKey(), "Request Key cannot be null.");
@@ -187,8 +185,8 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
-        KeyRequest<byte[], SecretKey> unwrapReq = new DefaultKeyRequest<>(request.getProvider(),
-            request.getSecureRandom(), request.getPayload(), derivedKek, header, request.getEncryptionAlgorithm());
+        DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),
+            request.getSecureRandom(), derivedKek, header, request.getEncryptionAlgorithm(), request.getPayload());
 
         return wrapAlg.getDecryptionKey(unwrapReq);
     }
