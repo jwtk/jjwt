@@ -7,6 +7,7 @@ import io.jsonwebtoken.impl.IdRegistry;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -15,7 +16,6 @@ import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.PbeKey;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -101,7 +101,7 @@ public final class KeyAlgorithmsBridge {
         return new KeyAlgorithm<PbeKey, SecretKey>() {
             @Override
             public KeyResult getEncryptionKey(KeyRequest<PbeKey> request) throws SecurityException {
-                int iterations = request.getKey().getWorkFactor();
+                int iterations = request.getKey().getIterations();
                 char[] password = request.getKey().getPassword();
                 try {
                     alg.deriveKey(factory, password, rfcSalt, iterations);
@@ -148,7 +148,7 @@ public final class KeyAlgorithmsBridge {
         final int PASSWORD_LENGTH = 8;
 
         final JweHeader HEADER = new DefaultJweHeader(); // not used during execution, needed to satisfy API call.
-        final SymmetricAeadAlgorithm ENC_ALG = EncryptionAlgorithms.A128GCM; // not used, needed to satisfy API
+        final AeadAlgorithm ENC_ALG = EncryptionAlgorithms.A128GCM; // not used, needed to satisfy API
 
         if (alg instanceof Pbes2HsAkwAlgorithm) {
             // Strip away all things that cause time during computation except for the actual hashing algorithm:
@@ -161,7 +161,7 @@ public final class KeyAlgorithmsBridge {
         for (int i = 0; points.size() < NUM_SAMPLES; i++) {
 
             char[] password = randomChars(PASSWORD_LENGTH);
-            PbeKey pbeKey = Keys.forPbe().setPassword(password).setWorkFactor(workFactor).build();
+            PbeKey pbeKey = Keys.forPbe().setPassword(password).setIterations(workFactor).build();
             KeyRequest<PbeKey> request = new DefaultKeyRequest<>(null, null, pbeKey, HEADER, ENC_ALG);
 
             long start = System.currentTimeMillis();

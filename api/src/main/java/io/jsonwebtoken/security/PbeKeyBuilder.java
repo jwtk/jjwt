@@ -15,20 +15,38 @@
  */
 package io.jsonwebtoken.security;
 
-import javax.crypto.interfaces.PBEKey;
-
 /**
  * @since JJWT_RELEASE_VERSION
  */
 public interface PbeKeyBuilder<K extends PbeKey> {
 
-    PbeKeyBuilder<K> forKey(PBEKey jcaKey);
-
-    PbeKeyBuilder<K> setPassword(String password);
-
+    /**
+     * Sets the password character array for the constructed key.  This does not clone the argument - changes made
+     * to the backing array will be reflected by the constructed key and any {@link PbeKey#destroy()} call will do
+     * the same. This is to ensure that any clearing of the password argument for security/safety reasons also
+     * guarantees the resulting key is also cleared and vice versa.
+     *
+     * @param password password character array for the constructed key
+     * @return this builder for method chaining
+     */
     PbeKeyBuilder<K> setPassword(char[] password);
 
-    PbeKeyBuilder<K> setWorkFactor(int workFactor);
+    /**
+     * Sets the number of hashing iterations to perform when deriving an encryption key.
+     *
+     * @param iterations the number of hashing iterations to perform when deriving an encryption key.
+     * @return @return this builder for method chaining
+     */
+    PbeKeyBuilder<K> setIterations(int iterations);
 
+    /**
+     * Constructs a new {@link PbeKey} that shares the {@link #setPassword(char[]) specified} password character array.
+     * Changes to that char array will be reflected in the returned key, and similarly,
+     * any call to the key's {@link PbeKey#destroy() destroy} method will clear/overwrite the shared char array.
+     * This is to ensure that any clearing of the password char array for security/safety reasons also
+     * guarantees the key is also cleared and vice versa.
+     *
+     * @return a new {@link PbeKey} that shares the {@link #setPassword(char[]) specified} password character array.
+     */
     K build();
 }

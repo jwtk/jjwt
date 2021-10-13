@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.security.PbeKey;
 
@@ -8,27 +9,17 @@ public class DefaultPbeKey implements PbeKey {
     private static final String RAW_FORMAT = "RAW";
     private static final String NONE_ALGORITHM = "NONE";
 
-    private volatile boolean destroyed = false;
+    private volatile boolean destroyed;
     private final char[] chars;
-    //private final byte[] bytes;
-    private final int workFactor;
+    private final int iterations;
 
-//    private static byte[] toBytes(char[] chars) {
-//        ByteBuffer buf = StandardCharsets.UTF_8.encode(CharBuffer.wrap(chars));
-//        byte[] bytes = new byte[buf.limit()];
-//        buf.get(bytes);
-//        return bytes;
-//    }
-
-    public DefaultPbeKey(char[] password, int workFactor) {
-        boolean empty = Objects.isEmpty(password);
-        this.chars = empty ? new char[0] : password.clone();
-        //this.bytes = empty ? new byte[0] : toBytes(this.chars);
-        if (workFactor < 0) {
-            String msg = "workFactor cannot be negative. Value: " + workFactor;
+    public DefaultPbeKey(char[] password, int iterations) {
+        if (iterations <= 0) {
+            String msg = "iterations must be a positive integer. Value: " + iterations;
             throw new IllegalArgumentException(msg);
         }
-        this.workFactor = workFactor;
+        this.iterations = iterations;
+        this.chars = Assert.notEmpty(password, "Password character array cannot be null or empty.");
     }
 
     private void assertActive() {
@@ -45,8 +36,8 @@ public class DefaultPbeKey implements PbeKey {
     }
 
     @Override
-    public int getWorkFactor() {
-        return this.workFactor;
+    public int getIterations() {
+        return this.iterations;
     }
 
     @Override
@@ -62,16 +53,11 @@ public class DefaultPbeKey implements PbeKey {
     @Override
     public byte[] getEncoded() {
         throw new UnsupportedOperationException("getEncoded is not supported for PbeKey instances.");
-        //assertActive();
-        //return this.bytes.clone();
     }
 
     @Override
     public void destroy() {
-//        if (bytes != null) {
-//            java.util.Arrays.fill(bytes, (byte) 0);
-//        }
-        if (chars != null) {
+        if (!destroyed && chars != null) {
             java.util.Arrays.fill(chars, '\u0000');
         }
         this.destroyed = true;
@@ -91,7 +77,7 @@ public class DefaultPbeKey implements PbeKey {
     public boolean equals(Object obj) {
         if (obj instanceof DefaultPbeKey) {
             DefaultPbeKey other = (DefaultPbeKey) obj;
-            return this.workFactor == other.workFactor &&
+            return this.iterations == other.iterations &&
                 Objects.nullSafeEquals(this.chars, other.chars);
         }
         return false;
@@ -99,6 +85,6 @@ public class DefaultPbeKey implements PbeKey {
 
     @Override
     public String toString() {
-        return "password=<redacted>, workFactor=" + this.workFactor;
+        return "password=<redacted>, iterations=" + this.iterations;
     }
 }

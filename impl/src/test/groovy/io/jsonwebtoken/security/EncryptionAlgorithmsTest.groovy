@@ -1,7 +1,7 @@
 package io.jsonwebtoken.security
 
+import io.jsonwebtoken.impl.security.DefaultAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
-import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import org.junit.Test
 
@@ -41,11 +41,11 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithoutAad() {
 
-        for (SymmetricAeadAlgorithm alg : EncryptionAlgorithms.values()) {
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
 
             def key = alg.generateKey()
 
-            def request = new DefaultSymmetricAeadRequest(PLAINTEXT_BYTES, key, null)
+            def request = new DefaultAeadRequest(PLAINTEXT_BYTES, key, null)
 
             def result = alg.encrypt(request)
 
@@ -71,11 +71,11 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithAad() {
 
-        for (SymmetricAeadAlgorithm alg : EncryptionAlgorithms.values()) {
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
 
             def key = alg.generateKey()
 
-            def req = new DefaultSymmetricAeadRequest(null, null, PLAINTEXT_BYTES, key, AAD_BYTES)
+            def req = new DefaultAeadRequest(null, null, PLAINTEXT_BYTES, key, AAD_BYTES)
 
             def result = alg.encrypt(req)
 

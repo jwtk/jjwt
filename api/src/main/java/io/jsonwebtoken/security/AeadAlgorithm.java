@@ -20,9 +20,9 @@ import io.jsonwebtoken.Identifiable;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface SymmetricAeadAlgorithm extends Identifiable, SecretKeyGenerator {
+public interface AeadAlgorithm extends Identifiable, SecretKeyGenerator {
 
-    AeadResult encrypt(SymmetricAeadRequest request) throws SecurityException;
+    AeadResult encrypt(AeadRequest request) throws SecurityException;
 
-    PayloadSupplier<byte[]> decrypt(DecryptSymmetricAeadRequest request) throws SecurityException;
+    PayloadSupplier<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException;
 }

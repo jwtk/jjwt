@@ -5,11 +5,11 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.RuntimeEnvironment;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
+import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.PayloadSupplier;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -18,7 +18,7 @@ import java.security.spec.AlgorithmParameterSpec;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAlgorithm {
+public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
 
     //TODO: Remove this static block when JDK 7 support is removed
     // JDK <= 7 does not support AES GCM mode natively and so BouncyCastle is required
@@ -33,7 +33,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
     }
 
     @Override
-    public AeadResult encrypt(final SymmetricAeadRequest req) throws SecurityException {
+    public AeadResult encrypt(final AeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
         final SecretKey key = assertKey(req);
@@ -65,7 +65,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAl
     }
 
     @Override
-    public PayloadSupplier<byte[]> decrypt(final DecryptSymmetricAeadRequest req) throws SecurityException {
+    public PayloadSupplier<byte[]> decrypt(final DecryptAeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
         final SecretKey key = assertKey(req);

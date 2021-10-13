@@ -20,7 +20,7 @@ public class JcaPbeKey implements PbeKey {
     }
 
     @Override
-    public int getWorkFactor() {
+    public int getIterations() {
         return this.jcaKey.getIterationCount();
     }
 

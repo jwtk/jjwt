@@ -1,15 +1,16 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.CryptoRequest;
-import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
+import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -21,7 +22,7 @@ import java.util.Arrays;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadAlgorithm {
+public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
 
     private static final String TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
 
@@ -40,9 +41,8 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
         this.SIGALG = sigAlg;
     }
 
-    @SuppressWarnings("unused") //Used via reflection by io.jsonwebtoken.security.EncryptionAlgorithms
-    public HmacAesAeadAlgorithm(int keyLength) {
-        this(id(keyLength), new MacSignatureAlgorithm(id(keyLength), "HmacSHA" + digestLength(keyLength), keyLength));
+    public HmacAesAeadAlgorithm(int keyBitLength) {
+        this(id(keyBitLength), new MacSignatureAlgorithm(id(keyBitLength), "HmacSHA" + digestLength(keyBitLength), keyBitLength));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
     }
 
     @Override
-    public AeadResult encrypt(final SymmetricAeadRequest req) {
+    public AeadResult encrypt(final AeadRequest req) {
 
         Assert.notNull(req, "Request cannot be null.");
 
@@ -89,7 +89,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
         long aadLength = io.jsonwebtoken.lang.Arrays.length(aad);
         long aadLengthInBits = aadLength * Byte.SIZE;
         long aadLengthInBitsAsUnsignedInt = aadLengthInBits & 0xffffffffL;
-        byte[] AL = toBytes(aadLengthInBitsAsUnsignedInt);
+        byte[] AL = Bytes.toBytes(aadLengthInBitsAsUnsignedInt);
 
         byte[] toHash = new byte[(int) aadLength + iv.length + ciphertext.length + AL.length];
 
@@ -113,18 +113,8 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements SymmetricAeadA
         return assertTag(Arrays.copyOfRange(digest, 0, macKeyBytes.length));
     }
 
-    private static byte[] toBytes(long l) {
-        byte[] b = new byte[8];
-        for (int i = 7; i > 0; i--) {
-            b[i] = (byte) l;
-            l >>>= 8;
-        }
-        b[0] = (byte) l;
-        return b;
-    }
-
     @Override
-    public PayloadSupplier<byte[]> decrypt(final DecryptSymmetricAeadRequest req) {
+    public PayloadSupplier<byte[]> decrypt(final DecryptAeadRequest req) {
 
         Assert.notNull(req, "Request cannot be null.");
 

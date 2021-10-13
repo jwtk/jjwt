@@ -2,12 +2,12 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.RsaKeyAlgorithm;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -35,7 +35,7 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
     public KeyResult getEncryptionKey(final KeyRequest<E> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final E kek = Assert.notNull(request.getKey(), "Request key encryption key cannot be null.");
-        SymmetricAeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
+        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         final SecretKey cek = Assert.notNull(enc.generateKey(), "Request encryption algorithm cannot generate a null key.");
 
         byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {

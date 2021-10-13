@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
@@ -25,9 +26,7 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.SignatureAlgorithms
-import io.jsonwebtoken.security.WeakKeyException
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -37,6 +36,7 @@ import java.security.Key
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.interfaces.RSAPrivateKey
 
 import static org.junit.Assert.*
 
@@ -814,6 +814,14 @@ class JwtsTest {
         assert token.header == [alg: alg.name()]
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
+    }
+
+    void testFoo() {
+        RSAPrivateKey key;
+        Jwts.jweBuilder()
+        .encryptWith(EncryptionAlgorithms.A128GCM)
+        .usingKey(key)
+        .fromKeyAlgorithm(KeyAlgorithms.PBES2_HS256_A128KW.withIterations(1203023))
     }
 }
 

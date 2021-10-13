@@ -3,7 +3,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
-import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.SignatureAlgorithms
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Ignore
@@ -14,53 +13,31 @@ import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertNull
-import static org.junit.Assert.assertTrue
-import static org.junit.Assert.fail
+import static org.junit.Assert.*
 
 class DispatchingJwkFactoryTest {
 
-    @Test
+    @Test(expected = IllegalArgumentException)
     void testNullJwk() {
-        try {
-            new DispatchingJwkFactory().createJwk(null)
-            fail()
-        } catch (InvalidKeyException expected) {
-            assertEquals 'JWK map cannot be null or empty.', expected.message
-        }
+        new DispatchingJwkFactory().createJwk(null)
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException)
     void testEmptyJwk() {
-        try {
-            new DispatchingJwkFactory().createJwk(new DefaultJwkContext<Key>())
-            fail()
-        } catch (InvalidKeyException expected) {
-            assertEquals 'JWK map cannot be null or empty.', expected.message
-        }
+        new DispatchingJwkFactory().createJwk(new DefaultJwkContext<Key>())
     }
 
-    @Test
+    @Test(expected = UnsupportedKeyException)
     void testUnknownKeyType() {
-
         def ctx = new DefaultJwkContext();
         ctx.put('kty', 'foo')
-
-        DispatchingJwkFactory factory = new DispatchingJwkFactory()
-        try {
-            factory.createJwk(ctx)
-            fail()
-        } catch (UnsupportedKeyException e) {
-            assertEquals 'Unrecognized JWK kty (key type) value: foo', e.getMessage()
-        }
+        new DispatchingJwkFactory().createJwk(ctx)
     }
 
     @Test
     void testEcKeyPairToKey() {
 
-        def m = [
+        Map<String,String> m = [
                 'kty': 'EC',
                 'crv': 'P-256',
                 "x"  : "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",
@@ -83,7 +60,7 @@ class DispatchingJwkFactoryTest {
         assertEquals jwk.d, d
 
         //remove the 'd' mapping to represent only a public key:
-        m = m.remove(DefaultEcPrivateJwk.D)
+        m.remove(DefaultEcPrivateJwk.D)
         ctx = new DefaultJwkContext()
         ctx.putAll(m)
 

@@ -24,7 +24,7 @@ import java.security.Key;
  */
 public interface KeyRequest<K extends Key> extends SecurityRequest, KeySupplier<K> {
 
-    SymmetricAeadAlgorithm getEncryptionAlgorithm();
+    AeadAlgorithm getEncryptionAlgorithm();
 
     JweHeader getHeader();
 }

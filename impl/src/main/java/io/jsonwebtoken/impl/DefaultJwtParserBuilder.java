@@ -35,10 +35,10 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import java.security.Key;
 import java.security.Provider;
@@ -73,7 +73,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
-    private final Collection<SymmetricAeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
+    private final Collection<AeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
 
     private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgorithms = new LinkedHashSet<>();
 
@@ -215,8 +215,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addEncryptionAlgorithms(Collection<SymmetricAeadAlgorithm> encAlgs) {
-        Assert.notEmpty(encAlgs, "Additional SymmetricAeadAlgorithm collection cannot be null or empty.");
+    public JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs) {
+        Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
         this.extraEncryptionAlgorithms.addAll(encAlgs);
         return this;
     }

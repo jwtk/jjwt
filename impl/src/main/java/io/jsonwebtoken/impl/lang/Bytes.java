@@ -69,13 +69,13 @@ public final class Bytes {
     public static byte[] concat(byte[]... arrays) {
         int len = 0;
         int count = Arrays.length(arrays);
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             len += arrays[i].length;
         }
         byte[] output = new byte[len];
         int position = 0;
         if (len > 0) {
-            for(byte[] array : arrays) {
+            for (byte[] array : arrays) {
                 int alen = Arrays.length(array);
                 if (alen > 0) {
                     System.arraycopy(array, 0, output, position, alen);
@@ -87,7 +87,7 @@ public final class Bytes {
     }
 
     public static long bitLength(byte[] bytes) {
-        return bytes == null ? 0 : bytes.length * (long)Byte.SIZE;
+        return bytes == null ? 0 : bytes.length * (long) Byte.SIZE;
     }
 
     public static String bitsMsg(long bitLength) {
@@ -95,7 +95,7 @@ public final class Bytes {
     }
 
     public static String bytesMsg(int byteArrayLength) {
-        return bitsMsg((long)byteArrayLength * Byte.SIZE);
+        return bitsMsg((long) byteArrayLength * Byte.SIZE);
     }
 
     public static void increment(byte[] a) {

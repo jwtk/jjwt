@@ -126,7 +126,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         Assert.notNull(request, "request cannot be null.");
         final PbeKey pbeKey = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
 
-        final int iterations = assertIterations(pbeKey.getWorkFactor());
+        final int iterations = assertIterations(pbeKey.getIterations());
         byte[] inputSalt = generateInputSalt(request);
         final byte[] rfcSalt = toRfcSalt(inputSalt);
         final String p2s = Encoders.BASE64URL.encode(inputSalt);

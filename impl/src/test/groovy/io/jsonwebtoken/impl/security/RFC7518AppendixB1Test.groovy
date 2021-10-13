@@ -70,7 +70,7 @@ class RFC7518AppendixB1Test {
     void test() {
 
         def alg = EncryptionAlgorithms.A128CBC_HS256
-        def request = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
+        def request = new DefaultAeadRequest(null, null, P, KEY, A, IV)
         def result = alg.encrypt(request);
 
         byte[] ciphertext = result.getPayload()

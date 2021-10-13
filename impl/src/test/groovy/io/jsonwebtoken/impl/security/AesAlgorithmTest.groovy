@@ -5,7 +5,8 @@ import org.junit.Test
 
 import java.security.SecureRandom
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertSame
+import static org.junit.Assert.fail
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -15,26 +16,6 @@ class AesAlgorithmTest {
     @Test(expected = IllegalArgumentException)
     void testConstructorWithoutRequiredKeyLength() {
         new TestAesAlgorithm('foo', 'foo', 0)
-    }
-
-    @Test
-    void testDoEncryptFailure() {
-
-        def alg = new TestAesAlgorithm('foo', 'foo', 128) {
-            @Override
-            AeadResult encrypt(SymmetricAeadRequest symmetricAeadRequest) throws Exception {
-                throw new IllegalArgumentException('broken')
-            }
-        }
-
-        def req = new DefaultSymmetricAeadRequest('bar'.getBytes(), alg.generateKey(), 'foo'.getBytes());
-
-        try {
-            alg.encrypt(req)
-        } catch (SecurityException expected) {
-            assertTrue expected.getCause() instanceof IllegalArgumentException
-            assertTrue expected.getCause().getMessage().equals('broken')
-        }
     }
 
     @Test
@@ -60,26 +41,26 @@ class AesAlgorithmTest {
 
         def secureRandom = new SecureRandom()
 
-        def req = new DefaultSymmetricAeadRequest(null, secureRandom, 'data'.getBytes(), alg.generateKey(), 'aad'.getBytes())
+        def req = new DefaultAeadRequest(null, secureRandom, 'data'.getBytes(), alg.generateKey(), 'aad'.getBytes())
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 
         assertSame(secureRandom, returnedSecureRandom)
     }
 
-    static class TestAesAlgorithm extends AesAlgorithm implements SymmetricAeadAlgorithm {
+    static class TestAesAlgorithm extends AesAlgorithm implements AeadAlgorithm {
 
         TestAesAlgorithm(String name, String transformationString, int requiredKeyLengthInBits) {
             super(name, transformationString, requiredKeyLengthInBits)
         }
 
         @Override
-        AeadResult encrypt(SymmetricAeadRequest symmetricAeadRequest) {
+        AeadResult encrypt(AeadRequest symmetricAeadRequest) {
             return null
         }
 
         @Override
-        PayloadSupplier<byte[]> decrypt(DecryptSymmetricAeadRequest symmetricAeadDecryptionRequest) {
+        PayloadSupplier<byte[]> decrypt(DecryptAeadRequest symmetricAeadDecryptionRequest) {
             return null
         }
     }

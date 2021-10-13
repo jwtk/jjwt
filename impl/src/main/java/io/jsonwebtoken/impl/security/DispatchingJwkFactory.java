@@ -46,6 +46,8 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
     @Override
     public Jwk<Key> createJwk(JwkContext<Key> ctx) {
 
+        Assert.notNull(ctx, "JwkContext cannot be null.");
+
         final Key key = ctx.getKey();
         final String kty = Strings.clean(ctx.getType());
 

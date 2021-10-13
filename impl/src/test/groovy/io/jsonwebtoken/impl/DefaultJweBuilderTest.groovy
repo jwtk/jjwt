@@ -75,7 +75,7 @@ class DefaultJweBuilderTest {
 
         for( KeyAlgorithm<? extends Key,? extends Key> keyAlg : KeyAlgorithms.values() ) {
 
-            for(SymmetricAeadAlgorithm encAlg : EncryptionAlgorithms.values() ) {
+            for(AeadAlgorithm encAlg : EncryptionAlgorithms.values() ) {
                 Key kek = encAlg.generateKey();
                 String jwe = builder().setSubject('joe').encryptWith(encAlg).withKeyFrom(kek, keyAlg).compact()
             }

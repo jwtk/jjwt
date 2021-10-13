@@ -24,6 +24,7 @@ import java.util.Collection;
 /**
  * @since JJWT_RELEASE_VERSION
  */
+@SuppressWarnings("rawtypes")
 public final class KeyAlgorithms {
 
     //prevent instantiation
@@ -69,15 +70,12 @@ public final class KeyAlgorithms {
     public static final KeyAlgorithm<SecretKey, SecretKey> A128GCMKW = forId0("A128GCMKW");
     public static final KeyAlgorithm<SecretKey, SecretKey> A192GCMKW = forId0("A192GCMKW");
     public static final KeyAlgorithm<SecretKey, SecretKey> A256GCMKW = forId0("A256GCMKW");
-    @SuppressWarnings("rawtypes")
-    public static final RsaKeyAlgorithm RSA1_5 = forId0("RSA1_5");
-    @SuppressWarnings("rawtypes")
-    public static final RsaKeyAlgorithm RSA_OAEP = forId0("RSA-OAEP");
-    @SuppressWarnings("rawtypes")
-    public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
     public static final KeyAlgorithm<PbeKey, SecretKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
     public static final KeyAlgorithm<PbeKey, SecretKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
     public static final KeyAlgorithm<PbeKey, SecretKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
+    public static final RsaKeyAlgorithm RSA1_5 = forId0("RSA1_5");
+    public static final RsaKeyAlgorithm RSA_OAEP = forId0("RSA-OAEP");
+    public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
 
     public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
         return Classes.invokeStatic(BRIDGE_CLASSNAME, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);

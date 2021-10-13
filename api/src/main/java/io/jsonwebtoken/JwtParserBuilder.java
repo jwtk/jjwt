@@ -17,9 +17,9 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import java.security.Key;
 import java.security.Provider;
@@ -339,7 +339,7 @@ public interface JwtParserBuilder {
     @Deprecated
     JwtParserBuilder setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
-    JwtParserBuilder addEncryptionAlgorithms(Collection<SymmetricAeadAlgorithm> encAlgs);
+    JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs);
 
     JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?,?>> sigAlgs);
 

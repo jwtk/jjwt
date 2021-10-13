@@ -22,8 +22,20 @@ import javax.crypto.SecretKey;
  */
 public interface PbeKey extends SecretKey {
 
+    /**
+     * Returns a clone of the underlying password character array represented by this Key.  Like all
+     * {@code SecretKey} implementations, if you wish to clear the backing password character array for
+     * safety/security reasons, call the {@link #destroy()} method, ensuring the key instance can no longer
+     * be used.
+     *
+     * @return a clone of the underlying password character array represented by this Key.
+     */
     char[] getPassword();
 
-    int getWorkFactor();
-
+    /**
+     * Returns the number of hashing iterations to perform.
+     *
+     * @return the number of hashing iterations to perform.
+     */
+    int getIterations();
 }

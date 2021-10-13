@@ -1,8 +1,8 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.security.AeadRequest
 import io.jsonwebtoken.security.AeadResult
 import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.SymmetricAeadRequest
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -70,7 +70,7 @@ class RFC7518AppendixB2Test {
     void test() {
 
         def alg = EncryptionAlgorithms.A192CBC_HS384
-        SymmetricAeadRequest req = new DefaultSymmetricAeadRequest(null, null, P, KEY, A, IV)
+        AeadRequest req = new DefaultAeadRequest(null, null, P, KEY, A, IV)
         AeadResult result = alg.encrypt(req)
 
         byte[] resultCiphertext = result.getPayload()

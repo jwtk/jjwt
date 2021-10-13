@@ -18,5 +18,5 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface DecryptSymmetricAeadRequest extends SymmetricAeadRequest, InitializationVectorSupplier, DigestSupplier {
+public interface DecryptAeadRequest extends AeadRequest, InitializationVectorSupplier, DigestSupplier {
 }

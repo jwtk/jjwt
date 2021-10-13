@@ -6,12 +6,12 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -34,7 +34,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements KeyAlgorithm<Sec
 
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request);
-        SymmetricAeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
+        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         final SecretKey cek = Assert.notNull(enc.generateKey(), "Request encryption algorithm cannot generate a null key.");
         final byte[] iv = ensureInitializationVector(request);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);

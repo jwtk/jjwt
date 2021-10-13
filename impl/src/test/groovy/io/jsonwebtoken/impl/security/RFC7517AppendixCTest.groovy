@@ -304,7 +304,7 @@ class RFC7517AppendixCTest {
             }
         }
 
-        PbeKey pbeKey = Keys.forPbe().setPassword(RFC_SHARED_PASSPHRASE).setWorkFactor(RFC_P2C).build()
+        PbeKey pbeKey = Keys.forPbe().setPassword(RFC_SHARED_PASSPHRASE.toCharArray()).setIterations(RFC_P2C).build()
 
         String compact = Jwts.jweBuilder()
                 .setPayload(RFC_JWK_JSON)

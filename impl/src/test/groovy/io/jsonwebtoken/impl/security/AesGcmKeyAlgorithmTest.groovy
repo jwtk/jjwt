@@ -19,7 +19,7 @@ import static org.junit.Assert.*
 class AesGcmKeyAlgorithmTest {
 
     /**
-     * This tests asserts that our SymmetricAeadAlgorithm implementation and the JCA 'AES/GCM/NoPadding' wrap algorithm
+     * This tests asserts that our AeadAlgorithm implementation and the JCA 'AES/GCM/NoPadding' wrap algorithm
      * produce the exact same values.  This should be the case when the transformation is identical, even though
      * one uses Cipher.WRAP_MODE and the other uses a raw plaintext byte array.
      */
@@ -52,7 +52,7 @@ class AesGcmKeyAlgorithmTest {
         System.arraycopy(jcaResult, ciphertextLength, tag, 0, 16)
         def resultA = new DefaultAeadResult(null, null, ciphertext, kek, null, tag, iv)
 
-        def encRequest = new DefaultSymmetricAeadRequest(null, null, cek.getEncoded(), kek, null, iv)
+        def encRequest = new DefaultAeadRequest(null, null, cek.getEncoded(), kek, null, iv)
         def encResult = EncryptionAlgorithms.A256GCM.encrypt(encRequest)
 
         assertArrayEquals resultA.digest, encResult.digest

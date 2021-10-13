@@ -46,7 +46,7 @@ class GcmAesAeadAlgorithmTest {
 
         def alg = EncryptionAlgorithms.A256GCM
 
-        def req = new DefaultSymmetricAeadRequest(null, null, P, KEY, AAD, IV)
+        def req = new DefaultAeadRequest(null, null, P, KEY, AAD, IV)
 
         def result = alg.encrypt(req)
 

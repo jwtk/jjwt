@@ -61,7 +61,8 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.DecryptSymmetricAeadRequest;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -70,7 +71,6 @@ import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
 import io.jsonwebtoken.security.VerifySignatureRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -121,7 +121,7 @@ public class DefaultJwtParser implements JwtParser {
         return locFn(JwsHeader.ALGORITHM, MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
     }
 
-    private static Function<JweHeader, SymmetricAeadAlgorithm> encFn(Collection<SymmetricAeadAlgorithm> extras) {
+    private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
         return locFn(JweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, EncryptionAlgorithmsBridge.REGISTRY, extras);
     }
 
@@ -140,7 +140,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Function<JwsHeader, SignatureAlgorithm<?, ?>> signatureAlgorithmLocator;
 
-    private final Function<JweHeader, SymmetricAeadAlgorithm> encryptionAlgorithmLocator;
+    private final Function<JweHeader, AeadAlgorithm> encryptionAlgorithmLocator;
 
     private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
 
@@ -169,7 +169,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signingKeyResolver = constantKeyLocator;
         this.signatureAlgorithmLocator = sigFn(Collections.<SignatureAlgorithm<?, ?>>emptyList());
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
-        this.encryptionAlgorithmLocator = encFn(Collections.<SymmetricAeadAlgorithm>emptyList());
+        this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
         this.compressionCodecLocator = new CompressionCodecLocator<>(new DefaultCompressionCodecResolver());
     }
 
@@ -186,7 +186,7 @@ public class DefaultJwtParser implements JwtParser {
                      CompressionCodecResolver compressionCodecResolver,
                      Collection<SignatureAlgorithm<?, ?>> extraSigAlgs,
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
-                     Collection<SymmetricAeadAlgorithm> extraEncAlgs) {
+                     Collection<AeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
         this.signingKeyResolver = Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
@@ -438,7 +438,7 @@ public class DefaultJwtParser implements JwtParser {
             if (!Strings.hasText(enc)) {
                 throw new MalformedJwtException(MISSING_ENC_MSG);
             }
-            final SymmetricAeadAlgorithm encAlg = this.encryptionAlgorithmLocator.apply(jweHeader);
+            final AeadAlgorithm encAlg = this.encryptionAlgorithmLocator.apply(jweHeader);
             if (encAlg == null) {
                 String msg = "Unrecognized JWE encryption algorithm '" + enc + "'.";
                 throw new UnsupportedJwtException(msg);
@@ -466,7 +466,7 @@ public class DefaultJwtParser implements JwtParser {
                 throw new IllegalStateException(msg);
             }
 
-            DecryptSymmetricAeadRequest decryptRequest =
+            DecryptAeadRequest decryptRequest =
                 new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
             PayloadSupplier<byte[]> result = encAlg.decrypt(decryptRequest);
             bytes = result.getPayload();

@@ -1,29 +1,29 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.InitializationVectorSupplier;
-import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultSymmetricAeadRequest extends DefaultCryptoRequest<byte[], SecretKey> implements SymmetricAeadRequest, InitializationVectorSupplier {
+public class DefaultAeadRequest extends DefaultCryptoRequest<byte[], SecretKey> implements AeadRequest, InitializationVectorSupplier {
 
     private final byte[] IV;
 
     private final byte[] AAD;
 
-    DefaultSymmetricAeadRequest(Provider provider, SecureRandom secureRandom, byte[] data, SecretKey key, byte[] aad, byte[] iv) {
+    DefaultAeadRequest(Provider provider, SecureRandom secureRandom, byte[] data, SecretKey key, byte[] aad, byte[] iv) {
         super(provider, secureRandom, data, key);
         this.AAD = aad;
         this.IV = iv;
     }
 
-    public DefaultSymmetricAeadRequest(Provider provider, SecureRandom secureRandom, byte[] data, SecretKey key, byte[] aad) {
+    public DefaultAeadRequest(Provider provider, SecureRandom secureRandom, byte[] data, SecretKey key, byte[] aad) {
         this(provider, secureRandom, data, key, aad, null);
     }
 
-    public DefaultSymmetricAeadRequest(byte[] data, SecretKey key, byte[] aad) {
+    public DefaultAeadRequest(byte[] data, SecretKey key, byte[] aad) {
         this(null, null, data, key, aad, null);
     }
 

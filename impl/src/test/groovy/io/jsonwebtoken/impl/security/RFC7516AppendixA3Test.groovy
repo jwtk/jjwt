@@ -102,7 +102,7 @@ class RFC7516AppendixA3Test {
         // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.8 :
 
         //ensure that the algorithm reflects the test harness values:
-        SymmetricAeadAlgorithm enc = new HmacAesAeadAlgorithm(128) {
+        AeadAlgorithm enc = new HmacAesAeadAlgorithm(128) {
             @Override
             protected byte[] ensureInitializationVector(SecurityRequest request) {
                 return IV;

@@ -7,8 +7,6 @@ import io.jsonwebtoken.security.Keys
 import org.junit.Ignore
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
-
 class Pbes2HsAkwAlgorithmTest {
 
     @Ignore // for manual/developer testing only.  Takes a long time and there is no deterministic output to assert
@@ -25,9 +23,9 @@ class Pbes2HsAkwAlgorithmTest {
         int skip = 6
         //double scale = 0.5035246727
 
-        def payload = 'hello world'.getBytes(StandardCharsets.UTF_8)
-        def key = Keys.forPbe().setPassword('hellowor').setWorkFactor(iterations).build()
-        def req = new DefaultKeyRequest(null, null, null, key, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM)
+        def password = 'hellowor'.toCharArray()
+        def key = Keys.forPbe().setPassword(password).setIterations(iterations).build()
+        def req = new DefaultKeyRequest(null, null, key, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM)
         int sum = 0;
         for(int i = 0; i < tries; i++) {
             long start = System.currentTimeMillis()

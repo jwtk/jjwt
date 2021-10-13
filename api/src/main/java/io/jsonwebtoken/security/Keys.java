@@ -31,6 +31,8 @@ import java.security.KeyPair;
 public final class Keys {
 
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
+    @SuppressWarnings("rawtypes")
+    private static final Class[] TO_PBE_ARG_TYPES = new Class[]{PBEKey.class};
 
     //prevent instantiation
     private Keys() {
@@ -223,10 +225,23 @@ public final class Keys {
         return asalg.generateKeyPair();
     }
 
+    /**
+     * Returns a JJWT {@link PbeKey} directly backed by the specified JCA {@link PBEKey}.  The returned instance
+     * is directly linked to the specified {@code PBEKey} - a call to either key's {@link SecretKey#destroy() destroy}
+     * method will destroy the other to ensure correct/safe cleanup for both.
+     *
+     * @param key the {@code PBEKey} to represent as a {@code PbeKey} instance.
+     * @return a JJWT {@link PbeKey} instance that wraps the specified JCA {@link PBEKey}
+     * @since JJWT_RELEASE_VERSION
+     */
     public static PbeKey toPbeKey(PBEKey key) {
-        return forPbe().forKey(key).build();
+        return Classes.invokeStatic(BRIDGE_CLASSNAME, "toPbeKey", TO_PBE_ARG_TYPES, new Object[]{key});
     }
 
+    /**
+     * Returns a new {@link PbeKeyBuilder} to use to construct a {@link PbeKey} instance.
+     * @return
+     */
     public static PbeKeyBuilder<PbeKey> forPbe() {
         return Classes.invokeStatic(BRIDGE_CLASSNAME, "forPbe", null, (Object[]) null);
     }

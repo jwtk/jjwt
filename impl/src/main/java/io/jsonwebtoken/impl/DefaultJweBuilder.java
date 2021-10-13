@@ -6,14 +6,16 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.impl.lang.Services;
+import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultSymmetricAeadRequest;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
@@ -22,8 +24,6 @@ import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.PbeKey;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SymmetricAeadAlgorithm;
-import io.jsonwebtoken.security.SymmetricAeadRequest;
 
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.PBEKey;
@@ -33,8 +33,8 @@ import java.util.Map;
 
 public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements JweBuilder {
 
-    private SymmetricAeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
-    private Function<SymmetricAeadRequest, AeadResult> encFunction;
+    private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
+    private Function<AeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key, ?> alg;
     private Function<KeyRequest<Key>, KeyResult> algFunction;
@@ -65,13 +65,13 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     }
 
     @Override
-    public JweBuilder encryptWith(final SymmetricAeadAlgorithm enc) {
+    public JweBuilder encryptWith(final AeadAlgorithm enc) {
         this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
         Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
         String encMsg = enc.getId() + " encryption failed.";
-        this.encFunction = wrap(encMsg, new Function<SymmetricAeadRequest, AeadResult>() {
+        this.encFunction = wrap(encMsg, new Function<AeadRequest, AeadResult>() {
             @Override
-            public AeadResult apply(SymmetricAeadRequest request) {
+            public AeadResult apply(AeadRequest request) {
                 return enc.encrypt(request);
             }
         });
@@ -159,7 +159,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
-        SymmetricAeadRequest encRequest = new DefaultSymmetricAeadRequest(provider, secureRandom, plaintext, cek, aad);
+        AeadRequest encRequest = new DefaultAeadRequest(provider, secureRandom, plaintext, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
