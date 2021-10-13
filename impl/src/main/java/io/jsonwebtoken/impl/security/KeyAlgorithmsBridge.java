@@ -188,9 +188,7 @@ public final class KeyAlgorithmsBridge {
             if (collectSample) {
                 // For each attempt, the x axis is the workFactor, and the y axis is how long it took to compute:
                 points.add(new Point(workFactor, duration));
-                ret.getDurations().add(duration);
-                ret.getWorkFactors().add(workFactor);
-                //System.out.println("Collected point: workFactor=" + workFactor + ", duration=" + duration + " ms, %achieved=" + durationPercentAchieved);
+                ret.addResult(workFactor, duration);
             } else {
                 minWorkFactor = Math.max(minWorkFactor, workFactor);
                 //System.out.println("      Excluding sample: workFactor=" + workFactor + ", duration=" + duration + " ms, %achieved=" + durationPercentAchieved);
@@ -232,7 +230,7 @@ public final class KeyAlgorithmsBridge {
         }
         double average = sumX / points.size();
         //ensure our average is at least as much as the smallest work factor that got us closest to desiredMillis:
-        ret.setIterations((int) Math.max(average, minWorkFactor));
+        ret.setEstimatedIterations((int) Math.max(average, minWorkFactor));
         return ret;
     }
 
