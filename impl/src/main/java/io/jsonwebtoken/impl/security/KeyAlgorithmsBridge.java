@@ -231,8 +231,9 @@ public final class KeyAlgorithmsBridge {
         }
         double average = sumX / points.size();
         //ensure our average is at least as much as the smallest work factor that got us closest to desiredMillis:
-        estimateIterationsResultBuilder.setEstimatedIterations((int) Math.max(average, minWorkFactor));
-        return estimateIterationsResultBuilder.build();
+        return estimateIterationsResultBuilder
+            .setEstimatedIterations((int) Math.max(average, minWorkFactor))
+            .build();
     }
 
     private static class Point {
