@@ -22,20 +22,16 @@ import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.security.Keys
-import org.hamcrest.CoreMatchers
-import org.junit.Test
-
-import static org.easymock.EasyMock.niceMock
 import io.jsonwebtoken.security.SignatureAlgorithms
+import org.hamcrest.CoreMatchers
 import org.junit.Test
 
 import java.security.Provider
 
 import static org.easymock.EasyMock.*
+import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertSame
-import static org.hamcrest.MatcherAssert.assertThat
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParserBuilder
 // implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class

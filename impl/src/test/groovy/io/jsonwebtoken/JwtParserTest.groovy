@@ -70,7 +70,7 @@ class JwtParserTest {
             Jwts.parserBuilder().build().parse(bad)
             fail()
         } catch (MalformedJwtException expected) {
-            assertEquals 'Unable to read claims JSON: ' + junkPayload, expected.getMessage()
+            assertEquals expected.getMessage(), 'Malformed JWT JSON: ' + junkPayload
         }
     }
 
