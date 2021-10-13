@@ -156,7 +156,8 @@ public final class KeyAlgorithmsBridge {
             alg = lean((Pbes2HsAkwAlgorithm) alg);
         }
 
-        EstimateIterationsResult ret = new EstimateIterationsResult(NUM_SAMPLES);
+        EstimateIterationsResult.EstimateIterationsResultBuilder estimateIterationsResultBuilder =
+                EstimateIterationsResult.builder(NUM_SAMPLES);
 
         int workFactor = 1000; // same as iterations for PBKDF2.  Different concept for Bcrypt/Scrypt
         int minWorkFactor = workFactor;
@@ -188,7 +189,7 @@ public final class KeyAlgorithmsBridge {
             if (collectSample) {
                 // For each attempt, the x axis is the workFactor, and the y axis is how long it took to compute:
                 points.add(new Point(workFactor, duration));
-                ret.addResult(workFactor, duration);
+                estimateIterationsResultBuilder.addResult(workFactor, duration);
             } else {
                 minWorkFactor = Math.max(minWorkFactor, workFactor);
                 //System.out.println("      Excluding sample: workFactor=" + workFactor + ", duration=" + duration + " ms, %achieved=" + durationPercentAchieved);
@@ -230,8 +231,8 @@ public final class KeyAlgorithmsBridge {
         }
         double average = sumX / points.size();
         //ensure our average is at least as much as the smallest work factor that got us closest to desiredMillis:
-        ret.setEstimatedIterations((int) Math.max(average, minWorkFactor));
-        return ret;
+        estimateIterationsResultBuilder.setEstimatedIterations((int) Math.max(average, minWorkFactor));
+        return estimateIterationsResultBuilder.build();
     }
 
     private static class Point {

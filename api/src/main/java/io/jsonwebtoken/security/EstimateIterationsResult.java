@@ -5,37 +5,56 @@ import java.util.Collections;
 import java.util.List;
 
 public class EstimateIterationsResult {
-    private int estimatedIterations;
-    private List<Result> results;
 
-    private boolean estimateSet;
+    private final int estimatedIterations;
+    private final List<Result> results;
 
-    public EstimateIterationsResult() {
-        this.results = new ArrayList<>();
-    }
-
-    public EstimateIterationsResult(int numSamples) {
-        this.results = new ArrayList<>(numSamples);
+    private EstimateIterationsResult(int estimatedIterations, List<Result> results) {
+        this.estimatedIterations = estimatedIterations;
+        this.results = results;
     }
 
     public int getEstimatedIterations() {
         return estimatedIterations;
     }
 
-    public synchronized void setEstimatedIterations(int estimatedIterations) {
-        if (estimateSet) {
-            throw new UnsupportedOperationException("Estimated iterations already set and can only be set once.");
-        }
-        estimateSet = true;
-        this.estimatedIterations = estimatedIterations;
-    }
-
-    public void addResult(int workFactor, long duration) {
-        this.results.add(new Result(workFactor, duration));
-    }
-
     public List<Result> getResults() {
-        return Collections.unmodifiableList(results);
+        return results;
+    }
+
+    public static EstimateIterationsResultBuilder builder() {
+        return new EstimateIterationsResultBuilder();
+    }
+
+    public static EstimateIterationsResultBuilder builder(int numSamples) {
+        return new EstimateIterationsResultBuilder(numSamples);
+    }
+
+    public static class EstimateIterationsResultBuilder {
+        private int estimatedIterations;
+        private final List<Result> results;
+
+        public EstimateIterationsResultBuilder() {
+            results = new ArrayList<>();
+        }
+
+        public EstimateIterationsResultBuilder(int numSamples) {
+            results = new ArrayList<>(numSamples);
+        }
+
+        public EstimateIterationsResultBuilder addResult(int workFactor, long duration) {
+            this.results.add(new Result(workFactor, duration));
+            return this;
+        }
+
+        public EstimateIterationsResultBuilder setEstimatedIterations(int estimatedIterations) {
+            this.estimatedIterations = estimatedIterations;
+            return this;
+        }
+
+        public EstimateIterationsResult build() {
+            return new EstimateIterationsResult(estimatedIterations, Collections.unmodifiableList(results));
+        }
     }
 
     public static final class Result {
