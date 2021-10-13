@@ -153,6 +153,9 @@ class JwksTest {
             PublicJwk privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
             assertEquals pub, pubJwk.toKey()
+            def jwkPair = privJwk.toKeyPair()
+            assertEquals pub, jwkPair.getPublic()
+            assertEquals priv, jwkPair.getPrivate()
 
             // test pair
             privJwk = pub instanceof ECKey ?
@@ -162,6 +165,9 @@ class JwksTest {
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
             assertEquals pub, pubJwk.toKey()
+            jwkPair = privJwk.toKeyPair()
+            assertEquals pub, jwkPair.getPublic()
+            assertEquals priv, jwkPair.getPrivate()
         }
     }
 }

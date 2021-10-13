@@ -42,12 +42,12 @@ public class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
     @Override
     public T onPlaintextJws(Jws<String> jws) {
-        throw new UnsupportedJwtException("Signed plaintext JWSs are not supported.");
+        throw new UnsupportedJwtException("Signed plaintext JWTs are not supported.");
     }
 
     @Override
     public T onClaimsJws(Jws<Claims> jws) {
-        throw new UnsupportedJwtException("Signed Claims JWSs are not supported.");
+        throw new UnsupportedJwtException("Signed Claims JWTs are not supported.");
     }
 
     @Override

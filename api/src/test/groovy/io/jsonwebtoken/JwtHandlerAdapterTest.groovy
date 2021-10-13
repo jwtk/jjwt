@@ -16,7 +16,9 @@
 package io.jsonwebtoken
 
 import org.junit.Test
-import static org.junit.Assert.*
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 class JwtHandlerAdapterTest {
 
@@ -49,7 +51,7 @@ class JwtHandlerAdapterTest {
             handler.onPlaintextJws(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed plaintext JWSs are not supported.'
+            assertEquals e.getMessage(), 'Signed plaintext JWTs are not supported.'
         }
     }
 
@@ -60,7 +62,7 @@ class JwtHandlerAdapterTest {
             handler.onClaimsJws(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
+            assertEquals e.getMessage(), 'Signed Claims JWTs are not supported.'
         }
     }
 }

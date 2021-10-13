@@ -23,7 +23,6 @@ import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
-import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
 import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
@@ -276,13 +275,10 @@ class DeprecatedJwtParserTest {
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parser().parsePlaintextJws(compact)
+            Jwts.parser().parsePlaintextJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of these ' +
-                    'to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals expected, e.getMessage()
+            assertEquals 'Cannot verify JWS signature: unable to locate signature verification key for JWS with header: {alg=HS256}', e.getMessage()
         }
     }
 
@@ -292,13 +288,10 @@ class DeprecatedJwtParserTest {
         String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parser().parsePlaintextJws(compact)
+            Jwts.parser().parsePlaintextJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of these ' +
-                    'to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals expected, e.getMessage()
+            assertEquals 'Cannot verify JWS signature: unable to locate signature verification key for JWS with header: {alg=HS256}', e.getMessage()
         }
     }
 
@@ -329,7 +322,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unsigned plaintext JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -344,10 +337,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of these ' +
-                    'to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals expected, e.getMessage()
+            assertEquals 'Cannot verify JWS signature: unable to locate signature verification key for JWS with header: {alg=HS256}', e.getMessage()
         }
     }
 
@@ -360,10 +350,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of these ' +
-                    'to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals expected, e.getMessage()
+            assertEquals 'Cannot verify JWS signature: unable to locate signature verification key for JWS with header: {alg=HS256}', e.getMessage()
         }
     }
 
@@ -430,7 +417,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unsigned plaintext JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -447,7 +434,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unsigned Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -464,7 +451,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
+            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -543,7 +530,7 @@ class DeprecatedJwtParserTest {
             Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unsigned plaintext JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -560,24 +547,24 @@ class DeprecatedJwtParserTest {
             Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unsigned Claims JWTs are not supported.', e.getMessage()
         }
     }
 
     @Test
     void testParseClaimsJwsWithPlaintextJws() {
 
-        String subject = 'Joe'
+        String payload = 'Hello world'
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+            Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
+            assertEquals 'Signed plaintext JWTs are not supported.', e.getMessage()
         }
     }
 

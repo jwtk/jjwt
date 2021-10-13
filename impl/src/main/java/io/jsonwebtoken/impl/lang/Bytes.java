@@ -86,6 +86,10 @@ public final class Bytes {
         return output;
     }
 
+    public static int byteLength(byte[] bytes) {
+        return bytes == null ? 0 : bytes.length;
+    }
+
     public static long bitLength(byte[] bytes) {
         return bytes == null ? 0 : bytes.length * (long) Byte.SIZE;
     }

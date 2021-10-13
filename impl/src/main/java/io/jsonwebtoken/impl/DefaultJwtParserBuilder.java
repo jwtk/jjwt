@@ -68,8 +68,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @SuppressWarnings({"rawtypes"})
     private Function<Header, Key> keyLocator = ConstantFunction.forNull();
+
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
-    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator<>(null, null);
+    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator<>(null , null);
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
@@ -88,6 +89,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private Clock clock = DefaultClock.INSTANCE;
 
     private long allowedClockSkewMillis = 0;
+
+    private Key signatureVerificationKey;
+    private Key decryptionKey;
 
     @Override
     public JwtParserBuilder setProvider(Provider provider) {
@@ -186,31 +190,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return setSigningKey(bytes);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public JwtParserBuilder setSigningKey(final Key key) {
-        Assert.notNull(key, "signing key cannot be null.");
-        final Function<Header, Key> existing = this.keyLocator;
-        this.keyLocator = new Function<Header, Key>() {
-            @Override
-            public Key apply(Header header) {
-                return header instanceof JwsHeader ? key : existing.apply(header);
-            }
-        };
+        this.signatureVerificationKey = Assert.notNull(key, "signing key cannot be null.");
         return setSigningKeyResolver(new ConstantKeyLocator<>(key, null));
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public JwtParserBuilder decryptWith(final Key key) {
-        Assert.notNull(key, "decryption key cannot be null.");
-        final Function<Header, Key> existing = this.keyLocator;
-        this.keyLocator = new Function<Header, Key>() {
-            @Override
-            public Key apply(Header header) {
-                return header instanceof JweHeader ? key : existing.apply(header);
-            }
-        };
+        this.decryptionKey = Assert.notNull(key, "decryption key cannot be null.");
         return this;
     }
 
@@ -262,6 +250,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public JwtParser build() {
 
@@ -271,6 +260,25 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             // try to find one based on the services available:
             //noinspection unchecked
             this.deserializer = Services.loadFirst(Deserializer.class);
+        }
+
+        final Function<Header,Key> existing1 = this.keyLocator;
+        if (this.signatureVerificationKey != null) {
+            this.keyLocator = new Function<Header, Key>() {
+                @Override
+                public Key apply(Header header) {
+                    return header instanceof JwsHeader ? signatureVerificationKey : existing1.apply(header);
+                }
+            };
+        }
+        final Function<Header,Key> existing2 = this.keyLocator;
+        if (this.decryptionKey != null) {
+            this.keyLocator = new Function<Header, Key>() {
+                @Override
+                public Key apply(Header header) {
+                    return header instanceof JweHeader ? decryptionKey : existing2.apply(header);
+                }
+            };
         }
 
         // Invariants.  If these are ever violated, it's an error in this class implementation

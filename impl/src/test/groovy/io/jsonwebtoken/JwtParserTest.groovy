@@ -317,29 +317,24 @@ class JwtParserTest {
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
-            Jwts.parserBuilder().build().parsePlaintextJws(compact)
+            Jwts.parserBuilder().build().parsePlaintextJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of ' +
-                    'these to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals msg, e.getMessage()
+            assertEquals 'Cannot verify JWS signature: unable to locate signature verification key for JWS with header: {alg=HS256}', e.getMessage()
         }
     }
 
     @Test
     void testParsePlaintextJwtWithClaimsJws() {
 
-        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, randomKey()).compact()
+        def key = randomKey()
+        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parserBuilder().build().parsePlaintextJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of ' +
-                    'these to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals msg, e.getMessage()
+            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -370,7 +365,7 @@ class JwtParserTest {
             Jwts.parserBuilder().build().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unsigned plaintext JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -385,26 +380,21 @@ class JwtParserTest {
             Jwts.parserBuilder().build().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of ' +
-                    'these to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals msg, e.getMessage()
+            assertEquals 'Cannot verify JWS signature: unable to locate signature verification key for JWS with header: {alg=HS256}', e.getMessage()
         }
     }
 
     @Test
     void testParseClaimsJwtWithClaimsJws() {
 
-        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, randomKey()).compact()
+        def key = randomKey()
+        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parserBuilder().build().parseClaimsJwt(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJwt(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = 'Signed JWTs are not supported: the JwtParser has not been configured with a signature ' +
-                    'verification key or a KeyResolver. Consider configuring the JwtParserBuilder with one of ' +
-                    'these to ensure it can use the necessary key to verify JWS signatures.'
-            assertEquals msg, e.getMessage()
+            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -476,7 +466,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unsigned plaintext JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -493,7 +483,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unsigned Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -510,7 +500,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
+            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -589,7 +579,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unsigned plaintext JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -608,7 +598,7 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unsigned Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -625,7 +615,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed Claims JWSs are not supported.'
+            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -674,7 +664,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
             fail()
         } catch (SignatureException se) {
-            assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
+            assertEquals 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.', se.getMessage()
         }
     }
 
@@ -691,7 +681,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKeyResolver(null).build().parseClaimsJws(compact)
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.getMessage(), 'SigningKeyResolver cannot be null.'
+            assertEquals 'SigningKeyResolver cannot be null.', iae.getMessage()
         }
     }
 
@@ -710,9 +700,9 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parseClaimsJws(compact)
             fail()
         } catch (UnsupportedJwtException ex) {
-            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support ' +
+            assertEquals 'The specified SigningKeyResolver implementation does not support ' +
                     'Claims JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, Claims) method ' +
-                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.'
+                    'or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, Claims) method.', ex.getMessage()
         }
     }
 
@@ -791,7 +781,7 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
             fail()
         } catch (SignatureException se) {
-            assertEquals se.getMessage(), 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
+            assertEquals 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.', se.getMessage()
         }
     }
 
@@ -1466,7 +1456,7 @@ class JwtParserTest {
         try {
             Jwts.parserBuilder().setSigningKey(key).
                     require("aDate", aDate).
-                build().
+                    build().
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {

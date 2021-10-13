@@ -376,11 +376,17 @@ public class DefaultJwtParser implements JwtParser {
         //
         final String alg = Strings.clean(header.getAlgorithm());
         if (!Strings.hasText(alg)) {
-            String msg = "Compact JWT strings MUST always have an 'alg' (Algorithm) header value per " +
-                "https://tools.ietf.org/html/rfc7515#section-4.1.1 and " +
-                "https://tools.ietf.org/html/rfc7516#section-4.1.1. Also see " +
-                "https://tools.ietf.org/html/rfc7515#section-10.7 for more information.";
+            String msg = tokenized instanceof TokenizedJwe ? MISSING_JWE_ALG_MSG : MISSING_JWS_ALG_MSG;
             throw new MalformedJwtException(msg);
+        } else {
+            if (!SignatureAlgorithms.NONE.getId().equals(alg) && !Strings.hasText(tokenized.getDigest())) {
+                String type = tokenized instanceof TokenizedJwe ? "JWE" : "JWS";
+                String algType = tokenized instanceof TokenizedJwe ? "key management" : "signature";
+                String digestType = tokenized instanceof TokenizedJwe ? "an AAD authentication tag" : "a signature";
+                String msg = "The " + type + " header references " + algType + " algorithm '" + alg + "' but the " +
+                    "compact " + type + " string does not have " + digestType + " token.";
+                throw new MalformedJwtException(msg);
+            }
         }
 
         // =============== Body =================
@@ -452,8 +458,7 @@ public class DefaultJwtParser implements JwtParser {
 
             final Key key = ((Function<JweHeader, Key>) this.keyLocator).apply(jweHeader);
             if (key == null) {
-                String msg = "No key found for use with JWE key algorithm '" + keyAlg.getId() +
-                    "'. Unable to decrypt JWE payload.";
+                String msg = "Cannot decrypt JWE payload: unable to locate key for JWE with header: " + jweHeader;
                 throw new UnsupportedJwtException(msg);
             }
 
@@ -500,9 +505,16 @@ public class DefaultJwtParser implements JwtParser {
 
             final JwsHeader jwsHeader = jws.getHeader();
 
-            SignatureAlgorithm<?, Key> algorithm = (SignatureAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
+            SignatureAlgorithm<?, Key> algorithm;
+            try {
+                algorithm = (SignatureAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
+            } catch (UnsupportedJwtException e) {
+                //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
+                String msg = "Unsupported signature algorithm '" + alg + "'";
+                throw new SignatureException(msg, e);
+            }
             if (algorithm == null) {
-                String msg = "Unrecognized JWS algorithm identifier: " + alg;
+                String msg = "Unrecognized JWS signature algorithm '" + alg + "'.";
                 throw new UnsupportedJwtException(msg);
             }
 
@@ -526,7 +538,10 @@ public class DefaultJwtParser implements JwtParser {
             } else {
                 key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
             }
-            Assert.notNull(key, "A signature verification key is required if the specified JWT is digitally signed.");
+            if (key == null) {
+                String msg = "Cannot verify JWS signature: unable to locate signature verification key for JWS with header: " + jwsHeader;
+                throw new UnsupportedJwtException(msg);
+            }
 
             //re-create the jwt part without the signature.  This is what is needed for signature verification:
             String jwtWithoutSignature = tokenized.getProtected() + SEPARATOR_CHAR + tokenized.getBody();
@@ -711,30 +726,22 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jwt<?, Claims> parseClaimsJwt(String claimsJwt) {
-        try {
-            return parse(claimsJwt, new JwtHandlerAdapter<Jwt<?, Claims>>() {
-                @Override
-                public Jwt<?, Claims> onClaimsJwt(Jwt<?, Claims> jwt) {
-                    return jwt;
-                }
-            });
-        } catch (IllegalArgumentException iae) {
-            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
-        }
+        return parse(claimsJwt, new JwtHandlerAdapter<Jwt<?, Claims>>() {
+            @Override
+            public Jwt<?, Claims> onClaimsJwt(Jwt<?, Claims> jwt) {
+                return jwt;
+            }
+        });
     }
 
     @Override
     public Jws<String> parsePlaintextJws(String plaintextJws) {
-        try {
-            return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
-                @Override
-                public Jws<String> onPlaintextJws(Jws<String> jws) {
-                    return jws;
-                }
-            });
-        } catch (IllegalArgumentException iae) {
-            throw new UnsupportedJwtException("Signed JWSs are not supported.", iae);
-        }
+        return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
+            @Override
+            public Jws<String> onPlaintextJws(Jws<String> jws) {
+                return jws;
+            }
+        });
     }
 
     @Override

@@ -13,7 +13,7 @@ class SignatureAlgorithmsTest {
 
     @Test
     void testForNameCaseInsensitive() {
-        for(SignatureAlgorithm alg : SignatureAlgorithms.STANDARD_ALGORITHMS.values()) {
+        for(SignatureAlgorithm alg : SignatureAlgorithms.values()) {
             assertSame alg, SignatureAlgorithms.forId(alg.getId().toLowerCase())
         }
     }
