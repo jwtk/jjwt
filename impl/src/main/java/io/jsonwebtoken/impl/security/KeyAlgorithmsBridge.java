@@ -10,6 +10,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
+import io.jsonwebtoken.security.EstimateIterationsResult;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
@@ -135,7 +136,7 @@ public final class KeyAlgorithmsBridge {
         return chars;
     }
 
-    public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
+    public static EstimateIterationsResult estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
 
         // The number of computational samples that land in our 'sweet spot' timing range matching desiredMillis.
         // These samples will be averaged and the final average will be the return value of this method
@@ -154,6 +155,8 @@ public final class KeyAlgorithmsBridge {
             // Strip away all things that cause time during computation except for the actual hashing algorithm:
             alg = lean((Pbes2HsAkwAlgorithm) alg);
         }
+
+        EstimateIterationsResult ret = new EstimateIterationsResult(NUM_SAMPLES);
 
         int workFactor = 1000; // same as iterations for PBKDF2.  Different concept for Bcrypt/Scrypt
         int minWorkFactor = workFactor;
@@ -185,6 +188,8 @@ public final class KeyAlgorithmsBridge {
             if (collectSample) {
                 // For each attempt, the x axis is the workFactor, and the y axis is how long it took to compute:
                 points.add(new Point(workFactor, duration));
+                ret.getDurations().add(duration);
+                ret.getWorkFactors().add(workFactor);
                 //System.out.println("Collected point: workFactor=" + workFactor + ", duration=" + duration + " ms, %achieved=" + durationPercentAchieved);
             } else {
                 minWorkFactor = Math.max(minWorkFactor, workFactor);
@@ -227,7 +232,8 @@ public final class KeyAlgorithmsBridge {
         }
         double average = sumX / points.size();
         //ensure our average is at least as much as the smallest work factor that got us closest to desiredMillis:
-        return (int) Math.max(average, minWorkFactor);
+        ret.setIterations((int) Math.max(average, minWorkFactor));
+        return ret;
     }
 
     private static class Point {

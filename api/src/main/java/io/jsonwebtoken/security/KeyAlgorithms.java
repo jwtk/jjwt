@@ -77,7 +77,7 @@ public final class KeyAlgorithms {
     public static final RsaKeyAlgorithm RSA_OAEP = forId0("RSA-OAEP");
     public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
 
-    public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
+    public static EstimateIterationsResult estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
         return Classes.invokeStatic(BRIDGE_CLASSNAME, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
     }
 }
