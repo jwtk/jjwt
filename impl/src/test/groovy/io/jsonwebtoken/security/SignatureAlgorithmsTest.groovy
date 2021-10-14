@@ -9,8 +9,8 @@ import static org.junit.Assert.assertSame
 class SignatureAlgorithmsTest {
 
     @Test
-    void testPrivateCtor() {
-        new SignatureAlgorithms() // for code coverage only
+    void testPrivateCtor() { // for code coverage only
+        new SignatureAlgorithms()
     }
 
     @Test

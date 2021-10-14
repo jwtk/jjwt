@@ -58,14 +58,6 @@ public final class Bytes {
             (bytes[3] & 0xFF);
     }
 
-    public static int[] toInts(byte[] bytes) {
-        int[] ints = new int[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            ints[i] = bytes[i] & 0xFF;
-        }
-        return ints;
-    }
-
     public static byte[] concat(byte[]... arrays) {
         int len = 0;
         int count = Arrays.length(arrays);
@@ -86,7 +78,7 @@ public final class Bytes {
         return output;
     }
 
-    public static int byteLength(byte[] bytes) {
+    public static int length(byte[] bytes) {
         return bytes == null ? 0 : bytes.length;
     }
 

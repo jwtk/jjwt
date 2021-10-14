@@ -9,7 +9,7 @@ import io.jsonwebtoken.security.SignatureAlgorithm;
 import java.util.Collection;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.SignatureAlgorithms implementation
-public class SignatureAlgorithmsBridge {
+public final class SignatureAlgorithmsBridge {
 
     //prevent instantiation
     private SignatureAlgorithmsBridge() {

@@ -21,15 +21,9 @@ import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
 
-import static org.easymock.EasyMock.createMock
-import static org.easymock.EasyMock.eq
-import static org.easymock.EasyMock.expect
-import static org.easymock.EasyMock.same
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.assertSame
-import static org.powermock.api.easymock.PowerMock.mockStatic
-import static org.powermock.api.easymock.PowerMock.replay
-import static org.powermock.api.easymock.PowerMock.reset
-import static org.powermock.api.easymock.PowerMock.verify
+import static org.powermock.api.easymock.PowerMock.*
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest([Classes, Jwts])

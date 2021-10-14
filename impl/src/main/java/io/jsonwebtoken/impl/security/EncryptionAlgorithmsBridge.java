@@ -9,7 +9,7 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import java.util.Collection;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.EncryptionAlgorithms implementation
-public class EncryptionAlgorithmsBridge {
+public final class EncryptionAlgorithmsBridge {
 
     // prevent instantiation
     private EncryptionAlgorithmsBridge() {

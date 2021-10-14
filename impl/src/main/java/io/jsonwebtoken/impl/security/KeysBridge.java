@@ -6,7 +6,7 @@ import io.jsonwebtoken.security.PbeKeyBuilder;
 import javax.crypto.interfaces.PBEKey;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
-public class KeysBridge {
+public final class KeysBridge {
 
     // prevent instantiation
     private KeysBridge() {

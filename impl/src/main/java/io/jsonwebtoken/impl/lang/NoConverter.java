@@ -1,11 +1,13 @@
 package io.jsonwebtoken.impl.lang;
 
+import io.jsonwebtoken.lang.Assert;
+
 class NoConverter<T> implements Converter<T, Object> {
 
     private final Class<T> type;
 
     public NoConverter(Class<T> type) {
-        this.type = type;
+        this.type = Assert.notNull(type, "type argument cannot be null.");
     }
 
     @Override
