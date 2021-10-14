@@ -17,6 +17,7 @@ package io.jsonwebtoken.lang;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -209,9 +210,13 @@ public final class Classes {
             Method method = clazz.getDeclaredMethod(methodName, argTypes);
             method.setAccessible(true);
             return(T)method.invoke(null, args);
-        } catch (Exception e) {
-            String msg = "Unable to invoke class method " + clazz.getName() + "#" + methodName + ".  Ensure the necessary " +
-                "implementation is in the runtime classpath.";
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause); //propagate
+            }
+            String msg = "Unable to invoke class method " + clazz.getName() + "#" + methodName +
+                ". Ensure the necessary implementation is in the runtime classpath.";
             throw new IllegalStateException(msg, e);
         }
     }

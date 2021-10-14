@@ -32,11 +32,12 @@ public final class KeyAlgorithms {
     }
 
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeyAlgorithmsBridge";
+    private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
     private static final Class<?>[] ESTIMATE_ITERATIONS_ARG_TYPES = new Class[]{KeyAlgorithm.class, long.class};
 
     public static Collection<KeyAlgorithm<?, ?>> values() {
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "values", null, (Object[]) null);
+        return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);
     }
 
     /**
@@ -50,7 +51,7 @@ public final class KeyAlgorithms {
      */
     public static KeyAlgorithm<?, ?> findById(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "findById", ID_ARG_TYPES, id);
+        return Classes.invokeStatic(BRIDGE_CLASS, "findById", ID_ARG_TYPES, id);
     }
 
     public static KeyAlgorithm<?, ?> forId(String id) {
@@ -60,7 +61,7 @@ public final class KeyAlgorithms {
     // do not change this visibility.  Raw type method signature not be publicly exposed
     private static <T> T forId0(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forId", ID_ARG_TYPES, id);
+        return Classes.invokeStatic(BRIDGE_CLASS, "forId", ID_ARG_TYPES, id);
     }
 
     public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = forId0("dir");
@@ -78,6 +79,6 @@ public final class KeyAlgorithms {
     public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
 
     public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
+        return Classes.invokeStatic(BRIDGE_CLASS, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
     }
 }

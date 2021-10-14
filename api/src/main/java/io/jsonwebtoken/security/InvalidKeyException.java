@@ -24,6 +24,13 @@ public class InvalidKeyException extends KeyException {
         super(message);
     }
 
+    /**
+     * Creates a new {@code InvalidKeyException} with the specified message and cause.
+     *
+     * @param msg   exception message
+     * @param cause triggering cause for the InvalidKeyException
+     * @since JJWT_RELEASE_VERSION
+     */
     public InvalidKeyException(String msg, Exception cause) {
         super(msg, cause);
     }

@@ -17,24 +17,83 @@ package io.jsonwebtoken.security
 
 import io.jsonwebtoken.impl.security.DefaultEllipticCurveSignatureAlgorithm
 import io.jsonwebtoken.impl.security.DefaultRsaSignatureAlgorithm
+import io.jsonwebtoken.impl.security.JcaPbeKey
 import org.junit.Test
 
 import javax.crypto.SecretKey
+import javax.crypto.interfaces.PBEKey
+import javax.crypto.spec.SecretKeySpec
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
-class KeysImplTest {
+class KeysTest {
+
+    private static final Random RANDOM = new SecureRandom()
+
+    static byte[] bytes(int sizeInBits) {
+        byte[] bytes = new byte[sizeInBits / Byte.SIZE]
+        RANDOM.nextBytes(bytes)
+        return bytes
+    }
 
     @Test
     void testPrivateCtor() { //for code coverage purposes only
         new Keys()
+    }
+
+    @Test
+    void testHmacShaKeyForWithNullArgument() {
+        try {
+            Keys.hmacShaKeyFor(null)
+        } catch (InvalidKeyException expected) {
+            assertEquals 'SecretKey byte array cannot be null.', expected.message
+        }
+    }
+
+    @Test
+    void testHmacShaKeyForWithWeakKey() {
+        int numBytes = 31
+        int numBits = numBytes * 8
+        try {
+            Keys.hmacShaKeyFor(new byte[numBytes])
+        } catch (WeakKeyException expected) {
+            assertEquals "The specified key byte array is " + numBits + " bits which " +
+                    "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
+                    "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
+                    "size >= 256 bits (the key size must be greater than or equal to the hash " +
+                    "output size).  Consider using the SignatureAlgorithms.HS256.generateKey() method (or " +
+                    "HS384.generateKey() or HS512.generateKey()) to create a key guaranteed to be secure enough " +
+                    "for your preferred HMAC-SHA algorithm.  See " +
+                    "https://tools.ietf.org/html/rfc7518#section-3.2 for more information." as String, expected.message
+        }
+    }
+
+    @Test
+    void testHmacShaWithValidSizes() {
+        for (int i : [256, 384, 512]) {
+            byte[] bytes = bytes(i)
+            def key = Keys.hmacShaKeyFor(bytes)
+            assertTrue key instanceof SecretKeySpec
+            assertEquals "HmacSHA$i" as String, key.getAlgorithm()
+            assertTrue Arrays.equals(bytes, key.getEncoded())
+        }
+    }
+
+    @Test
+    void testHmacShaLargerThan512() {
+        def key = Keys.hmacShaKeyFor(bytes(520))
+        assertTrue key instanceof SecretKeySpec
+        assertEquals 'HmacSHA512', key.getAlgorithm()
+        assertTrue key.getEncoded().length * Byte.SIZE >= 512
     }
 
     @Test
@@ -51,7 +110,8 @@ class KeysImplTest {
                 assertEquals alg.jcaName, key.algorithm
                 alg.assertValidSigningKey(key)
                 alg.assertValidVerificationKey(key)
-                assertEquals alg, io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
+                assertEquals alg, io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key)
+                // https://github.com/jwtk/jjwt/issues/381
             } else {
                 try {
                     Keys.secretKeyFor(alg)
@@ -69,7 +129,7 @@ class KeysImplTest {
         for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
             if (alg instanceof SecretKeySignatureAlgorithm) {
                 SecretKey key = alg.generateKey()
-                assertEquals  alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
+                assertEquals alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
                 assertEquals alg.jcaName, key.algorithm
                 assertEquals alg, SignatureAlgorithms.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
             }
@@ -106,7 +166,8 @@ class KeysImplTest {
 
                 int len = alg.minKeyLength
                 String asn1oid = "secp${len}r1"
-                String suffix = len == 256 ? ", X9.62 prime${len}v1" : '' //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
+                String suffix = len == 256 ? ", X9.62 prime${len}v1" : ''
+                //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
                 String jdkParamName = "$asn1oid [NIST P-${len}${suffix}]" as String
 
                 PublicKey pub = pair.getPublic()
@@ -157,7 +218,8 @@ class KeysImplTest {
 
                 int len = alg.minKeyLength
                 String asn1oid = "secp${len}r1"
-                String suffix = len == 256 ? ", X9.62 prime${len}v1" : '' //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
+                String suffix = len == 256 ? ", X9.62 prime${len}v1" : ''
+                //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
                 String jdkParamName = "$asn1oid [NIST P-${len}${suffix}]" as String
 
                 PublicKey pub = pair.getPublic()
@@ -173,8 +235,22 @@ class KeysImplTest {
                 assertEquals alg.minKeyLength, priv.params.order.bitLength()
 
             } else {
-                assertFalse alg instanceof AsymmetricKeySignatureAlgorithm //assert we've accounted for all asymmetric ones above
+                assertFalse alg instanceof AsymmetricKeySignatureAlgorithm
+                //assert we've accounted for all asymmetric ones above
             }
         }
+    }
+
+    @Test
+    void testToPbeKey() {
+
+        PBEKey jcaKey = createMock(PBEKey)
+        //asserts key is wrapped and no methods are called (i.e. we don't need to copy any values)
+        replay(jcaKey)
+
+        PbeKey key = Keys.toPbeKey(jcaKey)
+        assertTrue key instanceof JcaPbeKey
+
+        verify jcaKey
     }
 }

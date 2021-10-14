@@ -31,6 +31,7 @@ import java.security.KeyPair;
 public final class Keys {
 
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
+    private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     @SuppressWarnings("rawtypes")
     private static final Class[] TO_PBE_ARG_TYPES = new Class[]{PBEKey.class};
 
@@ -235,14 +236,15 @@ public final class Keys {
      * @since JJWT_RELEASE_VERSION
      */
     public static PbeKey toPbeKey(PBEKey key) {
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "toPbeKey", TO_PBE_ARG_TYPES, new Object[]{key});
+        return Classes.invokeStatic(BRIDGE_CLASS, "toPbeKey", TO_PBE_ARG_TYPES, new Object[]{key});
     }
 
     /**
      * Returns a new {@link PbeKeyBuilder} to use to construct a {@link PbeKey} instance.
-     * @return
+     *
+     * @return a new {@link PbeKeyBuilder} to use to construct a {@link PbeKey} instance.
      */
     public static PbeKeyBuilder<PbeKey> forPbe() {
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forPbe", null, (Object[]) null);
+        return Classes.invokeStatic(BRIDGE_CLASS, "forPbe", null, (Object[]) null);
     }
 }

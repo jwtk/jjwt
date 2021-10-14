@@ -30,10 +30,11 @@ public final class EncryptionAlgorithms {
     }
 
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge";
+    private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
 
     public static Collection<AeadAlgorithm> values() {
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "values", null, (Object[]) null);
+        return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);
     }
 
     /**
@@ -47,12 +48,12 @@ public final class EncryptionAlgorithms {
      */
     public static AeadAlgorithm findById(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "findById", ID_ARG_TYPES, id);
+        return Classes.invokeStatic(BRIDGE_CLASS, "findById", ID_ARG_TYPES, id);
     }
 
-    private static AeadAlgorithm forId(String id) {
+    public static AeadAlgorithm forId(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forId", ID_ARG_TYPES, id);
+        return Classes.invokeStatic(BRIDGE_CLASS, "forId", ID_ARG_TYPES, id);
     }
 
     /**

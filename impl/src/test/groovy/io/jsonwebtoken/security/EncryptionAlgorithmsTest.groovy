@@ -1,5 +1,6 @@
 package io.jsonwebtoken.security
 
+import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
@@ -36,6 +37,46 @@ class EncryptionAlgorithmsTest {
     @Test
     void testPrivateCtor() { //for code coverage only
         new EncryptionAlgorithms()
+    }
+
+    @Test
+    void testForId() {
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
+            assertSame alg, EncryptionAlgorithms.forId(alg.getId())
+        }
+    }
+
+    @Test
+    void testForIdCaseInsensitive() {
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
+            assertSame alg, EncryptionAlgorithms.forId(alg.getId().toLowerCase())
+        }
+    }
+
+    @Test(expected = UnsupportedJwtException)
+    void testForIdWithInvalidId() {
+        //unlike the 'find' paradigm, 'for' requires the value to exist
+        EncryptionAlgorithms.forId('invalid')
+    }
+
+    @Test
+    void testFindById() {
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
+            assertSame alg, EncryptionAlgorithms.findById(alg.getId())
+        }
+    }
+
+    @Test
+    void testFindByIdCaseInsensitive() {
+        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
+            assertSame alg, EncryptionAlgorithms.findById(alg.getId().toLowerCase())
+        }
+    }
+
+    @Test
+    void testFindByIdWithInvalidId() {
+        // 'find' paradigm can return null if not found
+        assertNull EncryptionAlgorithms.findById('invalid')
     }
 
     @Test
@@ -87,7 +128,7 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getDigest(), result.getInitializationVector());
+            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getDigest(), result.getInitializationVector())
             byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }

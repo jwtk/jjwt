@@ -36,15 +36,16 @@ public final class SignatureAlgorithms {
     }
 
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge";
+    private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
 
     public static Collection<SignatureAlgorithm<?,?>> values() {
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "values", null, (Object[]) null);
+        return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);
     }
 
     public static SignatureAlgorithm<?, ?> findById(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "findById", ID_ARG_TYPES, id);
+        return Classes.invokeStatic(BRIDGE_CLASS, "findById", ID_ARG_TYPES, id);
     }
 
     public static SignatureAlgorithm<?,?> forId(String id) {
@@ -53,7 +54,7 @@ public final class SignatureAlgorithms {
 
     static <T> T forId0(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return Classes.invokeStatic(BRIDGE_CLASSNAME, "forId", ID_ARG_TYPES, id);
+        return Classes.invokeStatic(BRIDGE_CLASS, "forId", ID_ARG_TYPES, id);
     }
 
     public static final SignatureAlgorithm<Key, Key> NONE = forId0("none");

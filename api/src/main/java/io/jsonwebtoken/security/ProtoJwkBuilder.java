@@ -18,10 +18,12 @@ package io.jsonwebtoken.security;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -32,9 +34,17 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
 
     RsaPublicJwkBuilder setKey(RSAPublicKey key);
 
+    RsaPublicJwkBuilder forRsaChain(X509Certificate... chain);
+
+    RsaPublicJwkBuilder forRsaChain(List<X509Certificate> x509CertificateChain);
+
     RsaPrivateJwkBuilder setKey(RSAPrivateKey key);
 
     EcPublicJwkBuilder setKey(ECPublicKey key);
+
+    EcPublicJwkBuilder forEcChain(X509Certificate... chain);
+
+    EcPublicJwkBuilder forEcChain(List<X509Certificate> chain);
 
     EcPrivateJwkBuilder setKey(ECPrivateKey key);
 

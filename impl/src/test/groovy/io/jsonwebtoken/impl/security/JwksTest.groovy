@@ -13,6 +13,7 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
+import java.security.interfaces.RSAPublicKey
 
 import static org.junit.Assert.*
 
@@ -119,6 +120,42 @@ class JwksTest {
         X509Certificate cert = CertUtils.readTestCertificate(SignatureAlgorithms.RS256)
         def sval = JwkX509StringConverter.INSTANCE.applyTo(cert)
         testProperty('x509CertificateChain', 'x5c', [cert], [sval])
+    }
+
+    @Test
+    void testX509Sha1Thumbprint() {
+        testThumbprint(1)
+    }
+
+    @Test
+    void testX509Sha256Thumbprint() {
+        testThumbprint(256)
+    }
+
+    static void testThumbprint(int number) {
+        def algs = SignatureAlgorithms.values().findAll {it instanceof AsymmetricKeySignatureAlgorithm}
+
+        for(def alg : algs) {
+            //get test cert:
+            X509Certificate cert = CertUtils.readTestCertificate(alg)
+            def pubKey = cert.getPublicKey()
+
+            def builder = pubKey instanceof RSAPublicKey ?
+                    Jwks.builder().forRsaChain(cert) :
+                    Jwks.builder().forEcChain(cert)
+
+            if (number == 1) {
+                builder.withX509Sha1Thumbprint(true)
+            } // otherwise, when a chain is present, a sha256 thumbprint is calculated automatically
+
+            def jwkFromKey = builder.build() as PublicJwk
+            byte[] thumbprint = jwkFromKey."getX509CertificateSha${number}Thumbprint"()
+            assertNotNull thumbprint
+
+            //ensure base64url encoding/decoding of the thumbprint works:
+            def jwkFromValues = Jwks.builder().putAll(jwkFromKey).build() as PublicJwk
+            assertArrayEquals thumbprint, jwkFromValues."getX509CertificateSha${number}Thumbprint"()
+        }
     }
 
     @Test
