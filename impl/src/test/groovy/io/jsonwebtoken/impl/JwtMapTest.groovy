@@ -110,20 +110,6 @@ class JwtMapTest {
         assertSame d, date
     }
 
-    @Deprecated //remove just before 1.0.0
-    @Test
-    void testSetDate() {
-        def m = new JwtMap()
-        m.put('foo', 'bar')
-        m.setDate('foo', null)
-        assertNull m.get('foo')
-        long millis = System.currentTimeMillis()
-        long seconds = (millis / 1000l) as long
-        Date date = new Date(millis)
-        m.setDate('foo', date)
-        assertEquals seconds, m.get('foo')
-    }
-
     @Test
     void testToDateFromNonDateObject() {
         try {

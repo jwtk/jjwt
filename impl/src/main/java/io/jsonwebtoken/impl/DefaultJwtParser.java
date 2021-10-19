@@ -138,6 +138,8 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("rawtypes")
     private Function<Header, CompressionCodec> compressionCodecLocator;
 
+    private final boolean enableUnsecuredJws;
+
     private final Function<JwsHeader, SignatureAlgorithm<?, ?>> signatureAlgorithmLocator;
 
     private final Function<JweHeader, AeadAlgorithm> encryptionAlgorithmLocator;
@@ -171,12 +173,14 @@ public class DefaultJwtParser implements JwtParser {
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
         this.compressionCodecLocator = new CompressionCodecLocator<>(new DefaultCompressionCodecResolver());
+        this.enableUnsecuredJws = false;
     }
 
     @SuppressWarnings("deprecation")
         //SigningKeyResolver will be removed for 1.0
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
+                     boolean enableUnsecuredJws,
                      Function<?, Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
@@ -188,6 +192,7 @@ public class DefaultJwtParser implements JwtParser {
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
                      Collection<AeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
+        this.enableUnsecuredJws = enableUnsecuredJws;
         this.signingKeyResolver = Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = clock;
@@ -378,26 +383,43 @@ public class DefaultJwtParser implements JwtParser {
         if (!Strings.hasText(alg)) {
             String msg = tokenized instanceof TokenizedJwe ? MISSING_JWE_ALG_MSG : MISSING_JWS_ALG_MSG;
             throw new MalformedJwtException(msg);
-        } else {
-            if (!SignatureAlgorithms.NONE.getId().equals(alg) && !Strings.hasText(tokenized.getDigest())) {
+        }
+        if (SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
+            if (!enableUnsecuredJws) {
+                String msg = "Unsecured JWTs (those with an  " + DefaultHeader.ALGORITHM +
+                    " header value of '" + SignatureAlgorithms.NONE.getId() +
+                    "') are disallowed by default as mandated by " +
+                    "https://datatracker.ietf.org/doc/html/rfc7518#section-3.6. If you wish to allow them to be " +
+                    "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
+                    "security considerations covered in that method's JavaDoc before doing so).  Header: " +
+                    header;
+                throw new UnsupportedJwtException(msg);
+            }
+            if (Strings.hasText(tokenized.getDigest())) {
                 String type = tokenized instanceof TokenizedJwe ? "JWE" : "JWS";
                 String algType = tokenized instanceof TokenizedJwe ? "key management" : "signature";
                 String digestType = tokenized instanceof TokenizedJwe ? "an AAD authentication tag" : "a signature";
+                String msg = "The " + type + " header references " + algType + " algorithm '" + alg + "' yet the " +
+                    "compact " + type + " string has " + digestType + " token.  This is not permitted per " +
+                    "https://tools.ietf.org/html/rfc7518#section-3.6.";
+                throw new MalformedJwtException(msg);
+            }
+        } else { // something other than 'none'.  Must have a digest component:
+            if (!Strings.hasText(tokenized.getDigest())) {
+                String type = tokenized instanceof TokenizedJwe ? "JWE" : "JWS";
+                String algType = tokenized instanceof TokenizedJwe ? "key management" : "signature";
+                String digestType = tokenized instanceof TokenizedJwe ? "AAD authentication tag" : "signature";
                 String msg = "The " + type + " header references " + algType + " algorithm '" + alg + "' but the " +
-                    "compact " + type + " string does not have " + digestType + " token.";
+                    "compact " + type + " string is missing the required " + digestType + " token.";
                 throw new MalformedJwtException(msg);
             }
         }
 
         // =============== Body =================
-        CompressionCodec compressionCodec = compressionCodecLocator.apply(header);
-        byte[] bytes = base64UrlDecode(tokenized.getBody(), "payload"); // Only JWS body can be empty per https://github.com/jwtk/jjwt/pull/540
-        if (tokenized instanceof TokenizedJwe && Arrays.length(bytes) == 0) {
+        byte[] bytes = base64UrlDecode(tokenized.getBody(), "payload");
+        if (tokenized instanceof TokenizedJwe && Arrays.length(bytes) == 0) { // Only JWS body can be empty per https://github.com/jwtk/jjwt/pull/540
             String msg = "Compact JWE strings MUST always contain a payload (ciphertext).";
             throw new MalformedJwtException(msg);
-        }
-        if (compressionCodec != null) {
-            bytes = compressionCodec.decompress(bytes);
         }
 
         byte[] iv = null;
@@ -475,6 +497,12 @@ public class DefaultJwtParser implements JwtParser {
                 new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
             PayloadSupplier<byte[]> result = encAlg.decrypt(decryptRequest);
             bytes = result.getPayload();
+        }
+
+        //TODO: Only allow decompression after JWS signature verification:
+        CompressionCodec compressionCodec = compressionCodecLocator.apply(header);
+        if (compressionCodec != null) {
+            bytes = compressionCodec.decompress(bytes);
         }
 
         String payload = new String(bytes, Strings.UTF_8);

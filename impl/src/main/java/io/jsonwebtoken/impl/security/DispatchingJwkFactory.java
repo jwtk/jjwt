@@ -52,7 +52,7 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
         final String kty = Strings.clean(ctx.getType());
 
         if (key == null && kty == null) {
-            String msg = "Either a Key instance or a '" + AbstractJwk.TYPE + "' value is required to create a JWK.";
+            String msg = "Either a Key instance or a '" + AbstractJwk.KTY + "' value is required to create a JWK.";
             throw new IllegalArgumentException(msg);
         }
 

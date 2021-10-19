@@ -160,14 +160,12 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
         }
 
         byte rLength = derSignature[offset + 1];
-
         int i = rLength;
         while ((i > 0) && (derSignature[(offset + 2 + rLength) - i] == 0)) {
             i--;
         }
 
         byte sLength = derSignature[offset + 2 + rLength + 1];
-
         int j = sLength;
         while ((j > 0) && (derSignature[(offset + 2 + rLength + 2 + sLength) - j] == 0)) {
             j--;
@@ -184,7 +182,6 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
         }
 
         final byte[] concatSignature = new byte[2 * rawLen];
-
         System.arraycopy(derSignature, (offset + 2 + rLength) - i, concatSignature, rawLen - i, i);
         System.arraycopy(derSignature, (offset + 2 + rLength + 2 + sLength) - j, concatSignature, 2 * rawLen - j, j);
 
@@ -206,39 +203,32 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
         int rawLen = jwsSignature.length / 2;
 
         int i = rawLen;
-
         while ((i > 0) && (jwsSignature[rawLen - i] == 0)) {
             i--;
         }
 
         int j = i;
-
         if (jwsSignature[rawLen - i] < 0) {
             j += 1;
         }
 
         int k = rawLen;
-
         while ((k > 0) && (jwsSignature[2 * rawLen - k] == 0)) {
             k--;
         }
 
         int l = k;
-
         if (jwsSignature[2 * rawLen - k] < 0) {
             l += 1;
         }
 
         int len = 2 + j + 2 + l;
-
         if (len > 255) {
             throw new JwtException("Invalid ECDSA signature format");
         }
 
         int offset;
-
         final byte[] derSignature;
-
         if (len < 128) {
             derSignature = new byte[2 + 2 + j + 2 + l];
             offset = 1;
@@ -252,14 +242,12 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
         derSignature[offset++] = (byte) len;
         derSignature[offset++] = 2;
         derSignature[offset++] = (byte) j;
-
         System.arraycopy(jwsSignature, rawLen - i, derSignature, (offset + j) - i, i);
 
         offset += j;
 
         derSignature[offset++] = 2;
         derSignature[offset++] = (byte) l;
-
         System.arraycopy(jwsSignature, 2 * rawLen - k, derSignature, (offset + l) - k, k);
 
         return derSignature;

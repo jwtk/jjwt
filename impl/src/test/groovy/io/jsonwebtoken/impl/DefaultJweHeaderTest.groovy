@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl
 import io.jsonwebtoken.JweHeader
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -23,7 +23,7 @@ class DefaultJweHeaderTest {
     @Test
     void testEncryptionAlgorithm() {
         JweHeader header = new DefaultJweHeader()
-        header.setEncryptionAlgorithm('foo')
+        header.put('enc', 'foo')
         assertEquals 'foo', header.getEncryptionAlgorithm()
 
         header = new DefaultJweHeader([enc: 'bar'])

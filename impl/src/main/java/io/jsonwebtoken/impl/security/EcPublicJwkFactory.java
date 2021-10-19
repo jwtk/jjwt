@@ -31,14 +31,14 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         ECPoint point = key.getW();
 
         String curveId = getJwaIdByCurve(curve);
-        ctx.put(DefaultEcPublicJwk.CURVE_ID, curveId);
+        ctx.put(DefaultEcPublicJwk.CRV.getId(), curveId);
 
         int fieldSize = curve.getField().getFieldSize();
         String x = toOctetString(fieldSize, point.getAffineX());
-        ctx.put(DefaultEcPublicJwk.X, x);
+        ctx.put(DefaultEcPublicJwk.X.getId(), x);
 
         String y = toOctetString(fieldSize, point.getAffineY());
-        ctx.put(DefaultEcPublicJwk.Y, y);
+        ctx.put(DefaultEcPublicJwk.Y.getId(), y);
 
         return new DefaultEcPublicJwk(ctx);
     }
@@ -47,9 +47,9 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
     protected EcPublicJwk createJwkFromValues(final JwkContext<ECPublicKey> ctx) {
 
         ValueGetter getter = new DefaultValueGetter(ctx);
-        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CURVE_ID);
-        BigInteger x = getter.getRequiredBigInt(DefaultEcPublicJwk.X, false);
-        BigInteger y = getter.getRequiredBigInt(DefaultEcPublicJwk.Y, false);
+        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CRV.getId());
+        BigInteger x = getter.getRequiredBigInt(DefaultEcPublicJwk.X.getId(), false);
+        BigInteger y = getter.getRequiredBigInt(DefaultEcPublicJwk.Y.getId(), false);
 
         ECParameterSpec spec = getCurveByJwaId(curveId);
         ECPoint point = new ECPoint(x, y);

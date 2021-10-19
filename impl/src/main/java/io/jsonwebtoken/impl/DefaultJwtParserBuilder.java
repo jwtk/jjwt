@@ -66,6 +66,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Provider provider;
 
+    private boolean enableUnsecuredJws = false;
+
     @SuppressWarnings({"rawtypes"})
     private Function<Header, Key> keyLocator = ConstantFunction.forNull();
 
@@ -92,6 +94,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Key signatureVerificationKey;
     private Key decryptionKey;
+
+    @Override
+    public JwtParserBuilder enableUnsecuredJws() {
+        this.enableUnsecuredJws = true;
+        return this;
+    }
 
     @Override
     public JwtParserBuilder setProvider(Provider provider) {
@@ -290,6 +298,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return new ImmutableJwtParser(new DefaultJwtParser(
             provider,
             signingKeyResolver,
+            enableUnsecuredJws,
             keyLocator,
             clock,
             allowedClockSkewMillis,

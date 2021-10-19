@@ -15,6 +15,13 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.security.PublicJwk;
+
+import java.net.URI;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Set;
+
 /**
  * A <a href="https://tools.ietf.org/html/rfc7515">JWS</a> header.
  *
@@ -91,4 +98,27 @@ public interface JwsHeader extends Header<JwsHeader> {
      * @return the {@code Header} instance for method chaining.
      */
     JwsHeader setKeyId(String kid);
+
+    URI getJwkSetUrl();
+    JwsHeader setJwkSetUrl(URI uri);
+
+    PublicJwk<?> getJwk();
+    JwsHeader setJwk(PublicJwk<?> jwk);
+
+    URI getX509Url();
+    JwsHeader setX509Url(URI uri);
+
+    List<X509Certificate> getX509CertificateChain();
+    JwsHeader setX509CertificateChain(List<X509Certificate> chain);
+
+    byte[] getX509CertificateSha1Thumbprint();
+    JwsHeader setX509CertificateSha1Thumbprint(byte[] thumbprint);
+    JwsHeader computeX509CertificateSha1Thumbprint();
+
+    byte[] getX509CertificateSha256Thumbprint();
+    JwsHeader setX509CertificateSha256Thumbprint(byte[] thumbprint);
+    JwsHeader computeX509CertificateSha256Thumbprint();
+
+    Set<String> getCritical();
+    JwsHeader setCritical(Set<String> crit);
 }

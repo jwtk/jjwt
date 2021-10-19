@@ -52,13 +52,13 @@ class AbstractAsymmetricJwkBuilderTest {
     void testX509CertificateSha1Thumbprint() {
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha1Thumbprint(true).build()
         Assert.notEmpty(jwk.getX509CertificateSha1Thumbprint())
-        Assert.hasText(jwk.get(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT) as String)
+        Assert.hasText(jwk.get(AbstractAsymmetricJwk.X5T) as String)
     }
 
     @Test
     void testX509CertificateSha256Thumbprint() {
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()
         Assert.notEmpty(jwk.getX509CertificateSha256Thumbprint())
-        Assert.hasText(jwk.get(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT) as String)
+        Assert.hasText(jwk.get(AbstractAsymmetricJwk.X5T_S256) as String)
     }
 }

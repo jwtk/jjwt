@@ -57,6 +57,10 @@ public final class Collections {
         return java.util.Collections.unmodifiableSet(set);
     }
 
+    public static <T> Set<T> immutable(Set<T> s) {
+        return java.util.Collections.unmodifiableSet(s);
+    }
+
     /**
      * Return <code>true</code> if the supplied Collection is <code>null</code>
      * or empty. Otherwise, return <code>false</code>.
@@ -110,6 +114,14 @@ public final class Collections {
      */
     public static List arrayToList(Object source) {
         return Arrays.asList(Objects.toObjectArray(source));
+    }
+
+    public static <T> Set<T> concat(Set<T> c, T... elements) {
+        int size = Math.max(1, Collections.size(c) + io.jsonwebtoken.lang.Arrays.length(elements));
+        Set<T> set = new LinkedHashSet<>(size);
+        set.addAll(c);
+        java.util.Collections.addAll(set, elements);
+        return set;
     }
 
     /**

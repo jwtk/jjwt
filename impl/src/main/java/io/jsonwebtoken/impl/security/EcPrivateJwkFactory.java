@@ -24,7 +24,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
 
     @Override
     protected boolean supportsKeyValues(JwkContext<?> ctx) {
-        return super.supportsKeyValues(ctx) && ctx.containsKey(DefaultEcPrivateJwk.D);
+        return super.supportsKeyValues(ctx) && ctx.containsKey(DefaultEcPrivateJwk.D.getId());
     }
 
     @Override
@@ -48,7 +48,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
 
         int fieldSize = key.getParams().getCurve().getField().getFieldSize();
         String d = toOctetString(fieldSize, key.getS());
-        ctx.put(DefaultEcPrivateJwk.D, d);
+        ctx.put(DefaultEcPrivateJwk.D.getId(), d);
 
         return new DefaultEcPrivateJwk(ctx, pubJwk);
     }
@@ -57,8 +57,8 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
     protected EcPrivateJwk createJwkFromValues(final JwkContext<ECPrivateKey> ctx) {
 
         ValueGetter getter = new DefaultValueGetter(ctx);
-        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CURVE_ID);
-        BigInteger d = getter.getRequiredBigInt(DefaultEcPrivateJwk.D, true);
+        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CRV.getId());
+        BigInteger d = getter.getRequiredBigInt(DefaultEcPrivateJwk.D.getId(), true);
 
         // We don't actually need the public x,y point coordinates for JVM lookup, but the
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)

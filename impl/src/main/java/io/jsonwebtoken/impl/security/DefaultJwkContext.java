@@ -2,12 +2,9 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.JwtMap;
-import io.jsonwebtoken.impl.io.CodecConverter;
 import io.jsonwebtoken.impl.lang.BiFunction;
 import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Converters;
-import io.jsonwebtoken.impl.lang.NullSafeConverter;
-import io.jsonwebtoken.impl.lang.UriStringConverter;
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
@@ -28,15 +25,6 @@ import java.util.Set;
 
 public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
-    private static final Converter<byte[], Object> THUMBPRINT_CONVERTER =
-        Converters.forEncoded(byte[].class, CodecConverter.BASE64URL);
-
-    private static final Converter<X509Certificate, Object> X509_CONVERTER =
-        Converters.forEncoded(X509Certificate.class, new JwkX509StringConverter());
-
-    private static final Converter<URI, Object> URI_CONVERTER =
-        Converters.forEncoded(URI.class, new UriStringConverter());
-
     private static final Set<String> DEFAULT_PRIVATE_NAMES;
     private static final Map<String, Canonicalizer<?>> SETTERS;
 
@@ -49,15 +37,15 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
         @SuppressWarnings("RedundantTypeArguments")
         List<Canonicalizer<?>> fns = Collections.<Canonicalizer<?>>of(
-            Canonicalizer.forKey(AbstractJwk.ALGORITHM, "Algorithm"),
-            Canonicalizer.forKey(AbstractJwk.ID, "Key ID"),
-            Canonicalizer.forKey(AbstractJwk.OPERATIONS, "Key Operations", Converters.forSetOf(String.class)),
-            Canonicalizer.forKey(AbstractAsymmetricJwk.PUBLIC_KEY_USE, "Public Key Use"),
-            Canonicalizer.forKey(AbstractJwk.TYPE, "Key Type"),
-            Canonicalizer.forKey(AbstractAsymmetricJwk.X509_CERT_CHAIN, "X.509 Certificate Chain", Converters.forList(X509_CONVERTER)),
-            Canonicalizer.forKey(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT, "X.509 Certificate SHA-1 Thumbprint", THUMBPRINT_CONVERTER),
-            Canonicalizer.forKey(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT, "X.509 Certificate SHA-256 Thumbprint", THUMBPRINT_CONVERTER),
-            Canonicalizer.forKey(AbstractAsymmetricJwk.X509_URL, "X.509 URL", URI_CONVERTER)
+            Canonicalizer.forField(AbstractJwk.ALG),
+            Canonicalizer.forField(AbstractJwk.KID),
+            Canonicalizer.forField(AbstractJwk.KEY_OPS),
+            Canonicalizer.forField(AbstractJwk.KTY),
+            Canonicalizer.forField(AbstractAsymmetricJwk.USE),
+            Canonicalizer.forField(AbstractAsymmetricJwk.X5C),
+            Canonicalizer.forField(AbstractAsymmetricJwk.X5T),
+            Canonicalizer.forField(AbstractAsymmetricJwk.X5T_S256),
+            Canonicalizer.forField(AbstractAsymmetricJwk.X5U)
         );
         Map<String, Canonicalizer<?>> s = new LinkedHashMap<>();
         for (Canonicalizer<?> fn : fns) {
@@ -86,11 +74,6 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         this.values = new LinkedHashMap<>();
         this.idiomaticValues = new LinkedHashMap<>();
         this.redactedValues = new LinkedHashMap<>();
-    }
-
-    public DefaultJwkContext(Set<String> privateMemberNames, K key) {
-        this(privateMemberNames);
-        this.key = Assert.notNull(key, "Key cannot be null.");
     }
 
     public DefaultJwkContext(Set<String> privateMemberNames, JwkContext<?> other) {
@@ -216,102 +199,102 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
 
     @Override
     public String getAlgorithm() {
-        return (String) this.values.get(AbstractJwk.ALGORITHM);
+        return (String) this.values.get(AbstractJwk.ALG.getId());
     }
 
     @Override
     public JwkContext<K> setAlgorithm(String algorithm) {
-        put(AbstractJwk.ALGORITHM, algorithm);
+        put(AbstractJwk.ALG.getId(), algorithm);
         return this;
     }
 
     @Override
     public String getId() {
-        return (String) this.values.get(AbstractJwk.ID);
+        return (String) this.values.get(AbstractJwk.KID.getId());
     }
 
     @Override
     public JwkContext<K> setId(String id) {
-        put(AbstractJwk.ID, id);
+        put(AbstractJwk.KID.getId(), id);
         return this;
     }
 
     @Override
     public Set<String> getOperations() {
         //noinspection unchecked
-        return (Set<String>) this.idiomaticValues.get(AbstractJwk.OPERATIONS);
+        return (Set<String>) this.idiomaticValues.get(AbstractJwk.KEY_OPS.getId());
     }
 
     @Override
     public JwkContext<K> setOperations(Set<String> ops) {
-        put(AbstractJwk.OPERATIONS, ops);
+        put(AbstractJwk.KEY_OPS.getId(), ops);
         return this;
     }
 
     @Override
     public String getType() {
-        return (String) this.values.get(AbstractJwk.TYPE);
+        return (String) this.values.get(AbstractJwk.KTY.getId());
     }
 
     @Override
     public JwkContext<K> setType(String type) {
-        put(AbstractJwk.TYPE, type);
+        put(AbstractJwk.KTY.getId(), type);
         return this;
     }
 
     @Override
     public String getPublicKeyUse() {
-        return (String) this.values.get(AbstractAsymmetricJwk.PUBLIC_KEY_USE);
+        return (String) this.values.get(AbstractAsymmetricJwk.USE.getId());
     }
 
     @Override
     public JwkContext<K> setPublicKeyUse(String use) {
-        put(AbstractAsymmetricJwk.PUBLIC_KEY_USE, use);
+        put(AbstractAsymmetricJwk.USE.getId(), use);
         return this;
     }
 
     @Override
     public List<X509Certificate> getX509CertificateChain() {
         //noinspection unchecked
-        return (List<X509Certificate>) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_CERT_CHAIN);
+        return (List<X509Certificate>) this.idiomaticValues.get(AbstractAsymmetricJwk.X5C.getId());
     }
 
     @Override
     public JwkContext<K> setX509CertificateChain(List<X509Certificate> x5c) {
-        put(AbstractAsymmetricJwk.X509_CERT_CHAIN, x5c);
+        put(AbstractAsymmetricJwk.X5C.getId(), x5c);
         return this;
     }
 
     @Override
     public byte[] getX509CertificateSha1Thumbprint() {
-        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT);
+        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X5T.getId());
     }
 
     @Override
     public JwkContext<K> setX509CertificateSha1Thumbprint(byte[] x5t) {
-        put(AbstractAsymmetricJwk.X509_SHA1_THUMBPRINT, x5t);
+        put(AbstractAsymmetricJwk.X5T.getId(), x5t);
         return this;
     }
 
     @Override
     public byte[] getX509CertificateSha256Thumbprint() {
-        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT);
+        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X5T_S256.getId());
     }
 
     @Override
     public JwkContext<K> setX509CertificateSha256Thumbprint(byte[] x5ts256) {
-        put(AbstractAsymmetricJwk.X509_SHA256_THUMBPRINT, x5ts256);
+        put(AbstractAsymmetricJwk.X5T_S256.getId(), x5ts256);
         return this;
     }
 
     @Override
     public URI getX509Url() {
-        return (URI) this.idiomaticValues.get(AbstractAsymmetricJwk.X509_URL);
+        return (URI) this.idiomaticValues.get(AbstractAsymmetricJwk.X5U.getId());
     }
 
     @Override
     public JwkContext<K> setX509Url(URI url) {
-        put(AbstractAsymmetricJwk.X509_URL, url);
+        put(AbstractAsymmetricJwk.X5U.getId(), url);
         return this;
     }
 
@@ -377,18 +360,14 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         private final String title;
         private final Converter<T, Object> converter;
 
-        public static Canonicalizer<String> forKey(String id, String title) {
-            return forKey(id, title, Converters.none(String.class));
+        public static <T> Canonicalizer<T> forField(Field<T> field) {
+            return new Canonicalizer<>(field);
         }
 
-        public static <T> Canonicalizer<T> forKey(String id, String title, Converter<T, Object> converter) {
-            return new Canonicalizer<>(id, title, new NullSafeConverter<>(converter));
-        }
-
-        public Canonicalizer(String id, String title, Converter<T, Object> converter) {
-            this.id = id;
-            this.title = title;
-            this.converter = converter;
+        public Canonicalizer(Field<T> field) {
+            this.id = field.getId();
+            this.title = field.getName();
+            this.converter = field.getConverter();
         }
 
         @Override
@@ -399,9 +378,12 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
         @Override
         public T apply(DefaultJwkContext<?> ctx, Object rawValue) {
 
+            //noinspection unchecked
+            final T previousValue = (T)ctx.idiomaticValues.get(id);
+
             if (JwtMap.isReduceableToNull(rawValue)) {
                 ctx.remove(id);
-                return null;
+                return previousValue;
             }
 
             T idiomaticValue; // preferred Java format
@@ -410,13 +392,13 @@ public class DefaultJwkContext<K extends Key> implements JwkContext<K> {
                 idiomaticValue = converter.applyFrom(rawValue);
                 canonicalValue = converter.applyTo(idiomaticValue);
             } catch (Exception e) {
-                String msg = "Invalid JWK '" + id + "' (" + title + ") value [" + rawValue + "]: " + e.getMessage();
+                Object sval = ctx.privateMemberNames.contains(id) ? AbstractJwk.REDACTED_VALUE : rawValue;
+                String msg = "Invalid JWK '" + id + "' (" + title + ") value [" + sval + "]: " + e.getMessage();
                 throw new MalformedKeyException(msg, e);
             }
             ctx.nullSafePut(id, canonicalValue);
             ctx.idiomaticValues.put(id, idiomaticValue);
-            //noinspection unchecked
-            return (T) canonicalValue;
+            return previousValue;
         }
     }
 }

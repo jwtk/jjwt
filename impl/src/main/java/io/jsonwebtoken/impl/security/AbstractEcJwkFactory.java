@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -23,8 +24,8 @@ import java.util.Map;
 
 abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> extends AbstractFamilyJwkFactory<K, J> {
 
-    private static final BigInteger TWO = new BigInteger("2");
-    private static final BigInteger THREE = new BigInteger("3");
+    private static final BigInteger TWO = BigInteger.valueOf(2);
+    private static final BigInteger THREE = BigInteger.valueOf(3);
     private static final Map<String, ECParameterSpec> EC_SPECS_BY_JWA_ID;
     private static final Map<EllipticCurve, String> JWA_IDS_BY_CURVE;
 
@@ -85,7 +86,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
      */
     // Algorithm defined in http://www.secg.org/sec1-v2.pdf Section 2.3.5
     static String toOctetString(int fieldSize, BigInteger coordinate) {
-        byte[] bytes = toUnsignedBytes(coordinate);
+        byte[] bytes = Converters.BIGINT_UNSIGNED_BYTES.applyTo(coordinate);
         int mlen = (int) Math.ceil(fieldSize / 8d);
         if (mlen > bytes.length) {
             byte[] m = new byte[mlen];
@@ -108,6 +109,11 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
      * @return {@code true} if a given elliptic curve contains the specified {@code point}, {@code false} otherwise.
      */
     static boolean contains(EllipticCurve curve, ECPoint point) {
+
+        if (ECPoint.POINT_INFINITY.equals(point)) {
+            return false;
+        }
+
         final BigInteger a = curve.getA();
         final BigInteger b = curve.getB();
         final BigInteger x = point.getAffineX();
@@ -119,10 +125,18 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         // to the equation to account for the restricted field.  For a nice overview of the math behind EC curves and
         // their application in cryptography, see
         // https://web.northeastern.edu/dummit/docs/cryptography_5_elliptic_curves_in_cryptography.pdf
-        final BigInteger p = ((ECFieldFp) curve.getField()).getP();
-        final BigInteger lhs = y.pow(2).mod(p); //mod p to account for field prime
-        final BigInteger rhs = x.pow(3).add(a.multiply(x)).add(b).mod(p); //mod p to account for field prime
 
+        final BigInteger p = ((ECFieldFp) curve.getField()).getP();
+
+        // Verify the point coordinates are in field range:
+        if (x.compareTo(BigInteger.ZERO) < 0 || x.compareTo(p) >= 0 ||
+            y.compareTo(BigInteger.ZERO) < 0 || y.compareTo(p) >= 0) {
+            return false;
+        }
+
+        // Finally, assert Weierstrass form equality:
+        final BigInteger lhs = y.modPow(TWO, p); //mod p to account for field prime
+        final BigInteger rhs = x.modPow(THREE, p).add(a.multiply(x)).add(b).mod(p); //mod p to account for field prime
         return lhs.equals(rhs);
     }
 

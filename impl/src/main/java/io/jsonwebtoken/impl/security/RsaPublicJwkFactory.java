@@ -20,16 +20,16 @@ class RsaPublicJwkFactory extends AbstractFamilyJwkFactory<RSAPublicKey, RsaPubl
     @Override
     protected RsaPublicJwk createJwkFromKey(JwkContext<RSAPublicKey> ctx) {
         RSAPublicKey key = ctx.getKey();
-        ctx.put(DefaultRsaPublicJwk.MODULUS, encode(key.getModulus()));
-        ctx.put(DefaultRsaPublicJwk.PUBLIC_EXPONENT, encode(key.getPublicExponent()));
+        ctx.put(DefaultRsaPublicJwk.MODULUS.getId(), encode(key.getModulus()));
+        ctx.put(DefaultRsaPublicJwk.PUBLIC_EXPONENT.getId(), encode(key.getPublicExponent()));
         return new DefaultRsaPublicJwk(ctx);
     }
 
     @Override
     protected RsaPublicJwk createJwkFromValues(JwkContext<RSAPublicKey> ctx) {
         ValueGetter getter = new DefaultValueGetter(ctx);
-        BigInteger modulus = getter.getRequiredBigInt(DefaultRsaPublicJwk.MODULUS, false);
-        BigInteger publicExponent = getter.getRequiredBigInt(DefaultRsaPublicJwk.PUBLIC_EXPONENT, false);
+        BigInteger modulus = getter.getRequiredBigInt(DefaultRsaPublicJwk.MODULUS.getId(), false);
+        BigInteger publicExponent = getter.getRequiredBigInt(DefaultRsaPublicJwk.PUBLIC_EXPONENT.getId(), false);
         final RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, publicExponent);
 
         RSAPublicKey key = generateKey(ctx, new CheckedFunction<KeyFactory, RSAPublicKey>() {

@@ -16,28 +16,20 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.impl.lang.Field;
 
 import java.util.Map;
+import java.util.Set;
 
 public class DefaultJwsHeader extends DefaultHeader<JwsHeader> implements JwsHeader {
 
+    static final Set<Field<?>> FIELDS = CHILD_FIELDS;
+
     public DefaultJwsHeader() {
-        super();
+        super(FIELDS);
     }
 
     public DefaultJwsHeader(Map<String, ?> map) {
-        super(map);
+        super(FIELDS, map);
     }
-
-    @Override
-    public String getKeyId() {
-        return getString(KEY_ID);
-    }
-
-    @Override
-    public JwsHeader setKeyId(String kid) {
-        setValue(KEY_ID, kid);
-        return this;
-    }
-
 }

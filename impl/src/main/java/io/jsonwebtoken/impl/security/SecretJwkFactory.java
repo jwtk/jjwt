@@ -50,7 +50,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         }
 
         assert k != null : "k value is mandatory.";
-        ctx.put(DefaultSecretJwk.K, k);
+        ctx.put(DefaultSecretJwk.K.getId(), k);
 
         return new DefaultSecretJwk(ctx);
     }
@@ -58,7 +58,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
     @Override
     protected SecretJwk createJwkFromValues(JwkContext<SecretKey> ctx) {
         ValueGetter getter = new DefaultValueGetter(ctx);
-        byte[] bytes = getter.getRequiredBytes(DefaultSecretJwk.K);
+        byte[] bytes = getter.getRequiredBytes(DefaultSecretJwk.K.getId());
         SecretKey key = new SecretKeySpec(bytes, "NONE"); //TODO: do we need a JCA-specific ID here?
         ctx.setKey(key);
         return new DefaultSecretJwk(ctx);

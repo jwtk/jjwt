@@ -41,6 +41,23 @@ import java.util.Map;
 public interface JwtParserBuilder {
 
     /**
+     * Enables parsing of Unsecured JWSs (JWTs an 'alg' (Algorithm) header value of
+     * 'none'). <b>Be careful when calling this method - one should fully understand
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-8.5">Unsecured JWS Security Considerations</a>
+     * before enabling this feature.</b>
+     * <p>If this method is not called, Unsecured JWSs are disabled by default as mandated by
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.6">RFC 7518, Section
+     * 3.6</a>.</p>
+     *
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-8.5">Unsecured JWS Security Considerations</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.6">Using the Algorithm &quot;none&quot;</a>
+     * @see io.jsonwebtoken.security.SignatureAlgorithms#NONE
+     */
+    JwtParserBuilder enableUnsecuredJws();
+
+    /**
      * Sets the JCA Provider to use during cryptographic signature and decryption operations, or {@code null} if the
      * JCA subsystem preferred provider should be used.
      *

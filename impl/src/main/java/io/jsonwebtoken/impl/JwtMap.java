@@ -15,14 +15,22 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.JwtDateConverter;
+import io.jsonwebtoken.impl.security.JwkContext;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.DateFormats;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.MalformedKeyException;
 
 import java.lang.reflect.Array;
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -31,151 +39,178 @@ import java.util.Set;
 
 public class JwtMap implements Map<String, Object> {
 
-    private final Map<String, Object> map;
+    static final String REDACTED_VALUE = "<redacted>";
 
-    public JwtMap() {
-        this.map = new LinkedHashMap<>();
+    protected final Map<String, Object> values; // canonical values formatted per RFC requirements
+    protected final Map<String, Object> idiomaticValues; // the values map with any string/encoded values converted to Java type-safe values where possible
+    protected final Map<String, Object> redactedValues; // the values map with any sensitive/secret values redacted. Used in the toString implementation.
+    protected final Map<String, Field<?>> FIELDS;
+
+    public JwtMap(Set<Field<?>> fieldSet) {
+        Assert.notEmpty(fieldSet, "Fields cannot be null or empty.");
+        Map<String, Field<?>> fields = new LinkedHashMap<>();
+        for (Field<?> field : fieldSet) {
+            fields.put(field.getId(), field);
+        }
+        this.FIELDS = java.util.Collections.unmodifiableMap(fields);
+        this.values = new LinkedHashMap<>();
+        this.idiomaticValues = new LinkedHashMap<>();
+        this.redactedValues = new LinkedHashMap<>();
     }
 
-    public JwtMap(Map<String, ?> map) {
-        this();
-        Assert.notNull(map, "Map argument cannot be null.");
-        putAll(map);
+    public JwtMap(Set<Field<?>> fieldSet, Map<String, ?> values) {
+        this(fieldSet);
+        Assert.notNull(values, "Map argument cannot be null.");
+        putAll(values);
     }
 
-    protected String getString(String name) {
-        Object v = get(name);
-        return v != null ? String.valueOf(v) : null;
+    protected boolean isSecret(String id) {
+        Field<?> field = FIELDS.get(id);
+        return field != null && field.isSecret();
     }
 
     protected static Date toDate(Object v, String name) {
-        if (v == null) {
-            return null;
-        } else if (v instanceof Date) {
-            return (Date) v;
-        } else if (v instanceof Calendar) { //since 0.10.0
-            return ((Calendar) v).getTime();
-        } else if (v instanceof Number) {
-            //assume millis:
-            long millis = ((Number) v).longValue();
-            return new Date(millis);
-        } else if (v instanceof String) {
-            return parseIso8601Date((String) v, name); //ISO-8601 parsing since 0.10.0
-        } else {
-            throw new IllegalStateException("Cannot create Date from '" + name + "' value '" + v + "'.");
-        }
-    }
-
-    /**
-     * @since 0.10.0
-     */
-    private static Date parseIso8601Date(String s, String name) throws IllegalArgumentException {
         try {
-            return DateFormats.parseIso8601Date(s);
-        } catch (ParseException e) {
-            String msg = "'" + name + "' value does not appear to be ISO-8601-formatted: " + s;
+            return JwtDateConverter.toDate(v);
+        } catch (Exception e) {
+            String msg = "Cannot create Date from '" + name + "' value: " + v + ".  Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
     }
 
-    /**
-     * @since 0.10.0
-     */
-    protected static Date toSpecDate(Object v, String name) {
-        if (v == null) {
-            return null;
-        } else if (v instanceof Number) {
-            // https://github.com/jwtk/jjwt/issues/122:
-            // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
-            long seconds = ((Number) v).longValue();
-            v = seconds * 1000;
-        } else if (v instanceof String) {
-            // https://github.com/jwtk/jjwt/issues/122
-            // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
-            try {
-                long seconds = Long.parseLong((String) v);
-                v = seconds * 1000;
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        //v would have been normalized to milliseconds if it was a number value, so perform normal date conversion:
-        return toDate(v, name);
-    }
-
     public static boolean isReduceableToNull(Object v) {
         return v == null ||
-            (v instanceof String && !Strings.hasText((String)v)) ||
+            (v instanceof String && !Strings.hasText((String) v)) ||
             (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
-            (v instanceof Map && Collections.isEmpty((Map<?,?>)v)) ||
+            (v instanceof Map && Collections.isEmpty((Map<?, ?>) v)) ||
             (v.getClass().isArray() && Array.getLength(v) == 0);
     }
 
-    protected void setValue(String name, Object v) {
-        if (isReduceableToNull(v)) {
-            map.remove(name);
-        } else {
-            map.put(name, v);
-        }
+    protected Object idiomaticGet(String key) {
+        return this.idiomaticValues.get(key);
     }
 
-    @Deprecated //remove just before 1.0.0
-    protected void setDate(String name, Date d) {
-        if (d == null) {
-            map.remove(name);
-        } else {
-            long seconds = d.getTime() / 1000;
-            map.put(name, seconds);
-        }
-    }
-
-    protected Object setDateAsSeconds(String name, Date d) {
-        if (d == null) {
-            return map.remove(name);
-        } else {
-            long seconds = d.getTime() / 1000;
-            return map.put(name, seconds);
-        }
+    @SuppressWarnings("unchecked")
+    protected <T> T idiomaticGet(Field<T> field) {
+        return (T)this.idiomaticValues.get(field.getId());
     }
 
     @Override
     public int size() {
-        return map.size();
+        return values.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return map.isEmpty();
+        return values.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object o) {
-        return map.containsKey(o);
+        return values.containsKey(o);
     }
 
     @Override
     public boolean containsValue(Object o) {
-        return map.containsValue(o);
+        return values.containsValue(o);
     }
 
     @Override
     public Object get(Object o) {
-        return map.get(o);
+        return values.get(o);
     }
 
     @Override
-    public Object put(String s, Object o) {
-        if (o == null) {
-            return map.remove(s);
+    public Object put(String name, Object value) {
+        name = Assert.notNull(Strings.clean(name), "Member name cannot be null or empty.");
+        if (value instanceof String) {
+            value = Strings.clean((String) value);
+        } else if (Objects.isArray(value) && !value.getClass().getComponentType().isPrimitive()) {
+            value = Collections.arrayToList(value);
+        }
+        return idiomaticPut(name, value);
+    }
+
+    // ensures that if a property name matches an RFC-specified name, that value can be represented
+    // as an idiomatic type-safe Java value in addition to the canonical RFC/encoded value.
+    private Object idiomaticPut(String name, Object value) {
+        assert name != null; //asserted by caller.
+        Field<?> field = FIELDS.get(name);
+        if (field != null) { //Setting a JWA-standard property - let's ensure we can represent it idiomatically:
+            return apply(field, value);
+        } else { //non-standard/custom property:
+            return nullSafePut(name, value);
+        }
+    }
+
+    protected Object nullSafePut(String name, Object value) {
+        if (JwtMap.isReduceableToNull(value)) {
+            return remove(name);
         } else {
-            return map.put(s, o);
+            Object redactedValue = isSecret(name) ? REDACTED_VALUE : value;
+            this.redactedValues.put(name, redactedValue);
+            this.idiomaticValues.put(name, value);
+            return this.values.put(name, value);
+        }
+    }
+
+    private JwtException malformed(String msg, Exception cause) {
+        if (this instanceof JwkContext || this instanceof Jwk) {
+            return new MalformedKeyException(msg, cause);
+        } else {
+            return new MalformedJwtException(msg, cause);
+        }
+    }
+
+    protected <T> Object apply(Field<T> field, Object rawValue) {
+
+        final String id = field.getId();
+        final Object previousValue = get(id);
+
+        if (isReduceableToNull(rawValue)) {
+            return remove(id);
+        }
+
+        T idiomaticValue; // preferred Java format
+        Object canonicalValue; // as required by the RFC
+        try {
+            idiomaticValue = field.applyFrom(rawValue);
+            Assert.notNull(idiomaticValue, "Converted idiomaticValue cannot be null.");
+            canonicalValue = field.applyTo(idiomaticValue);
+            Assert.notNull(canonicalValue, "Converted canonicalValue cannot be null.");
+        } catch (Exception e) {
+            Object sval = field.isSecret() ? REDACTED_VALUE : rawValue;
+            String msg = "Invalid " + name() + field + " value [" + sval + "]: " + e.getMessage();
+            throw malformed(msg, e);
+        }
+        nullSafePut(id, canonicalValue);
+        this.idiomaticValues.put(id, idiomaticValue);
+        return previousValue;
+    }
+
+    private String name() {
+        if (this instanceof JweHeader) {
+            return "JWE header";
+        } else if (this instanceof JwsHeader) {
+            return "JWS header";
+        } else if (this instanceof Header) {
+            return "JWT header";
+        } else if (this instanceof Jwk || this instanceof JwkContext) {
+            Object value = values.get("kty");
+            if ("oct".equals(value)) {
+                value = "Secret";
+            }
+            return value != null ? value + " JWK" : "JWK";
+        } else {
+            return "Map";
         }
     }
 
     @Override
-    public Object remove(Object o) {
-        return map.remove(o);
+    public Object remove(Object key) {
+        this.redactedValues.remove(key);
+        this.idiomaticValues.remove(key);
+        return this.values.remove(key);
     }
 
     @Override
@@ -190,36 +225,38 @@ public class JwtMap implements Map<String, Object> {
 
     @Override
     public void clear() {
-        map.clear();
+        this.values.clear();
+        this.idiomaticValues.clear();
+        this.redactedValues.clear();
     }
 
     @Override
     public Set<String> keySet() {
-        return map.keySet();
+        return values.keySet();
     }
 
     @Override
     public Collection<Object> values() {
-        return map.values();
+        return values.values();
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        return map.entrySet();
+        return values.entrySet();
     }
 
     @Override
     public String toString() {
-        return map.toString();
+        return redactedValues.toString();
     }
 
     @Override
     public int hashCode() {
-        return map.hashCode();
+        return values.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return map.equals(obj);
+        return values.equals(obj);
     }
 }

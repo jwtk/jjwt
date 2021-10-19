@@ -152,8 +152,8 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
-        jweHeader.setAlgorithm(alg.getId());
-        jweHeader.setEncryptionAlgorithm(enc.getId());
+        jweHeader.put(DefaultHeader.ALGORITHM.getId(), alg.getId());
+        jweHeader.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
         byte[] headerBytes = this.headerSerializer.apply(jweHeader);
         final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);

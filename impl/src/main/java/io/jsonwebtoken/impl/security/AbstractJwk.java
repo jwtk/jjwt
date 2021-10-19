@@ -1,6 +1,9 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Jwk;
 
 import java.security.Key;
@@ -8,12 +11,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-abstract class AbstractJwk<K extends Key> implements Jwk<K> {
+public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
 
-    static final String TYPE = "kty";
-    static final String OPERATIONS = "key_ops";
-    static final String ALGORITHM = "alg";
-    static final String ID = "kid";
+    static final Field<String> ALG = Fields.string("alg", "Algorithm");
+    public static final Field<String> KID = Fields.string("kid", "Key ID");
+    static final Field<Set<String>> KEY_OPS = Fields.stringSet("key_ops", "Key Operations");
+    static final Field<String> KTY = Fields.string("kty", "Key Type");
+    @SuppressWarnings("RedundantTypeArguments")
+    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.<Field<?>>setOf(ALG, KID, KEY_OPS, KTY));
+
     static final String REDACTED_VALUE = "<redacted>";
     public static final String IMMUTABLE_MSG = "JWKs are immutable may not be modified.";
     protected final JwkContext<K> context;

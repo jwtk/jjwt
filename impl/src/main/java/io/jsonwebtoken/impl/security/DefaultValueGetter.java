@@ -36,7 +36,7 @@ public class DefaultValueGetter implements ValueGetter {
         } else if (values instanceof Header) {
             return "JWT header";
         } else if (values instanceof Jwk || values instanceof JwkContext) {
-            Object value = values.get(AbstractJwk.TYPE);
+            Object value = values.get(AbstractJwk.KTY);
             if (DefaultSecretJwk.TYPE_VALUE.equals(value)) {
                 value = "Secret";
             }

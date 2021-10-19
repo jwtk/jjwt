@@ -1,38 +1,47 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.RsaPrivateJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
 
+import java.math.BigInteger;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAOtherPrimeInfo;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKey, RsaPublicJwk> implements RsaPrivateJwk {
 
-    static String PRIVATE_EXPONENT = "d";
-    static String FIRST_PRIME = "p";
-    static String SECOND_PRIME = "q";
-    static String FIRST_CRT_EXPONENT = "dp";
-    static String SECOND_CRT_EXPONENT = "dq";
-    static String FIRST_CRT_COEFFICIENT = "qi";
-    static String OTHER_PRIMES_INFO = "oth";
-    static String PRIME_FACTOR = "r";
-    static String FACTOR_CRT_EXPONENT = "d";
-    static String FACTOR_CRT_COEFFICIENT = "t";
+    static final Field<BigInteger> PRIVATE_EXPONENT = Fields.secretBigInt("d", "Private Exponent");
+    static final Field<BigInteger> FIRST_PRIME = Fields.secretBigInt("p", "First Prime Factor");
+    static final Field<BigInteger> SECOND_PRIME = Fields.secretBigInt("q", "Second Prime Factor");
+    static final Field<BigInteger> FIRST_CRT_EXPONENT = Fields.secretBigInt("dp", "First Factor CRT Exponent");
+    static final Field<BigInteger> SECOND_CRT_EXPONENT = Fields.secretBigInt("dq", "Second Factor CRT Exponent");
+    static final Field<BigInteger> FIRST_CRT_COEFFICIENT = Fields.secretBigInt("qi", "First CRT Coefficient");
+    static final Field<RSAOtherPrimeInfo> OTHER_PRIMES_INFO = Fields.builder(RSAOtherPrimeInfo.class).setSecret(true)
+        .setId("oth").setName("Other Primes Info")
+        .setConverter(new RsaPrivateJwkFactory.RSAOtherPrimeInfoConverter())
+        .build();
 
-    static final Set<String> PRIVATE_NAMES = Collections.setOf(
-        PRIVATE_EXPONENT, FIRST_PRIME, SECOND_PRIME,
-        FIRST_CRT_EXPONENT, SECOND_CRT_EXPONENT,
-        FIRST_CRT_COEFFICIENT, OTHER_PRIMES_INFO);
+    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(DefaultRsaPublicJwk.FIELDS,
+        PRIVATE_EXPONENT, FIRST_PRIME, SECOND_PRIME, FIRST_CRT_EXPONENT,
+        SECOND_CRT_EXPONENT, FIRST_CRT_COEFFICIENT, OTHER_PRIMES_INFO
+    ));
 
-    static final Set<String> OPTIONAL_PRIVATE_NAMES;
-
+    static final Set<String> PRIVATE_NAMES;
     static {
-        OPTIONAL_PRIVATE_NAMES = new LinkedHashSet<>(PRIVATE_NAMES);
-        OPTIONAL_PRIVATE_NAMES.remove(PRIVATE_EXPONENT);
+        Set<String> names = new LinkedHashSet<>();
+        for (Field<?> field : FIELDS) {
+            if (field.isSecret()) {
+                names.add(field.getId());
+            }
+        }
+        PRIVATE_NAMES = java.util.Collections.unmodifiableSet(names);
     }
+    static final Set<String> OPTIONAL_PRIVATE_NAMES = Collections.immutable(Collections.setOf(PRIVATE_EXPONENT.getId()));
 
     DefaultRsaPrivateJwk(JwkContext<RSAPrivateKey> ctx, RsaPublicJwk pubJwk) {
         super(ctx, pubJwk);

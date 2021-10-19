@@ -15,6 +15,13 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.security.PublicJwk;
+
+import java.net.URI;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Set;
+
 /**
  * A <a href="https://tools.ietf.org/html/rfc7516">JWE</a> header.
  *
@@ -89,15 +96,58 @@ public interface JweHeader extends Header<JweHeader> {
      */
     String getEncryptionAlgorithm();
 
-    /**
-     * Sets the JWE <a href="https://tools.ietf.org/html/rfc7516#section-4.1.2"><code>enc</code></a> (Encryption
-     * Algorithm) header value.  A {@code null} value will remove the property from the JSON map.
-     * <p>The JWE {@code enc} (encryption algorithm) Header Parameter identifies the content encryption algorithm
-     * used to perform authenticated encryption on the plaintext to produce the ciphertext and the JWE
-     * {@code Authentication Tag}.</p>
-     *
-     * @param enc the encryption algorithm identifier
-     * @return this header for method chaining
-     */
-    JweHeader setEncryptionAlgorithm(String enc);
+    //commented out on purpose - API users shouldn't call this method as it is always called by the Jwt/Jwe Builder
+//    /**
+//     * Sets the JWE <a href="https://tools.ietf.org/html/rfc7516#section-4.1.2"><code>enc</code></a> (Encryption
+//     * Algorithm) header value.  A {@code null} value will remove the property from the JSON map.
+//     * <p>The JWE {@code enc} (encryption algorithm) Header Parameter identifies the content encryption algorithm
+//     * used to perform authenticated encryption on the plaintext to produce the ciphertext and the JWE
+//     * {@code Authentication Tag}.</p>
+//     *
+//     * @param enc the encryption algorithm identifier
+//     * @return this header for method chaining
+//     */
+//    JweHeader setEncryptionAlgorithm(String enc);
+
+    URI getJwkSetUrl();
+    JweHeader setJwkSetUrl(URI uri);
+
+    PublicJwk<?> getJwk();
+    JweHeader setJwk(PublicJwk<?> jwk);
+
+    String getKeyId();
+    JweHeader setKeyId(String kid);
+
+    URI getX509Url();
+    JweHeader setX509Url(URI uri);
+
+    List<X509Certificate> getX509CertificateChain();
+    JweHeader setX509CertificateChain(List<X509Certificate> chain);
+
+    byte[] getX509CertificateSha1Thumbprint();
+    JweHeader setX509CertificateSha1Thumbprint(byte[] thumbprint);
+    JweHeader computeX509CertificateSha1Thumbprint();
+
+    byte[] getX509CertificateSha256Thumbprint();
+    JweHeader setX509CertificateSha256Thumbprint(byte[] thumbprint);
+    JweHeader computeX509CertificateSha256Thumbprint();
+
+    Set<String> getCritical();
+    JweHeader setCritical(Set<String> crit);
+
+    int getPbes2Count();
+    JweHeader setPbes2Count(int count);
+
+    byte[] getPbes2Salt();
+    JweHeader setPbes2Salt(byte[] salt);
+
+    byte[] getAgreementPartyUInfo();
+    String getAgreementPartyUInfoString();
+    JweHeader setAgreementPartyUInfo(byte[] info);
+    JweHeader setAgreementPartyUInfo(String info);
+
+    byte[] getAgreementPartyVInfo();
+    String getAgreementPartyVInfoString();
+    JweHeader setAgreementPartyVInfo(byte[] info);
+    JweHeader setAgreementPartyVInfo(String info);
 }

@@ -77,6 +77,10 @@ public final class KeyAlgorithms {
     public static final RsaKeyAlgorithm RSA1_5 = forId0("RSA1_5");
     public static final RsaKeyAlgorithm RSA_OAEP = forId0("RSA-OAEP");
     public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
+    public static final EcKeyAlgorithm ECDH_ES = forId0("ECDH-ES");
+    public static final EcKeyAlgorithm ECDH_ES_A128KW = forId0("ECDH-ES+A128KW");
+    public static final EcKeyAlgorithm ECDH_ES_A192KW = forId0("ECDH-ES+A192KW");
+    public static final EcKeyAlgorithm ECDH_ES_A256KW = forId0("ECDH-ES+A256KW");
 
     public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
         return Classes.invokeStatic(BRIDGE_CLASS, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
