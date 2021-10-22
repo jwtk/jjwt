@@ -18,7 +18,7 @@ public abstract class AbstractAsymmetricJwk<K extends Key> extends AbstractJwk<K
     public static final Field<byte[]> X5T = Fields.bytes("x5t", "X.509 Certificate SHA-1 Thumbprint").build();
     public static final Field<byte[]> X5T_S256 = Fields.bytes("x5t#S256", "X.509 Certificate SHA-256 Thumbprint").build();
     public static final Field<URI> X5U = Fields.uri("x5u", "X.509 URL");
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(AbstractJwk.FIELDS, USE, X5C, X5T, X5T_S256, X5U));
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractJwk.FIELDS, USE, X5C, X5T, X5T_S256, X5U);
 
     AbstractAsymmetricJwk(JwkContext<K> ctx) {
         super(ctx);

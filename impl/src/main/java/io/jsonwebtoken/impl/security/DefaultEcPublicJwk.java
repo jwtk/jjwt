@@ -15,7 +15,7 @@ class DefaultEcPublicJwk extends AbstractPublicJwk<ECPublicKey> implements EcPub
     static final Field<String> CRV = Fields.string("crv", "Curve");
     static final Field<BigInteger> X = Fields.bigInt("x", "X Coordinate").build();
     static final Field<BigInteger> Y = Fields.bigInt("y", "Y Coordinate").build();
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(AbstractAsymmetricJwk.FIELDS, CRV, X, Y));
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, CRV, X, Y);
 
     DefaultEcPublicJwk(JwkContext<ECPublicKey> ctx) {
         super(ctx);

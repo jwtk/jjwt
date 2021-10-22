@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -50,8 +51,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         super(ctx);
     }
 
-    AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, K key, Set<String> privateNames) {
-        super(new DefaultJwkContext<>(privateNames, b.jwkContext, key));
+    AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, K key, Set<Field<?>> fields) {
+        super(new DefaultJwkContext<>(fields, b.jwkContext, key));
         this.computeX509Sha1Thumbprint = b.computeX509Sha1Thumbprint;
         this.computeX509Sha256Thumbprint = b.computeX509Sha256Thumbprint;
         this.applyX509KeyUse = b.applyX509KeyUse;
@@ -181,8 +182,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
             super(ctx);
         }
 
-        DefaultPrivateJwkBuilder(DefaultPublicJwkBuilder<L, K, J, M, ?, ?> b, K key, Set<String> privateNames) {
-            super(b, key, privateNames);
+        DefaultPrivateJwkBuilder(DefaultPublicJwkBuilder<L, K, J, M, ?, ?> b, K key, Set<Field<?>> fields) {
+            super(b, key, fields);
             this.jwkContext.setPublicKey(b.jwkContext.getKey());
         }
 
@@ -198,7 +199,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         implements EcPublicJwkBuilder {
 
         DefaultEcPublicJwkBuilder(JwkContext<?> src, ECPublicKey key) {
-            super(new DefaultJwkContext<>(DefaultEcPrivateJwk.PRIVATE_NAMES, src, key));
+            super(new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, src, key));
         }
 
         @Override
@@ -212,7 +213,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         implements RsaPublicJwkBuilder {
 
         DefaultRsaPublicJwkBuilder(JwkContext<?> ctx, RSAPublicKey key) {
-            super(new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, ctx, key));
+            super(new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, key));
         }
 
         @Override
@@ -226,11 +227,11 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         implements EcPrivateJwkBuilder {
 
         DefaultEcPrivateJwkBuilder(JwkContext<?> src, ECPrivateKey key) {
-            super(new DefaultJwkContext<>(DefaultEcPrivateJwk.PRIVATE_NAMES, src, key));
+            super(new DefaultJwkContext<>(DefaultEcPrivateJwk.FIELDS, src, key));
         }
 
         DefaultEcPrivateJwkBuilder(DefaultEcPublicJwkBuilder b, ECPrivateKey key) {
-            super(b, key, DefaultEcPrivateJwk.PRIVATE_NAMES);
+            super(b, key, DefaultEcPrivateJwk.FIELDS);
         }
     }
 
@@ -239,11 +240,11 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         implements RsaPrivateJwkBuilder {
 
         DefaultRsaPrivateJwkBuilder(JwkContext<?> src, RSAPrivateKey key) {
-            super(new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, src, key));
+            super(new DefaultJwkContext<>(DefaultRsaPrivateJwk.FIELDS, src, key));
         }
 
         DefaultRsaPrivateJwkBuilder(DefaultRsaPublicJwkBuilder b, RSAPrivateKey key) {
-            super(b, key, DefaultRsaPrivateJwk.PRIVATE_NAMES);
+            super(b, key, DefaultRsaPrivateJwk.FIELDS);
         }
     }
 }

@@ -60,7 +60,7 @@ class DispatchingJwkFactoryTest {
         assertEquals jwk.d, d
 
         //remove the 'd' mapping to represent only a public key:
-        m.remove(DefaultEcPrivateJwk.D)
+        m.remove(DefaultEcPrivateJwk.D.getId())
         ctx = new DefaultJwkContext()
         ctx.putAll(m)
 

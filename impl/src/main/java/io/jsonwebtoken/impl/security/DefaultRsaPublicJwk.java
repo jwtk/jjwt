@@ -14,7 +14,7 @@ class DefaultRsaPublicJwk extends AbstractPublicJwk<RSAPublicKey> implements Rsa
     static final String TYPE_VALUE = "RSA";
     static final Field<BigInteger> MODULUS = Fields.bigInt("n", "Modulus").build();
     static final Field<BigInteger> PUBLIC_EXPONENT = Fields.bigInt("e", "Public Exponent").build();
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(AbstractAsymmetricJwk.FIELDS, MODULUS, PUBLIC_EXPONENT));
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, MODULUS, PUBLIC_EXPONENT);
 
     DefaultRsaPublicJwk(JwkContext<RSAPublicKey> ctx) {
         super(ctx);

@@ -14,8 +14,7 @@ import java.util.Set;
 class DefaultEcPrivateJwk extends AbstractPrivateJwk<ECPrivateKey, ECPublicKey, EcPublicJwk> implements EcPrivateJwk {
 
     static final Field<BigInteger> D = Fields.secretBigInt("d", "ECC Private Key");
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(DefaultEcPublicJwk.FIELDS, D));
-    static final Set<String> PRIVATE_NAMES = Collections.setOf(D.getId());
+    static final Set<Field<?>> FIELDS = Collections.concat(DefaultEcPublicJwk.FIELDS, D);
 
     DefaultEcPrivateJwk(JwkContext<ECPrivateKey> ctx, EcPublicJwk pubJwk) {
         super(ctx, pubJwk);

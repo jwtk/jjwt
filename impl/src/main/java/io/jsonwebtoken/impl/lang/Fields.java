@@ -13,7 +13,7 @@ public final class Fields {
     }
 
     public static Field<String> string(String id, String name) {
-        return builder(String.class).setConverter(Converters.none(String.class)).setId(id).setName(name).build();
+        return builder(String.class).setId(id).setName(name).build();
     }
 
     public static Field<Date> rfcDate(String id, String name) {

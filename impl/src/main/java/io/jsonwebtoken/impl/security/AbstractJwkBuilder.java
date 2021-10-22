@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
+import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
 import io.jsonwebtoken.security.SecretJwkBuilder;
 
@@ -83,14 +84,14 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
         } catch (IllegalArgumentException iae) {
             //if we get an IAE, it means the builder state wasn't configured enough in order to create
             String msg = "Unable to create JWK: " + iae.getMessage();
-            throw new IllegalStateException(msg, iae);
+            throw new MalformedKeyException(msg, iae);
         }
     }
 
     static class DefaultSecretJwkBuilder extends AbstractJwkBuilder<SecretKey, SecretJwk, SecretJwkBuilder>
         implements SecretJwkBuilder {
         public DefaultSecretJwkBuilder(JwkContext<?> ctx, SecretKey key) {
-            super(new DefaultJwkContext<>(DefaultSecretJwk.PRIVATE_NAMES, ctx, key));
+            super(new DefaultJwkContext<>(DefaultSecretJwk.FIELDS, ctx, key));
         }
     }
 }

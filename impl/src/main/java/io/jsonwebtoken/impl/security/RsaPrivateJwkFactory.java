@@ -30,8 +30,16 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
+
+    //All RSA Private fields _except_ for PRIVATE_EXPONENT.  That is always required:
+    private static final Set<Field<BigInteger>> OPTIONAL_PRIVATE_FIELDS = Collections.setOf(
+        DefaultRsaPrivateJwk.FIRST_PRIME, DefaultRsaPrivateJwk.SECOND_PRIME,
+        DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT,
+        DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT
+    );
 
     static final Converter<List<RSAOtherPrimeInfo>, Object> RSA_OTHER_PRIMES_CONVERTER =
         Converters.forList(new RSAOtherPrimeInfoConverter());
@@ -97,7 +105,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         // The [JWA Spec](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1)
         // requires public values to be present in private JWKs, so add them:
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, ctx, rsaPublicKey);
+        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, rsaPublicKey);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
 
@@ -137,7 +145,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         //The [JWA Spec, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES, ctx);
+        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwkFromValues(pubCtx);
         RSAPublicKey pubKey = pubJwk.toKey();
         final BigInteger modulus = pubKey.getModulus();
@@ -151,8 +159,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         //     factors were used
         //
         boolean containsOptional = false;
-        for (String optionalPrivateName : DefaultRsaPrivateJwk.OPTIONAL_PRIVATE_NAMES) {
-            if (ctx.containsKey(optionalPrivateName)) {
+        for (Field<?> field : OPTIONAL_PRIVATE_FIELDS) {
+            if (ctx.containsKey(field.getId())) {
                 containsOptional = true;
                 break;
             }
@@ -173,7 +181,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                 Object value = ctx.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId());
                 List<RSAOtherPrimeInfo> otherPrimes = RSA_OTHER_PRIMES_CONVERTER.applyFrom(value);
 
-                RSAOtherPrimeInfo[] arr = new RSAOtherPrimeInfo[otherPrimes.size()];
+                RSAOtherPrimeInfo[] arr = new RSAOtherPrimeInfo[Collections.size(otherPrimes)];
                 otherPrimes.toArray(arr);
 
                 spec = new RSAMultiPrimePrivateCrtKeySpec(modulus, publicExponent, privateExponent, firstPrime,
@@ -203,6 +211,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         static final Field<BigInteger> PRIME_FACTOR = Fields.secretBigInt("r", "Prime Factor");
         static final Field<BigInteger> FACTOR_CRT_EXPONENT = Fields.secretBigInt("d", "Factor CRT Exponent");
         static final Field<BigInteger> FACTOR_CRT_COEFFICIENT = Fields.secretBigInt("t", "Factor CRT Coefficient");
+        static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(PRIME_FACTOR, FACTOR_CRT_EXPONENT, FACTOR_CRT_COEFFICIENT);
 
         @Override
         public Object applyTo(RSAOtherPrimeInfo info) {
@@ -230,7 +239,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
             // Need to add the values to a Context instance to satisfy the API contract of the getRequired* methods
             // called below.  It's less than ideal, but it works:
-            JwkContext<?> ctx = new DefaultJwkContext<>(DefaultRsaPrivateJwk.PRIVATE_NAMES);
+            JwkContext<?> ctx = new DefaultJwkContext<>(FIELDS);
             for (Map.Entry<?, ?> entry : m.entrySet()) {
                 String name = String.valueOf(entry.getKey());
                 ctx.put(name, entry.getValue());

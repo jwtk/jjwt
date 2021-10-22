@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.impl.security.DefaultJwkContext
+
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -9,7 +9,7 @@ class EncodedObjectConverterTest {
 
     @Test
     void testApplyFromWithInvalidType() {
-        def converter = DefaultJwkContext.URI_CONVERTER
+        def converter = Converters.URI
         assertTrue converter instanceof EncodedObjectConverter
         int value = 42
         try {

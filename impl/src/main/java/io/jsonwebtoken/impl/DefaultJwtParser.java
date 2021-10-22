@@ -104,6 +104,22 @@ public class DefaultJwtParser implements JwtParser {
             "This header parameter is mandatory per the JWE Specification, Section 4.1.2. See " +
             "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2 for more information.";
 
+    private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an  " +
+        DefaultHeader.ALGORITHM + " header value of '" + SignatureAlgorithms.NONE.getId() +
+        "') are disallowed by default as mandated by " +
+        "https://datatracker.ietf.org/doc/html/rfc7518#section-3.6. If you wish to allow them to be " +
+        "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
+        "security considerations covered in that method's JavaDoc before doing so). Header: ";
+
+    private static final String JWE_NONE_MSG =
+        "JWEs do not support key management " + DefaultHeader.ALGORITHM +
+            " header value 'none' per https://datatracker.ietf.org/doc/html/rfc7518#section-4.1";
+
+    private static final String JWS_NONE_SIG_MISMATCH_MSG =
+        "The JWS header references signature algorithm 'none' yet the " +
+        "compact JWS string contains a signature. This is not permitted per " +
+        "https://tools.ietf.org/html/rfc7518#section-3.6.";
+
     private static <H extends Header<H>, R extends Identifiable> Function<H, R> backup(String id, String msg, Collection<R> extras) {
         if (Collections.isEmpty(extras)) {
             return ConstantFunction.forNull();
@@ -324,22 +340,12 @@ public class DefaultJwtParser implements JwtParser {
         if (compact == null) {
             return false;
         }
-
-        int delimiterCount = 0;
-
-        for (int i = 0; i < compact.length(); i++) {
-            char c = compact.charAt(i);
-
-            if (delimiterCount == 2) {
-                return !Character.isWhitespace(c) && c != SEPARATOR_CHAR;
-            }
-
-            if (c == SEPARATOR_CHAR) {
-                delimiterCount++;
-            }
+        try {
+            final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
+            return (!(tokenized instanceof TokenizedJwe)) && Strings.hasText(tokenized.getDigest());
+        } catch (MalformedJwtException e) {
+            return false;
         }
-
-        return false;
     }
 
     private static boolean hasContentType(Header<?> header) {
@@ -371,7 +377,13 @@ public class DefaultJwtParser implements JwtParser {
         final byte[] headerBytes = base64UrlDecode(base64UrlHeader, "protected header");
         String origValue = new String(headerBytes, Strings.UTF_8);
         Map<String, ?> m = readValue(origValue, "protected header");
-        Header<?> header = tokenized.createHeader(m);
+        Header<?> header;
+        try {
+            header = tokenized.createHeader(m);
+        } catch (Exception e) {
+            String msg = "Invalid protected header: " + e.getMessage();
+            throw new MalformedJwtException(msg, e);
+        }
 
         // https://tools.ietf.org/html/rfc7515#section-10.7 , second-to-last bullet point, note the use of 'always':
         //
@@ -385,24 +397,16 @@ public class DefaultJwtParser implements JwtParser {
             throw new MalformedJwtException(msg);
         }
         if (SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
+            if (tokenized instanceof TokenizedJwe) {
+                throw new MalformedJwtException(JWE_NONE_MSG);
+            }
+            // else it's a JWS:
             if (!enableUnsecuredJws) {
-                String msg = "Unsecured JWTs (those with an  " + DefaultHeader.ALGORITHM +
-                    " header value of '" + SignatureAlgorithms.NONE.getId() +
-                    "') are disallowed by default as mandated by " +
-                    "https://datatracker.ietf.org/doc/html/rfc7518#section-3.6. If you wish to allow them to be " +
-                    "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
-                    "security considerations covered in that method's JavaDoc before doing so).  Header: " +
-                    header;
+                String msg = UNSECURED_DISABLED_MSG_PREFIX + header;
                 throw new UnsupportedJwtException(msg);
             }
             if (Strings.hasText(tokenized.getDigest())) {
-                String type = tokenized instanceof TokenizedJwe ? "JWE" : "JWS";
-                String algType = tokenized instanceof TokenizedJwe ? "key management" : "signature";
-                String digestType = tokenized instanceof TokenizedJwe ? "an AAD authentication tag" : "a signature";
-                String msg = "The " + type + " header references " + algType + " algorithm '" + alg + "' yet the " +
-                    "compact " + type + " string has " + digestType + " token.  This is not permitted per " +
-                    "https://tools.ietf.org/html/rfc7518#section-3.6.";
-                throw new MalformedJwtException(msg);
+                throw new MalformedJwtException(JWS_NONE_SIG_MISMATCH_MSG);
             }
         } else { // something other than 'none'.  Must have a digest component:
             if (!Strings.hasText(tokenized.getDigest())) {
@@ -410,7 +414,7 @@ public class DefaultJwtParser implements JwtParser {
                 String algType = tokenized instanceof TokenizedJwe ? "key management" : "signature";
                 String digestType = tokenized instanceof TokenizedJwe ? "AAD authentication tag" : "signature";
                 String msg = "The " + type + " header references " + algType + " algorithm '" + alg + "' but the " +
-                    "compact " + type + " string is missing the required " + digestType + " token.";
+                    "compact " + type + " string is missing the required " + digestType + ".";
                 throw new MalformedJwtException(msg);
             }
         }
@@ -510,7 +514,12 @@ public class DefaultJwtParser implements JwtParser {
         Claims claims = null;
         if (!payload.isEmpty() && !hasContentType(header) && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
             Map<String, ?> claimsMap = readValue(payload, "claims");
-            claims = new DefaultClaims(claimsMap);
+            try {
+                claims = new DefaultClaims(claimsMap);
+            } catch (Exception e) {
+                String msg = "Invalid claims: " + e.getMessage();
+                throw new MalformedJwtException(msg, e);
+            }
         }
 
         Jwt<?, ?> jwt;
@@ -815,7 +824,7 @@ public class DefaultJwtParser implements JwtParser {
         try {
             byte[] bytes = val.getBytes(Strings.UTF_8);
             return deserializer.deserialize(bytes);
-        } catch (DeserializationException e) {
+        } catch (MalformedJwtException | DeserializationException e) {
             throw new MalformedJwtException("Unable to read " + name + " JSON: " + val, e);
         }
     }

@@ -44,14 +44,9 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     static final Field<PublicJwk> JWK = Fields.builder(PublicJwk.class).setId("jwk").setName("JSON Web Key").build();
     static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
 
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.<Field<?>>setOf(
-        TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM));
-
-    static final Set<Field<?>> CHILD_FIELDS = Collections.immutable(Collections.concat(FIELDS,
-        JKU, JWK, CRIT,
-        AbstractJwk.KID,
-        AbstractAsymmetricJwk.X5U, AbstractAsymmetricJwk.X5C, AbstractAsymmetricJwk.X5T, AbstractAsymmetricJwk.X5T_S256
-    ));
+    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM);
+    static final Set<Field<?>> CHILD_FIELDS = Collections.concat(FIELDS, JKU, JWK, CRIT, AbstractJwk.KID,
+        AbstractAsymmetricJwk.X5U, AbstractAsymmetricJwk.X5C, AbstractAsymmetricJwk.X5T, AbstractAsymmetricJwk.X5T_S256);
 
     protected DefaultHeader(Set<Field<?>> fieldSet) {
         super(fieldSet);

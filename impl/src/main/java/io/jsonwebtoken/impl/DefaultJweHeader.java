@@ -21,9 +21,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
 
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(CHILD_FIELDS,
-        ENCRYPTION_ALGORITHM, P2C, P2S, APU, APV
-    ));
+    static final Set<Field<?>> FIELDS = Collections.concat(CHILD_FIELDS, ENCRYPTION_ALGORITHM, P2C, P2S, APU, APV);
 
     public DefaultJweHeader() {
         super(FIELDS);

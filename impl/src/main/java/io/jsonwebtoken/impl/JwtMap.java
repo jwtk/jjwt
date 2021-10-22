@@ -40,9 +40,8 @@ import java.util.Set;
 public class JwtMap implements Map<String, Object> {
 
     static final String REDACTED_VALUE = "<redacted>";
-
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
-    protected final Map<String, Object> idiomaticValues; // the values map with any string/encoded values converted to Java type-safe values where possible
+    protected final Map<String, Object> idiomaticValues; // the values map with any RFC values converted to Java type-safe values where possible
     protected final Map<String, Object> redactedValues; // the values map with any sensitive/secret values redacted. Used in the toString implementation.
     protected final Map<String, Field<?>> FIELDS;
 
@@ -92,7 +91,7 @@ public class JwtMap implements Map<String, Object> {
 
     @SuppressWarnings("unchecked")
     protected <T> T idiomaticGet(Field<T> field) {
-        return (T)this.idiomaticValues.get(field.getId());
+        return (T) this.idiomaticValues.get(field.getId());
     }
 
     @Override
@@ -144,7 +143,7 @@ public class JwtMap implements Map<String, Object> {
     }
 
     protected Object nullSafePut(String name, Object value) {
-        if (JwtMap.isReduceableToNull(value)) {
+        if (isReduceableToNull(value)) {
             return remove(name);
         } else {
             Object redactedValue = isSecret(name) ? REDACTED_VALUE : value;
@@ -165,7 +164,6 @@ public class JwtMap implements Map<String, Object> {
     protected <T> Object apply(Field<T> field, Object rawValue) {
 
         final String id = field.getId();
-        final Object previousValue = get(id);
 
         if (isReduceableToNull(rawValue)) {
             return remove(id);
@@ -175,20 +173,20 @@ public class JwtMap implements Map<String, Object> {
         Object canonicalValue; // as required by the RFC
         try {
             idiomaticValue = field.applyFrom(rawValue);
-            Assert.notNull(idiomaticValue, "Converted idiomaticValue cannot be null.");
+            Assert.notNull(idiomaticValue, "Converter's resulting idiomaticValue cannot be null.");
             canonicalValue = field.applyTo(idiomaticValue);
-            Assert.notNull(canonicalValue, "Converted canonicalValue cannot be null.");
-        } catch (Exception e) {
+            Assert.notNull(canonicalValue, "Converter's resulting canonicalValue cannot be null.");
+        } catch (IllegalArgumentException e) {
             Object sval = field.isSecret() ? REDACTED_VALUE : rawValue;
-            String msg = "Invalid " + name() + field + " value [" + sval + "]: " + e.getMessage();
-            throw malformed(msg, e);
+            String msg = "Invalid " + getName() + " " + field + " value [" + sval + "]. Cause: " + e.getMessage();
+            throw new IllegalArgumentException(msg, e);
         }
-        nullSafePut(id, canonicalValue);
+        Object retval = nullSafePut(id, canonicalValue);
         this.idiomaticValues.put(id, idiomaticValue);
-        return previousValue;
+        return retval;
     }
 
-    private String name() {
+    private String getName() {
         if (this instanceof JweHeader) {
             return "JWE header";
         } else if (this instanceof JwsHeader) {
@@ -255,6 +253,7 @@ public class JwtMap implements Map<String, Object> {
         return values.hashCode();
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         return values.equals(obj);

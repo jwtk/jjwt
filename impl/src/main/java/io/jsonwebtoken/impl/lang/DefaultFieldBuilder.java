@@ -63,16 +63,14 @@ public class DefaultFieldBuilder<T> implements FieldBuilder<T> {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Field<T> build() {
-
         Assert.notNull(this.type, "Type must be set.");
         Converter converter = this.converter;
         if (converter == null) {
-            converter = Converters.none(this.type);
+            converter = Converters.forType(this.type);
         }
         if (this.list != null) {
             converter = this.list ? Converters.forList(converter) : Converters.forSet(converter);
         }
-
         return new DefaultField<>(this.id, this.name, this.secret, this.type, converter);
     }
 }

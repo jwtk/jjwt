@@ -44,9 +44,9 @@ public class DefaultClaims extends JwtMap implements Claims {
     static final Field<Date> ISSUED_AT = Fields.rfcDate(Claims.ISSUED_AT, "Issued At");
     static final Field<String> JTI = Fields.string(Claims.ID, "JWT ID");
 
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.<Field<?>>setOf(
+    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(
         ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI
-    ));
+    );
 
     public DefaultClaims() {
         super(FIELDS);
@@ -150,7 +150,7 @@ public class DefaultClaims extends JwtMap implements Claims {
             try {
                 value = JwtDateConverter.toDate(value); // NOT specDate logic
             } catch (Exception e) {
-                String msg = "Cannot create Date from '" + claimName + "' value: " + value + ".  Cause: " + e.getMessage();
+                String msg = "Cannot create Date from '" + claimName + "' value [" + value + "].  Cause: " + e.getMessage();
                 throw new IllegalArgumentException(msg, e);
             }
         }
@@ -160,9 +160,11 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     private <T> T castClaimValue(Object value, Class<T> requiredType) {
 
-        if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof Byte) {
+        if (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte) {
             long longValue = ((Number)value).longValue();
-            if (Integer.class.equals(requiredType) && Integer.MIN_VALUE <= longValue && longValue <= Integer.MAX_VALUE) {
+            if (Long.class.equals(requiredType)) {
+                value = longValue;
+            } else if (Integer.class.equals(requiredType) && Integer.MIN_VALUE <= longValue && longValue <= Integer.MAX_VALUE) {
                 value = (int)longValue;
             } else if (requiredType == Short.class && Short.MIN_VALUE <= longValue && longValue <= Short.MAX_VALUE) {
                 value = (short) longValue;

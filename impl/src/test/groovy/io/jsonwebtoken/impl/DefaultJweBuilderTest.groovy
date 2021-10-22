@@ -85,10 +85,10 @@ class DefaultJweBuilderTest {
 
     @Test
     void testBuild() {
-        def enc = EncryptionAlgorithms.A128GCM;
+        def enc = EncryptionAlgorithms.A128GCM
         def key = enc.generateKey()
 
-        String jwe = new DefaultJweBuilder()
+        new DefaultJweBuilder()
                 .setSubject('joe')
                 .encryptWith(enc)
                 .withKey(key)

@@ -55,8 +55,6 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String,Obje
 
     JwkContext<K> setPublicKey(PublicKey publicKey);
 
-    Set<String> getPrivateMemberNames();
-
     Provider getProvider();
 
     JwkContext<K> setProvider(Provider provider);

@@ -4,7 +4,7 @@ import io.jsonwebtoken.lang.Assert;
 
 import java.math.BigInteger;
 
-public class BigIntegerUnsignedBytesConverter implements Converter<BigInteger, byte[]> {
+public class BigIntegerUBytesConverter implements Converter<BigInteger, byte[]> {
 
     // Copied from Apache Commons Codec 1.14:
     // https://github.com/apache/commons-codec/blob/af7b94750e2178b8437d9812b28e36ac87a455f2/src/main/java/org/apache/commons/codec/binary/Base64.java#L746-L775

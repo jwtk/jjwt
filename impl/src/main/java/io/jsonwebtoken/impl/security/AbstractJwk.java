@@ -17,10 +17,8 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
     public static final Field<String> KID = Fields.string("kid", "Key ID");
     static final Field<Set<String>> KEY_OPS = Fields.stringSet("key_ops", "Key Operations");
     static final Field<String> KTY = Fields.string("kty", "Key Type");
-    @SuppressWarnings("RedundantTypeArguments")
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.<Field<?>>setOf(ALG, KID, KEY_OPS, KTY));
+    static final Set<Field<?>> FIELDS = Collections.setOf(ALG, KID, KEY_OPS, KTY);
 
-    static final String REDACTED_VALUE = "<redacted>";
     public static final String IMMUTABLE_MSG = "JWKs are immutable may not be modified.";
     protected final JwkContext<K> context;
 

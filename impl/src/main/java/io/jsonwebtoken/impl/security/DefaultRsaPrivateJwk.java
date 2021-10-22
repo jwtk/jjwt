@@ -10,7 +10,6 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAOtherPrimeInfo;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKey, RsaPublicJwk> implements RsaPrivateJwk {
@@ -26,22 +25,10 @@ class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKe
         .setConverter(new RsaPrivateJwkFactory.RSAOtherPrimeInfoConverter())
         .build();
 
-    static final Set<Field<?>> FIELDS = Collections.immutable(Collections.concat(DefaultRsaPublicJwk.FIELDS,
+    static final Set<Field<?>> FIELDS = Collections.concat(DefaultRsaPublicJwk.FIELDS,
         PRIVATE_EXPONENT, FIRST_PRIME, SECOND_PRIME, FIRST_CRT_EXPONENT,
         SECOND_CRT_EXPONENT, FIRST_CRT_COEFFICIENT, OTHER_PRIMES_INFO
-    ));
-
-    static final Set<String> PRIVATE_NAMES;
-    static {
-        Set<String> names = new LinkedHashSet<>();
-        for (Field<?> field : FIELDS) {
-            if (field.isSecret()) {
-                names.add(field.getId());
-            }
-        }
-        PRIVATE_NAMES = java.util.Collections.unmodifiableSet(names);
-    }
-    static final Set<String> OPTIONAL_PRIVATE_NAMES = Collections.immutable(Collections.setOf(PRIVATE_EXPONENT.getId()));
+    );
 
     DefaultRsaPrivateJwk(JwkContext<RSAPrivateKey> ctx, RsaPublicJwk pubJwk) {
         super(ctx, pubJwk);

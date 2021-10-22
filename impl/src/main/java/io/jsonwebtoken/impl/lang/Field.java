@@ -9,7 +9,4 @@ public interface Field<T> extends Identifiable, Converter<T, Object> {
     Class<T> getIdiomaticType();
 
     boolean isSecret();
-
-    Converter<T, Object> getConverter();
-
 }

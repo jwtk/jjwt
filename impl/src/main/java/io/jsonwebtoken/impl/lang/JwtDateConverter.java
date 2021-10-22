@@ -16,7 +16,7 @@ public class JwtDateConverter implements Converter<Date, Object> {
             return null;
         }
         // https://datatracker.ietf.org/doc/html/rfc7519#section-2, 'Numeric Date' definition:
-        return date.getTime() / 1000;
+        return date.getTime() / 1000L;
     }
 
     @Override

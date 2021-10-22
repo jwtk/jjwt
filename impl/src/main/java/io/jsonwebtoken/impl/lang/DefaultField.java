@@ -42,11 +42,6 @@ public class DefaultField<T> implements Field<T> {
     }
 
     @Override
-    public Converter<T, Object> getConverter() {
-        return this.CONVERTER;
-    }
-
-    @Override
     public int hashCode() {
         return this.ID.hashCode();
     }

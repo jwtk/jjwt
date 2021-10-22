@@ -18,7 +18,7 @@ public final class Converters {
     public static final Converter<X509Certificate, Object> X509_CERTIFICATE =
         Converters.forEncoded(X509Certificate.class, new JwkX509StringConverter());
 
-    public static final Converter<BigInteger, byte[]> BIGINT_UNSIGNED_BYTES = new BigIntegerUnsignedBytesConverter();
+    public static final Converter<BigInteger, byte[]> BIGINT_UNSIGNED_BYTES = new BigIntegerUBytesConverter();
 
     public static final Converter<BigInteger, Object> BIGINT = Converters.forEncoded(BigInteger.class,
         compound(BIGINT_UNSIGNED_BYTES, CodecConverter.BASE64URL));
@@ -27,8 +27,8 @@ public final class Converters {
     private Converters() {
     }
 
-    public static <T> Converter<T, Object> none(Class<T> clazz) {
-        return new NoConverter<>(clazz);
+    public static <T> Converter<T, Object> forType(Class<T> clazz) {
+        return new RequiredTypeConverter<>(clazz);
     }
 
     public static <T> Converter<Set<T>, Object> forSet(Converter<T, Object> elementConverter) {

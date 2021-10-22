@@ -12,7 +12,7 @@ class DefaultSecretJwk extends AbstractJwk<SecretKey> implements SecretJwk {
 
     static final String TYPE_VALUE = "oct";
     static final Field<byte[]> K = Fields.bytes("k", "Key Value").setSecret(true).build();
-    static final Set<String> PRIVATE_NAMES = java.util.Collections.unmodifiableSet(Collections.setOf(K.getId()));
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractJwk.FIELDS, K);
 
     DefaultSecretJwk(JwkContext<SecretKey> ctx) {
         super(ctx);

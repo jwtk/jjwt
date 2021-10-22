@@ -42,7 +42,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
 
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
         // requires public values to be present in private JWKs, so add them:
-        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPrivateJwk.PRIVATE_NAMES, ctx, ecPublicKey);
+        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, ctx, ecPublicKey);
         EcPublicJwk pubJwk = EcPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
 
@@ -63,7 +63,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
         // We don't actually need the public x,y point coordinates for JVM lookup, but the
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
         // requires them to be present and valid for the private key as well, so we assert that here:
-        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPrivateJwk.PRIVATE_NAMES, ctx);
+        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, ctx);
         EcPublicJwk pubJwk = EcPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
 
         ECParameterSpec spec = getCurveByJwaId(curveId);
