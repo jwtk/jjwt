@@ -16,12 +16,12 @@
 package io.jsonwebtoken.security
 
 import io.jsonwebtoken.impl.security.DefaultEllipticCurveSignatureAlgorithm
+import io.jsonwebtoken.impl.security.DefaultPasswordKey
 import io.jsonwebtoken.impl.security.DefaultRsaSignatureAlgorithm
-import io.jsonwebtoken.impl.security.JcaPbeKey
+import io.jsonwebtoken.impl.security.KeysBridge
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import javax.crypto.interfaces.PBEKey
 import javax.crypto.spec.SecretKeySpec
 import java.security.KeyPair
 import java.security.PrivateKey
@@ -32,9 +32,9 @@ import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
+@SuppressWarnings('GroovyAccessibility')
 class KeysTest {
 
     private static final Random RANDOM = new SecureRandom()
@@ -47,7 +47,9 @@ class KeysTest {
 
     @Test
     void testPrivateCtor() { //for code coverage purposes only
+        //noinspection GroovyResultOfObjectAllocationIgnored
         new Keys()
+        new KeysBridge()
     }
 
     @Test
@@ -242,15 +244,10 @@ class KeysTest {
     }
 
     @Test
-    void testToPbeKey() {
-
-        PBEKey jcaKey = createMock(PBEKey)
-        //asserts key is wrapped and no methods are called (i.e. we don't need to copy any values)
-        replay(jcaKey)
-
-        PbeKey key = Keys.toPbeKey(jcaKey)
-        assertTrue key instanceof JcaPbeKey
-
-        verify jcaKey
+    void testForPassword() {
+        def password = "whatever".toCharArray()
+        PasswordKey key = Keys.forPassword(password)
+        assertArrayEquals password, key.getPassword()
+        assertTrue key instanceof DefaultPasswordKey
     }
 }

@@ -15,14 +15,11 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.impl.DefaultHeader
-import io.jsonwebtoken.impl.DefaultJweHeader
-import io.jsonwebtoken.impl.DefaultJwsHeader
-import io.jsonwebtoken.impl.JwtTokenizer
+import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
@@ -30,13 +27,14 @@ import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.Mac
+import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
-import java.security.interfaces.RSAPrivateKey
 
 import static org.junit.Assert.*
 
@@ -55,6 +53,7 @@ class JwtsTest {
 
     @Test
     void testPrivateCtor() { // for code coverage only
+        //noinspection GroovyAccessibility
         new Jwts()
     }
 
@@ -112,32 +111,22 @@ class JwtsTest {
 
     @Test
     void testPlaintextJwtString() {
-
-        // Assert exact output per example at https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
-
-        // The base64url encoding of the example claims set in the spec shows that their original payload ends lines with
-        // carriage return + newline, so we have to include them in the test payload to assert our encoded output
-        // matches what is in the spec:
-
-        def payload = '{"iss":"joe",\r\n' +
-                ' "exp":1300819380,\r\n' +
-                ' "http://example.com/is_root":true}'
-
-        String val = Jwts.builder().setPayload(payload).compact();
-
-        def specOutput = 'eyJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-
-        assertEquals val, specOutput
+        // Assert exact output per example at https://datatracker.ietf.org/doc/html/rfc7519#section-6.1
+        String encodedBody = 'eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ'
+        String payload = new String(Decoders.BASE64URL.decode(encodedBody), StandardCharsets.UTF_8)
+        String val = Jwts.builder().setPayload(payload).compact()
+        String RFC_VALUE = 'eyJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
+        assertEquals val, RFC_VALUE
     }
 
     @Test
     void testParsePlaintextToken() {
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
+        def claims = [iss: 'joe', exp: later(), 'https://example.com/is_root': true]
 
-        String jwt = Jwts.builder().setClaims(claims).compact();
+        String jwt = Jwts.builder().setClaims(claims).compact()
 
-        def token = Jwts.parserBuilder().enableUnsecuredJws().build().parse(jwt);
+        def token = Jwts.parserBuilder().enableUnsecuredJws().build().parse(jwt)
 
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
@@ -164,6 +153,7 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('foo')
             fail()
         } catch (MalformedJwtException e) {
+            //noinspection GroovyAccessibility
             String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '0'
             assertEquals expected, e.message
         }
@@ -175,6 +165,7 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('.')
             fail()
         } catch (MalformedJwtException e) {
+            //noinspection GroovyAccessibility
             String expected = JwtTokenizer.DELIM_ERR_MSG_PREFIX + '1'
             assertEquals expected, e.message
         }
@@ -233,14 +224,14 @@ class JwtsTest {
 
     @Test
     void testConvenienceIssuer() {
-        String compact = Jwts.builder().setIssuer("Me").compact();
+        String compact = Jwts.builder().setIssuer("Me").compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertEquals claims.getIssuer(), "Me"
 
         compact = Jwts.builder().setSubject("Joe")
                 .setIssuer("Me") //set it
                 .setIssuer(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getIssuer()
@@ -248,14 +239,14 @@ class JwtsTest {
 
     @Test
     void testConvenienceSubject() {
-        String compact = Jwts.builder().setSubject("Joe").compact();
+        String compact = Jwts.builder().setSubject("Joe").compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertEquals claims.getSubject(), "Joe"
 
         compact = Jwts.builder().setIssuer("Me")
                 .setSubject("Joe") //set it
                 .setSubject(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getSubject()
@@ -263,45 +254,45 @@ class JwtsTest {
 
     @Test
     void testConvenienceAudience() {
-        String compact = Jwts.builder().setAudience("You").compact();
+        String compact = Jwts.builder().setAudience("You").compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertEquals claims.getAudience(), "You"
 
         compact = Jwts.builder().setIssuer("Me")
                 .setAudience("You") //set it
                 .setAudience(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getAudience()
     }
 
     private static Date now() {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis());
+        return dateWithOnlySecondPrecision(System.currentTimeMillis())
     }
 
     private static int later() {
-        return laterDate().getTime() / 1000;
+        return laterDate().getTime() / 1000
     }
 
     private static Date laterDate(int seconds) {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000));
+        return dateWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000))
     }
 
     private static Date laterDate() {
-        return laterDate(10000);
+        return laterDate(10000)
     }
 
     private static Date dateWithOnlySecondPrecision(long millis) {
-        long seconds = millis / 1000;
-        long secondOnlyPrecisionMillis = seconds * 1000;
-        return new Date(secondOnlyPrecisionMillis);
+        long seconds = (long) (millis / 1000)
+        long secondOnlyPrecisionMillis = seconds * 1000
+        return new Date(secondOnlyPrecisionMillis)
     }
 
     @Test
     void testConvenienceExpiration() {
-        Date then = laterDate();
-        String compact = Jwts.builder().setExpiration(then).compact();
+        Date then = laterDate()
+        String compact = Jwts.builder().setExpiration(then).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()
         assertEquals claimedDate, then
@@ -309,7 +300,7 @@ class JwtsTest {
         compact = Jwts.builder().setIssuer("Me")
                 .setExpiration(then) //set it
                 .setExpiration(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getExpiration()
@@ -318,7 +309,7 @@ class JwtsTest {
     @Test
     void testConvenienceNotBefore() {
         Date now = now() //jwt exp only supports *seconds* since epoch:
-        String compact = Jwts.builder().setNotBefore(now).compact();
+        String compact = Jwts.builder().setNotBefore(now).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getNotBefore()
         assertEquals claimedDate, now
@@ -326,7 +317,7 @@ class JwtsTest {
         compact = Jwts.builder().setIssuer("Me")
                 .setNotBefore(now) //set it
                 .setNotBefore(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getNotBefore()
@@ -335,7 +326,7 @@ class JwtsTest {
     @Test
     void testConvenienceIssuedAt() {
         Date now = now() //jwt exp only supports *seconds* since epoch:
-        String compact = Jwts.builder().setIssuedAt(now).compact();
+        String compact = Jwts.builder().setIssuedAt(now).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getIssuedAt()
         assertEquals claimedDate, now
@@ -343,7 +334,7 @@ class JwtsTest {
         compact = Jwts.builder().setIssuer("Me")
                 .setIssuedAt(now) //set it
                 .setIssuedAt(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getIssuedAt()
@@ -351,15 +342,15 @@ class JwtsTest {
 
     @Test
     void testConvenienceId() {
-        String id = UUID.randomUUID().toString();
-        String compact = Jwts.builder().setId(id).compact();
+        String id = UUID.randomUUID().toString()
+        String compact = Jwts.builder().setId(id).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertEquals claims.getId(), id
 
         compact = Jwts.builder().setIssuer("Me")
                 .setId(id) //set it
                 .setId(null) //null should remove it
-                .compact();
+                .compact()
 
         claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         assertNull claims.getId()
@@ -368,12 +359,12 @@ class JwtsTest {
     @Test
     void testUncompressedJwt() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
@@ -390,12 +381,12 @@ class JwtsTest {
     @Test
     void testCompressedJwtWithDeflate() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.DEFLATE).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
@@ -412,12 +403,12 @@ class JwtsTest {
     @Test
     void testCompressedJwtWithGZIP() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.GZIP).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
@@ -434,12 +425,12 @@ class JwtsTest {
     @Test
     void testCompressedWithCustomResolver() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
             @Override
             String getAlgorithmName() {
@@ -451,6 +442,7 @@ class JwtsTest {
             @Override
             CompressionCodec resolveCompressionCodec(Header header) {
                 String algorithm = header.getCompressionAlgorithm()
+                //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
                     return CompressionCodecs.GZIP
                 } else {
@@ -472,12 +464,12 @@ class JwtsTest {
     @Test(expected = CompressionException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
+        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
             @Override
             String getAlgorithmName() {
@@ -491,12 +483,12 @@ class JwtsTest {
     @Test
     void testCompressStringPayloadWithDeflate() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String payload = "this is my test for a payload"
 
-        String compact = Jwts.builder().setPayload(payload).signWith(alg, key)
+        String compact = Jwts.builder().setPayload(payload).signWith(key, alg)
                 .compressWith(CompressionCodecs.DEFLATE).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
@@ -510,103 +502,100 @@ class JwtsTest {
 
     @Test
     void testHS256() {
-        testHmac(SignatureAlgorithm.HS256)
+        testHmac(SignatureAlgorithms.HS256)
     }
 
     @Test
     void testHS384() {
-        testHmac(SignatureAlgorithm.HS384)
+        testHmac(SignatureAlgorithms.HS384)
     }
 
     @Test
     void testHS512() {
-        testHmac(SignatureAlgorithm.HS512)
+        testHmac(SignatureAlgorithms.HS512)
     }
 
     @Test
     void testRS256() {
-        testRsa(SignatureAlgorithm.RS256)
+        testRsa(SignatureAlgorithms.RS256)
     }
 
     @Test
     void testRS384() {
-        testRsa(SignatureAlgorithm.RS384)
+        testRsa(SignatureAlgorithms.RS384)
     }
 
     @Test
     void testRS512() {
-        testRsa(SignatureAlgorithm.RS512)
+        testRsa(SignatureAlgorithms.RS512)
     }
 
     @Test
     void testPS256() {
-        testRsa(SignatureAlgorithm.PS256)
+        testRsa(SignatureAlgorithms.PS256)
     }
 
     @Test
     void testPS384() {
-        testRsa(SignatureAlgorithm.PS384)
+        testRsa(SignatureAlgorithms.PS384)
     }
 
     @Test
     void testPS512() {
-        testRsa(SignatureAlgorithm.PS512)
+        testRsa(SignatureAlgorithms.PS512)
     }
 
     @Test
     void testRSA256WithPrivateKeyValidation() {
-        testRsa(SignatureAlgorithm.RS256, true)
+        testRsa(SignatureAlgorithms.RS256, true)
     }
 
     @Test
     void testRSA384WithPrivateKeyValidation() {
-        testRsa(SignatureAlgorithm.RS384, true)
+        testRsa(SignatureAlgorithms.RS384, true)
     }
 
     @Test
     void testRSA512WithPrivateKeyValidation() {
-        testRsa(SignatureAlgorithm.RS512, true)
+        testRsa(SignatureAlgorithms.RS512, true)
     }
 
     @Test
     void testES256() {
-        testEC(SignatureAlgorithm.ES256)
+        testEC(SignatureAlgorithms.ES256)
     }
 
     @Test
     void testES384() {
-        testEC(SignatureAlgorithm.ES384)
+        testEC(SignatureAlgorithms.ES384)
     }
 
     @Test
     void testES512() {
-        testEC(SignatureAlgorithm.ES512)
+        testEC(SignatureAlgorithms.ES512)
     }
 
     @Test
     void testES256WithPrivateKeyValidation() {
         try {
-            testEC(SignatureAlgorithm.ES256, true)
+            testEC(SignatureAlgorithms.ES256, true)
             fail("EC private keys cannot be used to validate EC signatures.")
         } catch (UnsupportedJwtException e) {
             assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey instance."
         }
     }
 
-    @Test
+    @Test(expected = WeakKeyException)
     void testParseClaimsJwsWithWeakHmacKey() {
 
-        SignatureAlgorithm alg = SignatureAlgorithm.HS384
-        def key = Keys.secretKeyFor(alg)
-        def weakKey = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        SignatureAlgorithm alg = SignatureAlgorithms.HS384
+        def key = alg.generateKey()
+        def weakKey = SignatureAlgorithms.HS256.generateKey()
 
         String jws = Jwts.builder().setSubject("Foo").signWith(key, alg).compact()
 
-        try {
-            Jwts.parserBuilder().setSigningKey(weakKey).build().parseClaimsJws(jws)
-            fail('parseClaimsJws must fail for weak keys')
-        } catch (WeakKeyException expected) {
-        }
+        Jwts.parserBuilder().setSigningKey(weakKey).build().parseClaimsJws(jws)
+        fail('parseClaimsJws must fail for weak keys')
     }
 
     //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
@@ -614,8 +603,8 @@ class JwtsTest {
     void testParseClaimsJwsWithUnsignedJwt() {
 
         //create random signing key for testing:
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         String notSigned = Jwts.builder().setSubject("Foo").compact()
 
@@ -632,11 +621,11 @@ class JwtsTest {
     void testForgedTokenWithSwappedHeaderUsingNoneAlgorithm() {
 
         //create random signing key for testing:
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        SecretKey key = alg.generateKey()
 
         //this is a 'real', valid JWT:
-        String compact = Jwts.builder().setSubject("Joe").signWith(alg, key).compact()
+        String compact = Jwts.builder().setSubject("Joe").signWith(key, alg).compact()
 
         //Now strip off the signature so we can add it back in later on a forged token:
         int i = compact.lastIndexOf('.')
@@ -665,7 +654,7 @@ class JwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPrivateKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = Keys.keyPairFor(SignatureAlgorithm.RS256)
+        KeyPair kp = SignatureAlgorithms.RS256.generateKeyPair()
         PublicKey publicKey = kp.getPublic()
         PrivateKey privateKey = kp.getPrivate()
 
@@ -675,17 +664,17 @@ class JwtsTest {
 
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
-        Mac mac = Mac.getInstance('HmacSHA256');
-        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
+        Mac mac = Mac.getInstance('HmacSHA256')
+        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'))
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
         String encodedSignature = Encoders.BASE64URL.encode(signatureBytes)
 
         //Finally, the forged token is the header + body + forged signature:
-        String forged = compact + encodedSignature;
+        String forged = compact + encodedSignature
 
         // Assert that the server (that should always use the private key) does not recognized the forged token:
         try {
-            Jwts.parserBuilder().setSigningKey(privateKey).build().parse(forged);
+            Jwts.parserBuilder().setSigningKey(privateKey).build().parse(forged)
             fail("Forged token must not be successfully parsed.")
         } catch (UnsupportedJwtException expected) {
             assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
@@ -697,8 +686,8 @@ class JwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPublicKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = Keys.keyPairFor(SignatureAlgorithm.RS256)
-        PublicKey publicKey = kp.getPublic();
+        KeyPair kp = SignatureAlgorithms.RS256.generateKeyPair()
+        PublicKey publicKey = kp.getPublic()
         //PrivateKey privateKey = kp.getPrivate();
 
         String header = base64Url(toJson(['alg': 'HS256']))
@@ -707,17 +696,17 @@ class JwtsTest {
 
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
-        Mac mac = Mac.getInstance('HmacSHA256');
-        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
+        Mac mac = Mac.getInstance('HmacSHA256')
+        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'))
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
-        String encodedSignature = Encoders.BASE64URL.encode(signatureBytes);
+        String encodedSignature = Encoders.BASE64URL.encode(signatureBytes)
 
         //Finally, the forged token is the header + body + forged signature:
-        String forged = compact + encodedSignature;
+        String forged = compact + encodedSignature
 
         // Assert that the parser does not recognized the forged token:
         try {
-            Jwts.parserBuilder().setSigningKey(publicKey).build().parse(forged);
+            Jwts.parserBuilder().setSigningKey(publicKey).build().parse(forged)
             fail("Forged token must not be successfully parsed.")
         } catch (UnsupportedJwtException expected) {
             assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
@@ -729,8 +718,8 @@ class JwtsTest {
     void testParseForgedEllipticCurvePublicKeyAsHmacToken() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = Keys.keyPairFor(SignatureAlgorithm.ES256)
-        PublicKey publicKey = kp.getPublic();
+        KeyPair kp = SignatureAlgorithms.ES256.generateKeyPair()
+        PublicKey publicKey = kp.getPublic()
         //PrivateKey privateKey = kp.getPrivate();
 
         String header = base64Url(toJson(['alg': 'HS256']))
@@ -739,13 +728,13 @@ class JwtsTest {
 
         // Now for the forgery: simulate an attacker using the Elliptic Curve public key to sign a token, but
         // using it as an HMAC signing key instead of Elliptic Curve:
-        Mac mac = Mac.getInstance('HmacSHA256');
-        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'));
+        Mac mac = Mac.getInstance('HmacSHA256')
+        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'))
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
-        String encodedSignature = Encoders.BASE64URL.encode(signatureBytes);
+        String encodedSignature = Encoders.BASE64URL.encode(signatureBytes)
 
         //Finally, the forged token is the header + body + forged signature:
-        String forged = compact + encodedSignature;
+        String forged = compact + encodedSignature
 
         // Assert that the parser does not recognized the forged token:
         try {
@@ -756,13 +745,13 @@ class JwtsTest {
         }
     }
 
-    static void testRsa(SignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
+    static void testRsa(AsymmetricKeySignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
-        KeyPair kp = Keys.keyPairFor(alg)
+        KeyPair kp = alg.generateKeyPair()
         PublicKey publicKey = kp.getPublic()
         PrivateKey privateKey = kp.getPrivate()
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
+        def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
         String jwt = Jwts.builder().setClaims(claims).signWith(privateKey, alg).compact()
 
@@ -773,34 +762,32 @@ class JwtsTest {
 
         def token = Jwts.parserBuilder().setSigningKey(key).build().parse(jwt)
 
-        assert [alg: alg.name()] == token.header
-        //noinspection GrEqualsBetweenInconvertibleTypes
-        assert token.body == claims
+        assertEquals([alg: alg.getId()], token.header)
+        assertEquals(claims, token.body)
     }
 
-    static void testHmac(SignatureAlgorithm alg) {
+    static void testHmac(SecretKeySignatureAlgorithm alg) {
 
         //create random signing key for testing:
-        byte[] key = Keys.secretKeyFor(alg).encoded
+        SecretKey key = alg.generateKey()
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
+        def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().setClaims(claims).signWith(alg, key).compact()
+        String jwt = Jwts.builder().setClaims(claims).signWith(key, alg).compact()
 
         def token = Jwts.parserBuilder().setSigningKey(key).build().parse(jwt)
 
-        assert token.header == [alg: alg.name()]
-        //noinspection GrEqualsBetweenInconvertibleTypes
-        assert token.body == claims
+        assertEquals([alg: alg.getId()], token.header)
+        assertEquals(claims, token.body)
     }
 
-    static void testEC(SignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
+    static void testEC(AsymmetricKeySignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
-        KeyPair pair = Keys.keyPairFor(alg)
+        KeyPair pair = alg.generateKeyPair()
         PublicKey publicKey = pair.getPublic()
         PrivateKey privateKey = pair.getPrivate()
 
-        def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
+        def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
         String jwt = Jwts.builder().setClaims(claims).signWith(privateKey, alg).compact()
 
@@ -811,17 +798,8 @@ class JwtsTest {
 
         def token = Jwts.parserBuilder().setSigningKey(key).build().parse(jwt)
 
-        assert token.header == [alg: alg.name()]
-        //noinspection GrEqualsBetweenInconvertibleTypes
-        assert token.body == claims
-    }
-
-    void testFoo() {
-        RSAPrivateKey key;
-        Jwts.jweBuilder()
-        .encryptWith(EncryptionAlgorithms.A128GCM)
-        .usingKey(key)
-        .fromKeyAlgorithm(KeyAlgorithms.PBES2_HS256_A128KW.withIterations(1203023))
+        assertEquals([alg: alg.getId()], token.header)
+        assertEquals(claims, token.body)
     }
 }
 

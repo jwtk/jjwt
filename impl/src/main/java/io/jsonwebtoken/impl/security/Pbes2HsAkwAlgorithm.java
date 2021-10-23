@@ -1,31 +1,30 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.ValueGetter;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.PbeKey;
+import io.jsonwebtoken.security.PasswordKey;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.PBEKeySpec;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 
-public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PbeKey, SecretKey> {
+public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PasswordKey, PasswordKey> {
 
-    private static final String SALT_HEADER_NAME = "p2s";
-    private static final String ITERATION_HEADER_NAME = "p2c"; // iteration count
     private static final int MIN_RECOMMENDED_ITERATIONS = 1000; // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2
+    private static final String MIN_ITERATIONS_MSG_PREFIX =
+        "[JWA RFC 7518, Section 4.8.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2) " +
+        "recommends password-based-encryption iterations be greater than or equal to " +
+        MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
 
     private final int HASH_BYTE_LENGTH;
     private final int DERIVED_KEY_BIT_LENGTH;
@@ -53,9 +52,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
     public static int assertIterations(int iterations) {
         if (iterations < MIN_RECOMMENDED_ITERATIONS) {
-            String msg = "[JWA RFC 7518, Section 4.8.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2) " +
-                "recommends password-based-encryption iterations be greater than or equal to " +
-                MIN_RECOMMENDED_ITERATIONS + ". Provided: " + iterations;
+            String msg = MIN_ITERATIONS_MSG_PREFIX + iterations;
             throw new IllegalArgumentException(msg);
         }
         return iterations;
@@ -83,18 +80,16 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
     // protected visibility for testing
     protected SecretKey deriveKey(SecretKeyFactory factory, final char[] password, final byte[] rfcSalt, int iterations) throws Exception {
-        PBEKeySpec spec = null;
+        PBEKeySpec spec = new PBEKeySpec(password, rfcSalt, iterations, DERIVED_KEY_BIT_LENGTH);
         try {
-            spec = new PBEKeySpec(password, rfcSalt, iterations, DERIVED_KEY_BIT_LENGTH);
             return factory.generateSecret(spec);
         } finally {
-            if (spec != null) {
-                spec.clearPassword();
-            }
+            spec.clearPassword();
         }
     }
 
     private SecretKey deriveKey(final KeyRequest<?> request, final char[] password, final byte[] salt, final int iterations) {
+        Assert.notEmpty(password, "Key password character array cannot be null or empty.");
         try {
             return execute(request, SecretKeyFactory.class, new CheckedFunction<SecretKeyFactory, SecretKey>() {
                 @Override
@@ -103,9 +98,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
                 }
             });
         } finally {
-            if (password != null) {
-                java.util.Arrays.fill(password, '\u0000');
-            }
+            java.util.Arrays.fill(password, '\u0000');
         }
     }
 
@@ -121,16 +114,15 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<PbeKey> request) throws SecurityException {
+    public KeyResult getEncryptionKey(KeyRequest<PasswordKey> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
-        final PbeKey pbeKey = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
+        final PasswordKey key = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
 
-        final int iterations = assertIterations(pbeKey.getIterations());
+        final int iterations = assertIterations(request.getHeader().getPbes2Count());
         byte[] inputSalt = generateInputSalt(request);
         final byte[] rfcSalt = toRfcSalt(inputSalt);
-        final String p2s = Encoders.BASE64URL.encode(inputSalt);
-        char[] password = pbeKey.getPassword(); // will be safely cleaned/zeroed in deriveKey next:
+        char[] password = key.getPassword(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
@@ -138,51 +130,22 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
             request.getSecureRandom(), derivedKek, request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 
-        request.getHeader().put(SALT_HEADER_NAME, p2s);
-        request.getHeader().put(ITERATION_HEADER_NAME, iterations);
+        request.getHeader().setPbes2Salt(inputSalt); //retain for recipients
 
         return result;
     }
 
-    private static char[] toChars(byte[] bytes) {
-        // use bytebuffer/charbuffer so we don't create a String that remains in the JVM string memory table (heap)
-        // the respective byte and char arrays will be cleared by the caller
-        ByteBuffer buf = ByteBuffer.wrap(bytes);
-        CharBuffer cbuf = StandardCharsets.UTF_8.decode(buf);
-        return cbuf.compact().array();
-    }
-
-    private char[] toPasswordChars(SecretKey key) {
-        if (key instanceof PBEKey) {
-            return ((PBEKey) key).getPassword();
-        }
-        if (key instanceof PbeKey) {
-            return ((PbeKey) key).getPassword();
-        }
-        // convert bytes to UTF-8 characters:
-        byte[] keyBytes = null;
-        try {
-            keyBytes = key.getEncoded();
-            return toChars(keyBytes);
-        } finally {
-            if (keyBytes != null) {
-                java.util.Arrays.fill(keyBytes, (byte) 0);
-            }
-        }
-    }
-
     @Override
-    public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
+    public SecretKey getDecryptionKey(DecryptionKeyRequest<PasswordKey> request) throws SecurityException {
 
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        final SecretKey key = Assert.notNull(request.getKey(), "Request Key cannot be null.");
+        final PasswordKey key = Assert.notNull(request.getKey(), "Request Key cannot be null.");
 
         ValueGetter getter = new DefaultValueGetter(header);
-        final byte[] inputSalt = getter.getRequiredBytes(SALT_HEADER_NAME);
+        final byte[] inputSalt = getter.getRequiredBytes(DefaultJweHeader.P2S.getId());
         final byte[] rfcSalt = Bytes.concat(SALT_PREFIX, inputSalt);
-        final int iterations = getter.getRequiredPositiveInteger(ITERATION_HEADER_NAME);
-        final char[] password = toPasswordChars(key); // will be safely cleaned/zeroed in deriveKey next:
-
+        final int iterations = getter.getRequiredPositiveInteger(DefaultJweHeader.P2C.getId());
+        final char[] password = key.getPassword(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),

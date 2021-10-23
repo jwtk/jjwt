@@ -6,7 +6,6 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.EcKeyAlgorithm;
 import io.jsonwebtoken.security.EcPublicJwk;
-import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
@@ -23,7 +22,6 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
-import java.security.spec.EllipticCurve;
 
 public class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey> extends CryptoAlgorithm implements EcKeyAlgorithm<E, D> {
 
@@ -63,16 +61,10 @@ public class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & Pri
         Assert.notNull(request, "Request cannot be null.");
         JweHeader header = Assert.notNull(request.getHeader(), "request JweHeader cannot be null.");
         E publicKey = Assert.notNull(request.getKey(), "request key cannot be null.");
-
-        // guarantee that the specified request key is on a supported curve
         ECParameterSpec spec = Assert.notNull(publicKey.getParams(), "request key params cannot be null.");
-        EllipticCurve curve = spec.getCurve();
-        String jwaCurveId = AbstractEcJwkFactory.getJwaIdByCurve(curve);
-        if (publicKey instanceof ECPublicKey && !AbstractEcJwkFactory.contains(curve, ((ECPublicKey) publicKey).getW())) {
-            String msg = "Specified ECPublicKey cannot be used with JWA standard curve " + jwaCurveId + ": " +
-                "The key's ECPoint does not exist on curve '" + jwaCurveId + "'.";
-            throw new InvalidKeyException(msg);
-        }
+
+        // note: we don't need to validate if specified key's point is on a supported curve here
+        // because that will automatically be asserted when using Jwks.builder().... below
 
         KeyPair pair = generateKeyPair(request, spec);
         ECPublicKey genPubKey = KeyPairs.getKey(pair, ECPublicKey.class);
@@ -80,6 +72,8 @@ public class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & Pri
 
         SecretKey secretKey = generateSecretKey(request, publicKey, genPrivKey);
 
+        // This line will assert/guarantee that the generated public key (and therefore the request key) is on
+        // a JWK-supported curve:
         EcPublicJwk jwk = Jwks.builder().setKey(genPubKey).build();
         header.put(EPHEMERAL_PUBLIC_KEY, jwk);
 

@@ -62,7 +62,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     @Override
     public T setPublicKeyUse(String use) {
         Assert.hasText(use, "publicKeyUse cannot be null or empty.");
-        return put(AbstractAsymmetricJwk.USE.getId(), use);
+        this.jwkContext.setPublicKeyUse(use);
+        return tthis();
     }
 
     public T setKeyUseStrategy(KeyUseStrategy strategy) {
@@ -142,11 +143,11 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
             }
             if (computeX509Sha1Thumbprint) {
                 byte[] thumbprint = computeThumbprint(firstCert, "SHA-1");
-                put(AbstractAsymmetricJwk.X5T.getId(), thumbprint);
+                this.jwkContext.setX509CertificateSha1Thumbprint(thumbprint);
             }
             if (computeX509Sha256Thumbprint) {
                 byte[] thumbprint = computeThumbprint(firstCert, "SHA-256");
-                put(AbstractAsymmetricJwk.X5T_S256.getId(), thumbprint);
+                this.jwkContext.setX509CertificateSha256Thumbprint(thumbprint);
             }
         }
         return super.build();

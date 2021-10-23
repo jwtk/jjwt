@@ -6,32 +6,30 @@ import java.math.BigInteger;
 
 public class BigIntegerUBytesConverter implements Converter<BigInteger, byte[]> {
 
-    // Copied from Apache Commons Codec 1.14:
-    // https://github.com/apache/commons-codec/blob/af7b94750e2178b8437d9812b28e36ac87a455f2/src/main/java/org/apache/commons/codec/binary/Base64.java#L746-L775
+    private static final String NEGATIVE_MSG =
+        "JWA Base64urlUInt values MUST be >= 0 (non-negative) per the " +
+            "[JWA RFC 7518, Section 2](https://datatracker.ietf.org/doc/html/rfc7518#section-2) " +
+            "'Base64urlUInt' definition.";
+
     @Override
     public byte[] applyTo(BigInteger bigInt) {
         Assert.notNull(bigInt, "BigInteger argument cannot be null.");
-        final int bitlen = bigInt.bitLength();
-        // round bitlen
-        final int roundedBitlen = ((bitlen + 7) >> 3) << 3;
-        final byte[] bigBytes = bigInt.toByteArray();
-
-        if (((bitlen % 8) != 0) && (((bitlen / 8) + 1) == (roundedBitlen / 8))) {
-            return bigBytes;
+        if (BigInteger.ZERO.compareTo(bigInt) > 0) {
+            throw new IllegalArgumentException(NEGATIVE_MSG);
         }
-        // set up params for copying everything but sign bit
-        int startSrc = 0;
-        int len = bigBytes.length;
 
-        // if bigInt is exactly byte-aligned, just skip signbit in copy
-        if ((bitlen % 8) == 0) {
-            startSrc = 1;
-            len--;
+        final int bitLen = bigInt.bitLength();
+        final byte[] bytes = bigInt.toByteArray();
+        // round bitLen. This gives the minimal number of bytes necessary to represent an unsigned byte array:
+        final int unsignedByteLen = Math.max(1, (bitLen + 7) / Byte.SIZE);
+
+        if (bytes.length == unsignedByteLen) { // already in the form we need
+            return bytes;
         }
-        final int startDst = roundedBitlen / 8 - len; // to pad w/ nulls as per spec
-        final byte[] resizedBytes = new byte[roundedBitlen / 8];
-        System.arraycopy(bigBytes, startSrc, resizedBytes, startDst, len);
-        return resizedBytes;
+        //otherwise, we need to strip the sign byte (start copying at index 1 instead of 0):
+        byte[] ubytes = new byte[unsignedByteLen];
+        System.arraycopy(bytes, 1, ubytes, 0, unsignedByteLen);
+        return ubytes;
     }
 
     @Override

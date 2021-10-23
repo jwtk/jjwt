@@ -1,14 +1,14 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
+import static org.junit.Assert.*
 
 class ConstantKeyLocatorTest {
 
@@ -48,5 +48,11 @@ class ConstantKeyLocatorTest {
                     'to ensure it can use the necessary key to decrypt JWEs.'
             assertEquals msg, uje.getMessage()
         }
+    }
+
+    @Test
+    void testApply() {
+        def locator = new ConstantKeyLocator(null, null)
+        assertNull locator.apply(new DefaultHeader())
     }
 }

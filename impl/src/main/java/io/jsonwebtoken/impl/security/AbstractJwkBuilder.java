@@ -20,8 +20,13 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @SuppressWarnings("unchecked")
     protected AbstractJwkBuilder(JwkContext<K> jwkContext) {
-        this.jwkContext = Assert.notNull(jwkContext, "JwkContext cannot be null.");
-        this.jwkFactory = (JwkFactory<K, J>) DispatchingJwkFactory.DEFAULT_INSTANCE;
+        this(jwkContext, (JwkFactory<K, J>)DispatchingJwkFactory.DEFAULT_INSTANCE);
+    }
+
+    // visible for testing
+    protected AbstractJwkBuilder(JwkContext<K> context, JwkFactory<K,J> factory) {
+        this.jwkContext = Assert.notNull(context, "JwkContext cannot be null.");
+        this.jwkFactory = Assert.notNull(factory, "JwkFactory cannot be null.");
     }
 
     @Override
@@ -72,7 +77,8 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     @Override
     public J build() {
 
-        assert this.jwkContext != null; //should always exist as there isn't a way to set it outside the constructor
+        //should always exist as there isn't a way to set it outside the constructor:
+        Assert.stateNotNull(this.jwkContext, "JwkContext should always be non-null");
 
         K key = this.jwkContext.getKey();
         if (key == null && this.jwkContext.isEmpty()) {

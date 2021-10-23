@@ -1,15 +1,41 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.JweHeader
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.DefaultJweHeader
-import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.KeyAlgorithms
-import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.*
 import org.junit.Ignore
 import org.junit.Test
 
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
+
+@SuppressWarnings('SpellCheckingInspection')
 class Pbes2HsAkwAlgorithmTest {
 
-    @Ignore // for manual/developer testing only.  Takes a long time and there is no deterministic output to assert
+    private static PasswordKey KEY = Keys.forPassword("12345678".toCharArray())
+    private static List<Pbes2HsAkwAlgorithm> ALGS = [KeyAlgorithms.PBES2_HS256_A128KW,
+                                                     KeyAlgorithms.PBES2_HS384_A192KW,
+                                                     KeyAlgorithms.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
+
+    @Test
+    void testInsufficientIterations() {
+        for (Pbes2HsAkwAlgorithm alg : ALGS) {
+            int iterations = 50 // must be 1000 or more
+            JweHeader header = Jwts.jweHeader().setPbes2Count(iterations)
+            KeyRequest<PasswordKey> req = new DefaultKeyRequest<>(null, null, KEY, header, EncryptionAlgorithms.A256GCM)
+            try {
+                alg.getEncryptionKey(req)
+                fail()
+            } catch (IllegalArgumentException iae) {
+                assertEquals Pbes2HsAkwAlgorithm.MIN_ITERATIONS_MSG_PREFIX + iterations, iae.getMessage()
+
+            }
+        }
+    }
+
+    @Ignore
+    // for manual/developer testing only.  Takes a long time and there is no deterministic output to assert
     @Test
     void test() {
 
@@ -24,16 +50,17 @@ class Pbes2HsAkwAlgorithmTest {
         //double scale = 0.5035246727
 
         def password = 'hellowor'.toCharArray()
-        def key = Keys.forPbe().setPassword(password).setIterations(iterations).build()
-        def req = new DefaultKeyRequest(null, null, key, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM)
-        int sum = 0;
-        for(int i = 0; i < tries; i++) {
+        def header = new DefaultJweHeader().setPbes2Count(iterations)
+        def key = Keys.forPassword(password)
+        def req = new DefaultKeyRequest(null, null, key, header, EncryptionAlgorithms.A128GCM)
+        int sum = 0
+        for (int i = 0; i < tries; i++) {
             long start = System.currentTimeMillis()
             alg.getEncryptionKey(req)
             long end = System.currentTimeMillis()
-            long duration = end - start;
+            long duration = end - start
             if (i >= skip) {
-                sum+= duration
+                sum += duration
             }
             println "Try $i: ${alg.id} took $duration millis"
         }

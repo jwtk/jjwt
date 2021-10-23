@@ -16,8 +16,8 @@ import java.util.Set;
 public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHeader {
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
-    static final Field<Integer> P2C = Fields.builder(Integer.class).setId("p2c").setName("PBES2 Count").build();
-    static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input").build();
+    public static final Field<Integer> P2C = Fields.builder(Integer.class).setId("p2c").setName("PBES2 Count").build();
+    public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input").build();
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
 

@@ -21,12 +21,10 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.PbeKey;
+import io.jsonwebtoken.security.PasswordKey;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.SecretKey;
-import javax.crypto.interfaces.PBEKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Map;
@@ -80,11 +78,8 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
     @Override
     public JweBuilder withKey(SecretKey key) {
-        if (key instanceof PBEKey) {
-            key = Keys.toPbeKey((PBEKey) key);
-        }
-        if (key instanceof PbeKey) {
-            return withKeyFrom((PbeKey) key, KeyAlgorithms.PBES2_HS512_A256KW);
+        if (key instanceof PasswordKey) {
+            return withKeyFrom((PasswordKey) key, KeyAlgorithms.PBES2_HS512_A256KW);
         }
         return withKeyFrom(key, KeyAlgorithms.DIRECT);
     }

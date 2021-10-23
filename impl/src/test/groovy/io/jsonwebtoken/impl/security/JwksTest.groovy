@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security
 
 
+import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
@@ -13,7 +14,10 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
+import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
 
 import static org.junit.Assert.*
 
@@ -81,6 +85,17 @@ class JwksTest {
             assertNull jwk."get${cap}"()
             assertNull jwk."$id"
             assertFalse jwk.containsKey(id)
+        }
+    }
+
+    @Test
+    void testBuilderWithoutState() {
+        try {
+            Jwks.builder().build()
+            fail()
+        } catch (IllegalStateException ise) {
+            String msg = 'A java.security.Key or one or more name/value pairs must be provided to create a JWK.'
+            assertEquals msg, ise.getMessage()
         }
     }
 
@@ -205,6 +220,85 @@ class JwksTest {
             jwkPair = privJwk.toKeyPair()
             assertEquals pub, jwkPair.getPublic()
             assertEquals priv, jwkPair.getPrivate()
+        }
+    }
+
+    @Test
+    void testInvalidCurvePoint() {
+        def algs = [SignatureAlgorithms.ES256, SignatureAlgorithms.ES384, SignatureAlgorithms.ES512]
+
+        for(EllipticCurveSignatureAlgorithm alg : algs) {
+
+            def pair = alg.generateKeyPair()
+            ECPublicKey pubKey = pair.getPublic() as ECPublicKey
+
+            EcPublicJwk jwk = Jwks.builder().setKey(pubKey).build()
+
+            //try creating a JWK with a bad point:
+            def badPubKey = new InvalidECPublicKey(pubKey)
+            try {
+                Jwks.builder().setKey(badPubKey).build()
+            } catch (InvalidKeyException ike) {
+                String curveId = jwk.get('crv')
+                String msg = String.format(EcPublicJwkFactory.KEY_CONTAINS_FORMAT_MSG, curveId, curveId)
+                assertEquals msg, ike.getMessage()
+            }
+
+            BigInteger p = pubKey.getParams().getCurve().getField().getP()
+            def outOfFieldRange = [BigInteger.ZERO, BigInteger.ONE,p, p.add(BigInteger.valueOf(1))]
+            for(def x : outOfFieldRange) {
+                Map<String,?> modified = new LinkedHashMap<>(jwk)
+                modified.put('x', Converters.BIGINT.applyTo(x))
+                try {
+                    Jwks.builder().putAll(modified).build()
+                } catch (InvalidKeyException ike) {
+                    String expected = String.format(EcPublicJwkFactory.JWK_CONTAINS_FORMAT_MSG, jwk.get('crv'), modified)
+                    assertEquals(expected, ike.getMessage())
+                }
+            }
+            for(def y : outOfFieldRange) {
+                Map<String,?> modified = new LinkedHashMap<>(jwk)
+                modified.put('y', Converters.BIGINT.applyTo(y))
+                try {
+                    Jwks.builder().putAll(modified).build()
+                } catch (InvalidKeyException ike) {
+                    String expected = String.format(EcPublicJwkFactory.JWK_CONTAINS_FORMAT_MSG, jwk.get('crv'), modified)
+                    assertEquals(expected, ike.getMessage())
+                }
+            }
+        }
+    }
+
+    private static class InvalidECPublicKey implements ECPublicKey {
+
+        private final ECPublicKey good;
+
+        InvalidECPublicKey(ECPublicKey good) {
+            this.good = good;
+        }
+        @Override
+        ECPoint getW() {
+            return ECPoint.POINT_INFINITY // bad value, should make all 'contains' validations fail
+        }
+
+        @Override
+        String getAlgorithm() {
+            return good.getAlgorithm()
+        }
+
+        @Override
+        String getFormat() {
+            return good.getFormat()
+        }
+
+        @Override
+        byte[] getEncoded() {
+            return good.getEncoded()
+        }
+
+        @Override
+        ECParameterSpec getParams() {
+            return good.getParams()
         }
     }
 }

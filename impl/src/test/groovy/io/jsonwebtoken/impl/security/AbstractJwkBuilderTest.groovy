@@ -1,18 +1,17 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.SecretJwk
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import java.security.Security
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class AbstractJwkBuilderTest {
 
-    private static final SecretKey SKEY = EncryptionAlgorithms.A256GCM.generateKey();
+    private static final SecretKey SKEY = EncryptionAlgorithms.A256GCM.generateKey()
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
         return (AbstractJwkBuilder)Jwks.builder().setKey(SKEY)
@@ -109,5 +108,24 @@ class AbstractJwkBuilderTest {
         def provider = Security.getProvider("BC")
         def jwk = builder().setProvider(provider).build()
         assertEquals 'oct', jwk.getType()
+    }
+
+    @Test
+    void testFactoryThrowsIllegalArgumentException() {
+        def ctx = new DefaultJwkContext()
+        ctx.put('whatevs', 42)
+        //noinspection GroovyUnusedAssignment
+        JwkFactory factory = new JwkFactory() {
+            @Override
+            Jwk createJwk(JwkContext jwkContext) {
+                throw new IllegalArgumentException("foo")
+            }
+        }
+        def builder = new AbstractJwkBuilder(ctx, factory) {}
+        try {
+            builder.build()
+        } catch (MalformedKeyException expected) {
+            assertEquals 'Unable to create JWK: foo', expected.getMessage()
+        }
     }
 }

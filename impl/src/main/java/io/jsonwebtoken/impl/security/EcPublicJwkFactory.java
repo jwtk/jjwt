@@ -17,6 +17,14 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
 
     static final EcPublicJwkFactory DEFAULT_INSTANCE = new EcPublicJwkFactory();
 
+    private static final String KEY_CONTAINS_FORMAT_MSG =
+        "ECPublicKey's ECPoint does not exist on elliptic curve '%s' and may not be used to create '%s' JWKs.";
+
+    private static final String JWK_CONTAINS_FORMAT_MSG =
+        "EC JWK x,y coordinates do not exist on elliptic curve '%s'. This " +
+        "could be due simply to an incorrectly-created JWK or possibly an attempted Invalid Curve Attack " +
+        "(see https://safecurves.cr.yp.to/twist.html for more information). JWK: %s";
+
     EcPublicJwkFactory() {
         super(ECPublicKey.class);
     }
@@ -31,6 +39,11 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         ECPoint point = key.getW();
 
         String curveId = getJwaIdByCurve(curve);
+        if (!contains(curve, point)) {
+            String msg = String.format(KEY_CONTAINS_FORMAT_MSG, curveId, curveId);
+            throw new InvalidKeyException(msg);
+        }
+
         ctx.put(DefaultEcPublicJwk.CRV.getId(), curveId);
 
         int fieldSize = curve.getField().getFieldSize();
@@ -55,9 +68,7 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         ECPoint point = new ECPoint(x, y);
 
         if (!contains(spec.getCurve(), point)) {
-            String msg = "EC JWK x,y coordinates do not match a point on the '" + curveId + "' elliptic curve. This " +
-                "could be due simply to an incorrectly-created JWK or possibly an attempted Invalid Curve Attack " +
-                "(see https://safecurves.cr.yp.to/twist.html for more information). JWK: {" + ctx + "}.";
+            String msg = String.format(JWK_CONTAINS_FORMAT_MSG, curveId, ctx);
             throw new InvalidKeyException(msg);
         }
 

@@ -14,7 +14,7 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.PbeKey;
+import io.jsonwebtoken.security.PasswordKey;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.SecretKey;
@@ -81,7 +81,7 @@ public final class KeyAlgorithmsBridge {
         return instance;
     }
 
-    private static KeyAlgorithm<PbeKey, SecretKey> lean(final Pbes2HsAkwAlgorithm alg) {
+    private static KeyAlgorithm<PasswordKey, PasswordKey> lean(final Pbes2HsAkwAlgorithm alg) {
 
         // ensure we use the same key factory over and over so that time spent acquiring one is not repeated:
         JcaTemplate template = new JcaTemplate(alg.getJcaName(), null, Randoms.secureRandom());
@@ -98,10 +98,10 @@ public final class KeyAlgorithmsBridge {
 
         // ensure that the bare minimum steps are performed to hash, ensuring our time sampling pertains only to
         // hashing and not ancillary steps needed to setup the hashing/derivation
-        return new KeyAlgorithm<PbeKey, SecretKey>() {
+        return new KeyAlgorithm<PasswordKey, PasswordKey>() {
             @Override
-            public KeyResult getEncryptionKey(KeyRequest<PbeKey> request) throws SecurityException {
-                int iterations = request.getKey().getIterations();
+            public KeyResult getEncryptionKey(KeyRequest<PasswordKey> request) throws SecurityException {
+                int iterations = request.getHeader().getPbes2Count();
                 char[] password = request.getKey().getPassword();
                 try {
                     alg.deriveKey(factory, password, rfcSalt, iterations);
@@ -112,7 +112,7 @@ public final class KeyAlgorithmsBridge {
             }
 
             @Override
-            public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
+            public SecretKey getDecryptionKey(DecryptionKeyRequest<PasswordKey> request) throws SecurityException {
                 throw new UnsupportedOperationException("Not intended to be called.");
             }
 
@@ -127,7 +127,7 @@ public final class KeyAlgorithmsBridge {
         return (char) Randoms.secureRandom().nextInt(Character.MAX_VALUE);
     }
 
-    private static char[] randomChars(int length) {
+    private static char[] randomChars(@SuppressWarnings("SameParameterValue") int length) {
         char[] chars = new char[length];
         for (int i = 0; i < length; i++) {
             chars[i] = randomChar();
@@ -135,7 +135,7 @@ public final class KeyAlgorithmsBridge {
         return chars;
     }
 
-    public static int estimateIterations(KeyAlgorithm<PbeKey, SecretKey> alg, long desiredMillis) {
+    public static int estimateIterations(KeyAlgorithm<PasswordKey, PasswordKey> alg, long desiredMillis) {
 
         // The number of computational samples that land in our 'sweet spot' timing range matching desiredMillis.
         // These samples will be averaged and the final average will be the return value of this method
@@ -147,7 +147,7 @@ public final class KeyAlgorithmsBridge {
         // 8 characters is a commonly-found minimum required length in many systems circa 2021.
         final int PASSWORD_LENGTH = 8;
 
-        final JweHeader HEADER = new DefaultJweHeader(); // not used during execution, needed to satisfy API call.
+        final JweHeader HEADER = new DefaultJweHeader();
         final AeadAlgorithm ENC_ALG = EncryptionAlgorithms.A128GCM; // not used, needed to satisfy API
 
         if (alg instanceof Pbes2HsAkwAlgorithm) {
@@ -161,8 +161,9 @@ public final class KeyAlgorithmsBridge {
         for (int i = 0; points.size() < NUM_SAMPLES; i++) {
 
             char[] password = randomChars(PASSWORD_LENGTH);
-            PbeKey pbeKey = Keys.forPbe().setPassword(password).setIterations(workFactor).build();
-            KeyRequest<PbeKey> request = new DefaultKeyRequest<>(null, null, pbeKey, HEADER, ENC_ALG);
+            PasswordKey key = Keys.forPassword(password);
+            HEADER.setPbes2Count(workFactor);
+            KeyRequest<PasswordKey> request = new DefaultKeyRequest<>(null, null, key, HEADER, ENC_ALG);
 
             long start = System.currentTimeMillis();
             alg.getEncryptionKey(request); // <-- Computation occurs here.  Don't need the result, just need to exec

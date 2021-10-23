@@ -34,11 +34,7 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
         Assert.notEmpty(factories, "FamilyJwkFactory collection cannot be null or empty.");
         this.factories = new ArrayList<>(factories.size());
         for (FamilyJwkFactory<?, ?> factory : factories) {
-            if (!Strings.hasText(factory.getId())) {
-                String msg = "FamilyJwkFactory instance of type " + factory.getClass().getName() + " does not " +
-                    "have a required algorithm family id (factory.getFactoryId() cannot be null or empty).";
-                throw new IllegalArgumentException(msg);
-            }
+            Assert.hasText(factory.getId(), "FamilyJwkFactory.getFactoryId() cannot return null or empty.");
             this.factories.add((FamilyJwkFactory<Key, ?>) factory);
         }
     }

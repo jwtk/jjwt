@@ -1,15 +1,12 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.io.Encoders
+
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
-import io.jsonwebtoken.security.SignatureAlgorithms
 import io.jsonwebtoken.security.UnsupportedKeyException
-import org.junit.Ignore
 import org.junit.Test
 
 import java.security.Key
-import java.security.KeyPair
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
@@ -28,10 +25,38 @@ class DispatchingJwkFactoryTest {
     }
 
     @Test(expected = UnsupportedKeyException)
-    void testUnknownKeyType() {
+    void testUnknownKtyValue() {
         def ctx = new DefaultJwkContext();
         ctx.put('kty', 'foo')
         new DispatchingJwkFactory().createJwk(ctx)
+    }
+
+    @Test
+    void testUnknownKeyType() {
+        def key = new Key() {
+            @Override
+            String getAlgorithm() {
+                return null
+            }
+
+            @Override
+            String getFormat() {
+                return null
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return new byte[0]
+            }
+        }
+        def ctx = new DefaultJwkContext().setKey(key)
+        try {
+            new DispatchingJwkFactory().createJwk(ctx)
+            fail()
+        } catch (UnsupportedKeyException uke) {
+            String msg = 'Unable to create JWK for unrecognized key of type io.jsonwebtoken.impl.security.DispatchingJwkFactoryTest$1: there is no known JWK Factory capable of creating JWKs for this key type.'
+            assertEquals msg, uke.getMessage()
+        }
     }
 
     @Test
@@ -70,26 +95,5 @@ class DispatchingJwkFactoryTest {
         assertTrue key instanceof ECPublicKey
         assertEquals jwk.x, x
         assertEquals jwk.y, y
-    }
-
-    @Test
-    @Ignore
-    //TODO re-enable
-    void testEcKeyPairToJwk() {
-
-        KeyPair pair = SignatureAlgorithms.ES256.generateKeyPair()
-        ECPublicKey pubKey = (ECPublicKey) pair.getPublic()
-        def ctx = new DefaultJwkContext()
-        ctx.setKey(pubKey)
-
-        DispatchingJwkFactory factory = new DispatchingJwkFactory()
-
-        def jwk = factory.createJwk(ctx)
-
-        assertNotNull jwk
-        assertEquals "EC", jwk.kty
-        assertEquals Encoders.BASE64URL.encode(pubKey.w.affineX.toByteArray()), jwk.x
-        assertEquals Encoders.BASE64URL.encode(pubKey.w.affineY.toByteArray()), jwk.y
-        assertNull jwk.d //public keys should not populate the private key 'd' parameter
     }
 }

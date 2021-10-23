@@ -6,12 +6,11 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.KeyException;
 
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> implements FamilyJwkFactory<K, J> {
 
@@ -53,11 +52,13 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
     protected <T extends Key> T generateKey(final JwkContext<?> ctx, final Class<T> type, final CheckedFunction<KeyFactory, T> fn) {
         return new JcaTemplate(getId(), ctx.getProvider()).execute(KeyFactory.class, new CheckedFunction<KeyFactory, T>() {
             @Override
-            public T apply(KeyFactory instance) throws Exception {
+            public T apply(KeyFactory instance) {
                 try {
                     return fn.apply(instance);
-                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                    String msg = "Unable to create " + type.getSimpleName() + " from JWK {" + ctx + "}: " + e.getMessage();
+                } catch (KeyException keyException) {
+                    throw keyException; // propagate
+                } catch (Exception e) {
+                    String msg = "Unable to create " + type.getSimpleName() + " from JWK " + ctx + ": " + e.getMessage();
                     throw new InvalidKeyException(msg, e);
                 }
             }

@@ -19,7 +19,6 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
-import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 
@@ -33,7 +32,7 @@ public final class Keys {
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     @SuppressWarnings("rawtypes")
-    private static final Class[] TO_PBE_ARG_TYPES = new Class[]{PBEKey.class};
+    private static final Class[] FOR_PASSWORD_ARG_TYPES = new Class[]{char[].class};
 
     //prevent instantiation
     private Keys() {
@@ -119,6 +118,7 @@ public final class Keys {
      * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link SecretKeySignatureAlgorithm} instance's
      * {@link SecretKeySignatureAlgorithm#generateKey() generateKey()} method directly.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
@@ -214,6 +214,7 @@ public final class Keys {
      * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link AsymmetricKeySignatureAlgorithm} instance's
      * {@link AsymmetricKeySignatureAlgorithm#generateKeyPair() generateKeyPair()} method directly.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
@@ -227,24 +228,16 @@ public final class Keys {
     }
 
     /**
-     * Returns a JJWT {@link PbeKey} directly backed by the specified JCA {@link PBEKey}.  The returned instance
-     * is directly linked to the specified {@code PBEKey} - a call to either key's {@link SecretKey#destroy() destroy}
-     * method will destroy the other to ensure correct/safe cleanup for both.
+     * Returns a new {@link PasswordKey} suitable for use with password-based key derivation algorithms.
+     * <b>Usage Note</b>: Using {@code PasswordKey}s outside of key derivation contexts will likely
+     * fail. See the {@link PasswordKey} JavaDoc for more, and also note the <b>Password Safety</b> section.
      *
-     * @param key the {@code PBEKey} to represent as a {@code PbeKey} instance.
-     * @return a JJWT {@link PbeKey} instance that wraps the specified JCA {@link PBEKey}
+     * @param password the raw password character array to use with password-based key derivation algorithms.
+     * @return a new {@link PasswordKey} that shares the specified {@code password} character array.
+     * @see PasswordKey#getPassword()
      * @since JJWT_RELEASE_VERSION
      */
-    public static PbeKey toPbeKey(PBEKey key) {
-        return Classes.invokeStatic(BRIDGE_CLASS, "toPbeKey", TO_PBE_ARG_TYPES, new Object[]{key});
-    }
-
-    /**
-     * Returns a new {@link PbeKeyBuilder} to use to construct a {@link PbeKey} instance.
-     *
-     * @return a new {@link PbeKeyBuilder} to use to construct a {@link PbeKey} instance.
-     */
-    public static PbeKeyBuilder<PbeKey> forPbe() {
-        return Classes.invokeStatic(BRIDGE_CLASS, "forPbe", null, (Object[]) null);
+    public static PasswordKey forPassword(char[] password) {
+        return Classes.invokeStatic(BRIDGE_CLASS, "forPassword", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
     }
 }

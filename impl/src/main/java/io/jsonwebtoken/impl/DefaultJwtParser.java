@@ -192,8 +192,7 @@ public class DefaultJwtParser implements JwtParser {
         this.enableUnsecuredJws = false;
     }
 
-    @SuppressWarnings("deprecation")
-        //SigningKeyResolver will be removed for 1.0
+    @SuppressWarnings("deprecation") //SigningKeyResolver will be removed for 1.0
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
                      boolean enableUnsecuredJws,

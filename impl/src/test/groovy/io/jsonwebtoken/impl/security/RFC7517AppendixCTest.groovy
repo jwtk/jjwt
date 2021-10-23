@@ -8,19 +8,21 @@ import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.security.KeyRequest
 import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.PbeKey
+import io.jsonwebtoken.security.PasswordKey
 import io.jsonwebtoken.security.SecurityRequest
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
+import java.security.Key
 
 import static org.junit.Assert.*
 
 /**
  * https://datatracker.ietf.org/doc/html/rfc7517#appendix-C
  */
+@SuppressWarnings('SpellCheckingInspection')
 class RFC7517AppendixCTest {
 
     private static final String rfcString(String s) {
@@ -205,9 +207,11 @@ class RFC7517AppendixCTest {
             101, 100, 46] as byte[]
 
     // "The Salt value (UTF8(Alg) || 0x00 || Salt Input) is":
+    @SuppressWarnings('unused')
     private static final byte[] RFC_SALT_VALUE = [80, 66, 69, 83, 50, 45, 72, 83, 50, 53, 54, 43, 65, 49, 50, 56, 75,
                                                   87, 0, 217, 96, 147, 112, 150, 117, 70, 247, 127, 8, 155, 137, 174,
                                                   42, 80, 215] as byte[]
+    @SuppressWarnings('unused')
     private static final byte[] RFC_PBKDF2_DERIVED_KEY_BYTES =
             [110, 171, 169, 92, 129, 92, 109, 117, 233, 242, 116, 233, 170, 14, 24, 75]
 
@@ -270,18 +274,19 @@ class RFC7517AppendixCTest {
         def encAlg = new HmacAesAeadAlgorithm(128) {
             @Override
             SecretKey generateKey() {
-                return RFC_CEK;
+                return RFC_CEK
             }
 
             @Override
             protected byte[] ensureInitializationVector(SecurityRequest request) {
-                return RFC_IV;
+                return RFC_IV
             }
         }
+        //noinspection unused
         def keyAlg = new Pbes2HsAkwAlgorithm(128) {
             @Override
-            protected byte[] generateInputSalt(KeyRequest<SecretKey> request) {
-                return RFC_P2S;
+            protected byte[] generateInputSalt(KeyRequest<? extends Key> request) {
+                return RFC_P2S
             }
         }
         def serializer = new Serializer() {
@@ -300,25 +305,27 @@ class RFC7517AppendixCTest {
 
                 //JSON serialization order isn't guaranteed, so now that we've asserted the values are correct,
                 //return the exact serialization order expected in the RFC test:
-                return RFC_JWE_PROTECTED_HEADER_JSON.getBytes(StandardCharsets.UTF_8);
+                return RFC_JWE_PROTECTED_HEADER_JSON.getBytes(StandardCharsets.UTF_8)
             }
         }
 
-        PbeKey pbeKey = Keys.forPbe().setPassword(RFC_SHARED_PASSPHRASE.toCharArray()).setIterations(RFC_P2C).build()
+        PasswordKey key = Keys.forPassword(RFC_SHARED_PASSPHRASE.toCharArray())
 
         String compact = Jwts.jweBuilder()
                 .setPayload(RFC_JWK_JSON)
-                .setHeaderParam('cty', 'jwk+json')
+                .setHeader(Jwts.jweHeader()
+                        .setContentType('jwk+json')
+                        .setPbes2Count(RFC_P2C))
                 .encryptWith(encAlg)
-                .withKeyFrom(pbeKey, keyAlg)
+                .withKeyFrom(key, keyAlg)
                 .serializeToJsonWith(serializer) //ensure JJWT created the header as expected with an assertion serializer
-                .compact();
+                .compact()
 
         assertEquals RFC_COMPACT_JWE, compact
 
         //ensure we can decrypt now:
         Jwe<String> jwe = Jwts.parserBuilder()
-                .decryptWith(new SecretKeySpec(RFC_SHARED_PASSPHRASE_BYTES, "RAW"))
+                .decryptWith(key)
                 .build()
                 .parsePlaintextJwe(compact)
 
