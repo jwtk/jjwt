@@ -15,7 +15,11 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.*
+import io.jsonwebtoken.impl.DefaultClaims
+import io.jsonwebtoken.impl.DefaultHeader
+import io.jsonwebtoken.impl.DefaultJweHeader
+import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
@@ -23,7 +27,11 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
+import io.jsonwebtoken.security.SecretKeySignatureAlgorithm
+import io.jsonwebtoken.security.SignatureAlgorithm
+import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
 import javax.crypto.Mac
