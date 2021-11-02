@@ -19,6 +19,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
+import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,16 +29,17 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
     private static final BigInteger THREE = BigInteger.valueOf(3);
     private static final Map<String, ECParameterSpec> EC_SPECS_BY_JWA_ID;
     private static final Map<EllipticCurve, String> JWA_IDS_BY_CURVE;
+    private static final String UNSUPPORTED_CURVE_MSG = "The specified ECKey curve does not match a JWA standard curve id.";
 
-    private static ECParameterSpec getJcaParameterSpec(String jcaAlgorithmName) throws IllegalStateException {
-        try {
-            AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
-            parameters.init(new ECGenParameterSpec(jcaAlgorithmName));
-            return parameters.getParameterSpec(ECParameterSpec.class);
-        } catch (Exception e) {
-            String msg = "Unable to obtain JVM ECParameterSpec for JCA algorithm name '" + jcaAlgorithmName + "'.";
-            throw new IllegalStateException(msg, e);
-        }
+    private static ECParameterSpec getJcaParameterSpec(final String jcaAlgorithmName) throws IllegalStateException {
+        JcaTemplate template = new JcaTemplate("EC", null);
+        return template.execute(AlgorithmParameters.class, new CheckedFunction<AlgorithmParameters, ECParameterSpec>() {
+            @Override
+            public ECParameterSpec apply(AlgorithmParameters params) throws Exception {
+                params.init(new ECGenParameterSpec(jcaAlgorithmName));
+                return params.getParameterSpec(ECParameterSpec.class);
+            }
+        });
     }
 
     static {
@@ -70,8 +72,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
     protected static String getJwaIdByCurve(EllipticCurve curve) {
         String jwaCurveId = JWA_IDS_BY_CURVE.get(curve);
         if (jwaCurveId == null) {
-            String msg = "The specified ECKey curve does not match a JWA standard curve id.";
-            throw new UnsupportedKeyException(msg);
+            throw new UnsupportedKeyException(UNSUPPORTED_CURVE_MSG);
         }
         return jwaCurveId;
     }
@@ -86,7 +87,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
      */
     // Algorithm defined in http://www.secg.org/sec1-v2.pdf Section 2.3.5
     static String toOctetString(int fieldSize, BigInteger coordinate) {
-        byte[] bytes = Converters.BIGINT_UNSIGNED_BYTES.applyTo(coordinate);
+        byte[] bytes = Converters.BIGINT_UBYTES.applyTo(coordinate);
         int mlen = (int) Math.ceil(fieldSize / 8d);
         if (mlen > bytes.length) {
             byte[] m = new byte[mlen];
@@ -215,6 +216,11 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         super(DefaultEcPublicJwk.TYPE_VALUE, keyType);
     }
 
+    // visible for testing
+    protected ECPublicKey derivePublic(KeyFactory keyFactory, ECPublicKeySpec spec) throws InvalidKeySpecException {
+        return (ECPublicKey)keyFactory.generatePublic(spec);
+    }
+
     protected ECPublicKey derivePublic(final JwkContext<ECPrivateKey> ctx) {
         final ECPrivateKey key = ctx.getKey();
         final ECParameterSpec params = key.getParams();
@@ -224,10 +230,10 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
             @Override
             public ECPublicKey apply(KeyFactory kf) {
                 try {
-                    return (ECPublicKey) kf.generatePublic(spec);
+                    return derivePublic(kf, spec);
                 } catch (Exception e) {
-                    String msg = "Unable to derive ECPublicKey from ECPrivateKey {" + ctx + "}.";
-                    throw new UnsupportedKeyException(msg);
+                    String msg = "Unable to derive ECPublicKey from ECPrivateKey: " + e.getMessage();
+                    throw new UnsupportedKeyException(msg, e);
                 }
             }
         });

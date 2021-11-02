@@ -2,8 +2,10 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.security.Jwk;
 
 import java.security.Key;
@@ -36,7 +38,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
 
     @Override
     public Set<String> getOperations() {
-        return this.context.getOperations();
+        return Collections.immutable(this.context.getOperations());
     }
 
     @Override
@@ -76,22 +78,31 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
 
     @Override
     public Object get(Object key) {
-        return this.context.get(key);
+        Object val = this.context.get(key);
+        if (val instanceof Map) {
+            return Collections.immutable((Map<?, ?>) val);
+        } else if (val instanceof Collection) {
+            return Collections.immutable((Collection<?>) val);
+        } else if (Objects.isArray(val)) {
+            return Arrays.copy(val);
+        } else {
+            return val;
+        }
     }
 
     @Override
     public Set<String> keySet() {
-        return this.context.keySet();
+        return Collections.immutable(this.context.keySet());
     }
 
     @Override
     public Collection<Object> values() {
-        return this.context.values();
+        return Collections.immutable(this.context.values());
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        return this.context.entrySet();
+        return Collections.immutable(this.context.entrySet());
     }
 
     private static Object immutable() {
@@ -128,11 +139,9 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
         return this.context.hashCode();
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Map) {
-            return this.context.equals(obj);
-        }
-        return false;
+        return this.context.equals(obj);
     }
 }

@@ -39,7 +39,7 @@ public final class Fields {
     }
 
     public static FieldBuilder<byte[]> bytes(String id, String name) {
-        return builder(byte[].class).setConverter(Converters.BYTES).setId(id).setName(name);
+        return builder(byte[].class).setConverter(Converters.BASE64URL_BYTES).setId(id).setName(name);
     }
 
     public static FieldBuilder<BigInteger> bigInt(String id, String name) {

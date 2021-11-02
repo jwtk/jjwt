@@ -282,7 +282,7 @@ public final class Assert {
      * @param collection the collection to check
      * @throws IllegalArgumentException if the collection is <code>null</code> or has no elements
      */
-    public static void notEmpty(Collection collection) {
+    public static void notEmpty(Collection<?> collection) {
         notEmpty(collection,
             "[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
     }

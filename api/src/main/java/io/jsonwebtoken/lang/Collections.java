@@ -61,16 +61,47 @@ public final class Collections {
     }
 
     /**
-     * Shorter convenience alias for {@link java.util.Collections#unmodifiableSet} so both classes
+     * Shorter null-safe convenience alias for {@link java.util.Collections#unmodifiableList(List)} so both classes
      * don't need to be imported.
      *
-     * @param s   set to wrap in an immutable/unmodifiable collection
-     * @param <T> type of elements in the set
-     * @return an immutable wrapper for {@code s}.
+     * @param m   map to wrap in an immutable/unmodifiable collection
+     * @param <K> map key type
+     * @param <V> map value type
+     * @return an immutable wrapper for {@code m}.
      * @since JJWT_RELEASE_VERSION
      */
-    public static <T> Set<T> immutable(Set<T> s) {
-        return java.util.Collections.unmodifiableSet(s);
+    public static <K, V> Map<K, V> immutable(Map<K, V> m) {
+        return m != null ? java.util.Collections.unmodifiableMap(m) : null;
+    }
+
+    public static <T> Set<T> immutable(Set<T> set) {
+        return set != null ? java.util.Collections.unmodifiableSet(set) : null;
+    }
+
+    public static <T> List<T> immutable(List<T> list) {
+        return list != null ? java.util.Collections.unmodifiableList(list) : null;
+    }
+
+    /**
+     * Null-safe factory method that returns an immutable/unmodifiable view of the specified collection instance.
+     * Works for {@link List}, {@link Set} and {@link Collection} arguments.
+     *
+     * @param c   collection to wrap in an immutable/unmodifiable collection
+     * @param <T> type of elements in the collection
+     * @return an immutable wrapper for {@code l}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, C extends Collection<T>> C immutable(C c) {
+        if (c == null) {
+            return null;
+        } else if (c instanceof Set) {
+            return (C) java.util.Collections.unmodifiableSet((Set<T>) c);
+        } else if (c instanceof List) {
+            return (C) java.util.Collections.unmodifiableList((List<T>) c);
+        } else {
+            return (C) java.util.Collections.unmodifiableCollection(c);
+        }
     }
 
     /**
@@ -80,8 +111,8 @@ public final class Collections {
      * @param collection the Collection to check
      * @return whether the given Collection is empty
      */
-    public static boolean isEmpty(Collection collection) {
-        return (collection == null || collection.isEmpty());
+    public static boolean isEmpty(Collection<?> collection) {
+        return size(collection) == 0;
     }
 
     /**
@@ -91,7 +122,7 @@ public final class Collections {
      * @return the collection's size or {@code 0} if the collection is {@code null}.
      * @since 0.9.2
      */
-    public static int size(Collection collection) {
+    public static int size(Collection<?> collection) {
         return collection == null ? 0 : collection.size();
     }
 
@@ -102,7 +133,7 @@ public final class Collections {
      * @return the map's size or {@code 0} if the map is {@code null}.
      * @since 0.9.2
      */
-    public static int size(Map map) {
+    public static int size(Map<?, ?> map) {
         return map == null ? 0 : map.size();
     }
 
@@ -113,8 +144,8 @@ public final class Collections {
      * @param map the Map to check
      * @return whether the given Map is empty
      */
-    public static boolean isEmpty(Map map) {
-        return (map == null || map.isEmpty());
+    public static boolean isEmpty(Map<?, ?> map) {
+        return size(map) == 0;
     }
 
     /**

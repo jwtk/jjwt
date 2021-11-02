@@ -1,10 +1,17 @@
 package io.jsonwebtoken.impl.security
 
-
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
+import io.jsonwebtoken.security.EcPublicJwk
+import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm
+import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.PrivateJwk
+import io.jsonwebtoken.security.PublicJwk
+import io.jsonwebtoken.security.SecretKeySignatureAlgorithm
+import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -133,7 +140,7 @@ class JwksTest {
     void testX509CertChain() {
         //get a test cert:
         X509Certificate cert = CertUtils.readTestCertificate(SignatureAlgorithms.RS256)
-        def sval = JwkX509StringConverter.INSTANCE.applyTo(cert)
+        def sval = JwtX509StringConverter.INSTANCE.applyTo(cert)
         testProperty('x509CertificateChain', 'x5c', [cert], [sval])
     }
 

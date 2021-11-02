@@ -32,6 +32,8 @@ import java.util.TreeSet;
 
 public final class Strings {
 
+    public static final String EMPTY = "";
+
     private static final String FOLDER_SEPARATOR = "/";
 
     private static final String WINDOWS_FOLDER_SEPARATOR = "\\";

@@ -14,6 +14,7 @@ public class EncodedObjectConverter<T> implements Converter<T, Object> {
 
     @Override
     public Object applyTo(T t) {
+        Assert.notNull(t, "Value argument cannot be null.");
         return converter.applyTo(t);
     }
 

@@ -1,12 +1,19 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.*
+
+import io.jsonwebtoken.security.AeadAlgorithm
+import io.jsonwebtoken.security.AeadRequest
+import io.jsonwebtoken.security.AeadResult
+import io.jsonwebtoken.security.DecryptAeadRequest
+import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.PayloadSupplier
+import io.jsonwebtoken.security.SecurityException
 import org.junit.Test
 
+import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
 
-import static org.junit.Assert.assertSame
-import static org.junit.Assert.fail
+import static org.junit.Assert.*
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -31,6 +38,57 @@ class AesAlgorithmTest {
             alg.assertKey(request)
             fail()
         } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    void testValidateLengthKeyExceptionPropagated() {
+
+        def alg = new TestAesAlgorithm('foo', 'foo', 192)
+        def ex = new java.lang.SecurityException("HSM: not allowed")
+        def key = new SecretKeySpec(new byte[1], 'AES') {
+            @Override
+            byte[] getEncoded() {
+                throw ex
+            }
+        }
+
+        try {
+            alg.validateLength(key, 192, true)
+            fail()
+        } catch (java.lang.SecurityException expected) {
+            assertSame ex, expected
+        }
+    }
+
+    @Test
+    void testValidateLengthKeyExceptionNotPropagated() {
+
+        def alg = new TestAesAlgorithm('foo', 'foo', 192)
+        def ex = new java.lang.SecurityException("HSM: not allowed")
+        def key = new SecretKeySpec(new byte[1], 'AES') {
+            @Override
+            byte[] getEncoded() {
+                throw ex
+            }
+        }
+
+        //exception thrown, but we don't propagate:
+        assertNull alg.validateLength(key, 192, false)
+    }
+
+    @Test
+    void testAssertBytesWithLengthMismatch() {
+        int reqdBitLen = 192
+        def alg = new TestAesAlgorithm('foo', 'foo', reqdBitLen)
+        byte[] bytes = new byte[(reqdBitLen - 8) / Byte.SIZE]
+        try {
+            alg.assertBytes(bytes, 'test arrays', reqdBitLen)
+            fail()
+        } catch (IllegalArgumentException iae) {
+            String msg = "The 'foo' algorithm requires test arrays with a length of 192 bits (24 bytes).  " +
+                    "The provided key has a length of 184 bits (23 bytes)."
+            assertEquals msg, iae.getMessage()
         }
     }
 

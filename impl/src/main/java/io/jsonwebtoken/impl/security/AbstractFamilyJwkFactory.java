@@ -15,7 +15,7 @@ import java.security.KeyFactory;
 abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> implements FamilyJwkFactory<K, J> {
 
     protected static String encode(BigInteger bigInt) {
-        byte[] unsigned = Converters.BIGINT_UNSIGNED_BYTES.applyTo(bigInt);
+        byte[] unsigned = Converters.BIGINT_UBYTES.applyTo(bigInt);
         return Encoders.BASE64URL.encode(unsigned);
     }
 

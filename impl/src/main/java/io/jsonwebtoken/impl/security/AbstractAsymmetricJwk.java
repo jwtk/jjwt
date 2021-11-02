@@ -2,6 +2,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AsymmetricJwk;
 
@@ -36,17 +37,16 @@ public abstract class AbstractAsymmetricJwk<K extends Key> extends AbstractJwk<K
 
     @Override
     public List<X509Certificate> getX509CertificateChain() {
-        return this.context.getX509CertificateChain();
+        return Collections.immutable(this.context.getX509CertificateChain());
     }
 
     @Override
     public byte[] getX509CertificateSha1Thumbprint() {
-        return this.context.getX509CertificateSha1Thumbprint();
+        return (byte[])Arrays.copy(this.context.getX509CertificateSha1Thumbprint());
     }
 
     @Override
     public byte[] getX509CertificateSha256Thumbprint() {
-        return this.context.getX509CertificateSha256Thumbprint();
+        return (byte[])Arrays.copy(this.context.getX509CertificateSha256Thumbprint());
     }
-
 }

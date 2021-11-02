@@ -230,7 +230,14 @@ public final class Keys {
     /**
      * Returns a new {@link PasswordKey} suitable for use with password-based key derivation algorithms.
      * <b>Usage Note</b>: Using {@code PasswordKey}s outside of key derivation contexts will likely
-     * fail. See the {@link PasswordKey} JavaDoc for more, and also note the <b>Password Safety</b> section.
+     * fail. See the {@link PasswordKey} JavaDoc for more, and also note the <b>Password Safety</b> section below.
+     * <h4>Password Safety</h4>
+     * <p>Instances returned by this method directly share the specified {@code password} character array argument -
+     * changes to that char array will be reflected in the returned key, and similarly, any call to the key's
+     * {@link PasswordKey#destroy()} method will clear/overwrite the shared char array. This is to ensure that
+     * any clearing of the source password char array for security/safety reasons also guarantees the key is also
+     * cleared and vice versa.  However, as is standard for JCA keys, calling {@link PasswordKey#getPassword()} will
+     * return a separate independent clone of the underlying character array.</p>
      *
      * @param password the raw password character array to use with password-based key derivation algorithms.
      * @return a new {@link PasswordKey} that shares the specified {@code password} character array.

@@ -3,12 +3,15 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.DefaultJweHeader
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.KeyAlgorithms
+import io.jsonwebtoken.security.KeyRequest
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.PasswordKey
 import org.junit.Ignore
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.fail
+import static org.junit.Assert.*
 
 @SuppressWarnings('SpellCheckingInspection')
 class Pbes2HsAkwAlgorithmTest {
@@ -29,7 +32,6 @@ class Pbes2HsAkwAlgorithmTest {
                 fail()
             } catch (IllegalArgumentException iae) {
                 assertEquals Pbes2HsAkwAlgorithm.MIN_ITERATIONS_MSG_PREFIX + iterations, iae.getMessage()
-
             }
         }
     }

@@ -6,7 +6,7 @@ import static org.junit.Assert.*
 
 class BigIntegerUBytesConverterTest {
 
-    private BigIntegerUBytesConverter CONVERTER = Converters.BIGINT_UNSIGNED_BYTES
+    private BigIntegerUBytesConverter CONVERTER = Converters.BIGINT_UBYTES as BigIntegerUBytesConverter
 
     @Test
     void testNegative() {

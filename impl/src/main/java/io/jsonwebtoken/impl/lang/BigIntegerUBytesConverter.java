@@ -7,9 +7,8 @@ import java.math.BigInteger;
 public class BigIntegerUBytesConverter implements Converter<BigInteger, byte[]> {
 
     private static final String NEGATIVE_MSG =
-        "JWA Base64urlUInt values MUST be >= 0 (non-negative) per the " +
-            "[JWA RFC 7518, Section 2](https://datatracker.ietf.org/doc/html/rfc7518#section-2) " +
-            "'Base64urlUInt' definition.";
+        "JWA Base64urlUInt values MUST be >= 0 (non-negative) per the 'Base64urlUInt' definition in " +
+            "[JWA RFC 7518, Section 2](https://datatracker.ietf.org/doc/html/rfc7518#section-2)";
 
     @Override
     public byte[] applyTo(BigInteger bigInt) {
@@ -34,6 +33,7 @@ public class BigIntegerUBytesConverter implements Converter<BigInteger, byte[]> 
 
     @Override
     public BigInteger applyFrom(byte[] bytes) {
+        Assert.notEmpty(bytes, "Byte array cannot be null or empty.");
         return new BigInteger(1, bytes);
     }
 }

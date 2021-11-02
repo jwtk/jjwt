@@ -13,14 +13,6 @@ import javax.crypto.SecretKey;
  * JCA subsystem during direct cryptographic operations) will throw an
  * {@link UnsupportedOperationException UnsupportedOperationException}.</p>
  *
- * <h4>Password Safety</h4>
- * <p>Instances returned by this method directly share the specified {@code password} character array argument -
- * changes to that char array will be reflected in the returned key, and similarly, any call to the key's
- * {@link PasswordKey#destroy() destroy()} method will clear/overwrite the shared char array. This is to ensure that
- * any clearing of the source password char array for security/safety reasons also guarantees the key is also
- * cleared and vice versa.  However, as is standard for JCA keys, calling {@link #getPassword() getPassword()} will
- * return a separate independent clone of the underlying character array.</p>
- *
  * @see #getPassword()
  * @since JJWT_RELEASE_VERSION
  */

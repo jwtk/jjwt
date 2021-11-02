@@ -16,16 +16,13 @@ import javax.crypto.spec.IvParameterSpec;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
-import static io.jsonwebtoken.lang.Arrays.*;
-
-
 abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerator {
 
     protected static final String KEY_ALG_NAME = "AES";
     protected static final int BLOCK_SIZE = 128;
     protected static final int BLOCK_BYTE_SIZE = BLOCK_SIZE / Byte.SIZE;
     protected static final int GCM_IV_SIZE = 96; // https://tools.ietf.org/html/rfc7518#section-5.3
-    protected static final int GCM_IV_BYTE_SIZE = GCM_IV_SIZE / Byte.SIZE;
+    //protected static final int GCM_IV_BYTE_SIZE = GCM_IV_SIZE / Byte.SIZE;
     protected static final String DECRYPT_NO_IV = "This algorithm implementation rejects decryption " +
         "requests that do not include initialization vectors. AES ciphertext without an IV is weak and " +
         "susceptible to attack.";
@@ -61,14 +58,14 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerato
         validateLength(key, this.keyBitLength, false);
     }
 
-    protected static String lengthMsg(String id, String type, int requiredLengthInBits, int actualLengthInBits) {
+    protected static String lengthMsg(String id, String type, int requiredLengthInBits, long actualLengthInBits) {
         return "The '" + id + "' algorithm requires " + type + " with a length of " +
             Bytes.bitsMsg(requiredLengthInBits) + ".  The provided key has a length of " +
             Bytes.bitsMsg(actualLengthInBits) + ".";
     }
 
     protected byte[] validateLength(SecretKey key, int requiredBitLength, boolean propagate) {
-        byte[] keyBytes = null;
+        byte[] keyBytes;
 
         try {
             keyBytes = key.getEncoded();
@@ -77,9 +74,9 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerato
                 throw re;
             }
             //can't get the bytes to validate, e.g. hardware security module or later Android, so just return:
-            return keyBytes;
+            return null;
         }
-        int keyBitLength = keyBytes.length * Byte.SIZE;
+        long keyBitLength = Bytes.bitLength(keyBytes);
         if (keyBitLength < requiredBitLength) {
             throw new WeakKeyException(lengthMsg(getId(), "keys", requiredBitLength, keyBitLength));
         }
@@ -87,22 +84,21 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerato
         return keyBytes;
     }
 
-    byte[] assertIvLength(final byte[] iv) {
-        int length = length(iv);
-        if ((this.ivBitLength / Byte.SIZE) != length) {
-            String msg = lengthMsg(getId(), "initialization vectors", this.ivBitLength, length * Byte.SIZE);
+    protected byte[] assertBytes(byte[] bytes, String type, int requiredBitLen) {
+        long bitLen = Bytes.bitLength(bytes);
+        if (requiredBitLen != bitLen) {
+            String msg = lengthMsg(getId(), type, requiredBitLen, bitLen);
             throw new IllegalArgumentException(msg);
         }
-        return iv;
+        return bytes;
+    }
+
+    byte[] assertIvLength(final byte[] iv) {
+        return assertBytes(iv, "initialization vectors", this.ivBitLength);
     }
 
     byte[] assertTag(byte[] tag) {
-        int len = Arrays.length(tag) * Byte.SIZE;
-        if (this.tagBitLength != len) {
-            String msg = lengthMsg(getId(), "authentication tags", this.tagBitLength, len);
-            throw new IllegalArgumentException(msg);
-        }
-        return tag;
+        return assertBytes(tag, "authentication tags", this.tagBitLength);
     }
 
     byte[] assertDecryptionIv(InitializationVectorSupplier src) throws IllegalArgumentException {
@@ -128,17 +124,11 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerato
     }
 
     protected AlgorithmParameterSpec getIvSpec(byte[] iv) {
-        if (Arrays.length(iv) == 0) {
-            return null;
-        }
+        Assert.notEmpty(iv, "Initialization Vector byte array cannot be null or empty.");
         return this.gcm ? new GCMParameterSpec(BLOCK_SIZE, iv) : new IvParameterSpec(iv);
     }
 
-    protected byte[] getAAD(SecurityRequest request) {
-        byte[] aad = null;
-        if (request instanceof AssociatedDataSupplier) {
-            aad = Arrays.clean(((AssociatedDataSupplier) request).getAssociatedData());
-        }
-        return aad;
+    protected byte[] getAAD(AssociatedDataSupplier request) {
+        return Arrays.clean(request.getAssociatedData());
     }
 }
