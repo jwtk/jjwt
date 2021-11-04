@@ -58,6 +58,10 @@ public final class KeyAlgorithmsBridge {
             new Pbes2HsAkwAlgorithm(128),
             new Pbes2HsAkwAlgorithm(192),
             new Pbes2HsAkwAlgorithm(256),
+            new EcdhKeyAlgorithm<>(),
+            new EcdhKeyAlgorithm<>(new AesWrapKeyAlgorithm(128)),
+            new EcdhKeyAlgorithm<>(new AesWrapKeyAlgorithm(192)),
+            new EcdhKeyAlgorithm<>(new AesWrapKeyAlgorithm(256)),
             new DefaultRsaKeyAlgorithm<>(RSA1_5_ID, RSA1_5_TRANSFORMATION),
             new DefaultRsaKeyAlgorithm<>(RSA_OAEP_ID, RSA_OAEP_TRANSFORMATION),
             new DefaultRsaKeyAlgorithm<>(RSA_OAEP_256_ID, RSA_OAEP_256_TRANSFORMATION, RSA_OAEP_256_SPEC)

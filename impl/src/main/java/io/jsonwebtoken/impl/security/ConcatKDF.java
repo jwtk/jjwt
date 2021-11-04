@@ -46,7 +46,7 @@ final class ConcatKDF extends CryptoAlgorithm {
      * <a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf">NIST.800-56A</a>,
      * Section <code>5.8.1.1</code>.
      *
-     * @param sharedSecretKey     shared secret key to use to seed the derived secret. key.getEncoded() must not be empty.
+     * @param Z                   shared secret key to use to seed the derived secret. Cannot be null or empty.
      * @param derivedKeyBitLength the total number of <b>bits</b> <em>(not bytes)</em> required in the returned derived
      *                            key.
      * @param OtherInfo           any additional party info to be associated with the derived key. May be null/empty.
@@ -56,16 +56,14 @@ final class ConcatKDF extends CryptoAlgorithm {
      * @throws SecurityException       if unable to perform the necessary {@link MessageDigest} computations to
      *                                 generate the derived key.
      */
-    public SecretKey deriveKey(SecretKey sharedSecretKey, final long derivedKeyBitLength, final byte[] OtherInfo)
+    public SecretKey deriveKey(final byte[] Z, final long derivedKeyBitLength, final byte[] OtherInfo)
         throws UnsupportedKeyException, SecurityException {
 
         // OtherInfo argument assertions:
         final int otherInfoByteLength = Arrays.length(OtherInfo);
 
         // sharedSecretKey argument assertions:
-        Assert.notNull(sharedSecretKey, "sharedSecretKey cannot be null.");
-        final byte[] Z = SecretJwkFactory.getRequiredEncoded(sharedSecretKey,
-            "use this key to create a Concat KDF derived key.");
+        Assert.notEmpty(Z, "Z cannot be null or empty.");
 
         // derivedKeyBitLength argument assertions:
         Assert.isTrue(derivedKeyBitLength > 0, "derivedKeyBitLength must be a positive number.");
@@ -88,7 +86,7 @@ final class ConcatKDF extends CryptoAlgorithm {
         assert reps <= MAX_REP_COUNT : "derivedKeyBitLength is too large.";
 
         // Section 5.8.1.1, Process step #3:
-        final byte[] counter = new byte[]{0, 0, 0, 0, 0, 0, 0, 1}; // same as 0x01L, but no extra step to convert to byte[]
+        final byte[] counter = new byte[]{0, 0, 0, 1}; // same as 0x0001L, but no extra step to convert to byte[]
 
         // Section 5.8.1.1, Process step #4:
         long inputBitLength = bitLength(counter) + bitLength(Z) + bitLength(OtherInfo);
@@ -104,12 +102,12 @@ final class ConcatKDF extends CryptoAlgorithm {
                 // Section 5.8.1.1, Process step #5:
                 for (long i = 0; i < reps; i++) {
 
+                    // Section 5.8.1.1, Process step #5.1:
                     md.update(counter);
                     md.update(Z);
                     if (otherInfoByteLength > 0) {
                         md.update(OtherInfo);
                     }
-                    // Section 5.8.1.1, Process step #5.1:
                     byte[] Ki = md.digest();
 
                     // Section 5.8.1.1, Process step #5.2:

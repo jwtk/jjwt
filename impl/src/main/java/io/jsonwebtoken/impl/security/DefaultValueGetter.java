@@ -146,4 +146,15 @@ public class DefaultValueGetter implements ValueGetter {
             throw malformed(msg);
         }
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, ?> getRequiredMap(String key) {
+        Object value = getRequiredValue(key);
+        if (!(value instanceof Map)) {
+            String msg = name() + " '" + key + "' value must be a Map. Actual type: " + value.getClass().getName();
+            throw malformed(msg);
+        }
+        return (Map<String,?>)value;
+    }
 }

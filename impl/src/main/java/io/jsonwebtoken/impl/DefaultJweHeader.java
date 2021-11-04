@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
@@ -70,10 +71,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
     @Override
     public String getAgreementPartyUInfoString() {
         byte[] bytes = getAgreementPartyUInfo();
-        if (bytes == null) {
-            return null;
-        }
-        return new String(bytes, StandardCharsets.UTF_8);
+        return Arrays.length(bytes) == 0 ? null : new String(bytes, StandardCharsets.UTF_8);
     }
 
     @Override
@@ -96,10 +94,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
     @Override
     public String getAgreementPartyVInfoString() {
         byte[] bytes = getAgreementPartyVInfo();
-        if (bytes == null) {
-            return null;
-        }
-        return new String(bytes, StandardCharsets.UTF_8);
+        return Arrays.length(bytes) == 0 ? null : new String(bytes, StandardCharsets.UTF_8);
     }
 
     @Override

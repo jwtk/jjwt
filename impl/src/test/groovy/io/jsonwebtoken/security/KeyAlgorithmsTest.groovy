@@ -21,7 +21,7 @@ class KeyAlgorithmsTest {
 
     @Test
     void testValues() {
-        assertEquals 13, KeyAlgorithms.values().size()
+        assertEquals 17, KeyAlgorithms.values().size()
         assertTrue(contains(KeyAlgorithms.DIRECT) &&
                 contains(KeyAlgorithms.A128KW) &&
                 contains(KeyAlgorithms.A192KW) &&
@@ -34,7 +34,11 @@ class KeyAlgorithmsTest {
                 contains(KeyAlgorithms.PBES2_HS512_A256KW) &&
                 contains(KeyAlgorithms.RSA1_5) &&
                 contains(KeyAlgorithms.RSA_OAEP) &&
-                contains(KeyAlgorithms.RSA_OAEP_256)
+                contains(KeyAlgorithms.RSA_OAEP_256) &&
+                contains(KeyAlgorithms.ECDH_ES) &&
+                contains(KeyAlgorithms.ECDH_ES_A128KW) &&
+                contains(KeyAlgorithms.ECDH_ES_A192KW) &&
+                contains(KeyAlgorithms.ECDH_ES_A256KW)
         )
     }
 
@@ -81,10 +85,8 @@ class KeyAlgorithmsTest {
     @Test
     void testEstimateIterations() {
         // keep it super short so we don't hammer the test server or slow down the build too much:
-        long desiredMillis = 50;
-
+        long desiredMillis = 50
         int result = KeyAlgorithms.estimateIterations(KeyAlgorithms.PBES2_HS256_A128KW, desiredMillis)
-
         assertTrue result > Pbes2HsAkwAlgorithm.MIN_RECOMMENDED_ITERATIONS
     }
 }
