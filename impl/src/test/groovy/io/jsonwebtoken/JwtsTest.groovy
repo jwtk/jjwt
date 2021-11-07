@@ -797,6 +797,35 @@ class JwtsTest {
     }
 
     @Test
+    void testJweCompression() {
+
+        def codecs = [CompressionCodecs.DEFLATE, CompressionCodecs.GZIP]
+
+        for (CompressionCodec codec : codecs) {
+
+            for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+
+                SecretKey key = enc.keyBuilder().build()
+
+                // encrypt and compress:
+                String jwe = Jwts.jweBuilder()
+                        .claim('foo', 'bar')
+                        .compressWith(codec)
+                        .encryptWith(enc)
+                        .withKey(key)
+                        .compact()
+
+                //decompress and decrypt:
+                def jwt = Jwts.parserBuilder()
+                        .decryptWith(key)
+                        .build()
+                        .parseClaimsJwe(jwe)
+                assertEquals 'bar', jwt.getBody().get('foo')
+            }
+        }
+    }
+
+    @Test
     void testPasswordJwes() {
 
         def algs = KeyAlgorithms.values().findAll({ it ->
@@ -827,6 +856,27 @@ class JwtsTest {
     }
 
     @Test
+    void testPasswordJweWithoutSpecifyingAlg() {
+
+        PasswordKey key = Keys.forPassword("12345678".toCharArray())
+
+        // encrypt:
+        String jwe = Jwts.jweBuilder()
+                .claim('foo', 'bar')
+                .encryptWith(EncryptionAlgorithms.A256GCM)
+                .withKey(key) // does not use 'withKeyFrom', should default to strongest PBES2_HS512_A256KW
+                .compact()
+
+        //decrypt:
+        def jwt = Jwts.parserBuilder()
+                .decryptWith(key)
+                .build()
+                .parseClaimsJwe(jwe)
+        assertEquals 'bar', jwt.getBody().get('foo')
+        assertEquals KeyAlgorithms.PBES2_HS512_A256KW, KeyAlgorithms.forId(jwt.getHeader().getAlgorithm())
+    }
+
+    @Test
     void testRsaJwes() {
 
         def pairs = [
@@ -851,7 +901,7 @@ class JwtsTest {
                     // encrypt:
                     String jwe = Jwts.jweBuilder()
                             .claim('foo', 'bar')
-                            .encryptWith(enc)
+                            .encryptWith(enc) // does not use 'withKeyFrom'
                             .withKeyFrom(pubKey, alg)
                             .compact()
 

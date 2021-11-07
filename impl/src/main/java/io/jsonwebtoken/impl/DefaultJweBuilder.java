@@ -116,7 +116,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
         Assert.state(key != null, "Key is required.");
         Assert.state(enc != null, "Encryption algorithm is required.");
-        assert alg != null : "KeyAlgorithm is required."; //always set by withKey calling withKeyFrom
+        Assert.state(alg != null, "KeyAlgorithm is required."); //always set by withKey calling withKeyFrom
 
         if (this.serializer == null) { // try to find one based on the services available
             //noinspection unchecked
