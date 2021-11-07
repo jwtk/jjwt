@@ -1,7 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.ValueGetter;
@@ -123,20 +122,24 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         return Assert.gt(bitLength, 0, "Algorithm keyBitLength must be > 0");
     }
 
+    private SecretKey deriveKey(KeyRequest<?> request, PublicKey publicKey, PrivateKey privateKey) {
+        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
+        int requiredCekBitLen = getKeyBitLength(enc);
+        final String AlgorithmID = getConcatKDFAlgorithmId(enc);
+        byte[] apu = request.getHeader().getAgreementPartyUInfo();
+        byte[] apv = request.getHeader().getAgreementPartyVInfo();
+        byte[] OtherInfo = createOtherInfo(requiredCekBitLen, AlgorithmID, apu, apv);
+        byte[] Z = generateZ(request, publicKey, privateKey);
+        return CONCAT_KDF.deriveKey(Z, requiredCekBitLen, OtherInfo);
+    }
+
     @Override
     public KeyResult getEncryptionKey(KeyRequest<E> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
+
         E publicKey = Assert.notNull(request.getKey(), "Request key cannot be null.");
         ECParameterSpec spec = Assert.notNull(publicKey.getParams(), "Request key params cannot be null.");
-        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
-
-        int requiredCekBitLen = getKeyBitLength(enc);
-        final String AlgorithmID = getConcatKDFAlgorithmId(enc);
-        byte[] apu = header.getAgreementPartyUInfo();
-        byte[] apv = header.getAgreementPartyVInfo();
-        byte[] OtherInfo = createOtherInfo(requiredCekBitLen, AlgorithmID, apu, apv);
-
         // note: we don't need to validate if specified key's point is on a supported curve here
         // because that will automatically be asserted when using Jwks.builder().... below
         KeyPair pair = generateKeyPair(request, spec);
@@ -145,11 +148,10 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         // This asserts that the generated public key (and therefore the request key) is on a JWK-supported curve:
         final EcPublicJwk jwk = Jwks.builder().setKey(genPubKey).build();
 
-        byte[] Z = generateZ(request, publicKey, genPrivKey);
-        SecretKey derived = CONCAT_KDF.deriveKey(Z, requiredCekBitLen, OtherInfo);
+        final SecretKey derived = deriveKey(request, publicKey, genPrivKey);
 
         DefaultKeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(request.getProvider(), request.getSecureRandom(),
-            derived, request.getHeader(), enc);
+            derived, request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = WRAP_ALG.getEncryptionKey(wrapReq);
 
         header.put(EPHEMERAL_PUBLIC_KEY, jwk);
@@ -166,35 +168,25 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
 
         ValueGetter getter = new DefaultValueGetter(header);
         Map<String, ?> epkValues = getter.getRequiredMap(EPHEMERAL_PUBLIC_KEY);
-        // This call will assert the EPK, if valid, is also on a NIST curve:
+        // This call will assert the EPK, if valid, is also on a JWA-supported NIST curve:
         Jwk<?> jwk = Jwks.builder().putAll(epkValues).build();
         if (!(jwk instanceof EcPublicJwk)) {
             String msg = "JWE Header '" + EPHEMERAL_PUBLIC_KEY + "' (Ephemeral Public Key) value is not an " +
                 "EllipticCurve Public JWK as required.";
-            throw new MalformedJwtException(msg);
+            throw new InvalidKeyException(msg);
         }
         EcPublicJwk epk = (EcPublicJwk) jwk;
-        // Now, while the EPK might be on a NIST curve, we need to ensure it's on the exact curve associted with the
-        // private key:
+        // While the EPK might be on a JWA-supported NIST curve, it must be on the private key's exact curve:
         if (!EcPublicJwkFactory.contains(privateKey.getParams().getCurve(), epk.toKey().getW())) {
             String msg = "JWE Header '" + EPHEMERAL_PUBLIC_KEY + "' (Ephemeral Public Key) value does not represent " +
                 "a point on the expected curve.";
             throw new InvalidKeyException(msg);
         }
 
-        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
-
-        int requiredCekBitLen = getKeyBitLength(enc);
-        final String AlgorithmID = getConcatKDFAlgorithmId(enc);
-        byte[] apu = header.getAgreementPartyUInfo();
-        byte[] apv = header.getAgreementPartyVInfo();
-        byte[] OtherInfo = createOtherInfo(requiredCekBitLen, AlgorithmID, apu, apv);
-
-        byte[] Z = generateZ(request, epk.toKey(), privateKey);
-        SecretKey derived = CONCAT_KDF.deriveKey(Z, requiredCekBitLen, OtherInfo);
+        final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),
-            request.getSecureRandom(), derived, header, enc, request.getPayload());
+            request.getSecureRandom(), derived, header, request.getEncryptionAlgorithm(), request.getPayload());
 
         return WRAP_ALG.getDecryptionKey(unwrapReq);
     }

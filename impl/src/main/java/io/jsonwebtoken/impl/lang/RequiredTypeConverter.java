@@ -2,6 +2,9 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 class RequiredTypeConverter<T> implements Converter<T, Object> {
 
     private final Class<T> type;
@@ -22,7 +25,7 @@ class RequiredTypeConverter<T> implements Converter<T, Object> {
         }
         Class<?> clazz = o.getClass();
         if (!type.isAssignableFrom(clazz)) {
-            String msg = "Unsupported value type: " + clazz.getName();
+            String msg = "Unsupported value type. Expected: " + type.getName() + ", found: " + clazz.getName();
             throw new IllegalArgumentException(msg);
         }
         return type.cast(o);

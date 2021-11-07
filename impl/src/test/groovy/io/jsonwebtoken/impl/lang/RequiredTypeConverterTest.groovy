@@ -4,6 +4,9 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 class RequiredTypeConverterTest {
 
     @Test
@@ -25,7 +28,8 @@ class RequiredTypeConverterTest {
         try {
             converter.applyFrom('hello' as String)
         } catch (IllegalArgumentException expected) {
-            assertEquals 'Unsupported value type: java.lang.String', expected.getMessage()
+            String msg = 'Unsupported value type. Expected: java.lang.Integer, found: java.lang.String'
+            assertEquals msg, expected.getMessage()
         }
     }
 }
