@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * No longer used by JJWT.  Will be removed before the 1.0 final release.
  *
- * @deprecated will be removed before the 1.0 final release.
+ * @deprecated since JJWT_RELEASE_VERSION. will be removed before the 1.0 final release.
  */
 @Deprecated
 public final class RuntimeEnvironment {
