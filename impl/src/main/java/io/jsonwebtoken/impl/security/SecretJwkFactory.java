@@ -47,12 +47,12 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         try {
             byte[] encoded = getRequiredEncoded(key, "represent the SecretKey instance as a JWK");
             k = Encoders.BASE64URL.encode(encoded);
+            Assert.hasText(k, "k value cannot be null or empty.");
         } catch (Exception e) {
             String msg = "Unable to encode SecretKey to JWK: " + e.getMessage();
             throw new UnsupportedKeyException(msg, e);
         }
 
-        assert k != null : "k value is mandatory.";
         ctx.put(DefaultSecretJwk.K.getId(), k);
 
         return new DefaultSecretJwk(ctx);

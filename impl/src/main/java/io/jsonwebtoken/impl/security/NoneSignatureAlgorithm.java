@@ -19,7 +19,7 @@ public class NoneSignatureAlgorithm implements SignatureAlgorithm<Key, Key> {
 
     @Override
     public byte[] sign(SignatureRequest<Key> request) throws SecurityException {
-        throw new SignatureException("The 'none' algorithm cannot be used to verify signatures.");
+        throw new SignatureException("The 'none' algorithm cannot be used to create signatures.");
     }
 
     @Override

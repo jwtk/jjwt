@@ -15,12 +15,14 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.IOException;
+
 /**
  * Exception indicating that either compressing or decompressing an JWT body failed.
  *
  * @since 0.6.0
  */
-public class CompressionException extends JwtException {
+public class CompressionException extends IOException {
 
     public CompressionException(String message) {
         super(message);

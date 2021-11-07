@@ -77,15 +77,15 @@ public final class Keys {
     /**
      * <h3>Deprecation Notice</h3>
      * <p>As of JJWT JJWT_RELEASE_VERSION, symmetric (secret) key algorithm instances can generate a key of suitable
-     * length for that specific algorithm by calling their {@code generateKey()} method directly. For example:
+     * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:
      * <code><pre>
-     * {@link SignatureAlgorithms#HS256}.generateKey();
-     * {@link SignatureAlgorithms#HS384}.generateKey();
-     * {@link SignatureAlgorithms#HS512}.generateKey();
+     * {@link SignatureAlgorithms#HS256}.keyBuilder().build();
+     * {@link SignatureAlgorithms#HS384}.keyBuilder().build();
+     * {@link SignatureAlgorithms#HS512}.keyBuilder().build();
      * </pre></code>
      * Call those methods as needed instead of this {@code secretKeyFor} helper method.  This helper method will be
      * removed before the 1.0 final release.</p>
-     * <p>
+     * <h3>Previous Documentation</h3>
      * Returns a new {@link SecretKey} with a key length suitable for use with the specified {@link SignatureAlgorithm}.
      *
      * <p><a href="https://tools.ietf.org/html/rfc7518#section-3.2">JWA Specification (RFC 7518), Section 3.2</a>
@@ -143,7 +143,7 @@ public final class Keys {
      * </pre></code>
      * Call those methods as needed instead of this {@code keyPairFor} helper method.  This helper method will be
      * removed before the 1.0 final release.</p>
-     * <p>
+     * <h3>Previous Documentation</h3>
      * Returns a new {@link KeyPair} suitable for use with the specified asymmetric algorithm.
      *
      * <p>If the {@code alg} argument is an RSA algorithm, a KeyPair is generated based on the following:</p>
