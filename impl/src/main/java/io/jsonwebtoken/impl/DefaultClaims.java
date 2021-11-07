@@ -20,6 +20,7 @@ import io.jsonwebtoken.RequiredTypeException;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.JwtDateConverter;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 
 import java.util.Date;
@@ -135,6 +136,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public <T> T get(String claimName, Class<T> requiredType) {
+        Assert.notNull(requiredType, "requiredType argument cannot be null.");
 
         Object value = idiomaticGet(claimName);
         if (requiredType.isInstance(value)) {
@@ -155,10 +157,10 @@ public class DefaultClaims extends JwtMap implements Claims {
             }
         }
 
-        return castClaimValue(value, requiredType);
+        return castClaimValue(claimName, value, requiredType);
     }
 
-    private <T> T castClaimValue(Object value, Class<T> requiredType) {
+    private <T> T castClaimValue(String name, Object value, Class<T> requiredType) {
 
         if (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte) {
             long longValue = ((Number)value).longValue();
@@ -171,6 +173,13 @@ public class DefaultClaims extends JwtMap implements Claims {
             } else if (requiredType == Byte.class && Byte.MIN_VALUE <= longValue && longValue <= Byte.MAX_VALUE) {
                 value = (byte) longValue;
             }
+        }
+
+        if (value instanceof Long &&
+            (requiredType.equals(Integer.class) || requiredType.equals(Short.class) || requiredType.equals(Byte.class))) {
+            String msg = "Claim '" + name + "' value is too large or too small to be represented as a " +
+                requiredType.getName() + " instance (would cause numeric overflow).";
+            throw new RequiredTypeException(msg);
         }
 
         if (!requiredType.isInstance(value)) {

@@ -17,7 +17,7 @@ import static io.jsonwebtoken.impl.lang.Bytes.*;
 /**
  * 'Clean room' implementation of the Concat KDF algorithm based solely on
  * <a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf">NIST.800-56A</a>,
- * Section <code>5.8.1.1</code>.  Call the {@link #deriveKey(SecretKey, long, byte[]) deriveKey} method.
+ * Section <code>5.8.1.1</code>.  Call the {@link #deriveKey(byte[], long, byte[]) deriveKey} method.
  */
 final class ConcatKDF extends CryptoAlgorithm {
 

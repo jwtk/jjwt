@@ -155,6 +155,23 @@ class DefaultClaimsTest {
     }
 
     @Test
+    void testGetRequiredIntegerFromLong() {
+        claims.put('foo', Long.valueOf(Integer.MAX_VALUE))
+        assertEquals Integer.MAX_VALUE, claims.get('foo', Integer.class) as Integer
+    }
+
+    @Test
+    void testGetRequiredIntegerWouldCauseOverflow() {
+        claims.put('foo', Long.MAX_VALUE)
+        try {
+            claims.get('foo', Integer.class)
+        } catch (RequiredTypeException expected) {
+            String msg = "Claim 'foo' value is too large or too small to be represented as a java.lang.Integer instance (would cause numeric overflow)."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
     void testGetRequiredDateFromNull() {
         Date date = claims.get("aDate", Date.class)
         assertNull date
@@ -162,7 +179,7 @@ class DefaultClaimsTest {
 
     @Test
     void testGetRequiredDateFromDate() {
-        def expected = new Date();
+        def expected = new Date()
         claims.put("aDate", expected)
         Date result = claims.get("aDate", Date.class)
         assertEquals expected, result
@@ -313,14 +330,14 @@ class DefaultClaimsTest {
 
     @Test
     void testToSpecDateWithDate() {
-        long millis = System.currentTimeMillis();
+        long millis = System.currentTimeMillis()
         Date d = new Date(millis)
         claims.put('exp', d)
         assertEquals d, claims.getExpiration()
     }
 
     void trySpecDateNonDate(Field<?> field) {
-        def val = new Object() { @Override public String toString() {return 'hi'} }
+        def val = new Object() { @Override String toString() {return 'hi'} }
         try {
             claims.put(field.getId(), val)
             fail()
