@@ -3,16 +3,25 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.KeyRequest;
+import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecurityRequest;
 
+import javax.crypto.SecretKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 abstract class CryptoAlgorithm implements Identifiable {
 
     private final String ID;
 
     private final String jcaName;
+
+    private Provider provider; // default, if any
 
     CryptoAlgorithm(String id, String jcaName) {
         Assert.hasText(id, "id cannot be null or empty.");
@@ -30,21 +39,40 @@ abstract class CryptoAlgorithm implements Identifiable {
         return this.jcaName;
     }
 
+    protected void setProvider(Provider provider) { // can be null
+        this.provider = provider;
+    }
+
     SecureRandom ensureSecureRandom(SecurityRequest request) {
         SecureRandom random = request != null ? request.getSecureRandom() : null;
         return random != null ? random : Randoms.secureRandom();
     }
 
     protected <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) {
-        return new JcaTemplate(getJcaName(), null).execute(clazz, fn);
+        return new JcaTemplate(getJcaName(), this.provider).execute(clazz, fn);
+    }
+
+    protected Provider getProvider(SecurityRequest request) {
+        Provider provider = request.getProvider();
+        if (provider == null) {
+            provider = this.provider; // fallback, if any
+        }
+        return provider;
     }
 
     protected <I, T> T execute(SecurityRequest request, Class<I> clazz, CheckedFunction<I, T> fn) {
         Assert.notNull(request, "request cannot be null.");
-        Provider provider = request.getProvider();
+        Provider provider = getProvider(request);
         SecureRandom random = ensureSecureRandom(request);
         JcaTemplate template = new JcaTemplate(getJcaName(), provider, random);
         return template.execute(clazz, fn);
+    }
+
+    public SecretKey generateKey(KeyRequest<?> request) {
+        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
+        SecretKeyBuilder builder = Assert.notNull(enc.keyBuilder(), "Request encryptionAlgorithm cannot produce a null SecretKeyBuilder");
+        SecretKey key = builder.setProvider(getProvider(request)).setRandom(request.getSecureRandom()).build();
+        return Assert.notNull(key, "Request encryptionAlgorithm SecretKeyBuilder cannot produce null keys.");
     }
 
     @Override
@@ -53,7 +81,7 @@ abstract class CryptoAlgorithm implements Identifiable {
             return true;
         }
         if (obj instanceof CryptoAlgorithm) {
-            CryptoAlgorithm other = (CryptoAlgorithm)obj;
+            CryptoAlgorithm other = (CryptoAlgorithm) obj;
             return this.ID.equals(other.getId()) && this.jcaName.equals(other.getJcaName());
         }
         return false;

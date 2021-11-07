@@ -18,17 +18,26 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PasswordKey, PasswordKey> {
+
+    // See https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2 :
+    private static final int DEFAULT_SHA256_ITERATIONS = 310000;
+    private static final int DEFAULT_SHA384_ITERATIONS = 210000;
+    private static final int DEFAULT_SHA512_ITERATIONS = 120000;
 
     private static final int MIN_RECOMMENDED_ITERATIONS = 1000; // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2
     private static final String MIN_ITERATIONS_MSG_PREFIX =
         "[JWA RFC 7518, Section 4.8.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2) " +
-        "recommends password-based-encryption iterations be greater than or equal to " +
-        MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
+            "recommends password-based-encryption iterations be greater than or equal to " +
+            MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
 
     private final int HASH_BYTE_LENGTH;
     private final int DERIVED_KEY_BIT_LENGTH;
     private final byte[] SALT_PREFIX;
+    private final int DEFAULT_ITERATIONS;
     private final KeyAlgorithm<SecretKey, SecretKey> wrapAlg;
 
     private static byte[] toRfcSaltPrefix(byte[] bytes) {
@@ -71,6 +80,16 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         // implementation to see the assertion:
         this.HASH_BYTE_LENGTH = hashBitLength / Byte.SIZE;
 
+        // If the JweBuilder caller doesn't specify an iteration count, fall back to OWASP best-practice recommendations
+        // per https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
+        if (hashBitLength >= 512) {
+            DEFAULT_ITERATIONS = DEFAULT_SHA512_ITERATIONS;
+        } else if (hashBitLength >= 384) {
+            DEFAULT_ITERATIONS = DEFAULT_SHA384_ITERATIONS;
+        } else {
+            DEFAULT_ITERATIONS = DEFAULT_SHA256_ITERATIONS;
+        }
+
         // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8, 2nd paragraph, last sentence:
         // "Their derived-key lengths respectively are 16, 24, and 32 octets." :
         this.DERIVED_KEY_BIT_LENGTH = hashBitLength / 2; // results in 128, 192, or 256
@@ -82,7 +101,8 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     protected SecretKey deriveKey(SecretKeyFactory factory, final char[] password, final byte[] rfcSalt, int iterations) throws Exception {
         PBEKeySpec spec = new PBEKeySpec(password, rfcSalt, iterations, DERIVED_KEY_BIT_LENGTH);
         try {
-            return factory.generateSecret(spec);
+            SecretKey derived = factory.generateSecret(spec);
+            return new WrappedSecretKey(derived, "AES"); // needed to keep the Sun Provider happy.  BC doesn't care.
         } finally {
             spec.clearPassword();
         }
@@ -118,8 +138,12 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
         Assert.notNull(request, "request cannot be null.");
         final PasswordKey key = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
-
-        final int iterations = assertIterations(request.getHeader().getPbes2Count());
+        Integer p2c = request.getHeader().getPbes2Count();
+        if (p2c == null) {
+            p2c = DEFAULT_ITERATIONS;
+            request.getHeader().setPbes2Count(p2c);
+        }
+        final int iterations = assertIterations(p2c);
         byte[] inputSalt = generateInputSalt(request);
         final byte[] rfcSalt = toRfcSalt(inputSalt);
         char[] password = key.getPassword(); // password will be safely cleaned/zeroed in deriveKey next:

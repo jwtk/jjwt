@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.security
 
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.DefaultEllipticCurveSignatureAlgorithm
 import io.jsonwebtoken.impl.security.DefaultPasswordKey
 import io.jsonwebtoken.impl.security.DefaultRsaSignatureAlgorithm
@@ -130,8 +131,8 @@ class KeysTest {
     void testSecretKeyFor() {
         for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
             if (alg instanceof SecretKeySignatureAlgorithm) {
-                SecretKey key = alg.generateKey()
-                assertEquals alg.minKeyLength, key.getEncoded().length * 8 //convert byte count to bit count
+                SecretKey key = alg.keyBuilder().build()
+                assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
                 assertEquals alg.jcaName, key.algorithm
                 assertEquals alg, SignatureAlgorithms.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
             }

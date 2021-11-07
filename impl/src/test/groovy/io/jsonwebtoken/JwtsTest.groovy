@@ -23,11 +23,22 @@ import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.impl.security.DirectKeyAlgorithm
+import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.AeadAlgorithm
 import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
+import io.jsonwebtoken.security.EcKeyAlgorithm
+import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.KeyAlgorithm
+import io.jsonwebtoken.security.KeyAlgorithms
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.PasswordKey
+import io.jsonwebtoken.security.RsaKeyAlgorithm
+import io.jsonwebtoken.security.SecretKeyAlgorithm
 import io.jsonwebtoken.security.SecretKeySignatureAlgorithm
 import io.jsonwebtoken.security.SignatureAlgorithm
 import io.jsonwebtoken.security.SignatureAlgorithms
@@ -208,7 +219,7 @@ class JwtsTest {
 
     @Test
     void testParseWithMissingRequiredSignature() {
-        Key key = SignatureAlgorithms.HS256.generateKey()
+        Key key = SignatureAlgorithms.HS256.keyBuilder().build()
         String compact = Jwts.builder().setSubject('foo').signWith(key).compact()
         int i = compact.lastIndexOf('.')
         String missingSig = compact.substring(0, i + 1)
@@ -368,7 +379,7 @@ class JwtsTest {
     void testUncompressedJwt() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -390,7 +401,7 @@ class JwtsTest {
     void testCompressedJwtWithDeflate() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -412,7 +423,7 @@ class JwtsTest {
     void testCompressedJwtWithGZIP() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -434,7 +445,7 @@ class JwtsTest {
     void testCompressedWithCustomResolver() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -473,7 +484,7 @@ class JwtsTest {
     void testCompressedJwtWithUnrecognizedHeader() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -492,7 +503,7 @@ class JwtsTest {
     void testCompressStringPayloadWithDeflate() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String payload = "this is my test for a payload"
 
@@ -597,8 +608,8 @@ class JwtsTest {
     void testParseClaimsJwsWithWeakHmacKey() {
 
         SignatureAlgorithm alg = SignatureAlgorithms.HS384
-        def key = alg.generateKey()
-        def weakKey = SignatureAlgorithms.HS256.generateKey()
+        def key = alg.keyBuilder().build()
+        def weakKey = SignatureAlgorithms.HS256.keyBuilder().build()
 
         String jws = Jwts.builder().setSubject("Foo").signWith(key, alg).compact()
 
@@ -612,7 +623,7 @@ class JwtsTest {
 
         //create random signing key for testing:
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         String notSigned = Jwts.builder().setSubject("Foo").compact()
 
@@ -630,7 +641,7 @@ class JwtsTest {
 
         //create random signing key for testing:
         SignatureAlgorithm alg = SignatureAlgorithms.HS256
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         //this is a 'real', valid JWT:
         String compact = Jwts.builder().setSubject("Joe").signWith(key, alg).compact()
@@ -753,6 +764,148 @@ class JwtsTest {
         }
     }
 
+    @Test
+    void testSecretKeyJwes() {
+
+        def algs = KeyAlgorithms.values().findAll({ it ->
+            it instanceof DirectKeyAlgorithm || it instanceof SecretKeyAlgorithm
+        })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
+
+        for (KeyAlgorithm alg : algs) {
+
+            for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+
+                SecretKey key = alg instanceof SecretKeyAlgorithm ?
+                        ((SecretKeyAlgorithm) alg).keyBuilder().build() :
+                        enc.keyBuilder().build()
+
+                // encrypt:
+                String jwe = Jwts.jweBuilder()
+                        .claim('foo', 'bar')
+                        .encryptWith(enc)
+                        .withKeyFrom(key, alg)
+                        .compact()
+
+                //decrypt:
+                def jwt = Jwts.parserBuilder()
+                        .decryptWith(key)
+                        .build()
+                        .parseClaimsJwe(jwe)
+                assertEquals 'bar', jwt.getBody().get('foo')
+            }
+        }
+    }
+
+    @Test
+    void testPasswordJwes() {
+
+        def algs = KeyAlgorithms.values().findAll({ it ->
+            it instanceof Pbes2HsAkwAlgorithm
+        })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
+
+        PasswordKey key = Keys.forPassword("12345678".toCharArray())
+
+        for (KeyAlgorithm alg : algs) {
+
+            for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+
+                // encrypt:
+                String jwe = Jwts.jweBuilder()
+                        .claim('foo', 'bar')
+                        .encryptWith(enc)
+                        .withKeyFrom(key, alg)
+                        .compact()
+
+                //decrypt:
+                def jwt = Jwts.parserBuilder()
+                        .decryptWith(key)
+                        .build()
+                        .parseClaimsJwe(jwe)
+                assertEquals 'bar', jwt.getBody().get('foo')
+            }
+        }
+    }
+
+    @Test
+    void testRsaJwes() {
+
+        def pairs = [
+                SignatureAlgorithms.RS256.generateKeyPair(),
+                SignatureAlgorithms.RS384.generateKeyPair(),
+                SignatureAlgorithms.RS512.generateKeyPair()
+        ]
+
+        def algs = KeyAlgorithms.values().findAll({ it ->
+            it instanceof RsaKeyAlgorithm
+        })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
+
+        for (KeyPair pair : pairs) {
+
+            def pubKey = pair.getPublic()
+            def privKey = pair.getPrivate()
+
+            for (KeyAlgorithm alg : algs) {
+
+                for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+
+                    // encrypt:
+                    String jwe = Jwts.jweBuilder()
+                            .claim('foo', 'bar')
+                            .encryptWith(enc)
+                            .withKeyFrom(pubKey, alg)
+                            .compact()
+
+                    //decrypt:
+                    def jwt = Jwts.parserBuilder()
+                            .decryptWith(privKey)
+                            .build()
+                            .parseClaimsJwe(jwe)
+                    assertEquals 'bar', jwt.getBody().get('foo')
+                }
+            }
+        }
+    }
+
+    @Test
+    void testEcJwes() {
+
+        def pairs = [
+                SignatureAlgorithms.ES256.generateKeyPair(),
+                SignatureAlgorithms.ES384.generateKeyPair(),
+                SignatureAlgorithms.ES512.generateKeyPair()
+        ]
+
+        def algs = KeyAlgorithms.values().findAll({ it ->
+            it instanceof EcKeyAlgorithm
+        })
+
+        for (KeyPair pair : pairs) {
+
+            def pubKey = pair.getPublic()
+            def privKey = pair.getPrivate()
+
+            for (KeyAlgorithm alg : algs) {
+
+                for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+
+                    // encrypt:
+                    String jwe = Jwts.jweBuilder()
+                            .claim('foo', 'bar')
+                            .encryptWith(enc)
+                            .withKeyFrom(pubKey, alg)
+                            .compact()
+
+                    //decrypt:
+                    def jwt = Jwts.parserBuilder()
+                            .decryptWith(privKey)
+                            .build()
+                            .parseClaimsJwe(jwe)
+                    assertEquals 'bar', jwt.getBody().get('foo')
+                }
+            }
+        }
+    }
+
     static void testRsa(AsymmetricKeySignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
         KeyPair kp = alg.generateKeyPair()
@@ -777,7 +930,7 @@ class JwtsTest {
     static void testHmac(SecretKeySignatureAlgorithm alg) {
 
         //create random signing key for testing:
-        SecretKey key = alg.generateKey()
+        SecretKey key = alg.keyBuilder().build()
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 

@@ -65,12 +65,12 @@ public final class KeyAlgorithms {
     }
 
     public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = forId0("dir");
-    public static final KeyAlgorithm<SecretKey, SecretKey> A128KW = forId0("A128KW");
-    public static final KeyAlgorithm<SecretKey, SecretKey> A192KW = forId0("A192KW");
-    public static final KeyAlgorithm<SecretKey, SecretKey> A256KW = forId0("A256KW");
-    public static final KeyAlgorithm<SecretKey, SecretKey> A128GCMKW = forId0("A128GCMKW");
-    public static final KeyAlgorithm<SecretKey, SecretKey> A192GCMKW = forId0("A192GCMKW");
-    public static final KeyAlgorithm<SecretKey, SecretKey> A256GCMKW = forId0("A256GCMKW");
+    public static final SecretKeyAlgorithm A128KW = forId0("A128KW");
+    public static final SecretKeyAlgorithm A192KW = forId0("A192KW");
+    public static final SecretKeyAlgorithm A256KW = forId0("A256KW");
+    public static final SecretKeyAlgorithm A128GCMKW = forId0("A128GCMKW");
+    public static final SecretKeyAlgorithm A192GCMKW = forId0("A192GCMKW");
+    public static final SecretKeyAlgorithm A256GCMKW = forId0("A256GCMKW");
     public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
     public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
     public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");

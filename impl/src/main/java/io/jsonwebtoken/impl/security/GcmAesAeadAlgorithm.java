@@ -4,7 +4,6 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.RuntimeEnvironment;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
@@ -19,12 +18,6 @@ import java.security.spec.AlgorithmParameterSpec;
  * @since JJWT_RELEASE_VERSION
  */
 public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
-
-    //TODO: Remove this static block when JDK 7 support is removed
-    // JDK <= 7 does not support AES GCM mode natively and so BouncyCastle is required
-    static {
-        RuntimeEnvironment.enableBouncyCastleIfPossible();
-    }
 
     private static final String TRANSFORMATION_STRING = "AES/GCM/NoPadding";
 

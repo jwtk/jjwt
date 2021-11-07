@@ -20,12 +20,14 @@ import javax.crypto.SecretKey;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface SecretKeyGenerator {
+public interface KeyBuilderSupplier<K extends SecretKey, B extends KeyBuilder<K, B>> {
 
     /**
-     * Creates and returns a new secure-random key with a length sufficient to be used by the associated Algorithm.
+     * Returns a new {@link KeyBuilder} instance that will produce new secure-random keys with a length sufficient
+     * to be used by the associated algorithm.
      *
-     * @return a new secure-random key with a length sufficient to be used by the associated Algorithm.
+     * @return a new {@link KeyBuilder} instance that will produce new secure-random keys with a length sufficient
+     * to be used by the associated algorithm.
      */
-    SecretKey generateKey();
+    B keyBuilder();
 }

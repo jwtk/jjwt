@@ -2,11 +2,10 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
-import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
+import io.jsonwebtoken.security.SecretKeyAlgorithm;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.Cipher;
@@ -16,7 +15,7 @@ import java.security.Key;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class AesWrapKeyAlgorithm extends AesAlgorithm implements KeyAlgorithm<SecretKey, SecretKey> {
+public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorithm {
 
     private static final String TRANSFORMATION = "AESWrap";
 
@@ -28,9 +27,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements KeyAlgorithm<Se
     public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request);
-        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
-        final SecretKey cek = enc.generateKey();
-        Assert.notNull(cek, "Request encryption algorithm cannot generate a null key.");
+        final SecretKey cek = generateKey(request);
 
         byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override

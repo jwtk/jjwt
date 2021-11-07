@@ -135,7 +135,7 @@ public interface JweHeader extends Header<JweHeader> {
     Set<String> getCritical();
     JweHeader setCritical(Set<String> crit);
 
-    int getPbes2Count();
+    Integer getPbes2Count();
     JweHeader setPbes2Count(int count);
 
     byte[] getPbes2Salt();

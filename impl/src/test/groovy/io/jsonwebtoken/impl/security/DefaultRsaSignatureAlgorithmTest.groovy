@@ -30,7 +30,7 @@ class DefaultRsaSignatureAlgorithmTest {
 
     @Test(expected = IllegalArgumentException)
     void testWeakPreferredKeyLength() {
-        new DefaultRsaSignatureAlgorithm('RS256', 'SHA256withRSA', 1024) //must be >= 2048
+        new DefaultRsaSignatureAlgorithm(256, 1024) //must be >= 2048
     }
 
     @Test

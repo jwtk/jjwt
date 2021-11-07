@@ -10,8 +10,7 @@ import javax.crypto.spec.SecretKeySpec
 import java.security.Key
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
+import static org.junit.Assert.*
 
 class DirectKeyAlgorithmTest {
 
@@ -51,7 +50,7 @@ class DirectKeyAlgorithmTest {
     void testGetDecryptionKey() {
         def alg = new DirectKeyAlgorithm()
         DecryptionKeyRequest req = createMock(DecryptionKeyRequest)
-        def key = EncryptionAlgorithms.A128GCM.generateKey()
+        def key = EncryptionAlgorithms.A128GCM.keyBuilder().build()
         expect(req.getKey()).andReturn(key)
         replay(req)
         def result = alg.getDecryptionKey(req)

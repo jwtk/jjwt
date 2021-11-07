@@ -30,7 +30,7 @@ class AesAlgorithmTest {
 
         def alg = new TestAesAlgorithm('foo', 'foo', 192)
 
-        def key = EncryptionAlgorithms.A128GCM.generateKey() //weaker than required
+        def key = EncryptionAlgorithms.A128GCM.keyBuilder().build() //weaker than required
 
         def request = new DefaultCryptoRequest(null, null, new byte[1], key)
 
@@ -99,7 +99,7 @@ class AesAlgorithmTest {
 
         def secureRandom = new SecureRandom()
 
-        def req = new DefaultAeadRequest(null, secureRandom, 'data'.getBytes(), alg.generateKey(), 'aad'.getBytes())
+        def req = new DefaultAeadRequest(null, secureRandom, 'data'.getBytes(), alg.keyBuilder().build(), 'aad'.getBytes())
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 

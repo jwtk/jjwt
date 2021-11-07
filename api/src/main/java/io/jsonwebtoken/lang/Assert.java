@@ -383,6 +383,18 @@ public final class Assert {
         }
     }
 
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static Integer gt(Integer value, Integer requirement, String msg) {
+        notNull(value, "value cannot be null.");
+        notNull(requirement, "requirement cannot be null.");
+        if (!(value > requirement)) {
+            throw new IllegalArgumentException(msg);
+        }
+        return value;
+    }
+
 
     /**
      * Assert a boolean expression, throwing <code>IllegalStateException</code>

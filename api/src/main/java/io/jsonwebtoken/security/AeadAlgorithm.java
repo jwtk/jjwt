@@ -17,10 +17,12 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 
+import javax.crypto.SecretKey;
+
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadAlgorithm extends Identifiable, SecretKeyGenerator {
+public interface AeadAlgorithm extends Identifiable, KeyBuilderSupplier<SecretKey, SecretKeyBuilder>, KeyLengthSupplier {
 
     AeadResult encrypt(AeadRequest request) throws SecurityException;
 

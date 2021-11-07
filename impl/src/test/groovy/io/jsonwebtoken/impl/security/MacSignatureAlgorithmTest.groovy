@@ -19,16 +19,16 @@ class MacSignatureAlgorithmTest {
     @Test(expected = SecurityException)
     void testKeyGeneratorNoSuchAlgorithm() {
         MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'foo', 256);
-        alg.generateKey()
+        alg.keyBuilder().build()
     }
 
     @Test
     void testKeyGeneratorKeyLength() {
         MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256);
-        assertEquals 256, alg.generateKey().getEncoded().length * Byte.SIZE
+        assertEquals 256, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
 
         alg = new MacSignatureAlgorithm('A128CBC-HS256', 'HmacSHA256', 128)
-        assertEquals 128, alg.generateKey().getEncoded().length * Byte.SIZE
+        assertEquals 128, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
     }
 
     @Test(expected = IllegalArgumentException)

@@ -15,6 +15,7 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.SecurityException;
@@ -32,7 +33,11 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.util.Map;
 
-class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey> extends CryptoAlgorithm implements EcKeyAlgorithm<E, D> {
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
+class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey> extends CryptoAlgorithm
+    implements EcKeyAlgorithm<E, D> {
 
     protected static final String JCA_NAME = "ECDH";
     protected static final String DEFAULT_ID = JCA_NAME + "-ES";
@@ -113,9 +118,9 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
     }
 
     private int getKeyBitLength(AeadAlgorithm enc) {
-        SecretKey forBitLen = Assert.notNull(enc.generateKey(), "EncryptionAlgorithm generated key cannot be null.");
-        byte[] toCount = Assert.notEmpty(forBitLen.getEncoded(), "EncryptionAlgorithm generated key encoded bytes cannot be null or empty.");
-        return (int)Bytes.bitLength(toCount); // MUST be an integer per the RFC
+        int bitLength = this.WRAP_ALG instanceof KeyLengthSupplier ?
+            ((KeyLengthSupplier)this.WRAP_ALG).getKeyBitLength() : enc.getKeyBitLength();
+        return Assert.gt(bitLength, 0, "Algorithm keyBitLength must be > 0");
     }
 
     @Override
@@ -158,10 +163,9 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         Assert.notNull(request, "Request cannot be null.");
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         D privateKey = Assert.notNull(request.getKey(), "Request key cannot be null.");
-        ECParameterSpec spec = Assert.notNull(privateKey.getParams(), "Request key params cannot be null.");
 
         ValueGetter getter = new DefaultValueGetter(header);
-        Map<String,?> epkValues = getter.getRequiredMap(EPHEMERAL_PUBLIC_KEY);
+        Map<String, ?> epkValues = getter.getRequiredMap(EPHEMERAL_PUBLIC_KEY);
         // This call will assert the EPK, if valid, is also on a NIST curve:
         Jwk<?> jwk = Jwks.builder().putAll(epkValues).build();
         if (!(jwk instanceof EcPublicJwk)) {
@@ -169,7 +173,7 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
                 "EllipticCurve Public JWK as required.";
             throw new MalformedJwtException(msg);
         }
-        EcPublicJwk epk = (EcPublicJwk)jwk;
+        EcPublicJwk epk = (EcPublicJwk) jwk;
         // Now, while the EPK might be on a NIST curve, we need to ensure it's on the exact curve associted with the
         // private key:
         if (!EcPublicJwkFactory.contains(privateKey.getParams().getCurve(), epk.toKey().getW())) {

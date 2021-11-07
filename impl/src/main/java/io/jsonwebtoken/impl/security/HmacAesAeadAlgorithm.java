@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.CryptoRequest;
 import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.PayloadSupplier;
+import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
 
@@ -37,7 +38,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     public HmacAesAeadAlgorithm(String id, MacSignatureAlgorithm sigAlg) {
-        super(id, TRANSFORMATION_STRING, sigAlg.getMinKeyLength());
+        super(id, TRANSFORMATION_STRING, sigAlg.getKeyBitLength());
         this.SIGALG = sigAlg;
     }
 
@@ -46,8 +47,15 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public SecretKey generateKey() {
-        return new JcaTemplate("AES", null).generateSecretKey(this.keyBitLength * 2);
+    public int getKeyBitLength() {
+        return super.getKeyBitLength() * 2;
+    }
+
+    @Override
+    public SecretKeyBuilder keyBuilder() {
+        // The Sun JCE KeyGenerator throws an exception if bitLengths are not standard AES 128, 192 or 256 values.
+        // Since the JWA HmacAes algorithms require double that, we use secure-random keys instead:
+        return new RandomSecretKeyBuilder(KEY_ALG_NAME, getKeyBitLength());
     }
 
     byte[] assertKeyBytes(CryptoRequest<?, SecretKey> request) {

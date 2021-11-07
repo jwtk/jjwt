@@ -1,11 +1,12 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecretKeySignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.WeakKeyException;
@@ -17,9 +18,12 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey, SecretKey> implements SecretKeySignatureAlgorithm {
 
-    private final int minKeyLength; //in bits
+    private final int minKeyBitLength; //in bits
 
     private static final Set<String> JWA_STANDARD_IDS = new LinkedHashSet<>(Collections.of("HS256", "HS384", "HS512"));
 
@@ -42,14 +46,15 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
         this("HS" + digestBitLength, "HmacSHA" + digestBitLength, digestBitLength);
     }
 
-    public MacSignatureAlgorithm(String id, String jcaName, int minKeyLength) {
+    public MacSignatureAlgorithm(String id, String jcaName, int minKeyBitLength) {
         super(id, jcaName);
-        Assert.isTrue(minKeyLength > 0, "minKeyLength must be greater than zero.");
-        this.minKeyLength = minKeyLength;
+        Assert.isTrue(minKeyBitLength > 0, "minKeyLength must be greater than zero.");
+        this.minKeyBitLength = minKeyBitLength;
     }
 
-    int getMinKeyLength() {
-        return this.minKeyLength;
+    @Override
+    public int getKeyBitLength() {
+        return this.minKeyBitLength;
     }
 
     private boolean isJwaStandard() {
@@ -61,8 +66,8 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
     }
 
     @Override
-    public SecretKey generateKey() {
-        return new JcaTemplate(getJcaName(), null).generateSecretKey(minKeyLength);
+    public SecretKeyBuilder keyBuilder() {
+        return new DefaultSecretKeyBuilder(getJcaName(), getKeyBitLength());
     }
 
     @Override
@@ -113,20 +118,20 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
         // so return early if we can't:
         if (encoded == null) return;
 
-        int size = Arrays.length(encoded) * Byte.SIZE;
-        if (size < this.minKeyLength) {
+        int size = (int)Bytes.bitLength(encoded);
+        if (size < this.minKeyBitLength) {
             String msg = "The " + keyType + " key's size is " + size + " bits which " +
                 "is not secure enough for the " + id + " algorithm.";
 
             if (isJwaStandard() && isJwaStandardJcaName(getJcaName())) { //JWA standard algorithm name - reference the spec:
                 msg += " The JWT " +
                     "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + id + " MUST have a " +
-                    "size >= " + minKeyLength + " bits (the key size must be greater than or equal to the hash " +
+                    "size >= " + minKeyBitLength + " bits (the key size must be greater than or equal to the hash " +
                     "output size). Consider using the SignatureAlgorithms." + id + ".generateKey() " +
                     "method to create a key guaranteed to be secure enough for " + id + ".  See " +
                     "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
             } else { //custom algorithm - just indicate required key length:
-                msg += " The " + id + " algorithm requires keys to have a size >= " + minKeyLength + " bits.";
+                msg += " The " + id + " algorithm requires keys to have a size >= " + minKeyBitLength + " bits.";
             }
 
             throw new WeakKeyException(msg);
@@ -134,7 +139,7 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
     }
 
     @Override
-    public byte[] doSign(final SignatureRequest<SecretKey> request) throws Exception {
+    public byte[] doSign(final SignatureRequest<SecretKey> request) {
         return execute(request, Mac.class, new CheckedFunction<Mac, byte[]>() {
             @Override
             public byte[] apply(Mac mac) throws Exception {

@@ -24,11 +24,15 @@ import io.jsonwebtoken.io.Encoder
 import io.jsonwebtoken.io.EncodingException
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.KeyException
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.SignatureException
+import io.jsonwebtoken.security.SignatureRequest
+import io.jsonwebtoken.security.VerifySignatureRequest
 import org.junit.Test
 
 import javax.crypto.KeyGenerator
-import java.security.Key
 import java.security.Provider
 import java.security.SecureRandom
 
@@ -70,7 +74,7 @@ class DefaultJwtBuilderTest {
 
         replay provider
         def b = new DefaultJwtBuilder().setProvider(provider)
-                .setSubject('me').signWith(SignatureAlgorithms.HS256.generateKey(), alg)
+                .setSubject('me').signWith(SignatureAlgorithms.HS256.keyBuilder().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -107,7 +111,7 @@ class DefaultJwtBuilderTest {
         }
 
         def b = new DefaultJwtBuilder().setSecureRandom(random)
-                .setSubject('me').signWith(SignatureAlgorithms.HS256.generateKey(), alg)
+                .setSubject('me').signWith(SignatureAlgorithms.HS256.keyBuilder().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]

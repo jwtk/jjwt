@@ -7,10 +7,10 @@ import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Arrays
 import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.Cipher
-import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import java.nio.charset.StandardCharsets
 
@@ -31,8 +31,8 @@ class AesGcmKeyAlgorithmTest {
         def iv = new byte[12];
         Randoms.secureRandom().nextBytes(iv);
 
-        def kek = alg.generateKey();
-        def cek = alg.generateKey();
+        def kek = alg.keyBuilder().build()
+        def cek = alg.keyBuilder().build()
 
         JcaTemplate template = new JcaTemplate("AES/GCM/NoPadding", null)
         byte[] jcaResult = template.execute(Cipher.class, new CheckedFunction<Cipher, byte[]>() {
@@ -72,8 +72,8 @@ class AesGcmKeyAlgorithmTest {
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
-            SecretKey generateKey() {
-                return cek;
+            SecretKeyBuilder keyBuilder() {
+                return new FixedSecretKeyBuilder(cek)
             }
         }
 
@@ -107,8 +107,8 @@ class AesGcmKeyAlgorithmTest {
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
-            SecretKey generateKey() {
-                return cek
+            SecretKeyBuilder keyBuilder() {
+                return new FixedSecretKeyBuilder(cek)
             }
         }
         def ereq = new DefaultKeyRequest(null, null, kek, header, enc)
@@ -129,12 +129,15 @@ class AesGcmKeyAlgorithmTest {
     String missing(String name) {
         return "JWE header is missing required '${name}' value." as String
     }
+
     String type(String name) {
         return "JWE header '${name}' value must be a String. Actual type: java.lang.Integer" as String
     }
+
     String base64Url(String name) {
         return "JWE header '${name}' value is not a valid Base64URL String: Illegal base64url character: '#'"
     }
+
     String length(String name, int requiredBitLength) {
         return "JWE header '${name}' decoded byte array must be ${Bytes.bitsMsg(requiredBitLength)} long. Actual length: ${Bytes.bitsMsg(16)}."
     }

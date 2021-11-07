@@ -30,7 +30,7 @@ import static org.junit.Assert.*
 
 class JwksTest {
 
-    private static final SecretKey SKEY = SignatureAlgorithms.HS256.generateKey();
+    private static final SecretKey SKEY = SignatureAlgorithms.HS256.keyBuilder().build()
     private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.generateKeyPair();
 
     private static String srandom() {
@@ -184,7 +184,7 @@ class JwksTest {
     void testSecretJwks() {
         Collection<SecretKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({it instanceof SecretKeySignatureAlgorithm}) as Collection<SecretKeySignatureAlgorithm>
         for(def alg : algs) {
-            SecretKey secretKey = alg.generateKey()
+            SecretKey secretKey = alg.keyBuilder().build()
             def jwk = Jwks.builder().setKey(secretKey).setId('id').build()
             assertEquals 'oct', jwk.getType()
             assertTrue jwk.containsKey('k')

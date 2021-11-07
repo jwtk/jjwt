@@ -1,9 +1,14 @@
 package io.jsonwebtoken.impl.lang;
 
+import io.jsonwebtoken.lang.Builder;
+
 import java.util.List;
 import java.util.Set;
 
-public interface FieldBuilder<T> {
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
+public interface FieldBuilder<T> extends Builder<Field<T>> {
 
     FieldBuilder<T> setId(String id);
 
@@ -18,7 +23,4 @@ public interface FieldBuilder<T> {
     FieldBuilder<Set<T>> set();
 
     FieldBuilder<T> setConverter(Converter<T, ?> converter);
-
-    Field<T> build();
-
 }

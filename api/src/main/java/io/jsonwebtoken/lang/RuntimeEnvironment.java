@@ -19,9 +19,16 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * No longer used by JJWT.  Will be removed before the 1.0 final release.
+ *
+ * @deprecated will be removed before the 1.0 final release.
+ */
+@Deprecated
 public final class RuntimeEnvironment {
 
-    private RuntimeEnvironment(){} //prevent instantiation
+    private RuntimeEnvironment() {
+    } //prevent instantiation
 
     private static final String BC_PROVIDER_CLASS_NAME = "org.bouncycastle.jce.provider.BouncyCastleProvider";
 
@@ -36,13 +43,13 @@ public final class RuntimeEnvironment {
         }
 
         try {
-            Class clazz = Classes.forName(BC_PROVIDER_CLASS_NAME);
+            Class<Provider> clazz = Classes.forName(BC_PROVIDER_CLASS_NAME);
 
             //check to see if the user has already registered the BC provider:
 
             Provider[] providers = Security.getProviders();
 
-            for(Provider provider : providers) {
+            for (Provider provider : providers) {
                 if (clazz.isInstance(provider)) {
                     bcLoaded.set(true);
                     return;
@@ -50,7 +57,8 @@ public final class RuntimeEnvironment {
             }
 
             //bc provider not enabled - add it:
-            Security.addProvider((Provider)Classes.newInstance(clazz));
+            Provider provider = Classes.newInstance(clazz);
+            Security.addProvider(provider);
             bcLoaded.set(true);
 
         } catch (UnknownClassException e) {

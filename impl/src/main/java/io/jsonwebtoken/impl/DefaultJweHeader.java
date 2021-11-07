@@ -44,7 +44,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
 //    }
 
     @Override
-    public int getPbes2Count() {
+    public Integer getPbes2Count() {
         return idiomaticGet(P2C);
     }
 

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.lang.Builder;
+
 import java.security.Key;
 import java.security.Provider;
 import java.util.Map;
@@ -23,7 +25,7 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> {
+public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends Builder<J> {
 
     T put(String name, Object value);
 
@@ -44,6 +46,4 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * @return the builder for method chaining.
      */
     T setProvider(Provider provider);
-
-    J build();
 }

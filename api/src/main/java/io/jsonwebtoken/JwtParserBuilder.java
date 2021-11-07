@@ -17,6 +17,7 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
@@ -38,7 +39,7 @@ import java.util.Map;
  * }</pre>
  * @since 0.11.0
  */
-public interface JwtParserBuilder {
+public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Enables parsing of Unsecured JWSs (JWTs an 'alg' (Algorithm) header value of

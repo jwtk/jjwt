@@ -1,22 +1,30 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.CheckedSupplier;
+import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AssociatedDataSupplier;
 import io.jsonwebtoken.security.InitializationVectorSupplier;
+import io.jsonwebtoken.security.KeyBuilderSupplier;
+import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeySupplier;
-import io.jsonwebtoken.security.SecretKeyGenerator;
+import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecurityRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
-abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerator {
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
+abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplier<SecretKey, SecretKeyBuilder>, KeyLengthSupplier {
 
     protected static final String KEY_ALG_NAME = "AES";
     protected static final int BLOCK_SIZE = 128;
@@ -32,7 +40,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerato
     protected final int tagBitLength;
     protected final boolean gcm;
 
-    AesAlgorithm(String id, String jcaTransformation, int keyBitLength) {
+    AesAlgorithm(String id, final String jcaTransformation, int keyBitLength) {
         super(id, jcaTransformation);
         Assert.isTrue(keyBitLength == 128 || keyBitLength == 192 || keyBitLength == 256, "Invalid AES key length: it must equal 128, 192, or 256.");
         this.keyBitLength = keyBitLength;
@@ -40,12 +48,27 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements SecretKeyGenerato
         this.ivBitLength = jcaTransformation.equals("AESWrap") ? 0 : (this.gcm ? GCM_IV_SIZE : BLOCK_SIZE);
         // https://tools.ietf.org/html/rfc7518#section-5.2.3 through https://tools.ietf.org/html/rfc7518#section-5.3 :
         this.tagBitLength = this.gcm ? BLOCK_SIZE : this.keyBitLength;
+
+        // GCM mode only available on JDK 8 and later, so enable BC as a backup provider if necessary for <= JDK 7:
+        // TODO: remove when dropping JDK 7:
+        if (this.gcm) {
+            setProvider(Providers.getBouncyCastle(Conditions.notExists(new CheckedSupplier<Cipher>() {
+                @Override
+                public Cipher get() throws Exception {
+                    return Cipher.getInstance(jcaTransformation);
+                }
+            })));
+        }
     }
 
     @Override
-    public SecretKey generateKey() {
-        return new JcaTemplate(KEY_ALG_NAME, null).generateSecretKey(this.keyBitLength);
-        //TODO: assert generated key length?
+    public int getKeyBitLength() {
+        return this.keyBitLength;
+    }
+
+    @Override
+    public SecretKeyBuilder keyBuilder() {
+        return new DefaultSecretKeyBuilder(KEY_ALG_NAME, getKeyBitLength());
     }
 
     protected SecretKey assertKey(KeySupplier<? extends SecretKey> request) {

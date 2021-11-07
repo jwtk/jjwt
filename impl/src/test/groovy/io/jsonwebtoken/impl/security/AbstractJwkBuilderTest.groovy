@@ -1,17 +1,20 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.*
+
+import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.Jwk
+import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.MalformedKeyException
+import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import java.security.Security
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.*
 
 class AbstractJwkBuilderTest {
 
-    private static final SecretKey SKEY = EncryptionAlgorithms.A256GCM.generateKey()
+    private static final SecretKey SKEY = EncryptionAlgorithms.A256GCM.keyBuilder().build()
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
         return (AbstractJwkBuilder)Jwks.builder().setKey(SKEY)
@@ -105,7 +108,7 @@ class AbstractJwkBuilderTest {
 
     @Test
     void testProvider() {
-        def provider = Security.getProvider("BC")
+        def provider = Providers.getBouncyCastleProviderIfPossible()
         def jwk = builder().setProvider(provider).build()
         assertEquals 'oct', jwk.getType()
     }

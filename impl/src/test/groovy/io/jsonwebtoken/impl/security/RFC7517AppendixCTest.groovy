@@ -9,6 +9,7 @@ import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.security.KeyRequest
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.PasswordKey
+import io.jsonwebtoken.security.SecretKeyBuilder
 import io.jsonwebtoken.security.SecurityRequest
 import org.junit.Test
 
@@ -273,8 +274,8 @@ class RFC7517AppendixCTest {
         //ensure that the KeyAlgorithm reflects test harness values:
         def encAlg = new HmacAesAeadAlgorithm(128) {
             @Override
-            SecretKey generateKey() {
-                return RFC_CEK
+            SecretKeyBuilder keyBuilder() {
+                return new FixedSecretKeyBuilder(RFC_CEK)
             }
 
             @Override

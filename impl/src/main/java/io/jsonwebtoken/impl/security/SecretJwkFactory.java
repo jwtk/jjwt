@@ -10,6 +10,9 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
     SecretJwkFactory() {
@@ -59,7 +62,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
     protected SecretJwk createJwkFromValues(JwkContext<SecretKey> ctx) {
         ValueGetter getter = new DefaultValueGetter(ctx);
         byte[] bytes = getter.getRequiredBytes(DefaultSecretJwk.K.getId());
-        SecretKey key = new SecretKeySpec(bytes, "NONE"); //TODO: do we need a JCA-specific ID here?
+        SecretKey key = new SecretKeySpec(bytes, "AES");
         ctx.setKey(key);
         return new DefaultSecretJwk(ctx);
     }

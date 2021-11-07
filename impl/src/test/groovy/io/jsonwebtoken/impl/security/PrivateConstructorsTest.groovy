@@ -1,8 +1,9 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.Conditions
 import org.junit.Test
 
-class BridgeConstructorsTest {
+class PrivateConstructorsTest {
 
     @Test
     void testPrivateCtors() { // for code coverage only
@@ -10,5 +11,6 @@ class BridgeConstructorsTest {
         new EncryptionAlgorithmsBridge()
         new KeyAlgorithmsBridge()
         new KeysBridge()
+        new Conditions()
     }
 }

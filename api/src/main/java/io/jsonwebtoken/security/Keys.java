@@ -116,7 +116,7 @@ public final class Keys {
      * @throws IllegalArgumentException for any input value other than {@link io.jsonwebtoken.SignatureAlgorithm#HS256},
      *                                  {@link io.jsonwebtoken.SignatureAlgorithm#HS384}, or {@link io.jsonwebtoken.SignatureAlgorithm#HS512}
      * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link SecretKeySignatureAlgorithm} instance's
-     * {@link SecretKeySignatureAlgorithm#generateKey() generateKey()} method directly.
+     * {@link SecretKeySignatureAlgorithm#keyBuilder() keyBuilder()} method directly.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -127,7 +127,7 @@ public final class Keys {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
         }
-        return ((SecretKeySignatureAlgorithm) salg).generateKey();
+        return ((SecretKeySignatureAlgorithm) salg).keyBuilder().build();
     }
 
     /**
