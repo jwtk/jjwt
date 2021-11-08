@@ -40,7 +40,7 @@ class Issue542Test {
         def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
 
         for (alg in algs) {
-            PublicKey key = CertUtils.readTestPublicKey(alg)
+            PublicKey key = TestCertificates.readTestPublicKey(alg)
             String jws = JWS_0_10_7_VALUES[alg]
             def token = Jwts.parser().setSigningKey(key).parseClaimsJws(jws)
             assert 'joe' == token.body.getIssuer()
@@ -54,7 +54,7 @@ class Issue542Test {
     static void main(String[] args) {
         def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
         for (alg in algs) {
-            PrivateKey privateKey = CertUtils.readTestPrivateKey(alg)
+            PrivateKey privateKey = TestCertificates.readTestPrivateKey(alg)
             String jws = Jwts.builder().setIssuer('joe').signWith(privateKey, alg).compact()
             println "private static String ${alg.id()}_0_10_7 = '$jws'"
         }

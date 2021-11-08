@@ -3,21 +3,19 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPublicJwkBuilder
-import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
 import java.security.cert.X509Certificate
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
+import static org.junit.Assert.*
 
 class AbstractAsymmetricJwkBuilderTest {
 
-    private static final X509Certificate CERT = CertUtils.readTestCertificate(SignatureAlgorithms.RS256)
+    private static final X509Certificate CERT = TestKeys.RS256.cert
     private static final List<X509Certificate> CHAIN = [CERT]
-    private static final RSAPublicKey PUB_KEY = (RSAPublicKey) CERT.getPublicKey()
+    private static final RSAPublicKey PUB_KEY = CERT.getPublicKey() as RSAPublicKey
 
     private static RsaPublicJwkBuilder builder() {
         return Jwks.builder().setKey(PUB_KEY)
@@ -30,9 +28,9 @@ class AbstractAsymmetricJwkBuilderTest {
         assertEquals val, jwk.getPublicKeyUse()
         assertEquals val, jwk.use
 
-        def privateKey = CertUtils.readTestPrivateKey(SignatureAlgorithms.RS256)
+        RSAPrivateKey privateKey = TestKeys.RS256.pair.private as RSAPrivateKey
 
-        jwk = builder().setPublicKeyUse(val).setPrivateKey((RSAPrivateKey) privateKey).build()
+        jwk = builder().setPublicKeyUse(val).setPrivateKey(privateKey).build()
         assertEquals val, jwk.getPublicKeyUse()
         assertEquals val, jwk.use
     }

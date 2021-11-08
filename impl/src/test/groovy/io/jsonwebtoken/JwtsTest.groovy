@@ -25,6 +25,7 @@ import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.DirectKeyAlgorithm
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm
+import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
@@ -673,7 +674,7 @@ class JwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPrivateKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = SignatureAlgorithms.RS256.generateKeyPair()
+        KeyPair kp = TestKeys.RS256.pair
         PublicKey publicKey = kp.getPublic()
         PrivateKey privateKey = kp.getPrivate()
 
@@ -705,7 +706,7 @@ class JwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPublicKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = SignatureAlgorithms.RS256.generateKeyPair()
+        KeyPair kp = TestKeys.RS256.pair
         PublicKey publicKey = kp.getPublic()
         //PrivateKey privateKey = kp.getPrivate();
 
@@ -736,8 +737,8 @@ class JwtsTest {
     @Test
     void testParseForgedEllipticCurvePublicKeyAsHmacToken() {
 
-        //Create a legitimate RSA public and private key pair:
-        KeyPair kp = SignatureAlgorithms.ES256.generateKeyPair()
+        //Create a legitimate EC public and private key pair:
+        KeyPair kp = TestKeys.ES256.pair
         PublicKey publicKey = kp.getPublic()
         //PrivateKey privateKey = kp.getPrivate();
 
@@ -879,11 +880,7 @@ class JwtsTest {
     @Test
     void testRsaJwes() {
 
-        def pairs = [
-                SignatureAlgorithms.RS256.generateKeyPair(),
-                SignatureAlgorithms.RS384.generateKeyPair(),
-                SignatureAlgorithms.RS512.generateKeyPair()
-        ]
+        def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
         def algs = KeyAlgorithms.values().findAll({ it ->
             it instanceof RsaKeyAlgorithm
@@ -919,11 +916,7 @@ class JwtsTest {
     @Test
     void testEcJwes() {
 
-        def pairs = [
-                SignatureAlgorithms.ES256.generateKeyPair(),
-                SignatureAlgorithms.ES384.generateKeyPair(),
-                SignatureAlgorithms.ES512.generateKeyPair()
-        ]
+        def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
         def algs = KeyAlgorithms.values().findAll({ it ->
             it instanceof EcKeyAlgorithm
@@ -958,7 +951,7 @@ class JwtsTest {
 
     static void testRsa(AsymmetricKeySignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
-        KeyPair kp = alg.generateKeyPair()
+        KeyPair kp = TestKeys.forAlgorithm(alg).pair
         PublicKey publicKey = kp.getPublic()
         PrivateKey privateKey = kp.getPrivate()
 
@@ -994,7 +987,7 @@ class JwtsTest {
 
     static void testEC(AsymmetricKeySignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
-        KeyPair pair = alg.generateKeyPair()
+        KeyPair pair = TestKeys.forAlgorithm(alg).pair
         PublicKey publicKey = pair.getPublic()
         PrivateKey privateKey = pair.getPrivate()
 

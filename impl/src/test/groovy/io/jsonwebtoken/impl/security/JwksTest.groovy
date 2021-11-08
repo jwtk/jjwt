@@ -139,7 +139,7 @@ class JwksTest {
     @Test
     void testX509CertChain() {
         //get a test cert:
-        X509Certificate cert = CertUtils.readTestCertificate(SignatureAlgorithms.RS256)
+        X509Certificate cert = TestCertificates.readTestCertificate(SignatureAlgorithms.RS256)
         def sval = JwtX509StringConverter.INSTANCE.applyTo(cert)
         testProperty('x509CertificateChain', 'x5c', [cert], [sval])
     }
@@ -159,7 +159,7 @@ class JwksTest {
 
         for(def alg : algs) {
             //get test cert:
-            X509Certificate cert = CertUtils.readTestCertificate(alg)
+            X509Certificate cert = TestCertificates.readTestCertificate(alg)
             def pubKey = cert.getPublicKey()
 
             def builder = pubKey instanceof RSAPublicKey ?

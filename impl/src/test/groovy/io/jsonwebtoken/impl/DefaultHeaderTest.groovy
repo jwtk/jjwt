@@ -16,40 +16,42 @@
 package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Header
+import org.junit.Before
 import org.junit.Test
-import static org.junit.Assert.*
+
+import static org.junit.Assert.assertEquals
 
 class DefaultHeaderTest {
+    
+    private DefaultHeader header
+    
+    @Before
+    void setUp() {
+        header = new DefaultHeader()
+    }
 
     @Test
     void testType() {
-
-        def h = new DefaultHeader()
-
-        h.setType('foo')
-        assertEquals h.getType(), 'foo'
+        header.setType('foo')
+        assertEquals header.getType(), 'foo'
     }
 
     @Test
     void testContentType() {
-
-        def h = new DefaultHeader()
-
-        h.setContentType('bar')
-        assertEquals h.getContentType(), 'bar'
+        header.setContentType('bar')
+        assertEquals header.getContentType(), 'bar'
     }
 
     @Test
     void testSetCompressionAlgorithm() {
-        def h = new DefaultHeader()
-        h.setCompressionAlgorithm("DEF")
-        assertEquals "DEF", h.getCompressionAlgorithm()
+        header.setCompressionAlgorithm("DEF")
+        assertEquals "DEF", header.getCompressionAlgorithm()
     }
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
     @Test
     void testBackwardsCompatibleCompressionHeader() {
-        def h = new DefaultHeader()
-        h.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
-        assertEquals "DEF", h.getCompressionAlgorithm()
+        header.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
+        assertEquals "DEF", header.getCompressionAlgorithm()
     }
 }

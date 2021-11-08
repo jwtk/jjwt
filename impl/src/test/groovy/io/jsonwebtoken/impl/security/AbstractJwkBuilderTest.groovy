@@ -1,7 +1,6 @@
 package io.jsonwebtoken.impl.security
 
 
-import io.jsonwebtoken.security.EncryptionAlgorithms
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
@@ -14,7 +13,7 @@ import static org.junit.Assert.*
 
 class AbstractJwkBuilderTest {
 
-    private static final SecretKey SKEY = EncryptionAlgorithms.A256GCM.keyBuilder().build()
+    private static final SecretKey SKEY = TestKeys.A256GCM
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
         return (AbstractJwkBuilder)Jwks.builder().setKey(SKEY)

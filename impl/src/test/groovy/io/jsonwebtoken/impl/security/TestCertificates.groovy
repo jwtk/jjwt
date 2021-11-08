@@ -1,10 +1,12 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
 import io.jsonwebtoken.security.SignatureAlgorithm
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
 
@@ -28,7 +30,7 @@ import java.security.cert.X509Certificate
  *   1) be used in Test classes only, and
  *   2) encapsulate the BouncyCastle API so it is not exposed to other Test classes.
  */
-class CertUtils {
+class TestCertificates {
 
     private static JcaX509CertificateConverter X509_CERT_CONVERTER = new JcaX509CertificateConverter()
     private static JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter()
@@ -49,16 +51,28 @@ class CertUtils {
     }
 
     static PublicKey readTestPublicKey(SignatureAlgorithm alg) {
-        return readTestCertificate(alg).getPublicKey();
+        return readTestCertificate(alg).getPublicKey()
     }
 
     static PrivateKey readTestPrivateKey(SignatureAlgorithm alg) {
         PEMParser parser = getParser(alg.getId() + '.key.pem')
         try {
-            PrivateKeyInfo info = parser.readObject() as PrivateKeyInfo
+            PrivateKeyInfo info
+            Object object = parser.readObject()
+            if (object instanceof PEMKeyPair) {
+                info = ((PEMKeyPair)object).getPrivateKeyInfo()
+            } else {
+                info = (PrivateKeyInfo)object
+            }
             return PEM_KEY_CONVERTER.getPrivateKey(info)
         } finally {
             parser.close()
         }
+    }
+
+    static TestKeys.Bundle readAsymmetricBundle(AsymmetricKeySignatureAlgorithm alg) {
+        X509Certificate cert = readTestCertificate(alg)
+        PrivateKey priv = readTestPrivateKey(alg)
+        return new TestKeys.Bundle(cert, priv)
     }
 }

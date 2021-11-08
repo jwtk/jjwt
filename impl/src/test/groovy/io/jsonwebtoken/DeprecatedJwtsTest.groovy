@@ -21,11 +21,11 @@ import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.SignatureAlgorithms
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -616,7 +616,7 @@ class DeprecatedJwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPrivateKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = SignatureAlgorithms.RS256.generateKeyPair()
+        KeyPair kp = TestKeys.RS256.pair
         PublicKey publicKey = kp.getPublic()
         PrivateKey privateKey = kp.getPrivate()
 
@@ -648,7 +648,7 @@ class DeprecatedJwtsTest {
     void testParseForgedRsaPublicKeyAsHmacTokenVerifiedWithTheRsaPublicKey() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = SignatureAlgorithms.RS256.generateKeyPair()
+        KeyPair kp = TestKeys.RS256.pair
         PublicKey publicKey = kp.getPublic();
         //PrivateKey privateKey = kp.getPrivate();
 
@@ -680,7 +680,7 @@ class DeprecatedJwtsTest {
     void testParseForgedEllipticCurvePublicKeyAsHmacToken() {
 
         //Create a legitimate RSA public and private key pair:
-        KeyPair kp = SignatureAlgorithms.ES256.generateKeyPair()
+        KeyPair kp = TestKeys.ES256.pair
         PublicKey publicKey = kp.getPublic();
         //PrivateKey privateKey = kp.getPrivate();
 

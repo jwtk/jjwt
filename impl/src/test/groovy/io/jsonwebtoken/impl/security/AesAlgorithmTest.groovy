@@ -5,7 +5,6 @@ import io.jsonwebtoken.security.AeadAlgorithm
 import io.jsonwebtoken.security.AeadRequest
 import io.jsonwebtoken.security.AeadResult
 import io.jsonwebtoken.security.DecryptAeadRequest
-import io.jsonwebtoken.security.EncryptionAlgorithms
 import io.jsonwebtoken.security.PayloadSupplier
 import io.jsonwebtoken.security.SecurityException
 import org.junit.Test
@@ -30,7 +29,7 @@ class AesAlgorithmTest {
 
         def alg = new TestAesAlgorithm('foo', 'foo', 192)
 
-        def key = EncryptionAlgorithms.A128GCM.keyBuilder().build() //weaker than required
+        def key = TestKeys.A128GCM //weaker than required
 
         def request = new DefaultCryptoRequest(null, null, new byte[1], key)
 

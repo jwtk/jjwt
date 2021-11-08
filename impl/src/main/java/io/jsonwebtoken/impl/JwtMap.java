@@ -133,7 +133,7 @@ public class JwtMap implements Map<String, Object> {
     // ensures that if a property name matches an RFC-specified name, that value can be represented
     // as an idiomatic type-safe Java value in addition to the canonical RFC/encoded value.
     private Object idiomaticPut(String name, Object value) {
-        assert name != null; //asserted by caller.
+        Assert.stateNotNull(name, "Name cannot be null."); // asserted by caller
         Field<?> field = FIELDS.get(name);
         if (field != null) { //Setting a JWA-standard property - let's ensure we can represent it idiomatically:
             return apply(field, value);
