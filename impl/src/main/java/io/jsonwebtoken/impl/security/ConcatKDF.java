@@ -37,8 +37,17 @@ final class ConcatKDF extends CryptoAlgorithm {
             }
         });
         this.hashBitLength = hashByteLength * Byte.SIZE;
-        assert this.hashBitLength > 0 : "MessageDigest length must be a positive value.";
-        MAX_DERIVED_KEY_BIT_LENGTH = this.hashBitLength * MAX_REP_COUNT;
+        Assert.state(this.hashBitLength > 0, "MessageDigest length must be a positive value.");
+
+        // NIST.SP.800-56Ar2.pdf, Section 5.8.1.1, Input requirement #2 says that the maximum bit length of the
+        // derived key cannot be more than this:
+        //
+        // hashBitLength * (2^32 - 1)
+        //
+        // However, this number is always greater than Integer.MAX_VALUE * Byte.SIZE, which is the maximum number of
+        // bits that can be represented in a Java byte array.  So our implementation must be limited to that size
+        // regardless of what the spec allows:
+        MAX_DERIVED_KEY_BIT_LENGTH = (long) Integer.MAX_VALUE * (long) Byte.SIZE;
     }
 
     /**
@@ -67,30 +76,26 @@ final class ConcatKDF extends CryptoAlgorithm {
 
         // derivedKeyBitLength argument assertions:
         Assert.isTrue(derivedKeyBitLength > 0, "derivedKeyBitLength must be a positive number.");
-        final long derivedKeyByteLength = derivedKeyBitLength / Byte.SIZE;
-        if (derivedKeyByteLength > Integer.MAX_VALUE) { // Java byte arrays can't be bigger than this
-            throw new IllegalArgumentException("derivedKeyBitLength cannot reflect a byte array size greater than Integer.MAX_VALUE.");
-        }
-        // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf, Section 5.8.1.1, Input requirement #2:
         if (derivedKeyBitLength > MAX_DERIVED_KEY_BIT_LENGTH) {
-            String msg = "derivedKeyBitLength for " + getJcaName() + "-derived keys may not exceed " +
-                bitsMsg(MAX_DERIVED_KEY_BIT_LENGTH) + ".  Specified size: " + bitsMsg(derivedKeyBitLength) + ".";
+            String msg = "derivedKeyBitLength may not exceed " + bitsMsg(MAX_DERIVED_KEY_BIT_LENGTH) +
+                ". Specified size: " + bitsMsg(derivedKeyBitLength) + ".";
             throw new IllegalArgumentException(msg);
         }
+        final long derivedKeyByteLength = derivedKeyBitLength / Byte.SIZE;
 
         // Section 5.8.1.1, Process step #1:
         final double repsd = derivedKeyBitLength / (double) this.hashBitLength;
         final long reps = (long) (Math.ceil(repsd));
 
         // Section 5.8.1.1, Process step #2:
-        assert reps <= MAX_REP_COUNT : "derivedKeyBitLength is too large.";
+        Assert.state(reps <= MAX_REP_COUNT, "derivedKeyBitLength is too large.");
 
         // Section 5.8.1.1, Process step #3:
         final byte[] counter = new byte[]{0, 0, 0, 1}; // same as 0x0001L, but no extra step to convert to byte[]
 
         // Section 5.8.1.1, Process step #4:
         long inputBitLength = bitLength(counter) + bitLength(Z) + bitLength(OtherInfo);
-        assert inputBitLength <= MAX_HASH_INPUT_BIT_LENGTH : "Hash input is too large.";
+        Assert.state(inputBitLength <= MAX_HASH_INPUT_BIT_LENGTH, "Hash input is too large.");
 
         byte[] derivedKeyBytes = new JcaTemplate(getJcaName(), null).execute(MessageDigest.class, new CheckedFunction<MessageDigest, byte[]>() {
             @Override

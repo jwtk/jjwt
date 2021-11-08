@@ -20,7 +20,7 @@ public class DefaultSecretKeyBuilder implements SecretKeyBuilder {
     public DefaultSecretKeyBuilder(String jcaName, int bitLength) {
         this.JCA_NAME = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
         if (bitLength % Byte.SIZE != 0) {
-            String msg = "bitLength must be a multiple of 8";
+            String msg = "bitLength must be an even multiple of 8";
             throw new IllegalArgumentException(msg);
         }
         this.BIT_LENGTH = Assert.gt(bitLength, 0, "bitLength must be > 0");

@@ -1,7 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Strings;
 
 import javax.crypto.SecretKey;
 
@@ -15,7 +14,7 @@ public class WrappedSecretKey implements SecretKey {
 
     public WrappedSecretKey(SecretKey key, String algorithm) {
         this.key = Assert.notNull(key, "SecretKey cannot be null.");
-        this.algorithm = Strings.hasText(algorithm) ? algorithm : key.getAlgorithm();
+        this.algorithm = Assert.hasText(algorithm, "Algorithm cannot be null or empty.");
     }
 
     @Override
