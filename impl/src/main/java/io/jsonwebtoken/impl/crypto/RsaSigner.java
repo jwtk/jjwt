@@ -30,7 +30,7 @@ public class RsaSigner extends RsaProvider implements Signer {
         super(alg, key);
         // https://github.com/jwtk/jjwt/issues/68
         // Instead of checking for an instance of RSAPrivateKey, check for PrivateKey and RSAKey:
-        if (!(key instanceof PrivateKey && key instanceof RSAKey)) {
+        if (!(key instanceof PrivateKey && (key instanceof RSAKey || "RSA".equals(key.getAlgorithm())))) {
             String msg = "RSA signatures must be computed using an RSA PrivateKey.  The specified key of type " +
                          key.getClass().getName() + " is not an RSA PrivateKey.";
             throw new IllegalArgumentException(msg);

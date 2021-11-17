@@ -29,7 +29,7 @@ public class EllipticCurveSigner extends EllipticCurveProvider implements Signer
 
     public EllipticCurveSigner(SignatureAlgorithm alg, Key key) {
         super(alg, key);
-        if (!(key instanceof PrivateKey && key instanceof ECKey)) {
+        if (!(key instanceof PrivateKey && (key instanceof ECKey || "EC".equals(key.getAlgorithm()) || "ECDSA".equals(key.getAlgorithm())))) {
             String msg = "Elliptic Curve signatures must be computed using an EC PrivateKey.  The specified key of " +
                          "type " + key.getClass().getName() + " is not an EC PrivateKey.";
             throw new IllegalArgumentException(msg);
