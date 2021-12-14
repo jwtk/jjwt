@@ -1,31 +1,80 @@
 name: CI
 
 on:
-  pull_request:
-    branches:
-      - master
+  pull_request: # all pull requests
   push:
     branches:
       - master
 
 jobs:
-  build:
+  hotspot:
     strategy:
       matrix:
-        java: [ '7', '8',  '11' ]
+        java: [ '8', '11' ]
     runs-on: 'ubuntu-latest'
     env:
       MVN_CMD: ./mvnw --no-transfer-progress -B
+    name: java-${{ matrix.java }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK
-      uses: actions/setup-java@v2
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: 'zulu'
-        cache: 'maven'
-    - name: Build
-      run: ${{env.MVN_CMD}} clean install
-    - name: Code coverage
-      if:  ${{matrix.java}} != '7'
-      run: ${{env.MVN_CMD}} clean clover:setup test && ${{env.MVN_CMD}} -pl . clover:clover clover:check coveralls:report;
+      - uses: actions/checkout@v2.4.0
+      - name: Set up JDK
+        uses: actions/setup-java@v2.4.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build
+        run: ${{env.MVN_CMD}} verify
+      - name: Code coverage
+        if:  matrix.java == '8'
+        run: |
+          ${{env.MVN_CMD}} clean clover:setup test
+          ${{env.MVN_CMD}} -pl . clover:clover clover:check coveralls:report \
+            -DrepoToken="${{ secrets.GITHUB_TOKEN }}" \
+            -DserviceName=github \
+            -DserviceBuildNumber="${{ env.GITHUB_RUN_ID }}"
+
+  zulu:
+    strategy:
+      matrix:
+        java: [ '9', '10', '14' ]
+    runs-on: 'ubuntu-latest'
+    env:
+      MVN_CMD: ./mvnw --no-transfer-progress -B
+    name: java-${{ matrix.java }}
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Set up JDK
+        uses: actions/setup-java@v2.4.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+          cache: 'maven'
+      - name: Build
+        run: ${{env.MVN_CMD}} verify
+
+  java-7:
+    runs-on: 'ubuntu-latest'
+    env:
+      MVN_CMD: ./mvnw --no-transfer-progress -B
+      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - run: |
+          download_url="https://238dj3282as03k369.s3-us-west-1.amazonaws.com/jdk-7u80-linux-x64.tar.gz"
+          wget -O $RUNNER_TEMP/java_package.tar.gz $download_url
+      - name: Set up JDK
+        uses: actions/setup-java@v2.4.0
+        with:
+          distribution: 'jdkfile'
+          jdkFile: ${{ runner.temp }}/java_package.tar.gz
+          java-version: '7'
+          architecture: x64
+          cache: 'maven'
+      - name: "Download and install JCE Unlimited Strength Crypto policies for Oracle JDK 7"
+        run: |
+          curl -q -L -C - https://238dj3282as03k369.s3-us-west-1.amazonaws.com/UnlimitedJCEPolicyJDK7.zip -o $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip
+          unzip -oj -d "$JAVA_HOME/jre/lib/security" $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip \*/\*.jar
+          rm $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip
+      - name: Build
+        run: ${{env.MVN_CMD}} verify
