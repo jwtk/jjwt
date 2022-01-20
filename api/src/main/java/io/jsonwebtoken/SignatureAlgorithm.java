@@ -394,50 +394,63 @@ public enum SignatureAlgorithm {
                     String msg = familyName + " signing keys must be PrivateKey instances.";
                     throw new InvalidKeyException(msg);
                 }
-            }
-
-            if (isEllipticCurve()) {
-
-                if (!(key instanceof ECKey)) {
-                    String msg = familyName + " " + keyType(signing) + " keys must be ECKey instances.";
-                    throw new InvalidKeyException(msg);
+                if (isEllipticCurve()) {
+                    if (!(key instanceof ECKey || "EC".equals(key.getAlgorithm()) || "ECDSA".equals(key.getAlgorithm()))) {
+                        String msg = "Elliptic Curve signatures must be computed using an EC PrivateKey.  The specified key of " +
+                            "type " + key.getClass().getName() + " is not an EC PrivateKey.";
+                        throw new InvalidKeyException(msg);
+                    }
+                } else { //RSA
+                    if (!(key instanceof RSAKey || "RSA".equals(key.getAlgorithm()))) {
+                        String msg = "RSA signatures must be computed using an RSA PrivateKey.  The specified key of type " +
+                            key.getClass().getName() + " is not an RSA PrivateKey.";
+                        throw new InvalidKeyException(msg);
+                    }
                 }
+            } else {
+                if (isEllipticCurve()) {
 
-                ECKey ecKey = (ECKey) key;
-                int size = ecKey.getParams().getOrder().bitLength();
-                if (size < this.minKeyLength) {
-                    String msg = "The " + keyType(signing) + " key's size (ECParameterSpec order) is " + size +
-                        " bits which is not secure enough for the " + name() + " algorithm.  The JWT " +
-                        "JWA Specification (RFC 7518, Section 3.4) states that keys used with " +
-                        name() + " MUST have a size >= " + this.minKeyLength +
-                        " bits.  Consider using the " + Keys.class.getName() + " class's " +
-                        "'keyPairFor(SignatureAlgorithm." + name() + ")' method to create a key pair guaranteed " +
-                        "to be secure enough for " + name() + ".  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-3.4 for more information.";
-                    throw new WeakKeyException(msg);
-                }
+                    if (!(key instanceof ECKey)) {
+                        String msg = familyName + " " + keyType(false) + " keys must be ECKey instances.";
+                        throw new InvalidKeyException(msg);
+                    }
 
-            } else { //RSA
+                    ECKey ecKey = (ECKey) key;
+                    int size = ecKey.getParams().getOrder().bitLength();
+                    if (size < this.minKeyLength) {
+                        String msg = "The " + keyType(false) + " key's size (ECParameterSpec order) is " + size +
+                            " bits which is not secure enough for the " + name() + " algorithm.  The JWT " +
+                            "JWA Specification (RFC 7518, Section 3.4) states that keys used with " +
+                            name() + " MUST have a size >= " + this.minKeyLength +
+                            " bits.  Consider using the " + Keys.class.getName() + " class's " +
+                            "'keyPairFor(SignatureAlgorithm." + name() + ")' method to create a key pair guaranteed " +
+                            "to be secure enough for " + name() + ".  See " +
+                            "https://tools.ietf.org/html/rfc7518#section-3.4 for more information.";
+                        throw new WeakKeyException(msg);
+                    }
 
-                if (!(key instanceof RSAKey)) {
-                    String msg = familyName + " " + keyType(signing) + " keys must be RSAKey instances.";
-                    throw new InvalidKeyException(msg);
-                }
+                } else { //RSA
 
-                RSAKey rsaKey = (RSAKey) key;
-                int size = rsaKey.getModulus().bitLength();
-                if (size < this.minKeyLength) {
+                    if (!(key instanceof RSAKey)) {
+                        String msg = familyName + " " + keyType(false) + " keys must be RSAKey instances.";
+                        throw new InvalidKeyException(msg);
+                    }
 
-                    String section = name().startsWith("P") ? "3.5" : "3.3";
+                    RSAKey rsaKey = (RSAKey) key;
+                    int size = rsaKey.getModulus().bitLength();
+                    if (size < this.minKeyLength) {
 
-                    String msg = "The " + keyType(signing) + " key's size is " + size + " bits which is not secure " +
-                        "enough for the " + name() + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
-                        section + ") states that keys used with " + name() + " MUST have a size >= " +
-                        this.minKeyLength + " bits.  Consider using the " + Keys.class.getName() + " class's " +
-                        "'keyPairFor(SignatureAlgorithm." + name() + ")' method to create a key pair guaranteed " +
-                        "to be secure enough for " + name() + ".  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
-                    throw new WeakKeyException(msg);
+                        String section = name().startsWith("P") ? "3.5" : "3.3";
+
+                        String msg = "The " + keyType(false) + " key's size is " + size + " bits which is not secure " +
+                            "enough for the " + name() + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
+                            section + ") states that keys used with " + name() + " MUST have a size >= " +
+                            this.minKeyLength + " bits.  Consider using the " + Keys.class.getName() + " class's " +
+                            "'keyPairFor(SignatureAlgorithm." + name() + ")' method to create a key pair guaranteed " +
+                            "to be secure enough for " + name() + ".  See " +
+                            "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
+                        throw new WeakKeyException(msg);
+                    }
                 }
             }
         }

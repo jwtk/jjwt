@@ -514,43 +514,16 @@ class SignatureAlgorithmTest {
         for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
 
             PrivateKey key = createMock(PrivateKey)
+            expect(key.getAlgorithm()).andStubReturn("unknown")
+            replay key
 
             try {
                 alg.assertValidSigningKey(key)
                 fail()
             } catch (InvalidKeyException expected) {
-                assertEquals 'ECDSA signing keys must be ECKey instances.', expected.message
+                assertEquals "Elliptic Curve signatures must be computed using an EC PrivateKey.  " +
+                        "The specified key of type ${key.getClass().getName()} is not an EC PrivateKey." as String, expected.message
             }
-        }
-    }
-
-    @Test
-    void testAssertValidECSigningKeyInsufficientKeyLength() {
-
-        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isEllipticCurve() }) {
-
-            ECPrivateKey key = createMock(ECPrivateKey)
-            ECParameterSpec spec = createMock(ECParameterSpec)
-            BigInteger order = bigInteger(alg.minKeyLength - 8) //one less byte
-            expect(key.getParams()).andStubReturn(spec)
-            expect(spec.getOrder()).andStubReturn(order)
-
-            replay key, spec
-
-            try {
-                alg.assertValidSigningKey(key)
-                fail()
-            } catch (InvalidKeyException expected) {
-                assertEquals "The signing key's size (ECParameterSpec order) is ${order.bitLength()} bits " +
-                        "which is not secure enough for the ${alg.name()} algorithm.  The JWT JWA Specification " +
-                        "(RFC 7518, Section 3.4) states that keys used with ${alg.name()} MUST have a size >= " +
-                        "${alg.minKeyLength} bits.  Consider using the ${Keys.class.getName()} class's " +
-                        "'keyPairFor(SignatureAlgorithm.${alg.name()})' method to create a key pair guaranteed " +
-                        "to be secure enough for ${alg.name()}.  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-3.4 for more information." as String, expected.message
-            }
-
-            verify key, spec
         }
     }
 
@@ -602,38 +575,9 @@ class SignatureAlgorithmTest {
                 alg.assertValidSigningKey(key)
                 fail()
             } catch (InvalidKeyException expected) {
-                assertEquals 'RSA signing keys must be RSAKey instances.', expected.message
+                assertEquals "RSA signatures must be computed using an RSA PrivateKey.  " +
+                        "The specified key of type ${key.getClass().getName()} is not an RSA PrivateKey." as String, expected.message
             }
-        }
-    }
-
-    @Test
-    void testAssertValidRSASigningKeyInsufficientKeyLength() {
-
-        for (SignatureAlgorithm alg : SignatureAlgorithm.values().findAll { it.isRsa() }) {
-
-            String section = alg.name().startsWith("P") ? "3.5" : "3.3"
-
-            RSAPrivateKey key = createMock(RSAPrivateKey)
-            BigInteger modulus = bigInteger(alg.minKeyLength - 8) // 1 less byte
-            expect(key.getModulus()).andStubReturn(modulus)
-
-            replay key
-
-            try {
-                alg.assertValidSigningKey(key)
-                fail()
-            } catch (InvalidKeyException expected) {
-                assertEquals "The signing key's size is ${modulus.bitLength()} bits which is not secure " +
-                        "enough for the ${alg.name()} algorithm.  The JWT JWA Specification " +
-                        "(RFC 7518, Section ${section}) states that keys used with ${alg.name()} MUST have a size >= " +
-                        "${alg.minKeyLength} bits.  Consider using the ${Keys.class.getName()} class's " +
-                        "'keyPairFor(SignatureAlgorithm.${alg.name()})' method to create a key pair guaranteed " +
-                        "to be secure enough for ${alg.name()}.  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-${section} for more information." as String, expected.message
-            }
-
-            verify key
         }
     }
 
