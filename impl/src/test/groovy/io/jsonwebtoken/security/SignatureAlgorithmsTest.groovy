@@ -3,6 +3,9 @@ package io.jsonwebtoken.security
 import io.jsonwebtoken.UnsupportedJwtException
 import org.junit.Test
 
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
+
 import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertSame
 
@@ -51,5 +54,15 @@ class SignatureAlgorithmsTest {
     void testFindByIdWithInvalidId() {
         // 'find' paradigm can return null if not found
         assertNull SignatureAlgorithms.findById('invalid')
+    }
+
+    @Test
+    void testOtherMacTypeAlg() {
+        byte[] bytes = new byte[48]
+        new Random().nextBytes(bytes)
+
+        SecretKey key = new SecretKeySpec(bytes, "UnknownMacAlg")
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithms.forSigningKey(key)
+        assertSame SignatureAlgorithms.HS384, signatureAlgorithm
     }
 }
