@@ -27,7 +27,10 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Type-safe representation of standard JWT signature algorithm names as defined in the
@@ -111,6 +114,7 @@ public enum SignatureAlgorithm {
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_HMAC_ALGS = Collections.unmodifiableList(Arrays.asList(
         SignatureAlgorithm.HS512, SignatureAlgorithm.HS384, SignatureAlgorithm.HS256));
+    private static final Map<String, SignatureAlgorithm> PREFERRED_HMAC_ALGS_LOOKUP = preferredHmacAlgorithmMap();
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_EC_ALGS = Collections.unmodifiableList(Arrays.asList(
         SignatureAlgorithm.ES512, SignatureAlgorithm.ES384, SignatureAlgorithm.ES256));
@@ -364,12 +368,7 @@ public enum SignatureAlgorithm {
             }
 
             // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
-            if (!HS256.jcaName.equalsIgnoreCase(alg) &&
-                !HS384.jcaName.equalsIgnoreCase(alg) &&
-                !HS512.jcaName.equalsIgnoreCase(alg) &&
-                !HS256.pkcs12Name.equals(alg) &&
-                !HS384.pkcs12Name.equals(alg) &&
-                !HS512.pkcs12Name.equals(alg)) {
+            if (!PREFERRED_HMAC_ALGS_LOOKUP.containsKey(alg.toUpperCase(Locale.ENGLISH))) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }
@@ -573,8 +572,16 @@ public enum SignatureAlgorithm {
         if (key instanceof SecretKey) {
 
             SecretKey secretKey = (SecretKey)key;
+            String secretKeyAlg = secretKey.getAlgorithm();
             int bitLength = io.jsonwebtoken.lang.Arrays.length(secretKey.getEncoded()) * Byte.SIZE;
 
+            // first, check the key alg name
+            SignatureAlgorithm algFromJcaName = PREFERRED_HMAC_ALGS_LOOKUP.get(secretKeyAlg.toUpperCase(Locale.ENGLISH));
+            if (algFromJcaName != null && bitLength >= algFromJcaName.minKeyLength) {
+                return algFromJcaName;
+            }
+
+            // fallback to getting a best fit based on bit length
             for(SignatureAlgorithm alg : PREFERRED_HMAC_ALGS) {
                 // ensure compatibility check is based on key length. See https://github.com/jwtk/jjwt/issues/381
                 if (bitLength >= alg.minKeyLength) {
@@ -650,5 +657,15 @@ public enum SignatureAlgorithm {
         }
 
         throw new SignatureException("Unsupported signature algorithm '" + value + "'");
+    }
+
+    private static Map<String, SignatureAlgorithm> preferredHmacAlgorithmMap() {
+        SignatureAlgorithm[] algs = {HS256, HS384, HS512};
+        Map<String, SignatureAlgorithm> lookupMap = new HashMap<>(6);
+        for (SignatureAlgorithm alg : algs) {
+            lookupMap.put(alg.jcaName.toUpperCase(Locale.ENGLISH), alg);
+            lookupMap.put(alg.pkcs12Name.toUpperCase(Locale.ENGLISH), alg);
+        }
+        return lookupMap;
     }
 }

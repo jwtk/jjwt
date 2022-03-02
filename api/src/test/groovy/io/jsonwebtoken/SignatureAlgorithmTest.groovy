@@ -192,6 +192,10 @@ class SignatureAlgorithmTest {
             SignatureAlgorithm.forSigningKey(new SecretKeySpec(new byte[1], 'HmacSHA256'))
             fail()
         } catch (WeakKeyException expected) {
+            assertEquals("The specified SecretKey is not strong enough to be used with JWT HMAC signature " +
+                    "algorithms.  The JWT specification requires HMAC keys to be >= 256 bits long.  The specified " +
+                    "key is " + 8 + " bits.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more " +
+                    "information.", expected.getMessage())
         }
     }
 
@@ -906,6 +910,17 @@ class SignatureAlgorithmTest {
 
             verify key
         }
+    }
+
+    // https://github.com/jwtk/jjwt/issues/707
+    @Test
+    void testOtherMacTypeAlg() {
+        byte[] bytes = new byte[48]
+        new Random().nextBytes(bytes)
+
+        SecretKey key = new SecretKeySpec(bytes, "UnknownMacAlg")
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.forSigningKey(key)
+        assertEquals SignatureAlgorithm.HS384, signatureAlgorithm
     }
 
     private static BigInteger bigInteger(int bitLength) {
