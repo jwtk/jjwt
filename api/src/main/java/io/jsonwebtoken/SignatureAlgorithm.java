@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -116,7 +117,7 @@ public enum SignatureAlgorithm {
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_HMAC_ALGS = Collections.unmodifiableList(Arrays.asList(
         SignatureAlgorithm.HS512, SignatureAlgorithm.HS384, SignatureAlgorithm.HS256));
-    private static final Map<String, SignatureAlgorithm> PREFERRED_HMAC_ALGS_LOOKUP = preferredHmacAlgorithmMap();
+    private static final Map<String, SignatureAlgorithm> HMAC_ALGS_BY_JCA_ID = preferredHmacAlgorithmMap();
     //purposefully ordered higher to lower:
     private static final List<SignatureAlgorithm> PREFERRED_EC_ALGS = Collections.unmodifiableList(Arrays.asList(
         SignatureAlgorithm.ES512, SignatureAlgorithm.ES384, SignatureAlgorithm.ES256));
@@ -370,7 +371,7 @@ public enum SignatureAlgorithm {
             }
 
             // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
-            if (!PREFERRED_HMAC_ALGS_LOOKUP.containsKey(alg.toUpperCase(Locale.ENGLISH))) {
+            if (!HMAC_ALGS_BY_JCA_ID.containsKey(alg.toUpperCase(Locale.ENGLISH))) {
                 throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
                     "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
             }
@@ -579,9 +580,11 @@ public enum SignatureAlgorithm {
             int bitLength = io.jsonwebtoken.lang.Arrays.length(secretKey.getEncoded()) * Byte.SIZE;
 
             // first, check the key alg name
-            SignatureAlgorithm algFromJcaName = PREFERRED_HMAC_ALGS_LOOKUP.get(secretKeyAlg.toUpperCase(Locale.ENGLISH));
-            if (algFromJcaName != null && bitLength >= algFromJcaName.minKeyLength) {
-                return algFromJcaName;
+            if (secretKeyAlg != null) {
+                SignatureAlgorithm algFromJcaName = HMAC_ALGS_BY_JCA_ID.get(secretKeyAlg.toUpperCase(Locale.ENGLISH));
+                if (algFromJcaName != null && bitLength >= algFromJcaName.minKeyLength) {
+                    return algFromJcaName;
+                }
             }
 
             // fallback to getting a best fit based on bit length

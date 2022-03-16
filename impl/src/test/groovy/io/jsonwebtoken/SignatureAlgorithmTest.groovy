@@ -923,6 +923,32 @@ class SignatureAlgorithmTest {
         assertEquals SignatureAlgorithm.HS384, signatureAlgorithm
     }
 
+    // https://github.com/jwtk/jjwt/issues/707
+    @Test
+    void testExplicitAlgLookup() {
+        byte[] bytes = new byte[48]
+        new Random().nextBytes(bytes)
+
+        SecretKey key = new SecretKeySpec(bytes, SignatureAlgorithm.HS256.getJcaName())
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.forSigningKey(key)
+        assertEquals SignatureAlgorithm.HS256, signatureAlgorithm
+    }
+
+    @Test
+    void testNullAlgNameLookup() {
+        byte[] bytes = new byte[48]
+        new Random().nextBytes(bytes)
+
+        // force getAlgorithm to be null (SecretKeySpec doesn't allow this)
+        SecretKey key = createMock(SecretKey)
+        expect(key.getAlgorithm()).andReturn(null)
+        expect(key.getEncoded()).andReturn(bytes)
+        replay(key)
+
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.forSigningKey(key)
+        assertEquals SignatureAlgorithm.HS384, signatureAlgorithm
+    }
+
     private static BigInteger bigInteger(int bitLength) {
         BigInteger result = null
         // https://github.com/jwtk/jjwt/issues/552:
