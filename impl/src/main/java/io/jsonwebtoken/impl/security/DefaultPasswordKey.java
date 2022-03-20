@@ -49,13 +49,11 @@ public class DefaultPasswordKey implements PasswordKey {
         throw new UnsupportedOperationException(ENCODED_DISABLED_MSG);
     }
 
-    @Override
     public void destroy() {
         java.util.Arrays.fill(password, '\u0000');
         this.destroyed = true;
     }
 
-    @Override
     public boolean isDestroyed() {
         return this.destroyed;
     }

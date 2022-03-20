@@ -17,13 +17,13 @@ class LocatorFunctionTest {
         assertEquals value, fn.apply(new DefaultJweHeader())
     }
 
-    static class StaticLocator<H extends Header<H>, R> implements Locator<H, R> {
-        private final R o;
-        StaticLocator(R o) {
+    static class StaticLocator<T> implements Locator<T> {
+        private final T o;
+        StaticLocator(T o) {
             this.o = o;
         }
         @Override
-        R locate(H header) {
+        T locate(Header<?> header) {
             return o;
         }
     }

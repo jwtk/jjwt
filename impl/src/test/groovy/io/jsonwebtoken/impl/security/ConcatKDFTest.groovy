@@ -1,7 +1,12 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.Bytes
 import org.junit.Before
 import org.junit.Test
+
+import javax.crypto.SecretKey
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 import static org.junit.Assert.*
 
@@ -18,12 +23,66 @@ class ConcatKDFTest {
     }
 
     @Test
+    void testNullOtherInfo() {
+        final int derivedKeyBitLength = 256
+        final byte[] OtherInfo = null
+
+        // exactly 1 Concat KDF iteration - derived key bit length of 256 is same as SHA-256 digest length:
+        def md = MessageDigest.getInstance("SHA-256")
+        md.update([0, 0, 0, 1] as byte[])
+        md.update(Z)
+        md.update(Bytes.EMPTY) // null OtherInfo should equate to a Bytes.EMPTY argument here
+        byte[] digest = md.digest()
+
+        SecretKey key = CONCAT_KDF.deriveKey(Z, derivedKeyBitLength, OtherInfo)
+        byte[] derived = key.getEncoded()
+        assertNotNull(key)
+        assertArrayEquals(digest, derived)
+    }
+
+    @Test
+    void testEmptyOtherInfo() {
+        final int derivedKeyBitLength = 256
+        final byte[] OtherInfo = Bytes.EMPTY
+
+        // exactly 1 Concat KDF iteration - derived key bit length of 256 is same as SHA-256 digest length:
+        def md = MessageDigest.getInstance("SHA-256")
+        md.update([0, 0, 0, 1] as byte[])
+        md.update(Z)
+        md.update(Bytes.EMPTY) // empty OtherInfo should equate to a Bytes.EMPTY argument here
+        byte[] digest = md.digest()
+
+        SecretKey key = CONCAT_KDF.deriveKey(Z, derivedKeyBitLength, OtherInfo)
+        byte[] derived = key.getEncoded()
+        assertNotNull(key)
+        assertArrayEquals(digest, derived)
+    }
+
+    @Test
+    void testPopulatedOtherInfo() {
+        final int derivedKeyBitLength = 256
+        final byte[] OtherInfo = 'whatever'.getBytes(StandardCharsets.UTF_8)
+
+        // exactly 1 Concat KDF iteration - derived key bit length of 256 is same as SHA-256 digest length:
+        def md = MessageDigest.getInstance("SHA-256")
+        md.update([0, 0, 0, 1] as byte[])
+        md.update(Z)
+        md.update(OtherInfo) // ensure OtherInfo is included in the digest
+        byte[] digest = md.digest()
+
+        SecretKey key = CONCAT_KDF.deriveKey(Z, derivedKeyBitLength, OtherInfo)
+        byte[] derived = key.getEncoded()
+        assertNotNull(key)
+        assertArrayEquals(digest, derived)
+    }
+
+    @Test
     void testNonPositiveBitLength() {
         try {
             CONCAT_KDF.deriveKey(Z, 0, null)
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = 'derivedKeyBitLength must be a positive number.'
+            String msg = 'derivedKeyBitLength must be a positive integer.'
             assertEquals msg, expected.getMessage()
         }
     }

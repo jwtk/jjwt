@@ -15,16 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.CompressionCodecResolver;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.JwtParserBuilder;
-import io.jsonwebtoken.Locator;
-import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
@@ -62,17 +53,16 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
      */
     static final long MAX_CLOCK_SKEW_MILLIS = Long.MAX_VALUE / MILLISECONDS_PER_SECOND;
     static final String MAX_CLOCK_SKEW_ILLEGAL_MSG = "Illegal allowedClockSkewMillis value: multiplying this " +
-        "value by 1000 to obtain the number of milliseconds would cause a numeric overflow.";
+            "value by 1000 to obtain the number of milliseconds would cause a numeric overflow.";
 
     private Provider provider;
 
     private boolean enableUnsecuredJws = false;
 
-    @SuppressWarnings({"rawtypes"})
-    private Function<Header, Key> keyLocator = ConstantFunction.forNull();
+    private Function<Header<?>, Key> keyLocator = ConstantFunction.forNull();
 
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
-    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator<>(null , null);
+    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator(null, null);
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
@@ -201,7 +191,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder setSigningKey(final Key key) {
         this.signatureVerificationKey = Assert.notNull(key, "signing key cannot be null.");
-        return setSigningKeyResolver(new ConstantKeyLocator<>(key, null));
+        return setSigningKeyResolver(new ConstantKeyLocator(key, null));
     }
 
     @Override
@@ -239,15 +229,10 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Function<Header, Key> coerce(Function f) {
-        return (Function<Header, Key>) f;
-    }
-
     @Override
-    public JwtParserBuilder setKeyLocator(Locator<? extends Header<?>, Key> keyLocator) {
+    public JwtParserBuilder setKeyLocator(Locator<Key> keyLocator) {
         Assert.notNull(keyLocator, "Key locator cannot be null.");
-        this.keyLocator = coerce(new LocatorFunction<>(keyLocator));
+        this.keyLocator = new LocatorFunction<>(keyLocator);
         return this;
     }
 
@@ -258,7 +243,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public JwtParser build() {
 
@@ -270,20 +254,20 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             this.deserializer = Services.loadFirst(Deserializer.class);
         }
 
-        final Function<Header,Key> existing1 = this.keyLocator;
+        final Function<Header<?>, Key> existing1 = this.keyLocator;
         if (this.signatureVerificationKey != null) {
-            this.keyLocator = new Function<Header, Key>() {
+            this.keyLocator = new Function<Header<?>, Key>() {
                 @Override
-                public Key apply(Header header) {
+                public Key apply(Header<?> header) {
                     return header instanceof JwsHeader ? signatureVerificationKey : existing1.apply(header);
                 }
             };
         }
-        final Function<Header,Key> existing2 = this.keyLocator;
+        final Function<Header<?>, Key> existing2 = this.keyLocator;
         if (this.decryptionKey != null) {
-            this.keyLocator = new Function<Header, Key>() {
+            this.keyLocator = new Function<Header<?>, Key>() {
                 @Override
-                public Key apply(Header header) {
+                public Key apply(Header<?> header) {
                     return header instanceof JweHeader ? decryptionKey : existing2.apply(header);
                 }
             };
@@ -296,19 +280,19 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         assert this.compressionCodecResolver != null : "CompressionCodecResolver should never be null.";
 
         return new ImmutableJwtParser(new DefaultJwtParser(
-            provider,
-            signingKeyResolver,
-            enableUnsecuredJws,
-            keyLocator,
-            clock,
-            allowedClockSkewMillis,
-            expectedClaims,
-            base64UrlDecoder,
-            new JwtDeserializer<>(deserializer),
-            compressionCodecResolver,
-            extraSignatureAlgorithms,
-            extraKeyAlgorithms,
-            extraEncryptionAlgorithms
+                provider,
+                signingKeyResolver,
+                enableUnsecuredJws,
+                keyLocator,
+                clock,
+                allowedClockSkewMillis,
+                expectedClaims,
+                base64UrlDecoder,
+                new JwtDeserializer<>(deserializer),
+                compressionCodecResolver,
+                extraSignatureAlgorithms,
+                extraKeyAlgorithms,
+                extraEncryptionAlgorithms
         ));
     }
 }

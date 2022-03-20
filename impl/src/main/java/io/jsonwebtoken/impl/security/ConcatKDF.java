@@ -1,7 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -58,24 +57,21 @@ final class ConcatKDF extends CryptoAlgorithm {
      * @param Z                   shared secret key to use to seed the derived secret. Cannot be null or empty.
      * @param derivedKeyBitLength the total number of <b>bits</b> <em>(not bytes)</em> required in the returned derived
      *                            key.
-     * @param OtherInfo           any additional party info to be associated with the derived key. May be null/empty.
+     * @param otherInfo           any additional party info to be associated with the derived key. May be null/empty.
      * @return the derived key
      * @throws UnsupportedKeyException if unable to obtain {@code sharedSecretKey}'s
      *                                 {@link Key#getEncoded() encoded byte array}.
      * @throws SecurityException       if unable to perform the necessary {@link MessageDigest} computations to
      *                                 generate the derived key.
      */
-    public SecretKey deriveKey(final byte[] Z, final long derivedKeyBitLength, final byte[] OtherInfo)
+    public SecretKey deriveKey(final byte[] Z, final long derivedKeyBitLength, final byte[] otherInfo)
         throws UnsupportedKeyException, SecurityException {
-
-        // OtherInfo argument assertions:
-        final int otherInfoByteLength = Arrays.length(OtherInfo);
 
         // sharedSecretKey argument assertions:
         Assert.notEmpty(Z, "Z cannot be null or empty.");
 
         // derivedKeyBitLength argument assertions:
-        Assert.isTrue(derivedKeyBitLength > 0, "derivedKeyBitLength must be a positive number.");
+        Assert.isTrue(derivedKeyBitLength > 0, "derivedKeyBitLength must be a positive integer.");
         if (derivedKeyBitLength > MAX_DERIVED_KEY_BIT_LENGTH) {
             String msg = "derivedKeyBitLength may not exceed " + bitsMsg(MAX_DERIVED_KEY_BIT_LENGTH) +
                 ". Specified size: " + bitsMsg(derivedKeyBitLength) + ".";
@@ -83,9 +79,14 @@ final class ConcatKDF extends CryptoAlgorithm {
         }
         final long derivedKeyByteLength = derivedKeyBitLength / Byte.SIZE;
 
+        final byte[] OtherInfo = otherInfo == null ? EMPTY : otherInfo;
+
         // Section 5.8.1.1, Process step #1:
         final double repsd = derivedKeyBitLength / (double) this.hashBitLength;
         final long reps = (long) (Math.ceil(repsd));
+        // If repsd didn't result in a whole number, the last derived key byte will be partially filled per
+        // Section 5.8.1.1, Process step #6:
+        final boolean kLastPartial = repsd != (double) reps;
 
         // Section 5.8.1.1, Process step #2:
         Assert.state(reps <= MAX_REP_COUNT, "derivedKeyBitLength is too large.");
@@ -102,24 +103,23 @@ final class ConcatKDF extends CryptoAlgorithm {
             public byte[] apply(MessageDigest md) throws Exception {
 
                 final ByteArrayOutputStream stream = new ByteArrayOutputStream((int) derivedKeyByteLength);
-                long kLastIndex = reps - 1;
 
-                // Section 5.8.1.1, Process step #5:
-                for (long i = 0; i < reps; i++) {
+                // Section 5.8.1.1, Process step #5.  We depart from Java idioms here by starting iteration index at 1
+                // (instead of 0) and continue to <= reps (instead of < reps) to match the NIST publication algorithm
+                // notation convention (so variables like Ki and kLast below match the NIST definitions).
+                for (long i = 1; i <= reps; i++) {
 
                     // Section 5.8.1.1, Process step #5.1:
                     md.update(counter);
                     md.update(Z);
-                    if (otherInfoByteLength > 0) {
-                        md.update(OtherInfo);
-                    }
+                    md.update(OtherInfo);
                     byte[] Ki = md.digest();
 
                     // Section 5.8.1.1, Process step #5.2:
                     increment(counter);
 
                     // Section 5.8.1.1, Process step #6:
-                    if (i == kLastIndex && repsd != (double) reps) { //repsd calculation above didn't result in a whole number:
+                    if (i == reps && kLastPartial) {
                         long leftmostBitLength = derivedKeyBitLength % hashBitLength;
                         int leftmostByteLength = (int) (leftmostBitLength / Byte.SIZE);
                         byte[] kLast = new byte[leftmostByteLength];

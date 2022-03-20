@@ -16,7 +16,6 @@
 package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.lang.Classes
-import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -24,10 +23,8 @@ import org.powermock.modules.junit4.PowerMockRunner
 
 import static org.easymock.EasyMock.eq
 import static org.easymock.EasyMock.expect
-import static org.junit.Assert.*
-import static org.powermock.api.easymock.PowerMock.mockStatic
-import static org.powermock.api.easymock.PowerMock.replay
-import static org.powermock.api.easymock.PowerMock.verify
+import static org.junit.Assert.assertFalse
+import static org.powermock.api.easymock.PowerMock.*
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest([Classes])

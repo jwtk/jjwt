@@ -6,7 +6,7 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
 
-public class CompressionCodecLocator<H extends Header<H>> implements Function<H, CompressionCodec> {
+public class CompressionCodecLocator implements Function<Header<?>, CompressionCodec> {
 
     private final CompressionCodecResolver resolver;
 
@@ -15,7 +15,7 @@ public class CompressionCodecLocator<H extends Header<H>> implements Function<H,
     }
 
     @Override
-    public CompressionCodec apply(H header) {
+    public CompressionCodec apply(Header<?> header) {
         return resolver.resolveCompressionCodec(header);
     }
 }

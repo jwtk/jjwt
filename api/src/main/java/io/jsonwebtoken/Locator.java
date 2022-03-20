@@ -18,7 +18,7 @@ package io.jsonwebtoken;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface Locator<H extends Header<H>, R> {
+public interface Locator<T> {
 
-    R locate(H header);
+    T locate(Header<?> header);
 }

@@ -65,4 +65,26 @@ class JwtHandlerAdapterTest {
             assertEquals e.getMessage(), 'Signed Claims JWTs are not supported.'
         }
     }
+
+    @Test
+    void testOnPlaintextJwe() {
+        def handler = new JwtHandlerAdapter();
+        try {
+            handler.onPlaintextJwe(null)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            assertEquals e.getMessage(), 'Encrypted plaintext JWTs are not supported.'
+        }
+    }
+
+    @Test
+    void testOnClaimsJwe() {
+        def handler = new JwtHandlerAdapter();
+        try {
+            handler.onClaimsJwe(null)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            assertEquals e.getMessage(), 'Encrypted Claims JWTs are not supported.'
+        }
+    }
 }

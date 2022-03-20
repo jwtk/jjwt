@@ -20,29 +20,31 @@ import io.jsonwebtoken.lang.Assert;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public abstract class LocatorAdapter<H extends Header<H>, R> implements Locator<H, R> {
+public class LocatorAdapter<T> implements Locator<T> {
 
     @Override
-    public final R locate(H header) {
+    public final T locate(Header<?> header) {
         Assert.notNull(header, "Header cannot be null.");
         if (header instanceof JwsHeader) {
-            return locate((JwsHeader) header);
+            JwsHeader jwsHeader = (JwsHeader) header;
+            return locate(jwsHeader);
         } else if (header instanceof JweHeader) {
-            return locate((JweHeader) header);
+            JweHeader jweHeader = (JweHeader) header;
+            return locate(jweHeader);
         } else {
             return doLocate(header);
         }
     }
 
-    protected R locate(JweHeader header) {
+    protected T locate(JweHeader header) {
         return null;
     }
 
-    protected R locate(JwsHeader header) {
+    protected T locate(JwsHeader header) {
         return null;
     }
 
-    protected R doLocate(Header<?> header) {
+    protected T doLocate(Header<?> header) {
         return null;
     }
 }

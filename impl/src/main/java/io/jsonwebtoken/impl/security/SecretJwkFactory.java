@@ -15,13 +15,16 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
+    private static final String ENCODED_UNAVAILABLE_MSG = "SecretKey argument does not have any encoded bytes, or " +
+            "the key's backing JCA Provider is preventing key.getEncoded() from returning any bytes.  It is not " +
+            "possible to represent the SecretKey instance as a JWK.";
+
     SecretJwkFactory() {
         super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class);
     }
 
-    static byte[] getRequiredEncoded(SecretKey key, String reason) {
+    static byte[] getRequiredEncoded(SecretKey key) {
         Assert.notNull(key, "SecretKey argument cannot be null.");
-        Assert.hasText(reason, "Reason string argument cannot be null or empty.");
         byte[] encoded = null;
         Exception cause = null;
         try {
@@ -31,10 +34,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         }
 
         if (Arrays.length(encoded) == 0) {
-            String msg = "SecretKey argument does not have any encoded bytes, or the key's backing JCA Provider " +
-                "is preventing key.getEncoded() from returning any bytes.  In either case, it is not possible to " +
-                reason + ".";
-            throw new UnsupportedKeyException(msg, cause);
+            throw new IllegalArgumentException(ENCODED_UNAVAILABLE_MSG, cause);
         }
 
         return encoded;
@@ -45,7 +45,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         SecretKey key = Assert.notNull(ctx.getKey(), "JwkContext key cannot be null.");
         String k;
         try {
-            byte[] encoded = getRequiredEncoded(key, "represent the SecretKey instance as a JWK");
+            byte[] encoded = getRequiredEncoded(key);
             k = Encoders.BASE64URL.encode(encoded);
             Assert.hasText(k, "k value cannot be null or empty.");
         } catch (Exception e) {

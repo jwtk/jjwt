@@ -3,15 +3,7 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
-import io.jsonwebtoken.security.EcPublicJwk
-import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm
-import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.PrivateJwk
-import io.jsonwebtoken.security.PublicJwk
-import io.jsonwebtoken.security.SecretKeySignatureAlgorithm
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -190,6 +182,42 @@ class JwksTest {
             assertTrue jwk.containsKey('k')
             assertEquals 'id', jwk.getId()
             assertEquals secretKey, jwk.toKey()
+        }
+    }
+
+    @Test
+    void testSecretKeyGetEncodedReturnsNull() {
+        SecretKey key = new TestSecretKey(algorithm: "AES")
+        try {
+            Jwks.builder().setKey(key).build()
+            fail()
+        } catch (UnsupportedKeyException expected) {
+            String expectedMsg = 'Unable to encode SecretKey to JWK: ' + SecretJwkFactory.ENCODED_UNAVAILABLE_MSG
+            assertEquals expectedMsg, expected.getMessage()
+            assertTrue expected.getCause() instanceof IllegalArgumentException
+            assertEquals SecretJwkFactory.ENCODED_UNAVAILABLE_MSG, expected.getCause().getMessage()
+        }
+    }
+
+    @Test
+    void testSecretKeyGetEncodedThrowsException() {
+        String encodedMsg = "not allowed"
+        def encodedEx = new UnsupportedOperationException(encodedMsg)
+        SecretKey key = new TestSecretKey() {
+            @Override
+            byte[] getEncoded() {
+                throw encodedEx
+            }
+        }
+        try {
+            Jwks.builder().setKey(key).build()
+            fail()
+        } catch (UnsupportedKeyException expected) {
+            String expectedMsg = 'Unable to encode SecretKey to JWK: ' + SecretJwkFactory.ENCODED_UNAVAILABLE_MSG
+            assertEquals expectedMsg, expected.getMessage()
+            assertTrue expected.getCause() instanceof IllegalArgumentException
+            assertEquals SecretJwkFactory.ENCODED_UNAVAILABLE_MSG, expected.getCause().getMessage()
+            assertSame encodedEx, expected.getCause().getCause()
         }
     }
 

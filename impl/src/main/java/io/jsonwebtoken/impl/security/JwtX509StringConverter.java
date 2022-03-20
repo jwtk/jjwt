@@ -9,6 +9,7 @@ import io.jsonwebtoken.lang.Assert;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -38,16 +39,21 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
         return Encoders.BASE64.encode(der);
     }
 
+    //visible for testing
+    protected CertificateFactory newCertificateFactory() throws CertificateException {
+        return CertificateFactory.getInstance("X.509");
+    }
+
     @Override
     public X509Certificate applyFrom(String s) {
         Assert.hasText(s, "X.509 Certificate encoded string cannot be null or empty.");
         try {
             byte[] der = Decoders.BASE64.decode(s); //RFC requires Base64, not Base64Url
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            CertificateFactory cf = newCertificateFactory();
             InputStream stream = new ByteArrayInputStream(der);
             return (X509Certificate) cf.generateCertificate(stream);
         } catch (Exception e) {
-            String msg = "Unable to convert Base64 String '" + s + "' to X509Certificate instance: " + e.getMessage();
+            String msg = "Unable to convert Base64 String '" + s + "' to X509Certificate instance. Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
     }

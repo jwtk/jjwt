@@ -4,16 +4,16 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.lang.Assert;
 
-public class LocatorFunction<H extends Header<H>, R> implements Function<H, R> {
+public class LocatorFunction<T> implements Function<Header<?>, T> {
 
-    private final Locator<H, R> locator;
+    private final Locator<T> locator;
 
-    public LocatorFunction(Locator<H, R> locator) {
+    public LocatorFunction(Locator<T> locator) {
         this.locator = Assert.notNull(locator, "Locator instance cannot be null.");
     }
 
     @Override
-    public R apply(H h) {
+    public T apply(Header<?> h) {
         return this.locator.locate(h);
     }
 }

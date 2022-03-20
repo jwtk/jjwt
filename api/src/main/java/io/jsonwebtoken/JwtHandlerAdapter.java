@@ -52,11 +52,11 @@ public class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
     @Override
     public T onPlaintextJwe(Jwe<String> jwe) {
-        throw new UnsupportedJwtException("Encrypted plaintext JWEs are not supported.");
+        throw new UnsupportedJwtException("Encrypted plaintext JWTs are not supported.");
     }
 
     @Override
     public T onClaimsJwe(Jwe<Claims> jwe) {
-        throw new UnsupportedJwtException("Encrypted Claims JWEs are not supported.");
+        throw new UnsupportedJwtException("Encrypted Claims JWTs are not supported.");
     }
 }

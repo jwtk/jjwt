@@ -317,7 +317,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the parser builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder setKeyLocator(Locator<? extends Header<?>, Key> keyLocator);
+    JwtParserBuilder setKeyLocator(Locator<Key> keyLocator);
 
     /**
      * <h4>Deprecation Notice</h4>

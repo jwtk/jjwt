@@ -10,6 +10,8 @@ public final class Conditions {
     private Conditions() {
     }
 
+    public static final Condition TRUE = new TrueCondition();
+
     public static Condition not(Condition c) {
         return new NotCondition(c);
     }
@@ -33,6 +35,13 @@ public final class Conditions {
         @Override
         public boolean test() {
             return !c.test();
+        }
+    }
+
+    private static final class TrueCondition implements Condition {
+        @Override
+        public boolean test() {
+            return true;
         }
     }
 
