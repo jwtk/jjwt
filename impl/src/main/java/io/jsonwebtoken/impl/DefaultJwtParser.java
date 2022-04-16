@@ -42,6 +42,7 @@ import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.DateFormats;
@@ -330,7 +331,7 @@ public class DefaultJwtParser implements JwtParser {
 
         Claims claims = null;
 
-        if (!payload.isEmpty() && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        if (!payload.isEmpty() && payload.trim().charAt(0) == '{' && payload.trim().charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
             Map<String, Object> claimsMap = (Map<String, Object>) readValue(payload);
             claims = new DefaultClaims(claimsMap);
         }
