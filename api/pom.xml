@@ -70,13 +70,14 @@
                                 </goals>
                                 <configuration>
                                     <module>
-                                        <moduleInfo>
-                                            <name>io.jsonwebtoken.jjwt.api</name>
-                                            <exports>
-                                                io.jsonwebtoken;
-                                                io.jsonwebtoken.*;
-                                            </exports>
-                                        </moduleInfo>
+                                        <moduleInfoSource>
+                                            module io.jsonwebtoken.jjwt.api {
+                                                exports io.jsonwebtoken;
+                                                exports io.jsonwebtoken.io;
+                                                exports io.jsonwebtoken.lang;
+                                                exports io.jsonwebtoken.security;
+                                            }
+                                        </moduleInfoSource>
                                     </module>
                                 </configuration>
                             </execution>

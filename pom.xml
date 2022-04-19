@@ -71,7 +71,7 @@
         <gmavenplus.version>1.6.1</gmavenplus.version>
         <moditect.version>1.0.0.RC2</moditect.version>
 
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
@@ -550,8 +550,8 @@
                 <jdk>[,9)</jdk>
             </activation>
             <properties>
-                <maven.compiler.source>${jdk.version}</maven.compiler.source>
-                <maven.compiler.target>${jdk.version}</maven.compiler.target>
+                <maven.compiler.source>1.${jdk.version}</maven.compiler.source>
+                <maven.compiler.target>1.${jdk.version}</maven.compiler.target>
             </properties>
         </profile>
         <profile>

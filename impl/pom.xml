@@ -86,17 +86,25 @@
                                 </goals>
                                 <configuration>
                                     <module>
-                                        <moduleInfo>
-                                            <name>io.jsonwebtoken.jjwt.impl</name>
-                                            <requires>
-                                                io.jsonwebtoken.jjwt.api;
-                                            </requires>
-                                            <uses>
-                                                io.jsonwebtoken.CompressionCodec;
-                                                io.jsonwebtoken.io.Deserializer;
-                                                io.jsonwebtoken.io.Serializer;
-                                            </uses>
-                                        </moduleInfo>
+                                        <moduleInfoSource>
+                                            module io.jsonwebtoken.jjwt.impl {
+                                                requires io.jsonwebtoken.jjwt.api;
+
+                                                exports io.jsonwebtoken.impl;
+                                                exports io.jsonwebtoken.impl.compression;
+                                                exports io.jsonwebtoken.impl.crypto;
+                                                exports io.jsonwebtoken.impl.lang;
+
+                                                provides io.jsonwebtoken.CompressionCodec with
+                                                    io.jsonwebtoken.impl.compression.DeflateCompressionCodec,
+                                                    io.jsonwebtoken.impl.compression.GzipCompressionCodec;
+
+                                                uses io.jsonwebtoken.CompressionCodec;
+                                                uses io.jsonwebtoken.io.Deserializer;
+                                                uses io.jsonwebtoken.io.Serializer;
+                                            }
+
+                                        </moduleInfoSource>
                                     </module>
                                 </configuration>
                             </execution>
