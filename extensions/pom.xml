@@ -41,9 +41,9 @@
 
     <profiles>
         <profile>
-            <id>java8</id>
+            <id>nonJDK7</id>
             <activation>
-                <jdk>[8,)</jdk>
+                <jdk>[1.8,)</jdk>
             </activation>
             <modules>
                 <module>jsonb</module>
