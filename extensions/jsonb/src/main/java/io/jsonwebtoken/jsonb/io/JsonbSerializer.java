@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets;
 import static java.util.Objects.requireNonNull;
 
 /**
- * @since 0.10.0
+ * @since JJWT_RELEASE_VERSION
  */
 public class JsonbSerializer<T> implements Serializer<T> {
 
@@ -49,7 +49,7 @@ public class JsonbSerializer<T> implements Serializer<T> {
 
     @Override
     public byte[] serialize(T t) throws SerializationException {
-        Assert.notNull(t, "Object to serialize cannot be null.");
+        requireNonNull(t, "Object to serialize cannot be null.");
         try {
             return writeValueAsBytes(t);
         } catch (JsonbException jsonbException) {

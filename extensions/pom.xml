@@ -37,6 +37,17 @@
         <module>jackson</module>
         <module>orgjson</module>
         <module>gson</module>
-        <module>jsonb</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>java8</id>
+            <activation>
+                <jdk>[8,)</jdk>
+            </activation>
+            <modules>
+                <module>jsonb</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 import static java.util.Objects.requireNonNull;
 
 /**
- * @since 0.10.0
+ * @since JJWT_RELEASE_VERSION
  */
 public class JsonbDeserializer<T> implements Deserializer<T> {
 

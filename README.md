@@ -1287,8 +1287,7 @@ They are checked in order, and the first one found is used:
 Jackson will force a sizable (> 1 MB) dependency to an Android application thus increasing the app download size for 
 mobile users.
 
-If you want to use POJOs and a JSON-B compliant specification _**or**_ you want to use JJWT on a JakartaEE compliant application server, use
-`io.jsonwebtoken:jjwt-jsonb`.
+If you want to use POJOs and a JSON-B compliant specification _**or**_ you want to use JJWT on a JakartaEE compliant application server, use `io.jsonwebtoken:jjwt-jsonb`.
 
 <a name="json-custom"></a>
 ### Custom JSON Processor
