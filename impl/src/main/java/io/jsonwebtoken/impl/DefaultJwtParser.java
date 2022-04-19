@@ -331,7 +331,8 @@ public class DefaultJwtParser implements JwtParser {
 
         Claims claims = null;
 
-        if (!payload.isEmpty() && payload.trim().charAt(0) == '{' && payload.trim().charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        final String trimmedPayload = payload.trim();
+        if (!payload.isEmpty() && trimmedPayload.charAt(0) == '{' && trimmedPayload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
             Map<String, Object> claimsMap = (Map<String, Object>) readValue(payload);
             claims = new DefaultClaims(claimsMap);
         }
