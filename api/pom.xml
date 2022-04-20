@@ -50,4 +50,42 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>nonJDK7</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.moditect</groupId>
+                        <artifactId>moditect-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-module-infos</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>add-module-info</goal>
+                                </goals>
+                                <configuration>
+                                    <module>
+                                        <moduleInfoSource>
+                                            module io.jsonwebtoken.jjwt.api {
+                                                exports io.jsonwebtoken;
+                                                exports io.jsonwebtoken.io;
+                                                exports io.jsonwebtoken.lang;
+                                                exports io.jsonwebtoken.security;
+                                            }
+                                        </moduleInfoSource>
+                                    </module>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

@@ -77,4 +77,49 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>nonJDK7</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.moditect</groupId>
+                        <artifactId>moditect-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-module-infos</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>add-module-info</goal>
+                                </goals>
+                                <configuration>
+                                    <module>
+                                        <moduleInfoSource>
+                                            module io.jsonwebtoken.jjwt.ext.jackson {
+                                                requires transitive com.fasterxml.jackson.core;
+                                                requires transitive com.fasterxml.jackson.databind;
+                                                requires io.jsonwebtoken.jjwt.api;
+
+                                                exports io.jsonwebtoken.jackson.io;
+
+                                                provides io.jsonwebtoken.io.Deserializer with
+                                                io.jsonwebtoken.jackson.io.JacksonDeserializer;
+                                                provides io.jsonwebtoken.io.Serializer with
+                                                io.jsonwebtoken.jackson.io.JacksonSerializer;
+
+                                            }
+                                        </moduleInfoSource>
+                                    </module>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

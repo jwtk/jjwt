@@ -66,4 +66,52 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>nonJDK7</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.moditect</groupId>
+                        <artifactId>moditect-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-module-infos</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>add-module-info</goal>
+                                </goals>
+                                <configuration>
+                                    <module>
+                                        <moduleInfoSource>
+                                            module io.jsonwebtoken.jjwt.impl {
+                                                requires io.jsonwebtoken.jjwt.api;
+
+                                                exports io.jsonwebtoken.impl;
+                                                exports io.jsonwebtoken.impl.compression;
+                                                exports io.jsonwebtoken.impl.crypto;
+                                                exports io.jsonwebtoken.impl.lang;
+
+                                                provides io.jsonwebtoken.CompressionCodec with
+                                                    io.jsonwebtoken.impl.compression.DeflateCompressionCodec,
+                                                    io.jsonwebtoken.impl.compression.GzipCompressionCodec;
+
+                                                uses io.jsonwebtoken.CompressionCodec;
+                                                uses io.jsonwebtoken.io.Deserializer;
+                                                uses io.jsonwebtoken.io.Serializer;
+                                            }
+
+                                        </moduleInfoSource>
+                                    </module>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

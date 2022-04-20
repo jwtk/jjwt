@@ -69,8 +69,9 @@
         <maven.compiler.version>3.8.0</maven.compiler.version>
         <maven.javadoc.version>3.1.1</maven.javadoc.version>
         <gmavenplus.version>1.6.1</gmavenplus.version>
+        <moditect.version>1.0.0.RC2</moditect.version>
 
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
@@ -251,9 +252,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.10.4</version>
-                    <configuration>
-                        <source>${jdk.version}</source>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <!-- japicmp will scan code for binary breaking changes, Open api/target/japicmp/japicmp.html
@@ -349,8 +347,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.version}</version>
                 <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -527,6 +523,11 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <version>${moditect.version}</version>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -544,13 +545,30 @@
             </properties>
         </profile>
         <profile>
+            <id>nonJDK9+</id>
+            <activation>
+                <jdk>[,9)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>1.${jdk.version}</maven.compiler.source>
+                <maven.compiler.target>1.${jdk.version}</maven.compiler.target>
+            </properties>
+        </profile>
+        <profile>
             <!-- Added profile to address https://github.com/jwtk/jjwt/issues/364 -->
             <id>jdk9AndLater</id>
             <activation>
                 <jdk>[1.9,)</jdk>
             </activation>
+            <modules>
+                <module>integration-tests</module>
+            </modules>
             <properties>
-                <surefire.argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED</surefire.argLine>
+                <surefire.argLine>
+                    --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+                    --add-opens java.base/java.lang.ClassLoader=ALL-UNNAMED
+                </surefire.argLine>
+                <maven.compiler.release>${jdk.version}</maven.compiler.release>
             </properties>
         </profile>
         <profile>
