@@ -564,7 +564,10 @@
                 <module>integration-tests</module>
             </modules>
             <properties>
-                <surefire.argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED</surefire.argLine>
+                <surefire.argLine>
+                    --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+                    --add-opens java.base/java.lang.ClassLoader=ALL-UNNAMED
+                </surefire.argLine>
                 <maven.compiler.release>${jdk.version}</maven.compiler.release>
             </properties>
         </profile>
