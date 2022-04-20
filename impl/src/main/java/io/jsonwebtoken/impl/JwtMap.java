@@ -18,21 +18,15 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.JwtDateConverter;
 import io.jsonwebtoken.impl.security.JwkContext;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.MalformedKeyException;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -66,15 +60,6 @@ public class JwtMap implements Map<String, Object> {
     protected boolean isSecret(String id) {
         Field<?> field = FIELDS.get(id);
         return field != null && field.isSecret();
-    }
-
-    protected static Date toDate(Object v, String name) {
-        try {
-            return JwtDateConverter.toDate(v);
-        } catch (Exception e) {
-            String msg = "Cannot create Date from '" + name + "' value: " + v + ".  Cause: " + e.getMessage();
-            throw new IllegalArgumentException(msg, e);
-        }
     }
 
     public static boolean isReduceableToNull(Object v) {
@@ -124,8 +109,6 @@ public class JwtMap implements Map<String, Object> {
         name = Assert.notNull(Strings.clean(name), "Member name cannot be null or empty.");
         if (value instanceof String) {
             value = Strings.clean((String) value);
-        } else if (Objects.isArray(value) && !value.getClass().getComponentType().isPrimitive()) {
-            value = Collections.arrayToList(value);
         }
         return idiomaticPut(name, value);
     }
@@ -150,14 +133,6 @@ public class JwtMap implements Map<String, Object> {
             this.redactedValues.put(name, redactedValue);
             this.idiomaticValues.put(name, value);
             return this.values.put(name, value);
-        }
-    }
-
-    private JwtException malformed(String msg, Exception cause) {
-        if (this instanceof JwkContext || this instanceof Jwk) {
-            return new MalformedKeyException(msg, cause);
-        } else {
-            return new MalformedJwtException(msg, cause);
         }
     }
 
