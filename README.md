@@ -4,7 +4,7 @@
 
 ## Java JWT: JSON Web Token for Java and Android
 
-JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM
+JJWT (pronunciation: jay-jot /ˈdʒeɪ-dʒɒt/) aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM
 and Android.
 
 JJWT is a pure Java implementation based 
