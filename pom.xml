@@ -39,6 +39,15 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <name>Les Hazlewood</name>
+            <email>121180+lhazlewood@users.noreply.github.com</email>
+            <organization>JJWT</organization>
+            <organizationUrl>https://github.com/jwtk/jjwt</organizationUrl>
+        </developer>
+    </developers>
+
     <scm>
         <connection>scm:git:https://github.com/jwtk/jjwt.git</connection>
         <developerConnection>scm:git:git@github.com:jwtk/jjwt.git</developerConnection>
