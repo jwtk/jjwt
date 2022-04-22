@@ -330,7 +330,7 @@ public class DefaultJwtParser implements JwtParser {
 
         Claims claims = null;
 
-        if (!payload.isEmpty() && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        if (isLikelyJsonObject(payload)) {
             Map<String, Object> claimsMap = (Map<String, Object>) readValue(payload);
             claims = new DefaultClaims(claimsMap);
         }
@@ -479,6 +479,55 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             return new DefaultJwt<>(header, body);
         }
+    }
+
+    /**
+     * Checks very roughly whether the given payload might be a JSON Object.
+     *
+     * The check works by scanning the input until it hits the first non-whitespace character.
+     * If it is not a left brace, it will return {@code false} early. Otherwise it saves this position and
+     * tries to find a right brace from the end,, but only going back to the position where the opening brace was found.
+     * @param payload - the JWT payload to check for being a JSON Object.
+     * @return {@code true} if the specified payload is valid JSON by a quick check. {@code false} otherwise.
+     * @since 0.12.0
+     */
+    private static boolean isLikelyJsonObject(String payload) {
+        if (payload.isEmpty()) {
+            return false;
+        }
+
+        int foundStart = -1;
+        for (int ii = 0; ii < payload.length(); ii++) {
+            if (payload.charAt(ii) == '{') {
+                foundStart = ii;
+                break;
+            }
+            if (Character.isWhitespace(payload.charAt(ii))) {
+                continue;
+            }
+
+            // char is neither whitespace nor right brace.
+            return false;
+        }
+
+        if (foundStart == -1) {
+            return false;
+        }
+
+        for (int ii = payload.length() - 1; ii >= foundStart; ii--) {
+            if (payload.charAt(ii) == '}') {
+                return true;
+            }
+            if (Character.isWhitespace(payload.charAt(ii))) {
+                continue;
+            }
+
+            // char is neither whitespace nor right brace.
+            return false;
+        }
+
+        // no right brace found
+        return false;
     }
 
     /**
