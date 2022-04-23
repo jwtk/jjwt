@@ -19,6 +19,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.SignatureException;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -238,6 +239,15 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * @throws JwtException If the ECDSA JWS signature format is invalid.
      */
     public static byte[] transcodeSignatureToDER(byte[] jwsSignature) throws JwtException {
+        try {
+            return concatToDER(jwsSignature);
+        } catch (Exception e) { // CVE-2022-21449 guard
+            String msg = "Invalid ECDSA signature format.";
+            throw new SignatureException(msg, e);
+        }
+    }
+
+    private static byte[] concatToDER(byte[] jwsSignature) throws ArrayIndexOutOfBoundsException {
 
         int rawLen = jwsSignature.length / 2;
 
@@ -245,6 +255,10 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
         while ((i > 0) && (jwsSignature[rawLen - i] == 0)) {
             i--;
+        }
+
+        if (i == 0) { // r == 0, JVM bug CVE-2202-21449 guard:
+            throw new JwtException("Invalid ECDSA Signature format");
         }
 
         int j = i;
@@ -273,7 +287,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
         int offset;
 
-        final byte derSignature[];
+        final byte[] derSignature;
 
         if (len < 128) {
             derSignature = new byte[2 + 2 + j + 2 + l];

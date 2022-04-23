@@ -264,18 +264,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.3</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.3</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-    <version>0.11.2</version>
+    <version>0.11.3</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
@@ -295,11 +295,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2',
-            // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-            //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.11.2' // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
+    compile 'io.jsonwebtoken:jjwt-api:0.11.3'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.3',
+    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+    //'org.bouncycastle:bcprov-jdk15on:1.60',
+    'io.jsonwebtoken:jjwt-jackson:0.11.3' // or 'io.jsonwebtoken:jjwt-gson:0.11.3' for gson
 }
 ```
 
@@ -315,9 +315,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.11.2'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.2') {
+    api 'io.jsonwebtoken:jjwt-api:0.11.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.3' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.3') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -1328,7 +1328,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.3</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1337,7 +1337,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.3'
 }
 ```
 
@@ -1436,7 +1436,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-gson</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.3</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1445,7 +1445,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-gson:0.11.3'
 }
 ```
 

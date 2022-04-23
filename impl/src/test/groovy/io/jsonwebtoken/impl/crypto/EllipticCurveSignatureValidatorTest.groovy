@@ -21,7 +21,10 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
-import java.security.*
+import java.security.InvalidKeyException
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 
 import static org.junit.Assert.*
@@ -73,8 +76,8 @@ class EllipticCurveSignatureValidatorTest {
         verifier("eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiJ9.eyJ0ZXN0IjoidGVzdCJ9.AV26tERbSEwcoDGshneZmhokg-tAKUk0uQBoHBohveEd51D5f6EIs6cskkgwtfzs4qAGfx2rYxqQXr7LTXCNquKiAJNkTIKVddbPfped3_TQtmHZTmMNiqmWjiFj7Y9eTPMMRRu26w4gD1a8EQcBF-7UGgeH4L_1CwHJWAXGbtu7uMUn")
     }
 
-    @Test
-    void legacySignatureCompatTest() {
+    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    void legacySignatureCompatDefaultTest() {
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def keypair = EllipticCurveProvider.generateKeyPair()
         def signature = Signature.getInstance(SignatureAlgorithm.ES512.jcaName)
@@ -82,7 +85,76 @@ class EllipticCurveSignatureValidatorTest {
         signature.initSign(keypair.private)
         signature.update(data)
         def signed = signature.sign()
-        assert new EllipticCurveSignatureValidator(SignatureAlgorithm.ES512, keypair.public).isValid(data, signed)
+        assertFalse new EllipticCurveSignatureValidator(SignatureAlgorithm.ES512, keypair.public).isValid(data, signed)
+    }
+
+    @Test
+    void legacySignatureCompatWhenEnabledTest() {
+        try {
+            System.setProperty(EllipticCurveSignatureValidator.DER_ENCODING_SYS_PROPERTY_NAME, 'true')
+            def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
+            def keypair = EllipticCurveProvider.generateKeyPair()
+            def signature = Signature.getInstance(SignatureAlgorithm.ES512.jcaName)
+            def data = withoutSignature.getBytes("US-ASCII")
+            signature.initSign(keypair.private)
+            signature.update(data)
+            def signed = signature.sign()
+            assertTrue new EllipticCurveSignatureValidator(SignatureAlgorithm.ES512, keypair.public).isValid(data, signed)
+        } finally {
+            System.clearProperty(EllipticCurveSignatureValidator.DER_ENCODING_SYS_PROPERTY_NAME)
+        }
+    }
+
+    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    void testSignatureAllZeros() {
+        try {
+            byte[] forgedSig = new byte[64]
+            def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
+            def keypair = EllipticCurveProvider.generateKeyPair()
+            def data = withoutSignature.getBytes("US-ASCII")
+            new EllipticCurveSignatureValidator(SignatureAlgorithm.ES256, keypair.public).isValid(data, forgedSig)
+            fail("SignatureException expected")
+        } catch(SignatureException expected) {
+            assertEquals 'Unable to verify Elliptic Curve signature using configured ECPublicKey. Invalid ECDSA signature format.', expected.getMessage()
+        }
+    }
+
+    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    void testSignatureRZero() {
+        try {
+            byte[] r = new byte[32]
+            byte[] s = new byte[32]; Arrays.fill(s, Byte.MAX_VALUE)
+            byte[] sig = new byte[r.length + s.length]
+            System.arraycopy(r, 0, sig, 0, r.length)
+            System.arraycopy(s, 0, sig, r.length, s.length)
+
+            def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
+            def keypair = EllipticCurveProvider.generateKeyPair()
+            def data = withoutSignature.getBytes("US-ASCII")
+            new EllipticCurveSignatureValidator(SignatureAlgorithm.ES256, keypair.public).isValid(data, sig)
+            fail("SignatureException expected")
+        } catch(SignatureException expected) {
+            assertEquals 'Unable to verify Elliptic Curve signature using configured ECPublicKey. Invalid ECDSA signature format.', expected.getMessage()
+        }
+    }
+
+    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    void testSignatureSZero() {
+        try {
+            byte[] r = new byte[32]; Arrays.fill(r, Byte.MAX_VALUE);
+            byte[] s = new byte[32]
+            byte[] sig = new byte[r.length + s.length]
+            System.arraycopy(r, 0, sig, 0, r.length)
+            System.arraycopy(s, 0, sig, r.length, s.length)
+
+            def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
+            def keypair = EllipticCurveProvider.generateKeyPair()
+            def data = withoutSignature.getBytes("US-ASCII")
+            new EllipticCurveSignatureValidator(SignatureAlgorithm.ES256, keypair.public).isValid(data, sig)
+            fail("SignatureException expected")
+        } catch(SignatureException expected) {
+            assertEquals 'Unable to verify Elliptic Curve signature using configured ECPublicKey. Invalid ECDSA signature format.', expected.getMessage()
+        }
     }
 
     @Test
@@ -104,7 +176,7 @@ class EllipticCurveSignatureValidatorTest {
             EllipticCurveProvider.transcodeSignatureToDER(signature)
             fail()
         } catch (JwtException e) {
-            assertEquals e.message, 'Invalid ECDSA signature format'
+            assertEquals e.message, 'Invalid ECDSA signature format.'
         }
     }
 
@@ -130,12 +202,6 @@ class EllipticCurveSignatureValidatorTest {
 //        signature[1] = 0x81
         signature[1] = -10
         verify(signature)
-    }
-
-    @Test
-    void edgeCaseSignatureLengthTest() {
-        def signature = new byte[1]
-        EllipticCurveProvider.transcodeSignatureToDER(signature)
     }
 
     @Test
