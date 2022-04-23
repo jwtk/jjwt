@@ -112,7 +112,7 @@
         <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
-        <jjwt.previousVersion>0.11.3</jjwt.previousVersion>
+        <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
 
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
