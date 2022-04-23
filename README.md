@@ -266,18 +266,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.11.3</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.11.3</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.11.3</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
@@ -1330,7 +1330,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.11.3</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1438,7 +1438,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-gson</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.11.3</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
