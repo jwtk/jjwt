@@ -31,7 +31,7 @@ import java.util.Map;
  * claims.{@link Map#put(Object, Object) put}("someKey", "someValue");
  * </pre>
  *
- * <h3>Creation</h3>
+ * <h2>Creation</h2>
  *
  * <p>It is easiest to create a {@code Claims} instance by calling one of the
  * {@link Jwts#claims() JWTs.claims()} factory methods.</p>
@@ -177,7 +177,7 @@ public interface Claims extends Map<String, Object>, ClaimsMutator<Claims> {
      * complex is expected to be already converted to your desired type by the JSON
      * {@link io.jsonwebtoken.io.Deserializer Deserializer} implementation. You may specify a custom Deserializer for a
      * JwtParser with the desired conversion configuration via the {@link JwtParserBuilder#deserializeJsonWith} method.
-     * See <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a></a> for more
+     * See <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a> for more
      * information. If using Jackson, you can specify custom claim POJO types as described in
      * <a href="https://github.com/jwtk/jjwt#json-jackson-custom-types">custom claim types</a>.
      *

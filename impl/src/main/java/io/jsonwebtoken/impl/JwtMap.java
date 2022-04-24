@@ -17,13 +17,9 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.DateFormats;
+
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class JwtMap implements Map<String, Object> {
 
@@ -62,9 +58,7 @@ public class JwtMap implements Map<String, Object> {
         }
     }
 
-    /**
-     * @since 0.10.0
-     */
+    // @since 0.10.0
     private static Date parseIso8601Date(String s, String name) throws IllegalArgumentException {
         try {
             return DateFormats.parseIso8601Date(s);
@@ -74,9 +68,7 @@ public class JwtMap implements Map<String, Object> {
         }
     }
 
-    /**
-     * @since 0.10.0
-     */
+    // @since 0.10.0
     protected static Date toSpecDate(Object v, String name) {
         if (v == null) {
             return null;

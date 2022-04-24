@@ -7,24 +7,27 @@ on:
       - master
 
 jobs:
-  hotspot:
+  temurin:
     strategy:
       matrix:
-        java: [ '8', '11' ]
+        java: [ '8', '11', '17', '18' ]
     runs-on: 'ubuntu-latest'
     env:
       MVN_CMD: ./mvnw --no-transfer-progress -B
-    name: java-${{ matrix.java }}
+    name: jdk-${{ matrix.java }}-temurin
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Set up JDK
-        uses: actions/setup-java@v2.4.0
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
+          check-latest: true
       - name: Build
-        run: ${{env.MVN_CMD}} verify
+        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
+        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
       - name: Code coverage
         if:  matrix.java == '8'
         run: |
@@ -37,34 +40,40 @@ jobs:
   zulu:
     strategy:
       matrix:
-        java: [ '9', '10', '14' ]
+        java: [ '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18' ]
     runs-on: 'ubuntu-latest'
     env:
       MVN_CMD: ./mvnw --no-transfer-progress -B
-    name: java-${{ matrix.java }}
+      JDK_MAJOR_VERSION: ${{ matrix.java }}
+    name: jdk-${{ matrix.java }}-zulu
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Set up JDK
-        uses: actions/setup-java@v2.4.0
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
           distribution: 'zulu'
           cache: 'maven'
+          check-latest: true
       - name: Build
-        run: ${{env.MVN_CMD}} verify
+        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
+        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
+        run: |
+          if [ "$JDK_MAJOR_VERSION" == "7" ]; then export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"; fi
+          ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
 
-  java-7:
+  jdk-7-oracle:
     runs-on: 'ubuntu-latest'
     env:
       MVN_CMD: ./mvnw --no-transfer-progress -B
       MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - run: |
           download_url="https://238dj3282as03k369.s3-us-west-1.amazonaws.com/jdk-7u80-linux-x64.tar.gz"
           wget -O $RUNNER_TEMP/java_package.tar.gz $download_url
       - name: Set up JDK
-        uses: actions/setup-java@v2.4.0
+        uses: actions/setup-java@v3
         with:
           distribution: 'jdkfile'
           jdkFile: ${{ runner.temp }}/java_package.tar.gz
@@ -77,4 +86,6 @@ jobs:
           unzip -oj -d "$JAVA_HOME/jre/lib/security" $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip \*/\*.jar
           rm $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip
       - name: Build
-        run: ${{env.MVN_CMD}} verify
+        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
+        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true

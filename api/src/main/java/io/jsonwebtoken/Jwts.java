@@ -48,6 +48,8 @@ public final class Jwts {
      * with the specified name/value pairs.  As this is a less common use of JWTs, consider using the
      * {@link #jwsHeader(java.util.Map)} factory method instead if you will later digitally sign the JWT.
      *
+     * @param header map of name/value pairs used to create a <em>plaintext</em> (not digitally signed) JWT
+     *               {@code Header} instance.
      * @return a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.
      */
     public static Header header(Map<String, Object> header) {
@@ -68,6 +70,7 @@ public final class Jwts {
      * Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
      * specified name/value pairs.
      *
+     * @param header map of name/value pairs used to create a new {@link JwsHeader} instance.
      * @return a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
      * specified name/value pairs.
      * @see JwtBuilder#setHeader(Header)
@@ -122,9 +125,9 @@ public final class Jwts {
     }
 
     /**
-     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser).
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
      *
-     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser).
+     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
      */
     public static JwtParserBuilder parserBuilder() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");

@@ -39,7 +39,7 @@ public final class Maps {
      * @param value the value of map entry to be added
      * @param <K> the maps key type
      * @param <V> the maps value type
-     * Creates a new map builder with a single entry.
+     * @return a new map builder with a single entry.
      */
     public static <K, V> MapBuilder<K, V> of(K key, V value) {
         return new HashMapBuilder<K, V>().and(key, value);

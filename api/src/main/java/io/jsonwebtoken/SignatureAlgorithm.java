@@ -531,7 +531,7 @@ public enum SignatureAlgorithm {
      * Section 3.3)</a> mandates that RSA signing key lengths <em>MUST</em> be 2048 bits or greater.
      * {@code RSAKey}s with key lengths less than 2048 bits will be rejected with a
      * {@link WeakKeyException}.</li>
-     * <li>Technically any RSA key of length >= 2048 bits may be used with the {@link #RS256}, {@link #RS384}, and
+     * <li>Technically any RSA key of length &gt;= 2048 bits may be used with the {@link #RS256}, {@link #RS384}, and
      * {@link #RS512} algorithms, so we assume an RSA signature algorithm based on the key length to
      * parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>
@@ -545,7 +545,6 @@ public enum SignatureAlgorithm {
      * <li>The {@link #RS256}, {@link #RS384}, and {@link #RS512} algorithms are available in the JDK by default
      * while the {@code PS}* variants require an additional JCA Provider (like BouncyCastle).</li>
      * </ul>
-     * </p>
      *
      * <p>Finally, this method will throw an {@link InvalidKeyException} for any key that does not match the
      * heuristics and requirements documented above, since that inevitably means the Key is either insufficient or
