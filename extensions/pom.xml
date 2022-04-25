@@ -38,4 +38,16 @@
         <module>orgjson</module>
         <module>gson</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>nonJDK7</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <modules>
+                <module>jsonb</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

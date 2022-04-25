@@ -1269,10 +1269,25 @@ They are checked in order, and the first one found is used:
    Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple 
    Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshalling.
 
+4. JSON-B: This will automatically be used if you specify `io.jsonwebtoken:jjwt-jsonb` as a project runtime dependency.
+   JSON-B also supports POJOs as claims with full marshaling/unmarshaling as necessary.
+
+   **NOTE**: `JSON-B` is just a specification and does not bring an implementation.
+   
+   * In Java-SE environments you will need to add three more dependencies:
+      1. `jakarta.json:jakarta.json-api`
+      2. `jakarta.json.bind:jakarta.json.bind-api`
+      3. A JSON-B compliant implementation like [Eclipse Yasson](https://github.com/eclipse-ee4j/yasson) or [Apache Johnzon](https://johnzon.apache.org/johnzon-jsonb/index.html).
+   * In Java/Jakarta EE environments, you might need to enable the following features:
+      1. json-p / json-api
+      2. json-b / json-bind
+
 **If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or 
 `io.jsonwebtoken:jjwt-gson` dependency** (or implement your own Serializer and Deserializer if desired). **But beware**, 
 Jackson will force a sizable (> 1 MB) dependency to an Android application thus increasing the app download size for 
 mobile users.
+
+If you want to use POJOs and a JSON-B compliant specification _**or**_ you want to use JJWT on a JakartaEE compliant application server, use `io.jsonwebtoken:jjwt-jsonb`.
 
 <a name="json-custom"></a>
 ### Custom JSON Processor
