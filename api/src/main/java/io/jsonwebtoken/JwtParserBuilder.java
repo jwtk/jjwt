@@ -31,8 +31,10 @@ import java.util.Map;
  *         .build()
  *         .parse(jwtString)
  * }</pre>
+ *
  * @since 0.11.0
  */
+@SuppressWarnings("JavadocLinkAsPlainText")
 public interface JwtParserBuilder {
 
     /**
@@ -125,7 +127,7 @@ public interface JwtParserBuilder {
      * JWT is invalid and may not be used.
      *
      * @param claimName the name of a claim that must exist
-     * @param value the required value of the specified {@code claimName}
+     * @param value     the required value of the specified {@code claimName}
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -148,7 +150,8 @@ public interface JwtParserBuilder {
      * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
      * @return the parser builder for method chaining.
      * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
-     * any such value would cause numeric overflow when multiplying by 1000 to obtain a millisecond value.
+     *                                  any such value would cause numeric overflow when multiplying by 1000 to obtain
+     *                                  a millisecond value.
      */
     JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
 
@@ -199,13 +202,16 @@ public interface JwtParserBuilder {
      * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
      * signature operations.</p>
      *
-     * <p>Finally, please use the {@link #setSigningKey(Key) setSigningKey(Key)} instead, as this method and the
-     * {@code byte[]} variant will be removed before the 1.0.0 release.</p>
+     * <p>Finally, please use the {@link #setSigningKey(Key) setSigningKey(Key)} instead, as this method (and likely the
+     * {@code byte[]} variant) will be removed before the 1.0.0 release.</p>
      *
      * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signature verification key to use to validate
      *                               any discovered JWS digital signature.
      * @return the parser builder for method chaining.
+     * @deprecated in favor of {@link #setSigningKey(Key)} as explained in the above <b>Deprecation Notice</b>,
+     * and will be removed in 1.0.0.
      */
+    @Deprecated
     JwtParserBuilder setSigningKey(String base64EncodedSecretKey);
 
     /**
@@ -301,10 +307,11 @@ public interface JwtParserBuilder {
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
      */
-    JwtParserBuilder deserializeJsonWith(Deserializer<Map<String,?>> deserializer);
+    JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
     /**
      * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.
+     *
      * @return an immutable/thread-safe JwtParser created from the configuration from this JwtParserBuilder.
      */
     JwtParser build();
