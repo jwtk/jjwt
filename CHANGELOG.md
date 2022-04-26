@@ -1,11 +1,21 @@
 ## Release Notes
 
-### 0.11.4 (pending release)
+### 0.11.4
 
 This patch release:
 
 * Adds additional handling for rare JSON parsing exceptions and wraps them in a `JwtException` to allow the application to handle these conditions as JWT concerns.
 * Upgrades the `jjwt-jackson` module's Jackson dependency to `2.12.6.1`.
+* Upgrades the `jjwt-orgjson` module's org.json:json dependency to `20220320`.
+* Upgrades the `jjwt-gson` module's gson dependency to `2.9.0`.
+* Upgrades the internal testing BouncyCastle version and any references in README documentation examples to `1.70`.
+* Contains various documentation and typo fixes.
+
+The patch also makes various internal project POM and build enhancements to reduce repetition and the chance for 
+stale references, and overall create a cleaner build with less warnings.  It also ensures that CI testing builds
+and executes on all latest OpenJDK versions from Java 7 to Java 18 (inclusive).
+
+Issues included in this patch are listed in the [JJWT 0.11.4 milestone](https://github.com/jwtk/jjwt/milestone/25?closed=1).
 
 ### 0.11.3
 
