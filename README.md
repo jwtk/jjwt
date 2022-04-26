@@ -1522,7 +1522,7 @@ anyone in the world can take Base64-encoded text, decode it with any standard Ba
 underlying raw byte array data.  No key or secret is required to decode Base64 text - anyone can do it.
 
 Based on this, when encoding sensitive byte data with Base64 - like a shared or private key - **the resulting
-string NOT is safe to expose publicly**.
+string is NOT safe to expose publicly**.
 
 A base64-encoded key is still sensitive information and must
 be kept as secret and as safe as the original thing you got the bytes from (e.g. a Java `PrivateKey` or `SecretKey` 
