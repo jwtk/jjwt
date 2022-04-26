@@ -14,14 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.11.4-SNAPSHOT</version>
+    <version>0.11.4</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
@@ -54,7 +52,7 @@
         <connection>scm:git:https://github.com/jwtk/jjwt.git</connection>
         <developerConnection>scm:git:git@github.com:jwtk/jjwt.git</developerConnection>
         <url>git@github.com:jwtk/jjwt.git</url>
-        <tag>HEAD</tag>
+        <tag>0.11.4</tag>
     </scm>
     <issueManagement>
         <system>GitHub Issues</system>
@@ -112,7 +110,7 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments/>
+        <arguments />
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
@@ -132,7 +130,7 @@
         <orgjson.version>20220320</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
-        <maven.javadoc.additionalOptions></maven.javadoc.additionalOptions>
+        <maven.javadoc.additionalOptions />
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.70</bouncycastle.version>
@@ -146,7 +144,7 @@
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine/>
+        <surefire.argLine />
 
     </properties>
 
@@ -418,7 +416,7 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                         </transformers>
                     </configuration>
                     <executions>
