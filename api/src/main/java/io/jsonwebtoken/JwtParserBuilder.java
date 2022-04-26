@@ -40,7 +40,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param id
+     * @param id the required value of the {@code jti} header parameter.
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -52,7 +52,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param subject
+     * @param subject the required value of the {@code sub} header parameter.
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -64,7 +64,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param audience
+     * @param audience the required value of the {@code aud} header parameter.
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -76,7 +76,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param issuer
+     * @param issuer the required value of the {@code iss} header parameter.
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -88,7 +88,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param issuedAt
+     * @param issuedAt the required value of the {@code iat} header parameter.
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -100,7 +100,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param expiration
+     * @param expiration the required value of the {@code exp} header parameter.
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -112,7 +112,7 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param notBefore
+     * @param notBefore the required value of the {@code npf} header parameter.
      * @return the parser builder for method chaining
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -124,8 +124,8 @@ public interface JwtParserBuilder {
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param claimName
-     * @param value
+     * @param claimName the name of a claim that must exist
+     * @param value the required value of the specified {@code claimName}
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
@@ -155,10 +155,10 @@ public interface JwtParserBuilder {
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
-     * <p>
+     *
      * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
      * (as the {@code alg} header parameter).</p>
-     * <p>
+     *
      * <p>This method overwrites any previously set key.</p>
      *
      * @param key the algorithm-specific signature verification key used to validate any discovered JWS digital
@@ -179,7 +179,7 @@ public interface JwtParserBuilder {
      * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
      * byte array is used to invoke {@link #setSigningKey(byte[])}.</p>
      *
-     * <h4>Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0</h4>
+     * <p><b>Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0</b></p>
      *
      * <p>This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
      * cryptographic operations are always binary (byte arrays), and many people were confused as to how bytes were
@@ -211,10 +211,10 @@ public interface JwtParserBuilder {
     /**
      * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
      * a JWS (no signature), this key is not used.
-     * <p>
+     *
      * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
      * (as the {@code alg} header parameter).</p>
-     * <p>
+     *
      * <p>This method overwrites any previously set key.</p>
      *
      * @param key the algorithm-specific signature verification key to use to validate any discovered JWS digital
@@ -226,12 +226,12 @@ public interface JwtParserBuilder {
     /**
      * Sets the {@link SigningKeyResolver} used to acquire the <code>signing key</code> that should be used to verify
      * a JWS's signature.  If the parsed String is not a JWS (no signature), this resolver is not used.
-     * <p>
+     *
      * <p>Specifying a {@code SigningKeyResolver} is necessary when the signing key is not already known before parsing
      * the JWT and the JWT header or payload (plaintext body or Claims) must be inspected first to determine how to
      * look up the signing key.  Once returned by the resolver, the JwtParser will then verify the JWS signature with the
      * returned key.  For example:</p>
-     * <p>
+     *
      * <pre>
      * Jws&lt;Claims&gt; jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
      *         &#64;Override
@@ -241,9 +241,9 @@ public interface JwtParserBuilder {
      *         }})
      *     .parseClaimsJws(compact);
      * </pre>
-     * <p>
+     *
      * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>
-     * <p>
+     *
      * <p>This method should only be used if a signing key is not provided by the other {@code setSigningKey*} builder
      * methods.</p>
      *
@@ -255,15 +255,19 @@ public interface JwtParserBuilder {
     /**
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to
      * decompress the JWT body. If the parsed JWT is not compressed, this resolver is not used.
+     *
      * <p><b>NOTE:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
      * (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWT body correctly.  This method is only
      * useful if the compact JWT was compressed with JJWT &gt;= 0.6.0 or another library that you know implements
      * the same behavior.</p>
-     * <h3>Default Support</h3>
+     *
+     * <p><b>Default Support</b></p>
+     *
      * <p>JJWT's default {@link JwtParser} implementation supports both the
      * {@link CompressionCodecs#DEFLATE DEFLATE}
      * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
+     *
      * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement
      * your own {@link CompressionCodecResolver} and specify that via this method and also when
      * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} JWTs.</p>

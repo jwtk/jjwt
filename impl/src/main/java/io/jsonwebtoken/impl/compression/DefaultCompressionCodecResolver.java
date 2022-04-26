@@ -15,13 +15,10 @@
  */
 package io.jsonwebtoken.impl.compression;
 
-import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.CompressionCodecs;
-import io.jsonwebtoken.CompressionException;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.lang.Services;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collections;
@@ -30,7 +27,7 @@ import java.util.Map;
 
 /**
  * Default implementation of {@link CompressionCodecResolver} that supports the following:
- * <p>
+ *
  * <ul>
  * <li>If the specified JWT {@link Header} does not have a {@code zip} header, this implementation does
  * nothing and returns {@code null} to the caller, indicating no compression was used.</li>
