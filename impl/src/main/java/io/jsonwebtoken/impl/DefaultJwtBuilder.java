@@ -15,21 +15,11 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSigner;
 import io.jsonwebtoken.impl.crypto.JwtSigner;
 import io.jsonwebtoken.impl.lang.LegacyServices;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoder;
-import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.io.SerializationException;
-import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.io.*;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -120,6 +110,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
+        createSigner(alg, key); // since 0.11.5: fail fast if key cannot be used for alg.
         this.algorithm = alg;
         this.key = key;
         return this;

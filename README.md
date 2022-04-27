@@ -580,15 +580,15 @@ for any RSA key, the requirement is the RSA key (modulus) length in bits MUST be
 <a name="jws-key-ecdsa"></a>
 #### Elliptic Curve
 
-JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all require a minimum key length
-(aka an Elliptic Curve order bit length) that is _at least_ as many bits as the algorithm signature's individual 
+JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all require a key length
+(aka an Elliptic Curve order bit length) equal to the algorithm signature's individual 
 `R` and `S` components per [RFC 7512 Section 3.4](https://tools.ietf.org/html/rfc7518#section-3.4).  This means:
 
-* `ES256` requires that you use a private key that is at least 256 bits (32 bytes) long.
+* `ES256` requires that you use a private key that is exactly 256 bits (32 bytes) long.
   
-* `ES384` requires that you use a private key that is at least 384 bits (48 bytes) long.
+* `ES384` requires that you use a private key that is exactly 384 bits (48 bytes) long.
 
-* `ES512` requires that you use a private key that is at least 512 bits (64 bytes) long.
+* `ES512` requires that you use a private key that is exactly 521 bits (65 or 66 bytes) long (depending on format).
 
 <a name="jws-key-create"></a>
 #### Creating Safe Keys
