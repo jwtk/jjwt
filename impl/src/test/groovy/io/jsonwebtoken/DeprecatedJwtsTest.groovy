@@ -40,6 +40,28 @@ import static org.junit.Assert.*
 
 class DeprecatedJwtsTest {
 
+    private static Date now() {
+        return dateWithOnlySecondPrecision(System.currentTimeMillis());
+    }
+
+    private static int later() {
+        def date = laterDate(10000)
+        def seconds = date.getTime() / 1000
+        return seconds as int
+    }
+
+    private static Date laterDate(int seconds) {
+        def millis = seconds * 1000L
+        def time = System.currentTimeMillis() + millis
+        return dateWithOnlySecondPrecision(time)
+    }
+
+    private static Date dateWithOnlySecondPrecision(long millis) {
+        long seconds = (millis / 1000) as long
+        long secondOnlyPrecisionMillis = seconds * 1000
+        return new Date(secondOnlyPrecisionMillis)
+    }
+
     protected static String base64Url(String s) {
         byte[] bytes = s.getBytes(Strings.UTF_8)
         return Encoders.BASE64URL.encode(bytes)
@@ -227,31 +249,9 @@ class DeprecatedJwtsTest {
         assertNull claims.getAudience()
     }
 
-    private static Date now() {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis());
-    }
-
-    private static int later() {
-        return laterDate().getTime() / 1000;
-    }
-
-    private static Date laterDate(int seconds) {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000));
-    }
-
-    private static Date laterDate() {
-        return laterDate(10000);
-    }
-
-    private static Date dateWithOnlySecondPrecision(long millis) {
-        long seconds = millis / 1000;
-        long secondOnlyPrecisionMillis = seconds * 1000;
-        return new Date(secondOnlyPrecisionMillis);
-    }
-
     @Test
     void testConvenienceExpiration() {
-        Date then = laterDate();
+        Date then = laterDate(10000)
         String compact = Jwts.builder().setExpiration(then).compact();
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()

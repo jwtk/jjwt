@@ -87,7 +87,7 @@ class OrgJsonDeserializerTest {
         def d = new OrgJsonDeserializer();
         def b = '3.14159'.getBytes(Strings.UTF_8)
         def value = d.deserialize(b)
-        assert value instanceof Double
+        assert value instanceof BigDecimal
         assertEquals 3.14159 as Double, value, 0d
     }
 

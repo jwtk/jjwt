@@ -176,6 +176,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     @Override
     public T signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
+        alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
         return signWith(key, (SignatureAlgorithm<Key,?>)SignatureAlgorithmsBridge.forId(alg.getValue()));
     }
 

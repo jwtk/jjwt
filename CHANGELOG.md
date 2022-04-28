@@ -1,11 +1,93 @@
 ## Release Notes
 
-### 0.11.3 (pending release)
+### 0.11.5
+
+This patch release adds additional security guards against an ECDSA bug in Java SE versions 15-15.0.6, 17-17.0.2, and 18
+([CVE-2022-21449](https://nvd.nist.gov/vuln/detail/CVE-2022-21449)) in addition to the guards added in the JJWT 0.11.3 
+release. This patch allows JJWT users using those JVM versions to upgrade to JJWT 0.11.5, even if they are unable to 
+upgrade their JVM to patched/fixed JVM version in a timely manner.  Note: if your application does not use these JVM 
+versions, you are not exposed to the JVM vulnerability.
+
+Note that the CVE is not a bug within JJWT itself - it is a bug within the above listed JVM versions, and the
+JJWT 0.11.5 release adds additional precautions within JJWT in case an application team is not able to upgrade
+their JVM in a timely manner.
+
+However, even with these additional JJWT security guards, the root cause of the issue is the JVM, so it **strongly
+recommended** to upgrade your JVM to version
+15.0.7, 17.0.3, or 18.0.1 or later to ensure the bug does not surface elsewhere in your application code or any other
+third party library in your application that may not contain similar security guards.
+
+Issues included in this patch are listed in the [JJWT 0.11.5 milestone](https://github.com/jwtk/jjwt/milestone/26?closed=1).
+
+#### Credits
+
+Thank you to [Neil Madden](https://neilmadden.blog), the security researcher that first discovered the JVM
+vulnerability as covered in his [Psychic Signatures in Java](https://neilmadden.blog/2022/04/19/psychic-signatures-in-java/) 
+blog post.  Neil worked directly with the JJWT team to provide these additional guards, beyond what was in the JJWT 0.11.3
+release, and we're grateful for his help and collaboration in reviewing our fixes and for the additional tests he
+provided the JJWT team.
+
+### 0.11.4
 
 This patch release:
 
 * Adds additional handling for rare JSON parsing exceptions and wraps them in a `JwtException` to allow the application to handle these conditions as JWT concerns.
-* Upgrades the `jjwt-jackson` module's Jackson dependency to `2.9.10.7`.
+* Upgrades the `jjwt-jackson` module's Jackson dependency to `2.12.6.1`.
+* Upgrades the `jjwt-orgjson` module's org.json:json dependency to `20220320`.
+* Upgrades the `jjwt-gson` module's gson dependency to `2.9.0`.
+* Upgrades the internal testing BouncyCastle version and any references in README documentation examples to `1.70`.
+* Contains various documentation and typo fixes.
+
+The patch also makes various internal project POM and build enhancements to reduce repetition and the chance for 
+stale references, and overall create a cleaner build with less warnings.  It also ensures that CI testing builds
+and executes on all latest OpenJDK versions from Java 7 to Java 18 (inclusive).
+
+Issues included in this patch are listed in the [JJWT 0.11.4 milestone](https://github.com/jwtk/jjwt/milestone/25?closed=1).
+
+### 0.11.3
+
+This patch release adds security guards against an ECDSA bug in Java SE versions 15-15.0.6, 17-17.0.2, and 18
+([CVE-2022-21449](https://nvd.nist.gov/vuln/detail/CVE-2022-21449)). Note: if your application does not use these 
+JVM versions, you are not exposed to the JVM vulnerability.
+
+Note that the CVE is not a bug within JJWT itself - it is a bug within the above listed JVM versions.  However, even 
+with these additional JJWT security guards, the root cause of the issue is the JVM, so it **strongly 
+recommended** to upgrade your JVM to version 15.0.7, 17.0.3, or 18.0.1 or later to ensure the bug does not surface 
+elsewhere in your application code or any other third party library in your application that may not contain similar 
+security guards.
+
+Issues included in this patch are listed in the [JJWT 0.11.3 milestone](https://github.com/jwtk/jjwt/milestone/24).
+
+#### Backwards Compatibility Warning
+
+In addition to additional protections against 
+[r or s values of zero in ECDSA signatures](https://neilmadden.blog/2022/04/19/psychic-signatures-in-java/), this 
+release also disables by default legacy DER-encoded signatures that might be included in an ECDSA-signed JWT. 
+(DER-encoded signatures are not supported by the JWT RFC specifications, so they are not frequently encountered.)
+
+However, if you are using an application that needs to consume such legacy JWTs (either produced by a very 
+early version of JJWT, or a different JWT library), you may re-enable DER-encoded ECDSA signatures by setting the 
+`io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported` System property to the _exact_ 
+`String` value `true`.  For example:
+
+```java
+System.setProperty("io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported", "true");
+```
+
+*BUT BE CAREFUL*:  **DO NOT** set this System property if your application may run on one of the vulnerable JVMs
+noted above (Java SE versions 15-15.0.6, 17-17.0.2, and 18).
+
+You may safely set this property to a `String` value of `true` on all other versions of the JVM if you need to 
+support these legacy JWTs, *otherwise it is best to ignore (not set) the property entirely*.
+
+#### Credits
+
+Thank you to [Neil Madden](https://neilmadden.blog), the security researcher that first discovered the JVM
+vulnerability as covered in his [Psychic Signatures in Java](https://neilmadden.blog/2022/04/19/psychic-signatures-in-java/) blog post.
+
+We'd also like to thank Toshiki Sasazaki, a member of [LINE Corporation](https://linecorp.com)'s Application Security 
+Team as the first person to report the concern directly to the JJWT team, as well as for working with us during testing 
+leading to our conclusions and subsequent 0.11.3 patch release.
 
 ### 0.11.2
 

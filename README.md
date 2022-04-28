@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jwtk/jjwt.svg?branch=master)](https://travis-ci.org/jwtk/jjwt)
+[![Build Status](https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/github/jwtk/jjwt?branch=master)
 [![Gitter](https://badges.gitter.im/jwtk/jjwt.svg)](https://gitter.im/jwtk/jjwt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
@@ -13,10 +13,8 @@ exclusively on the [JWT](https://tools.ietf.org/html/rfc7519),
 [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications and 
 open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 
-The library was created by [Okta's](http://www.okta.com) Senior Architect, [Les Hazlewood](https://github.com/lhazlewood)
+The library was created by [Les Hazlewood](https://github.com/lhazlewood)
 and is supported and maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
-
-[Okta](https://developer.okta.com/) is a complete authentication and user management API for developers.
 
 We've also added some convenience extensions that are not part of the specification, such as JWS compression and claim 
 enforcement.
@@ -267,18 +265,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.5</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.5</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-    <version>0.11.2</version>
+    <version>0.11.5</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
@@ -286,7 +284,7 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
-    <version>1.60</version>
+    <version>1.70</version>
     <scope>runtime</scope>
 </dependency>
 -->
@@ -298,11 +296,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2',
-            // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-            //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.11.2' // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
+    compile 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.5',
+    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+    //'org.bouncycastle:bcprov-jdk15on:1.70',
+    'io.jsonwebtoken:jjwt-jackson:0.11.5' // or 'io.jsonwebtoken:jjwt-gson:0.11.5' for gson
 }
 ```
 
@@ -318,13 +316,13 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.11.2'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.2') {
+    api 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.5') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-    //runtimeOnly 'org.bouncycastle:bcprov-jdk15on:1.60'
+    //runtimeOnly 'org.bouncycastle:bcprov-jdk15on:1.70'
 }
 ```
 
@@ -583,15 +581,15 @@ for any RSA key, the requirement is the RSA key (modulus) length in bits MUST be
 <a name="jws-key-ecdsa"></a>
 #### Elliptic Curve
 
-JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all require a minimum key length
-(aka an Elliptic Curve order bit length) that is _at least_ as many bits as the algorithm signature's individual 
+JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all require a key length
+(aka an Elliptic Curve order bit length) equal to the algorithm signature's individual 
 `R` and `S` components per [RFC 7512 Section 3.4](https://tools.ietf.org/html/rfc7518#section-3.4).  This means:
 
-* `ES256` requires that you use a private key that is at least 256 bits (32 bytes) long.
+* `ES256` requires that you use a private key that is exactly 256 bits (32 bytes) long.
   
-* `ES384` requires that you use a private key that is at least 384 bits (48 bytes) long.
+* `ES384` requires that you use a private key that is exactly 384 bits (48 bytes) long.
 
-* `ES512` requires that you use a private key that is at least 512 bits (64 bytes) long.
+* `ES512` requires that you use a private key that is exactly 521 bits (65 or 66 bytes) long (depending on format).
 
 <a name="jws-key-create"></a>
 #### Creating Safe Keys
@@ -1334,7 +1332,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.5</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1343,7 +1341,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 ```
 
@@ -1442,7 +1440,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-gson</artifactId>
-    <version>0.11.2</version>
+    <version>0.11.5</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1451,7 +1449,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-gson:0.11.5'
 }
 ```
 
@@ -1528,7 +1526,7 @@ anyone in the world can take Base64-encoded text, decode it with any standard Ba
 underlying raw byte array data.  No key or secret is required to decode Base64 text - anyone can do it.
 
 Based on this, when encoding sensitive byte data with Base64 - like a shared or private key - **the resulting
-string NOT is safe to expose publicly**.
+string is NOT safe to expose publicly**.
 
 A base64-encoded key is still sensitive information and must
 be kept as secret and as safe as the original thing you got the bytes from (e.g. a Java `PrivateKey` or `SecretKey` 
@@ -1638,7 +1636,7 @@ Jwts.parserBuilder()
 
 ## Author
 
-Maintained by Les Hazlewood &amp; [Okta](https://okta.com/)
+Maintained by Les Hazlewood &amp; the community :heart:
 
 <a name="license"></a>
 ## License

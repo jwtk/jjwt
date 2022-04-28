@@ -15,18 +15,64 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.ClaimJwtException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Clock;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.IncorrectClaimException;
+import io.jsonwebtoken.InvalidClaimException;
+import io.jsonwebtoken.Jwe;
+import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtHandler;
+import io.jsonwebtoken.JwtHandlerAdapter;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.MissingClaimException;
+import io.jsonwebtoken.PrematureJwtException;
+import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LegacyServices;
-import io.jsonwebtoken.impl.security.*;
-import io.jsonwebtoken.io.*;
-import io.jsonwebtoken.lang.*;
+import io.jsonwebtoken.impl.security.ConstantKeyLocator;
+import io.jsonwebtoken.impl.security.DefaultAeadResult;
+import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
+import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
+import io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge;
+import io.jsonwebtoken.impl.security.KeyAlgorithmsBridge;
+import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
+import io.jsonwebtoken.io.Decoder;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
+import io.jsonwebtoken.io.DeserializationException;
+import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.DateFormats;
+import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.DecryptAeadRequest;
+import io.jsonwebtoken.security.DecryptionKeyRequest;
+import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.PayloadSupplier;
 import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.VerifySignatureRequest;
+import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -552,13 +598,13 @@ public class DefaultJwtParser implements JwtParser {
                 throw e;
             } catch (InvalidKeyException | IllegalArgumentException e) {
                 String algId = algorithm.getId();
-                String msg = "The parsed JWT indicates it was signed with the " + algId + " signature " +
-                        "algorithm, but the specified verification key of type " + key.getClass().getName() +
-                        " may not be used to validate " + algId + " signatures.  Because the verification " +
-                        "key reflects a specific and expected algorithm, and the JWT does not reflect " +
-                        "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                        "trusted.  Another possibility is that the parser was supplied with the incorrect " +
-                        "verification key, but this cannot be assumed for security reasons.";
+                String msg = "The parsed JWT indicates it was signed with the '" + algId + "' signature " +
+                    "algorithm, but the provided " + key.getClass().getName() + " key may " +
+                    "not be used to verify " + algId + " signatures.  Because the specified " +
+                    "key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                    "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
+                    "trusted.  Another possibility is that the parser was provided the incorrect " +
+                    "signature verification key, but this cannot be assumed for security reasons.";
                 throw new UnsupportedJwtException(msg, e);
             }
         }

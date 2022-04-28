@@ -55,7 +55,7 @@ public final class Strings {
     /**
      * Check that the given CharSequence is neither <code>null</code> nor of length 0.
      * Note: Will return <code>true</code> for a CharSequence that purely consists of whitespace.
-     * <p><pre>
+     * <pre>
      * Strings.hasLength(null) = false
      * Strings.hasLength("") = false
      * Strings.hasLength(" ") = true
@@ -84,7 +84,7 @@ public final class Strings {
      * Check whether the given CharSequence has actual text.
      * More specifically, returns <code>true</code> if the string not <code>null</code>,
      * its length is greater than 0, and it contains at least one non-whitespace character.
-     * <p><pre>
+     * <pre>
      * Strings.hasText(null) = false
      * Strings.hasText("") = false
      * Strings.hasText(" ") = false
@@ -319,10 +319,10 @@ public final class Strings {
 
 
     /**
-     * Test if the given String starts with the specified prefix,
-     * ignoring upper/lower case.
+     * Returns {@code true} if the given string starts with the specified case-insensitive prefix, {@code false} otherwise.
      * @param str the String to check
      * @param prefix the prefix to look for
+     * @return {@code true} if the given string starts with the specified case-insensitive prefix, {@code false} otherwise.
      * @see java.lang.String#startsWith
      */
     public static boolean startsWithIgnoreCase(String str, String prefix) {
@@ -341,10 +341,10 @@ public final class Strings {
     }
 
     /**
-     * Test if the given String ends with the specified suffix,
-     * ignoring upper/lower case.
+     * Returns {@code true} if the given string ends with the specified case-insensitive suffix, {@code false} otherwise.
      * @param str the String to check
      * @param suffix the suffix to look for
+     * @return {@code true} if the given string ends with the specified case-insensitive suffix, {@code false} otherwise.
      * @see java.lang.String#endsWith
      */
     public static boolean endsWithIgnoreCase(String str, String suffix) {
@@ -364,11 +364,11 @@ public final class Strings {
     }
 
     /**
-     * Test whether the given string matches the given substring
-     * at the given index.
+     * Returns {@code true} if the given string matches the given substring at the given index, {@code false} otherwise.
      * @param str the original string (or StringBuilder)
      * @param index the index in the original string to start matching against
      * @param substring the substring to match at the given index
+     * @return {@code true} if the given string matches the given substring at the given index, {@code false} otherwise.
      */
     public static boolean substringMatch(CharSequence str, int index, CharSequence substring) {
         for (int j = 0; j < substring.length(); j++) {
@@ -381,9 +381,10 @@ public final class Strings {
     }
 
     /**
-     * Count the occurrences of the substring in string s.
+     * Returns the number of occurrences the substring {@code sub} appears in string {@code str}.
      * @param str string to search in. Return 0 if this is null.
      * @param sub string to search for. Return 0 if this is null.
+     * @return the number of occurrences the substring {@code sub} appears in string {@code str}.
      */
     public static int countOccurrencesOf(String str, String sub) {
         if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
@@ -488,6 +489,7 @@ public final class Strings {
      * Unqualify a string qualified by a '.' dot character. For example,
      * "this.name.is.qualified", returns "qualified".
      * @param qualifiedName the qualified name
+     * @return an unqualified string by stripping all previous text before (and including) the last period character.
      */
     public static String unqualify(String qualifiedName) {
         return unqualify(qualifiedName, '.');
@@ -498,6 +500,7 @@ public final class Strings {
      * "this:name:is:qualified" returns "qualified" if using a ':' separator.
      * @param qualifiedName the qualified name
      * @param separator the separator
+     * @return an unqualified string by stripping all previous text before and including the last {@code separator} character.
      */
     public static String unqualify(String qualifiedName, char separator) {
         return qualifiedName.substring(qualifiedName.lastIndexOf(separator) + 1);

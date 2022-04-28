@@ -66,6 +66,7 @@ public final class Classes {
      * the JRE's <code>ClassNotFoundException</code>.
      *
      * @param fqcn the fully qualified class name to load
+     * @param <T> The type of Class returned
      * @return the located class
      * @throws UnknownClassException if the class cannot be found.
      */
@@ -188,6 +189,14 @@ public final class Classes {
     }
 
     /**
+     * Invokes the fully qualified class name's method named {@code methodName} with parameters of type {@code argTypes}
+     * using the {@code args} as the method arguments.
+     * @param fqcn fully qualified class name to locate
+     * @param methodName name of the method to invoke on the class
+     * @param argTypes the method argument types supported by the {@code methodName} method
+     * @param args the runtime arguments to use when invoking the located class method
+     * @param <T> the expected type of the object returned from the invoked method.
+     * @return the result returned by the invoked method
      * @since 0.10.0
      */
     public static <T> T invokeStatic(String fqcn, String methodName, Class<?>[] argTypes, Object... args) {

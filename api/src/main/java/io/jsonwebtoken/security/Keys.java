@@ -93,6 +93,7 @@ public final class Keys {
      * secure-random generated SecretKey that adheres to the required minimum key length.  The lengths are:</p>
      *
      * <table>
+     *     <caption>JWA HMAC-SHA Key Length Requirements</caption>
      * <tr>
      * <th>Algorithm</th>
      * <th>Key Length</th>
@@ -149,6 +150,7 @@ public final class Keys {
      * <p>If the {@code alg} argument is an RSA algorithm, a KeyPair is generated based on the following:</p>
      *
      * <table>
+     *     <caption>Generated RSA Key Sizes</caption>
      * <tr>
      * <th>JWA Algorithm</th>
      * <th>Key Size</th>
@@ -182,6 +184,7 @@ public final class Keys {
      * <p>If the {@code alg} argument is an Elliptic Curve algorithm, a KeyPair is generated based on the following:</p>
      *
      * <table>
+     *     <caption>Generated Elliptic Curve Key Parameters</caption>
      * <tr>
      * <th>JWA Algorithm</th>
      * <th>Key Size</th>

@@ -17,15 +17,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.11.6-SNAPSHOT</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
@@ -40,10 +34,19 @@
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <name>Les Hazlewood</name>
+            <email>121180+lhazlewood@users.noreply.github.com</email>
+            <organization>JJWT</organization>
+            <organizationUrl>https://github.com/jwtk/jjwt</organizationUrl>
+        </developer>
+    </developers>
 
     <scm>
         <connection>scm:git:https://github.com/jwtk/jjwt.git</connection>
@@ -59,39 +62,89 @@
         <system>TravisCI</system>
         <url>https://travis-ci.org/jwtk/jjwt</url>
     </ciManagement>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>ossrh</id>
+            <name>OSSRH Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- temporary fix until official release of coverall-maven-plugin with clover support: -->
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jwtk-coveralls-maven-plugin</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <!-- temporary fix until official release of coverall-maven-plugin with clover support: -->
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jwtk-coveralls-maven-plugin</id>
+            <name>bintray-plugins</name>
+            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <arguments />
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
-        <maven.jar.version>3.0.2</maven.jar.version>
-        <maven.compiler.version>3.8.0</maven.compiler.version>
-        <maven.javadoc.version>3.1.1</maven.javadoc.version>
-        <gmavenplus.version>1.6.1</gmavenplus.version>
+        <maven.jar.version>3.2.2</maven.jar.version>
+        <maven.compiler.version>3.8.1</maven.compiler.version> <!-- max version allowed for JDK 7 builds -->
+        <maven.javadoc.version>3.1.1</maven.javadoc.version> <!-- max version allowed for JDK 7 builds -->
+        <maven.source.version>3.2.1</maven.source.version>
+        <maven.gpg.version>1.6</maven.gpg.version> <!-- max version allowed for JDK 7 builds -->
+        <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
+        <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
 
         <jdk.version>1.7</jdk.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.12.5</jackson.version>
-        <orgjson.version>20180130</orgjson.version>
-        <gson.version>2.8.8</gson.version>
+        <jackson.version>2.12.6.1</jackson.version>
+        <orgjson.version>20220320</orgjson.version>
+        <gson.version>2.9.0</gson.version>
+
+        <maven.javadoc.additionalOptions />
 
         <!-- Optional Runtime Dependencies: -->
-        <bouncycastle.version>1.60</bouncycastle.version>
+        <bouncycastle.version>1.70</bouncycastle.version>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.11</groovy.version>
-        <logback.version>1.2.3</logback.version>
-        <easymock.version>3.6</easymock.version>
+        <groovy.version>2.5.16</groovy.version> <!-- higher version used in jdk8AndLater profile below -->
+        <easymock.version>3.6</easymock.version> <!-- higher version used in jdk8AndLater profile below -->
         <junit.version>4.12</junit.version>
-        <powermock.version>2.0.7</powermock.version> <!-- necessary for Java 9 support -->
-        <failsafe.plugin.version>2.22.0</failsafe.plugin.version>
-        <surefire.plugin.version>2.22.0</surefire.plugin.version>
-        <clover.version>4.2.1</clover.version>
+        <powermock.version>2.0.0-beta.5</powermock.version> <!-- higher version used in jdk8AndLater profile below -->
+        <failsafe.plugin.version>3.0.0-M5</failsafe.plugin.version>
+        <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
+        <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine/>
+        <surefire.argLine />
 
     </properties>
 
@@ -158,12 +211,6 @@
     <dependencies>
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
@@ -204,6 +251,23 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.scm</groupId>
+                            <artifactId>maven-scm-provider-gitexe</artifactId>
+                            <version>1.9.5</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <mavenExecutorId>forked-path</mavenExecutorId>
+                        <releaseProfiles>ossrh</releaseProfiles>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.openclover</groupId>
                     <artifactId>clover-maven-plugin</artifactId>
@@ -250,17 +314,63 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.4</version>
+                    <version>${maven.javadoc.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                     <configuration>
                         <source>${jdk.version}</source>
+                        <failOnError>true</failOnError>
+                        <failOnWarnings>false</failOnWarnings>
+                        <additionalOptions>${maven.javadoc.additionalOptions}</additionalOptions>
                     </configuration>
+                    <dependencies>
+                        <!-- Workaround for Java 9 -->
+                        <dependency>
+                            <groupId>commons-lang</groupId>
+                            <artifactId>commons-lang</artifactId>
+                            <version>2.6</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven.source.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${maven.gpg.version}</version>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <!-- japicmp will scan code for binary breaking changes, Open api/target/japicmp/japicmp.html
                          for a report of the changes since ${jjwt.previousVersion} -->
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.13.1</version>
+                    <version>${maven.japicmp.version}</version>
                     <configuration>
                         <oldVersion>
                             <dependency>
@@ -314,7 +424,7 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                         </transformers>
                     </configuration>
                     <executions>
@@ -426,46 +536,20 @@
             <plugin>
                 <groupId>org.openclover</groupId>
                 <artifactId>clover-maven-plugin</artifactId>
-                <!--
-                <configuration>
-                    <excludes>
-                        <!- - leaving out lang as it mostly comes from other sources - ->
-                        <exclude>io/jsonwebtoken/lang/*</exclude>
-                    </excludes>
-                    <methodPercentage>100.000000%</methodPercentage>
-                    <statementPercentage>100.000000%</statementPercentage>
-                    <conditionalPercentage>100.000000%</conditionalPercentage>
-                    <targetPercentage>100.000000%</targetPercentage>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>clover</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>instrument</goal>
-                            <goal>aggregate</goal>
-                            <goal>clover</goal>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions> -->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe</artifactId>
-                        <version>1.9.5</version>
-                    </dependency>
-                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <arguments>-Psonatype-oss-release -Pdocs -Psign</arguments>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
             </plugin>
             <plugin>
@@ -503,53 +587,26 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
             <plugin>
+                <!-- Temporarily host coveralls SNAPSHOT with clover support locally:  -->
                 <groupId>io.jsonwebtoken.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.4.1</version>
-            </plugin>
-            <!-- Temporarily host coveralls SNAPSHOT with clover support locally  -->
-
-            <!-- Override OSS parent to support Java 9 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <failOnError>false</failOnError>
-                </configuration>
-                <dependencies>
-                    <!-- Workaround for Java 9 -->
-                    <dependency>
-                        <groupId>commons-lang</groupId>
-                        <artifactId>commons-lang</artifactId>
-                        <version>2.6</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
     <profiles>
         <profile>
-            <id>nonJDK7</id>
+            <id>jdk8AndLater</id>
             <activation>
                 <jdk>[1.8,)</jdk>
             </activation>
             <properties>
-                <!-- Turn off JDK >= 8's lint checks: -->
-                <additionalparam>-Xdoclint:none</additionalparam>
-                <gmavenplus.version>1.8.1</gmavenplus.version>
+                <gmavenplus.version>1.13.1</gmavenplus.version>
+                <groovy.version>3.0.10</groovy.version>
                 <easymock.version>4.2</easymock.version>
                 <powermock.version>2.0.7</powermock.version>
+                <maven.japicmp.version>0.15.6</maven.japicmp.version>
             </properties>
         </profile>
         <profile>
@@ -559,29 +616,23 @@
                 <jdk>[1.9,)</jdk>
             </activation>
             <properties>
+                <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
                 <surefire.argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED</surefire.argLine>
             </properties>
         </profile>
         <profile>
-            <id>sign</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>jdk16AndLater</id>
+            <activation>
+                <jdk>[16,)</jdk>
+            </activation>
+            <properties>
+                <surefire.argLine>
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                    --add-opens java.base/java.lang.ref=ALL-UNNAMED
+                    --add-opens java.base/java.util=ALL-UNNAMED
+                    --add-opens java.base/sun.security.util=ALL-UNNAMED
+                </surefire.argLine>
+            </properties>
         </profile>
         <profile>
             <id>docs</id>
@@ -590,36 +641,29 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>${maven.javadoc.version}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <!-- Workaround for Java 9 -->
-                            <dependency>
-                                <groupId>commons-lang</groupId>
-                                <artifactId>commons-lang</artifactId>
-                                <version>2.6</version>
-                            </dependency>
-                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ossrh</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

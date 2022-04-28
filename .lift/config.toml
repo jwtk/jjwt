@@ -1,0 +1,4 @@
+ignoreRules = ["MissingOverride"]
+ignoreFiles = '''
+**/test/**
+'''

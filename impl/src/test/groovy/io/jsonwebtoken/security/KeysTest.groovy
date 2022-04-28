@@ -219,7 +219,7 @@ class KeysTest {
                 KeyPair pair = alg.generateKeyPair()
                 assertNotNull pair
 
-                int len = alg.minKeyLength
+                int len = alg.minKeyBitLength
                 String asn1oid = "secp${len}r1"
                 String suffix = len == 256 ? ", X9.62 prime${len}v1" : ''
                 //the JDK only adds this extra suffix to the secp256r1 curve name and not secp384r1 or secp521r1 curve names
@@ -229,13 +229,13 @@ class KeysTest {
                 assert pub instanceof ECPublicKey
                 assertEquals "EC", pub.algorithm
                 assertEquals jdkParamName, pub.params.name
-                assertEquals alg.minKeyLength, pub.params.order.bitLength()
+                assertEquals alg.minKeyBitLength, pub.params.order.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof ECPrivateKey
                 assertEquals "EC", priv.algorithm
                 assertEquals jdkParamName, priv.params.name
-                assertEquals alg.minKeyLength, priv.params.order.bitLength()
+                assertEquals alg.minKeyBitLength, priv.params.order.bitLength()
 
             } else {
                 assertFalse alg instanceof AsymmetricKeySignatureAlgorithm
