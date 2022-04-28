@@ -43,13 +43,14 @@ class EllipticCurveSignerTest {
 
     @Test
     void testConstructorWithoutECPrivateKey() {
-        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        def pair = Keys.keyPairFor(SignatureAlgorithm.ES256)
         try {
-            new EllipticCurveSigner(SignatureAlgorithm.ES256, key)
-            fail('EllipticCurveSigner should reject non ECPrivateKey instances.')
-        } catch (IllegalArgumentException expected) {
-            assertEquals expected.message, "Elliptic Curve signatures must be computed using an EC PrivateKey.  The specified key of " +
-            "type " + key.getClass().getName() + " is not an EC PrivateKey."
+            new EllipticCurveSigner(SignatureAlgorithm.ES256, pair.public)
+            fail('EllipticCurveSigner should reject public ECKey instances.')
+        } catch (io.jsonwebtoken.security.InvalidKeyException expected) {
+            String msg = 'Elliptic Curve signatures must be computed using an EC PrivateKey. The specified key of ' +
+                    'type sun.security.ec.ECPublicKeyImpl is not an EC PrivateKey.'
+            assertEquals(msg, expected.getMessage())
         }
     }
 
@@ -59,7 +60,6 @@ class EllipticCurveSignerTest {
         SignatureAlgorithm alg = SignatureAlgorithm.ES256
 
         KeyPair kp = Keys.keyPairFor(alg)
-        PublicKey publicKey = kp.getPublic()
         PrivateKey privateKey = kp.getPrivate()
 
         String msg = 'foo'
@@ -87,14 +87,15 @@ class EllipticCurveSignerTest {
     @Test
     void testDoSignWithJoseSignatureFormatException() {
 
-        KeyPair kp = EllipticCurveProvider.generateKeyPair()
+        SignatureAlgorithm alg = SignatureAlgorithm.ES256
+        KeyPair kp = EllipticCurveProvider.generateKeyPair(alg)
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
         String msg = 'foo'
         final JwtException ex = new JwtException(msg)
 
-        def signer = new EllipticCurveSigner(SignatureAlgorithm.ES256, privateKey) {
+        def signer = new EllipticCurveSigner(alg, privateKey) {
             @Override
             protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException, JwtException {
                 throw ex
@@ -116,14 +117,15 @@ class EllipticCurveSignerTest {
     @Test
     void testDoSignWithJdkSignatureException() {
 
-        KeyPair kp = EllipticCurveProvider.generateKeyPair()
+        SignatureAlgorithm alg = SignatureAlgorithm.ES256
+        KeyPair kp = EllipticCurveProvider.generateKeyPair(alg)
         PublicKey publicKey = kp.getPublic();
         PrivateKey privateKey = kp.getPrivate();
 
         String msg = 'foo'
         final java.security.SignatureException ex = new java.security.SignatureException(msg)
 
-        def signer = new EllipticCurveSigner(SignatureAlgorithm.ES256, privateKey) {
+        def signer = new EllipticCurveSigner(alg, privateKey) {
             @Override
             protected byte[] doSign(byte[] data) throws InvalidKeyException, java.security.SignatureException {
                 throw ex

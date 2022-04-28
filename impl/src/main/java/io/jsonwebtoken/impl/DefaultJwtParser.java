@@ -15,27 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.ClaimJwtException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.CompressionCodecResolver;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.IncorrectClaimException;
-import io.jsonwebtoken.InvalidClaimException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.JwtHandler;
-import io.jsonwebtoken.JwtHandlerAdapter;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.MissingClaimException;
-import io.jsonwebtoken.PrematureJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SigningKeyResolver;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.impl.crypto.JwtSignatureValidator;
@@ -403,13 +383,13 @@ public class DefaultJwtParser implements JwtParser {
                 throw e;
             } catch (InvalidKeyException | IllegalArgumentException e) {
                 String algName = algorithm.getValue();
-                String msg = "The parsed JWT indicates it was signed with the " + algName + " signature " +
-                    "algorithm, but the specified signing key of type " + key.getClass().getName() +
-                    " may not be used to validate " + algName + " signatures.  Because the specified " +
-                    "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                String msg = "The parsed JWT indicates it was signed with the '" + algName + "' signature " +
+                    "algorithm, but the provided " + key.getClass().getName() + " key may " +
+                    "not be used to verify " + algName + " signatures.  Because the specified " +
+                    "key reflects a specific and expected algorithm, and the JWT does not reflect " +
                     "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                    "trusted.  Another possibility is that the parser was configured with the incorrect " +
-                    "signing key, but this cannot be assumed for security reasons.";
+                    "trusted.  Another possibility is that the parser was provided the incorrect " +
+                    "signature verification key, but this cannot be assumed for security reasons.";
                 throw new UnsupportedJwtException(msg, e);
             }
 

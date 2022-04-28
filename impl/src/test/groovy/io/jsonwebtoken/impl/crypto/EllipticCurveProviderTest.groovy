@@ -15,7 +15,10 @@
  */
 package io.jsonwebtoken.impl.crypto
 
+
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import java.security.KeyPair
@@ -63,6 +66,31 @@ class EllipticCurveProviderTest {
             fail()
         } catch (IllegalArgumentException ise) {
             assertEquals ise.message, "SignatureAlgorithm argument must represent an Elliptic Curve algorithm."
+        }
+    }
+
+    @Test
+    void testConstructorWithNonEcKey() {
+        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        try {
+            new EllipticCurveProvider(SignatureAlgorithm.ES256, key) {}
+        } catch (InvalidKeyException expected) {
+            String msg = 'Elliptic Curve signatures require an ECKey. The provided key of type ' +
+                    'javax.crypto.spec.SecretKeySpec is not a java.security.interfaces.ECKey instance.'
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testConstructorWithInvalidKeyFieldLength() {
+        def keypair = Keys.keyPairFor(SignatureAlgorithm.ES256)
+        try {
+            new EllipticCurveProvider(SignatureAlgorithm.ES384, keypair.public){}
+        } catch (InvalidKeyException expected) {
+            String msg = "EllipticCurve key has a field size of 32 bytes (256 bits), but ES384 requires a " +
+                    "field size of 48 bytes (384 bits) per [RFC 7518, Section 3.4 (validation)]" +
+                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
+            assertEquals msg, expected.getMessage()
         }
     }
 }
