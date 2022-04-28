@@ -19,7 +19,7 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.11.5-SNAPSHOT</version>
+    <version>0.11.5</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
@@ -52,7 +52,7 @@
         <connection>scm:git:https://github.com/jwtk/jjwt.git</connection>
         <developerConnection>scm:git:git@github.com:jwtk/jjwt.git</developerConnection>
         <url>git@github.com:jwtk/jjwt.git</url>
-        <tag>HEAD</tag>
+        <tag>0.11.5</tag>
     </scm>
     <issueManagement>
         <system>GitHub Issues</system>
