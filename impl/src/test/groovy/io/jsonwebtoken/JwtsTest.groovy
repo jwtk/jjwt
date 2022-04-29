@@ -212,7 +212,7 @@ class JwtsTest {
     void testParseWithHeaderOnly() {
         String unsecuredJwt = base64Url("{\"alg\":\"none\"}") + ".."
         Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parse(unsecuredJwt)
-        assertEquals"none", jwt.getHeader().get("alg")
+        assertEquals "none", jwt.getHeader().get("alg")
     }
 
     @Test
@@ -364,7 +364,7 @@ class JwtsTest {
     @Test
     void testUncompressedJwt() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -386,7 +386,7 @@ class JwtsTest {
     @Test
     void testCompressedJwtWithDeflate() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -408,7 +408,7 @@ class JwtsTest {
     @Test
     void testCompressedJwtWithGZIP() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -430,7 +430,7 @@ class JwtsTest {
     @Test
     void testCompressedWithCustomResolver() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -469,7 +469,7 @@ class JwtsTest {
     @Test(expected = CompressionException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -488,7 +488,7 @@ class JwtsTest {
     @Test
     void testCompressStringPayloadWithDeflate() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String payload = "this is my test for a payload"
@@ -595,7 +595,7 @@ class JwtsTest {
     @Test(expected = WeakKeyException)
     void testParseClaimsJwsWithWeakHmacKey() {
 
-        SignatureAlgorithm alg = SignatureAlgorithms.HS384
+        def alg = SignatureAlgorithms.HS384
         def key = alg.keyBuilder().build()
         def weakKey = SignatureAlgorithms.HS256.keyBuilder().build()
 
@@ -676,7 +676,7 @@ class JwtsTest {
     void testParseClaimsJwsWithUnsignedJwt() {
 
         //create random signing key for testing:
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String notSigned = Jwts.builder().setSubject("Foo").compact()
@@ -694,7 +694,7 @@ class JwtsTest {
     void testForgedTokenWithSwappedHeaderUsingNoneAlgorithm() {
 
         //create random signing key for testing:
-        SignatureAlgorithm alg = SignatureAlgorithms.HS256
+        def alg = SignatureAlgorithms.HS256
         SecretKey key = alg.keyBuilder().build()
 
         //this is a 'real', valid JWT:
