@@ -17,6 +17,7 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.security.Key;
@@ -320,7 +321,8 @@ public interface JwtParser {
      * <p><b>NOTE: this method will be removed before version 1.0</b>
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
-    @Deprecated // TODO: remove for 1.0
+    @Deprecated
+    // TODO: remove for 1.0
     JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
     /**
@@ -429,7 +431,7 @@ public interface JwtParser {
      * @see #parsePlaintextJws(String)
      * @see #parseClaimsJws(String)
      */
-    Jwt<?,?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+    Jwt<?, ?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -460,9 +462,9 @@ public interface JwtParser {
      * <li>{@link #parseClaimsJws(String)}</li>
      * </ul>
      *
-     * @param jwt the compact serialized JWT to parse
+     * @param jwt     the compact serialized JWT to parse
      * @param handler the handler to invoke when encountering a specific type of JWT
-     * @param <T> the type of object returned from the {@code handler}
+     * @param <T>     the type of object returned from the {@code handler}
      * @return the result returned by the {@code JwtHandler}
      * @throws MalformedJwtException    if the specified JWT was incorrectly constructed (and therefore invalid).
      *                                  Invalid JWTs should not be trusted and should be discarded.
@@ -494,6 +496,7 @@ public interface JwtParser {
      * an {@link UnsupportedJwtException} will be thrown.</b></p>
      *
      * @param plaintextJwt a compact serialized unsigned plaintext JWT string.
+     * @param <H>          the type of {@link Header} expected to be contained within the JWT.
      * @return the {@link Jwt Jwt} instance that reflects the specified compact JWT string.
      * @throws UnsupportedJwtException  if the {@code plaintextJwt} argument does not represent an unsigned plaintext
      *                                  JWT
@@ -509,7 +512,7 @@ public interface JwtParser {
      * @since 0.2
      */
     <H extends Header<H>> Jwt<H, String> parsePlaintextJwt(String plaintextJwt)
-        throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -523,6 +526,7 @@ public interface JwtParser {
      * {@link UnsupportedJwtException} will be thrown.</b></p>
      *
      * @param claimsJwt a compact serialized unsigned Claims JWT string.
+     * @param <H>       the type of {@link Header} expected to be contained within the JWT.
      * @return the {@link Jwt Jwt} instance that reflects the specified compact JWT string.
      * @throws UnsupportedJwtException  if the {@code claimsJwt} argument does not represent an unsigned Claims JWT
      * @throws MalformedJwtException    if the {@code claimsJwt} string is not a valid JWT
@@ -539,7 +543,7 @@ public interface JwtParser {
      * @since 0.2
      */
     <H extends Header<H>> Jwt<H, Claims> parseClaimsJwt(String claimsJwt)
-        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -559,8 +563,10 @@ public interface JwtParser {
      * @throws SignatureException       if the {@code plaintextJws} JWS signature validation fails
      * @throws IllegalArgumentException if the {@code plaintextJws} string is {@code null} or empty or only whitespace
      * @see #parsePlaintextJwt(String)
+     * @see #parsePlaintextJwe(String)
      * @see #parseClaimsJwt(String)
      * @see #parseClaimsJws(String)
+     * @see #parseClaimsJwe(String)
      * @see #parse(String, JwtHandler)
      * @see #parse(String)
      * @since 0.2
@@ -587,22 +593,73 @@ public interface JwtParser {
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJws} string is {@code null} or empty or only whitespace
      * @see #parsePlaintextJwt(String)
-     * @see #parseClaimsJwt(String)
      * @see #parsePlaintextJws(String)
+     * @see #parsePlaintextJwe(String) 
+     * @see #parseClaimsJwt(String)
+     * @see #parseClaimsJwe(String)
      * @see #parse(String, JwtHandler)
      * @see #parse(String)
      * @since 0.2
      */
     Jws<Claims> parseClaimsJws(String claimsJws)
-        throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
+     * Parses the specified compact serialized JWE string based on the builder's current configuration state and
+     * returns the resulting plaintext JWE instance.
+     *
+     * <p>This is a convenience method that is usable if you are confident that the compact string argument reflects a
+     * plaintext JWE. A plaintext JWE is a JWT with a byte array (non-JSON) body (payload) that has been
+     * encrypted.</p>
+     *
+     * <p><b>If the compact string presented does not reflect a plaintext JWE, an {@link UnsupportedJwtException}
+     * will be thrown.</b></p>
+     *
+     * @param plaintextJwe a compact serialized JWE string.
+     * @return the {@link Jwe Jwe} instance that reflects the specified compact JWS string.
+     * @throws UnsupportedJwtException  if the {@code plaintextJwe} argument does not represent a plaintext JWE
+     * @throws MalformedJwtException    if the {@code plaintextJwe} string is not a valid JWE
+     * @throws SecurityException        if the {@code plaintextJwe} JWE decryption fails
+     * @throws IllegalArgumentException if the {@code plaintextJwe} string is {@code null} or empty or only whitespace
+     * @see #parsePlaintextJwt(String)
+     * @see #parsePlaintextJws(String) 
+     * @see #parseClaimsJwt(String)
+     * @see #parseClaimsJws(String)
+     * @see #parseClaimsJwe(String)
+     * @see #parse(String, JwtHandler)
+     * @see #parse(String)
      * @since JJWT_RELEASE_VERSION
      */
-    Jwe<String> parsePlaintextJwe(String plaintextJwe) throws JwtException;
+    Jwe<String> parsePlaintextJwe(String plaintextJwe)
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SecurityException, IllegalArgumentException;
 
     /**
+     * Parses the specified compact serialized JWE string based on the builder's current configuration state and
+     * returns the resulting Claims JWE instance.
+     *
+     * <p>This is a convenience method that is usable if you are confident that the compact string argument reflects a
+     * Claims JWE. A Claims JWE is a JWT with a {@link Claims} body that has been encrypted.</p>
+     *
+     * <p><b>If the compact string presented does not reflect a Claims JWE, an {@link UnsupportedJwtException} will be
+     * thrown.</b></p>
+     *
+     * @param claimsJwe a compact serialized Claims JWE string.
+     * @return the {@link Jwe Jwe} instance that reflects the specified compact Claims JWE string.
+     * @throws UnsupportedJwtException  if the {@code claimsJwe} argument does not represent a Claims JWE
+     * @throws MalformedJwtException    if the {@code claimsJwe} string is not a valid JWE
+     * @throws SignatureException       if the {@code claimsJwe} JWE decryption fails
+     * @throws ExpiredJwtException      if the specified JWT is a Claims JWE and the Claims has an expiration time
+     *                                  before the time this method is invoked.
+     * @throws IllegalArgumentException if the {@code claimsJwe} string is {@code null} or empty or only whitespace
+     * @see #parsePlaintextJwt(String)
+     * @see #parsePlaintextJws(String)
+     * @see #parsePlaintextJwe(String)
+     * @see #parseClaimsJwt(String)
+     * @see #parseClaimsJws(String)
+     * @see #parse(String, JwtHandler)
+     * @see #parse(String)
      * @since JJWT_RELEASE_VERSION
      */
-    Jwe<Claims> parseClaimsJwe(String claimsJwe) throws JwtException;
+    Jwe<Claims> parseClaimsJwe(String claimsJwe)
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SecurityException, IllegalArgumentException;
 }

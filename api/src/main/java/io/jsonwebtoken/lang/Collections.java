@@ -87,6 +87,7 @@ public final class Collections {
      * Works for {@link List}, {@link Set} and {@link Collection} arguments.
      *
      * @param c   collection to wrap in an immutable/unmodifiable collection
+     * @param <C> type of collection
      * @param <T> type of elements in the collection
      * @return an immutable wrapper for {@code l}.
      * @since JJWT_RELEASE_VERSION

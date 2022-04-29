@@ -53,10 +53,10 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * 3.6</a>.</p>
      *
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.6">Using the Algorithm &quot;none&quot;</a>
      * @see io.jsonwebtoken.security.SignatureAlgorithms#NONE
+     * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder enableUnsecuredJws();
 
@@ -249,7 +249,6 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder setSigningKey(String base64EncodedSecretKey);
 
     /**
-<<<<<<< HEAD
      * Sets the signature verification key used to verify all encountered JWS signatures. If the encountered JWT
      * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
      *
@@ -259,7 +258,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p>If there is any chance that the parser will encounter JWSs
      * that need different signature verification keys based on the JWS being parsed, it is strongly
-     * recommended to configure your own {@link Locator Locator<?,Key>} via the
+     * recommended to configure your own {@link Locator} via the
      * {@link #setKeyLocator(Locator) setKeyLocator} method instead of using this one.</p>
      *
      * <p>Calling this method overrides any previously set signature verification key.</p>
@@ -273,18 +272,19 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     /**
      * Sets the decryption key to be used to decrypt all encountered JWEs.  If the encountered JWT string is not a
      * JWE (e.g. a JWS), this key is not used.
-     * <p/>
+     *
      * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
      * JWEs that can always be decrypted by a single key.  This also implies that this key <em>MUST</em> be a valid
      * key for both the key management algorithm ({@code alg} header) and the content encryption algorithm
      * ({@code enc} header) used for the JWE.</p>
-     * <p/>
+     *
      * <p>If there is any chance that the parser will encounter JWEs
      * that need different decryption keys based on the JWE being parsed, it is strongly recommended to configure
-     * your own {@link Locator Locator<?,Key>} via the {@link #setKeyLocator(Locator) setKeyLocator} method instead of
+     * your own {@link Locator Locator} via the {@link #setKeyLocator(Locator) setKeyLocator} method instead of
      * using this one.</p>
-     * <p/>
+     *
      * <p>Calling this method overrides any previously set decryption key.</p>
+     *
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
      */
@@ -297,12 +297,12 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *     necessary to verify the JWS signature.</li>
      *     <li>If the parsed String is a JWE, it will be called to find the appropriate decryption key.</li>
      * </ul>
-     * <p>
+     *
      * <p>Specifying a key {@code Locator} is necessary when the signing or decryption key is not already known before
      * parsing the JWT and the JWT header must be inspected first to determine how to
      * look up the verification or decryption key.  Once returned by the locator, the JwtParser will then either
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
-     * <p>
+     *
      * <pre>
      * Jws&lt;Claims&gt; jws = Jwts.parser().setKeyLocator(new Locator&lt;Header,Key&gt;() {
      *         &#64;Override
@@ -315,7 +315,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *         }})
      *     .parseClaimsJws(compact);
      * </pre>
-     * <p>
+     *
      * <p>A Key {@code Locator} is invoked once during parsing before performing decryption or signature verification.</p>
      *
      * @param keyLocator the locator used to retrieve decryption or signature verification keys.
@@ -325,14 +325,17 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder setKeyLocator(Locator<Key> keyLocator);
 
     /**
-     * <h4>Deprecation Notice</h4>
+     * <p><b>Deprecation Notice</b></p>
+     *
      * <p>This method has been deprecated as of JJWT version JJWT_RELEASE_VERSION because it only supports key location
      * for JWSs (signed JWTs) instead of both signed (JWS) and encrypted (JWE) scenarios.  Use the
      * {@link #setKeyLocator(Locator) setKeyLocator} method instead to ensure a locator that can work for both JWS and
      * JWE inputs.  This method will be removed for the 1.0 release.</p>
-     * <h4>Previous Documentation</h4>
-     * Sets the {@link SigningKeyResolver} used to acquire the <code>signing key</code> that should be used to verify
-     * a JWS's signature.  If the parsed String is not a JWS (no signature), this resolver is not used.
+     *
+     * <p><b>Previous Documentation</b></p>
+     *
+     * <p>Sets the {@link SigningKeyResolver} used to acquire the <code>signing key</code> that should be used to verify
+     * a JWS's signature.  If the parsed String is not a JWS (no signature), this resolver is not used.</p>
      *
      * <p>Specifying a {@code SigningKeyResolver} is necessary when the signing key is not already known before parsing
      * the JWT and the JWT header or payload (plaintext body or Claims) must be inspected first to determine how to
@@ -354,9 +357,9 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>This method should only be used if a signing key is not provided by the other {@code setSigningKey*} builder
      * methods.</p>
      *
-     * @deprecated since JJWT_RELEASE_VERSION
      * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
      * @return the parser builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -364,9 +367,9 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs);
 
-    JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?,?>> sigAlgs);
+    JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs);
 
-    JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?,?>> keyAlgs);
+    JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs);
 
     /**
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to

@@ -66,11 +66,26 @@ public interface JwtHandler<T> {
     T onClaimsJws(Jws<Claims> jws);
 
     /**
+     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+     * a plaintext JWE.  A plaintext JWE is a JWE with a byte array (non-JSON) body (payload) that has been
+     * encrypted.
+     *
+     * <p>This method will only be invoked if the plaintext JWE can be successfully decrypted.</p>
+     *
+     * @param jwe the parsed plaintext jwe
+     * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
      * @since JJWT_RELEASE_VERSION
      */
     T onPlaintextJwe(Jwe<String> jwe);
 
     /**
+     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+     * a valid Claims JWE.  A Claims JWE is a JWT with a {@link Claims} body that has been encrypted.
+     *
+     * <p>This method will only be invoked if the Claims JWE can be successfully decrypted.</p>
+     *
+     * @param jwe the parsed claims jwe
+     * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
      * @since JJWT_RELEASE_VERSION
      */
     T onClaimsJwe(Jwe<Claims> jwe);

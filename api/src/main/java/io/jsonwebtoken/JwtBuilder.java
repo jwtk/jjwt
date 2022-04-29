@@ -32,6 +32,7 @@ import java.util.Map;
 /**
  * A builder for constructing JWTs.
  *
+ * @param <T> the type of builder returned from various builder configuration methods.
  * @since 0.1
  */
 public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
@@ -509,6 +510,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * you want explicit control over the signature algorithm used with the specified key.</p>
      *
      * @param key the signing key to use to digitally sign the JWT.
+     * @param <K> The type of key accepted by the {@code SignatureAlgorithm}.
      * @param alg the JWS algorithm to use with the key to digitally sign the JWT, thereby producing a JWS.
      * @return the builder for method chaining.
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for

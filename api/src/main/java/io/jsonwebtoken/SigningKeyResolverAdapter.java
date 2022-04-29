@@ -21,19 +21,20 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 
 /**
- * <h4>Deprecation Notice</h4>
+ * <h2>Deprecation Notice</h2>
+ *
  * <p>As of JJWT JJWT_RELEASE_VERSION, various Resolver concepts (including the {@code SigningKeyResolver}) have been
  * unified into a single {@link Locator} interface.  For key location, (for both signing and encryption keys),
  * use the {@link JwtParserBuilder#setKeyLocator(Locator)} to configure a parser with your desired Key locator instead
  * of using a {@code SigningKeyResolver}. Also see {@link LocatorAdapter} for the Adapter pattern parallel of this
  * class. <b>This {@code SigningKeyResolverAdapter} class will be removed before the 1.0 release.</b></p>
  *
- * <h4>Previous Documentation</h4>
- * An <a href="http://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
- * {@link SigningKeyResolver} interface that allows subclasses to process only the type of JWS body that
- * is known/expected for a particular case.
+ * <p><b>Previous Documentation</b></p>
  *
- * <h4>Previous Documentation</h4>
+ * <p>An <a href="http://en.wikipedia.org/wiki/Adapter_pattern">Adapter</a> implementation of the
+ * {@link SigningKeyResolver} interface that allows subclasses to process only the type of JWS body that
+ * is known/expected for a particular case.</p>
+ *
  * <p>The {@link #resolveSigningKey(JwsHeader, Claims)} and {@link #resolveSigningKey(JwsHeader, String)} method
  * implementations delegate to the
  * {@link #resolveSigningKeyBytes(JwsHeader, Claims)} and {@link #resolveSigningKeyBytes(JwsHeader, String)} methods

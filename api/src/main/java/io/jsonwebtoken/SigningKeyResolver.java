@@ -45,7 +45,7 @@ import java.security.Key;
  * implementing this interface directly.</p>
  *
  * @since 0.4
- * @deprecated since JJWT_RELEASE_VERSION. Implement {@link io.jsonwebtoken.Locator Locator<?, Key>} instead.
+ * @deprecated since JJWT_RELEASE_VERSION. Implement {@link Locator} instead.
  * @see io.jsonwebtoken.JwtParserBuilder#setKeyLocator(Locator)
  */
 @Deprecated

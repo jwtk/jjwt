@@ -80,7 +80,9 @@ public final class Assert {
      * <pre class="code">Assert.notNull(clazz, "The class must not be null");</pre>
      *
      * @param object  the object to check
+     * @param <T>     the type of object
      * @param message the exception message to use if the assertion fails
+     * @return the non-null object
      * @throws IllegalArgumentException if the object is <code>null</code>
      */
     public static <T> T notNull(T object, String message) {
@@ -126,7 +128,7 @@ public final class Assert {
      */
     public static void hasLength(String text) {
         hasLength(text,
-            "[Assertion failed] - this String argument must have length; it must not be null or empty");
+                "[Assertion failed] - this String argument must have length; it must not be null or empty");
     }
 
     /**
@@ -136,6 +138,7 @@ public final class Assert {
      *
      * @param text    the String to check
      * @param message the exception message to use if the assertion fails
+     * @return the string if it has text
      * @see Strings#hasText
      */
     public static String hasText(String text, String message) {
@@ -155,7 +158,7 @@ public final class Assert {
      */
     public static void hasText(String text) {
         hasText(text,
-            "[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
+                "[Assertion failed] - this String argument must have text; it must not be null, empty, or blank");
     }
 
     /**
@@ -168,7 +171,7 @@ public final class Assert {
      */
     public static void doesNotContain(String textToSearch, String substring, String message) {
         if (Strings.hasLength(textToSearch) && Strings.hasLength(substring) &&
-            textToSearch.indexOf(substring) != -1) {
+                textToSearch.indexOf(substring) != -1) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -182,7 +185,7 @@ public final class Assert {
      */
     public static void doesNotContain(String textToSearch, String substring) {
         doesNotContain(textToSearch, substring,
-            "[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
+                "[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
     }
 
 
@@ -264,7 +267,9 @@ public final class Assert {
      * <pre class="code">Assert.notEmpty(collection, "Collection must have elements");</pre>
      *
      * @param collection the collection to check
+     * @param <T>        the type of collection
      * @param message    the exception message to use if the assertion fails
+     * @return the non-null, non-empty collection
      * @throws IllegalArgumentException if the collection is <code>null</code> or has no elements
      */
     public static <T extends Collection<?>> T notEmpty(T collection, String message) {
@@ -284,7 +289,7 @@ public final class Assert {
      */
     public static void notEmpty(Collection<?> collection) {
         notEmpty(collection,
-            "[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
+                "[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
     }
 
     /**
@@ -293,7 +298,9 @@ public final class Assert {
      * <pre class="code">Assert.notEmpty(map, "Map must have entries");</pre>
      *
      * @param map     the map to check
+     * @param <T>     the type of Map to check
      * @param message the exception message to use if the assertion fails
+     * @return the non-null, non-empty map
      * @throws IllegalArgumentException if the map is <code>null</code> or has no entries
      */
     public static <T extends Map<?, ?>> T notEmpty(T map, String message) {
@@ -334,11 +341,13 @@ public final class Assert {
      * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
      *
      * @param type    the type to check against
+     * @param <T>     the object's expected type
      * @param obj     the object to check
      * @param message a message which will be prepended to the message produced by
      *                the function itself, and which may be used to provide context. It should
      *                normally end in a ": " or ". " so that the function generate message looks
      *                ok when prepended to it.
+     * @return the non-null object IFF it is an instance of the specified {@code type}.
      * @throws IllegalArgumentException if the object is not an instance of clazz
      * @see Class#isInstance
      */
@@ -346,8 +355,8 @@ public final class Assert {
         notNull(type, "Type to check against must not be null");
         if (!type.isInstance(obj)) {
             throw new IllegalArgumentException(message +
-                "Object of class [" + (obj != null ? obj.getClass().getName() : "null") +
-                "] must be an instance of " + type);
+                    "Object of class [" + (obj != null ? obj.getClass().getName() : "null") +
+                    "] must be an instance of " + type);
         }
         return type.cast(obj);
     }
@@ -384,6 +393,13 @@ public final class Assert {
     }
 
     /**
+     * Asserts that a specified {@code value} is greater than the given {@code requirement}, throwing
+     * an {@link IllegalArgumentException} with the given message if not.
+     *
+     * @param value the value to check
+     * @param requirement the integer that {@code value} must be greater than
+     * @param msg the message to use for the {@code IllegalArgumentException} if thrown.
+     * @return {@code value} if greater than the specified {@code requirement}.
      * @since JJWT_RELEASE_VERSION
      */
     public static Integer gt(Integer value, Integer requirement, String msg) {

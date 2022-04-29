@@ -211,6 +211,15 @@ public final class Classes {
     }
 
     /**
+     * Invokes the {@code clazz}'s matching static method (named {@code methodName} with exact argument types
+     * of {@code argTypes}) with the given {@code args} arguments, and returns the method return value.
+     *
+     * @param clazz the class to invoke
+     * @param methodName the name of the static method on {@code clazz} to invoke
+     * @param argTypes the types of the arguments accepted by the method
+     * @param args the actual runtime arguments to use when invoking the method
+     * @param <T> the type of object expected to be returned from the method
+     * @return the result returned by the invoked method.
      * @since JJWT_RELEASE_VERSION
      */
     @SuppressWarnings("unchecked")

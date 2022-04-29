@@ -95,6 +95,7 @@ public final class Jwts {
      * Returns a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's), populated with the
      * specified name/value pairs.
      *
+     * @param header initial name/value pairs to add to the created {@code Header} before returning.
      * @return a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's), populated with the
      * specified name/value pairs.
      * @see JwtBuilder#setHeader(Header)

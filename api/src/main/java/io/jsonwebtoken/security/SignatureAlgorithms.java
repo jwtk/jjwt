@@ -28,7 +28,7 @@ import java.util.Collection;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "JavadocLinkAsPlainText"})
 public final class SignatureAlgorithms {
 
     // Prevent instantiation
@@ -156,14 +156,14 @@ public final class SignatureAlgorithms {
      * {@code ECKey}s with key lengths less than 256 bits will be rejected with a
      * {@link WeakKeyException}.</li>
      * <li>The ECDSA {@code P-521} curve does indeed use keys of <b>521</b> bits, not 512 as might be expected.  ECDSA
-     * keys of 384 < size <= 520 are suitable for ES384, while ES512 requires keys >= 521 bits.  The '512' part of the
+     * keys of 384 &lt; size &lt;= 520 are suitable for ES384, while ES512 requires keys &gt;= 521 bits.  The '512' part of the
      * ES512 name reflects the usage of the SHA-512 algorithm, not the ECDSA key length.  ES512 with ECDSA keys less
      * than 521 bits will be rejected with a {@link WeakKeyException}.</li>
      * <li>The JWT <a href="https://tools.ietf.org/html/rfc7518#section-3.3">JWA Specification (RFC 7518,
      * Section 3.3)</a> mandates that RSA signing key lengths <em>MUST</em> be 2048 bits or greater.
      * {@code RSAKey}s with key lengths less than 2048 bits will be rejected with a
      * {@link WeakKeyException}.</li>
-     * <li>Technically any RSA key of length >= 2048 bits may be used with the {@link #RS256}, {@link #RS384}, and
+     * <li>Technically any RSA key of length &gt;= 2048 bits may be used with the {@link #RS256}, {@link #RS384}, and
      * {@link #RS512} algorithms, so we assume an RSA signature algorithm based on the key length to
      * parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>

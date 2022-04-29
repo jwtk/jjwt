@@ -37,15 +37,21 @@ import java.util.Map;
  *
  * @since 0.1
  */
-public interface Header<T extends Header> extends Map<String,Object> {
+public interface Header<T extends Header> extends Map<String, Object> {
 
-    /** JWT {@code Type} (typ) value: <code>"JWT"</code> */
+    /**
+     * JWT {@code Type} (typ) value: <code>"JWT"</code>
+     */
     String JWT_TYPE = "JWT";
 
-    /** JWT {@code Type} header parameter name: <code>"typ"</code> */
+    /**
+     * JWT {@code Type} header parameter name: <code>"typ"</code>
+     */
     String TYPE = "typ";
 
-    /** JWT {@code Content Type} header parameter name: <code>"cty"</code> */
+    /**
+     * JWT {@code Content Type} header parameter name: <code>"cty"</code>
+     */
     String CONTENT_TYPE = "cty";
 
     /**
@@ -56,11 +62,16 @@ public interface Header<T extends Header> extends Map<String,Object> {
      */
     String ALGORITHM = "alg";
 
-    /** JWT {@code Compression Algorithm} header parameter name: <code>"zip"</code> */
+    /**
+     * JWT {@code Compression Algorithm} header parameter name: <code>"zip"</code>
+     */
     String COMPRESSION_ALGORITHM = "zip";
 
-    /** JJWT legacy/deprecated compression algorithm header parameter name: <code>"calg"</code>
-     * @deprecated use {@link #COMPRESSION_ALGORITHM} instead. */
+    /**
+     * JJWT legacy/deprecated compression algorithm header parameter name: <code>"calg"</code>
+     *
+     * @deprecated use {@link #COMPRESSION_ALGORITHM} instead.
+     */
     @Deprecated
     String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
@@ -142,12 +153,12 @@ public interface Header<T extends Header> extends Map<String,Object> {
     String getAlgorithm();
 
     /**
-     * Sets the JWT <code>alg</code></a> (Algorithm) header value.  A {@code null} value will remove the property
+     * Sets the JWT {@code alg} (Algorithm) header value.  A {@code null} value will remove the property
      * from the JSON map.
      * <ul>
-     *     <li>If the JWT is a Signed JWT (a JWS), the <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">
-     *      <code>alg</code></a> (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
-     *      JWS.</li>
+     *     <li>If the JWT is a Signed JWT (a JWS), the
+     *     <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">{@code alg}</a> (Algorithm) header
+     *     parameter identifies the cryptographic algorithm used to secure the JWS.</li>
      *      <li>If the JWT is an Encrypted JWT (a JWE), the
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
      * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
