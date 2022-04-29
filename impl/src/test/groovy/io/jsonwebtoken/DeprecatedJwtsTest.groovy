@@ -540,7 +540,9 @@ class DeprecatedJwtsTest {
             testEC(SignatureAlgorithm.ES256, true)
             fail("EC private keys cannot be used to validate EC signatures.")
         } catch (UnsupportedJwtException e) {
-            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey instance."
+            String msg = "Elliptic Curve verification keys must be PublicKeys (implement java.security.PublicKey). " +
+                    "Provided key type: sun.security.ec.ECPrivateKeyImpl."
+            assertEquals msg, e.cause.message
         }
     }
 

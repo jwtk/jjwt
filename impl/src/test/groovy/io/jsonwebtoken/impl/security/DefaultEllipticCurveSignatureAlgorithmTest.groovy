@@ -3,7 +3,10 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm
+import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -13,7 +16,6 @@ import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.X509EncodedKeySpec
 
-import static org.easymock.EasyMock.createMock
 import static org.junit.Assert.*
 
 class DefaultEllipticCurveSignatureAlgorithmTest {
@@ -25,16 +27,11 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     @Test
     void testConstructorWithWeakKeyLength() {
         try {
-            new DefaultEllipticCurveSignatureAlgorithm('ES256', 'SHA256withECDSA', 'secp256r1', 128, 256)
+            new DefaultEllipticCurveSignatureAlgorithm(128)
         } catch (IllegalArgumentException iae) {
-            assertEquals 'minKeyLength bits must be greater than the JWA mandatory minimum key length of 256', iae.getMessage()
+            String msg = 'orderBitLength must equal 256, 384, or 512.'
+            assertEquals msg, iae.getMessage()
         }
-    }
-
-    @Test(expected = SecurityException)
-    void testGenerateKeyPairInvalidCurveName() {
-        def alg = new DefaultEllipticCurveSignatureAlgorithm('ES256', 'SHA256withECDSA', 'notreal', 256, 256)
-        alg.generateKeyPair()
     }
 
     @Test
@@ -46,8 +43,9 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             try {
                 it.sign(req)
             } catch (InvalidKeyException expected) {
-                String msg = 'Elliptic Curve signatures require an ECKey. The provided key of type ' +
-                        'javax.crypto.spec.SecretKeySpec is not a java.security.interfaces.ECKey instance.'
+                String msg = "Elliptic Curve signing keys must be ECKeys " +
+                        "(implement java.security.interfaces.ECKey). Provided key type: " +
+                        "javax.crypto.spec.SecretKeySpec."
                 assertEquals msg, expected.getMessage()
             }
         }
@@ -55,12 +53,14 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void testSignWithPublicKey() {
-        ECPublicKey key = createMock(ECPublicKey)
+        ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
         def request = new DefaultSignatureRequest(null, null, new byte[1], key)
         try {
             SignatureAlgorithms.ES256.sign(request)
         } catch (InvalidKeyException e) {
-            assertTrue e.getMessage().startsWith("Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: ")
+            String msg = "Elliptic Curve signing keys must be PrivateKeys (implement ${PrivateKey.class.getName()}). " +
+                    "Provided key type: ${key.getClass().getName()}."
+            assertEquals msg, e.getMessage()
         }
     }
 
@@ -74,7 +74,13 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         algs().each {
             try {
                 it.sign(request)
-            } catch (WeakKeyException expected) {
+            } catch (InvalidKeyException expected) {
+                def keyOrderBitLength = pair.getPublic().getParams().getOrder().bitLength()
+                String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
+                        "${Bytes.bitsMsg(keyOrderBitLength)}, but the '${it.getId()}' algorithm requires EC Keys with " +
+                        "${Bytes.bitsMsg(it.orderBitLength)} per " +
+                        "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
+                assertEquals msg, expected.getMessage()
             }
         }
     }
@@ -87,9 +93,10 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         try {
             SignatureAlgorithms.ES384.sign(req)
         } catch (InvalidKeyException expected) {
-            String msg = "EllipticCurve key has a field size of 32 bytes (256 bits), but ES384 requires a " +
-                    "field size of 48 bytes (384 bits) per [RFC 7518, Section 3.4 (validation)]" +
-                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
+            String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
+                    "256 bits (32 bytes), but the 'ES384' algorithm requires EC Keys with " +
+                    "384 bits (48 bytes) per " +
+                    "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -102,7 +109,29 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             try {
                 it.verify(request)
             } catch (InvalidKeyException e) {
-                assertTrue e.getMessage().startsWith("Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: ")
+                String msg = "Elliptic Curve verification keys must be ECKeys " +
+                        "(implement java.security.interfaces.ECKey). Provided key type: " +
+                        "javax.crypto.spec.SecretKeySpec."
+                assertEquals msg, e.getMessage()
+            }
+        }
+    }
+
+    @Test
+    void testVerifyWithPrivateKey() {
+        byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
+        algs().each {
+            KeyPair pair = it.generateKeyPair()
+            def key = pair.getPrivate()
+            def signRequest = new DefaultSignatureRequest(null, null, data, key)
+            byte[] signature = it.sign(signRequest)
+            def verifyRequest = new DefaultVerifySignatureRequest(null, null, data, key, signature)
+            try {
+                it.verify(verifyRequest)
+            } catch (InvalidKeyException e) {
+                String msg = "Elliptic Curve verification keys must be PublicKeys (implement " +
+                        "${PublicKey.class.name}). Provided key type: ${key.class.name}."
+                assertEquals msg, e.getMessage()
             }
         }
     }
@@ -116,23 +145,13 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         algs().each {
             try {
                 it.verify(request)
-            } catch (WeakKeyException expected) {
-            }
-        }
-    }
-
-    @Test
-    void testVerifyWithPrivateKey() {
-        byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
-        algs().each {
-            KeyPair pair = it.generateKeyPair()
-            def signRequest = new DefaultSignatureRequest(null, null, data, pair.getPrivate())
-            byte[] signature = it.sign(signRequest)
-            def verifyRequest = new DefaultVerifySignatureRequest(null, null, data, pair.getPrivate(), signature)
-            try {
-                it.verify(verifyRequest)
-            } catch (InvalidKeyException e) {
-                assertEquals 'Elliptic Curve signature validation requires an ECPublicKey instance.', e.getMessage()
+            } catch (InvalidKeyException expected) {
+                def keyOrderBitLength = pair.getPublic().getParams().getOrder().bitLength()
+                String msg = "The provided Elliptic Curve verification key's size (aka Order bit length) is " +
+                        "${Bytes.bitsMsg(keyOrderBitLength)}, but the '${it.getId()}' algorithm requires EC Keys with " +
+                        "${Bytes.bitsMsg(it.orderBitLength)} per " +
+                        "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
+                assertEquals msg, expected.getMessage()
             }
         }
     }
@@ -213,7 +232,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             DefaultEllipticCurveSignatureAlgorithm.transcodeConcatToDER(signature)
             fail()
         } catch (JwtException e) {
-            assertEquals e.message, 'Invalid ECDSA signature format'
+            assertEquals 'Invalid ECDSA signature format.', e.message
         }
     }
 
@@ -248,19 +267,6 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         verifier("eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30.Aab4x7HNRzetjgZ88AMGdYV2Ml7kzFbl8Ql2zXvBores7iRqm2nK6810ANpVo5okhHa82MQf2Q_Zn4tFyLDR9z4GAcKFdcAtopxq1h8X58qBWgNOc0Bn40SsgUc8wOX4rFohUCzEtnUREePsvc9EfXjjAH78WD2nq4tn-N94vf14SncQ")
         //Test verification for token created using https://github.com/jwt/ruby-jwt/tree/v1.5.4
         verifier("eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiJ9.eyJ0ZXN0IjoidGVzdCJ9.AV26tERbSEwcoDGshneZmhokg-tAKUk0uQBoHBohveEd51D5f6EIs6cskkgwtfzs4qAGfx2rYxqQXr7LTXCNquKiAJNkTIKVddbPfped3_TQtmHZTmMNiqmWjiFj7Y9eTPMMRRu26w4gD1a8EQcBF-7UGgeH4L_1CwHJWAXGbtu7uMUn")
-    }
-
-    @Test
-    void legacySignatureCompatTest() {
-        def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = SignatureAlgorithms.ES512
-        def keypair = alg.generateKeyPair()
-        def signature = Signature.getInstance(alg.jcaName)
-        def data = withoutSignature.getBytes("US-ASCII")
-        signature.initSign(keypair.private)
-        signature.update(data)
-        def signed = signature.sign()
-        assertTrue alg.verify(new DefaultVerifySignatureRequest(null, null, data, keypair.public, signed))
     }
 
     @Test
@@ -440,8 +446,8 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             fail()
         } catch (SignatureException expected) {
             String signedBytesString = Bytes.bytesMsg(signed.length)
-            String msg = "Unable to verify Elliptic Curve signature using configured ECPublicKey. Provided " +
-                    "signature is $signedBytesString but ES512 signatures must be exactly 132 bytes (1056 bits) " +
+            String msg = "Unable to verify Elliptic Curve signature using provided ECPublicKey: Provided " +
+                    "signature is $signedBytesString but ES512 signatures must be exactly 1056 bits (132 bytes) " +
                     "per [RFC 7518, Section 3.4 (validation)]" +
                     "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
             assertEquals msg, expected.getMessage()

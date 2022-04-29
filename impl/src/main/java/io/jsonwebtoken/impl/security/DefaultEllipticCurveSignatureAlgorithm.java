@@ -9,7 +9,6 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.VerifySignatureRequest;
-import io.jsonwebtoken.security.WeakKeyException;
 
 import java.math.BigInteger;
 import java.security.Key;
@@ -20,45 +19,72 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.ECKey;
 import java.security.spec.ECGenParameterSpec;
+import java.text.MessageFormat;
 import java.util.Arrays;
 
 public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKey, VK extends ECKey & PublicKey> extends AbstractSignatureAlgorithm<SK, VK> implements EllipticCurveSignatureAlgorithm<SK, VK> {
 
-    private static final String EC_PUBLIC_KEY_REQD_MSG =
-            "Elliptic Curve signature validation requires an ECPublicKey instance.";
+    private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 512.";
+    private static final String KEY_TYPE_MSG_PATTERN =
+            "Elliptic Curve {0} keys must be {1}s (implement {2}). Provided key type: {3}.";
 
     private static final String DER_ENCODING_SYS_PROPERTY_NAME =
             "io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported";
 
-    private static final int MIN_KEY_LENGTH_BITS = 256;
-
     private final String curveName;
 
-    private final int minKeyBitLength; //in bits
+    private final int orderBitLength;
 
+    /**
+     * JWA EC (concat formatted) length in bytes for this instance's {@link #orderBitLength}.
+     */
     private final int signatureByteLength;
-    private final int keyFieldByteLength;
+    private final int sigFieldByteLength;
 
-    private static int shaSize(int keyBitLength) {
-        return keyBitLength == 521 ? 512 : keyBitLength;
+    private static int shaSize(int orderBitLength) {
+        return orderBitLength == 521 ? 512 : orderBitLength;
     }
 
-    public DefaultEllipticCurveSignatureAlgorithm(int keyBitLength, int signatureByteLength) {
-        this("ES" + shaSize(keyBitLength), "SHA" + shaSize(keyBitLength) + "withECDSA", "secp" + keyBitLength + "r1", keyBitLength, signatureByteLength);
+    /**
+     * Returns the correct byte length of an R or S field in a concat signature for the given EC Key order bit length.
+     *
+     * <p>Per <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>:
+     * <quote>
+     * the Integer-to-OctetString Conversion
+     * defined in Section 2.3.7 of SEC1 [SEC1] used to represent R and S as
+     * octet sequences adds zero-valued high-order padding bits when needed
+     * to round the size up to a multiple of 8 bits; thus, each 521-bit
+     * integer is represented using 528 bits in 66 octets.
+     * </quote>
+     * </p>
+     *
+     * @param orderBitLength the EC Key order bit length (ecKey.getParams().getOrder().bitLength())
+     * @return the correct byte length of an R or S field in a concat signature for the given EC Key order bit length.
+     */
+    private static int fieldByteLength(int orderBitLength) {
+        return (orderBitLength + 7) / Byte.SIZE;
     }
 
-    public DefaultEllipticCurveSignatureAlgorithm(String name, String jcaName, String curveName, int minKeyBitLength, int signatureByteLength) {
-        super(name, jcaName);
-        Assert.hasText(curveName, "Curve name cannot be null or empty.");
-        this.curveName = curveName;
-        if (minKeyBitLength < MIN_KEY_LENGTH_BITS) {
-            String msg = "minKeyLength bits must be greater than the JWA mandatory minimum key length of " + MIN_KEY_LENGTH_BITS;
-            throw new IllegalArgumentException(msg);
-        }
-        this.minKeyBitLength = minKeyBitLength;
-        Assert.isTrue(signatureByteLength > 0, "signatureLength must be greater than zero.");
-        this.signatureByteLength = signatureByteLength;
-        this.keyFieldByteLength = this.signatureByteLength / 2;
+    /**
+     * Returns {@code true} for Order bit lengths defined in the JWA specification, {@code false} otherwise.
+     * Specifically, returns {@code true} <em>only</em> for values of {@code 256}, {@code 384} and {@code 521}.  See
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a> for more.
+     *
+     * @param orderBitLength the EC key Order bit length to check
+     * @return {@code true} for Order bit lengths defined in the JWA specification, {@code false} otherwise.
+     */
+    private static boolean isSupportedOrderBitLength(int orderBitLength) {
+        // This implementation supports only those defined in the JWA specification.
+        return orderBitLength == 256 || orderBitLength == 384 || orderBitLength == 521;
+    }
+
+    public DefaultEllipticCurveSignatureAlgorithm(int orderBitLength) {
+        super("ES" + shaSize(orderBitLength), "SHA" + shaSize(orderBitLength) + "withECDSA");
+        Assert.isTrue(isSupportedOrderBitLength(orderBitLength), REQD_ORDER_BIT_LENGTH_MSG);
+        this.curveName = "secp" + orderBitLength + "r1";
+        this.orderBitLength = orderBitLength;
+        this.sigFieldByteLength = fieldByteLength(this.orderBitLength);
+        this.signatureByteLength = this.sigFieldByteLength * 2; // R bytes + S bytes = concat signature bytes
     }
 
     @Override
@@ -74,52 +100,35 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
         });
     }
 
+    private static void assertKey(Key key, Class<?> type, boolean signing) {
+        if (!type.isInstance(key)) {
+            String msg = MessageFormat.format(KEY_TYPE_MSG_PATTERN,
+                    keyType(signing), type.getSimpleName(), type.getName(), key.getClass().getName());
+            throw new InvalidKeyException(msg);
+        }
+    }
+
     @Override
     protected void validateKey(Key key, boolean signing) {
 
-        if (!(key instanceof ECKey)) {
-            String msg = "EC " + keyType(signing) + " keys must be an ECKey.  The specified key is of type: " +
-                    key.getClass().getName();
-            throw new InvalidKeyException(msg);
-        }
-
-        if (signing) {
-            // https://github.com/jwtk/jjwt/issues/68
-            // Instead of checking for an instance of ECPrivateKey, check for PrivateKey (and ECKey assertion is above):
-            if (!(key instanceof PrivateKey)) {
-                String msg = "Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: " +
-                        key.getClass().getName();
-                throw new InvalidKeyException(msg);
-            }
-        } else { //verification
-            if (!(key instanceof PublicKey)) {
-                throw new InvalidKeyException(EC_PUBLIC_KEY_REQD_MSG);
-            }
-        }
+        assertKey(key, ECKey.class, signing);
+        // https://github.com/jwtk/jjwt/issues/68:
+        // Instead of checking for an instance of ECPrivateKey, check for PrivateKey (and ECKey assertion is above):
+        Class<?> requiredType = signing ? PrivateKey.class : PublicKey.class;
+        assertKey(key, requiredType, signing);
 
         final String name = getId();
         ECKey ecKey = (ECKey) key;
         BigInteger order = ecKey.getParams().getOrder();
         int orderBitLength = order.bitLength();
-        if (orderBitLength < this.minKeyBitLength) {
-            String msg = "The " + keyType(signing) + " key's size (ECParameterSpec order) is " + orderBitLength +
-                    " bits which is not secure enough for the " + name + " algorithm.  The JWT " +
-                    "JWA Specification (RFC 7518, Section 3.4) states that keys used with " +
-                    name + " MUST have a size >= " + this.minKeyBitLength +
-                    " bits.  Consider using the SignatureAlgorithms." + name + ".generateKeyPair() " +
-                    "method to create a key pair guaranteed to be secure enough for " + name + ".  See " +
-                    "https://tools.ietf.org/html/rfc7518#section-3.4 for more information.";
-            throw new WeakKeyException(msg);
-        }
-
-        int keyFieldByteLength = (orderBitLength + 7) / Byte.SIZE; //for ES512 (can be 65 or 66, this ensures 66)
-        int concatByteLength = keyFieldByteLength * 2;
+        int sigFieldByteLength = fieldByteLength(orderBitLength);
+        int concatByteLength = sigFieldByteLength * 2;
 
         if (concatByteLength != this.signatureByteLength) {
-            String msg = "EllipticCurve key has a field size of " + Bytes.bytesMsg(keyFieldByteLength) + ", but " +
-                    getId() + " requires a field size of " + Bytes.bytesMsg(this.keyFieldByteLength) +
-                    " per [RFC 7518, Section 3.4 (validation)]" +
-                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
+            String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " +
+                    Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " +
+                    Bytes.bitsMsg(this.orderBitLength) + " per " +
+                    "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
             throw new InvalidKeyException(msg);
         }
     }
@@ -169,8 +178,8 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
                     } else {
                         //guard for JVM security bug CVE-2022-21449:
                         BigInteger order = key.getParams().getOrder();
-                        BigInteger r = new BigInteger(1, Arrays.copyOfRange(concatSignature, 0, keyFieldByteLength));
-                        BigInteger s = new BigInteger(1, Arrays.copyOfRange(concatSignature, keyFieldByteLength, concatSignature.length));
+                        BigInteger r = new BigInteger(1, Arrays.copyOfRange(concatSignature, 0, sigFieldByteLength));
+                        BigInteger s = new BigInteger(1, Arrays.copyOfRange(concatSignature, sigFieldByteLength, concatSignature.length));
                         if (r.signum() < 1 || s.signum() < 1 || r.compareTo(order) >= 0 || s.compareTo(order) >= 0) {
                             return false;
                         }

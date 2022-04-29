@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
@@ -45,7 +44,7 @@ import static org.junit.Assert.*
 class JwtsTest {
 
     private static Date now() {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis());
+        return dateWithOnlySecondPrecision(System.currentTimeMillis())
     }
 
     private static int later() {
@@ -93,7 +92,7 @@ class JwtsTest {
     void testHeaderWithMapArg() {
         def header = Jwts.header([alg: "HS256"])
         assertTrue header instanceof DefaultHeader
-        assertEquals header.alg, 'HS256'
+        assertEquals 'HS256', header.alg
     }
 
     @Test
@@ -106,7 +105,7 @@ class JwtsTest {
     void testJwsHeaderWithMapArg() {
         def header = Jwts.jwsHeader([alg: "HS256"])
         assertTrue header instanceof DefaultJwsHeader
-        assertEquals header.getAlgorithm(), 'HS256'
+        assertEquals 'HS256', header.getAlgorithm()
     }
 
     @Test
@@ -119,7 +118,7 @@ class JwtsTest {
     void testJweHeaderWithMapArg() {
         def header = Jwts.jweHeader([enc: 'foo'])
         assertTrue header instanceof DefaultJweHeader
-        assertEquals header.getEncryptionAlgorithm(), 'foo'
+        assertEquals 'foo', header.getEncryptionAlgorithm()
     }
 
     @Test
@@ -132,7 +131,7 @@ class JwtsTest {
     void testClaimsWithMapArg() {
         Claims claims = Jwts.claims([sub: 'Joe'])
         assertNotNull claims
-        assertEquals claims.getSubject(), 'Joe'
+        assertEquals 'Joe', claims.getSubject()
     }
 
     @Test
@@ -142,7 +141,7 @@ class JwtsTest {
         String payload = new String(Decoders.BASE64URL.decode(encodedBody), StandardCharsets.UTF_8)
         String val = Jwts.builder().setPayload(payload).compact()
         String RFC_VALUE = 'eyJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-        assertEquals val, RFC_VALUE
+        assertEquals RFC_VALUE, val
     }
 
     @Test
@@ -203,7 +202,9 @@ class JwtsTest {
             Jwts.parserBuilder().build().parse('..')
             fail()
         } catch (MalformedJwtException e) {
-            assertEquals 'Compact JWT strings MUST always have a Base64Url protected header per https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).', e.message
+            String msg = 'Compact JWT strings MUST always have a Base64Url protected header per ' +
+                    'https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).'
+            assertEquals msg, e.message
         }
     }
 
@@ -211,7 +212,7 @@ class JwtsTest {
     void testParseWithHeaderOnly() {
         String unsecuredJwt = base64Url("{\"alg\":\"none\"}") + ".."
         Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parse(unsecuredJwt)
-        assertEquals("none", jwt.getHeader().get("alg"))
+        assertEquals"none", jwt.getHeader().get("alg")
     }
 
     @Test
@@ -252,7 +253,7 @@ class JwtsTest {
     void testConvenienceIssuer() {
         String compact = Jwts.builder().setIssuer("Me").compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
-        assertEquals claims.getIssuer(), "Me"
+        assertEquals 'Me', claims.getIssuer()
 
         compact = Jwts.builder().setSubject("Joe")
                 .setIssuer("Me") //set it
@@ -267,7 +268,7 @@ class JwtsTest {
     void testConvenienceSubject() {
         String compact = Jwts.builder().setSubject("Joe").compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
-        assertEquals claims.getSubject(), "Joe"
+        assertEquals 'Joe', claims.getSubject()
 
         compact = Jwts.builder().setIssuer("Me")
                 .setSubject("Joe") //set it
@@ -282,7 +283,7 @@ class JwtsTest {
     void testConvenienceAudience() {
         String compact = Jwts.builder().setAudience("You").compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
-        assertEquals claims.getAudience(), "You"
+        assertEquals 'You', claims.getAudience()
 
         compact = Jwts.builder().setIssuer("Me")
                 .setAudience("You") //set it
@@ -297,9 +298,9 @@ class JwtsTest {
     void testConvenienceExpiration() {
         Date then = laterDate(10000);
         String compact = Jwts.builder().setExpiration(then).compact();
-        Claims claims = Jwts.parserBuilder().build().parse(compact).body as Claims
+        Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()
-        assertEquals claimedDate, then
+        assertEquals then, claimedDate
 
         compact = Jwts.builder().setIssuer("Me")
                 .setExpiration(then) //set it
@@ -316,7 +317,7 @@ class JwtsTest {
         String compact = Jwts.builder().setNotBefore(now).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getNotBefore()
-        assertEquals claimedDate, now
+        assertEquals now, claimedDate
 
         compact = Jwts.builder().setIssuer("Me")
                 .setNotBefore(now) //set it
@@ -333,7 +334,7 @@ class JwtsTest {
         String compact = Jwts.builder().setIssuedAt(now).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getIssuedAt()
-        assertEquals claimedDate, now
+        assertEquals now, claimedDate
 
         compact = Jwts.builder().setIssuer("Me")
                 .setIssuedAt(now) //set it
@@ -349,7 +350,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
         String compact = Jwts.builder().setId(id).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
-        assertEquals claims.getId(), id
+        assertEquals id, claims.getId()
 
         compact = Jwts.builder().setIssuer("Me")
                 .setId(id) //set it
@@ -585,7 +586,9 @@ class JwtsTest {
             testEC(SignatureAlgorithms.ES256, true)
             fail("EC private keys cannot be used to validate EC signatures.")
         } catch (UnsupportedJwtException e) {
-            assertEquals e.cause.message, "Elliptic Curve signature validation requires an ECPublicKey instance."
+            String msg = "Elliptic Curve verification keys must be PublicKeys (implement java.security.PublicKey). " +
+                    "Provided key type: sun.security.ec.ECPrivateKeyImpl."
+            assertEquals msg, e.cause.message
         }
     }
 
@@ -608,9 +611,9 @@ class JwtsTest {
     @Test
     void testBuilderWithEcdsaPublicKey() {
         def builder = Jwts.builder().setSubject('foo')
-        def pair = Keys.keyPairFor(SignatureAlgorithm.ES256)
+        def pair = TestKeys.ES256.pair
         try {
-            builder.signWith(pair.public, SignatureAlgorithm.ES256) //public keys can't be used to create signatures
+            builder.signWith(pair.public, SignatureAlgorithms.ES256) //public keys can't be used to create signatures
         } catch (InvalidKeyException expected) {
             String msg = "ECDSA signing keys must be PrivateKey instances."
             assertEquals msg, expected.getMessage()
@@ -623,9 +626,10 @@ class JwtsTest {
     @Test
     void testBuilderWithMismatchedEllipticCurveKeyAndAlgorithm() {
         def builder = Jwts.builder().setSubject('foo')
-        def pair = Keys.keyPairFor(SignatureAlgorithm.ES384)
+        def pair = TestKeys.ES384.pair
         try {
-            builder.signWith(pair.private, SignatureAlgorithm.ES256) //ES384 keys can't be used to create ES256 signatures
+            builder.signWith(pair.private, SignatureAlgorithms.ES256)
+            //ES384 keys can't be used to create ES256 signatures
         } catch (InvalidKeyException expected) {
             String msg = "EllipticCurve key has a field size of 48 bytes (384 bits), but ES256 requires a " +
                     "field size of 32 bytes (256 bits) per [RFC 7518, Section 3.4 (validation)]" +
@@ -639,9 +643,9 @@ class JwtsTest {
      */
     @Test
     void testParserWithMismatchedEllipticCurveKeyAndAlgorithm() {
-        def pair = Keys.keyPairFor(SignatureAlgorithm.ES256)
+        def pair = TestKeys.ES256.pair
         def jws = Jwts.builder().setSubject('foo').signWith(pair.private).compact()
-        def parser = Jwts.parserBuilder().setSigningKey(Keys.keyPairFor(SignatureAlgorithm.ES384).public).build()
+        def parser = Jwts.parserBuilder().setSigningKey(TestKeys.ES384.pair.public).build()
         try {
             parser.parseClaimsJws(jws)
         } catch (UnsupportedJwtException expected) {
@@ -658,7 +662,7 @@ class JwtsTest {
     /**
      * @since 0.11.5 as part of testing guards against JVM CVE-2022-21449
      */
-    @Test(expected=io.jsonwebtoken.security.SignatureException)
+    @Test(expected = io.jsonwebtoken.security.SignatureException)
     void testEcdsaInvalidSignatureValue() {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
@@ -681,7 +685,7 @@ class JwtsTest {
             Jwts.parserBuilder().enableUnsecuredJws().setSigningKey(key).build().parseClaimsJws(notSigned)
             fail('parseClaimsJws must fail for unsigned JWTs')
         } catch (UnsupportedJwtException expected) {
-            assertEquals expected.message, 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unsigned Claims JWTs are not supported.', expected.message
         }
     }
 
@@ -704,7 +708,7 @@ class JwtsTest {
         String forged = Jwts.builder().setSubject("Not Joe").compact()
 
         //assert that our forged header has a 'NONE' algorithm:
-        assertEquals Jwts.parserBuilder().enableUnsecuredJws().build().parseClaimsJwt(forged).getHeader().get('alg'), 'none'
+        assertEquals 'none', Jwts.parserBuilder().enableUnsecuredJws().build().parseClaimsJwt(forged).getHeader().get('alg')
 
         //now let's forge it by appending the signature the server expects:
         forged += signature
