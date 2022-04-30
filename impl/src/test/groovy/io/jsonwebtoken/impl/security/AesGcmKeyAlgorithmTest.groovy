@@ -6,6 +6,7 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Arrays
+import io.jsonwebtoken.lang.RuntimeEnvironment
 import io.jsonwebtoken.security.EncryptionAlgorithms
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
@@ -13,10 +14,22 @@ import org.junit.Test
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import java.nio.charset.StandardCharsets
+import java.security.NoSuchAlgorithmException
 
 import static org.junit.Assert.*
 
 class AesGcmKeyAlgorithmTest {
+
+    // TODO: remove when we stop supporting JDK 7:
+    static {
+        //test to see if the alg we need is available (e.g. see if we're on JDK 7).  If it's not available
+        // and we're on JDK 7, enable BouncyCastle
+        try {
+            Cipher.getInstance('AES/GCM/NoPadding')
+        } catch (NoSuchAlgorithmException e) {
+            RuntimeEnvironment.enableBouncyCastleIfPossible();
+        }
+    }
 
     /**
      * This tests asserts that our AeadAlgorithm implementation and the JCA 'AES/GCM/NoPadding' wrap algorithm

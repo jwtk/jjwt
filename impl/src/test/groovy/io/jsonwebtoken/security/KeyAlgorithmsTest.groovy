@@ -2,6 +2,7 @@ package io.jsonwebtoken.security
 
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm
+import org.junit.Ignore
 import org.junit.Test
 
 import java.security.Key
@@ -83,6 +84,7 @@ class KeyAlgorithmsTest {
     }
 
     @Test
+    @Ignore // temporarily until we decide if this API will remain
     void testEstimateIterations() {
         // keep it super short so we don't hammer the test server or slow down the build too much:
         long desiredMillis = 50

@@ -107,11 +107,40 @@ enforcement.
     * PS384: RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup>1</sup>
     * PS512: RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup>1</sup>
     
-     <sup>1. Requires JDK 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+    <sup>1. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+ * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
+    * A128CBC-HS256: AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3)
+    * A192CBC-HS384: AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.4](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4)
+    * A256CBC-HS512: AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.5](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5)
+    * A128GCM: AES GCM using 128-bit key<sup>2</sup>
+    * A192GCM: AES GCM using 192-bit key<sup>2</sup>
+    * A256GCM: AES GCM using 256-bit key<sup>2</sup>
+    
+    <sup>2. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+ * All Key Management Algorithms for obtaining JWE encryption and decryption keys: 
+   * RSA1_5: RSAES-PKCS1-v1_5
+   * RSA-OAEP: RSAES OAEP using default parameters
+   * RSA-OAEP-256: RSAES OAEP using SHA-256 and MGF1 with SHA-256
+   * A128KW: AES Key Wrap with default initial value using 128-bit key
+   * A192KW: AES Key Wrap with default initial value using 192-bit key
+   * A256KW: AES Key Wrap with default initial value using 256-bit key
+   * dir: Direct use of a shared symmetric key as the CEK
+   * ECDH-ES: Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF
+   * ECDH-ES+A128KW: ECDH-ES using Concat KDF and CEK wrapped with "A128KW"
+   * ECDH-ES+A192KW: ECDH-ES using Concat KDF and CEK wrapped with "A192KW"
+   * ECDH-ES+A256KW: ECDH-ES using Concat KDF and CEK wrapped with "A256KW"
+   * A128GCMKW: Key wrapping with AES GCM using 128-bit key<sup>3</sup>
+   * A192GCMKW: Key wrapping with AES GCM using 192-bit key<sup>3</sup>
+   * A256GCMKW: Key wrapping with AES GCM using 256-bit key<sup>3</sup>
+   * PBES2-HS256+A128KW: PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup>3</sup>
+   * PBES2-HS384+A192KW: PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup>3</sup>
+   * PBES2-HS512+A256KW: PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup>3</sup>
+
+   <sup>3. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
  * Convenience enhancements beyond the specification such as
     * Body compression for any large JWT, not just JWEs
     * Claims assertions (requiring specific values)
-    * Claim POJO marshaling and unmarshaling when using a compatible JSON parser (e.g. Jackson) 
+    * Claim POJO marshaling and unmarshaling when using a compatible JSON parser (e.g. Jackson)
     * Secure Key generation based on desired JWA algorithms
     * and more...
     
