@@ -25,23 +25,32 @@ import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.lang.RuntimeEnvironment
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
-import java.security.Key
-import java.security.KeyPair
-import java.security.PrivateKey
-import java.security.PublicKey
+import java.security.*
 
 import static org.junit.Assert.*
 
 class JwtsTest {
+
+    // TODO: remove when we stop supporting JDK 7:
+    static {
+        // 'PBKDF2WithHmacSHA256' is available on Java 8 and later.  If we're on Java 7, we need to enable BC:
+        try {
+            SecretKeyFactory.getInstance('PBKDF2WithHmacSHA256')
+        } catch (NoSuchAlgorithmException e) {
+            RuntimeEnvironment.enableBouncyCastleIfPossible();
+        }
+    }
 
     private static Date now() {
         return dateWithOnlySecondPrecision(System.currentTimeMillis())

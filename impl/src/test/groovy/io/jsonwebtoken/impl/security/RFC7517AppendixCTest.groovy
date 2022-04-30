@@ -27,8 +27,7 @@ class RFC7517AppendixCTest {
 
     // TODO: remove when we stop supporting JDK 7:
     static {
-        //test to see if the alg we need is available (e.g. see if we're on JDK 7).  If it's not available
-        // and we're on JDK 7, enable BouncyCastle
+        // 'PBKDF2WithHmacSHA256' is available on Java 8 and later.  If we're on Java 7, we need to enable BC:
         try {
             SecretKeyFactory.getInstance('PBKDF2WithHmacSHA256')
         } catch (NoSuchAlgorithmException e) {

@@ -22,8 +22,7 @@ class AesGcmKeyAlgorithmTest {
 
     // TODO: remove when we stop supporting JDK 7:
     static {
-        //test to see if the alg we need is available (e.g. see if we're on JDK 7).  If it's not available
-        // and we're on JDK 7, enable BouncyCastle
+        // 'GCM' is available on Java 8 and later.  If we're on Java 7, we need to enable BC:
         try {
             Cipher.getInstance('AES/GCM/NoPadding')
         } catch (NoSuchAlgorithmException e) {
