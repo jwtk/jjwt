@@ -176,13 +176,21 @@ class KeysTest {
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof ECPublicKey
                 assertEquals "EC", pub.algorithm
-                assertEquals jdkParamName, pub.params.name
+                if (pub.params.hasProperty('name')) { // JDK <= 14
+                    assertEquals jdkParamName, pub.params.name
+                } else { // JDK >= 15
+                    assertEquals asn1oid, pub.params.nameAndAliases[0]
+                }
                 assertEquals alg.minKeyLength, pub.params.order.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof ECPrivateKey
                 assertEquals "EC", priv.algorithm
-                assertEquals jdkParamName, priv.params.name
+                if (priv.params.hasProperty('name')) { // JDK <= 14
+                    assertEquals jdkParamName, priv.params.name
+                } else { // JDK >= 15
+                    assertEquals asn1oid, priv.params.nameAndAliases[0]
+                }
                 assertEquals alg.minKeyLength, priv.params.order.bitLength()
 
             } else {
@@ -228,13 +236,21 @@ class KeysTest {
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof ECPublicKey
                 assertEquals "EC", pub.algorithm
-                assertEquals jdkParamName, pub.params.name
+                if (pub.params.hasProperty('name')) { // JDK <= 14
+                    assertEquals jdkParamName, pub.params.name
+                } else { // JDK >= 15
+                    assertEquals asn1oid, pub.params.nameAndAliases[0]
+                }
                 assertEquals alg.orderBitLength, pub.params.order.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof ECPrivateKey
                 assertEquals "EC", priv.algorithm
-                assertEquals jdkParamName, priv.params.name
+                if (priv.params.hasProperty('name')) { // JDK <= 14
+                    assertEquals jdkParamName, priv.params.name
+                } else { // JDK >= 15
+                    assertEquals asn1oid, priv.params.nameAndAliases[0]
+                }
                 assertEquals alg.orderBitLength, priv.params.order.bitLength()
 
             } else {

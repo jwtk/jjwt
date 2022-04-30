@@ -176,7 +176,7 @@ public interface Header<T extends Header> extends Map<String, Object> {
      * Returns the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
      * (Compression Algorithm) header parameter value or {@code null} if not present.
      *
-     * <h3>Compatiblity Note</h3>
+     * <p><b>Compatibility Note</b></p>
      *
      * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
      * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.
@@ -194,7 +194,7 @@ public interface Header<T extends Header> extends Map<String, Object> {
      * (Compression Algorithm) header parameter value. A {@code null} value will remove
      * the property from the JSON map.
      *
-     * <h3>Compatibility Note</h3>
+     * <p><b>Compatibility Note</b></p>
      *
      * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
      * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.

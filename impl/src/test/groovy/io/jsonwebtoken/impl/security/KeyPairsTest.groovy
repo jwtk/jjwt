@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl.security
 
-
 import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
@@ -8,14 +7,12 @@ import java.security.Key
 import java.security.KeyPair
 import java.security.PublicKey
 import java.security.interfaces.DSAPublicKey
-import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
-import java.security.spec.ECParameterSpec
-import java.security.spec.ECPoint
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 class KeyPairsTest {
 
@@ -112,59 +109,4 @@ class KeyPairsTest {
             }
         }
     }
-
-    private static class TestECPublicKey implements ECPublicKey {
-        @Override
-        ECPoint getW() {
-            return null
-        }
-
-        @Override
-        String getAlgorithm() {
-            return null
-        }
-
-        @Override
-        String getFormat() {
-            return null
-        }
-
-        @Override
-        byte[] getEncoded() {
-            return new byte[0]
-        }
-
-        @Override
-        ECParameterSpec getParams() {
-            return null
-        }
-    }
-
-    private static class TestECPrivateKey implements ECPrivateKey {
-        @Override
-        BigInteger getS() {
-            return null
-        }
-
-        @Override
-        String getAlgorithm() {
-            return null
-        }
-
-        @Override
-        String getFormat() {
-            return null
-        }
-
-        @Override
-        byte[] getEncoded() {
-            return new byte[0]
-        }
-
-        @Override
-        ECParameterSpec getParams() {
-            return null
-        }
-    }
-
 }

@@ -478,13 +478,14 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
     T signWith(SignatureAlgorithm alg, Key key) throws InvalidKeyException;
 
     /**
-     * <h3>Deprecation Notice</h3>
+     * <p><b>Deprecation Notice</b></p>
+     *
      * <p><b>This has been deprecated since JJWT_RELEASE_VERSION.  Use
      * {@link #signWith(Key, io.jsonwebtoken.security.SignatureAlgorithm)} instead.</b>.  Standard JWA algorithms
      * are represented as instances of this new interface in the {@link io.jsonwebtoken.security.SignatureAlgorithms}
      * enum class.</p>
      *
-     * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
+     * <p>Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.</p>
      *
      * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
      * However, this method can be useful if the recommended algorithm heuristics do not meet your needs or if

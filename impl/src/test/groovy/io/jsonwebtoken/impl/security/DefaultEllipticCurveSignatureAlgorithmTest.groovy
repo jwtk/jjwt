@@ -14,6 +14,9 @@ import java.nio.charset.StandardCharsets
 import java.security.*
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.EllipticCurve
 import java.security.spec.X509EncodedKeySpec
 
 import static org.junit.Assert.*
@@ -66,18 +69,16 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void testSignWithWeakKey() {
-        def gen = KeyPairGenerator.getInstance("EC")
-        gen.initialize(192) //too week for any JWA EC algorithm
-        def pair = gen.generateKeyPair()
-
-        def request = new DefaultSignatureRequest(null, null, new byte[1], pair.getPrivate())
         algs().each {
+            BigInteger order = BigInteger.ONE
+            ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
+            ECPrivateKey priv = new TestECPrivateKey(params: spec)
+            def request = new DefaultSignatureRequest(null, null, new byte[1], priv)
             try {
                 it.sign(request)
             } catch (InvalidKeyException expected) {
-                def keyOrderBitLength = pair.getPublic().getParams().getOrder().bitLength()
                 String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
-                        "${Bytes.bitsMsg(keyOrderBitLength)}, but the '${it.getId()}' algorithm requires EC Keys with " +
+                        "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
                         "${Bytes.bitsMsg(it.orderBitLength)} per " +
                         "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
                 assertEquals msg, expected.getMessage()
@@ -138,17 +139,16 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void testVerifyWithWeakKey() {
-        def gen = KeyPairGenerator.getInstance("EC")
-        gen.initialize(192) //too week for any JWA EC algorithm
-        def pair = gen.generateKeyPair()
-        def request = new DefaultVerifySignatureRequest(null, null, new byte[1], pair.getPublic(), new byte[1])
         algs().each {
+            BigInteger order = BigInteger.ONE
+            ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
+            ECPublicKey pub = new TestECPublicKey(params: spec)
+            def request = new DefaultVerifySignatureRequest(null, null, new byte[1], pub, new byte[1])
             try {
                 it.verify(request)
             } catch (InvalidKeyException expected) {
-                def keyOrderBitLength = pair.getPublic().getParams().getOrder().bitLength()
                 String msg = "The provided Elliptic Curve verification key's size (aka Order bit length) is " +
-                        "${Bytes.bitsMsg(keyOrderBitLength)}, but the '${it.getId()}' algorithm requires EC Keys with " +
+                        "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
                         "${Bytes.bitsMsg(it.orderBitLength)} per " +
                         "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
                 assertEquals msg, expected.getMessage()

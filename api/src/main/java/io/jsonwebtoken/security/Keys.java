@@ -75,10 +75,10 @@ public final class Keys {
     }
 
     /**
-     * <h3>Deprecation Notice</h3>
+     * <p><b>Deprecation Notice</b></p>
      *
      * <p>As of JJWT JJWT_RELEASE_VERSION, symmetric (secret) key algorithm instances can generate a key of suitable
-     * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:
+     * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:</p>
      *
      * <pre><code>
      * {@link SignatureAlgorithms#HS256}.keyBuilder().build();
@@ -137,7 +137,7 @@ public final class Keys {
     }
 
     /**
-     * <h3>Deprecation Notice</h3>
+     * <p><b>Deprecation Notice</b></p>
      *
      * <p>As of JJWT JJWT_RELEASE_VERSION, asymmetric key algorithm instances can generate KeyPairs of suitable strength
      * for that specific algorithm by calling their {@code generateKeyPair()} method directly. For example:</p>
@@ -153,7 +153,7 @@ public final class Keys {
      * <p>Call those methods as needed instead of this {@code keyPairFor} helper method.  This helper method will be
      * removed before the 1.0 final release.</p>
      *
-     * <h3>Previous Documentation</h3>
+     * <p><b>Previous Documentation</b></p>
      *
      * <p>Returns a new {@link KeyPair} suitable for use with the specified asymmetric algorithm.</p>
      *
