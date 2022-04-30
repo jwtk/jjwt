@@ -4,31 +4,23 @@ import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
+import io.jsonwebtoken.impl.lang.CheckedSupplier
+import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Arrays
-import io.jsonwebtoken.lang.RuntimeEnvironment
 import io.jsonwebtoken.security.EncryptionAlgorithms
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.Cipher
+import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 import java.nio.charset.StandardCharsets
-import java.security.NoSuchAlgorithmException
+import java.security.Provider
 
 import static org.junit.Assert.*
 
 class AesGcmKeyAlgorithmTest {
-
-    // TODO: remove when we stop supporting JDK 7:
-    static {
-        // 'GCM' is available on Java 8 and later.  If we're on Java 7, we need to enable BC:
-        try {
-            Cipher.getInstance('AES/GCM/NoPadding')
-        } catch (NoSuchAlgorithmException e) {
-            RuntimeEnvironment.enableBouncyCastleIfPossible();
-        }
-    }
 
     /**
      * This tests asserts that our AeadAlgorithm implementation and the JCA 'AES/GCM/NoPadding' wrap algorithm
@@ -46,7 +38,19 @@ class AesGcmKeyAlgorithmTest {
         def kek = alg.keyBuilder().build()
         def cek = alg.keyBuilder().build()
 
-        JcaTemplate template = new JcaTemplate("AES/GCM/NoPadding", null)
+        final String jcaName = "AES/GCM/NoPadding"
+
+        // AES/GCM/NoPadding is only available on JDK 8 and later, so enable BC as a backup provider if
+        // necessary for <= JDK 7:
+        // TODO: remove when dropping Java 7 support:
+        Provider provider = Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<SecretKeyFactory>() {
+            @Override
+            SecretKeyFactory get() throws Exception {
+                return SecretKeyFactory.getInstance(jcaName);
+            }
+        }))
+
+        JcaTemplate template = new JcaTemplate(jcaName, provider)
         byte[] jcaResult = template.execute(Cipher.class, new CheckedFunction<Cipher, byte[]>() {
             @Override
             byte[] apply(Cipher cipher) throws Exception {

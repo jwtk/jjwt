@@ -28,7 +28,7 @@ class ProvidersWithoutBCTest {
         mockStatic(Classes)
         expect(Classes.isAvailable(eq("org.bouncycastle.jce.provider.BouncyCastleProvider"))).andReturn(Boolean.FALSE).anyTimes()
         replay Classes
-        assertNull Providers.getBouncyCastle(Conditions.TRUE) // one should not be created/exist
+        assertNull Providers.findBouncyCastle(Conditions.TRUE) // one should not be created/exist
         verify Classes
         assertFalse ProvidersTest.bcRegistered() // nothing should be in the environment
     }

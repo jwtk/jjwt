@@ -6,16 +6,13 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.lang.RuntimeEnvironment
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
 import java.security.Key
-import java.security.NoSuchAlgorithmException
 
 import static org.junit.Assert.*
 
@@ -24,16 +21,6 @@ import static org.junit.Assert.*
  */
 @SuppressWarnings('SpellCheckingInspection')
 class RFC7517AppendixCTest {
-
-    // TODO: remove when we stop supporting JDK 7:
-    static {
-        // 'PBKDF2WithHmacSHA256' is available on Java 8 and later.  If we're on Java 7, we need to enable BC:
-        try {
-            SecretKeyFactory.getInstance('PBKDF2WithHmacSHA256')
-        } catch (NoSuchAlgorithmException e) {
-            RuntimeEnvironment.enableBouncyCastleIfPossible();
-        }
-    }
 
     private static final String rfcString(String s) {
         return s.replaceAll('[\\s]', '')

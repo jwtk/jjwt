@@ -52,7 +52,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         // GCM mode only available on JDK 8 and later, so enable BC as a backup provider if necessary for <= JDK 7:
         // TODO: remove when dropping JDK 7:
         if (this.gcm) {
-            setProvider(Providers.getBouncyCastle(Conditions.notExists(new CheckedSupplier<Cipher>() {
+            setProvider(Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<Cipher>() {
                 @Override
                 public Cipher get() throws Exception {
                     return Cipher.getInstance(jcaTransformation);

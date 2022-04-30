@@ -61,7 +61,7 @@ class ProvidersTest {
         assertTrue bcRegistered() // ensure it exists in the system as expected
 
         //now ensure that we find it and cache it:
-        def returned = Providers.getBouncyCastle(Conditions.TRUE)
+        def returned = Providers.findBouncyCastle(Conditions.TRUE)
         assertSame bc, returned
         assertSame bc, Providers.BC_PROVIDER.get() // ensure cached for future lookup
 
@@ -76,7 +76,7 @@ class ProvidersTest {
 
         // ensure we can create one and cache it, *without* modifying the system JVM:
         //now ensure that we find it and cache it:
-        def returned = Providers.getBouncyCastle(Conditions.TRUE)
+        def returned = Providers.findBouncyCastle(Conditions.TRUE)
         assertNotNull returned
         assertSame Providers.BC_PROVIDER.get(), returned //ensure cached for future lookup
         assertFalse bcRegistered() //ensure we don't alter the system environment

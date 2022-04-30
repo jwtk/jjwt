@@ -55,7 +55,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
     public DefaultRsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength, int pssSaltBitLength) {
         this("PS" + digestBitLength, PSS_JCA_NAME, preferredKeyBitLength, pssParamFromSaltBitLength(pssSaltBitLength));
         // PSS is not available natively until JDK 11, so try to load BC as a backup provider if possible on <= JDK 10:
-        setProvider(Providers.getBouncyCastle(Conditions.notExists(new CheckedSupplier<Signature>() {
+        setProvider(Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<Signature>() {
             @Override
             public Signature get() throws Exception {
                 return Signature.getInstance(PSS_JCA_NAME);
