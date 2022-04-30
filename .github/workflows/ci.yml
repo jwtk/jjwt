@@ -28,14 +28,6 @@ jobs:
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
         run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
-      - name: Code coverage
-        if:  matrix.java == '8'
-        run: |
-          ${{env.MVN_CMD}} clean clover:setup test
-          ${{env.MVN_CMD}} -pl . clover:clover clover:check coveralls:report \
-            -DrepoToken="${{ secrets.GITHUB_TOKEN }}" \
-            -DserviceName=github \
-            -DserviceBuildNumber="${{ env.GITHUB_RUN_ID }}"
 
   zulu:
     strategy:
@@ -89,3 +81,26 @@ jobs:
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
         run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
+
+  code-coverage:
+    runs-on: 'ubuntu-latest'
+    env:
+      MVN_CMD: ./mvnw --no-transfer-progress -B
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+          cache: 'maven'
+          check-latest: true
+      - name: Code Coverage
+        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
+        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
+        run: |
+          ${{env.MVN_CMD}} clover:setup test && \
+            ${{env.MVN_CMD}} -pl . clover:clover clover:check coveralls:report \
+              -DrepoToken="${{ secrets.GITHUB_TOKEN }}" \
+              -DserviceName=github \
+              -DserviceBuildNumber="${{ env.GITHUB_RUN_ID }}"
