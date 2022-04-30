@@ -83,6 +83,7 @@ jobs:
         run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
 
   code-coverage:
+    needs: zulu # wait until others finish so a coverage failure doesn't cancel others accidentally
     runs-on: 'ubuntu-latest'
     env:
       MVN_CMD: ./mvnw --no-transfer-progress -B
