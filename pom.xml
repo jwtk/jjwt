@@ -110,7 +110,7 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments />
+        <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
@@ -126,11 +126,11 @@
         <jdk.version>1.7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.12.6.1</jackson.version>
+        <jackson.version>2.13.2.2</jackson.version>
         <orgjson.version>20220320</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
-        <maven.javadoc.additionalOptions />
+        <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.70</bouncycastle.version>
@@ -144,7 +144,7 @@
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine />
+        <surefire.argLine/>
 
     </properties>
 
@@ -416,7 +416,7 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         </transformers>
                     </configuration>
                     <executions>
