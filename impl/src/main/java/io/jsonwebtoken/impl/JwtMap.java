@@ -15,15 +15,10 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.security.JwkContext;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.Jwk;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -64,10 +59,10 @@ public class JwtMap implements Map<String, Object> {
 
     public static boolean isReduceableToNull(Object v) {
         return v == null ||
-            (v instanceof String && !Strings.hasText((String) v)) ||
-            (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
-            (v instanceof Map && Collections.isEmpty((Map<?, ?>) v)) ||
-            (v.getClass().isArray() && Array.getLength(v) == 0);
+                (v instanceof String && !Strings.hasText((String) v)) ||
+                (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
+                (v instanceof Map && Collections.isEmpty((Map<?, ?>) v)) ||
+                (v.getClass().isArray() && Array.getLength(v) == 0);
     }
 
     protected Object idiomaticGet(String key) {
@@ -102,6 +97,18 @@ public class JwtMap implements Map<String, Object> {
     @Override
     public Object get(Object o) {
         return values.get(o);
+    }
+
+    /**
+     * Convenience method to put a value for a canonical field.
+     *
+     * @param field the field representing the property name to set
+     * @param value the value to set
+     * @return the previous value for the field name, or {@code null} if there was no previous value
+     * @since JJWT_RELEASE_VERSION
+     */
+    protected Object put(Field<?> field, Object value) {
+        return put(field.getId(), value);
     }
 
     @Override
@@ -161,22 +168,8 @@ public class JwtMap implements Map<String, Object> {
         return retval;
     }
 
-    private String getName() {
-        if (this instanceof JweHeader) {
-            return "JWE header";
-        } else if (this instanceof JwsHeader) {
-            return "JWS header";
-        } else if (this instanceof Header) {
-            return "JWT header";
-        } else if (this instanceof Jwk || this instanceof JwkContext) {
-            Object value = values.get("kty");
-            if ("oct".equals(value)) {
-                value = "Secret";
-            }
-            return value != null ? value + " JWK" : "JWK";
-        } else {
-            return "Map";
-        }
+    protected String getName() {
+        return "Map";
     }
 
     @Override
@@ -191,7 +184,7 @@ public class JwtMap implements Map<String, Object> {
         if (m == null) {
             return;
         }
-        for (Map.Entry <? extends String, ?>entry : m.entrySet()) {
+        for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
             String s = entry.getKey();
             put(s, entry.getValue());
         }

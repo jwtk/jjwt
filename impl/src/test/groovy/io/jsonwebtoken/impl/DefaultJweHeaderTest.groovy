@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl
 
-
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
@@ -11,7 +10,8 @@ import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertArrayEquals
+import static org.junit.Assert.assertEquals
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -93,5 +93,11 @@ class DefaultJweHeaderTest {
         Set<String> crits = Collections.setOf('foo', 'bar')
         header.setCritical(crits)
         assertEquals crits, header.getCritical()
+    }
+
+    @Test
+    void testGetName() {
+        def header = new DefaultJweHeader()
+        assertEquals 'JWE header', header.getName()
     }
 }

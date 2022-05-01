@@ -27,6 +27,7 @@ import static org.junit.Assert.*
 class JwtMapTest {
 
     private static final Field<String> DUMMY = Fields.string('' + Randoms.secureRandom().nextInt(), "RANDOM")
+    private static final Field<String> SECRET = Fields.secretBigInt('foo', 'foo')
     private static final Set<Field<?>> FIELDS = Collections.setOf(DUMMY)
     JwtMap jwtMap
 
@@ -68,7 +69,7 @@ class JwtMapTest {
 
     @Test
     void testPutAllWithNullArgument() {
-        jwtMap.putAll((Map)null)
+        jwtMap.putAll((Map) null)
         assertEquals jwtMap.size(), 0
     }
 
@@ -83,7 +84,7 @@ class JwtMapTest {
     @Test
     void testKeySet() {
         jwtMap.putAll([a: 'b', c: 'd'])
-        assertEquals( jwtMap.keySet(), ['a', 'c'] as Set)
+        assertEquals(jwtMap.keySet(), ['a', 'c'] as Set)
     }
 
     @Test
@@ -114,5 +115,27 @@ class JwtMapTest {
 
         def identityHash = System.identityHashCode(jwtMap);
         assertTrue(hashCodeNonEmpty != identityHash);
+    }
+
+    @Test
+    void testGetName() {
+        def map = new JwtMap(FIELDS)
+        assertEquals 'Map', map.getName()
+    }
+
+    @Test
+    void testSetSecretFieldWithInvalidTypeValue() {
+        def map = new JwtMap(Collections.setOf(SECRET))
+        def invalidValue = URI.create('https://whatever.com')
+        try {
+            map.put('foo', invalidValue)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            //Ensure <redacted> message so we don't show any secret value:
+            String msg = 'Invalid Map \'foo\' (foo) value [<redacted>]. Cause: Values must be ' +
+                    'either String or java.math.BigInteger instances. Value type found: ' +
+                    'java.net.URI.'
+            assertEquals msg, expected.getMessage()
+        }
     }
 }

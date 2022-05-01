@@ -15,19 +15,12 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.security.PublicJwk;
-
-import java.net.URI;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Set;
-
 /**
  * A <a href="https://tools.ietf.org/html/rfc7515">JWS</a> header.
  *
  * @since 0.1
  */
-public interface JwsHeader extends Header<JwsHeader> {
+public interface JwsHeader extends ProtectedHeader<JwsHeader> {
 
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">Algorithm Header</a> name: the string literal <b><code>alg</code></b>
@@ -73,52 +66,4 @@ public interface JwsHeader extends Header<JwsHeader> {
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.11">Critical Header</a> name: the string literal <b><code>crit</code></b>
      */
     String CRITICAL = "crit";
-
-    /**
-     * Returns the JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.4">
-     * <code>kid</code></a> (Key ID) header value or {@code null} if not present.
-     * <p>The keyId header parameter is a hint indicating which key was used to secure the JWS.  This parameter allows
-     * originators to explicitly signal a change of key to recipients.  The structure of the keyId value is
-     * unspecified.</p>
-     * <p>When used with a JWK, the keyId value is used to match a JWK {@code keyId} parameter value.</p>
-     *
-     * @return the JWS {@code kid} header value or {@code null} if not present.
-     */
-    String getKeyId();
-
-    /**
-     * Sets the JWT <a href="https://tools.ietf.org/html/rfc7516#section-4.1.4">
-     * <code>kid</code></a> (Key ID) header value.  A {@code null} value will remove the property from the JSON map.
-     * <p>The keyId header parameter is a hint indicating which key was used to secure the JWS.  This parameter allows
-     * originators to explicitly signal a change of key to recipients.  The structure of the keyId value is
-     * unspecified.</p>
-     * <p>When used with a JWK, the keyId value is used to match a JWK {@code keyId} parameter value.</p>
-     *
-     * @param kid the JWS {@code kid} header value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Header} instance for method chaining.
-     */
-    JwsHeader setKeyId(String kid);
-
-    URI getJwkSetUrl();
-    JwsHeader setJwkSetUrl(URI uri);
-
-    PublicJwk<?> getJwk();
-    JwsHeader setJwk(PublicJwk<?> jwk);
-
-    URI getX509Url();
-    JwsHeader setX509Url(URI uri);
-
-    List<X509Certificate> getX509CertificateChain();
-    JwsHeader setX509CertificateChain(List<X509Certificate> chain);
-
-    byte[] getX509CertificateSha1Thumbprint();
-    JwsHeader setX509CertificateSha1Thumbprint(byte[] thumbprint);
-    JwsHeader computeX509CertificateSha1Thumbprint();
-
-    byte[] getX509CertificateSha256Thumbprint();
-    JwsHeader setX509CertificateSha256Thumbprint(byte[] thumbprint);
-    JwsHeader computeX509CertificateSha256Thumbprint();
-
-    Set<String> getCritical();
-    JwsHeader setCritical(Set<String> crit);
 }

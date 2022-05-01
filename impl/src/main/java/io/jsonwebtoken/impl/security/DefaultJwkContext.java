@@ -18,6 +18,7 @@ import java.util.Set;
 public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkContext<K> {
 
     private static final Set<Field<?>> DEFAULT_FIELDS;
+
     static { // assume all known fields:
         Set<Field<?>> set = new LinkedHashSet<>();
         set.addAll(DefaultSecretJwk.FIELDS); // Private/Secret JWKs has both public and private fields
@@ -62,12 +63,21 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         this.idiomaticValues.putAll(src.idiomaticValues);
         this.redactedValues.putAll(src.redactedValues);
         if (removePrivate) {
-            for(Field<?> field : src.FIELDS.values()) {
+            for (Field<?> field : src.FIELDS.values()) {
                 if (field.isSecret()) {
                     remove(field.getId());
                 }
             }
         }
+    }
+
+    @Override
+    protected String getName() {
+        Object value = values.get("kty");
+        if ("oct".equals(value)) {
+            value = "Secret";
+        }
+        return value != null ? value + " JWK" : "JWK";
     }
 
     @Override
@@ -78,102 +88,100 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public String getAlgorithm() {
-        return (String) this.values.get(AbstractJwk.ALG.getId());
+        return idiomaticGet(AbstractJwk.ALG);
     }
 
     @Override
     public JwkContext<K> setAlgorithm(String algorithm) {
-        put(AbstractJwk.ALG.getId(), algorithm);
+        put(AbstractJwk.ALG, algorithm);
         return this;
     }
 
     @Override
     public String getId() {
-        return (String) this.values.get(AbstractJwk.KID.getId());
+        return idiomaticGet(AbstractJwk.KID);
     }
 
     @Override
     public JwkContext<K> setId(String id) {
-        put(AbstractJwk.KID.getId(), id);
+        put(AbstractJwk.KID, id);
         return this;
     }
 
     @Override
     public Set<String> getOperations() {
-        //noinspection unchecked
-        return (Set<String>) this.idiomaticValues.get(AbstractJwk.KEY_OPS.getId());
+        return idiomaticGet(AbstractJwk.KEY_OPS);
     }
 
     @Override
     public JwkContext<K> setOperations(Set<String> ops) {
-        put(AbstractJwk.KEY_OPS.getId(), ops);
+        put(AbstractJwk.KEY_OPS, ops);
         return this;
     }
 
     @Override
     public String getType() {
-        return (String) this.values.get(AbstractJwk.KTY.getId());
+        return idiomaticGet(AbstractJwk.KTY);
     }
 
     @Override
     public JwkContext<K> setType(String type) {
-        put(AbstractJwk.KTY.getId(), type);
+        put(AbstractJwk.KTY, type);
         return this;
     }
 
     @Override
     public String getPublicKeyUse() {
-        return (String) this.values.get(AbstractAsymmetricJwk.USE.getId());
+        return idiomaticGet(AbstractAsymmetricJwk.USE);
     }
 
     @Override
     public JwkContext<K> setPublicKeyUse(String use) {
-        put(AbstractAsymmetricJwk.USE.getId(), use);
+        put(AbstractAsymmetricJwk.USE, use);
         return this;
     }
 
     @Override
     public List<X509Certificate> getX509CertificateChain() {
-        //noinspection unchecked
-        return (List<X509Certificate>) this.idiomaticValues.get(AbstractAsymmetricJwk.X5C.getId());
+        return idiomaticGet(AbstractAsymmetricJwk.X5C);
     }
 
     @Override
     public JwkContext<K> setX509CertificateChain(List<X509Certificate> x5c) {
-        put(AbstractAsymmetricJwk.X5C.getId(), x5c);
+        put(AbstractAsymmetricJwk.X5C, x5c);
         return this;
     }
 
     @Override
     public byte[] getX509CertificateSha1Thumbprint() {
-        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X5T.getId());
+        return idiomaticGet(AbstractAsymmetricJwk.X5T);
     }
 
     @Override
     public JwkContext<K> setX509CertificateSha1Thumbprint(byte[] x5t) {
-        put(AbstractAsymmetricJwk.X5T.getId(), x5t);
+        put(AbstractAsymmetricJwk.X5T, x5t);
         return this;
     }
 
     @Override
     public byte[] getX509CertificateSha256Thumbprint() {
-        return (byte[]) this.idiomaticValues.get(AbstractAsymmetricJwk.X5T_S256.getId());
+        return idiomaticGet(AbstractAsymmetricJwk.X5T_S256);
     }
 
     @Override
     public JwkContext<K> setX509CertificateSha256Thumbprint(byte[] x5ts256) {
-        put(AbstractAsymmetricJwk.X5T_S256.getId(), x5ts256);
+        put(AbstractAsymmetricJwk.X5T_S256, x5ts256);
         return this;
     }
 
     @Override
     public URI getX509Url() {
-        return (URI) this.idiomaticValues.get(AbstractAsymmetricJwk.X5U.getId());
+        return idiomaticGet(AbstractAsymmetricJwk.X5U);
     }
 
     @Override
     public JwkContext<K> setX509Url(URI url) {
-        put(AbstractAsymmetricJwk.X5U.getId(), url);
+        put(AbstractAsymmetricJwk.X5U, url);
         return this;
     }
 

@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl
 
 import org.junit.Test
-import static org.junit.Assert.*
+
+import static org.junit.Assert.assertEquals
 
 class DefaultJwsHeaderTest {
 
@@ -27,5 +28,11 @@ class DefaultJwsHeaderTest {
 
         h.setKeyId('foo')
         assertEquals h.getKeyId(), 'foo'
+    }
+
+    @Test
+    void testGetName() {
+        def header = new DefaultJwsHeader()
+        assertEquals 'JWS header', header.getName()
     }
 }

@@ -54,4 +54,10 @@ class DefaultHeaderTest {
         header.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
         assertEquals "DEF", header.getCompressionAlgorithm()
     }
+
+    @Test
+    void testGetName() {
+        def header = new DefaultHeader()
+        assertEquals 'JWT header', header.getName()
+    }
 }

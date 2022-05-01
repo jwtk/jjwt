@@ -134,11 +134,11 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private static Function<JwsHeader, SignatureAlgorithm<?, ?>> sigFn(Collection<SignatureAlgorithm<?, ?>> extras) {
-        return locFn(JwsHeader.ALGORITHM, MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
+        return locFn(DefaultHeader.ALGORITHM.getId(), MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
-        return locFn(JweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, EncryptionAlgorithmsBridge.REGISTRY, extras);
+        return locFn(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), MISSING_ENC_MSG, EncryptionAlgorithmsBridge.REGISTRY, extras);
     }
 
     private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {

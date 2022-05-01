@@ -31,7 +31,7 @@ public class Codec implements Converter<byte[], String> {
         try {
             return this.decoder.decode(b);
         } catch (DecodingException e) {
-            String msg = "Cannot decode input String '" + b + "'. Cause: " + e.getMessage();
+            String msg = "Cannot decode input String. Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
     }

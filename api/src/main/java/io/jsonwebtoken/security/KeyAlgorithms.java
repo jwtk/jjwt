@@ -82,7 +82,9 @@ public final class KeyAlgorithms {
     public static final EcKeyAlgorithm ECDH_ES_A192KW = forId0("ECDH-ES+A192KW");
     public static final EcKeyAlgorithm ECDH_ES_A256KW = forId0("ECDH-ES+A256KW");
 
+    /*
     public static int estimateIterations(KeyAlgorithm<PasswordKey, PasswordKey> alg, long desiredMillis) {
         return Classes.invokeStatic(BRIDGE_CLASS, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
     }
+     */
 }

@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Header implementation satisfying JWE header parameter requirements.
+ *
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHeader {
+public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> implements JweHeader {
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
     public static final Field<Integer> P2C = Fields.builder(Integer.class).setId("p2c").setName("PBES2 Count").build();
@@ -22,7 +24,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
 
-    static final Set<Field<?>> FIELDS = Collections.concat(CHILD_FIELDS, ENCRYPTION_ALGORITHM, P2C, P2S, APU, APV);
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractProtectedHeader.FIELDS, ENCRYPTION_ALGORITHM, P2C, P2S, APU, APV);
 
     public DefaultJweHeader() {
         super(FIELDS);
@@ -33,13 +35,18 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
     }
 
     @Override
+    protected String getName() {
+        return "JWE header";
+    }
+
+    @Override
     public String getEncryptionAlgorithm() {
         return idiomaticGet(ENCRYPTION_ALGORITHM);
     }
 
 //    @Override
 //    public JweHeader setEncryptionAlgorithm(String enc) {
-//        put(ENCRYPTION_ALGORITHM.getId(), enc);
+//        put(ENCRYPTION_ALGORITHM, enc);
 //        return this;
 //    }
 
@@ -50,7 +57,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
 
     @Override
     public JweHeader setPbes2Count(int count) {
-        put(P2C.getId(), count);
+        put(P2C, count);
         return this;
     }
 
@@ -59,7 +66,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
     }
 
     public JweHeader setPbes2Salt(byte[] salt) {
-        put(P2S.getId(), salt);
+        put(P2S, salt);
         return this;
     }
 
@@ -76,7 +83,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
 
     @Override
     public JweHeader setAgreementPartyUInfo(byte[] info) {
-        put(APU.getId(), info);
+        put(APU, info);
         return this;
     }
 
@@ -99,7 +106,7 @@ public class DefaultJweHeader extends DefaultHeader<JweHeader> implements JweHea
 
     @Override
     public JweHeader setAgreementPartyVInfo(byte[] info) {
-        put(APV.getId(), info);
+        put(APV, info);
         return this;
     }
 

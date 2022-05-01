@@ -21,9 +21,9 @@ import io.jsonwebtoken.impl.lang.Field;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultJwsHeader extends DefaultHeader<JwsHeader> implements JwsHeader {
+public class DefaultJwsHeader extends AbstractProtectedHeader<JwsHeader> implements JwsHeader {
 
-    static final Set<Field<?>> FIELDS = CHILD_FIELDS;
+    static final Set<Field<?>> FIELDS = AbstractProtectedHeader.FIELDS; //same
 
     public DefaultJwsHeader() {
         super(FIELDS);
@@ -31,5 +31,10 @@ public class DefaultJwsHeader extends DefaultHeader<JwsHeader> implements JwsHea
 
     public DefaultJwsHeader(Map<String, ?> map) {
         super(FIELDS, map);
+    }
+
+    @Override
+    protected String getName() {
+        return "JWS header";
     }
 }

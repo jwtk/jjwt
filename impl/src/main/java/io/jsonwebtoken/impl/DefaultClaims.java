@@ -30,12 +30,12 @@ import java.util.Set;
 public class DefaultClaims extends JwtMap implements Claims {
 
     private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
-        "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
-        "Anything more complex is expected to be already converted to your desired type by the JSON Deserializer " +
-        "implementation. You may specify a custom Deserializer for a JwtParser with the desired conversion " +
-        "configuration via the JwtParserBuilder.deserializeJsonWith() method. " +
-        "See https://github.com/jwtk/jjwt#custom-json-processor for more information. If using Jackson, you can " +
-        "specify custom claim POJO types as described in https://github.com/jwtk/jjwt#json-jackson-custom-types";
+            "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
+            "Anything more complex is expected to be already converted to your desired type by the JSON Deserializer " +
+            "implementation. You may specify a custom Deserializer for a JwtParser with the desired conversion " +
+            "configuration via the JwtParserBuilder.deserializeJsonWith() method. " +
+            "See https://github.com/jwtk/jjwt#custom-json-processor for more information. If using Jackson, you can " +
+            "specify custom claim POJO types as described in https://github.com/jwtk/jjwt#json-jackson-custom-types";
 
     static final Field<String> ISSUER = Fields.string(Claims.ISSUER, "Issuer");
     static final Field<String> SUBJECT = Fields.string(Claims.SUBJECT, "Subject");
@@ -46,7 +46,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     static final Field<String> JTI = Fields.string(Claims.ID, "JWT ID");
 
     static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(
-        ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI
+            ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI
     );
 
     public DefaultClaims() {
@@ -64,7 +64,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setIssuer(String iss) {
-        put(ISSUER.getId(), iss);
+        put(ISSUER, iss);
         return this;
     }
 
@@ -75,7 +75,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setSubject(String sub) {
-        put(SUBJECT.getId(), sub);
+        put(SUBJECT, sub);
         return this;
     }
 
@@ -86,7 +86,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setAudience(String aud) {
-        put(AUDIENCE.getId(), aud);
+        put(AUDIENCE, aud);
         return this;
     }
 
@@ -97,7 +97,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setExpiration(Date exp) {
-        put(EXPIRATION.getId(), exp);
+        put(EXPIRATION, exp);
         return this;
     }
 
@@ -108,7 +108,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setNotBefore(Date nbf) {
-        put(NOT_BEFORE.getId(), nbf);
+        put(NOT_BEFORE, nbf);
         return this;
     }
 
@@ -119,7 +119,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setIssuedAt(Date iat) {
-        put(ISSUED_AT.getId(), iat);
+        put(ISSUED_AT, iat);
         return this;
     }
 
@@ -130,7 +130,7 @@ public class DefaultClaims extends JwtMap implements Claims {
 
     @Override
     public Claims setId(String jti) {
-        put(JTI.getId(), jti);
+        put(JTI, jti);
         return this;
     }
 
@@ -163,11 +163,11 @@ public class DefaultClaims extends JwtMap implements Claims {
     private <T> T castClaimValue(String name, Object value, Class<T> requiredType) {
 
         if (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte) {
-            long longValue = ((Number)value).longValue();
+            long longValue = ((Number) value).longValue();
             if (Long.class.equals(requiredType)) {
                 value = longValue;
             } else if (Integer.class.equals(requiredType) && Integer.MIN_VALUE <= longValue && longValue <= Integer.MAX_VALUE) {
-                value = (int)longValue;
+                value = (int) longValue;
             } else if (requiredType == Short.class && Short.MIN_VALUE <= longValue && longValue <= Short.MAX_VALUE) {
                 value = (short) longValue;
             } else if (requiredType == Byte.class && Byte.MIN_VALUE <= longValue && longValue <= Byte.MAX_VALUE) {
@@ -176,9 +176,9 @@ public class DefaultClaims extends JwtMap implements Claims {
         }
 
         if (value instanceof Long &&
-            (requiredType.equals(Integer.class) || requiredType.equals(Short.class) || requiredType.equals(Byte.class))) {
+                (requiredType.equals(Integer.class) || requiredType.equals(Short.class) || requiredType.equals(Byte.class))) {
             String msg = "Claim '" + name + "' value is too large or too small to be represented as a " +
-                requiredType.getName() + " instance (would cause numeric overflow).";
+                    requiredType.getName() + " instance (would cause numeric overflow).";
             throw new RequiredTypeException(msg);
         }
 

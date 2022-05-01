@@ -27,7 +27,7 @@ public class EncodedObjectConverter<T> implements Converter<T, Object> {
             return converter.applyFrom((String) value);
         } else {
             String msg = "Values must be either String or " + type.getName() +
-                " instances. Value type found: " + value.getClass().getName() + ". Value: " + value;
+                " instances. Value type found: " + value.getClass().getName() + ".";
             throw new IllegalArgumentException(msg);
         }
     }
