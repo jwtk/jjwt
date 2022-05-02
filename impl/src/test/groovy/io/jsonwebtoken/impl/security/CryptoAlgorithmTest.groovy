@@ -49,6 +49,13 @@ class CryptoAlgorithmTest {
     }
 
     @Test
+    void testEnsureSecureRandomWorksWithNullRequest() {
+        def alg = new TestCryptoAlgorithm('test', 'test')
+        def random = alg.ensureSecureRandom(null)
+        assertSame Randoms.secureRandom(), random
+    }
+
+    @Test
     void testRequestProviderPriorityOverDefaultProvider() {
 
         def alg = new TestCryptoAlgorithm('test', 'test')

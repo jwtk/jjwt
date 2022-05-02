@@ -40,6 +40,9 @@ public class DefaultJws<B> extends DefaultJwt<JwsHeader, B> implements Jws<B> {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (obj instanceof Jws) {
             Jws<?> jws = (Jws<?>) obj;
             return super.equals(jws) &&

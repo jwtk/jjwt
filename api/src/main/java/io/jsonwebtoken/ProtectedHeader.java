@@ -50,6 +50,8 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      *
      * @param kid the case-sensitive JWS {@code kid} header value or {@code null} to remove the property from the JSON map.
      * @return the header instance for method chaining.
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4">JWS Key ID</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.6">JWE Key ID</a>
      */
     T setKeyId(String kid);
 

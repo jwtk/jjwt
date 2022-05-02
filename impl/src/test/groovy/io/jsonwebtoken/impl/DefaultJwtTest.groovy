@@ -20,6 +20,7 @@ import io.jsonwebtoken.Jwts
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotEquals
 
 class DefaultJwtTest {
 
@@ -36,6 +37,9 @@ class DefaultJwtTest {
         def parser = Jwts.parserBuilder().enableUnsecuredJws().build()
         def jwt1 = parser.parseClaimsJwt(compact)
         def jwt2 = parser.parseClaimsJwt(compact)
+        assertNotEquals jwt1, 'hello' as String
+        assertEquals jwt1, jwt1
+        assertEquals jwt2, jwt2
         assertEquals jwt1, jwt2
         assertEquals jwt1.hashCode(), jwt2.hashCode()
     }

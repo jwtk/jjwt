@@ -65,6 +65,9 @@ class ProvidersTest {
         assertSame bc, returned
         assertSame bc, Providers.BC_PROVIDER.get() // ensure cached for future lookup
 
+        //ensure cache hit works:
+        assertSame bc, Providers.findBouncyCastle(Conditions.TRUE)
+
         //cleanup() method will remove the provider from the system
     }
 
@@ -79,6 +82,9 @@ class ProvidersTest {
         def returned = Providers.findBouncyCastle(Conditions.TRUE)
         assertNotNull returned
         assertSame Providers.BC_PROVIDER.get(), returned //ensure cached for future lookup
+        assertFalse bcRegistered() //ensure we don't alter the system environment
+
+        assertSame returned, Providers.findBouncyCastle(Conditions.TRUE) //ensure cache hit
         assertFalse bcRegistered() //ensure we don't alter the system environment
     }
 }

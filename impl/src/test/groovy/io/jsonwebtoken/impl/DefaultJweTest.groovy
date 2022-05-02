@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.EncryptionAlgorithms
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotEquals
 
 class DefaultJweTest {
 
@@ -16,6 +17,9 @@ class DefaultJweTest {
         def parser = Jwts.parserBuilder().decryptWith(key).build()
         def jwe1 = parser.parseClaimsJwe(compact)
         def jwe2 = parser.parseClaimsJwe(compact)
+        assertNotEquals jwe1, 'hello' as String
+        assertEquals jwe1, jwe1
+        assertEquals jwe2, jwe2
         assertEquals jwe1, jwe2
         assertEquals jwe1.hashCode(), jwe2.hashCode()
     }

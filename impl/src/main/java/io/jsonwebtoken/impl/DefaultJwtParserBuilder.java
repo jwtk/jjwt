@@ -15,7 +15,16 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Clock;
+import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.JwtParserBuilder;
+import io.jsonwebtoken.Locator;
+import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
@@ -275,9 +284,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
         // Invariants.  If these are ever violated, it's an error in this class implementation
         // (we default to non-null instances, and the setters should never allow null):
-        assert this.keyLocator != null : "Key locator should never be null.";
-        assert this.signingKeyResolver != null : "SigningKeyResolver should never be null.";
-        assert this.compressionCodecResolver != null : "CompressionCodecResolver should never be null.";
+        Assert.stateNotNull(this.keyLocator, "Key locator should never be null.");
+        Assert.stateNotNull(this.signingKeyResolver, "SigningKeyResolver should never be null.");
+        Assert.stateNotNull(this.compressionCodecResolver, "CompressionCodecResolver should never be null.");
 
         return new ImmutableJwtParser(new DefaultJwtParser(
                 provider,

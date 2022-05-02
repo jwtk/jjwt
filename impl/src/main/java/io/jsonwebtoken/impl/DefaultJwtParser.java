@@ -341,7 +341,7 @@ public class DefaultJwtParser implements JwtParser {
         }
         try {
             final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
-            return (!(tokenized instanceof TokenizedJwe)) && Strings.hasText(tokenized.getDigest());
+            return !(tokenized instanceof TokenizedJwe) && Strings.hasText(tokenized.getDigest());
         } catch (MalformedJwtException e) {
             return false;
         }
@@ -565,7 +565,7 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(msg);
             }
 
-            assert this.signingKeyResolver != null : "SigningKeyResolver cannot be null (invariant).";
+            Assert.stateNotNull(this.signingKeyResolver, "SigningKeyResolver cannot be null (invariant).");
 
             //digitally signed, let's assert the signature:
             Key key;

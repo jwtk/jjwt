@@ -114,9 +114,9 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
             throw new IllegalStateException("Both 'payload' and 'claims' cannot both be specified. Choose either one.");
         }
 
-        Assert.state(key != null, "Key is required.");
-        Assert.state(enc != null, "Encryption algorithm is required.");
-        Assert.state(alg != null, "KeyAlgorithm is required."); //always set by withKey calling withKeyFrom
+        Assert.stateNotNull(key, "Key is required.");
+        Assert.stateNotNull(enc, "Encryption algorithm is required.");
+        Assert.stateNotNull(alg, "KeyAlgorithm is required."); //always set by withKey calling withKeyFrom
 
         if (this.serializer == null) { // try to find one based on the services available
             //noinspection unchecked

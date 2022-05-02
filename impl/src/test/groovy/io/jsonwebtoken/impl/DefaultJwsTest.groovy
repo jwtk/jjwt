@@ -20,8 +20,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
+import static org.junit.Assert.*
 
 class DefaultJwsTest {
 
@@ -56,6 +55,9 @@ class DefaultJwsTest {
         def parser = Jwts.parserBuilder().setSigningKey(key).build()
         def jws1 = parser.parseClaimsJws(compact)
         def jws2 = parser.parseClaimsJws(compact)
+        assertNotEquals jws1, 'hello' as String
+        assertEquals jws1, jws1
+        assertEquals jws2, jws2
         assertEquals jws1, jws2
         assertEquals jws1.hashCode(), jws2.hashCode()
     }

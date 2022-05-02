@@ -28,6 +28,9 @@ public class DefaultJwe<B> extends DefaultJwt<JweHeader, B> implements Jwe<B> {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (obj instanceof Jwe) {
             Jwe<?> jwe = (Jwe<?>)obj;
             return super.equals(jwe) &&

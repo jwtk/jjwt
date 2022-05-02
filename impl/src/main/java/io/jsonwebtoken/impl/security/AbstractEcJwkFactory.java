@@ -190,7 +190,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         final BigInteger prime = ((ECFieldFp) curve.getField()).getP();
         final BigInteger slope = Qy.subtract(Py).multiply(Qx.subtract(Px).modInverse(prime)).mod(prime);
         final BigInteger Rx = (slope.modPow(TWO, prime).subtract(Px)).subtract(Qx).mod(prime);
-        final BigInteger Ry = (Qy.negate().mod(prime)).add(slope.multiply(Qx.subtract(Rx))).mod(prime);
+        final BigInteger Ry = Qy.negate().mod(prime).add(slope.multiply(Qx.subtract(Rx))).mod(prime);
 
         return new ECPoint(Rx, Ry);
     }

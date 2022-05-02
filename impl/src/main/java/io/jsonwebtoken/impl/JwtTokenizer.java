@@ -25,7 +25,9 @@ public class JwtTokenizer {
 
         StringBuilder sb = new StringBuilder(128);
 
-        for (int i = 0; i < jwt.length(); i++) { char c = jwt.charAt(i);if (Character.isWhitespace(c)) {
+        for (int i = 0; i < jwt.length(); i++) {
+
+            char c = jwt.charAt(i);
 
             if (Character.isWhitespace(c)) {
                 String msg = "Compact JWT strings may not contain whitespace.";
