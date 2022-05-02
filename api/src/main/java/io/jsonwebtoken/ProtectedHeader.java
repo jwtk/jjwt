@@ -24,7 +24,7 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
     T setJwk(PublicJwk<?> jwk);
 
     /**
-     * Returns the JWT case-sensitive {@code kid}</a> (Key ID) header value or {@code null} if not present.
+     * Returns the JWT case-sensitive {@code kid} (Key ID) header value or {@code null} if not present.
      *
      * <p>The keyId header parameter is a hint indicating which key was used to secure a JWS or JWE.  This
      * parameter allows originators to explicitly signal a change of key to recipients.  The structure of the keyId
