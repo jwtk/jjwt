@@ -1,3 +1,3 @@
 # JavaDoc purity is not necessary in the impl module since it's never intended
 # to be consumed by users:
-ignoreRules = ["MissingSummary", "InconsistentCapitalization"]
+ignoreRules = ["MissingSummary", "InconsistentCapitalization", "JavaUtilDate"]
