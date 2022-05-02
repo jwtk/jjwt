@@ -10,8 +10,9 @@ import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
 
-import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertEquals
+import java.nio.charset.StandardCharsets
+
+import static org.junit.Assert.*
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -97,7 +98,92 @@ class DefaultJweHeaderTest {
 
     @Test
     void testGetName() {
-        def header = new DefaultJweHeader()
         assertEquals 'JWE header', header.getName()
+    }
+
+    @Test
+    void pbe2SaltBytesTest() {
+        byte[] salt = new byte[32]
+        Randoms.secureRandom().nextBytes(salt)
+        header.setPbes2Salt(salt)
+        assertArrayEquals salt, header.getPbes2Salt()
+    }
+
+    @Test
+    void pbe2SaltStringTest() {
+        byte[] salt = new byte[32]
+        Randoms.secureRandom().nextBytes(salt)
+        String val = Encoders.BASE64URL.encode(salt)
+        header.put('p2s', val)
+        //ensure that even though a Base64Url string was set, we get back a byte[]:
+        assertArrayEquals salt, header.getPbes2Salt()
+    }
+
+    @Test
+    void testAgreementPartyUInfo() {
+        String val = "Party UInfo"
+        byte[] info = val.getBytes(StandardCharsets.UTF_8)
+        header.setAgreementPartyUInfo(info)
+        assertArrayEquals info, header.getAgreementPartyUInfo()
+        assertEquals val, header.getAgreementPartyUInfoString()
+    }
+
+    @Test
+    void testAgreementPartyUInfoString() {
+        String val = "Party UInfo"
+        byte[] info = val.getBytes(StandardCharsets.UTF_8)
+        header.setAgreementPartyUInfo(val)
+        assertArrayEquals info, header.getAgreementPartyUInfo()
+        assertEquals val, header.getAgreementPartyUInfoString()
+    }
+
+    @Test
+    void testEmptyAgreementPartyUInfo() {
+        byte[] info = new byte[0]
+        header.setAgreementPartyUInfo(info)
+        assertNull header.getAgreementPartyUInfo()
+        assertNull header.getAgreementPartyUInfoString()
+    }
+
+    @Test
+    void testEmptyAgreementPartyUInfoString() {
+        String s = '  '
+        header.setAgreementPartyUInfo(s)
+        assertNull header.getAgreementPartyUInfo()
+        assertNull header.getAgreementPartyUInfoString()
+    }
+
+    @Test
+    void testAgreementPartyVInfo() {
+        String val = "Party VInfo"
+        byte[] info = val.getBytes(StandardCharsets.UTF_8)
+        header.setAgreementPartyVInfo(info)
+        assertArrayEquals info, header.getAgreementPartyVInfo()
+        assertEquals val, header.getAgreementPartyVInfoString()
+    }
+
+    @Test
+    void testAgreementPartyVInfoString() {
+        String val = "Party VInfo"
+        byte[] info = val.getBytes(StandardCharsets.UTF_8)
+        header.setAgreementPartyVInfo(val)
+        assertArrayEquals info, header.getAgreementPartyVInfo()
+        assertEquals val, header.getAgreementPartyVInfoString()
+    }
+
+    @Test
+    void testEmptyAgreementPartyVInfo() {
+        byte[] info = new byte[0]
+        header.setAgreementPartyVInfo(info)
+        assertNull header.getAgreementPartyVInfo()
+        assertNull header.getAgreementPartyVInfoString()
+    }
+
+    @Test
+    void testEmptyAgreementPartyVInfoString() {
+        String s = '  '
+        header.setAgreementPartyVInfo(s)
+        assertNull header.getAgreementPartyVInfo()
+        assertNull header.getAgreementPartyVInfoString()
     }
 }

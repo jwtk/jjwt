@@ -17,8 +17,7 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -40,12 +39,24 @@ class DefaultJwsTest {
     @Test
     void testToString() {
         //create random signing key for testing:
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
-        String compact = Jwts.builder().claim('foo', 'bar').signWith(alg, key).compact();
+        def alg = SignatureAlgorithms.HS256
+        def key = alg.keyBuilder().build()
+        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact();
         int i = compact.lastIndexOf('.')
         String signature = compact.substring(i + 1)
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
         assertEquals 'header={alg=HS256},body={foo=bar},signature=' + signature, jws.toString()
+    }
+
+    @Test
+    void testEqualsAndHashCode() {
+        def alg = SignatureAlgorithms.HS256
+        def key = alg.keyBuilder().build()
+        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
+        def parser = Jwts.parserBuilder().setSigningKey(key).build()
+        def jws1 = parser.parseClaimsJws(compact)
+        def jws2 = parser.parseClaimsJws(compact)
+        assertEquals jws1, jws2
+        assertEquals jws1.hashCode(), jws2.hashCode()
     }
 }

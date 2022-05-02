@@ -16,7 +16,8 @@ class EncodedObjectConverterTest {
             converter.applyFrom(value)
             fail("IllegalArgumentException should have been thrown.")
         } catch (IllegalArgumentException expected) {
-            String msg = "Values must be either String or java.net.URI instances. Value type found: java.lang.Integer. Value: ${value}"
+            String msg = "Values must be either String or java.net.URI instances. " +
+                    "Value type found: java.lang.Integer."
             assertEquals msg, expected.getMessage()
         }
     }

@@ -16,7 +16,7 @@ class CodecTest {
         } catch (IllegalArgumentException expected) {
             def cause = expected.getCause()
             assertTrue cause instanceof DecodingException
-            String msg = "Cannot decode input String '$s'. Cause: ${cause.getMessage()}"
+            String msg = "Cannot decode input String. Cause: ${cause.getMessage()}"
             assertEquals msg, expected.getMessage()
         }
     }

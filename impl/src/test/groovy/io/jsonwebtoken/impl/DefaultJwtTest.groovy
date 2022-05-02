@@ -30,4 +30,13 @@ class DefaultJwtTest {
         assertEquals 'header={foo=bar, alg=none},body={aud=jsmith}', jwt.toString()
     }
 
+    @Test
+    void testEqualsAndHashCode() {
+        String compact = Jwts.builder().claim('foo', 'bar').compact()
+        def parser = Jwts.parserBuilder().enableUnsecuredJws().build()
+        def jwt1 = parser.parseClaimsJwt(compact)
+        def jwt2 = parser.parseClaimsJwt(compact)
+        assertEquals jwt1, jwt2
+        assertEquals jwt1.hashCode(), jwt2.hashCode()
+    }
 }
