@@ -1,11 +1,15 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.lang.Assert
+import io.jsonwebtoken.security.EcPrivateJwk
+import io.jsonwebtoken.security.EcPublicJwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPublicJwkBuilder
 import org.junit.Test
 
 import java.security.cert.X509Certificate
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
@@ -58,5 +62,26 @@ class AbstractAsymmetricJwkBuilderTest {
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()
         Assert.notEmpty(jwk.getX509CertificateSha256Thumbprint())
         Assert.hasText(jwk.get(AbstractAsymmetricJwk.X5T_S256.getId()) as String)
+    }
+
+    @Test
+    void testEcPrivateJwkFromPublicBuilder() {
+        def pair = TestKeys.ES256.pair
+
+        //start with a public key builder
+        def builder = Jwks.builder().setKey(pair.public as ECPublicKey)
+        assertTrue builder instanceof AbstractAsymmetricJwkBuilder.DefaultEcPublicJwkBuilder
+
+        //applying the private key turns it into a private key builder
+        builder = builder.setPrivateKey(pair.private as ECPrivateKey)
+        assertTrue builder instanceof AbstractAsymmetricJwkBuilder.DefaultEcPrivateJwkBuilder
+
+        //building creates a private jwk:
+        def jwk = builder.build()
+        assertTrue jwk instanceof EcPrivateJwk
+
+        //which also has information for the public key:
+        jwk = jwk.toPublicJwk()
+        assertTrue jwk instanceof EcPublicJwk
     }
 }

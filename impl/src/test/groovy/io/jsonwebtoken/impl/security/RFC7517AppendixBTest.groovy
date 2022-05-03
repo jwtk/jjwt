@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPublicJwk
 import org.junit.Test
@@ -57,8 +58,8 @@ class RFC7517AppendixBTest {
         assertEquals m.kty, jwk.getType()
         assertEquals m.use, jwk.getPublicKeyUse()
         assertEquals m.kid, jwk.getId()
-        assertEquals m.n, AbstractFamilyJwkFactory.encode(key.getModulus())
-        assertEquals m.e, AbstractFamilyJwkFactory.encode(key.getPublicExponent())
+        assertEquals m.n, Converters.BIGINT.applyTo(key.getModulus())
+        assertEquals m.e, Converters.BIGINT.applyTo(key.getPublicExponent())
         def chain = jwk.getX509CertificateChain()
         assertNotNull chain
         assertFalse chain.isEmpty()

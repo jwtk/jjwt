@@ -20,8 +20,8 @@ class RsaPublicJwkFactory extends AbstractFamilyJwkFactory<RSAPublicKey, RsaPubl
     @Override
     protected RsaPublicJwk createJwkFromKey(JwkContext<RSAPublicKey> ctx) {
         RSAPublicKey key = ctx.getKey();
-        ctx.put(DefaultRsaPublicJwk.MODULUS.getId(), encode(key.getModulus()));
-        ctx.put(DefaultRsaPublicJwk.PUBLIC_EXPONENT.getId(), encode(key.getPublicExponent()));
+        ctx.put(DefaultRsaPublicJwk.MODULUS.getId(), DefaultRsaPublicJwk.MODULUS.applyTo(key.getModulus()));
+        ctx.put(DefaultRsaPublicJwk.PUBLIC_EXPONENT.getId(), DefaultRsaPublicJwk.PUBLIC_EXPONENT.applyTo(key.getPublicExponent()));
         return new DefaultRsaPublicJwk(ctx);
     }
 

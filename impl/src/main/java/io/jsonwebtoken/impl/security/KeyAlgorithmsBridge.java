@@ -1,31 +1,16 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.IdRegistry;
-import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.DecryptionKeyRequest;
-import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyRequest;
-import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.PasswordKey;
-import io.jsonwebtoken.security.SecurityException;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.KeyAlgorithms implementation
 public final class KeyAlgorithmsBridge {
@@ -85,6 +70,7 @@ public final class KeyAlgorithmsBridge {
         return instance;
     }
 
+    /*
     private static KeyAlgorithm<PasswordKey, PasswordKey> lean(final Pbes2HsAkwAlgorithm alg) {
 
         // ensure we use the same key factory over and over so that time spent acquiring one is not repeated:
@@ -246,4 +232,5 @@ public final class KeyAlgorithmsBridge {
             this.lnY = Math.log((double) y);
         }
     }
+     */
 }

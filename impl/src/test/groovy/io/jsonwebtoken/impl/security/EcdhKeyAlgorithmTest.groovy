@@ -63,7 +63,7 @@ class EcdhKeyAlgorithmTest {
             fail()
         } catch (InvalidKeyException expected) {
             String msg = expected.getMessage()
-            String expectedMsg = String.format(EcPublicJwkFactory.JWK_CONTAINS_FORMAT_MSG, pubJwk.crv, jwk)
+            String expectedMsg = EcPublicJwkFactory.jwkContainsErrorMessage(pubJwk.crv as String, jwk)
             assertEquals(expectedMsg, msg)
         }
     }

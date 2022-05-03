@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAOtherPrimeInfo;
+import java.util.List;
 import java.util.Set;
 
 class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKey, RsaPublicJwk> implements RsaPrivateJwk {
@@ -20,14 +21,15 @@ class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKe
     static final Field<BigInteger> FIRST_CRT_EXPONENT = Fields.secretBigInt("dp", "First Factor CRT Exponent");
     static final Field<BigInteger> SECOND_CRT_EXPONENT = Fields.secretBigInt("dq", "Second Factor CRT Exponent");
     static final Field<BigInteger> FIRST_CRT_COEFFICIENT = Fields.secretBigInt("qi", "First CRT Coefficient");
-    static final Field<RSAOtherPrimeInfo> OTHER_PRIMES_INFO = Fields.builder(RSAOtherPrimeInfo.class).setSecret(true)
-        .setId("oth").setName("Other Primes Info")
-        .setConverter(new RsaPrivateJwkFactory.RSAOtherPrimeInfoConverter())
-        .build();
+    static final Field<List<RSAOtherPrimeInfo>> OTHER_PRIMES_INFO =
+            Fields.builder(RSAOtherPrimeInfo.class).setSecret(true)
+                    .setId("oth").setName("Other Primes Info")
+                    .setConverter(RSAOtherPrimeInfoConverter.INSTANCE).list()
+                    .build();
 
     static final Set<Field<?>> FIELDS = Collections.concat(DefaultRsaPublicJwk.FIELDS,
-        PRIVATE_EXPONENT, FIRST_PRIME, SECOND_PRIME, FIRST_CRT_EXPONENT,
-        SECOND_CRT_EXPONENT, FIRST_CRT_COEFFICIENT, OTHER_PRIMES_INFO
+            PRIVATE_EXPONENT, FIRST_PRIME, SECOND_PRIME, FIRST_CRT_EXPONENT,
+            SECOND_CRT_EXPONENT, FIRST_CRT_COEFFICIENT, OTHER_PRIMES_INFO
     );
 
     DefaultRsaPrivateJwk(JwkContext<RSAPrivateKey> ctx, RsaPublicJwk pubJwk) {

@@ -1,22 +1,19 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.Converters;
-import io.jsonwebtoken.io.Encoders;
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyException;
 
-import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
 
 abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> implements FamilyJwkFactory<K, J> {
 
-    protected static String encode(BigInteger bigInt) {
-        byte[] unsigned = Converters.BIGINT_UBYTES.applyTo(bigInt);
-        return Encoders.BASE64URL.encode(unsigned);
+    protected static <T> void put(JwkContext<?> ctx, Field<T> field, T value) {
+        ctx.put(field.getId(), field.applyTo(value));
     }
 
     private final String ktyValue;

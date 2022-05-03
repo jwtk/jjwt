@@ -275,7 +275,7 @@ class JwksTest {
                 Jwks.builder().setKey(badPubKey).build()
             } catch (InvalidKeyException ike) {
                 String curveId = jwk.get('crv')
-                String msg = String.format(EcPublicJwkFactory.KEY_CONTAINS_FORMAT_MSG, curveId, curveId)
+                String msg = EcPublicJwkFactory.keyContainsErrorMessage(curveId)
                 assertEquals msg, ike.getMessage()
             }
 
@@ -287,7 +287,7 @@ class JwksTest {
                 try {
                     Jwks.builder().putAll(modified).build()
                 } catch (InvalidKeyException ike) {
-                    String expected = String.format(EcPublicJwkFactory.JWK_CONTAINS_FORMAT_MSG, jwk.get('crv'), modified)
+                    String expected = EcPublicJwkFactory.jwkContainsErrorMessage(jwk.crv as String, modified)
                     assertEquals(expected, ike.getMessage())
                 }
             }
@@ -297,7 +297,7 @@ class JwksTest {
                 try {
                     Jwks.builder().putAll(modified).build()
                 } catch (InvalidKeyException ike) {
-                    String expected = String.format(EcPublicJwkFactory.JWK_CONTAINS_FORMAT_MSG, jwk.get('crv'), modified)
+                    String expected = EcPublicJwkFactory.jwkContainsErrorMessage(jwk.crv as String, modified)
                     assertEquals(expected, ike.getMessage())
                 }
             }

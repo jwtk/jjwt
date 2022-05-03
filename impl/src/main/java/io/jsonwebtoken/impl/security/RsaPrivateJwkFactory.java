@@ -4,12 +4,10 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.RsaPrivateJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -27,9 +25,7 @@ import java.security.spec.RSAOtherPrimeInfo;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
@@ -42,7 +38,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
     );
 
     static final Converter<List<RSAOtherPrimeInfo>, Object> RSA_OTHER_PRIMES_CONVERTER =
-        Converters.forList(new RSAOtherPrimeInfoConverter());
+        Converters.forList(RSAOtherPrimeInfoConverter.INSTANCE);
 
     private static final String PUBKEY_ERR_MSG = "JwkContext publicKey must be an " + RSAPublicKey.class.getName() + " instance.";
 
@@ -83,7 +79,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                 try {
                     return (RSAPublicKey) kf.generatePublic(spec);
                 } catch (Exception e) {
-                    String msg = "Unable to derive RSAPublicKey from RSAPrivateKey {" + ctx + "}.";
+                    String msg = "Unable to derive RSAPublicKey from RSAPrivateKey " + ctx +
+                            ". Cause: " + e.getMessage();
                     throw new UnsupportedKeyException(msg);
                 }
             }
@@ -109,28 +106,27 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
 
-        ctx.put(DefaultRsaPrivateJwk.PRIVATE_EXPONENT.getId(), encode(key.getPrivateExponent()));
+        put(ctx, DefaultRsaPrivateJwk.PRIVATE_EXPONENT, key.getPrivateExponent());
 
         if (key instanceof RSAPrivateCrtKey) {
             RSAPrivateCrtKey ckey = (RSAPrivateCrtKey) key;
             //noinspection DuplicatedCode
-            ctx.put(DefaultRsaPrivateJwk.FIRST_PRIME.getId(), encode(ckey.getPrimeP()));
-            ctx.put(DefaultRsaPrivateJwk.SECOND_PRIME.getId(), encode(ckey.getPrimeQ()));
-            ctx.put(DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT.getId(), encode(ckey.getPrimeExponentP()));
-            ctx.put(DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT.getId(), encode(ckey.getPrimeExponentQ()));
-            ctx.put(DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT.getId(), encode(ckey.getCrtCoefficient()));
+            put(ctx, DefaultRsaPrivateJwk.FIRST_PRIME, ckey.getPrimeP());
+            put(ctx, DefaultRsaPrivateJwk.SECOND_PRIME, ckey.getPrimeQ());
+            put(ctx, DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, ckey.getPrimeExponentP());
+            put(ctx, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT, ckey.getPrimeExponentQ());
+            put(ctx, DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT, ckey.getCrtCoefficient());
         } else if (key instanceof RSAMultiPrimePrivateCrtKey) {
             RSAMultiPrimePrivateCrtKey ckey = (RSAMultiPrimePrivateCrtKey) key;
             //noinspection DuplicatedCode
-            ctx.put(DefaultRsaPrivateJwk.FIRST_PRIME.getId(), encode(ckey.getPrimeP()));
-            ctx.put(DefaultRsaPrivateJwk.SECOND_PRIME.getId(), encode(ckey.getPrimeQ()));
-            ctx.put(DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT.getId(), encode(ckey.getPrimeExponentP()));
-            ctx.put(DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT.getId(), encode(ckey.getPrimeExponentQ()));
-            ctx.put(DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT.getId(), encode(ckey.getCrtCoefficient()));
+            put(ctx, DefaultRsaPrivateJwk.FIRST_PRIME, ckey.getPrimeP());
+            put(ctx, DefaultRsaPrivateJwk.SECOND_PRIME, ckey.getPrimeQ());
+            put(ctx, DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, ckey.getPrimeExponentP());
+            put(ctx, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT, ckey.getPrimeExponentQ());
+            put(ctx, DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT, ckey.getCrtCoefficient());
             List<RSAOtherPrimeInfo> infos = Arrays.asList(ckey.getOtherPrimeInfo());
             if (!Collections.isEmpty(infos)) {
-                Object val = RSA_OTHER_PRIMES_CONVERTER.applyTo(infos);
-                ctx.put(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId(), val);
+                put(ctx,DefaultRsaPrivateJwk.OTHER_PRIMES_INFO, infos);
             }
         }
 
@@ -194,63 +190,18 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
             spec = new RSAPrivateKeySpec(modulus, privateExponent);
         }
 
-        final KeySpec keySpec = spec;
-        RSAPrivateKey key = generateKey(ctx, new CheckedFunction<KeyFactory, RSAPrivateKey>() {
-            @Override
-            public RSAPrivateKey apply(KeyFactory kf) throws Exception {
-                return (RSAPrivateKey) kf.generatePrivate(keySpec);
-            }
-        });
+        RSAPrivateKey key = generateFromSpec(ctx, spec);
         ctx.setKey(key);
 
         return new DefaultRsaPrivateJwk(ctx, pubJwk);
     }
 
-    static class RSAOtherPrimeInfoConverter implements Converter<RSAOtherPrimeInfo, Object> {
-
-        static final Field<BigInteger> PRIME_FACTOR = Fields.secretBigInt("r", "Prime Factor");
-        static final Field<BigInteger> FACTOR_CRT_EXPONENT = Fields.secretBigInt("d", "Factor CRT Exponent");
-        static final Field<BigInteger> FACTOR_CRT_COEFFICIENT = Fields.secretBigInt("t", "Factor CRT Coefficient");
-        static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(PRIME_FACTOR, FACTOR_CRT_EXPONENT, FACTOR_CRT_COEFFICIENT);
-
-        @Override
-        public Object applyTo(RSAOtherPrimeInfo info) {
-            Map<String, String> m = new LinkedHashMap<>(3);
-            m.put(PRIME_FACTOR.getId(), encode(info.getPrime()));
-            m.put(FACTOR_CRT_EXPONENT.getId(), encode(info.getExponent()));
-            m.put(FACTOR_CRT_COEFFICIENT.getId(), encode(info.getCrtCoefficient()));
-            return m;
-        }
-
-        @Override
-        public RSAOtherPrimeInfo applyFrom(Object o) {
-            if (o == null) {
-                throw new MalformedKeyException("RSA JWK 'oth' Other Prime Info element cannot be null.");
+    protected RSAPrivateKey generateFromSpec(JwkContext<RSAPrivateKey> ctx, final KeySpec keySpec) {
+        return generateKey(ctx, new CheckedFunction<KeyFactory, RSAPrivateKey>() {
+            @Override
+            public RSAPrivateKey apply(KeyFactory kf) throws Exception {
+                return (RSAPrivateKey) kf.generatePrivate(keySpec);
             }
-            if (!(o instanceof Map)) {
-                String msg = "RSA JWK 'oth' Other Prime Info list must contain map elements of name/value pairs. " +
-                    "Element type found: " + o.getClass().getName();
-                throw new MalformedKeyException(msg);
-            }
-            Map<?, ?> m = (Map<?, ?>) o;
-            if (Collections.isEmpty(m)) {
-                throw new MalformedKeyException("RSA JWK 'oth' Other Prime Info element map cannot be empty.");
-            }
-
-            // Need to add the values to a Context instance to satisfy the API contract of the getRequired* methods
-            // called below.  It's less than ideal, but it works:
-            JwkContext<?> ctx = new DefaultJwkContext<>(FIELDS);
-            for (Map.Entry<?, ?> entry : m.entrySet()) {
-                String name = String.valueOf(entry.getKey());
-                ctx.put(name, entry.getValue());
-            }
-
-            final ValueGetter getter = new DefaultValueGetter(ctx);
-            BigInteger prime = getter.getRequiredBigInt(PRIME_FACTOR.getId(), true);
-            BigInteger primeExponent = getter.getRequiredBigInt(FACTOR_CRT_EXPONENT.getId(), true);
-            BigInteger crtCoefficient = getter.getRequiredBigInt(FACTOR_CRT_COEFFICIENT.getId(), true);
-
-            return new RSAOtherPrimeInfo(prime, primeExponent, crtCoefficient);
-        }
+        });
     }
 }

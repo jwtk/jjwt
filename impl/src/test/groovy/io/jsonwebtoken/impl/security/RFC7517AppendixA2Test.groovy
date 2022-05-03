@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPrivateJwk
@@ -20,7 +21,7 @@ class RFC7517AppendixA2Test {
     }
 
     private static final String rsaEncode(BigInteger i) {
-        return AbstractFamilyJwkFactory.encode(i)
+        return Converters.BIGINT.applyTo(i) as String
     }
 
     private static final List<Map<String, String>> keys = [

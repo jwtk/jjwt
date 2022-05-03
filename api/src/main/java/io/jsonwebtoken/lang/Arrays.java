@@ -31,7 +31,7 @@ public final class Arrays {
     }
 
     public static <T> List<T> asList(T[] a) {
-        return a == null ? Collections.<T>emptyList() : java.util.Arrays.asList(a);
+        return Objects.isEmpty(a) ? Collections.<T>emptyList() : java.util.Arrays.asList(a);
     }
 
     public static int length(byte[] bytes) {
