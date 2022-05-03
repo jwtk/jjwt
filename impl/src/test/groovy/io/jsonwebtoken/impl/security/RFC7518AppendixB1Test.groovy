@@ -73,7 +73,7 @@ class RFC7518AppendixB1Test {
         def request = new DefaultAeadRequest(null, null, P, KEY, A, IV)
         def result = alg.encrypt(request);
 
-        byte[] ciphertext = result.getPayload()
+        byte[] ciphertext = result.getContent()
         byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
@@ -83,7 +83,7 @@ class RFC7518AppendixB1Test {
 
         // now test decryption:
         def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, A, tag, iv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
+        byte[] decryptionResult = alg.decrypt(dreq).getContent()
         assertArrayEquals(P, decryptionResult)
     }
 

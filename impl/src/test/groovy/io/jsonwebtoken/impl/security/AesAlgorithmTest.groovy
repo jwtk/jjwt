@@ -1,12 +1,6 @@
 package io.jsonwebtoken.impl.security
 
-
-import io.jsonwebtoken.security.AeadAlgorithm
-import io.jsonwebtoken.security.AeadRequest
-import io.jsonwebtoken.security.AeadResult
-import io.jsonwebtoken.security.DecryptAeadRequest
-import io.jsonwebtoken.security.PayloadSupplier
-import io.jsonwebtoken.security.SecurityException
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -117,7 +111,7 @@ class AesAlgorithmTest {
         }
 
         @Override
-        PayloadSupplier<byte[]> decrypt(DecryptAeadRequest symmetricAeadDecryptionRequest) {
+        Message decrypt(DecryptAeadRequest symmetricAeadDecryptionRequest) {
             return null
         }
     }

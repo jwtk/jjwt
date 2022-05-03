@@ -139,7 +139,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
             @Override
             public byte[] apply(Signature sig) throws Exception {
                 sig.initSign(request.getKey());
-                sig.update(request.getPayload());
+                sig.update(request.getContent());
                 byte[] signature = sig.sign();
                 return transcodeDERToConcat(signature, signatureByteLength);
             }
@@ -191,7 +191,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
                     }
 
                     sig.initVerify(request.getKey());
-                    sig.update(request.getPayload());
+                    sig.update(request.getContent());
                     return sig.verify(derSignature);
 
                 } catch (Exception e) {

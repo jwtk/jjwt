@@ -26,5 +26,5 @@ public interface AeadAlgorithm extends Identifiable, KeyBuilderSupplier<SecretKe
 
     AeadResult encrypt(AeadRequest request) throws SecurityException;
 
-    PayloadSupplier<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException;
+    Message decrypt(DecryptAeadRequest request) throws SecurityException;
 }

@@ -112,7 +112,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initSign(request.getKey());
-                sig.update(request.getPayload());
+                sig.update(request.getContent());
                 return sig.sign();
             }
         });
@@ -131,7 +131,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initVerify(request.getKey());
-                sig.update(request.getPayload());
+                sig.update(request.getContent());
                 return sig.verify(request.getDigest());
             }
         });

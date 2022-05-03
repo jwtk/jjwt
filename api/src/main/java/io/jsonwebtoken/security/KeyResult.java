@@ -20,5 +20,5 @@ import javax.crypto.SecretKey;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyResult extends PayloadSupplier<byte[]>, KeySupplier<SecretKey> {
+public interface KeyResult extends Message, KeySupplier<SecretKey> {
 }

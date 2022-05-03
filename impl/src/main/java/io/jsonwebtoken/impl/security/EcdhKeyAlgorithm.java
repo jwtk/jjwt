@@ -186,7 +186,7 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),
-            request.getSecureRandom(), derived, header, request.getEncryptionAlgorithm(), request.getPayload());
+            request.getSecureRandom(), derived, header, request.getEncryptionAlgorithm(), request.getContent());
 
         return WRAP_ALG.getDecryptionKey(unwrapReq);
     }

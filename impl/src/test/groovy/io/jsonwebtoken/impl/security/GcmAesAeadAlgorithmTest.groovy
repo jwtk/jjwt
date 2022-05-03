@@ -50,7 +50,7 @@ class GcmAesAeadAlgorithmTest {
 
         def result = alg.encrypt(req)
 
-        byte[] ciphertext = result.getPayload()
+        byte[] ciphertext = result.getContent()
         byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
@@ -60,7 +60,7 @@ class GcmAesAeadAlgorithmTest {
 
         // now test decryption:
         def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, AAD, tag, iv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
+        byte[] decryptionResult = alg.decrypt(dreq).getContent()
         assertArrayEquals(P, decryptionResult)
     }
 

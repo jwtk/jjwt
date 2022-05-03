@@ -73,7 +73,7 @@ class AesGcmKeyAlgorithmTest {
 
         assertArrayEquals resultA.digest, encResult.digest
         assertArrayEquals resultA.initializationVector, encResult.initializationVector
-        assertArrayEquals resultA.payload, encResult.payload
+        assertArrayEquals resultA.getContent(), encResult.getContent()
     }
 
     static void assertAlgorithm(int keyLength) {
@@ -97,7 +97,7 @@ class AesGcmKeyAlgorithmTest {
 
         def result = alg.getEncryptionKey(ereq)
 
-        byte[] encryptedKeyBytes = result.getPayload()
+        byte[] encryptedKeyBytes = result.getContent()
         assertFalse "encryptedKey must be populated", Arrays.length(encryptedKeyBytes) == 0
 
         def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(null, null, kek, header, enc, encryptedKeyBytes))
@@ -132,7 +132,7 @@ class AesGcmKeyAlgorithmTest {
 
         header.put(headerName, value) //null value will remove it
 
-        byte[] encryptedKeyBytes = result.getPayload()
+        byte[] encryptedKeyBytes = result.getContent()
 
         try {
             alg.getDecryptionKey(new DefaultDecryptionKeyRequest(null, null, kek, header, enc, encryptedKeyBytes))

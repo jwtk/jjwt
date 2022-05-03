@@ -185,7 +185,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),
-            request.getSecureRandom(), derivedKek, header, request.getEncryptionAlgorithm(), request.getPayload());
+            request.getSecureRandom(), derivedKek, header, request.getEncryptionAlgorithm(), request.getContent());
 
         return wrapAlg.getDecryptionKey(unwrapReq);
     }

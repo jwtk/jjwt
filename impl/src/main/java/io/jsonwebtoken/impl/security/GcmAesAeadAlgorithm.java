@@ -8,7 +8,7 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.DecryptAeadRequest;
-import io.jsonwebtoken.security.PayloadSupplier;
+import io.jsonwebtoken.security.Message;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -30,7 +30,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
 
         Assert.notNull(req, "Request cannot be null.");
         final SecretKey key = assertKey(req);
-        final byte[] plaintext = Assert.notEmpty(req.getPayload(), "Request payload (plaintext) cannot be null or empty.");
+        final byte[] plaintext = Assert.notEmpty(req.getContent(), "Request content (plaintext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
@@ -58,11 +58,11 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
     }
 
     @Override
-    public PayloadSupplier<byte[]> decrypt(final DecryptAeadRequest req) throws SecurityException {
+    public Message decrypt(final DecryptAeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
         final SecretKey key = assertKey(req);
-        final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request payload (ciphertext) cannot be null or empty.");
+        final byte[] ciphertext = Assert.notEmpty(req.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
         final byte[] tag = Assert.notEmpty(req.getDigest(), "Decryption request authentication tag cannot be null or empty.");
         final byte[] iv = assertDecryptionIv(req);
@@ -82,6 +82,6 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
             }
         });
 
-        return new DefaultPayloadSupplier<>(plaintext);
+        return new DefaultMessage(plaintext);
     }
 }

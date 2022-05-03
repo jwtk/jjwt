@@ -20,5 +20,5 @@ import javax.crypto.SecretKey;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadRequest extends CryptoRequest<byte[], SecretKey>, AssociatedDataSupplier {
+public interface AeadRequest extends CryptoRequest<SecretKey>, AssociatedDataSupplier {
 }

@@ -29,7 +29,7 @@ class YagCompressionCodec implements CompressionCodec {
     }
 
     @Override
-    byte[] compress(byte[] payload) throws CompressionException {
+    byte[] compress(byte[] content) throws CompressionException {
         return new byte[0]
     }
 

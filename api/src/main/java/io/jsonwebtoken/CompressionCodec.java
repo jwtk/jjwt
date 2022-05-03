@@ -36,12 +36,12 @@ public interface CompressionCodec {
     /**
      * Compresses the specified byte array according to the compression {@link #getAlgorithmName() algorithm}.
      *
-     * @param payload bytes to compress
+     * @param content bytes to compress
      * @return compressed bytes
      * @throws CompressionException if the specified byte array cannot be compressed according to the compression
      *                              {@link #getAlgorithmName() algorithm}.
      */
-    byte[] compress(byte[] payload) throws CompressionException;
+    byte[] compress(byte[] content) throws CompressionException;
 
     /**
      * Decompresses the specified compressed byte array according to the compression

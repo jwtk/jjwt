@@ -26,7 +26,7 @@ abstract class AbstractSignatureAlgorithm<SK extends Key, VK extends Key> extend
     @Override
     public byte[] sign(SignatureRequest<SK> request) throws SecurityException {
         final SK key = Assert.notNull(request.getKey(), "Request key cannot be null.");
-        Assert.notEmpty(request.getPayload(), "Request payload cannot be null or empty.");
+        Assert.notEmpty(request.getContent(), "Request content cannot be null or empty.");
         try {
             validateKey(key, true);
             return doSign(request);
@@ -44,7 +44,7 @@ abstract class AbstractSignatureAlgorithm<SK extends Key, VK extends Key> extend
     @Override
     public boolean verify(VerifySignatureRequest<VK> request) throws SecurityException {
         final VK key = Assert.notNull(request.getKey(), "Request key cannot be null.");
-        Assert.notEmpty(request.getPayload(), "Request payload cannot be null or empty.");
+        Assert.notEmpty(request.getContent(), "Request content cannot be null or empty.");
         Assert.notEmpty(request.getDigest(), "Request signature byte array cannot be null or empty.");
         try {
             validateKey(key, false);

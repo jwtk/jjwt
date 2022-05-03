@@ -145,7 +145,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
         Assert.state(keyResult != null, "KeyAlgorithm must return a KeyResult.");
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
-        byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
+        byte[] encryptedCek = Assert.notNull(keyResult.getContent(), "KeyResult must return an encrypted key byte array, even if empty.");
 
         jweHeader.put(DefaultHeader.ALGORITHM.getId(), alg.getId());
         jweHeader.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
@@ -158,7 +158,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
-        byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");
+        byte[] ciphertext = Assert.notEmpty(encResult.getContent(), "Encryption result must have non-empty ciphertext (result.getData()).");
         byte[] tag = Assert.notEmpty(encResult.getDigest(), "Encryption result must have a non-empty authentication tag.");
 
         String base64UrlEncodedEncryptedCek = base64UrlEncoder.encode(encryptedCek);

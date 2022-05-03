@@ -67,7 +67,7 @@ import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.PayloadSupplier;
+import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.SignatureException;
@@ -498,8 +498,8 @@ public class DefaultJwtParser implements JwtParser {
 
             DecryptAeadRequest decryptRequest =
                     new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
-            PayloadSupplier<byte[]> result = encAlg.decrypt(decryptRequest);
-            bytes = result.getPayload();
+            Message result = encAlg.decrypt(decryptRequest);
+            bytes = result.getContent();
         }
 
         //TODO: Only allow decompression after JWS signature verification:

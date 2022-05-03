@@ -7,7 +7,7 @@ import javax.crypto.SecretKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultAeadRequest extends DefaultCryptoRequest<byte[], SecretKey> implements AeadRequest, InitializationVectorSupplier {
+public class DefaultAeadRequest extends DefaultCryptoRequest<SecretKey> implements AeadRequest, InitializationVectorSupplier {
 
     private final byte[] IV;
 

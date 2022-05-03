@@ -58,7 +58,7 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
     public SecretKey getDecryptionKey(DecryptionKeyRequest<D> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final D kek = Assert.notNull(request.getKey(), "Request key decryption key cannot be null.");
-        final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request encrypted key (request.getPayload()) cannot be null or empty.");
+        final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Request content (encrypted key) cannot be null or empty.");
 
         return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
             @Override

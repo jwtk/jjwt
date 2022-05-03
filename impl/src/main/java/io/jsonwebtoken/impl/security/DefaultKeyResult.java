@@ -8,7 +8,7 @@ import javax.crypto.SecretKey;
 
 public class DefaultKeyResult implements KeyResult {
 
-    private final byte[] payload;
+    private final byte[] encryptedKey;
     private final SecretKey key;
 
     public DefaultKeyResult(SecretKey key) {
@@ -16,13 +16,13 @@ public class DefaultKeyResult implements KeyResult {
     }
 
     public DefaultKeyResult(SecretKey key, byte[] encryptedKey) {
-        this.payload = Assert.notNull(encryptedKey, "encryptedKey cannot be null (but can be empty).");
+        this.encryptedKey = Assert.notNull(encryptedKey, "encryptedKey cannot be null (but can be empty).");
         this.key = Assert.notNull(key, "Key argument cannot be null.");
     }
 
     @Override
-    public byte[] getPayload() {
-        return this.payload;
+    public byte[] getContent() {
+        return this.encryptedKey;
     }
 
     @Override

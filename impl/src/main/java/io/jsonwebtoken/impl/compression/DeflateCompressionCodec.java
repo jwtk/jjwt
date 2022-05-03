@@ -48,8 +48,8 @@ public class DeflateCompressionCodec extends AbstractCompressionCodec {
     }
 
     @Override
-    protected byte[] doCompress(byte[] payload) throws IOException {
-        return writeAndClose(payload, WRAPPER);
+    protected byte[] doCompress(byte[] content) throws IOException {
+        return writeAndClose(content, WRAPPER);
     }
 
     @Override

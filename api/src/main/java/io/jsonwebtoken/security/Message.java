@@ -18,8 +18,8 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface PayloadSupplier<T> {
+public interface Message {
 
-    T getPayload(); //plaintext, ciphertext, or Key to be wrapped
+    byte[] getContent(); //plaintext or ciphertext
 
 }

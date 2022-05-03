@@ -10,7 +10,8 @@ import javax.crypto.spec.SecretKeySpec
 import java.security.Key
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertSame
 
 class DirectKeyAlgorithmTest {
 
@@ -26,7 +27,7 @@ class DirectKeyAlgorithmTest {
         def request = new DefaultKeyRequest(null, null, key, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM)
         def result = alg.getEncryptionKey(request)
         assertSame key, result.getKey()
-        assertEquals 0, Arrays.length(result.getPayload()) //must not have an encrypted key
+        assertEquals 0, Arrays.length(result.getContent()) //must not have an encrypted key
     }
 
     @Test(expected = IllegalArgumentException)

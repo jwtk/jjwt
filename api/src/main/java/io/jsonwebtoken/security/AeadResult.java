@@ -18,5 +18,5 @@ package io.jsonwebtoken.security;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadResult extends PayloadSupplier<byte[]>, DigestSupplier, InitializationVectorSupplier {
+public interface AeadResult extends Message, DigestSupplier, InitializationVectorSupplier {
 }

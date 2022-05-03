@@ -20,5 +20,5 @@ import java.security.Key;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface SignatureRequest<K extends Key> extends CryptoRequest<byte[], K> {
+public interface SignatureRequest<K extends Key> extends CryptoRequest<K> {
 }

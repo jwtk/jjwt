@@ -144,7 +144,7 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
             @Override
             public byte[] apply(Mac mac) throws Exception {
                 mac.init(request.getKey());
-                return mac.doFinal(request.getPayload());
+                return mac.doFinal(request.getContent());
             }
         });
     }

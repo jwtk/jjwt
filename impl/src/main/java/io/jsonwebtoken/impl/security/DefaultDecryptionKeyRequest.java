@@ -10,15 +10,15 @@ import java.security.SecureRandom;
 
 public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyRequest<K> implements DecryptionKeyRequest<K> {
 
-    private final byte[] payload;
+    private final byte[] encryptedCek;
 
-    public DefaultDecryptionKeyRequest(Provider provider, SecureRandom secureRandom, K key, JweHeader header, AeadAlgorithm encryptionAlgorithm, byte[] payload) {
+    public DefaultDecryptionKeyRequest(Provider provider, SecureRandom secureRandom, K key, JweHeader header, AeadAlgorithm encryptionAlgorithm, byte[] encryptedCek) {
         super(provider, secureRandom, key, header, encryptionAlgorithm);
-        this.payload = payload;
+        this.encryptedCek = encryptedCek;
     }
 
     @Override
-    public byte[] getPayload() {
-        return this.payload;
+    public byte[] getContent() {
+        return this.encryptedCek;
     }
 }

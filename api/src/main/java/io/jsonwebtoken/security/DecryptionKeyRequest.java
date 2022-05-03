@@ -20,5 +20,5 @@ import java.security.Key;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface DecryptionKeyRequest<K extends Key> extends KeyRequest<K>, PayloadSupplier<byte[]> {
+public interface DecryptionKeyRequest<K extends Key> extends KeyRequest<K>, Message {
 }

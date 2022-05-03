@@ -65,7 +65,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
     public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request);
-        final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request payload (ciphertext) cannot be null or empty.");
+        final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
         final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final ValueGetter getter = new DefaultValueGetter(header);
         final byte[] tag = getter.getRequiredBytes("tag", this.tagBitLength / Byte.SIZE);
