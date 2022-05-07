@@ -43,6 +43,10 @@ abstract class CryptoAlgorithm implements Identifiable {
         this.provider = provider;
     }
 
+    protected Provider getProvider() {
+        return this.provider;
+    }
+
     SecureRandom ensureSecureRandom(SecurityRequest request) {
         SecureRandom random = request != null ? request.getSecureRandom() : null;
         return random != null ? random : Randoms.secureRandom();

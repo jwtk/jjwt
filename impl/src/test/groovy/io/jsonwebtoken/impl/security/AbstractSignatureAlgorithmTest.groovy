@@ -7,16 +7,19 @@ import io.jsonwebtoken.security.VerifySignatureRequest
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
-import java.security.*
+import java.security.Key
+import java.security.Provider
+import java.security.Security
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertSame
+import static org.junit.Assert.assertTrue
 
 class AbstractSignatureAlgorithmTest {
 
     @Test
     void testSignAndVerifyWithExplicitProvider() {
         Provider provider = Security.getProvider('BC')
-        KeyPair pair = SignatureAlgorithms.RS256.generateKeyPair()
+        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
         byte[] signature = SignatureAlgorithms.RS256.sign(new DefaultSignatureRequest<Key>(provider, null, data, pair.getPrivate()))
         assertTrue SignatureAlgorithms.RS256.verify(new DefaultVerifySignatureRequest(provider, null, data, pair.getPublic(), signature))
@@ -24,7 +27,7 @@ class AbstractSignatureAlgorithmTest {
 
     @Test
     void testSignFailsWithAnExternalException() {
-        KeyPair pair = SignatureAlgorithms.RS256.generateKeyPair()
+        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSignatureAlgorithm() {
             @Override
@@ -43,7 +46,7 @@ class AbstractSignatureAlgorithmTest {
 
     @Test
     void testVerifyFailsWithExternalException() {
-        KeyPair pair = SignatureAlgorithms.RS256.generateKeyPair()
+        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSignatureAlgorithm() {
             @Override

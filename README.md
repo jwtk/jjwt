@@ -406,7 +406,7 @@ import java.security.Key;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
-Key key = SignatureAlgorithms.HS256.generateKey();
+SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build();
 
 String jws = Jwts.builder().setSubject("Joe").signWith(key).compact();
 ```
@@ -624,21 +624,28 @@ JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all requir
 #### Creating Safe Keys
 
 If you don't want to think about bit length requirements or just want to make your life easier, JJWT has
-provided the `io.jsonwebtoken.security.Keys` utility class that can generate sufficiently secure keys for any given
+provided convenient builder classes that can generate sufficiently secure keys for any given
 JWT signature algorithm you might want to use.
 
 <a name="jws-key-create-secret"></a>
 ##### Secret Keys
 
-If you want to generate a sufficiently strong `SecretKey` for use with the JWT HMAC-SHA algorithms, use the 
-`Keys.secretKeyFor(SignatureAlgorithm)` helper method:
+If you want to generate a sufficiently strong `SecretKey` for use with the JWT HMAC-SHA algorithms, use the respective 
+algorithm's `keyBuilder()` method:
 
 ```java
-SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256); //or HS384 or HS512
+SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build(); //or HS384.keyBuilder() or HS512.keyBuilder()
 ```
 
-Under the hood, JJWT uses the JCA provider's `KeyGenerator` to create a secure-random key with the correct minimum
-length for the given algorithm.
+Under the hood, JJWT uses the JCA default provider's `KeyGenerator` to create a secure-random key with the correct 
+minimum length for the given algorithm.
+
+If you want to specify a specific JCA `Provider` or `SecureRandom` to use during key generation, you may specify those
+as builder arguments. For example:
+
+```java
+SecretKey key = SignatureAlgorithms.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
+```
 
 If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
 
@@ -654,14 +661,20 @@ further encrypt it, etc, before saving to disk (for example).
 ##### Asymmetric Keys
 
 If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key pairs for use with JWT ECDSA or RSA
-algorithms, use the `Keys.keyPairFor(SignatureAlgorithm)` helper method:
+algorithms, use an algorithm's respective `keyPairBuilder()` method:
 
 ```java
-KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
+KeyPair keyPair = SignatureAlgorithms.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
 ```
 
-You use the private key (`keyPair.getPrivate()`) to create a JWS and the public key (`keyPair.getPublic()`) to 
-parse/verify a JWS.
+The `keyPair` instance returned is a `io.jsonwebtoken.security.KeyPair`, which is essentially the same thing
+as the JDK's `java.security.KeyPair` class, except it provides generics type-safety, for example, 
+`KeyPair<ECPublicKey, ECPrivateKey>` or `KeyPair<RSAPublicKey, RSAPrivateKey>`.  If you want to convert this type-safe
+instance to the standard JDK type-erased instance, just call `keyPair.toJdkKeyPair()` and you'll get a
+`java.security.KeyPair` as expected.
+
+Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
+public key (`keyPair.getPublic()`) to parse/verify a JWS.
 
 **NOTE: The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider 
 (like BouncyCastle) in the runtime classpath.**  If you are using JDK 10 or earlier and you want to use them, see 

@@ -68,8 +68,8 @@ public final class Keys {
             "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
             "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
             "size >= 256 bits (the key size must be greater than or equal to the hash " +
-            "output size).  Consider using the SignatureAlgorithms.HS256.generateKey() method (or HS384.generateKey() " +
-            "or HS512.generateKey()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
+            "output size).  Consider using the SignatureAlgorithms.HS256.keyBuilder() method (or HS384.keyBuilder() " +
+            "or HS512.keyBuilder()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
             "algorithm.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
         throw new WeakKeyException(msg);
     }
@@ -140,18 +140,20 @@ public final class Keys {
      * <p><b>Deprecation Notice</b></p>
      *
      * <p>As of JJWT JJWT_RELEASE_VERSION, asymmetric key algorithm instances can generate KeyPairs of suitable strength
-     * for that specific algorithm by calling their {@code generateKeyPair()} method directly. For example:</p>
+     * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
      *
      * <pre><code>
-     * {@link SignatureAlgorithms#RS256}.generateKeyPair();
-     * {@link SignatureAlgorithms#RS384}.generateKeyPair();
-     * {@link SignatureAlgorithms#RS256}.generateKeyPair();
+     * {@link SignatureAlgorithms#RS256}.keyPairBuilder().build();
+     * {@link SignatureAlgorithms#RS384}.keyPairBuilder().build();
+     * {@link SignatureAlgorithms#RS256}.keyPairBuilder().build();
      * ... etc ...
-     * {@link SignatureAlgorithms#ES512}.generateKeyPair();
+     * {@link SignatureAlgorithms#ES512}.keyPairBuilder().build();
      * </code></pre>
      *
-     * <p>Call those methods as needed instead of this {@code keyPairFor} helper method.  This helper method will be
-     * removed before the 1.0 final release.</p>
+     * <p>Call those methods as needed instead of this {@code keyPairFor} helper method - the returned
+     * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
+     * desired, whereas this {@code keyPairFor} method does not. Consequently this helper method will be removed
+     * before the 1.0 release.</p>
      *
      * <p><b>Previous Documentation</b></p>
      *
@@ -225,7 +227,7 @@ public final class Keys {
      * @return a new {@link KeyPair} suitable for use with the specified asymmetric algorithm.
      * @throws IllegalArgumentException if {@code alg} is not an asymmetric algorithm
      * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link AsymmetricKeySignatureAlgorithm} instance's
-     * {@link AsymmetricKeySignatureAlgorithm#generateKeyPair() generateKeyPair()} method directly.
+     * {@link AsymmetricKeySignatureAlgorithm#keyPairBuilder() keyPairBuilder()} method directly.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -237,7 +239,7 @@ public final class Keys {
             throw new IllegalArgumentException(msg);
         }
         AsymmetricKeySignatureAlgorithm<?, ?> asalg = ((AsymmetricKeySignatureAlgorithm<?, ?>) salg);
-        return asalg.generateKeyPair();
+        return asalg.keyPairBuilder().build().toJdkKeyPair();
     }
 
     /**

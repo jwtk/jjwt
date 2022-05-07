@@ -6,7 +6,6 @@ import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
-import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -17,14 +16,14 @@ import static org.junit.Assert.*
 class DefaultRsaSignatureAlgorithmTest {
 
     @Test
-    void testGenerateKeyPair() {
+    void testKeyPairBuilder() {
         SignatureAlgorithms.values().findAll({it.id.startsWith("RS") || it.id.startsWith("PS")}).each {
-            KeyPair pair = it.generateKeyPair()
+            def pair = it.keyPairBuilder().build()
             assertNotNull pair.public
             assertTrue pair.public instanceof RSAPublicKey
-            assertEquals it.preferredKeyLength, pair.public.modulus.bitLength()
+            assertEquals it.preferredKeyBitLength, pair.public.modulus.bitLength()
             assertTrue pair.private instanceof RSAPrivateKey
-            assertEquals it.preferredKeyLength, pair.private.modulus.bitLength()
+            assertEquals it.preferredKeyBitLength, pair.private.modulus.bitLength()
         }
     }
 

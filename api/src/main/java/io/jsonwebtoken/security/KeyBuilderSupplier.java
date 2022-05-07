@@ -15,19 +15,25 @@
  */
 package io.jsonwebtoken.security;
 
-import javax.crypto.SecretKey;
+import java.security.Key;
 
 /**
+ * Interface implemented by components that support building/creating new {@link Key}s suitable for use with
+ * their associated cryptographic algorithm implementation.
+ *
+ * @param <K> type of {@link Key} created by the builder
+ * @param <B> type of builder to create each time {@link #keyBuilder()} is called.
+ * @see #keyBuilder()
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyBuilderSupplier<K extends SecretKey, B extends KeyBuilder<K, B>> {
+public interface KeyBuilderSupplier<K extends Key, B extends KeyBuilder<K, B>> {
 
     /**
      * Returns a new {@link KeyBuilder} instance that will produce new secure-random keys with a length sufficient
-     * to be used by the associated algorithm.
+     * to be used by the component's associated cryptographic algorithm.
      *
      * @return a new {@link KeyBuilder} instance that will produce new secure-random keys with a length sufficient
-     * to be used by the associated algorithm.
+     * to be used by the component's associated cryptographic algorithm.
      */
     B keyBuilder();
 }

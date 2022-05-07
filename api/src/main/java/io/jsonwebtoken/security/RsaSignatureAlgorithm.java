@@ -22,5 +22,6 @@ import java.security.interfaces.RSAKey;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface RsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK extends RSAKey & PublicKey> extends AsymmetricKeySignatureAlgorithm<SK, VK> {
+public interface RsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK extends RSAKey & PublicKey>
+        extends AsymmetricKeySignatureAlgorithm<SK, VK> {
 }

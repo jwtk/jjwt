@@ -88,7 +88,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void testSignWithInvalidKeyFieldLength() {
-        def keypair = SignatureAlgorithms.ES256.generateKeyPair()
+        def keypair = SignatureAlgorithms.ES256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def data = "foo".getBytes(StandardCharsets.UTF_8)
         def req = new DefaultSignatureRequest(null, null, data, keypair.private)
         try {
@@ -122,7 +122,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void testVerifyWithPrivateKey() {
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
         algs().each {
-            KeyPair pair = it.generateKeyPair()
+            def pair = it.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
             def key = pair.getPrivate()
             def signRequest = new DefaultSignatureRequest(null, null, data, key)
             byte[] signature = it.sign(signRequest)
@@ -273,7 +273,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void verifySwarmTest() {
         algs().each { alg ->
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-            KeyPair keypair = alg.generateKeyPair()
+            def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
             assertNotNull keypair
             assertTrue keypair.getPublic() instanceof ECPublicKey
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
@@ -434,7 +434,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void legacySignatureCompatDefaultTest() {
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = SignatureAlgorithms.ES512
-        def keypair = alg.generateKeyPair()
+        def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def signature = Signature.getInstance(alg.jcaName)
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         signature.initSign(keypair.private)
@@ -461,7 +461,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
             def alg = SignatureAlgorithms.ES512
-            def keypair = alg.generateKeyPair()
+            def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
             def signature = Signature.getInstance(alg.jcaName)
             def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
             signature.initSign(keypair.private)
@@ -479,7 +479,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         byte[] forgedSig = new byte[64]
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = SignatureAlgorithms.ES256
-        def keypair = alg.generateKeyPair()
+        def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, forgedSig)
         assertFalse alg.verify(request)
@@ -495,7 +495,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = SignatureAlgorithms.ES256
-        def keypair = alg.generateKeyPair()
+        def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, sig)
         assertFalse alg.verify(request)
@@ -511,7 +511,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = SignatureAlgorithms.ES256
-        def keypair = alg.generateKeyPair()
+        def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, sig)
         assertFalse alg.verify(request)
@@ -522,7 +522,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
         def alg = SignatureAlgorithms.ES256
-        def keypair = alg.generateKeyPair()
+        def keypair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def invalidSignature = Decoders.BASE64URL.decode(invalidEncodedSignature)
         def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, invalidSignature)

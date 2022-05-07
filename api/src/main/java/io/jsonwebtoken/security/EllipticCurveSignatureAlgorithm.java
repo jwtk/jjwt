@@ -22,5 +22,6 @@ import java.security.interfaces.ECKey;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public interface EllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKey, VK extends ECKey & PublicKey> extends AsymmetricKeySignatureAlgorithm<SK, VK> {
+public interface EllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKey, VK extends ECKey & PublicKey>
+        extends AsymmetricKeySignatureAlgorithm<SK, VK> {
 }

@@ -47,7 +47,7 @@ class KeyPairsTest {
 
     @Test
     void testGetKeyECMismatch() {
-        KeyPair pair = SignatureAlgorithms.RS256.generateKeyPair()
+        KeyPair pair = SignatureAlgorithms.RS256.keyPairBuilder().build().toJdkKeyPair()
         Class clazz = ECPublicKey
         try {
             KeyPairs.getKey(pair, clazz)

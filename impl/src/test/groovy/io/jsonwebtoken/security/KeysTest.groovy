@@ -73,8 +73,8 @@ class KeysTest {
                     "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                     "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                     "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                    "output size).  Consider using the SignatureAlgorithms.HS256.generateKey() method (or " +
-                    "HS384.generateKey() or HS512.generateKey()) to create a key guaranteed to be secure enough " +
+                    "output size).  Consider using the SignatureAlgorithms.HS256.keyBuilder() method (or " +
+                    "HS384.keyBuilder() or HS512.keyBuilder()) to create a key guaranteed to be secure enough " +
                     "for your preferred HMAC-SHA algorithm.  See " +
                     "https://tools.ietf.org/html/rfc7518#section-3.2 for more information." as String, expected.message
         }
@@ -211,20 +211,20 @@ class KeysTest {
 
             if (alg instanceof DefaultRsaSignatureAlgorithm) {
 
-                KeyPair pair = alg.generateKeyPair()
+                def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
                 assertNotNull pair
 
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof RSAPublicKey
-                assertEquals alg.preferredKeyLength, pub.modulus.bitLength()
+                assertEquals alg.preferredKeyBitLength, pub.modulus.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof RSAPrivateKey
-                assertEquals alg.preferredKeyLength, priv.modulus.bitLength()
+                assertEquals alg.preferredKeyBitLength, priv.modulus.bitLength()
 
             } else if (alg instanceof DefaultEllipticCurveSignatureAlgorithm) {
 
-                KeyPair pair = alg.generateKeyPair()
+                def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
                 assertNotNull pair
 
                 int len = alg.orderBitLength

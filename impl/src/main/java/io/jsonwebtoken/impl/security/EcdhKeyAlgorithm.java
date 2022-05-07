@@ -23,7 +23,6 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
@@ -69,14 +68,8 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
     //visible for testing
     protected KeyPair generateKeyPair(final KeyRequest<E> request, final ECParameterSpec spec) {
         Assert.notNull(spec, "request key params cannot be null.");
-        return new JcaTemplate("EC", request.getProvider(), ensureSecureRandom(request))
-            .execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
-                @Override
-                public KeyPair apply(KeyPairGenerator keyPairGenerator) throws Exception {
-                    keyPairGenerator.initialize(spec, ensureSecureRandom(request));
-                    return keyPairGenerator.generateKeyPair();
-                }
-            });
+        JcaTemplate template = new JcaTemplate("EC", getProvider(request), ensureSecureRandom(request));
+        return template.generateKeyPair(spec);
     }
 
     protected byte[] generateZ(final KeyRequest<?> request, final PublicKey pub, final PrivateKey priv) {

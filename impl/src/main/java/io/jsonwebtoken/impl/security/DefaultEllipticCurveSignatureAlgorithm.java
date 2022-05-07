@@ -6,14 +6,13 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.VerifySignatureRequest;
 
 import java.math.BigInteger;
 import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -31,7 +30,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     private static final String DER_ENCODING_SYS_PROPERTY_NAME =
             "io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported";
 
-    private final String curveName;
+    private final ECGenParameterSpec KEY_PAIR_GEN_PARAMS;
 
     private final int orderBitLength;
 
@@ -81,23 +80,17 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     public DefaultEllipticCurveSignatureAlgorithm(int orderBitLength) {
         super("ES" + shaSize(orderBitLength), "SHA" + shaSize(orderBitLength) + "withECDSA");
         Assert.isTrue(isSupportedOrderBitLength(orderBitLength), REQD_ORDER_BIT_LENGTH_MSG);
-        this.curveName = "secp" + orderBitLength + "r1";
+        String curveName = "secp" + orderBitLength + "r1";
+        this.KEY_PAIR_GEN_PARAMS = new ECGenParameterSpec(curveName);
         this.orderBitLength = orderBitLength;
         this.sigFieldByteLength = fieldByteLength(this.orderBitLength);
         this.signatureByteLength = this.sigFieldByteLength * 2; // R bytes + S bytes = concat signature bytes
     }
 
     @Override
-    public KeyPair generateKeyPair() {
-        final ECGenParameterSpec spec = new ECGenParameterSpec(this.curveName);
-        JcaTemplate template = new JcaTemplate("EC", null);
-        return template.execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
-            @Override
-            public KeyPair apply(KeyPairGenerator generator) throws Exception {
-                generator.initialize(spec, Randoms.secureRandom());
-                return generator.generateKeyPair();
-            }
-        });
+    public KeyPairBuilder<VK, SK> keyPairBuilder() {
+        return new DefaultKeyPairBuilder<VK, SK>("EC", this.KEY_PAIR_GEN_PARAMS)
+                .setProvider(getProvider()).setRandom(Randoms.secureRandom());
     }
 
     private static void assertKey(Key key, Class<?> type, boolean signing) {
@@ -111,9 +104,9 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     @Override
     protected void validateKey(Key key, boolean signing) {
 
-        assertKey(key, ECKey.class, signing);
         // https://github.com/jwtk/jjwt/issues/68:
-        // Instead of checking for an instance of ECPrivateKey, check for PrivateKey (and ECKey assertion is above):
+        // Instead of checking for an instance of ECPrivateKey, check for ECKey and PrivateKey separately:
+        assertKey(key, ECKey.class, signing);
         Class<?> requiredType = signing ? PrivateKey.class : PublicKey.class;
         assertKey(key, requiredType, signing);
 

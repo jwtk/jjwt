@@ -9,11 +9,13 @@ import io.jsonwebtoken.security.SignatureException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.spec.AlgorithmParameterSpec;
 
 public class JcaTemplate {
 
@@ -22,14 +24,13 @@ public class JcaTemplate {
     private final SecureRandom secureRandom;
 
     JcaTemplate(String jcaName, Provider provider) {
-        this(jcaName, provider, Randoms.secureRandom());
+        this(jcaName, provider, null);
     }
 
     JcaTemplate(String jcaName, Provider provider, SecureRandom secureRandom) {
-        Assert.hasText(jcaName, "jcaName string cannot be null or empty.");
-        this.jcaName = jcaName;
-        this.provider = provider;
-        this.secureRandom = Assert.notNull(secureRandom, "SecureRandom cannot be null.");
+        this.jcaName = Assert.hasText(jcaName, "jcaName string cannot be null or empty.");
+        this.secureRandom = secureRandom != null ? secureRandom : Randoms.secureRandom();
+        this.provider = provider; //may be null, meaning to use the JCA subsystem default provider
     }
 
     public <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws SecurityException {
@@ -51,6 +52,16 @@ public class JcaTemplate {
             @Override
             public KeyPair apply(KeyPairGenerator generator) {
                 generator.initialize(keyBitLength, secureRandom);
+                return generator.generateKeyPair();
+            }
+        });
+    }
+
+    public KeyPair generateKeyPair(final AlgorithmParameterSpec params) {
+        return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
+            @Override
+            public KeyPair apply(KeyPairGenerator generator) throws InvalidAlgorithmParameterException {
+                generator.initialize(params, secureRandom);
                 return generator.generateKeyPair();
             }
         });

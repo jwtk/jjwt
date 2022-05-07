@@ -5,7 +5,6 @@ import io.jsonwebtoken.lang.Builder;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-
 /**
  * A Security-specific {@link Builder} that allows configuration of common JCA API parameters, such as a
  * {@link java.security.Provider} or {@link java.security.SecureRandom}.

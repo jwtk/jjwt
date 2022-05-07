@@ -1,5 +1,20 @@
 ## Release Notes
 
+### JJWT_RELEASE_VERSION
+
+* The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of a new 
+  `io.jsonwebtoken.security.SignatureAlgorithm` interface.  Also, a new `io.jsonwebtoken.security.SignatureAlgorithms` 
+  static helper class enumerates all the standard JWA algorithms as expected, exactly like the old enum.  This change
+  was made because enums are a static concept by design and cannot support custom values: those who wanted to use custom
+  signature algorithms could not do so until now.  The new interface now allows anyone to plug in and support custom
+  algorithms with JJWT as desired.
+
+* Similarly, as the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
+  accepted the now-deprecated `io.jsonwebtoken.SignatureAlgorithm` enum, they have also been deprecated in favor of 
+  calling new `keyBuilder()` or `keyPairBuilder()` methods on `SignatureAlgorithm` instances directly. The builders 
+  allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
+  the old enum-based static utility methods did not.
+
 ### 0.11.5
 
 This patch release adds additional security guards against an ECDSA bug in Java SE versions 15-15.0.6, 17-17.0.2, and 18

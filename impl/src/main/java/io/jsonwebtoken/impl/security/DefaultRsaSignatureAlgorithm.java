@@ -4,13 +4,13 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.CheckedSupplier;
 import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.RsaSignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureRequest;
 import io.jsonwebtoken.security.VerifySignatureRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import java.security.Key;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -23,7 +23,7 @@ import java.security.spec.PSSParameterSpec;
  * @since JJWT_RELEASE_VERSION
  */
 public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK extends RSAKey & PublicKey>
-    extends AbstractSignatureAlgorithm<SK, VK> implements RsaSignatureAlgorithm<SK, VK> {
+        extends AbstractSignatureAlgorithm<SK, VK> implements RsaSignatureAlgorithm<SK, VK> {
 
     private static final String PSS_JCA_NAME = "RSASSA-PSS";
     private static final int MIN_KEY_BIT_LENGTH = 2048;
@@ -34,17 +34,17 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
         return new PSSParameterSpec(ps.getDigestAlgorithm(), "MGF1", ps, saltByteLength, 1);
     }
 
-    private final int preferredKeyLength;
+    private final int preferredKeyBitLength;
 
     private final AlgorithmParameterSpec algorithmParameterSpec;
 
     public DefaultRsaSignatureAlgorithm(String name, String jcaName, int preferredKeyBitLength, AlgorithmParameterSpec algParam) {
         super(name, jcaName);
         if (preferredKeyBitLength < MIN_KEY_BIT_LENGTH) {
-            String msg = "preferredKeyLengthBits must be greater than the JWA mandatory minimum key length of " + MIN_KEY_BIT_LENGTH;
+            String msg = "preferredKeyBitLength must be greater than the JWA mandatory minimum key length of " + MIN_KEY_BIT_LENGTH;
             throw new IllegalArgumentException(msg);
         }
-        this.preferredKeyLength = preferredKeyBitLength;
+        this.preferredKeyBitLength = preferredKeyBitLength;
         this.algorithmParameterSpec = algParam;
     }
 
@@ -64,8 +64,9 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
     }
 
     @Override
-    public KeyPair generateKeyPair() {
-        return new JcaTemplate("RSA", null).generateKeyPair(this.preferredKeyLength);
+    public KeyPairBuilder<VK, SK> keyPairBuilder() {
+        return new DefaultKeyPairBuilder<VK, SK>("RSA", this.preferredKeyBitLength)
+                .setProvider(getProvider()).setRandom(Randoms.secureRandom());
     }
 
     @Override
@@ -73,7 +74,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
 
         if (!(key instanceof RSAKey)) {
             String msg = "RSA " + keyType(signing) + " keys must be an RSAKey.  The specified key is of type: " +
-                key.getClass().getName();
+                    key.getClass().getName();
             throw new InvalidKeyException(msg);
         }
 
@@ -81,7 +82,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
         // Instead of checking for an instance of RSAPrivateKey, check for PrivateKey (RSAKey assertion is above):
         if (signing && !(key instanceof PrivateKey)) {
             String msg = "Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: " +
-                key.getClass().getName();
+                    key.getClass().getName();
             throw new InvalidKeyException(msg);
         }
 
@@ -94,11 +95,11 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
             String section = id.startsWith("PS") ? "3.5" : "3.3";
 
             String msg = "The " + keyType(signing) + " key's size is " + size + " bits which is not secure " +
-                "enough for the " + id + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
-                section + ") states that RSA keys MUST have a size >= " +
-                MIN_KEY_BIT_LENGTH + " bits.  Consider using the SignatureAlgorithms." + id + ".generateKeyPair() " +
-                "method to create a key pair guaranteed to be secure enough for " + id + ".  See " +
-                "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
+                    "enough for the " + id + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
+                    section + ") states that RSA keys MUST have a size >= " +
+                    MIN_KEY_BIT_LENGTH + " bits.  Consider using the SignatureAlgorithms." + id + ".generateKeyPair() " +
+                    "method to create a key pair guaranteed to be secure enough for " + id + ".  See " +
+                    "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
             throw new WeakKeyException(msg);
         }
     }

@@ -667,7 +667,7 @@ class JwtsTest {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
         String jws = withoutSignature + '.' + invalidEncodedSignature
-        def keypair = SignatureAlgorithms.ES256.generateKeyPair()
+        def keypair = SignatureAlgorithms.ES256.keyPairBuilder().build()
         Jwts.parserBuilder().setSigningKey(keypair.public).build().parseClaimsJws(jws)
     }
 

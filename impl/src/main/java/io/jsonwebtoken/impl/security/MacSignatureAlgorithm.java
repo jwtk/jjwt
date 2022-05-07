@@ -127,7 +127,7 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
                 msg += " The JWT " +
                     "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + id + " MUST have a " +
                     "size >= " + minKeyBitLength + " bits (the key size must be greater than or equal to the hash " +
-                    "output size). Consider using the SignatureAlgorithms." + id + ".generateKey() " +
+                    "output size). Consider using the SignatureAlgorithms." + id + ".keyBuilder() " +
                     "method to create a key guaranteed to be secure enough for " + id + ".  See " +
                     "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
             } else { //custom algorithm - just indicate required key length:

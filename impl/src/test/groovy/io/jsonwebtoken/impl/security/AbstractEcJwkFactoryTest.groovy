@@ -8,13 +8,10 @@ import org.junit.Test
 import java.security.KeyFactory
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
-import java.security.spec.ECParameterSpec
-import java.security.spec.ECPoint
-import java.security.spec.ECPublicKeySpec
-import java.security.spec.EllipticCurve
-import java.security.spec.InvalidKeySpecException
+import java.security.spec.*
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 class AbstractEcJwkFactoryTest {
 
@@ -71,7 +68,7 @@ class AbstractEcJwkFactoryTest {
 
     @Test
     void testAddSamePointDoublesIt() {
-        def pair = SignatureAlgorithms.ES256.generateKeyPair();
+        def pair = SignatureAlgorithms.ES256.keyPairBuilder().build()
         def pub = pair.getPublic() as ECPublicKey
 
         def spec = pub.getParams()
@@ -86,7 +83,7 @@ class AbstractEcJwkFactoryTest {
     @Test
     void testDerivePublicFails() {
 
-        def pair = SignatureAlgorithms.ES256.generateKeyPair();
+        def pair = SignatureAlgorithms.ES256.keyPairBuilder().build()
         def priv = pair.getPrivate() as ECPrivateKey
 
         final def context = new DefaultJwkContext(DefaultEcPrivateJwk.FIELDS)
