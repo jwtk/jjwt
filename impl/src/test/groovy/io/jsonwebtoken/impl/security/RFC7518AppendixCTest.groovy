@@ -6,12 +6,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.security.EcPrivateJwk
-import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.KeyRequest
-import io.jsonwebtoken.security.KeyResult
-import io.jsonwebtoken.security.SecurityException
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
@@ -89,7 +84,7 @@ class RFC7518AppendixCTest {
             //ensure keypair reflects required RFC test value:
             @Override
             protected KeyPair generateKeyPair(KeyRequest request, ECParameterSpec spec) {
-                return aliceJwk.toKeyPair()
+                return aliceJwk.toKeyPair().toJavaKeyPair()
             }
 
             @Override

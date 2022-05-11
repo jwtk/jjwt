@@ -7,10 +7,7 @@ import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import java.security.KeyPair
-import java.security.MessageDigest
-import java.security.PrivateKey
-import java.security.PublicKey
+import java.security.*
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
 import java.security.interfaces.ECPublicKey
@@ -23,7 +20,7 @@ import static org.junit.Assert.*
 class JwksTest {
 
     private static final SecretKey SKEY = SignatureAlgorithms.HS256.keyBuilder().build()
-    private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build().toJdkKeyPair()
+    private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build().toJavaKeyPair()
 
     private static String srandom() {
         byte[] random = new byte[16];
@@ -146,6 +143,18 @@ class JwksTest {
         testThumbprint(256)
     }
 
+    @Test
+    void testRandom() {
+        def random = new SecureRandom()
+        def jwk = Jwks.builder().setKey(SKEY).setRandom(random).build()
+        assertSame random, jwk.@context.getRandom()
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testNullRandom() {
+        Jwks.builder().setKey(SKEY).setRandom(null).build()
+    }
+
     static void testThumbprint(int number) {
         def algs = SignatureAlgorithms.values().findAll {it instanceof AsymmetricKeySignatureAlgorithm}
 
@@ -246,8 +255,8 @@ class JwksTest {
 
             // test pair
             privJwk = pub instanceof ECKey ?
-                    Jwks.builder().setKeyPairEc(pair.toJdkKeyPair()).setPublicKeyUse("sig").build() :
-                    Jwks.builder().setKeyPairRsa(pair.toJdkKeyPair()).setPublicKeyUse("sig").build()
+                    Jwks.builder().setKeyPairEc(pair.toJavaKeyPair()).setPublicKeyUse("sig").build() :
+                    Jwks.builder().setKeyPairRsa(pair.toJavaKeyPair()).setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk

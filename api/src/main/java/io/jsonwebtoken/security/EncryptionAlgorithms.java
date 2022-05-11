@@ -21,6 +21,10 @@ import io.jsonwebtoken.lang.Classes;
 import java.util.Collection;
 
 /**
+ * Constant definitions and utility methods for all
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>.
+ *
+ * @see AeadAlgorithm
  * @since JJWT_RELEASE_VERSION
  */
 public final class EncryptionAlgorithms {
@@ -33,6 +37,11 @@ public final class EncryptionAlgorithms {
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
 
+    /**
+     * Returns all JWE-standard AEAD encryption algorithms as an unmodifiable collection.
+     *
+     * @return all JWE-standard AEAD encryption algorithms as an unmodifiable collection.
+     */
     public static Collection<AeadAlgorithm> values() {
         return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);
     }
@@ -40,10 +49,12 @@ public final class EncryptionAlgorithms {
     /**
      * Returns the JWE Encryption Algorithm with the specified
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">{@code enc} algorithm identifier</a> or
-     * {@code null} if an algorithm for the specified {@code id} cannot be found.
+     * {@code null} if a JWE-standard algorithm for the specified {@code id} cannot be found.  If a JWE-standard
+     * instance must be resolved, consider using the {@link #forId(String)} method instead.
      *
      * @param id a JWE standard {@code enc} algorithm identifier
-     * @return the associated Encryption Algorithm instance or {@code null} otherwise.
+     * @return the associated standard Encryption Algorithm instance or {@code null} otherwise.
+     * @see #forId(String)
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">RFC 7518, Section 5.1</a>
      */
     public static AeadAlgorithm findById(String id) {
@@ -51,7 +62,20 @@ public final class EncryptionAlgorithms {
         return Classes.invokeStatic(BRIDGE_CLASS, "findById", ID_ARG_TYPES, id);
     }
 
-    public static AeadAlgorithm forId(String id) {
+    /**
+     * Returns the JWE Encryption Algorithm with the specified
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">{@code enc} algorithm identifier</a> or
+     * throws an {@link IllegalArgumentException} if there is no JWE-standard algorithm for the specified
+     * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link #findById(String)}
+     * method instead.
+     *
+     * @param id a JWE standard {@code enc} algorithm identifier
+     * @return the associated Encryption Algorithm instance.
+     * @throws IllegalArgumentException if there is no JWE-standard algorithm for the specified identifier.
+     * @see #findById(String)
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">RFC 7518, Section 5.1</a>
+     */
+    public static AeadAlgorithm forId(String id) throws IllegalArgumentException {
         Assert.hasText(id, "id cannot be null or empty.");
         return Classes.invokeStatic(BRIDGE_CLASS, "forId", ID_ARG_TYPES, id);
     }
@@ -79,22 +103,31 @@ public final class EncryptionAlgorithms {
 
     /**
      * &quot;AES GCM using 128-bit key&quot; as defined by
-     * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This algorithm requires
-     * a 128 bit (16 byte) key.
+     * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
+     * algorithm requires a 128 bit (16 byte) key.
+     *
+     * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</p>
      */
     public static final AeadAlgorithm A128GCM = forId("A128GCM");
 
     /**
      * &quot;AES GCM using 192-bit key&quot; as defined by
-     * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This algorithm requires
-     * a 192 bit (24 byte) key.
+     * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
+     * algorithm requires a 192 bit (24 byte) key.
+     *
+     * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</p>
      */
     public static final AeadAlgorithm A192GCM = forId("A192GCM");
 
     /**
      * &quot;AES GCM using 256-bit key&quot; as defined by
-     * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This algorithm requires
-     * a 256 bit (32 byte) key.
+     * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
+     * algorithm requires a 256 bit (32 byte) key.
+     *
+     * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</p>
      */
     public static final AeadAlgorithm A256GCM = forId("A256GCM");
 }

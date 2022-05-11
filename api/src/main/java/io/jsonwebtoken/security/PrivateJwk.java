@@ -15,17 +15,44 @@
  */
 package io.jsonwebtoken.security;
 
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
 /**
+ * The JWK parallel of a Java {@link PrivateKey}.
+ *
+ * <p><b>JWK Private Key vs Java {@code PrivateKey} differences</b></p>
+ *
+ * <p>Unlike the Java cryptography APIs, the JWK specification requires all public key <em>and</em> private key
+ * properties to be contained within every private JWK. As such, a {@code PrivateJwk} of course represents
+ * private key fields as its name implies, but it is probably more similar to the Java JCA concept of a
+ * {@link java.security.KeyPair} since it contains everything for both keys.</p>
+ *
+ * <p>Consequently a {@code PrivateJwk} is capable of providing two additional convenience methods:</p>
+ * <ul>
+ *     <li>{@link #toPublicJwk()} - a method to obtain a {@link PublicJwk} instance that contains only the JWK public
+ *     key properties, and</li>
+ *     <li>{@link #toKeyPair()} - a method to obtain both Java {@link PublicKey} and {@link PrivateKey}s in aggregate
+ *     as a {@link KeyPair} instance if desired.</li>
+ * </ul>
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface PrivateJwk<K extends PrivateKey, L extends PublicKey, M extends PublicJwk<L>> extends AsymmetricJwk<K> {
 
+    /**
+     * Returns the private JWK's corresponding {@link PublicJwk}, containing only the key's public properties.
+     *
+     * @return the private JWK's corresponding {@link PublicJwk}, containing only the key's public properties.
+     */
     M toPublicJwk();
 
-    KeyPair toKeyPair();
-
+    /**
+     * Returns the key's corresponding Java {@link PrivateKey} and {@link PublicKey} in aggregate as a
+     * type-safe {@link KeyPair} instance.
+     *
+     * @return the key's corresponding Java {@link PrivateKey} and {@link PublicKey} in aggregate as a
+     * type-safe {@link KeyPair} instance.
+     */
+    KeyPair<L, K> toKeyPair();
 }

@@ -1,6 +1,6 @@
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.UnsupportedJwtException
+
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
@@ -53,7 +53,7 @@ class EncryptionAlgorithmsTest {
         }
     }
 
-    @Test(expected = UnsupportedJwtException)
+    @Test(expected = IllegalArgumentException)
     void testForIdWithInvalidId() {
         //unlike the 'find' paradigm, 'for' requires the value to exist
         EncryptionAlgorithms.forId('invalid')

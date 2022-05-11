@@ -19,9 +19,22 @@ import java.security.Provider;
 import java.security.SecureRandom;
 
 /**
+ * A {@code Request} aggregates various parameters that may be used by a particular cryptographic algorithm. It and
+ * any of its subtypes implemented as a single object submitted to an algorithm effectively reflect the
+ * <a href="https://java-design-patterns.com/patterns/parameter-object/">Parameter Object</a> design pattern.  This
+ * provides for a much cleaner request/result algorithm API instead of polluting the API with an excessive number of
+ * overloaded methods that would exist otherwise.
+ *
+ * <p>The {@code Request} interface specifically allows for JCA {@link Provider} and {@link SecureRandom} instances
+ * to be used during request execution, which allows more flexibility than forcing a single {@code Provider} or
+ * {@code SecureRandom} for all executions. {@code Request} subtypes provide additional parameters as necessary
+ * depending on the type of cryptographic algorithm invoked.</p>
+ *
+ * @see #getProvider()
+ * @see #getSecureRandom()
  * @since JJWT_RELEASE_VERSION
  */
-public interface SecurityRequest {
+public interface Request {
 
     /**
      * Returns the JCA provider that should be used for cryptographic operations during the request or

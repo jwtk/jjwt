@@ -47,7 +47,7 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
     }
 
     protected <T extends Key> T generateKey(final JwkContext<?> ctx, final Class<T> type, final CheckedFunction<KeyFactory, T> fn) {
-        return new JcaTemplate(getId(), ctx.getProvider()).execute(KeyFactory.class, new CheckedFunction<KeyFactory, T>() {
+        return new JcaTemplate(getId(), ctx.getProvider(), ctx.getRandom()).execute(KeyFactory.class, new CheckedFunction<KeyFactory, T>() {
             @Override
             public T apply(KeyFactory instance) {
                 try {

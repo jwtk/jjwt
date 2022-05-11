@@ -16,10 +16,20 @@
 package io.jsonwebtoken.security;
 
 /**
+ * A {@code DigestSupplier} provides access to the result of a cryptographic digest algorithm, such as a
+ * Message Digest, MAC, Signature, or Authentication Tag.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface DigestSupplier {
 
+    /**
+     * Returns a cryptographic digest result, such as a Message Digest, MAC, Signature, or Authentication Tag
+     * depending on the cryptographic algorithm that produced it.
+     *
+     * @return a cryptographic digest result, such as a Message Digest, MAC, Signature, or Authentication Tag
+     * * depending on the cryptographic algorithm that produced it.
+     */
     byte[] getDigest();
 
 }

@@ -6,6 +6,7 @@ import java.net.URI;
 import java.security.Key;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
@@ -58,4 +59,8 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String,Obje
     Provider getProvider();
 
     JwkContext<K> setProvider(Provider provider);
+
+    SecureRandom getRandom();
+
+    JwkContext<K> setRandom(SecureRandom random);
 }

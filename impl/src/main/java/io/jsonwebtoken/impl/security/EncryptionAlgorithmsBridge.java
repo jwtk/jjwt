@@ -1,6 +1,5 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.IdRegistry;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
@@ -37,11 +36,11 @@ public final class EncryptionAlgorithmsBridge {
         return REGISTRY.apply(id);
     }
 
-    public static AeadAlgorithm forId(String id) {
+    public static AeadAlgorithm forId(String id) throws IllegalArgumentException {
         AeadAlgorithm alg = findById(id);
         if (alg == null) {
             String msg = "Unrecognized JWA AeadAlgorithm identifier: " + id;
-            throw new UnsupportedJwtException(msg);
+            throw new IllegalArgumentException(msg);
         }
         return alg;
     }

@@ -86,8 +86,10 @@ public final class Keys {
      * {@link SignatureAlgorithms#HS512}.keyBuilder().build();
      * </code></pre>
      *
-     * <p>Call those methods as needed instead of this {@code secretKeyFor} helper method.  This helper method will be
-     * removed before the 1.0 final release.</p>
+     * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
+     * {@link KeyBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
+     * desired, whereas this {@code secretKeyFor} method does not. Consequently this helper method will be removed
+     * before the 1.0 release.</p>
      *
      * <p><b>Previous Documentation</b></p>
      *
@@ -150,7 +152,7 @@ public final class Keys {
      * {@link SignatureAlgorithms#ES512}.keyPairBuilder().build();
      * </code></pre>
      *
-     * <p>Call those methods as needed instead of this {@code keyPairFor} helper method - the returned
+     * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
      * desired, whereas this {@code keyPairFor} method does not. Consequently this helper method will be removed
      * before the 1.0 release.</p>
@@ -239,7 +241,7 @@ public final class Keys {
             throw new IllegalArgumentException(msg);
         }
         AsymmetricKeySignatureAlgorithm<?, ?> asalg = ((AsymmetricKeySignatureAlgorithm<?, ?>) salg);
-        return asalg.keyPairBuilder().build().toJdkKeyPair();
+        return asalg.keyPairBuilder().build().toJavaKeyPair();
     }
 
     /**

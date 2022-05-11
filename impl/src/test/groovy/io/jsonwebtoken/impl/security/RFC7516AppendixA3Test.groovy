@@ -4,19 +4,15 @@ import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.AeadAlgorithm
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.KeyAlgorithms
-import io.jsonwebtoken.security.SecretJwk
-import io.jsonwebtoken.security.SecretKeyBuilder
-import io.jsonwebtoken.security.SecurityRequest
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertArrayEquals
+import static org.junit.Assert.assertEquals
 
 class RFC7516AppendixA3Test {
 
@@ -108,7 +104,7 @@ class RFC7516AppendixA3Test {
         //ensure that the algorithm reflects the test harness values:
         AeadAlgorithm enc = new HmacAesAeadAlgorithm(128) {
             @Override
-            protected byte[] ensureInitializationVector(SecurityRequest request) {
+            protected byte[] ensureInitializationVector(Request request) {
                 return IV
             }
 

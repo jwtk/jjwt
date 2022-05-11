@@ -18,6 +18,8 @@ package io.jsonwebtoken.security;
 import java.security.PublicKey;
 
 /**
+ * The JWK parallel of a Java {@link PublicKey}.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface PublicJwk<K extends PublicKey> extends AsymmetricJwk<K> {

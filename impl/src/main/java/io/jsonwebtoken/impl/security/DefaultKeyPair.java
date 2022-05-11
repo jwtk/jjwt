@@ -30,7 +30,7 @@ public class DefaultKeyPair<A extends PublicKey, B extends PrivateKey> implement
     }
 
     @Override
-    public java.security.KeyPair toJdkKeyPair() {
+    public java.security.KeyPair toJavaKeyPair() {
         return this.jdkPair;
     }
 }

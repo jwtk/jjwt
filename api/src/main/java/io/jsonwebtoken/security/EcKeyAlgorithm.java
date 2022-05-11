@@ -20,6 +20,10 @@ import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 
 /**
+ * A {@link KeyAlgorithm} that produces JWE Encrypted Keys via Elliptic Curve cryptography.
+ *
+ * @param <E> the type of Elliptic Curve public key used to obtain the AEAD encryption key
+ * @param <D> the type of Elliptic Curve private key used to obtain the AEAD decryption key
  * @since JJWT_RELEASE_VERSION
  */
 public interface EcKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey> extends KeyAlgorithm<E, D> {

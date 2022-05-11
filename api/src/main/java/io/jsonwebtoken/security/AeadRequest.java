@@ -18,6 +18,11 @@ package io.jsonwebtoken.security;
 import javax.crypto.SecretKey;
 
 /**
+ * A request to an {@link AeadAlgorithm} to perform authenticated encryption with a supplied symmetric
+ * {@link SecretKey}, allowing for additional data to be authenticated and integrity-protected.
+ *
+ * @see CryptoRequest
+ * @see AssociatedDataSupplier
  * @since JJWT_RELEASE_VERSION
  */
 public interface AeadRequest extends CryptoRequest<SecretKey>, AssociatedDataSupplier {

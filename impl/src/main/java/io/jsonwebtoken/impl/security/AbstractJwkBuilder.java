@@ -10,6 +10,7 @@ import io.jsonwebtoken.security.SecretJwkBuilder;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.Provider;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,11 +21,11 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @SuppressWarnings("unchecked")
     protected AbstractJwkBuilder(JwkContext<K> jwkContext) {
-        this(jwkContext, (JwkFactory<K, J>)DispatchingJwkFactory.DEFAULT_INSTANCE);
+        this(jwkContext, (JwkFactory<K, J>) DispatchingJwkFactory.DEFAULT_INSTANCE);
     }
 
     // visible for testing
-    protected AbstractJwkBuilder(JwkContext<K> context, JwkFactory<K,J> factory) {
+    protected AbstractJwkBuilder(JwkContext<K> context, JwkFactory<K, J> factory) {
         this.jwkContext = Assert.notNull(context, "JwkContext cannot be null.");
         this.jwkFactory = Assert.notNull(factory, "JwkFactory cannot be null.");
     }
@@ -33,6 +34,13 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     public T setProvider(Provider provider) {
         Assert.notNull(provider, "Provider cannot be null.");
         jwkContext.setProvider(provider);
+        return tthis();
+    }
+
+    @Override
+    public T setRandom(SecureRandom random) {
+        Assert.notNull(random, "SecureRandom cannot be null.");
+        jwkContext.setRandom(random);
         return tthis();
     }
 
@@ -95,7 +103,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     static class DefaultSecretJwkBuilder extends AbstractJwkBuilder<SecretKey, SecretJwk, SecretJwkBuilder>
-        implements SecretJwkBuilder {
+            implements SecretJwkBuilder {
         public DefaultSecretJwkBuilder(JwkContext<?> ctx, SecretKey key) {
             super(new DefaultJwkContext<>(DefaultSecretJwk.FIELDS, ctx, key));
         }

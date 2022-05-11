@@ -20,7 +20,11 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAKey;
 
 /**
+ * A {@link KeyAlgorithm} that produces JWE Encrypted Keys via RSA cryptography.
+ *
+ * @param <E> the type of RSA public key used to obtain the AEAD encryption key
+ * @param <D> the type of RSA private key used to obtain the AEAD decryption key
  * @since JJWT_RELEASE_VERSION
  */
-public interface RsaKeyAlgorithm<EK extends RSAKey & PublicKey, DK extends RSAKey & PrivateKey> extends KeyAlgorithm<EK, DK> {
+public interface RsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAKey & PrivateKey> extends KeyAlgorithm<E, D> {
 }

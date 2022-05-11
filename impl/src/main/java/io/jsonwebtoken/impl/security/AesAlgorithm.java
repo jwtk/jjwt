@@ -10,8 +10,8 @@ import io.jsonwebtoken.security.InitializationVectorSupplier;
 import io.jsonwebtoken.security.KeyBuilderSupplier;
 import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeySupplier;
+import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecretKeyBuilder;
-import io.jsonwebtoken.security.SecurityRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Cipher;
@@ -130,7 +130,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         return assertIvLength(iv);
     }
 
-    protected byte[] ensureInitializationVector(SecurityRequest request) {
+    protected byte[] ensureInitializationVector(Request request) {
         byte[] iv = null;
         if (request instanceof InitializationVectorSupplier) {
             iv = Arrays.clean(((InitializationVectorSupplier) request).getInitializationVector());

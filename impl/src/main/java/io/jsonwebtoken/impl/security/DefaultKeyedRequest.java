@@ -7,7 +7,7 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultKeyedRequest<K extends Key> extends DefaultSecurityRequest implements KeySupplier<K> {
+public class DefaultKeyedRequest<K extends Key> extends DefaultRequest implements KeySupplier<K> {
 
     private final K key;
 

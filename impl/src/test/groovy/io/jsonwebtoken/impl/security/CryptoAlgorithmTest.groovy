@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.SecurityRequest
+import io.jsonwebtoken.security.Request
 import org.junit.Test
 
 import java.security.Provider
@@ -62,7 +62,7 @@ class CryptoAlgorithmTest {
 
         Provider defaultProvider = createMock(Provider)
         Provider requestProvider = createMock(Provider)
-        SecurityRequest request = createMock(SecurityRequest)
+        Request request = createMock(Request)
         alg.setProvider(defaultProvider)
 
         expect(request.getProvider()).andReturn(requestProvider)
@@ -80,7 +80,7 @@ class CryptoAlgorithmTest {
         def alg = new TestCryptoAlgorithm('test', 'test')
 
         Provider defaultProvider = createMock(Provider)
-        SecurityRequest request = createMock(SecurityRequest)
+        Request request = createMock(Request)
         alg.setProvider(defaultProvider)
 
         expect(request.getProvider()).andReturn(null)
@@ -95,7 +95,7 @@ class CryptoAlgorithmTest {
     @Test
     void testMissingRequestAndDefaultProviderReturnsNull() {
         def alg = new TestCryptoAlgorithm('test', 'test')
-        SecurityRequest request = createMock(SecurityRequest)
+        Request request = createMock(Request)
         expect(request.getProvider()).andReturn(null)
         replay request
         assertNull alg.getProvider(request) // null return value means use JCA internal default provider

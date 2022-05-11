@@ -18,6 +18,23 @@ package io.jsonwebtoken.security;
 import java.security.Key;
 
 /**
+ * A {@link KeyRequest} to obtain a decryption key that will be used to decrypt a JWE using an {@link AeadAlgorithm}.
+ * The AEAD algorithm used for decryption is accessible via {@link #getEncryptionAlgorithm()}.
+ *
+ * <p>The key used to perform cryptographic operations, for example a direct shared key, or a
+ * JWE &quot;key decryption key&quot; will be accessible via {@link #getKey()}. This is always required and
+ * never {@code null}.</p>
+ *
+ * <p>Any encrypted key material (what the JWE specification calls the
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-2">JWE Encrypted Key</a>) will
+ * be accessible via {@link #getContent()}. If present, the {@link KeyAlgorithm} will decrypt it to obtain the resulting
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-2">Content Encryption Key (CEK)<a/>.
+ * This may be empty however depending on which {@link KeyAlgorithm} was used during JWE encryption.</p>
+ *
+ * <p>Finally, any public information necessary by the called {@link KeyAlgorithm} to decrypt any
+ * {@code JWE Encrypted Key} (such as an initialization vector, authentication tag, ephemeral key, etc) is expected
+ * to be available in the JWE protected header, accessible via {@link #getHeader()}.</p>
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface DecryptionKeyRequest<K extends Key> extends KeyRequest<K>, Message {

@@ -17,7 +17,7 @@ public class IdRegistry<T extends Identifiable> implements Registry<String, T> {
         Assert.notEmpty(instances, "Collection of Identifiable instances may not be null or empty.");
         Map<String, T> m = new LinkedHashMap<>(instances.size());
         for (T instance : instances) {
-            String id = Assert.hasText(Strings.clean(instance.getId()), "All Identifiable instances within the collection cannot be null or empty.");
+            String id = Assert.hasText(Strings.clean(instance.getId()), "All Identifiable instances within the collection cannot have a null or empty id.");
             m.put(id, instance);
         }
         this.INSTANCES = java.util.Collections.unmodifiableMap(m);

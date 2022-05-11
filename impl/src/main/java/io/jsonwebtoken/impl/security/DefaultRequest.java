@@ -1,16 +1,16 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.security.SecurityRequest;
+import io.jsonwebtoken.security.Request;
 
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultSecurityRequest implements SecurityRequest {
+public class DefaultRequest implements Request {
 
     private final Provider provider;
     private final SecureRandom secureRandom;
 
-    public DefaultSecurityRequest(Provider provider, SecureRandom secureRandom) {
+    public DefaultRequest(Provider provider, SecureRandom secureRandom) {
         this.provider = provider;
         this.secureRandom = secureRandom;
     }

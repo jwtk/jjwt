@@ -9,6 +9,7 @@ import java.net.URI;
 import java.security.Key;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +31,8 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
     private K key;
     private PublicKey publicKey;
     private Provider provider;
+
+    private SecureRandom random;
 
     public DefaultJwkContext() {
         // For the default constructor case, we don't know how it will be used or what values will be populated,
@@ -59,6 +62,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         Assert.isInstanceOf(DefaultJwkContext.class, other, "JwkContext must be a DefaultJwkContext instance.");
         DefaultJwkContext<?> src = (DefaultJwkContext<?>) other;
         this.provider = other.getProvider();
+        this.random = other.getRandom();
         this.values.putAll(src.values);
         this.idiomaticValues.putAll(src.idiomaticValues);
         this.redactedValues.putAll(src.redactedValues);
@@ -215,6 +219,17 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
     @Override
     public JwkContext<K> setProvider(Provider provider) {
         this.provider = provider;
+        return this;
+    }
+
+    @Override
+    public SecureRandom getRandom() {
+        return this.random;
+    }
+
+    @Override
+    public JwkContext<K> setRandom(SecureRandom random) {
+        this.random = random;
         return this;
     }
 }

@@ -275,7 +275,7 @@ class RFC7517AppendixCTest {
             }
 
             @Override
-            protected byte[] ensureInitializationVector(SecurityRequest request) {
+            protected byte[] ensureInitializationVector(Request request) {
                 return RFC_IV
             }
         }

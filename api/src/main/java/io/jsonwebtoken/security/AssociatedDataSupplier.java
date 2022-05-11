@@ -16,10 +16,22 @@
 package io.jsonwebtoken.security;
 
 /**
+ * Provides any &quot;associated data&quot; that must be integrity protected (but not encrypted) when performing
+ * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
+ *
+ * @see #getAssociatedData()
  * @since JJWT_RELEASE_VERSION
  */
 public interface AssociatedDataSupplier {
 
+    /**
+     * Returns any data that must be integrity protected (but not encrypted) when performing
+     * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>, or
+     * {@code null} if no additional data must be integrity protected.
+     *
+     * @return any data that must be integrity protected (but not encrypted) when performing
+     * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>, or
+     * {@code null} if no additional data must be integrity protected.
+     */
     byte[] getAssociatedData();
-
 }
