@@ -18,6 +18,22 @@ package io.jsonwebtoken.security;
 import java.security.interfaces.RSAPublicKey;
 
 /**
+ * JWK representation of an {@link RSAPublicKey} as defined by the JWA (RFC 7518) specification sections on
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.3">Parameters for RSA Keys</a> and
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1">Parameters for RSA Public Keys</a>.
+ *
+ * <p>Note that the various RSA-specific properties are not available as separate dedicated getter methods, as most Java
+ * applications should rarely, if ever, need to access these individual key properties since they typically represent
+ * internal key material and/or implementation details.</p>
+ *
+ * <p>Even so, because they exist and are readable by nature of every JWK being a {@link java.util.Map Map}, the
+ * properties are still accessible in two different ways:</p>
+ * <ul>
+ *     <li>Via the standard {@code Map} {@link #get(Object) get} method using an appropriate JWK parameter id,
+ *     e.g. {@code jwk.get("n")}, {@code jwk.get("e")}, etc.</li>
+ *     <li>Via the various getter methods on the {@link RSAPublicKey} instance returned by {@link #toKey()}.</li>
+ * </ul>
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface RsaPublicJwk extends PublicJwk<RSAPublicKey> {

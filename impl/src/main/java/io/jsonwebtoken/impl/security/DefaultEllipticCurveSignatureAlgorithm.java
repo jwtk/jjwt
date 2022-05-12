@@ -21,7 +21,9 @@ import java.security.spec.ECGenParameterSpec;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
-public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKey, VK extends ECKey & PublicKey> extends AbstractSignatureAlgorithm<SK, VK> implements EllipticCurveSignatureAlgorithm<SK, VK> {
+// @since JJWT_RELEASE_VERSION
+public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey, V extends ECKey & PublicKey>
+        extends AbstractSignatureAlgorithm<S, V> implements EllipticCurveSignatureAlgorithm<S, V> {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 512.";
     private static final String KEY_TYPE_MSG_PATTERN =
@@ -88,8 +90,8 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     }
 
     @Override
-    public KeyPairBuilder<VK, SK> keyPairBuilder() {
-        return new DefaultKeyPairBuilder<VK, SK>("EC", this.KEY_PAIR_GEN_PARAMS)
+    public KeyPairBuilder<V, S> keyPairBuilder() {
+        return new DefaultKeyPairBuilder<V, S>("EC", this.KEY_PAIR_GEN_PARAMS)
                 .setProvider(getProvider()).setRandom(Randoms.secureRandom());
     }
 
@@ -127,7 +129,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     }
 
     @Override
-    protected byte[] doSign(final SignatureRequest<SK> request) {
+    protected byte[] doSign(final SignatureRequest<S> request) {
         return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
@@ -140,7 +142,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKe
     }
 
     @Override
-    protected boolean doVerify(final VerifySignatureRequest<VK> request) {
+    protected boolean doVerify(final VerifySignatureRequest<V> request) {
 
         final ECKey key = request.getKey();
 

@@ -18,7 +18,7 @@ package io.jsonwebtoken.security;
 import java.security.PublicKey;
 
 /**
- * The JWK parallel of a Java {@link PublicKey}.
+ * JWK representation of a {@link PublicKey}.
  *
  * @since JJWT_RELEASE_VERSION
  */

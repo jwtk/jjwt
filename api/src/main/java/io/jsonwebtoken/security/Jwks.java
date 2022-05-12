@@ -18,6 +18,10 @@ package io.jsonwebtoken.security;
 import io.jsonwebtoken.lang.Classes;
 
 /**
+ * Utility methods for creating
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7517">JWKs (JSON Web Keys)</a> with a type-safe builder.
+ *
+ * @see #builder()
  * @since JJWT_RELEASE_VERSION
  */
 public class Jwks {

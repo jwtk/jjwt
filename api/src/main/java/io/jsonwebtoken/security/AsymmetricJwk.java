@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * A JWK that represents an asymmetric (public or private) cryptographic key.
+ * JWK representation of an asymmetric (public or private) cryptographic key.
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -119,7 +119,7 @@ public interface AsymmetricJwk<K extends Key> extends Jwk<K> {
      * previous one.  The key in the first certificate <em>MUST</em> match the public key represented by other
      * members of the JWK.</p>
      *
-     * @return the JWK {@code x5u} value as a type-safe <code>List&lt;{@link X509Certificate}&gt;</code> or
+     * @return the JWK {@code x5c} value as a type-safe <code>List&lt;{@link X509Certificate}&gt;</code> or
      * {@code null} if not present.
      */
     List<X509Certificate> getX509CertificateChain();

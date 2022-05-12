@@ -20,8 +20,13 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAKey;
 
 /**
+ * An {@link AsymmetricKeySignatureAlgorithm} that uses RSA private keys to create signatures, and
+ * RSA public keys to verify signatures.
+ *
+ * @param <S> The type of RSA private key used to create signatures
+ * @param <V> The type of RSA public key used to verify signatures
  * @since JJWT_RELEASE_VERSION
  */
-public interface RsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK extends RSAKey & PublicKey>
-        extends AsymmetricKeySignatureAlgorithm<SK, VK> {
+public interface RsaSignatureAlgorithm<S extends RSAKey & PrivateKey, V extends RSAKey & PublicKey>
+        extends AsymmetricKeySignatureAlgorithm<S, V> {
 }

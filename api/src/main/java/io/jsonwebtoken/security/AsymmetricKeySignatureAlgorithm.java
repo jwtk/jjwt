@@ -19,8 +19,24 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 /**
+ * A {@link SignatureAlgorithm} that works with asymmetric keys. A {@link PrivateKey} is used to create
+ * signatures, and a {@link PublicKey} is used to verify signatures.
+ *
+ * <p><b>Key Pair Generation</b></p>
+ *
+ * <p>{@code AsymmetricKeySignatureAlgorithm} extends {@link KeyPairBuilderSupplier} to enable
+ * {@link KeyPair} generation. Each {@code AsymmetricKeySignatureAlgorithm} instance will return a
+ * {@link KeyPairBuilder} that ensures any created key pairs will have a sufficient length and algorithm parameters
+ * required by that algorithm.  For example:</p>
+ *
+ * <blockquote><pre>
+ * KeyPair pair = anAsymmetricKeySignatureAlgorithm.keyPairBuilder().build();</pre></blockquote>
+ *
+ * <p>The resulting {@code pair} is guaranteed to have the correct algorithm parameters and length/strength necessary
+ * for that exact {@code anAsymmetricKeySignatureAlgorithm} instance.</p>
+ *
  * @since JJWT_RELEASE_VERSION
  */
-public interface AsymmetricKeySignatureAlgorithm<SK extends PrivateKey, VK extends PublicKey>
-        extends SignatureAlgorithm<SK, VK>, KeyPairBuilderSupplier<VK, SK> {
+public interface AsymmetricKeySignatureAlgorithm<S extends PrivateKey, V extends PublicKey>
+        extends SignatureAlgorithm<S, V>, KeyPairBuilderSupplier<V, S> {
 }

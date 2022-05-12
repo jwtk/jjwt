@@ -20,8 +20,13 @@ import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 
 /**
+ * An {@link AsymmetricKeySignatureAlgorithm} that uses Elliptic Curve private keys to create signatures, and
+ * Elliptic Curve public keys to verify signatures.
+ *
+ * @param <S> The type of Elliptic Curve private key used to create signatures
+ * @param <V> The type of Elliptic Curve public key used to verify signatures
  * @since JJWT_RELEASE_VERSION
  */
-public interface EllipticCurveSignatureAlgorithm<SK extends ECKey & PrivateKey, VK extends ECKey & PublicKey>
-        extends AsymmetricKeySignatureAlgorithm<SK, VK> {
+public interface EllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey, V extends ECKey & PublicKey>
+        extends AsymmetricKeySignatureAlgorithm<S, V> {
 }

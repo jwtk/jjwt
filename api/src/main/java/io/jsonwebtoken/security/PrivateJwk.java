@@ -19,7 +19,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 /**
- * The JWK parallel of a Java {@link PrivateKey}.
+ * JWK representation of a {@link PrivateKey}.
  *
  * <p><b>JWK Private Key vs Java {@code PrivateKey} differences</b></p>
  *

@@ -19,6 +19,8 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 
 /**
+ * A {@link PublicJwkBuilder} that creates {@link EcPublicJwk}s.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface EcPublicJwkBuilder extends PublicJwkBuilder<ECPublicKey, ECPrivateKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder, EcPublicJwkBuilder> {

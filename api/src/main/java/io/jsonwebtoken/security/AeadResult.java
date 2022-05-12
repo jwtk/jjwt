@@ -16,8 +16,9 @@
 package io.jsonwebtoken.security;
 
 /**
- * The result of authenticated encryption, providing access to the resulting ciphertext, AAD tag, and initialization
- * vector.  The AAD tag and initialization vector must be supplied with the ciphertext to decrypt.
+ * The result of authenticated encryption, providing access to the resulting {@link #getContent() ciphertext},
+ * {@link #getDigest() AAD tag}, and {@link #getInitializationVector() initialization vector}. The AAD tag and
+ * initialization vector must be supplied with the ciphertext to decrypt.
  *
  * <p><b>AAD Tag</b></p>
  *
@@ -27,7 +28,7 @@ package io.jsonwebtoken.security;
  * <p><b>Initialization Vector</b></p>
  *
  * All JWE-standard AEAD algorithms use a secure-random Initialization Vector for safe ciphertext creation, so
- * {@code AeadAlgorithm} inherits {@link InitializationVectorSupplier} to make the generated IV available after
+ * {@code AeadResult} inherits {@link InitializationVectorSupplier} to make the generated IV available after
  * encryption. This IV must in turn be supplied during decryption.
  *
  * @since JJWT_RELEASE_VERSION

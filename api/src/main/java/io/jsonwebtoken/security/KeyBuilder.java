@@ -10,9 +10,9 @@ import java.security.Key;
  * <p>{@code KeyBuilder}s are provided by components that implement the {@link KeyBuilderSupplier} interface,
  * ensuring the resulting {@link SecretKey}s are compatible with their associated cryptographic algorithm.</p>
  *
- * @param <A> the type of public key found within newly-created {@link KeyPair}s.
- * @param <B> the type of private key found within newly-created {@link KeyPair}s.
- * @see KeyPairBuilderSupplier
+ * @param <K> the type of key to build
+ * @param <B> the type of the builder, for subtype method chaining
+ * @see KeyBuilderSupplier
  * @since JJWT_RELEASE_VERSION
  */
 public interface KeyBuilder<K extends Key, B extends KeyBuilder<K, B>> extends SecurityBuilder<K, B> {

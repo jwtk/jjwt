@@ -22,6 +22,12 @@ import javax.crypto.SecretKey;
 import java.util.Collection;
 
 /**
+ * Constant definitions and utility methods for all
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4">JWA (RFC 7518) Key Management Algorithms</a>.
+ *
+ * @see #values() 
+ * @see #findById(String) 
+ * @see #forId(String) 
  * @since JJWT_RELEASE_VERSION
  */
 @SuppressWarnings("rawtypes")
@@ -34,7 +40,7 @@ public final class KeyAlgorithms {
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeyAlgorithmsBridge";
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
-    private static final Class<?>[] ESTIMATE_ITERATIONS_ARG_TYPES = new Class[]{KeyAlgorithm.class, long.class};
+    //private static final Class<?>[] ESTIMATE_ITERATIONS_ARG_TYPES = new Class[]{KeyAlgorithm.class, long.class};
 
     public static Collection<KeyAlgorithm<?, ?>> values() {
         return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);

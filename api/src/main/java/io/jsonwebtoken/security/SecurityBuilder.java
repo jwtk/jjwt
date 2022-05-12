@@ -6,8 +6,8 @@ import java.security.Provider;
 import java.security.SecureRandom;
 
 /**
- * A Security-specific {@link Builder} that allows configuration of common JCA API parameters, such as a
- * {@link java.security.Provider} or {@link java.security.SecureRandom}.
+ * A Security-specific {@link Builder} that allows configuration of common JCA API parameters that might be used
+ * during instance creation, such as a {@link java.security.Provider} or {@link java.security.SecureRandom}.
  *
  * @param <T> The type of object that will be created each time {@link #build()} is invoked.
  * @see #setProvider(Provider)

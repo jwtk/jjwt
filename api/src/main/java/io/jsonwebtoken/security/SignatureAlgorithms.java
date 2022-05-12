@@ -26,6 +26,9 @@ import java.security.interfaces.RSAKey;
 import java.util.Collection;
 
 /**
+ * Constant definitions and utility methods for all
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3">JWA (RFC 7518) Signature Algorithms</a>.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 @SuppressWarnings({"rawtypes", "JavadocLinkAsPlainText"})
@@ -39,7 +42,7 @@ public final class SignatureAlgorithms {
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] ID_ARG_TYPES = new Class[]{String.class};
 
-    public static Collection<SignatureAlgorithm<?,?>> values() {
+    public static Collection<SignatureAlgorithm<?, ?>> values() {
         return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);
     }
 
@@ -48,7 +51,7 @@ public final class SignatureAlgorithms {
         return Classes.invokeStatic(BRIDGE_CLASS, "findById", ID_ARG_TYPES, id);
     }
 
-    public static SignatureAlgorithm<?,?> forId(String id) {
+    public static SignatureAlgorithm<?, ?> forId(String id) {
         return forId0(id);
     }
 

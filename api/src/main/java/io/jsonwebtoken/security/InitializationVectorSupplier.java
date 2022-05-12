@@ -16,16 +16,21 @@
 package io.jsonwebtoken.security;
 
 /**
+ * An {@code InitializationVectorSupplier} provides access to the secure-random Initialization Vector used during
+ * encryption, which must in turn be presented for use during decryption.  To maintain the security integrity of cryptographic
+ * algorithms, a <em>new</em> secure-random Initialization Vector <em>MUST</em> be generated for every individual
+ * encryption attempt.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface InitializationVectorSupplier {
 
     /**
-     * Returns the secure-random initialization vector used during encryption that must be presented in order
-     * to decrypt.
+     * Returns the secure-random Initialization Vector used during encryption, which must in turn be presented for
+     * use during decryption.
      *
-     * @return the secure-random initialization vector used during encryption that must be presented in order
-     * to decrypt.
+     * @return the secure-random Initialization Vector used during encryption, which must in turn be presented for
+     * use during decryption.
      */
     byte[] getInitializationVector();
 }

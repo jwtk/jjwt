@@ -159,7 +159,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * {@code sign} with {@code verify}, {@code encrypt} with {@code decrypt}, and {@code wrapKey} with
      * {@code unwrapKey} are permitted, but other combinations <em>SHOULD NOT</em> be used.</p>
      *
-     * @return the JWK {@code alg} value or {@code null} if not present.
+     * @return the JWK {@code key_ops} value or {@code null} if not present.
      */
     Set<String> getOperations();
 

@@ -16,6 +16,9 @@
 package io.jsonwebtoken.security;
 
 /**
+ * A {@code KeyException} thrown when encountering a key that is not suitable for the required functionality, or
+ * when attempting to use a Key in an incorrect or prohibited manner.
+ *
  * @since 0.10.0
  */
 public class InvalidKeyException extends KeyException {

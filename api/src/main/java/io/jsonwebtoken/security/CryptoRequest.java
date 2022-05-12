@@ -18,8 +18,9 @@ package io.jsonwebtoken.security;
 import java.security.Key;
 
 /**
- * A request to a cryptographic algorithm that requires a {@link Key}.
+ * A request to a cryptographic algorithm requiring a {@link Key}.
  *
+ * @param <K> they type of key used by the algorithm during the request
  * @since JJWT_RELEASE_VERSION
  */
 public interface CryptoRequest<K extends Key> extends Message, Request, KeySupplier<K> {

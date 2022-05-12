@@ -19,11 +19,9 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-/**
- * @since JJWT_RELEASE_VERSION
- */
-public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK extends RSAKey & PublicKey>
-        extends AbstractSignatureAlgorithm<SK, VK> implements RsaSignatureAlgorithm<SK, VK> {
+// @since JJWT_RELEASE_VERSION
+public class DefaultRsaSignatureAlgorithm<S extends RSAKey & PrivateKey, V extends RSAKey & PublicKey>
+        extends AbstractSignatureAlgorithm<S, V> implements RsaSignatureAlgorithm<S, V> {
 
     private static final String PSS_JCA_NAME = "RSASSA-PSS";
     private static final int MIN_KEY_BIT_LENGTH = 2048;
@@ -64,8 +62,8 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
     }
 
     @Override
-    public KeyPairBuilder<VK, SK> keyPairBuilder() {
-        return new DefaultKeyPairBuilder<VK, SK>("RSA", this.preferredKeyBitLength)
+    public KeyPairBuilder<V, S> keyPairBuilder() {
+        return new DefaultKeyPairBuilder<V, S>("RSA", this.preferredKeyBitLength)
                 .setProvider(getProvider()).setRandom(Randoms.secureRandom());
     }
 
@@ -105,7 +103,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
     }
 
     @Override
-    protected byte[] doSign(final SignatureRequest<SK> request) {
+    protected byte[] doSign(final SignatureRequest<S> request) {
         return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
@@ -120,7 +118,7 @@ public class DefaultRsaSignatureAlgorithm<SK extends RSAKey & PrivateKey, VK ext
     }
 
     @Override
-    protected boolean doVerify(final VerifySignatureRequest<VK> request) throws Exception {
+    protected boolean doVerify(final VerifySignatureRequest<V> request) throws Exception {
         final Key key = request.getKey();
         if (key instanceof PrivateKey) { //legacy support only
             return super.doVerify(request);
