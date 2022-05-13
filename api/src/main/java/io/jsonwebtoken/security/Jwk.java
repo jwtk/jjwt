@@ -25,7 +25,7 @@ import java.util.Set;
  * A JWK is an immutable set of name/value pairs that represent a cryptographic key as defined by
  * <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}
  * interface represents JWK properties accessible for any JWK.  Subtypes will have additional JWK properties
- * specific to different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).</p>
+ * specific to different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
  *
  * <p><b>Immutability</b></p>
  *
@@ -47,8 +47,9 @@ import java.util.Set;
  * <p><b>toString Safety</b></p>
  *
  * <p>JWKs often represent secret or private key data which should never be exposed publicly, nor mistakenly printed
- * via application logs or {@code System.out.println} calls.  As a result, all JJWT JWK {@link #toString()}
- * implementations automatically print redacted values instead actual values for any private or secret fields.</p>
+ * via application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
+ * {@link String#toString() toString()} implementations automatically print redacted values instead actual
+ * values for any private or secret fields.</p>
  *
  * <p>For example, a {@link SecretJwk} will have an internal &quot;{@code k}&quot; member whose value reflects raw
  * key material that should always be kept secret. If {@code aSecretJwk.toString()} is called, the resulting string
@@ -107,7 +108,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * <p>The JWK specification <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">defines</a> the
      * following values:</p>
      *
-     * <table summary="JWK Key Operations">
+     * <table>
      * <caption>JWK Key Operations</caption>
      * <thead>
      * <tr>
@@ -171,7 +172,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * <p>The JWA specification <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.1">defines</a> the
      * following {@code kty} values:</p>
      *
-     * <table summary="JWK Key Types">
+     * <table>
      * <caption>JWK Key Types</caption>
      * <thead>
      * <tr>
@@ -194,6 +195,8 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * </tr>
      * </tbody>
      * </table>
+     *
+     * @return the JWK {@code kty} (Key Type) value.
      */
     String getType();
 

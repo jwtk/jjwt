@@ -16,12 +16,27 @@
 package io.jsonwebtoken;
 
 /**
- * @param <B> payload type
+ * An encrypted JWT, called a &quot;JWE&quot;, per the
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7516">JWE (RFC 7516) Specification</a>.
+ *
+ * @param <B> payload type, either {@link Claims} or {@code byte[]} content.
  * @since JJWT_RELEASE_VERSION
  */
-public interface Jwe<B> extends Jwt<JweHeader,B> {
+public interface Jwe<B> extends Jwt<JweHeader, B> {
 
+    /**
+     * Returns the Initialization Vector used during JWE encryption and decryption.
+     *
+     * @return the Initialization Vector used during JWE encryption and decryption.
+     */
     byte[] getInitializationVector();
 
+    /**
+     * Returns the Additional Authenticated Data authentication Tag used for JWE header
+     * authenticity and integrity verification.
+     *
+     * @return the Additional Authenticated Data authentication Tag used for JWE header
+     * authenticity and integrity verification.
+     */
     byte[] getAadTag();
 }

@@ -4,7 +4,7 @@ import java.security.interfaces.RSAMultiPrimePrivateCrtKey
 import java.security.interfaces.RSAPrivateCrtKey
 import java.security.spec.RSAOtherPrimeInfo
 
-class TestRSAMultiPrimePrivateCrtKey extends TestRSAPrivateKey<RSAPrivateCrtKey> implements RSAMultiPrimePrivateCrtKey {
+class TestRSAMultiPrimePrivateCrtKey extends TestRSAPrivateKey implements RSAMultiPrimePrivateCrtKey {
 
     private final List<RSAOtherPrimeInfo> infos
 

@@ -2,9 +2,9 @@ package io.jsonwebtoken.impl.security
 
 import java.security.interfaces.RSAPrivateKey
 
-class TestRSAPrivateKey<T extends RSAPrivateKey> extends TestRSAKey<T> implements RSAPrivateKey {
+class TestRSAPrivateKey extends TestRSAKey implements RSAPrivateKey {
 
-    TestRSAPrivateKey(T key) {
+    TestRSAPrivateKey(RSAPrivateKey key) {
         super(key)
     }
 

@@ -41,7 +41,9 @@ public interface Header<T extends Header> extends Map<String, Object> {
 
     /**
      * JWT {@code Type} (typ) value: <code>"JWT"</code>
+     * @deprecated since JJWT_RELEASE_VERSION - this constant is never used within the JJWT codebase.
      */
+    @Deprecated
     String JWT_TYPE = "JWT";
 
     /**
@@ -72,6 +74,7 @@ public interface Header<T extends Header> extends Map<String, Object> {
      *
      * @deprecated use {@link #COMPRESSION_ALGORITHM} instead.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 

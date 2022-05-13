@@ -18,6 +18,10 @@ package io.jsonwebtoken.lang;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Utility methods for providing argument and state assertions to reduce repeating these patterns and otherwise
+ * increasing cyclomatic complexity.
+ */
 public final class Assert {
 
     private Assert() {
@@ -216,6 +220,15 @@ public final class Assert {
         notEmpty(array, "[Assertion failed] - this array must not be empty: it must contain at least 1 element");
     }
 
+    /**
+     * Assert that the specified byte array is not null and has at least one byte element.
+     *
+     * @param array the byte array to check
+     * @param msg   the exception message to use if the assertion fails
+     * @return the byte array if the assertion passes
+     * @throws IllegalArgumentException if the byte array is null or empty
+     * @since JJWT_RELEASE_VERSION
+     */
     public static byte[] notEmpty(byte[] array, String msg) {
         if (Objects.isEmpty(array)) {
             throw new IllegalArgumentException(msg);
@@ -223,6 +236,15 @@ public final class Assert {
         return array;
     }
 
+    /**
+     * Assert that the specified character array is not null and has at least one byte element.
+     *
+     * @param chars the character array to check
+     * @param msg   the exception message to use if the assertion fails
+     * @return the character array if the assertion passes
+     * @throws IllegalArgumentException if the character array is null or empty
+     * @since JJWT_RELEASE_VERSION
+     */
     public static char[] notEmpty(char[] chars, String msg) {
         if (Objects.isEmpty(chars)) {
             throw new IllegalArgumentException(msg);
@@ -396,9 +418,9 @@ public final class Assert {
      * Asserts that a specified {@code value} is greater than the given {@code requirement}, throwing
      * an {@link IllegalArgumentException} with the given message if not.
      *
-     * @param value the value to check
+     * @param value       the value to check
      * @param requirement the integer that {@code value} must be greater than
-     * @param msg the message to use for the {@code IllegalArgumentException} if thrown.
+     * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
      * @return {@code value} if greater than the specified {@code requirement}.
      * @since JJWT_RELEASE_VERSION
      */

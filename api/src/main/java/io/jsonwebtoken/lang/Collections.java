@@ -26,23 +26,55 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+/**
+ * Utility methods for working with {@link Collection}s, {@link List}s, {@link Set}s, and {@link Maps}.
+ */
+@SuppressWarnings({"unused", "rawtypes"})
 public final class Collections {
 
     private Collections() {
     } //prevent instantiation
 
+    /**
+     * Returns a type-safe immutable empty {@code List}.
+     *
+     * @param <T> list element type
+     * @return a type-safe immutable empty {@code List}.
+     */
     public static <T> List<T> emptyList() {
         return java.util.Collections.emptyList();
     }
 
+    /**
+     * Returns a type-safe immutable empty {@code Set}.
+     *
+     * @param <T> set element type
+     * @return a type-safe immutable empty {@code Set}.
+     */
+    @SuppressWarnings("unused")
     public static <T> Set<T> emptySet() {
         return java.util.Collections.emptySet();
     }
 
+    /**
+     * Returns a type-safe immutable empty {@code Map}.
+     *
+     * @param <K> map key type
+     * @param <V> map value type
+     * @return a type-safe immutable empty {@code Map}.
+     */
+    @SuppressWarnings("unused")
     public static <K, V> Map<K, V> emptyMap() {
         return java.util.Collections.emptyMap();
     }
 
+    /**
+     * Returns a type-safe immutable {@code List} containing the specified array elements.
+     *
+     * @param elements array elements to include in the list
+     * @param <T>      list element type
+     * @return a type-safe immutable {@code List} containing the specified array elements.
+     */
     @SafeVarargs
     public static <T> List<T> of(T... elements) {
         if (elements == null || elements.length == 0) {
@@ -51,6 +83,13 @@ public final class Collections {
         return java.util.Collections.unmodifiableList(Arrays.asList(elements));
     }
 
+    /**
+     * Returns a type-safe immutable {@code Set} containing the specified array elements.
+     *
+     * @param elements array elements to include in the set
+     * @param <T>      set element type
+     * @return a type-safe immutable {@code Set} containing the specified array elements.
+     */
     @SafeVarargs
     public static <T> Set<T> setOf(T... elements) {
         if (elements == null || elements.length == 0) {
@@ -74,10 +113,26 @@ public final class Collections {
         return m != null ? java.util.Collections.unmodifiableMap(m) : null;
     }
 
+    /**
+     * Shorter null-safe convenience alias for {@link java.util.Collections#unmodifiableSet(Set)} so both classes don't
+     * need to be imported.
+     *
+     * @param set set to wrap in an immutable Set
+     * @param <T> set element type
+     * @return an immutable wrapper for {@code set}
+     */
     public static <T> Set<T> immutable(Set<T> set) {
         return set != null ? java.util.Collections.unmodifiableSet(set) : null;
     }
 
+    /**
+     * Shorter null-safe convenience alias for {@link java.util.Collections#unmodifiableList(List)} so both classes
+     * don't need to be imported.
+     *
+     * @param list list to wrap in an immutable List
+     * @param <T>  list element type
+     * @return an immutable wrapper for {@code list}
+     */
     public static <T> List<T> immutable(List<T> list) {
         return list != null ? java.util.Collections.unmodifiableList(list) : null;
     }
@@ -163,6 +218,15 @@ public final class Collections {
         return Arrays.asList(Objects.toObjectArray(source));
     }
 
+    /**
+     * Concatenate the specified set with the specified array elements, resulting in a new {@link LinkedHashSet} with
+     * the array elements appended to the end of the existing Set.
+     *
+     * @param c        the set to append to
+     * @param elements the array elements to append to the end of the set
+     * @param <T>      set element type
+     * @return a new {@link LinkedHashSet} with the array elements appended to the end of the original set.
+     */
     @SafeVarargs
     public static <T> Set<T> concat(Set<T> c, T... elements) {
         int size = Math.max(1, Collections.size(c) + io.jsonwebtoken.lang.Arrays.length(elements));
@@ -425,7 +489,7 @@ public final class Collections {
      * @return a new array of type {@code A} that contains the elements in the specified {@code enumeration}.
      */
     public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
-        ArrayList<A> elements = new ArrayList<A>();
+        ArrayList<A> elements = new ArrayList<>();
         while (enumeration.hasMoreElements()) {
             elements.add(enumeration.nextElement());
         }
@@ -440,7 +504,7 @@ public final class Collections {
      * @return the iterator
      */
     public static <E> Iterator<E> toIterator(Enumeration<E> enumeration) {
-        return new EnumerationIterator<E>(enumeration);
+        return new EnumerationIterator<>(enumeration);
     }
 
     /**
@@ -448,7 +512,7 @@ public final class Collections {
      */
     private static class EnumerationIterator<E> implements Iterator<E> {
 
-        private Enumeration<E> enumeration;
+        private final Enumeration<E> enumeration;
 
         public EnumerationIterator(Enumeration<E> enumeration) {
             this.enumeration = enumeration;

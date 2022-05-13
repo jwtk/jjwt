@@ -34,7 +34,7 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     @Deprecated // TODO: remove for 1.0.0:
     static final Field<String> DEPRECATED_COMPRESSION_ALGORITHM = Fields.string(Header.DEPRECATED_COMPRESSION_ALGORITHM, "Deprecated Compression Algorithm");
 
-    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM);
+    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
 
     protected DefaultHeader(Set<Field<?>> fieldSet) {
         super(fieldSet);

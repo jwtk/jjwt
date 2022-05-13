@@ -1,29 +1,28 @@
 package io.jsonwebtoken.impl.security
 
-import java.security.Key
 import java.security.interfaces.RSAKey
 
-class TestRSAKey<T extends RSAKey & Key> implements RSAKey, Key {
+class TestRSAKey extends TestKey implements RSAKey {
 
-    final T src
+    final def src
 
-    TestRSAKey(T key) {
+    TestRSAKey(def key) {
         this.src = key
     }
 
     @Override
     String getAlgorithm() {
-        return src.getAlgorithm()
+        return src.algorithm
     }
 
     @Override
     String getFormat() {
-        return src.getFormat()
+        return src.format
     }
 
     @Override
     byte[] getEncoded() {
-        return src.getEncoded()
+        return src.encoded
     }
 
     @Override

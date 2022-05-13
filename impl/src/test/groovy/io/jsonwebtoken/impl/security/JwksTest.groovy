@@ -7,7 +7,10 @@ import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import java.security.*
+import java.security.MessageDigest
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
 import java.security.interfaces.ECPublicKey
@@ -20,7 +23,7 @@ import static org.junit.Assert.*
 class JwksTest {
 
     private static final SecretKey SKEY = SignatureAlgorithms.HS256.keyBuilder().build()
-    private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build().toJavaKeyPair()
+    private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build()
 
     private static String srandom() {
         byte[] random = new byte[16];
@@ -28,7 +31,7 @@ class JwksTest {
         return Encoders.BASE64URL.encode(random);
     }
 
-    static void testProperty(String name, String id, def val, def expectedFieldValue=val) {
+    static void testProperty(String name, String id, def val, def expectedFieldValue = val) {
         String cap = "${name.capitalize()}"
         def key = name == 'publicKeyUse' || name == 'x509CertificateChain' ? EC_PAIR.public : SKEY
 
@@ -82,6 +85,11 @@ class JwksTest {
             assertNull jwk."$id"
             assertFalse jwk.containsKey(id)
         }
+    }
+
+    @Test
+    void testPrivateCtor() {
+        new Jwks() // for code coverage only
     }
 
     @Test
@@ -156,9 +164,9 @@ class JwksTest {
     }
 
     static void testThumbprint(int number) {
-        def algs = SignatureAlgorithms.values().findAll {it instanceof AsymmetricKeySignatureAlgorithm}
+        def algs = SignatureAlgorithms.values().findAll { it instanceof AsymmetricKeySignatureAlgorithm }
 
-        for(def alg : algs) {
+        for (def alg : algs) {
             //get test cert:
             X509Certificate cert = TestCertificates.readTestCertificate(alg)
             def pubKey = cert.getPublicKey()
@@ -183,8 +191,8 @@ class JwksTest {
 
     @Test
     void testSecretJwks() {
-        Collection<SecretKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({it instanceof SecretKeySignatureAlgorithm}) as Collection<SecretKeySignatureAlgorithm>
-        for(def alg : algs) {
+        Collection<SecretKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({ it instanceof SecretKeySignatureAlgorithm }) as Collection<SecretKeySignatureAlgorithm>
+        for (def alg : algs) {
             SecretKey secretKey = alg.keyBuilder().build()
             def jwk = Jwks.builder().setKey(secretKey).setId('id').build()
             assertEquals 'oct', jwk.getType()
@@ -233,9 +241,9 @@ class JwksTest {
     @Test
     void testAsymmetricJwks() {
 
-        Collection<AsymmetricKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({it instanceof AsymmetricKeySignatureAlgorithm}) as Collection<AsymmetricKeySignatureAlgorithm>
+        Collection<AsymmetricKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({ it instanceof AsymmetricKeySignatureAlgorithm }) as Collection<AsymmetricKeySignatureAlgorithm>
 
-        for(def alg : algs) {
+        for (def alg : algs) {
 
             def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
             PublicKey pub = pair.getPublic()
@@ -271,7 +279,7 @@ class JwksTest {
     void testInvalidCurvePoint() {
         def algs = [SignatureAlgorithms.ES256, SignatureAlgorithms.ES384, SignatureAlgorithms.ES512]
 
-        for(EllipticCurveSignatureAlgorithm alg : algs) {
+        for (EllipticCurveSignatureAlgorithm alg : algs) {
 
             def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
             ECPublicKey pubKey = pair.getPublic() as ECPublicKey
@@ -289,9 +297,9 @@ class JwksTest {
             }
 
             BigInteger p = pubKey.getParams().getCurve().getField().getP()
-            def outOfFieldRange = [BigInteger.ZERO, BigInteger.ONE,p, p.add(BigInteger.valueOf(1))]
-            for(def x : outOfFieldRange) {
-                Map<String,?> modified = new LinkedHashMap<>(jwk)
+            def outOfFieldRange = [BigInteger.ZERO, BigInteger.ONE, p, p.add(BigInteger.valueOf(1))]
+            for (def x : outOfFieldRange) {
+                Map<String, ?> modified = new LinkedHashMap<>(jwk)
                 modified.put('x', Converters.BIGINT.applyTo(x))
                 try {
                     Jwks.builder().putAll(modified).build()
@@ -300,8 +308,8 @@ class JwksTest {
                     assertEquals(expected, ike.getMessage())
                 }
             }
-            for(def y : outOfFieldRange) {
-                Map<String,?> modified = new LinkedHashMap<>(jwk)
+            for (def y : outOfFieldRange) {
+                Map<String, ?> modified = new LinkedHashMap<>(jwk)
                 modified.put('y', Converters.BIGINT.applyTo(y))
                 try {
                     Jwks.builder().putAll(modified).build()
@@ -320,6 +328,7 @@ class JwksTest {
         InvalidECPublicKey(ECPublicKey good) {
             this.good = good;
         }
+
         @Override
         ECPoint getW() {
             return ECPoint.POINT_INFINITY // bad value, should make all 'contains' validations fail

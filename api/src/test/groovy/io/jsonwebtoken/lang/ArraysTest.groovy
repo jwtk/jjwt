@@ -1,5 +1,6 @@
 package io.jsonwebtoken.lang
 
+
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
@@ -10,6 +11,11 @@ import static org.junit.Assert.*
  * @since JJWT_RELEASE_VERSION
  */
 class ArraysTest {
+
+    @Test
+    void testPrivateCtor() {
+        new Arrays() //not allowed in java, including here only to pass test coverage assertions
+    }
 
     @Test
     void testCleanWithNull() {
@@ -29,7 +35,7 @@ class ArraysTest {
 
     @Test
     void testByteArrayLengthWithNull() {
-        assertEquals 0, Arrays.length((byte[])null)
+        assertEquals 0, Arrays.length((byte[]) null)
     }
 
     @Test

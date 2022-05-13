@@ -22,13 +22,45 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 
 /**
+ * A {@code JwtBuilder} that creates JWEs.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface JweBuilder extends JwtBuilder<JweBuilder> {
 
+    /**
+     * Encrypt the resulting JWE with the specified {@link AeadAlgorithm} Content Encryption Algorithm.  They
+     * key used to perform the encryption must be supplied by calling {@link #withKey(SecretKey)} or
+     * {@link #withKeyFrom(Key, KeyAlgorithm)}.
+     *
+     * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE.
+     * @return the builder for method chaining.
+     */
     JweBuilder encryptWith(AeadAlgorithm enc);
 
+    /**
+     * Specifies the shared symmetric key to use to encrypt the JWE using the AEAD content encryption algorithm
+     * specified via the {@link #encryptWith(AeadAlgorithm)} builder method.
+     *
+     * <p>This is a convenience method that is an alias for the following:</p>
+     *
+     * <blockquote><pre>
+     * {@link #withKeyFrom(Key, KeyAlgorithm) withKeyFrom}(key, {@link io.jsonwebtoken.security.KeyAlgorithms KeyAlgorithms}.{@link io.jsonwebtoken.security.KeyAlgorithms#DIRECT DIRECT});</pre></blockquote>
+     *
+     * @param key the shared symmetric key to use to encrypt the JWE.
+     * @return the builder for method chaining.
+     */
     JweBuilder withKey(SecretKey key);
 
-    <K extends Key> JweBuilder withKeyFrom(K key, KeyAlgorithm<K, ?> alg);
+    /**
+     * Use the specified {@code key} to invoke the specified {@link KeyAlgorithm} to obtain a
+     * {@code Content Encryption Key (CEK)}.  The resulting CEK will be used to encrypt the JWE using the
+     * AEAD content encryption algorithm specified via the {@link #encryptWith(AeadAlgorithm)} builder method.
+     *
+     * @param key    the key to use with the {@code keyAlg} to obtain a {@code Content Encryption Key (CEK)}.
+     * @param keyAlg the key algorithm that will provide a {@code Content Encryption Key (CEK)}.
+     * @param <K>    the type of key to use with {@code keyAlg}
+     * @return the builder for method chaining.
+     */
+    <K extends Key> JweBuilder withKeyFrom(K key, KeyAlgorithm<K, ?> keyAlg);
 }

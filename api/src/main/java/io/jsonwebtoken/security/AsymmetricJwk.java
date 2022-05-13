@@ -35,7 +35,7 @@ public interface AsymmetricJwk<K extends Key> extends Jwk<K> {
      * <p>The JWK specification <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.2">defines</a> the
      * following {@code use} values:</p>
      *
-     * <table summary="JWK Key Use Values">
+     * <table>
      * <caption>JWK Key Use Values</caption>
      * <thead>
      * <tr>

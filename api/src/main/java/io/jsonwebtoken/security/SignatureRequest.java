@@ -18,6 +18,13 @@ package io.jsonwebtoken.security;
 import java.security.Key;
 
 /**
+ * A request to a {@link SignatureAlgorithm} to compute a digital signature or
+ * <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature</a> or
+ * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
+ * authentication code</a>.
+ * <p>The content for signature input will be available via {@link #getContent()}, and the key used to compute
+ * the signature will be available via {@link #getKey()}.</p>
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface SignatureRequest<K extends Key> extends CryptoRequest<K> {

@@ -25,8 +25,8 @@ import org.junit.Test
 
 import java.security.SecureRandom
 
-import static ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
-import static ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
+import static io.jsonwebtoken.impl.DefaultJwtParser.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
+import static io.jsonwebtoken.impl.DefaultJwtParser.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
 import static org.junit.Assert.*
 
 class DeprecatedJwtParserTest {

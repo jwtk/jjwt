@@ -30,11 +30,16 @@ public class NoneSignatureAlgorithm implements SignatureAlgorithm<Key, Key> {
     @Override
     public boolean equals(Object obj) {
         return this == obj ||
-            (obj instanceof SignatureAlgorithm && ID.equalsIgnoreCase(((SignatureAlgorithm<?, ?>) obj).getId()));
+                (obj instanceof SignatureAlgorithm && ID.equalsIgnoreCase(((SignatureAlgorithm<?, ?>) obj).getId()));
     }
 
     @Override
     public int hashCode() {
         return getId().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return ID;
     }
 }

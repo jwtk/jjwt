@@ -16,6 +16,9 @@
 package io.jsonwebtoken.security;
 
 /**
+ * General-purpose exception when encountering a problem with a cryptographic {@link java.security.Key}
+ * or {@link Jwk}.
+ *
  * @since 0.10.0
  */
 public class KeyException extends SecurityException {

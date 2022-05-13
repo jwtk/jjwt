@@ -18,6 +18,8 @@ package io.jsonwebtoken.security;
 import java.security.Key;
 
 /**
+ * Provides access to a cryptographic {@link Key} necessary for signing, wrapping, encryption or decryption algorithms.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface KeySupplier<K extends Key> {

@@ -17,13 +17,17 @@ package io.jsonwebtoken.io
 
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertTrue
 
 class DecodersTest {
 
     @Test
-    void testBase64() {
+    void testPrivateCtor() {
         new Decoders() //not allowed in java, including here only to pass test coverage assertions
+    }
+
+    @Test
+    void testBase64() {
         assertTrue Decoders.BASE64 instanceof ExceptionPropagatingDecoder
         assertTrue Decoders.BASE64.decoder instanceof Base64Decoder
     }

@@ -25,7 +25,7 @@ import java.util.Set;
  * <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}.
  * The {@code JwkBuilder} interface represents common JWK properties that may be specified for any type of JWK.
  * Builder subtypes support additional JWK properties specific to different types of cryptographic keys
- * (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).</p>
+ * (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
  *
  * @see SecretJwkBuilder
  * @see RsaPublicJwkBuilder
@@ -103,7 +103,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * <p>The JWK specification <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">defines</a> the
      * following values:</p>
      *
-     * <table summary="JWK Key Operations">
+     * <table>
      * <caption>JWK Key Operations</caption>
      * <thead>
      * <tr>

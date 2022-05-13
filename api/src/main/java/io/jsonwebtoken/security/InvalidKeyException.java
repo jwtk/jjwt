@@ -23,18 +23,23 @@ package io.jsonwebtoken.security;
  */
 public class InvalidKeyException extends KeyException {
 
+    /**
+     * Creates a new instance with the specified explanation message.
+     *
+     * @param message the message explaining why the exception is thrown.
+     */
     public InvalidKeyException(String message) {
         super(message);
     }
 
     /**
-     * Creates a new {@code InvalidKeyException} with the specified message and cause.
+     * Creates a new instance with the specified explanation message and underlying cause.
      *
-     * @param msg   exception message
-     * @param cause triggering cause for the InvalidKeyException
+     * @param message the message explaining why the exception is thrown.
+     * @param cause   the underlying cause that resulted in this exception being thrown.
      * @since JJWT_RELEASE_VERSION
      */
-    public InvalidKeyException(String msg, Exception cause) {
-        super(msg, cause);
+    public InvalidKeyException(String message, Exception cause) {
+        super(message, cause);
     }
 }

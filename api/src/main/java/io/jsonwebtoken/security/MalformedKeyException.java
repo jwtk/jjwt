@@ -16,6 +16,9 @@
 package io.jsonwebtoken.security;
 
 /**
+ * Exception thrown when encountering a key or key material that is incomplete or improperly configured or
+ * formatted and cannot be used as expected.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public class MalformedKeyException extends InvalidKeyException {

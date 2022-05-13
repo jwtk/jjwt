@@ -23,11 +23,26 @@ package io.jsonwebtoken;
  */
 public class IncorrectClaimException extends InvalidClaimException {
 
-    public IncorrectClaimException(Header header, Claims claims, String message) {
+    /**
+     * Creates a new instance with the specified header, claims and explanation message.
+     *
+     * @param header  the header inspected
+     * @param claims  the claims obtained
+     * @param message the exception message
+     */
+    public IncorrectClaimException(Header<?> header, Claims claims, String message) {
         super(header, claims, message);
     }
 
-    public IncorrectClaimException(Header header, Claims claims, String message, Throwable cause) {
+    /**
+     * Creates a new instance with the specified header, claims, explanation message and underlying cause.
+     *
+     * @param header  the header inspected
+     * @param claims  the claims obtained
+     * @param message the exception message
+     * @param cause   the underlying cause that resulted in this exception being thrown
+     */
+    public IncorrectClaimException(Header<?> header, Claims claims, String message, Throwable cause) {
         super(header, claims, message, cause);
     }
 }

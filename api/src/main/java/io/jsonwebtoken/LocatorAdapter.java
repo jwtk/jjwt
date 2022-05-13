@@ -18,6 +18,10 @@ package io.jsonwebtoken;
 import io.jsonwebtoken.lang.Assert;
 
 /**
+ * Adapter pattern implementation for the {@link Locator} interface.  Subclasses can override any of the
+ * {@link #locate(Header)}, {@link #locate(JwsHeader)}, or {@link #locate(JwsHeader)} methods for type-specific logic if
+ * desired when the encountered header is an unprotected JWT, JWS or JWE respectively.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public class LocatorAdapter<T> implements Locator<T> {

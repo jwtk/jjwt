@@ -18,9 +18,11 @@ import java.util.Set;
 public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T> {
 
     URI getJwkSetUrl();
+
     T setJwkSetUrl(URI uri);
 
     PublicJwk<?> getJwk();
+
     T setJwk(PublicJwk<?> jwk);
 
     /**
@@ -56,17 +58,22 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
     T setKeyId(String kid);
 
     URI getX509Url();
+
     T setX509Url(URI uri);
 
     List<X509Certificate> getX509CertificateChain();
+
     T setX509CertificateChain(List<X509Certificate> chain);
 
     byte[] getX509CertificateSha1Thumbprint();
+
     T setX509CertificateSha1Thumbprint(byte[] thumbprint);
 
     byte[] getX509CertificateSha256Thumbprint();
+
     T setX509CertificateSha256Thumbprint(byte[] thumbprint);
 
     Set<String> getCritical();
+
     T setCritical(Set<String> crit);
 }

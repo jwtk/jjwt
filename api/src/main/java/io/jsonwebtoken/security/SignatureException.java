@@ -16,6 +16,8 @@
 package io.jsonwebtoken.security;
 
 /**
+ * Exception thrown if there is problem calculating or verifying a digital signature or message authentication code.
+ *
  * @since 0.10.0
  */
 @SuppressWarnings("deprecation")

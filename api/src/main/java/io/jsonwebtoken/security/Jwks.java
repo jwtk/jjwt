@@ -24,10 +24,18 @@ import io.jsonwebtoken.lang.Classes;
  * @see #builder()
  * @since JJWT_RELEASE_VERSION
  */
-public class Jwks {
+public final class Jwks {
+
+    private Jwks() {
+    } //prevent instantiation
 
     private static final String CNAME = "io.jsonwebtoken.impl.security.DefaultProtoJwkBuilder";
 
+    /**
+     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
+     *
+     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
+     */
     public static ProtoJwkBuilder<?, ?, ?> builder() {
         return Classes.newInstance(CNAME);
     }

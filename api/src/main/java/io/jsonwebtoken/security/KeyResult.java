@@ -18,6 +18,16 @@ package io.jsonwebtoken.security;
 import javax.crypto.SecretKey;
 
 /**
+ * The result of a {@link KeyAlgorithm} encryption key request, containing the resulting
+ * {@code JWE encrypted key} and {@code JWE Content Encryption Key (CEK)}, concepts defined in
+ * <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-2">JWE Terminology</a>.
+ *
+ * <p>The result {@link #getContent() content} is the {@code JWE encrypted key}, which will be Base64URL-encoded
+ * and embedded in the resulting compact JWE string.</p>
+ *
+ * <p>The result {@link #getKey() key} is the {@code JWE Content Encryption Key (CEK)} which will be used to encrypt
+ * the JWE.</p>
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public interface KeyResult extends Message, KeySupplier<SecretKey> {

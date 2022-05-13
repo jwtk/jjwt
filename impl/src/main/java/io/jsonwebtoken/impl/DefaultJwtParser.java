@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
@@ -88,6 +87,9 @@ public class DefaultJwtParser implements JwtParser {
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
     private static final JwtTokenizer jwtTokenizer = new JwtTokenizer();
+
+    public static final String INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was: %s.";
+    public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not present in the JWT claims.";
 
     public static final String MISSING_JWS_ALG_MSG =
             "JWS header does not contain a required 'alg' (Algorithm) header parameter.  " +
@@ -695,14 +697,14 @@ public class DefaultJwtParser implements JwtParser {
 
             if (actualClaimValue == null) {
 
-                String msg = String.format(ClaimJwtException.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                String msg = String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
                         expectedClaimName, expectedClaimValue);
 
                 invalidClaimException = new MissingClaimException(header, claims, msg);
 
             } else if (!expectedClaimValue.equals(actualClaimValue)) {
 
-                String msg = String.format(ClaimJwtException.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
+                String msg = String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
                         expectedClaimName, expectedClaimValue, actualClaimValue);
 
                 invalidClaimException = new IncorrectClaimException(header, claims, msg);
