@@ -15,6 +15,12 @@
   allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
   the old enum-based static utility methods did not.
 
+#### Backwards Compatibility Warning
+
+* `io.jsonwebtoken.JwtHandlerAdapter` has been changed to add the `abstract` modifier.  This class was never intended
+  to be instantiated directly, and is provided for subclassing benefits.  The missing modifier has been added to ensure
+  the class is used as it had always been intended.
+
 ### 0.11.5
 
 This patch release adds additional security guards against an ECDSA bug in Java SE versions 15-15.0.6, 17-17.0.2, and 18

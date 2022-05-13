@@ -28,7 +28,7 @@ package io.jsonwebtoken;
  * @param <T> the type of object to return to the parser caller after handling the parsed JWT.
  * @since 0.2
  */
-public class JwtHandlerAdapter<T> implements JwtHandler<T> {
+public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
     @Override
     public T onPlaintextJwt(Jwt<?, String> jwt) {

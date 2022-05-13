@@ -31,6 +31,13 @@ import java.util.Map;
  */
 public interface JwtParser {
 
+    /**
+     * Deprecated - this was an implementation detail accidentally added to the public interface. This
+     * will be removed in a future release.
+     *
+     * @deprecated since JJWT_RELEASE_VERSION, to be removed in a future relase.
+     */
+    @Deprecated
     char SEPARATOR_CHAR = '.';
 
     /**
@@ -594,7 +601,7 @@ public interface JwtParser {
      * @throws IllegalArgumentException if the {@code claimsJws} string is {@code null} or empty or only whitespace
      * @see #parsePlaintextJwt(String)
      * @see #parsePlaintextJws(String)
-     * @see #parsePlaintextJwe(String) 
+     * @see #parsePlaintextJwe(String)
      * @see #parseClaimsJwt(String)
      * @see #parseClaimsJwe(String)
      * @see #parse(String, JwtHandler)
@@ -622,7 +629,7 @@ public interface JwtParser {
      * @throws SecurityException        if the {@code plaintextJwe} JWE decryption fails
      * @throws IllegalArgumentException if the {@code plaintextJwe} string is {@code null} or empty or only whitespace
      * @see #parsePlaintextJwt(String)
-     * @see #parsePlaintextJws(String) 
+     * @see #parsePlaintextJws(String)
      * @see #parseClaimsJwt(String)
      * @see #parseClaimsJws(String)
      * @see #parseClaimsJwe(String)

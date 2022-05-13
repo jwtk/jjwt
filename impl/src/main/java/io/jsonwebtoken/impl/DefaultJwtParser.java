@@ -84,6 +84,8 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser implements JwtParser {
 
+    static final char SEPARATOR_CHAR = '.';
+
     private static final int MILLISECONDS_PER_SECOND = 1000;
 
     private static final JwtTokenizer jwtTokenizer = new JwtTokenizer();

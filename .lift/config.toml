@@ -1,4 +1,4 @@
-ignoreRules = ["MissingOverride"]
+ignoreRules = ["MissingOverride", "MissingSummary", "InconsistentCapitalization", "JavaUtilDate"]
 ignoreFiles = '''
 **/test/**
 '''

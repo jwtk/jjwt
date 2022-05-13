@@ -20,7 +20,6 @@ import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
@@ -59,14 +58,14 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     protected Claims claims;
     protected String payload;
 
-    private SignatureAlgorithm<Key,?> algorithm = SignatureAlgorithms.NONE;
+    private SignatureAlgorithm<Key, ?> algorithm = SignatureAlgorithms.NONE;
     private Function<SignatureRequest<Key>, byte[]> signFunction;
 
     private Key key;
 
     protected Serializer<Map<String, ?>> serializer;
-    protected Function<Map<String,?>, byte[]> headerSerializer;
-    protected Function<Map<String,?>, byte[]> claimsSerializer;
+    protected Function<Map<String, ?>, byte[]> headerSerializer;
+    protected Function<Map<String, ?>, byte[]> claimsSerializer;
 
     protected Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
     protected CompressionCodec compressionCodec;
@@ -74,28 +73,28 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     @Override
     public T setProvider(Provider provider) {
         this.provider = provider;
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T setSecureRandom(SecureRandom secureRandom) {
         this.secureRandom = secureRandom;
-        return (T)this;
+        return (T) this;
     }
 
     @SuppressWarnings("rawtypes")
-    protected Function<Map<String,?>, byte[]> wrap(final Serializer<Map<String,?>> serializer, String which) {
+    protected Function<Map<String, ?>, byte[]> wrap(final Serializer<Map<String, ?>> serializer, String which) {
         // TODO for 1.0 - these should throw SerializationException not IllegalArgumentException
         // IAE is being retained for backwards pre-1.0 behavior compatibility
         Class clazz = "header".equals(which) ? IllegalStateException.class : IllegalArgumentException.class;
         return new PropagatingExceptionFunction<>(clazz,
-            "Unable to serialize " + which + " to JSON.",
-            new Function<Map<String, ?>, byte[]>() {
-                @Override
-                public byte[] apply(Map<String, ?> map) {
-                    return serializer.serialize(map);
+                "Unable to serialize " + which + " to JSON.",
+                new Function<Map<String, ?>, byte[]>() {
+                    @Override
+                    public byte[] apply(Map<String, ?> map) {
+                        return serializer.serialize(map);
+                    }
                 }
-            }
         );
     }
 
@@ -105,26 +104,26 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         this.serializer = serializer;
         this.headerSerializer = wrap(serializer, "header");
         this.claimsSerializer = wrap(serializer, "claims");
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder) {
         Assert.notNull(base64UrlEncoder, "base64UrlEncoder cannot be null.");
         this.base64UrlEncoder = base64UrlEncoder;
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T setHeader(Header<?> header) {
         this.header = header;
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T setHeader(Map<String, ?> header) {
         this.header = new DefaultHeader<>(header);
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -133,7 +132,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
             Header<?> header = ensureHeader();
             header.putAll(params);
         }
-        return (T)this;
+        return (T) this;
     }
 
     protected Header<?> ensureHeader() {
@@ -146,30 +145,30 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     @Override
     public T setHeaderParam(String name, Object value) {
         ensureHeader().put(name, value);
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T signWith(Key key) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
-        SignatureAlgorithm<Key,?> alg = (SignatureAlgorithm<Key,?>)SignatureAlgorithms.forSigningKey(key);
+        SignatureAlgorithm<Key, ?> alg = (SignatureAlgorithm<Key, ?>) SignatureAlgorithms.forSigningKey(key);
         return signWith(key, alg);
     }
 
     @Override
-    public <K extends Key> T signWith(K key, final SignatureAlgorithm<K,?> alg) throws InvalidKeyException {
+    public <K extends Key> T signWith(K key, final SignatureAlgorithm<K, ?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         this.key = key;
-        this.algorithm = (SignatureAlgorithm<Key,?>)alg;
+        this.algorithm = (SignatureAlgorithm<Key, ?>) alg;
         this.signFunction = new PropagatingExceptionFunction<>(SignatureException.class,
-            "Unable to compute " + alg.getId() + " signature.", new Function<SignatureRequest<Key>, byte[]>() {
+                "Unable to compute " + alg.getId() + " signature.", new Function<SignatureRequest<Key>, byte[]>() {
             @Override
             public byte[] apply(SignatureRequest<Key> request) {
                 return algorithm.sign(request);
             }
         });
-        return (T)this;
+        return (T) this;
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -177,7 +176,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     public T signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SignatureAlgorithm<Key,?>)SignatureAlgorithmsBridge.forId(alg.getValue()));
+        return signWith(key, (SignatureAlgorithm<Key, ?>) SignatureAlgorithmsBridge.forId(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -209,13 +208,13 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     public T compressWith(CompressionCodec compressionCodec) {
         Assert.notNull(compressionCodec, "compressionCodec cannot be null");
         this.compressionCodec = compressionCodec;
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T setPayload(String payload) {
         this.payload = payload;
-        return (T)this;
+        return (T) this;
     }
 
     protected Claims ensureClaims() {
@@ -228,19 +227,19 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     @Override
     public T setClaims(Claims claims) {
         this.claims = claims;
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T setClaims(Map<String, ?> claims) {
         this.claims = new DefaultClaims(claims);
-        return (T)this;
+        return (T) this;
     }
 
     @Override
     public T addClaims(Map<String, ?> claims) {
         ensureClaims().putAll(claims);
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -252,7 +251,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 claims.setIssuer(iss);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -264,7 +263,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 claims.setSubject(sub);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -276,7 +275,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 claims.setAudience(aud);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -289,7 +288,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 this.claims.setExpiration(exp);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -302,7 +301,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 this.claims.setNotBefore(nbf);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -315,7 +314,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 this.claims.setIssuedAt(iat);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -327,7 +326,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
                 claims.setId(jti);
             }
         }
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -345,7 +344,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
             }
         }
 
-        return (T)this;
+        return (T) this;
     }
 
     @Override
@@ -390,18 +389,18 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
         String base64UrlEncodedBody = base64UrlEncoder.encode(bytes);
 
-        String jwt = base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
+        String jwt = base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
         if (key != null) { //jwt must be signed:
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
             SignatureRequest<Key> request = new DefaultSignatureRequest<>(provider, secureRandom, data, key);
             byte[] signature = signFunction.apply(request);
             String base64UrlSignature = base64UrlEncoder.encode(signature);
-            jwt += JwtParser.SEPARATOR_CHAR + base64UrlSignature;
+            jwt += DefaultJwtParser.SEPARATOR_CHAR + base64UrlSignature;
         } else {
             // no signature (plaintext), but must terminate w/ a period, see
             // https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
-            jwt += JwtParser.SEPARATOR_CHAR;
+            jwt += DefaultJwtParser.SEPARATOR_CHAR;
         }
 
         return jwt;

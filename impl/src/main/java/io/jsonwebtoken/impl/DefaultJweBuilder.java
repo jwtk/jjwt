@@ -2,7 +2,6 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweBuilder;
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.impl.lang.Services;
@@ -167,10 +166,10 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         String base64UrlEncodedTag = base64UrlEncoder.encode(tag);
 
         return
-            base64UrlEncodedHeader + JwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedEncryptedCek + JwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedIv + JwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedCiphertext + JwtParser.SEPARATOR_CHAR +
+            base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
                 base64UrlEncodedTag;
     }
 }

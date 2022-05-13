@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken
 
+import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -22,9 +23,15 @@ import static org.junit.Assert.fail
 
 class JwtHandlerAdapterTest {
 
+    private JwtHandlerAdapter handler
+
+    @Before
+    void setUp() {
+        handler = new JwtHandlerAdapter(){}
+    }
+
     @Test
     void testOnPlaintextJwt() {
-        def handler = new JwtHandlerAdapter();
         try {
             handler.onPlaintextJwt(null)
             fail()
@@ -35,7 +42,6 @@ class JwtHandlerAdapterTest {
 
     @Test
     void testOnClaimsJwt() {
-        def handler = new JwtHandlerAdapter();
         try {
             handler.onClaimsJwt(null)
             fail()
@@ -46,7 +52,6 @@ class JwtHandlerAdapterTest {
 
     @Test
     void testOnPlaintextJws() {
-        def handler = new JwtHandlerAdapter();
         try {
             handler.onPlaintextJws(null)
             fail()
@@ -57,7 +62,6 @@ class JwtHandlerAdapterTest {
 
     @Test
     void testOnClaimsJws() {
-        def handler = new JwtHandlerAdapter();
         try {
             handler.onClaimsJws(null)
             fail()
@@ -68,7 +72,6 @@ class JwtHandlerAdapterTest {
 
     @Test
     void testOnPlaintextJwe() {
-        def handler = new JwtHandlerAdapter();
         try {
             handler.onPlaintextJwe(null)
             fail()
@@ -79,7 +82,6 @@ class JwtHandlerAdapterTest {
 
     @Test
     void testOnClaimsJwe() {
-        def handler = new JwtHandlerAdapter();
         try {
             handler.onClaimsJwe(null)
             fail()

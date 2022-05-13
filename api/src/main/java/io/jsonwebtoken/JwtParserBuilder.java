@@ -19,6 +19,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 
@@ -365,6 +366,22 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     @Deprecated
     JwtParserBuilder setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
+    /**
+     * Adds the specified AEAD encryption algorithms to the parser's total set of supported encryption algorithms,
+     * overwriting any previously-added algorithms with the same {@link AeadAlgorithm#getId() id}s.
+     *
+     * <p>There may be only one registered {@code AeadAlgorithm} per algorithm {@code id}, and the {@code encAlgs}
+     * collection is added in iteration order; if a duplicate id is found when iterating the {@code encAlgs}
+     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     *
+     * <p>Finally, the {@link EncryptionAlgorithms#values() JWA standard encryption algorithms} are added last,
+     * <em>after</em> those in the {@code encAlgs} collection, to ensure that JWA standard algorithms cannot be
+     * accidentally replaced.</p>
+     *
+     * @param encAlgs collection of AEAD encryption algorithms to add to the parser's total set of supported
+     *                encryption algorithms.
+     * @return the builder for method chaining.
+     */
     JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs);
 
     JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs);

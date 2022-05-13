@@ -20,7 +20,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     private static final Set<Field<?>> DEFAULT_FIELDS;
 
-    static { // assume all known fields:
+    static { // assume all JWA fields:
         Set<Field<?>> set = new LinkedHashSet<>();
         set.addAll(DefaultSecretJwk.FIELDS); // Private/Secret JWKs has both public and private fields
         set.addAll(DefaultEcPrivateJwk.FIELDS); // Private JWKs have both public and private fields
@@ -77,8 +77,8 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     protected String getName() {
-        Object value = values.get("kty");
-        if ("oct".equals(value)) {
+        Object value = values.get(AbstractJwk.KTY.getId());
+        if (DefaultSecretJwk.TYPE_VALUE.equals(value)) {
             value = "Secret";
         }
         return value != null ? value + " JWK" : "JWK";
