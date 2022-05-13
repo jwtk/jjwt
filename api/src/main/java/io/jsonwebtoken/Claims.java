@@ -24,12 +24,11 @@ import java.util.Map;
  * <p>This is ultimately a JSON map and any values can be added to it, but JWT standard names are provided as
  * type-safe getters and setters for convenience.</p>
  *
- * <p>Because this interface extends {@code Map&lt;String, Object&gt;}, if you would like to add your own properties,
+ * <p>Because this interface extends <code>Map&lt;String, Object&gt;</code>, if you would like to add your own properties,
  * you simply use map methods, for example:</p>
  *
- * <pre>
- * claims.{@link Map#put(Object, Object) put}("someKey", "someValue");
- * </pre>
+ * <blockquote><pre>
+ * claims.{@link Map#put(Object, Object) put}("someKey", "someValue");</pre></blockquote>
  *
  * <h2>Creation</h2>
  *
