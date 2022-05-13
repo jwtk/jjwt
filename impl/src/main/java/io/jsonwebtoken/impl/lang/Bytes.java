@@ -47,7 +47,7 @@ public final class Bytes {
             ((bytes[4] & 0xFFL) << 24) |
             ((bytes[5] & 0xFFL) << 16) |
             ((bytes[6] & 0xFFL) << 8) |
-            ((bytes[7] & 0xFFL));
+            (bytes[7] & 0xFFL);
     }
 
     public static int toInt(byte[] bytes) {

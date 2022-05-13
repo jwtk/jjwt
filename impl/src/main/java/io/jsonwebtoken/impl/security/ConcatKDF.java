@@ -83,7 +83,7 @@ final class ConcatKDF extends CryptoAlgorithm {
 
         // Section 5.8.1.1, Process step #1:
         final double repsd = derivedKeyBitLength / (double) this.hashBitLength;
-        final long reps = (long) (Math.ceil(repsd));
+        final long reps = (long) Math.ceil(repsd);
         // If repsd didn't result in a whole number, the last derived key byte will be partially filled per
         // Section 5.8.1.1, Process step #6:
         final boolean kLastPartial = repsd != (double) reps;

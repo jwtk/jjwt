@@ -1,4 +1,6 @@
-ignoreRules = ["MissingOverride", "MissingSummary", "InconsistentCapitalization", "JavaUtilDate"]
+ignoreRules = ["MissingOverride", "MissingSummary", "InconsistentCapitalization", "JavaUtilDate",
+    "TypeParameterUnusedInFormals", "JavaLangClash", "InlineFormatString"]
 ignoreFiles = '''
+impl/**
 **/test/**
 '''
