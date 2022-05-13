@@ -47,7 +47,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     T put(String name, Object value);
 
     /**
-     * Sets one or more JWK properties by name.  If any {@code name} has a {@code value} that is {@code null},
+     * Sets one or more JWK properties by name.  If any {@code name} has a value that is {@code null},
      * an empty {@link java.util.Collection}, or an empty {@link Map}, the property will be removed from the JWK.
      *
      * @param values one or more name/value pairs to set on the JWK.

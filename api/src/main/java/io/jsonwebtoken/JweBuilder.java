@@ -29,7 +29,7 @@ import java.security.Key;
 public interface JweBuilder extends JwtBuilder<JweBuilder> {
 
     /**
-     * Encrypt the resulting JWE with the specified {@link AeadAlgorithm} Content Encryption Algorithm.  The
+     * Encrypts the constructed JWT with the specified {@link AeadAlgorithm} Content Encryption Algorithm.  The
      * key used to perform the encryption must be supplied by calling {@link #withKey(SecretKey)} or
      * {@link #withKeyFrom(Key, KeyAlgorithm)}.
      *
