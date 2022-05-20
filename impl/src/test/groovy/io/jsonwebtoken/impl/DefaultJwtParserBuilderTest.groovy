@@ -18,12 +18,15 @@ package io.jsonwebtoken.impl
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.security.ConstantKeyLocator
+import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.security.SignatureAlgorithms
 import org.hamcrest.CoreMatchers
+import org.junit.Before
 import org.junit.Test
 
 import java.security.Provider
@@ -40,20 +43,41 @@ class DefaultJwtParserBuilderTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
 
+    private DefaultJwtParserBuilder builder
+
+    @Before
+    void setUp() {
+        builder = new DefaultJwtParserBuilder()
+    }
+
     @Test
     void testSetProvider() {
         Provider provider = createMock(Provider)
         replay provider
 
-        def parser = new DefaultJwtParserBuilder().setProvider(provider).build()
+        def parser = builder.setProvider(provider).build()
 
         assertSame provider, parser.jwtParser.provider
         verify provider
     }
 
+    @Test
+    void testKeyLocatorAndDecryptionKeyConfigured() {
+        try {
+            builder
+                    .setKeyLocator(new ConstantKeyLocator(null, null))
+                    .decryptWith(TestKeys.A128GCM)
+                    .build()
+            fail()
+        } catch (IllegalStateException e) {
+            String msg = "Both 'keyLocator' and 'decryptionKey' cannot be configured. Prefer 'keyLocator' if possible."
+            assertEquals msg, e.getMessage()
+        }
+    }
+
     @Test(expected = IllegalArgumentException)
     void testBase64UrlDecodeWithNullArgument() {
-        new DefaultJwtParserBuilder().base64UrlDecodeWith(null)
+        builder.base64UrlDecodeWith(null)
     }
 
     @Test
@@ -64,13 +88,13 @@ class DefaultJwtParserBuilderTest {
                 return null
             }
         }
-        def b = new DefaultJwtParserBuilder().base64UrlDecodeWith(decoder)
+        def b = builder.base64UrlDecodeWith(decoder)
         assertSame decoder, b.base64UrlDecoder
     }
 
     @Test(expected = IllegalArgumentException)
     void testDeserializeJsonWithNullArgument() {
-        new DefaultJwtParserBuilder().deserializeJsonWith(null)
+        builder.deserializeJsonWith(null)
     }
 
     @Test
@@ -81,7 +105,7 @@ class DefaultJwtParserBuilderTest {
                 return OBJECT_MAPPER.readValue(bytes, Map.class)
             }
         }
-        def p = new DefaultJwtParserBuilder().deserializeJsonWith(deserializer)
+        def p = builder.deserializeJsonWith(deserializer)
         assertSame deserializer, p.deserializer
 
         def alg = SignatureAlgorithms.HS256
@@ -95,7 +119,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testMaxAllowedClockSkewSeconds() {
         long max = Long.MAX_VALUE / 1000 as long
-        new DefaultJwtParserBuilder().setAllowedClockSkewSeconds(max) // no exception should be thrown
+        builder.setAllowedClockSkewSeconds(max) // no exception should be thrown
     }
 
     @Test
@@ -103,7 +127,7 @@ class DefaultJwtParserBuilderTest {
         long value = Long.MAX_VALUE / 1000 as long
         value = value + 1L
         try {
-            new DefaultJwtParserBuilder().setAllowedClockSkewSeconds(value)
+            builder.setAllowedClockSkewSeconds(value)
         } catch (IllegalArgumentException expected) {
             assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
         }
@@ -111,7 +135,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDefaultDeserializer() {
-        JwtParser parser = new DefaultJwtParserBuilder().build()
+        JwtParser parser = builder.build()
         assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
 
         // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating, something like:
@@ -121,9 +145,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testUserSetDeserializerWrapped() {
         Deserializer deserializer = niceMock(Deserializer)
-        JwtParser parser = new DefaultJwtParserBuilder()
-                .deserializeJsonWith(deserializer)
-                .build()
+        JwtParser parser = builder.deserializeJsonWith(deserializer).build()
 
         // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating
         assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)

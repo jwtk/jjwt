@@ -258,7 +258,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <em>MUST</em> be a valid key for the signature algorithm ({@code alg} header) used for the JWS.</p>
      *
      * <p>If there is any chance that the parser will encounter JWSs
-     * that need different signature verification keys based on the JWS being parsed, it is strongly
+     * that need different signature verification keys based on the JWS being parsed, or JWEs, it is strongly
      * recommended to configure your own {@link Locator} via the
      * {@link #setKeyLocator(Locator) setKeyLocator} method instead of using this one.</p>
      *
@@ -279,8 +279,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * key for both the key management algorithm ({@code alg} header) and the content encryption algorithm
      * ({@code enc} header) used for the JWE.</p>
      *
-     * <p>If there is any chance that the parser will encounter JWEs
-     * that need different decryption keys based on the JWE being parsed, it is strongly recommended to configure
+     * <p>If there is any chance that the parser will encounter JWEs that need different decryption keys based on the
+     * JWE being parsed, or JWSs, it is strongly recommended to configure
      * your own {@link Locator Locator} via the {@link #setKeyLocator(Locator) setKeyLocator} method instead of
      * using this one.</p>
      *

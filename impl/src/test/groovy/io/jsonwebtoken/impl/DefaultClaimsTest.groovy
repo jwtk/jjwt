@@ -228,7 +228,9 @@ class DefaultClaimsTest {
             claims.get('aDate', Date.class)
             fail()
         } catch (IllegalArgumentException expected) {
-            String expectedMsg = "Cannot create Date from 'aDate' value [$s].  Cause: String value does not appear to be ISO-8601-formatted: $s" as String
+            String expectedMsg = "Cannot create Date from 'aDate' value '$s'. Cause: " +
+                    "String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics " +
+                    "exhausted. Cause: Unparseable date: \"$s\""
             assertEquals expectedMsg, expected.getMessage()
         }
     }
@@ -342,7 +344,7 @@ class DefaultClaimsTest {
             claims.put(field.getId(), val)
             fail()
         } catch (IllegalArgumentException iae) {
-            String msg = "Invalid Map $field value [hi]. Cause: Cannot create Date from Object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1 with value: hi"
+            String msg = "Invalid JWT Claim $field value: hi. Cause: Cannot create Date from Object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1 with value: hi"
             assertEquals msg, iae.getMessage()
         }
     }

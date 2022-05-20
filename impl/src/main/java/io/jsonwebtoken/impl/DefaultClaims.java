@@ -58,6 +58,11 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
+    protected String getName() {
+        return "JWT Claim";
+    }
+
+    @Override
     public String getIssuer() {
         return idiomaticGet(ISSUER);
     }
@@ -152,7 +157,7 @@ public class DefaultClaims extends JwtMap implements Claims {
             try {
                 value = JwtDateConverter.toDate(value); // NOT specDate logic
             } catch (Exception e) {
-                String msg = "Cannot create Date from '" + claimName + "' value [" + value + "].  Cause: " + e.getMessage();
+                String msg = "Cannot create Date from '" + claimName + "' value '" + value + "'. Cause: " + e.getMessage();
                 throw new IllegalArgumentException(msg, e);
             }
         }

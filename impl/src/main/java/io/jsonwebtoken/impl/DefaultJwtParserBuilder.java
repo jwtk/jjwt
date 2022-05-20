@@ -19,14 +19,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
-import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.LocatorFunction;
 import io.jsonwebtoken.impl.lang.Services;
@@ -68,10 +65,10 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private boolean enableUnsecuredJws = false;
 
-    private Function<Header<?>, Key> keyLocator = ConstantFunction.forNull();
+    private Function<Header<?>, Key> keyLocator;
 
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
-    private SigningKeyResolver signingKeyResolver = new ConstantKeyLocator(null, null);
+    private SigningKeyResolver signingKeyResolver = null;
 
     private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
 
@@ -263,23 +260,17 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             this.deserializer = Services.loadFirst(Deserializer.class);
         }
 
-        final Function<Header<?>, Key> existing1 = this.keyLocator;
-        if (this.signatureVerificationKey != null) {
-            this.keyLocator = new Function<Header<?>, Key>() {
-                @Override
-                public Key apply(Header<?> header) {
-                    return header instanceof JwsHeader ? signatureVerificationKey : existing1.apply(header);
-                }
-            };
+        if (this.keyLocator != null && this.decryptionKey != null) {
+            String msg = "Both 'keyLocator' and 'decryptionKey' cannot be configured. Prefer 'keyLocator' if possible.";
+            throw new IllegalStateException(msg);
         }
-        final Function<Header<?>, Key> existing2 = this.keyLocator;
-        if (this.decryptionKey != null) {
-            this.keyLocator = new Function<Header<?>, Key>() {
-                @Override
-                public Key apply(Header<?> header) {
-                    return header instanceof JweHeader ? decryptionKey : existing2.apply(header);
-                }
-            };
+
+        if (this.keyLocator == null) {
+            this.keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
+        }
+
+        if (this.signingKeyResolver == null) {
+            this.signingKeyResolver = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
         // Invariants.  If these are ever violated, it's an error in this class implementation

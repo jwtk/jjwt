@@ -103,6 +103,14 @@ public class DefaultJwtParser implements JwtParser {
                     "This header parameter is mandatory per the JWE Specification, Section 4.1.1. See " +
                     "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.1 for more information.";
 
+    public static final String MISSING_JWS_DIGEST_MSG_FMT =
+            "The JWS header references signature algorithm '%s' but the compact JWE string is missing the " +
+                    "required signature.";
+
+    public static final String MISSING_JWE_DIGEST_MSG_FMT =
+            "The JWE header references key management algorithm '%s' but the compact JWE string is missing the " +
+                    "required AAD authentication tag.";
+
     private static final String MISSING_ENC_MSG =
             "JWE header does not contain a required 'enc' (Encryption Algorithm) header parameter.  " +
                     "This header parameter is mandatory per the JWE Specification, Section 4.1.2. See " +
@@ -165,7 +173,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
 
-    private final Function<?, Key> keyLocator;
+    private final Function<Header<?>, Key> keyLocator;
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
@@ -200,7 +208,7 @@ public class DefaultJwtParser implements JwtParser {
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
                      boolean enableUnsecuredJws,
-                     Function<?, Key> keyLocator,
+                     Function<Header<?>, Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
                      Claims expectedClaims,
@@ -399,6 +407,8 @@ public class DefaultJwtParser implements JwtParser {
             String msg = tokenized instanceof TokenizedJwe ? MISSING_JWE_ALG_MSG : MISSING_JWS_ALG_MSG;
             throw new MalformedJwtException(msg);
         }
+
+        final String base64UrlDigest = tokenized.getDigest();
         if (SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
             if (tokenized instanceof TokenizedJwe) {
                 throw new MalformedJwtException(JWE_NONE_MSG);
@@ -408,16 +418,13 @@ public class DefaultJwtParser implements JwtParser {
                 String msg = UNSECURED_DISABLED_MSG_PREFIX + header;
                 throw new UnsupportedJwtException(msg);
             }
-            if (Strings.hasText(tokenized.getDigest())) {
+            if (Strings.hasText(base64UrlDigest)) {
                 throw new MalformedJwtException(JWS_NONE_SIG_MISMATCH_MSG);
             }
         } else { // something other than 'none'.  Must have a digest component:
-            if (!Strings.hasText(tokenized.getDigest())) {
-                String type = tokenized instanceof TokenizedJwe ? "JWE" : "JWS";
-                String algType = tokenized instanceof TokenizedJwe ? "key management" : "signature";
-                String digestType = tokenized instanceof TokenizedJwe ? "AAD authentication tag" : "signature";
-                String msg = "The " + type + " header references " + algType + " algorithm '" + alg + "' but the " +
-                        "compact " + type + " string is missing the required " + digestType + ".";
+            if (!Strings.hasText(base64UrlDigest)) {
+                String fmt = tokenized instanceof TokenizedJwe ? MISSING_JWE_DIGEST_MSG_FMT : MISSING_JWS_DIGEST_MSG_FMT;
+                String msg = String.format(fmt, alg);
                 throw new MalformedJwtException(msg);
             }
         }
@@ -460,10 +467,10 @@ public class DefaultJwtParser implements JwtParser {
             // https://datatracker.ietf.org/doc/html/rfc7516#section-5.1, Step 14.
             final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
 
-            base64Url = tokenizedJwe.getDigest();
-            if (Strings.hasText(base64Url)) {
-                tag = base64UrlDecode(base64Url, "JWE AAD Authentication Tag");
-            }
+            base64Url = base64UrlDigest;
+            //guaranteed to be non-empty via the `alg` check (~ line 423) above:
+            Assert.hasText(base64Url, "JWE AAD Authentication Tag cannot be null or empty.");
+            tag = base64UrlDecode(base64Url, "JWE AAD Authentication Tag");
             if (Arrays.length(tag) == 0) {
                 String msg = "Compact JWE strings must always contain an AAD Authentication Tag.";
                 throw new MalformedJwtException(msg);
@@ -474,18 +481,12 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(MISSING_ENC_MSG);
             }
             final AeadAlgorithm encAlg = this.encryptionAlgorithmLocator.apply(jweHeader);
-            if (encAlg == null) {
-                String msg = "Unrecognized JWE encryption algorithm '" + enc + "'.";
-                throw new UnsupportedJwtException(msg);
-            }
+            Assert.stateNotNull(encAlg, "JWE Encryption Algorithm cannot be null.");
 
             @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgorithmLocator.apply(jweHeader);
-            if (keyAlg == null) {
-                String msg = "Unrecognized JWE key algorithm '" + alg + "'.";
-                throw new UnsupportedJwtException(msg);
-            }
+            Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
-            final Key key = ((Function<JweHeader, Key>) this.keyLocator).apply(jweHeader);
+            final Key key = this.keyLocator.apply(jweHeader);
             if (key == null) {
                 String msg = "Cannot decrypt JWE payload: unable to locate key for JWE with header: " + jweHeader;
                 throw new UnsupportedJwtException(msg);
@@ -530,11 +531,11 @@ public class DefaultJwtParser implements JwtParser {
         if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else { // JWS
-            if (!Strings.hasText(tokenized.getDigest()) && SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
+            if (!Strings.hasText(base64UrlDigest) && SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
                 //noinspection rawtypes
                 jwt = new DefaultJwt(header, body);
             } else {
-                jwt = new DefaultJws<>((JwsHeader) header, body, tokenized.getDigest());
+                jwt = new DefaultJws<>((JwsHeader) header, body, base64UrlDigest);
             }
         }
 
@@ -553,21 +554,7 @@ public class DefaultJwtParser implements JwtParser {
                 String msg = "Unsupported signature algorithm '" + alg + "'";
                 throw new SignatureException(msg, e);
             }
-            if (algorithm == null) {
-                String msg = "Unrecognized JWS signature algorithm '" + alg + "'.";
-                throw new UnsupportedJwtException(msg);
-            }
-
-            String digest = tokenized.getDigest();
-
-            if (SignatureAlgorithms.NONE.equals(algorithm) && Strings.hasText(digest)) {
-                //'none' algorithm, but it has a signature.  This is invalid:
-                String msg = "The JWS header references signature algorithm '" + alg + "' yet the compact JWS string has a digest/signature. This is not permitted per https://tools.ietf.org/html/rfc7518#section-3.6.";
-                throw new MalformedJwtException(msg);
-            } else if (!Strings.hasText(digest)) {
-                String msg = "The JWS header references signature algorithm '" + alg + "' but the compact JWS string does not have a signature token.";
-                throw new MalformedJwtException(msg);
-            }
+            Assert.stateNotNull(algorithm, "JWS Signature Algorithm cannot be null.");
 
             Assert.stateNotNull(this.signingKeyResolver, "SigningKeyResolver cannot be null (invariant).");
 
@@ -603,12 +590,12 @@ public class DefaultJwtParser implements JwtParser {
             } catch (InvalidKeyException | IllegalArgumentException e) {
                 String algId = algorithm.getId();
                 String msg = "The parsed JWT indicates it was signed with the '" + algId + "' signature " +
-                    "algorithm, but the provided " + key.getClass().getName() + " key may " +
-                    "not be used to verify " + algId + " signatures.  Because the specified " +
-                    "key reflects a specific and expected algorithm, and the JWT does not reflect " +
-                    "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                    "trusted.  Another possibility is that the parser was provided the incorrect " +
-                    "signature verification key, but this cannot be assumed for security reasons.";
+                        "algorithm, but the provided " + key.getClass().getName() + " key may " +
+                        "not be used to verify " + algId + " signatures.  Because the specified " +
+                        "key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                        "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
+                        "trusted.  Another possibility is that the parser was provided the incorrect " +
+                        "signature verification key, but this cannot be assumed for security reasons.";
                 throw new UnsupportedJwtException(msg, e);
             }
         }

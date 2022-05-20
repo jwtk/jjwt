@@ -172,7 +172,7 @@ public class JwtMap implements Map<String, Object> {
             Assert.notNull(canonicalValue, "Converter's resulting canonicalValue cannot be null.");
         } catch (IllegalArgumentException e) {
             Object sval = field.isSecret() ? REDACTED_VALUE : rawValue;
-            String msg = "Invalid " + getName() + " " + field + " value [" + sval + "]. Cause: " + e.getMessage();
+            String msg = "Invalid " + getName() + " " + field + " value: " + sval + ". Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
         Object retval = nullSafePut(id, canonicalValue);

@@ -132,7 +132,7 @@ class JwtMapTest {
             fail()
         } catch (IllegalArgumentException expected) {
             //Ensure <redacted> message so we don't show any secret value:
-            String msg = 'Invalid Map \'foo\' (foo) value [<redacted>]. Cause: Values must be ' +
+            String msg = 'Invalid Map \'foo\' (foo) value: <redacted>. Cause: Values must be ' +
                     'either String or java.math.BigInteger instances. Value type found: ' +
                     'java.net.URI.'
             assertEquals msg, expected.getMessage()

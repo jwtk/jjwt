@@ -74,7 +74,8 @@ public class JwtDateConverter implements Converter<Date, Object> {
         try {
             return DateFormats.parseIso8601Date(value);
         } catch (ParseException e) {
-            String msg = "String value does not appear to be ISO-8601-formatted: " + value;
+            String msg = "String value is not a JWT NumericDate, nor is it ISO-8601-formatted. " +
+                    "All heuristics exhausted. Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
     }

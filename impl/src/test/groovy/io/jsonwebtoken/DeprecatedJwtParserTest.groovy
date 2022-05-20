@@ -18,6 +18,7 @@ package io.jsonwebtoken
 import io.jsonwebtoken.impl.DefaultClock
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
+import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.SignatureException
@@ -1408,7 +1409,34 @@ class DeprecatedJwtParserTest {
     }
 
     @Test
+    void testSetClock() {
+        def clock = new DefaultClock();
+        def parser = Jwts.parser().setClock(clock)
+        assertSame clock, parser.@clock
+        assertFalse DefaultClock.INSTANCE.is(parser.@clock)
+    }
+
+    @Test
     void testParseClockManipulationWithDefaultClock() {
+        Date expiry = new Date(System.currentTimeMillis() - 1000)
+
+        def key = TestKeys.HS256
+
+        String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry)
+                .signWith(key).compact()
+
+        try {
+            def clock = new DefaultClock()
+            def parser = Jwts.parser().setSigningKey(key).setClock(clock)
+            parser.parseClaimsJws(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertTrue e.getMessage().startsWith('JWT expired at ')
+        }
+    }
+
+    @Test
+    void testBuilderParseClockManipulationWithDefaultClock() {
         Date expiry = new Date(System.currentTimeMillis() - 1000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()

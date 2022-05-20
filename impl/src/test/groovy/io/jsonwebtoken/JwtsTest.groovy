@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.impl.security.ConstantKeyLocator
 import io.jsonwebtoken.impl.security.DirectKeyAlgorithm
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm
 import io.jsonwebtoken.impl.security.TestKeys
@@ -134,6 +135,47 @@ class JwtsTest {
         assertEquals 'Joe', claims.getSubject()
     }
 
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseMalformedHeader() {
+        def headerString = '{"jku":42}' // cannot be parsed as a URI --> malformed header
+        def claimsString = '{"sub":"joe"}'
+        def encodedHeader = base64Url(headerString)
+        def encodedClaims = base64Url(claimsString)
+        def compact = encodedHeader + '.' + encodedClaims + '.AAD='
+        try {
+            Jwts.parserBuilder().build().parseClaimsJws(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = 'Invalid protected header: Invalid JWS header \'jku\' (JWK Set URL) value: 42. ' +
+                    'Cause: Values must be either String or java.net.URI instances. ' +
+                    'Value type found: java.lang.Integer.'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseMalformedClaims() {
+        def h = base64Url('{"alg":"HS256"}')
+        def c = base64Url('{"sub":"joe","exp":"-42-"}')
+        def sig = 'IA=='
+        def compact = "$h.$c.$sig" as String
+        try {
+            Jwts.parserBuilder().build().parseClaimsJws(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = 'Invalid claims: Invalid JWT Claim \'exp\' (Expiration Time) value: -42-. Cause: ' +
+                    'String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics exhausted. ' +
+                    'Cause: Unparseable date: "-42-"'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
     @Test
     void testPlaintextJwtString() {
         // Assert exact output per example at https://datatracker.ietf.org/doc/html/rfc7519#section-6.1
@@ -235,7 +277,8 @@ class JwtsTest {
             Jwts.parserBuilder().enableUnsecuredJws().setSigningKey(key).build().parseClaimsJws(missingSig)
             fail()
         } catch (MalformedJwtException expected) {
-            assertEquals 'The JWS header references signature algorithm \'HS256\' but the compact JWS string is missing the required signature.', expected.getMessage()
+            String s = String.format(DefaultJwtParser.MISSING_JWS_DIGEST_MSG_FMT, 'HS256')
+            assertEquals s, expected.getMessage()
         }
     }
 
@@ -296,8 +339,8 @@ class JwtsTest {
 
     @Test
     void testConvenienceExpiration() {
-        Date then = laterDate(10000);
-        String compact = Jwts.builder().setExpiration(then).compact();
+        Date then = laterDate(10000)
+        String compact = Jwts.builder().setExpiration(then).compact()
         Claims claims = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()
         assertEquals then, claimedDate
@@ -667,7 +710,7 @@ class JwtsTest {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
         String jws = withoutSignature + '.' + invalidEncodedSignature
-        def keypair = SignatureAlgorithms.ES256.keyPairBuilder().build()
+        def keypair = SignatureAlgorithms.ES256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
         Jwts.parserBuilder().setSigningKey(keypair.public).build().parseClaimsJws(jws)
     }
 
@@ -687,6 +730,399 @@ class JwtsTest {
         } catch (UnsupportedJwtException expected) {
             assertEquals 'Unsigned Claims JWTs are not supported.', expected.message
         }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweMissingAlg() {
+        def h = base64Url('{"enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def compact = h + '.ecek.iv.' + c + '.tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            assertEquals DefaultJwtParser.MISSING_JWE_ALG_MSG, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweEmptyAlg() {
+        def h = base64Url('{"alg":"","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def compact = h + '.ecek.iv.' + c + '.tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            assertEquals DefaultJwtParser.MISSING_JWE_ALG_MSG, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWhitespaceAlg() {
+        def h = base64Url('{"alg":"  ","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def compact = h + '.ecek.iv.' + c + '.tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            assertEquals DefaultJwtParser.MISSING_JWE_ALG_MSG, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithNoneAlg() {
+        def h = base64Url('{"alg":"none","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def compact = h + '.ecek.iv.' + c + '.tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            assertEquals DefaultJwtParser.JWE_NONE_MSG, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithMissingAadTag() {
+        def h = base64Url('{"alg":"dir","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def compact = h + '.ecek.iv.' + c + '.'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = String.format(DefaultJwtParser.MISSING_JWE_DIGEST_MSG_FMT, 'dir')
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithEmptyAadTag() {
+        def h = base64Url('{"alg":"dir","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        // our decoder skips invalid Base64Url characters, so this decodes to empty which is not allowed:
+        def tag = '&'
+        def compact = h + '.IA==.IA==.' + c + '.' + tag
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = 'Compact JWE strings must always contain an AAD Authentication Tag.'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithMissingRequiredBody() {
+        def h = base64Url('{"alg":"dir","enc":"A128GCM"}')
+        def compact = h + '.ecek.iv..tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = 'Compact JWE strings MUST always contain a payload (ciphertext).'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithEmptyEncryptedKey() {
+        def h = base64Url('{"alg":"dir","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        // our decoder skips invalid Base64Url characters, so this decodes to empty which is not allowed:
+        def encodedKey = '&'
+        def compact = h + '.' + encodedKey + '.iv.' + c + '.tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = 'Compact JWE string represents an encrypted key, but the key is empty.'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithMissingInitializationVector() {
+        def h = base64Url('{"alg":"dir","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def compact = h + '.IA==..' + c + '.tag'
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            String expected = 'Compact JWE strings must always contain an Initialization Vector.'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithMissingEncHeader() {
+        def h = base64Url('{"alg":"dir"}')
+        def c = base64Url('{"sub":"joe"}')
+        def ekey = 'IA=='
+        def iv = 'IA=='
+        def tag = 'IA=='
+        def compact = "$h.$ekey.$iv.$c.$tag" as String
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (MalformedJwtException e) {
+            assertEquals DefaultJwtParser.MISSING_ENC_MSG, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithUnrecognizedEncValue() {
+        def h = base64Url('{"alg":"dir","enc":"foo"}')
+        def c = base64Url('{"sub":"joe"}')
+        def ekey = 'IA=='
+        def iv = 'IA=='
+        def tag = 'IA=='
+        def compact = "$h.$ekey.$iv.$c.$tag" as String
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String expected = "Unrecognized JWE 'enc' header value: foo"
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithUnrecognizedAlgValue() {
+        def h = base64Url('{"alg":"bar","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def ekey = 'IA=='
+        def iv = 'IA=='
+        def tag = 'IA=='
+        def compact = "$h.$ekey.$iv.$c.$tag" as String
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String expected = "Unrecognized JWE 'alg' header value: bar"
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJwsWithUnrecognizedAlgValue() {
+        def h = base64Url('{"alg":"bar"}')
+        def c = base64Url('{"sub":"joe"}')
+        def sig = 'IA=='
+        def compact = "$h.$c.$sig" as String
+        try {
+            Jwts.parserBuilder().build().parseClaimsJws(compact)
+            fail()
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            String expected = "Unsupported signature algorithm 'bar'"
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithUnlocatableKey() {
+        def h = base64Url('{"alg":"dir","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def ekey = 'IA=='
+        def iv = 'IA=='
+        def tag = 'IA=='
+        def compact = "$h.$ekey.$iv.$c.$tag" as String
+        try {
+            Jwts.parserBuilder().build().parseClaimsJwe(compact)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String expected = "Cannot decrypt JWE payload: unable to locate key for JWE with header: {alg=dir, enc=A128GCM}"
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJwsWithCustomSignatureAlgorithm() {
+        def realAlg = SignatureAlgorithms.HS256 // any alg will do, we're going to wrap it
+        def key = TestKeys.HS256
+        def id = realAlg.getId() + 'X' // custom id
+        def alg = new SecretKeySignatureAlgorithm() {
+            @Override
+            SecretKeyBuilder keyBuilder() {
+                return realAlg.keyBuilder()
+            }
+
+            @Override
+            int getKeyBitLength() {
+                return realAlg.keyBitLength
+            }
+
+            @Override
+            byte[] sign(SignatureRequest<SecretKey> request) throws SecurityException {
+                return realAlg.sign(request)
+            }
+
+            @Override
+            boolean verify(VerifySignatureRequest<SecretKey> request) throws SecurityException {
+                return realAlg.verify(request)
+            }
+
+            @Override
+            String getId() {
+                return id
+            }
+        }
+
+        def jws = Jwts.builder().setSubject("joe").signWith(key, alg).compact()
+
+        assertEquals 'joe', Jwts.parserBuilder()
+                .addSignatureAlgorithms([alg])
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(jws).body.getSubject()
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithCustomEncryptionAlgorithm() {
+        def realAlg = EncryptionAlgorithms.A128GCM // any alg will do, we're going to wrap it
+        def key = realAlg.keyBuilder().build()
+        def enc = realAlg.getId() + 'X' // custom id
+        def encAlg = new AeadAlgorithm() {
+            @Override
+            AeadResult encrypt(AeadRequest request) throws SecurityException {
+                return realAlg.encrypt(request)
+            }
+
+            @Override
+            Message decrypt(DecryptAeadRequest request) throws SecurityException {
+                return realAlg.decrypt(request)
+            }
+
+            @Override
+            String getId() {
+                return enc
+            }
+
+            @Override
+            SecretKeyBuilder keyBuilder() {
+                return realAlg.keyBuilder()
+            }
+
+            @Override
+            int getKeyBitLength() {
+                return realAlg.getKeyBitLength()
+            }
+        }
+
+        def jwe = Jwts.jweBuilder().setSubject("joe").encryptWith(encAlg).withKey(key).compact()
+
+        assertEquals 'joe', Jwts.parserBuilder()
+                .addEncryptionAlgorithms([encAlg])
+                .decryptWith(key)
+                .build()
+                .parseClaimsJwe(jwe).body.getSubject()
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseJweWithBadKeyAlg() {
+        def alg = 'foo'
+        def h = base64Url('{"alg":"foo","enc":"A128GCM"}')
+        def c = base64Url('{"sub":"joe"}')
+        def ekey = 'IA=='
+        def iv = 'IA=='
+        def tag = 'IA=='
+        def compact = "$h.$ekey.$iv.$c.$tag" as String
+
+        def badKeyAlg = new KeyAlgorithm() {
+            @Override
+            KeyResult getEncryptionKey(KeyRequest request) throws SecurityException {
+                return null
+            }
+
+            @Override
+            SecretKey getDecryptionKey(DecryptionKeyRequest request) throws SecurityException {
+                return null // bad implementation here - returns null, and that's not good
+            }
+
+            @Override
+            String getId() {
+                return alg
+            }
+        }
+
+        try {
+            Jwts.parserBuilder()
+                    .setKeyLocator(new ConstantKeyLocator(TestKeys.HS256, TestKeys.A128GCM))
+                    .addKeyAlgorithms([badKeyAlg]) // <-- add bad alg here
+                    .build()
+                    .parseClaimsJwe(compact)
+            fail()
+        } catch (IllegalStateException e) {
+            String expected = "The 'foo' JWE key algorithm did not return a decryption key. " +
+                    "Unable to perform 'A128GCM' decryption."
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testParseRequiredInt() {
+        def key = TestKeys.HS256
+        def jws = Jwts.builder().signWith(key).claim("foo", 42).compact()
+        Jwts.parserBuilder().setSigningKey(key)
+                .require("foo", 42L) //require a long, but jws contains int, should still work
+                .build().parseClaimsJws(jws)
     }
 
     //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20
