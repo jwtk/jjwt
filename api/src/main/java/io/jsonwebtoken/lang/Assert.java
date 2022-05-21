@@ -202,10 +202,11 @@ public final class Assert {
      * @param message the exception message to use if the assertion fails
      * @throws IllegalArgumentException if the object array is <code>null</code> or has no elements
      */
-    public static void notEmpty(Object[] array, String message) {
+    public static Object[] notEmpty(Object[] array, String message) {
         if (Objects.isEmpty(array)) {
             throw new IllegalArgumentException(message);
         }
+        return array;
     }
 
     /**

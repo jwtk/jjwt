@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Conditions
+import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
 import org.junit.Test
 
@@ -14,5 +15,6 @@ class PrivateConstructorsTest {
         new KeyAlgorithmsBridge()
         new KeysBridge()
         new Conditions()
+        new Functions()
     }
 }

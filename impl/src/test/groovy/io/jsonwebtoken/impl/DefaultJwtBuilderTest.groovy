@@ -24,12 +24,7 @@ import io.jsonwebtoken.io.Encoder
 import io.jsonwebtoken.io.EncodingException
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.security.KeyException
-import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.SignatureAlgorithms
-import io.jsonwebtoken.security.SignatureException
-import io.jsonwebtoken.security.SignatureRequest
-import io.jsonwebtoken.security.VerifySignatureRequest
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.KeyGenerator
@@ -286,7 +281,7 @@ class DefaultJwtBuilderTest {
             b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals iae.message, 'Unable to serialize claims to JSON. Cause: dummy text'
+            assertEquals 'Unable to serialize claims to JSON. Cause: dummy text', iae.message
         }
     }
 

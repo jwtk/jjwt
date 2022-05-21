@@ -21,8 +21,8 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.LegacyServices;
-import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.impl.security.DefaultSignatureRequest;
 import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
 import io.jsonwebtoken.io.Decoders;
@@ -87,15 +87,12 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         // TODO for 1.0 - these should throw SerializationException not IllegalArgumentException
         // IAE is being retained for backwards pre-1.0 behavior compatibility
         Class clazz = "header".equals(which) ? IllegalStateException.class : IllegalArgumentException.class;
-        return new PropagatingExceptionFunction<>(clazz,
-                "Unable to serialize " + which + " to JSON.",
-                new Function<Map<String, ?>, byte[]>() {
-                    @Override
-                    public byte[] apply(Map<String, ?> map) {
-                        return serializer.serialize(map);
-                    }
-                }
-        );
+        return Functions.wrap(new Function<Map<String, ?>, byte[]>() {
+            @Override
+            public byte[] apply(Map<String, ?> map) {
+                return serializer.serialize(map);
+            }
+        }, clazz, "Unable to serialize %s to JSON.", which);
     }
 
     @Override
@@ -161,13 +158,13 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         this.key = key;
         this.algorithm = (SignatureAlgorithm<Key, ?>) alg;
-        this.signFunction = new PropagatingExceptionFunction<>(SignatureException.class,
-                "Unable to compute " + alg.getId() + " signature.", new Function<SignatureRequest<Key>, byte[]>() {
+        String id = Assert.hasText(this.algorithm.getId(), "SignatureAlgorithm id cannot be null or empty.");
+        this.signFunction = Functions.wrap(new Function<SignatureRequest<Key>, byte[]>() {
             @Override
             public byte[] apply(SignatureRequest<Key> request) {
                 return algorithm.sign(request);
             }
-        });
+        }, SignatureException.class, "Unable to compute %s signature.", id);
         return (T) this;
     }
 

@@ -3,7 +3,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.JweBuilder;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
+import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
@@ -38,21 +38,19 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
     private Key key;
 
-    protected <I, O> Function<I, O> wrap(String msg, Function<I, O> fn) {
-        return new PropagatingExceptionFunction<>(SecurityException.class, msg, fn);
+    protected <I, O> Function<I, O> wrap(Function<I, O> fn, String fmt, Object... args) {
+        return Functions.wrap(fn, SecurityException.class, fmt, args);
     }
 
     //TODO for 1.0: delete this method when the parent class's implementation has changed to SerializationException
     @Override
     protected Function<Map<String, ?>, byte[]> wrap(final Serializer<Map<String, ?>> serializer, String which) {
-        return new PropagatingExceptionFunction<>(SerializationException.class,
-            "Unable to serialize " + which + " to JSON.", new Function<Map<String, ?>, byte[]>() {
+        return Functions.wrap(new Function<Map<String, ?>, byte[]>() {
             @Override
             public byte[] apply(Map<String, ?> map) {
                 return serializer.serialize(map);
             }
-        }
-        );
+        }, SerializationException.class, "Unable to serialize %s to JSON.", which);
     }
 
     @Override
@@ -64,14 +62,14 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     @Override
     public JweBuilder encryptWith(final AeadAlgorithm enc) {
         this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
-        Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
-        String encMsg = enc.getId() + " encryption failed.";
-        this.encFunction = wrap(encMsg, new Function<AeadRequest, AeadResult>() {
+        final String id = enc.getId();
+        Assert.hasText(id, "Encryption algorithm id cannot be null or empty.");
+        this.encFunction = wrap(new Function<AeadRequest, AeadResult>() {
             @Override
             public AeadResult apply(AeadRequest request) {
                 return enc.encrypt(request);
             }
-        });
+        }, "%s encryption failed.", id);
         return this;
     }
 
@@ -89,16 +87,15 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         //noinspection unchecked
         this.alg = (KeyAlgorithm<Key, ?>) Assert.notNull(alg, "KeyAlgorithm cannot be null.");
         final KeyAlgorithm<Key, ?> keyAlg = this.alg;
-        Assert.hasText(alg.getId(), "KeyAlgorithm id cannot be null or empty.");
-
-        String cekMsg = "Unable to obtain content encryption key from key management algorithm '" + alg.getId() + "'.";
-        this.algFunction = wrap(cekMsg, new Function<KeyRequest<Key>, KeyResult>() {
+        final String id = alg.getId();
+        Assert.hasText(id, "KeyAlgorithm id cannot be null or empty.");
+        String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
+        this.algFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
             @Override
             public KeyResult apply(KeyRequest<Key> request) {
                 return keyAlg.getEncryptionKey(request);
             }
-        });
-
+        }, SecurityException.class, cekMsg, id);
         return this;
     }
 
@@ -166,10 +163,10 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
         String base64UrlEncodedTag = base64UrlEncoder.encode(tag);
 
         return
-            base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedTag;
+                base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
+                        base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
+                        base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
+                        base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
+                        base64UrlEncodedTag;
     }
 }

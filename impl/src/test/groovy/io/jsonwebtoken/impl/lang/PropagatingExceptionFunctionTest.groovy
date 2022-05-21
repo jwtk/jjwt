@@ -12,12 +12,12 @@ class PropagatingExceptionFunctionTest {
 
         def ex = new SecurityException("test")
 
-        def fn = new PropagatingExceptionFunction<>(SecurityException.class, "foo", new Function<Object,Object>() {
+        def fn = new PropagatingExceptionFunction<>(new Function<Object, Object>() {
             @Override
             Object apply(Object t) {
                 throw ex
             }
-        })
+        }, SecurityException.class, "foo")
 
         try {
             fn.apply("hi")

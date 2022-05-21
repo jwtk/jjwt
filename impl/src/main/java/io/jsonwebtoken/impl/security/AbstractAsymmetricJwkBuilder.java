@@ -1,6 +1,9 @@
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -22,11 +25,8 @@ import io.jsonwebtoken.security.RsaPublicJwkBuilder;
 
 import java.net.URI;
 import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Set;
 
 abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
-    T extends AsymmetricJwkBuilder<K, J, T>>
-    extends AbstractJwkBuilder<K, J, T> implements AsymmetricJwkBuilder<K, J, T> {
+        T extends AsymmetricJwkBuilder<K, J, T>>
+        extends AbstractJwkBuilder<K, J, T> implements AsymmetricJwkBuilder<K, J, T> {
 
     protected boolean computeX509Sha1Thumbprint;
     /**
@@ -46,6 +46,14 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     protected Boolean computeX509Sha256Thumbprint = null;
     protected Boolean applyX509KeyUse = null;
     private KeyUseStrategy keyUseStrategy = DefaultKeyUseStrategy.INSTANCE;
+
+    private static final Function<X509Certificate, byte[]> GET_X509_BYTES =
+            Functions.wrapFmt(new CheckedFunction<X509Certificate, byte[]>() {
+                @Override
+                public byte[] apply(X509Certificate cert) throws Exception {
+                    return cert.getEncoded();
+                }
+            }, MalformedKeyException.class, "Unable to access X509Certificate encoded bytes necessary to compute thumbprint. Certificate: %s");
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
@@ -103,19 +111,11 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         return tthis();
     }
 
-    private byte[] computeThumbprint(final X509Certificate cert, final String jcaName) {
-        try {
-            byte[] encoded = cert.getEncoded();
-            MessageDigest digest = MessageDigest.getInstance(jcaName);
-            return digest.digest(encoded);
-        } catch (CertificateEncodingException e) {
-            String msg = "Unable to access X509Certificate encoded bytes necessary to compute a " + jcaName +
-                " thumbprint. Certificate: {" + cert + "}.  Cause: " + e.getMessage();
-            throw new MalformedKeyException(msg, e);
-        } catch (NoSuchAlgorithmException e) {
-            String msg = "JCA Algorithm Name '" + jcaName + "' is not available: " + e.getMessage();
-            throw new IllegalStateException(msg, e);
-        }
+    private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {
+        byte[] encoded = GET_X509_BYTES.apply(cert);
+        ContentRequest request =
+                new DefaultContentRequest(this.jwkContext.getProvider(), this.jwkContext.getRandom(), encoded);
+        return alg.hash(request);
     }
 
     @Override
@@ -142,11 +142,11 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
                 }
             }
             if (computeX509Sha1Thumbprint) {
-                byte[] thumbprint = computeThumbprint(firstCert, "SHA-1");
+                byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA1);
                 this.jwkContext.setX509CertificateSha1Thumbprint(thumbprint);
             }
             if (computeX509Sha256Thumbprint) {
-                byte[] thumbprint = computeThumbprint(firstCert, "SHA-256");
+                byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA256);
                 this.jwkContext.setX509CertificateSha256Thumbprint(thumbprint);
             }
         }
@@ -154,10 +154,10 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     private abstract static class DefaultPublicJwkBuilder<K extends PublicKey, L extends PrivateKey,
-        J extends PublicJwk<K>, M extends PrivateJwk<L, K, J>, P extends PrivateJwkBuilder<L, K, J, M, P>,
-        T extends PublicJwkBuilder<K, L, J, M, P, T>>
-        extends AbstractAsymmetricJwkBuilder<K, J, T>
-        implements PublicJwkBuilder<K, L, J, M, P, T> {
+            J extends PublicJwk<K>, M extends PrivateJwk<L, K, J>, P extends PrivateJwkBuilder<L, K, J, M, P>,
+            T extends PublicJwkBuilder<K, L, J, M, P, T>>
+            extends AbstractAsymmetricJwkBuilder<K, J, T>
+            implements PublicJwkBuilder<K, L, J, M, P, T> {
 
         DefaultPublicJwkBuilder(JwkContext<K> ctx) {
             super(ctx);
@@ -174,10 +174,10 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     private abstract static class DefaultPrivateJwkBuilder<K extends PrivateKey, L extends PublicKey,
-        J extends PublicJwk<L>, M extends PrivateJwk<K, L, J>,
-        T extends PrivateJwkBuilder<K, L, J, M, T>>
-        extends AbstractAsymmetricJwkBuilder<K, M, T>
-        implements PrivateJwkBuilder<K, L, J, M, T> {
+            J extends PublicJwk<L>, M extends PrivateJwk<K, L, J>,
+            T extends PrivateJwkBuilder<K, L, J, M, T>>
+            extends AbstractAsymmetricJwkBuilder<K, M, T>
+            implements PrivateJwkBuilder<K, L, J, M, T> {
 
         DefaultPrivateJwkBuilder(JwkContext<K> ctx) {
             super(ctx);
@@ -196,8 +196,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     static class DefaultEcPublicJwkBuilder
-        extends DefaultPublicJwkBuilder<ECPublicKey, ECPrivateKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder, EcPublicJwkBuilder>
-        implements EcPublicJwkBuilder {
+            extends DefaultPublicJwkBuilder<ECPublicKey, ECPrivateKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder, EcPublicJwkBuilder>
+            implements EcPublicJwkBuilder {
 
         DefaultEcPublicJwkBuilder(JwkContext<?> src, ECPublicKey key) {
             super(new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, src, key));
@@ -210,8 +210,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     static class DefaultRsaPublicJwkBuilder
-        extends DefaultPublicJwkBuilder<RSAPublicKey, RSAPrivateKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder, RsaPublicJwkBuilder>
-        implements RsaPublicJwkBuilder {
+            extends DefaultPublicJwkBuilder<RSAPublicKey, RSAPrivateKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder, RsaPublicJwkBuilder>
+            implements RsaPublicJwkBuilder {
 
         DefaultRsaPublicJwkBuilder(JwkContext<?> ctx, RSAPublicKey key) {
             super(new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, key));
@@ -224,8 +224,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     static class DefaultEcPrivateJwkBuilder
-        extends DefaultPrivateJwkBuilder<ECPrivateKey, ECPublicKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder>
-        implements EcPrivateJwkBuilder {
+            extends DefaultPrivateJwkBuilder<ECPrivateKey, ECPublicKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder>
+            implements EcPrivateJwkBuilder {
 
         DefaultEcPrivateJwkBuilder(JwkContext<?> src, ECPrivateKey key) {
             super(new DefaultJwkContext<>(DefaultEcPrivateJwk.FIELDS, src, key));
@@ -237,8 +237,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     static class DefaultRsaPrivateJwkBuilder
-        extends DefaultPrivateJwkBuilder<RSAPrivateKey, RSAPublicKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder>
-        implements RsaPrivateJwkBuilder {
+            extends DefaultPrivateJwkBuilder<RSAPrivateKey, RSAPublicKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder>
+            implements RsaPrivateJwkBuilder {
 
         DefaultRsaPrivateJwkBuilder(JwkContext<?> src, RSAPrivateKey key) {
             super(new DefaultJwkContext<>(DefaultRsaPrivateJwk.FIELDS, src, key));
