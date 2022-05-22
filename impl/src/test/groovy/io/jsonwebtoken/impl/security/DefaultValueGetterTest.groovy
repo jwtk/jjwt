@@ -143,8 +143,10 @@ class DefaultValueGetterTest {
             getter.getRequiredBytes('foo')
             fail()
         } catch (MalformedJwtException expected) {
-            String msg = "Map 'foo' value is not a valid Base64URL String: Unable to decode input: null"
-            assertEquals msg, expected.getMessage()
+            String msg = "Map 'foo' value is not a valid Base64URL String: Unable to decode input: "
+            // cannot do msg equality check here - the trailing value differs depending on the JDK < 11 or >= 11,
+            // so we do a 'starts with' check to ensure the parts of the message in our control are verified:
+            assertTrue expected.getMessage().startsWith(msg)
         }
     }
 
@@ -155,8 +157,10 @@ class DefaultValueGetterTest {
             getter.getRequiredBigInt('foo', false)
             fail()
         } catch (MalformedJwtException expected) {
-            String msg = "Unable to decode Map 'foo' value '#@!' to BigInteger: Unable to decode input: null"
-            assertEquals msg, expected.getMessage()
+            String msg = "Unable to decode Map 'foo' value '#@!' to BigInteger: Unable to decode input: "
+            // cannot do msg equality check here - the trailing value differs depending on the JDK < 11 or >= 11,
+            // so we do a 'starts with' check to ensure the parts of the message in our control are verified:
+            assertTrue expected.getMessage().startsWith(msg)
         }
     }
 
@@ -167,8 +171,10 @@ class DefaultValueGetterTest {
             getter.getRequiredBigInt('foo', true)
             fail()
         } catch (MalformedJwtException expected) {
-            String msg = "Unable to decode Map 'foo' value to BigInteger: Unable to decode input: null"
-            assertEquals msg, expected.getMessage()
+            String msg = "Unable to decode Map 'foo' value to BigInteger: Unable to decode input: "
+            // cannot do msg equality check here - the trailing value differs depending on the JDK < 11 or >= 11,
+            // so we do a 'starts with' check to ensure the parts of the message in our control are verified:
+            assertTrue expected.getMessage().startsWith(msg)
         }
     }
 
