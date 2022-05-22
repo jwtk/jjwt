@@ -6,7 +6,6 @@ import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AsymmetricJwk;
 import io.jsonwebtoken.security.AsymmetricJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwk;
@@ -74,10 +73,12 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         return tthis();
     }
 
+    /*
     public T setKeyUseStrategy(KeyUseStrategy strategy) {
         this.keyUseStrategy = Assert.notNull(strategy, "KeyUseStrategy cannot be null.");
         return tthis();
     }
+     */
 
     @Override
     public T setX509CertificateChain(List<X509Certificate> chain) {
@@ -93,11 +94,13 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         return tthis();
     }
 
+    /*
     @Override
     public T withX509KeyUse(boolean enable) {
         this.applyX509KeyUse = enable;
         return tthis();
     }
+     */
 
     @Override
     public T withX509Sha1Thumbprint(boolean enable) {
@@ -126,21 +129,21 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
             firstCert = chain.get(0);
         }
 
-        if (applyX509KeyUse == null) { //if not specified, enable by default if possible:
-            applyX509KeyUse = firstCert != null && !Strings.hasText(this.jwkContext.getPublicKeyUse());
-        }
+//        if (applyX509KeyUse == null) { //if not specified, enable by default if possible:
+//            applyX509KeyUse = firstCert != null && !Strings.hasText(this.jwkContext.getPublicKeyUse());
+//        }
         if (computeX509Sha256Thumbprint == null) { //if not specified, enable by default if possible:
             computeX509Sha256Thumbprint = firstCert != null && !computeX509Sha1Thumbprint;
         }
 
         if (firstCert != null) {
-            if (applyX509KeyUse) {
-                KeyUsage usage = new KeyUsage(firstCert);
-                String use = keyUseStrategy.toJwkValue(usage);
-                if (Strings.hasText(use)) {
-                    setPublicKeyUse(use);
-                }
-            }
+//            if (applyX509KeyUse) {
+//                KeyUsage usage = new KeyUsage(firstCert);
+//                String use = keyUseStrategy.toJwkValue(usage);
+//                if (Strings.hasText(use)) {
+//                    setPublicKeyUse(use);
+//                }
+//            }
             if (computeX509Sha1Thumbprint) {
                 byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA1);
                 this.jwkContext.setX509CertificateSha1Thumbprint(thumbprint);

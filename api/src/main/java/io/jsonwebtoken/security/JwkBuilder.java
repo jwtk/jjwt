@@ -37,7 +37,7 @@ import java.util.Set;
 public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends SecurityBuilder<J, T> {
 
     /**
-     * Set a single JWK property by name. If the {@code value} is {@code null}, an  empty
+     * Set a single JWK property by name. If the {@code value} is {@code null}, an empty array, an empty
      * {@link java.util.Collection}, or an empty {@link Map}, the property will be removed from the JWK.
      *
      * @param name  the name of the JWK property
@@ -47,7 +47,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     T put(String name, Object value);
 
     /**
-     * Sets one or more JWK properties by name.  If any {@code name} has a value that is {@code null},
+     * Sets one or more JWK properties by name.  If any {@code name} has a value that is {@code null}, an empty array,
      * an empty {@link java.util.Collection}, or an empty {@link Map}, the property will be removed from the JWK.
      *
      * @param values one or more name/value pairs to set on the JWK.

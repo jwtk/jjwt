@@ -132,7 +132,7 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      */
     T setX509Url(URI uri) throws IllegalArgumentException;
 
-    T withX509KeyUse(boolean enable);
+    //T withX509KeyUse(boolean enable);
 
     T withX509Sha1Thumbprint(boolean enable);
 

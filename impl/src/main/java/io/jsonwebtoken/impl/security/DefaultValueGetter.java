@@ -100,23 +100,13 @@ public class DefaultValueGetter implements ValueGetter {
 
     @Override
     public byte[] getRequiredBytes(String key) {
-
-        String encoded = getRequiredString(key);
-
-        byte[] decoded;
+        String encoded = getRequiredString(key); // guaranteed to be non-null and non-empty
         try {
-            decoded = Decoders.BASE64URL.decode(encoded);
+            return Decoders.BASE64URL.decode(encoded);
         } catch (Exception e) {
             String msg = name() + " '" + key + "' value is not a valid Base64URL String: " + e.getMessage();
             throw malformed(msg);
         }
-
-        if (Arrays.length(decoded) == 0) {
-            String msg = name() + " '" + key + "' decoded byte array cannot be empty.";
-            throw malformed(msg);
-        }
-
-        return decoded;
     }
 
     @Override
