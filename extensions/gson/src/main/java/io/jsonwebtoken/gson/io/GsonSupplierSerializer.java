@@ -13,24 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.gson.io;
 
-import io.jsonwebtoken.lang.Assert;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import io.jsonwebtoken.lang.Supplier;
 
-public class FormattedStringSupplier implements Supplier<String> {
+import java.lang.reflect.Type;
 
-    private final String msg;
+public final class GsonSupplierSerializer implements JsonSerializer<Supplier<?>> {
 
-    private final Object[] args;
-
-    public FormattedStringSupplier(String msg, Object[] args) {
-        this.msg = Assert.hasText(msg, "Message cannot be null or empty.");
-        this.args = Assert.notEmpty(args, "Arguments cannot be null or empty.");
-    }
+    public static final GsonSupplierSerializer INSTANCE = new GsonSupplierSerializer();
 
     @Override
-    public String get() {
-        return String.format(this.msg, this.args);
+    public JsonElement serialize(Supplier<?> supplier, Type type, JsonSerializationContext ctx) {
+        Object value = supplier.get();
+        return ctx.serialize(value);
     }
 }

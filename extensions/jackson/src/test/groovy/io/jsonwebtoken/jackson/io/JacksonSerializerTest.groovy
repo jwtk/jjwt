@@ -23,8 +23,8 @@ import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
 import static org.hamcrest.CoreMatchers.instanceOf
+import static org.junit.Assert.*
 
 class JacksonSerializerTest {
 
@@ -50,6 +50,15 @@ class JacksonSerializerTest {
     @Test(expected = IllegalArgumentException)
     void testObjectMapperConstructorWithNullArgument() {
         new JacksonSerializer<>(null)
+    }
+
+    @Test
+    void testObjectMapperConstructorAutoRegistersModule() {
+        def om = createMock(ObjectMapper)
+        expect(om.registerModule(same(JacksonSerializer.MODULE))).andReturn(om)
+        replay om
+        def serializer = new JacksonSerializer<>(om)
+        verify om
     }
 
     @Test

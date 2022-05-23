@@ -18,19 +18,28 @@ package io.jsonwebtoken.impl.lang;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Supplier;
 
-public class FormattedStringSupplier implements Supplier<String> {
+public class RedactedValueConverter<T> implements Converter<T, Object> {
 
-    private final String msg;
+    private final Converter<T, Object> delegate;
 
-    private final Object[] args;
-
-    public FormattedStringSupplier(String msg, Object[] args) {
-        this.msg = Assert.hasText(msg, "Message cannot be null or empty.");
-        this.args = Assert.notEmpty(args, "Arguments cannot be null or empty.");
+    public RedactedValueConverter(Converter<T, Object> delegate) {
+        this.delegate = Assert.notNull(delegate, "Delegate cannot be null.");
     }
 
     @Override
-    public String get() {
-        return String.format(this.msg, this.args);
+    public Object applyTo(T t) {
+        Object value = this.delegate.applyTo(t);
+        if (value != null && !(value instanceof RedactedSupplier)) {
+            value = new RedactedSupplier<>(value);
+        }
+        return value;
+    }
+
+    @Override
+    public T applyFrom(Object o) {
+        if (o instanceof RedactedSupplier) {
+            o = ((Supplier<?>) o).get();
+        }
+        return this.delegate.applyFrom(o);
     }
 }

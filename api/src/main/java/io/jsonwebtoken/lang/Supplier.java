@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.lang;
 
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Supplier;
+/**
+ * Represents a supplier of results.
+ *
+ * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.</p>
+ *
+ * <p>This interface is the equivalent of a JDK 8 {@code java.util.function.Supplier}, backported for JJWT's use in
+ * JDK 7 environments.</p>
+ *
+ * @param <T> the type of object returned by this supplier
+ * @since JJWT_RELEASE_VERSION
+ */
+public interface Supplier<T> {
 
-public class FormattedStringSupplier implements Supplier<String> {
-
-    private final String msg;
-
-    private final Object[] args;
-
-    public FormattedStringSupplier(String msg, Object[] args) {
-        this.msg = Assert.hasText(msg, "Message cannot be null or empty.");
-        this.args = Assert.notEmpty(args, "Arguments cannot be null or empty.");
-    }
-
-    @Override
-    public String get() {
-        return String.format(this.msg, this.args);
-    }
+    /**
+     * Returns a result.
+     *
+     * @return a result.
+     */
+    T get();
 }

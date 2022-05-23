@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.jackson.io
 
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.lang.Supplier
+import org.junit.Test
 
-public class FormattedStringSupplier implements Supplier<String> {
+import java.nio.charset.StandardCharsets
 
-    private final String msg;
+import static org.junit.Assert.assertEquals
 
-    private final Object[] args;
+class JacksonSupplierSerializerTest {
 
-    public FormattedStringSupplier(String msg, Object[] args) {
-        this.msg = Assert.hasText(msg, "Message cannot be null or empty.");
-        this.args = Assert.notEmpty(args, "Arguments cannot be null or empty.");
-    }
-
-    @Override
-    public String get() {
-        return String.format(this.msg, this.args);
+    @Test
+    void testSupplierNullValue() {
+        def serializer = new JacksonSerializer()
+        def supplier = new Supplier() {
+            @Override
+            Object get() {
+                return null
+            }
+        }
+        byte[] bytes = serializer.serialize(supplier)
+        assertEquals 'null', new String(bytes, StandardCharsets.UTF_8)
     }
 }

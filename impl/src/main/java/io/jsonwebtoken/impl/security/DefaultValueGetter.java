@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Header;
@@ -6,6 +21,7 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.impl.lang.ValueGetter;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.lang.Arrays;
@@ -56,6 +72,9 @@ public class DefaultValueGetter implements ValueGetter {
 
     protected Object getRequiredValue(String key) {
         Object value = this.values.get(key);
+        if (value instanceof RedactedSupplier) {
+            value = ((RedactedSupplier<?>) value).get();
+        }
         if (value == null) {
             String msg = name() + " is missing required '" + key + "' value.";
             throw malformed(msg);
@@ -115,7 +134,7 @@ public class DefaultValueGetter implements ValueGetter {
         int len = Arrays.length(decoded);
         if (len != requiredByteLength) {
             String msg = name() + " '" + key + "' decoded byte array must be " + Bytes.bytesMsg(requiredByteLength) +
-                " long. Actual length: " + Bytes.bytesMsg(len) + ".";
+                    " long. Actual length: " + Bytes.bytesMsg(len) + ".";
             throw malformed(msg);
         }
         return decoded;
@@ -145,6 +164,6 @@ public class DefaultValueGetter implements ValueGetter {
             String msg = name() + " '" + key + "' value must be a Map. Actual type: " + value.getClass().getName();
             throw malformed(msg);
         }
-        return (Map<String,?>)value;
+        return (Map<String, ?>) value;
     }
 }

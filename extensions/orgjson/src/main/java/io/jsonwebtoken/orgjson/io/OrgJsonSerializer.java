@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.lang.Supplier;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -80,6 +81,10 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
 
         if (object == null) {
             return JSONObject.NULL;
+        }
+
+        if (object instanceof Supplier) {
+            object = ((Supplier<?>)object).get();
         }
 
         if (object instanceof JSONObject || object instanceof JSONArray
@@ -168,7 +173,7 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         //
         // This is sufficient for all JJWT-supported scenarios on Android since Android users shouldn't ever use
         // JJWT's internal Serializer implementation for general JSON serialization.  That is, its intended use
-        // is within the context of JwtBuilder execution and not for application use outside of that.
+        // is within the context of JwtBuilder execution and not for application use beyond that.
         if (o instanceof JSONObject) {
             s = o.toString();
         } else {

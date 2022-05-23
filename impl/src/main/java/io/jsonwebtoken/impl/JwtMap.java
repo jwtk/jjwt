@@ -16,9 +16,8 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
@@ -30,43 +29,25 @@ import java.util.Set;
 
 public class JwtMap implements Map<String, Object> {
 
-    private static final String GROOVY_PRESENCE_CLASS_NAME = "org.codehaus.groovy.runtime.InvokerHelper";
-    private static final String GROOVY_PRESENCE_CLASS_METHOD_NAME = "formatMap";
-    private static final boolean GROOVY_PRESENT = Classes.isAvailable(GROOVY_PRESENCE_CLASS_NAME);
-
-    static final String REDACTED_VALUE = "<redacted>";
+    protected final Map<String, Field<?>> FIELDS;
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
     protected final Map<String, Object> idiomaticValues; // the values map with any RFC values converted to Java type-safe values where possible
-    protected final Map<String, Object> redactedValues; // the values map with any sensitive/secret values redacted. Used in the toString implementation.
-    protected final Map<String, Field<?>> FIELDS;
-    private final boolean hasSecretFields;
 
     public JwtMap(Set<Field<?>> fieldSet) {
         Assert.notEmpty(fieldSet, "Fields cannot be null or empty.");
         Map<String, Field<?>> fields = new LinkedHashMap<>();
-        boolean hasSecretFields = false;
         for (Field<?> field : fieldSet) {
             fields.put(field.getId(), field);
-            if (field.isSecret()) {
-                hasSecretFields = true;
-            }
         }
-        this.hasSecretFields = hasSecretFields;
         this.FIELDS = java.util.Collections.unmodifiableMap(fields);
         this.values = new LinkedHashMap<>();
         this.idiomaticValues = new LinkedHashMap<>();
-        this.redactedValues = new LinkedHashMap<>();
     }
 
     public JwtMap(Set<Field<?>> fieldSet, Map<String, ?> values) {
         this(fieldSet);
         Assert.notNull(values, "Map argument cannot be null.");
         putAll(values);
-    }
-
-    protected boolean isSecret(String id) {
-        Field<?> field = FIELDS.get(id);
-        return field != null && field.isSecret();
     }
 
     public static boolean isReduceableToNull(Object v) {
@@ -148,8 +129,6 @@ public class JwtMap implements Map<String, Object> {
         if (isReduceableToNull(value)) {
             return remove(name);
         } else {
-            Object redactedValue = isSecret(name) ? REDACTED_VALUE : value;
-            this.redactedValues.put(name, redactedValue);
             this.idiomaticValues.put(name, value);
             return this.values.put(name, value);
         }
@@ -171,7 +150,7 @@ public class JwtMap implements Map<String, Object> {
             canonicalValue = field.applyTo(idiomaticValue);
             Assert.notNull(canonicalValue, "Converter's resulting canonicalValue cannot be null.");
         } catch (IllegalArgumentException e) {
-            Object sval = field.isSecret() ? REDACTED_VALUE : rawValue;
+            Object sval = field.isSecret() ? RedactedSupplier.REDACTED_VALUE : rawValue;
             String msg = "Invalid " + getName() + " " + field + " value: " + sval + ". Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
@@ -186,7 +165,6 @@ public class JwtMap implements Map<String, Object> {
 
     @Override
     public Object remove(Object key) {
-        this.redactedValues.remove(key);
         this.idiomaticValues.remove(key);
         return this.values.remove(key);
     }
@@ -206,7 +184,6 @@ public class JwtMap implements Map<String, Object> {
     public void clear() {
         this.values.clear();
         this.idiomaticValues.clear();
-        this.redactedValues.clear();
     }
 
     @Override
@@ -219,38 +196,14 @@ public class JwtMap implements Map<String, Object> {
         return values.values();
     }
 
-    // MAINTAINER'S NOTE:
-    //
-    // BE VERY CAREFUL about moving this method - it's exact location in this
-    // file ties it to its implementation per StackTrace depth expectations.
-    //
-    // This behavior (and it's stack depth) is asserted in the
-    // DefaultJwkContextTest.testGStringPrintsRedactedValues() test case.  If you
-    // change the location of this method, you must update that test as well.
-    protected boolean preferRedactedEntrySet() {
-        // For better performance, only execute the groovy stack count if this instance has secret fields
-        // (otherwise, we don't need to worry about redaction) and Groovy is detected:
-        if (this.hasSecretFields && GROOVY_PRESENT) {
-            Throwable t = new Throwable();
-            StackTraceElement[] elements = t.getStackTrace();
-            Assert.gt(Arrays.length(elements), 2, "StackTraceElement array must be greater than 2.");
-            return GROOVY_PRESENCE_CLASS_NAME.equals(elements[2].getClassName()) &&
-                    GROOVY_PRESENCE_CLASS_METHOD_NAME.equals(elements[2].getMethodName());
-        }
-        return false;
-    }
-
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        if (preferRedactedEntrySet()) {
-            return this.redactedValues.entrySet();
-        }
         return values.entrySet();
     }
 
     @Override
     public String toString() {
-        return redactedValues.toString();
+        return values.toString();
     }
 
     @Override

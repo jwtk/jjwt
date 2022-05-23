@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Converters
@@ -84,7 +99,7 @@ class RFC7517AppendixA2Test {
         assertEquals m.x, ecEncode(fieldSize, jwk.toPublicJwk().toKey().w.affineX)
         assertEquals m.y, jwk.get('y')
         assertEquals m.y, ecEncode(fieldSize, jwk.toPublicJwk().toKey().w.affineY)
-        assertEquals m.d, jwk.get('d')
+        assertEquals m.d, jwk.get('d').get()
         assertEquals m.d, ecEncode(fieldSize, key.s)
         assertEquals m.use, jwk.getPublicKeyUse()
         assertEquals m.kid, jwk.getId()
@@ -99,17 +114,17 @@ class RFC7517AppendixA2Test {
         assertEquals m.n, rsaEncode(key.modulus)
         assertEquals m.e, jwk.get('e')
         assertEquals m.e, rsaEncode(jwk.toPublicJwk().toKey().publicExponent)
-        assertEquals m.d, jwk.get('d')
+        assertEquals m.d, jwk.get('d').get()
         assertEquals m.d, rsaEncode(key.privateExponent)
-        assertEquals m.p, jwk.get('p')
+        assertEquals m.p, jwk.get('p').get()
         assertEquals m.p, rsaEncode(key.getPrimeP())
-        assertEquals m.q, jwk.get('q')
+        assertEquals m.q, jwk.get('q').get()
         assertEquals m.q, rsaEncode(key.getPrimeQ())
-        assertEquals m.dp, jwk.get('dp')
+        assertEquals m.dp, jwk.get('dp').get()
         assertEquals m.dp, rsaEncode(key.getPrimeExponentP())
-        assertEquals m.dq, jwk.get('dq')
+        assertEquals m.dq, jwk.get('dq').get()
         assertEquals m.dq, rsaEncode(key.getPrimeExponentQ())
-        assertEquals m.qi, jwk.get('qi')
+        assertEquals m.qi, jwk.get('qi').get()
         assertEquals m.qi, rsaEncode(key.getCrtCoefficient())
         assertEquals m.alg, jwk.getAlgorithm()
         assertEquals m.kid, jwk.getId()
