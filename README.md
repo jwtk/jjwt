@@ -1467,11 +1467,15 @@ all that is required, no code or config is necessary.
 If you're curious, JJWT will automatically create an internal default Gson instance for its own needs as follows:
 
 ```java
-new GsonBuilder().disableHtmlEscaping().create();
+new GsonBuilder()
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)    
+    .disableHtmlEscaping().create();
 ```
 
+The `registerTypeHierarchyAdapter` builder call is required to serialize JWKs with secret or private values.
+
 However, if you prefer to use a different Gson instance instead of JJWT's default, you can configure JJWT to use your 
-own. 
+own - just don't forget to register the necessary JJWT type hierarchy adapter.
 
 You do this by declaring the `io.jsonwebtoken:jjwt-gson` dependency with **compile** scope (not runtime 
 scope which is the typical JJWT default).  That is:
@@ -1499,7 +1503,10 @@ And then you can specify the `GsonSerializer` using your own `Gson` instance on 
 
 ```java
 
-Gson gson = getGson(); //implement me
+Gson gson = new GsonBuilder()
+    // don't forget this line!:    
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)
+    .disableHtmlEscaping().create();
 
 String jws = Jwts.builder()
 
@@ -1519,6 +1526,14 @@ Jwts.parser()
     
     // ... etc ...
 ```
+
+Again, as shown above, it is critical to create your `Gson` instance using the `GsonBuilder` and include the line:
+
+```java
+.registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)
+```
+
+to ensure JWK serialization works as expected.
 
 <a name="base64"></a>
 ## Base64 Support

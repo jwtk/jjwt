@@ -23,15 +23,9 @@ import javax.crypto.SecretKey;
  *
  * <p>Note that the {@code SecretKey}-specific properties are not available as separate dedicated getter methods, as
  * most Java applications should rarely, if ever, need to access these individual key properties since they typically
- * represent internal key material and/or implementation details.</p>
- *
- * <p>Even so, because they exist and are readable by nature of every JWK being a {@link java.util.Map Map}, the
- * properties are still accessible in two different ways:</p>
- * <ul>
- *     <li>Via the standard {@code Map} {@link #get(Object) get} method using an appropriate JWK parameter id,
- *     e.g. {@code jwk.get("k")}.</li>
- *     <li>Via the various getter methods on the {@link SecretKey} instance returned by {@link #toKey()}.</li>
- * </ul>
+ * internal key material and/or serialization details. If you need to access these key properties, it is usually
+ * recommended to obtain the corresponding {@link SecretKey} instance returned by {@link #toKey()} and
+ * query that instead.</p>
  *
  * @since JJWT_RELEASE_VERSION
  */

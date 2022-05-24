@@ -24,15 +24,17 @@ import java.security.interfaces.ECPublicKey;
  *
  * <p>Note that the various EC-specific properties are not available as separate dedicated getter methods, as most Java
  * applications should rarely, if ever, need to access these individual key properties since they typically represent
- * internal key material and/or implementation details.</p>
+ * internal key material and/or serialization details. If you need to access these key properties, it is usually
+ * recommended to obtain the corresponding {@link ECPublicKey} instance returned by {@link #toKey()} and
+ * query that instead.</p>
  *
- * <p>Even so, because they exist and are readable by nature of every JWK being a {@link java.util.Map Map}, the
- * properties are still accessible in two different ways:</p>
- * <ul>
- *     <li>Via the standard {@code Map} {@link #get(Object) get} method using an appropriate JWK parameter id,
- *     e.g. {@code jwk.get("x")}, {@code jwk.get("y")}, etc.</li>
- *     <li>Via the various getter methods on the {@link ECPublicKey} instance returned by {@link #toKey()}.</li>
- * </ul>
+ * <p>Even so, because these properties exist and are readable by nature of every JWK being a
+ * {@link java.util.Map Map}, they are still accessible via the standard {@code Map} {@link #get(Object) get} method
+ * using an appropriate JWK parameter id, for example:</p>
+ * <blockquote><pre>
+ * jwk.get(&quot;x&quot;);
+ * jwk.get(&quot;y&quot;);
+ * // ... etc ...</pre></blockquote>
  *
  * @since JJWT_RELEASE_VERSION
  */

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Supplier;
 
 import java.security.Key;
 import java.util.Map;
@@ -44,47 +45,40 @@ import java.util.Set;
  * {@code aJwk.get("kid")}. Either approach will return an id if one was originally set on the JWK, or {@code null} if
  * an id does not exist.</p>
  *
- * <p><b>toString Safety</b></p>
+ * <p><b>Private and Secret Value Safety</b></p>
  *
  * <p>JWKs often represent secret or private key data which should never be exposed publicly, nor mistakenly printed
  * via application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
- * {@link String#toString() toString()} implementations automatically print redacted values instead actual
- * values for any private or secret fields.</p>
+ * private or secret field values are 'wrapped' in a {@link io.jsonwebtoken.lang.Supplier Supplier} instance to ensure
+ * any attempt to call {@link String#toString() toString()} on the value will print a redacted value instead of an
+ * actual private or secret value.</p>
  *
  * <p>For example, a {@link SecretJwk} will have an internal &quot;{@code k}&quot; member whose value reflects raw
- * key material that should always be kept secret. If {@code aSecretJwk.toString()} is called, the resulting string
- * will contain the substring <code>k=&lt;redacted&gt;</code>, instead of the actual {@code k} value.  The string
- * literal <code>&lt;redacted&gt;</code> is printed everywhere a private or secret value would have otherwise.</p>
+ * key material that should always be kept secret.  If the following is called:</p>
+ * <blockquote><pre>
+ * System.out.println(aSecretJwk.get(&quot;k&quot;));</pre></blockquote>
+ * <p>You would see the following:</p>
+ * <blockquote><pre>
+ * &lt;redacted&gt;</pre></blockquote>
+ * <p>instead of the actual/raw {@code k} value.</p>
  *
- * <p><b>WARNING:</b> Note however, certain JVM programming languages (like
- * <a href="https://stackoverflow.com/questions/45383815/groovy-gstring-rendering-does-not-call-overridden-tostring-method-when-parent">
- * Groovy for example</a>) when encountering a
- * Map or Collection instance, will <em>NOT</em> always call an object's {@code toString()} method when rendering
- * strings.  <b>Because all JJWT JWKs implement the {@link Map Map} interface, in these language environments,
- * you must explicitly call {@code aJwk.toString()} method to override the language's built-in string rendering to
- * ensure key safety.</b> This is not a concern if using the Java language directly.</p>
+ * <p>Similarly, if the attempting to print the entire JWK:</p>
+ * <blockquote><pre>
+ * System.out.println(aSecretJwk);</pre></blockquote>
+ * <p>You would see the following substring in the output:</p>
+ * <blockquote><pre>
+ * k=&lt;redacted&gt;</pre></blockquote>
+ * <p>instead of the actual/raw {@code k} value.</p>
  *
- * <p>For example, this is safe in Java:</p>
- * <pre><code>
- *     String s = "My JWK is: " + aSecretJwk; //or String.format("My JWK is: %s", aSecretJwk)
- *     System.out.println(s);
- * </code></pre>
- *
- * <p>Whereas the same is NOT SAFE in Groovy:</p>
- * <pre><code>
- *     println "My JWK is: ${aSecretJwk}" // or "My JWK is " + aSecretJwk
- * </code></pre>
- *
- * <p>But the following IS safe in Groovy:</p>
- * <pre><code>
- *     println "My JWK is: ${aSecretJwk.toString()}" // or "My JWK is " + aSecretJwk.toString()
- * </code></pre>
- * <p>Because Groovy's {@code GString} concept does not call {@code Map#toString()} directly and creates its own
- * toString implementation with the raw name/value pairs, you must call {@link String#toString() toString()}
- * explicitly.</p>
- *
- * <p>If you are using an alternative JVM programming language other than Java, understand your language
- * environment's String rendering behavior and adjust for explicit {@code toString()} calls as necessary.</p>
+ * <p>Finally, because all private or secret field values are wrapped as {@link io.jsonwebtoken.lang.Supplier}
+ * instances, if you really wanted the <em>real</em> internal value, you could just call the supplier's
+ * {@link Supplier#get() get()} method:</p>
+ * <blockquote><pre>
+ * String k = ((Supplier&lt;String&gt;)aSecretJwk.get(&quot;k&quot;)).get();</pre></blockquote>
+ * <p>but <b><em>BE CAREFUL</em></b>: obtaining the raw value in your application code exposes greater security
+ * risk - you must ensure to keep that value safe and out of console or log output.  It is almost always better to
+ * interact with the JWK's {@link #toKey() toKey()} instance directly instead of accessing
+ * JWK internal serialization fields.</p>
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -201,10 +195,10 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
     String getType();
 
     /**
-     * Converts the JWK to its corresponding Java {@link Key} instance for use with Java cryptographic
+     * Represents the JWK as its corresponding Java {@link Key} instance for use with Java cryptographic
      * APIs.
      *
-     * @return the corresponding Java {@link Key} instance for use with Java cryptographic APIs.
+     * @return the JWK's corresponding Java {@link Key} instance for use with Java cryptographic APIs.
      */
     K toKey();
 }
