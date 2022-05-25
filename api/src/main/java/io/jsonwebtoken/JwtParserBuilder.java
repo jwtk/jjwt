@@ -387,7 +387,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Adds the specified signature algorithms to the parser's total set of supported signature algorithms,
-     * overwriting any previously-added algorithms with the same {@link SignatureAlgorithm#getId() id}s.
+     * overwriting any previously-added algorithms with the same
+     * {@link io.jsonwebtoken.security.SignatureAlgorithm#getId() id}s.
      *
      * <p>There may be only one registered {@code SignatureAlgorithm} per algorithm {@code id}, and the {@code sigAlgs}
      * collection is added in iteration order; if a duplicate id is found when iterating the {@code sigAlgs}

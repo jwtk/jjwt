@@ -113,11 +113,11 @@ public final class KeyAlgorithms {
      * </ol>
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
-     *     <li>Receives the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Decrypts the encrypted key ciphertext with the 128-bit shared symmetric key,
      *     using the AES Key Unwrap algorithm, producing the decryption key plaintext.</li>
      *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
-     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
     public static final SecretKeyAlgorithm A128KW = forId0("A128KW");
@@ -137,11 +137,11 @@ public final class KeyAlgorithms {
      * </ol>
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
-     *     <li>Receives the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Decrypts the encrypted key ciphertext with the 192-bit shared symmetric key,
      *     using the AES Key Unwrap algorithm, producing the decryption key plaintext.</li>
      *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
-     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
     public static final SecretKeyAlgorithm A192KW = forId0("A192KW");
@@ -161,11 +161,11 @@ public final class KeyAlgorithms {
      * </ol>
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
-     *     <li>Receives the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Decrypts the encrypted key ciphertext with the 256-bit shared symmetric key,
      *     using the AES Key Unwrap algorithm, producing the decryption key plaintext.</li>
      *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
-     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
     public static final SecretKeyAlgorithm A256KW = forId0("A256KW");
@@ -193,7 +193,7 @@ public final class KeyAlgorithms {
      * </ol>
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
-     *     <li>Receives the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Obtains the required initialization vector from the
      *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
@@ -204,7 +204,7 @@ public final class KeyAlgorithms {
      *     and GCM authentication tag using the AES GCM Key Unwrap algorithm, producing the decryption key
      *     plaintext.</li>
      *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
-     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
     public static final SecretKeyAlgorithm A128GCMKW = forId0("A128GCMKW");
@@ -232,7 +232,7 @@ public final class KeyAlgorithms {
      * </ol>
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
-     *     <li>Receives the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Obtains the required initialization vector from the
      *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
@@ -243,7 +243,7 @@ public final class KeyAlgorithms {
      *     and GCM authentication tag using the AES GCM Key Unwrap algorithm, producing the decryption key \
      *     plaintext.</li>
      *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
-     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
     public static final SecretKeyAlgorithm A192GCMKW = forId0("A192GCMKW");
@@ -271,7 +271,7 @@ public final class KeyAlgorithms {
      * </ol>
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
-     *     <li>Receives the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Obtains the required initialization vector from the
      *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
@@ -282,12 +282,144 @@ public final class KeyAlgorithms {
      *     and GCM authentication tag using the AES GCM Key Unwrap algorithm, producing the decryption key \
      *     plaintext.</li>
      *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
-     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
     public static final SecretKeyAlgorithm A256GCMKW = forId0("A256GCMKW");
+
+    /**
+     * Key encryption algorithm using <code>PBES2 with HMAC SHA-256 and &quot;A128KW&quot; wrapping</code>
+     * as defined by
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
+     *
+     * <p>During JWE creation, this algorithm:</p>
+     * <ol>
+     *     <li>Determines the number of PBDKF2 iterations via the JWE header's
+     *     {@link JweHeader#getPbes2Count() pbes2Count} value.  If that value is not set, a suitable number of
+     *     iterations will be chosen based on
+     *     <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP
+     *     PBKDF2 recommendations</a> and then that value is set as the JWE header {@code pbes2Count} value.</li>
+     *     <li>Generates a new secure-random salt input and sets it as the JWE header
+     *     {@link JweHeader#setPbes2Salt(byte[]) pbes2Salt} value.</li>
+     *     <li>Derives a 128-bit Key Encryption Key with the PBES2-HS256 password-based key derivation algorithm,
+     *     using the provided password, iteration count, and input salt as arguments.</li>
+     *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
+     *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+     *     <li>Encrypts this newly-generated Content Encryption {@code SecretKey} with the {@code A128KW} key wrap
+     *      algorithm using the 128-bit derived password-based Key Encryption Key from step {@code #3},
+     *      producing encrypted key ciphertext.</li>
+     *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
+     *     Content Encryption {@code SecretKey} for JJWT to use to encrypt the entire JWE with associated
+     *     {@link AeadAlgorithm}.</li>
+     * </ol>
+     * <p>For JWE decryption, this algorithm:</p>
+     * <ol>
+     *     <li>Obtains the required PBKDF2 input salt from the
+     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">&quot;p2s&quot;
+     *     (PBES2 Salt Input) Header Parameter</a></li>
+     *     <li>Obtains the required PBKDF2 iteration count from the
+     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">&quot;p2c&quot;
+     *     (PBES2 Count) Header Parameter</a></li>
+     *     <li>Derives the 128-bit Key Encryption Key with the PBES2-HS256 password-based key derivation algorithm,
+     *     using the provided password, obtained salt input, and obtained iteration count as arguments.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Decrypts the encrypted key ciphertext with with the {@code A128KW} key unwrap
+     *      algorithm using the 128-bit derived password-based Key Encryption Key from step {@code #3},
+     *      producing the decryption key plaintext.</li>
+     *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
+     * </ol>
+     */
     public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
+
+    /**
+     * Key encryption algorithm using <code>PBES2 with HMAC SHA-384 and &quot;A192KW&quot; wrapping</code>
+     * as defined by
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
+     *
+     * <p>During JWE creation, this algorithm:</p>
+     * <ol>
+     *     <li>Determines the number of PBDKF2 iterations via the JWE header's
+     *     {@link JweHeader#getPbes2Count() pbes2Count} value.  If that value is not set, a suitable number of
+     *     iterations will be chosen based on
+     *     <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP
+     *     PBKDF2 recommendations</a> and then that value is set as the JWE header {@code pbes2Count} value.</li>
+     *     <li>Generates a new secure-random salt input and sets it as the JWE header
+     *     {@link JweHeader#setPbes2Salt(byte[]) pbes2Salt} value.</li>
+     *     <li>Derives a 192-bit Key Encryption Key with the PBES2-HS384 password-based key derivation algorithm,
+     *     using the provided password, iteration count, and input salt as arguments.</li>
+     *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
+     *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+     *     <li>Encrypts this newly-generated Content Encryption {@code SecretKey} with the {@code A192KW} key wrap
+     *      algorithm using the 192-bit derived password-based Key Encryption Key from step {@code #3},
+     *      producing encrypted key ciphertext.</li>
+     *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
+     *     Content Encryption {@code SecretKey} for JJWT to use to encrypt the entire JWE with associated
+     *     {@link AeadAlgorithm}.</li>
+     * </ol>
+     * <p>For JWE decryption, this algorithm:</p>
+     * <ol>
+     *     <li>Obtains the required PBKDF2 input salt from the
+     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">&quot;p2s&quot;
+     *     (PBES2 Salt Input) Header Parameter</a></li>
+     *     <li>Obtains the required PBKDF2 iteration count from the
+     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">&quot;p2c&quot;
+     *     (PBES2 Count) Header Parameter</a></li>
+     *     <li>Derives the 192-bit Key Encryption Key with the PBES2-HS384 password-based key derivation algorithm,
+     *     using the provided password, obtained salt input, and obtained iteration count as arguments.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Decrypts the encrypted key ciphertext with with the {@code A192KW} key unwrap
+     *      algorithm using the 192-bit derived password-based Key Encryption Key from step {@code #3},
+     *      producing the decryption key plaintext.</li>
+     *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
+     * </ol>
+     */
     public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
+
+    /**
+     * Key encryption algorithm using <code>PBES2 with HMAC SHA-512 and &quot;A256KW&quot; wrapping</code>
+     * as defined by
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
+     *
+     * <p>During JWE creation, this algorithm:</p>
+     * <ol>
+     *     <li>Determines the number of PBDKF2 iterations via the JWE header's
+     *     {@link JweHeader#getPbes2Count() pbes2Count} value.  If that value is not set, a suitable number of
+     *     iterations will be chosen based on
+     *     <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP
+     *     PBKDF2 recommendations</a> and then that value is set as the JWE header {@code pbes2Count} value.</li>
+     *     <li>Generates a new secure-random salt input and sets it as the JWE header
+     *     {@link JweHeader#setPbes2Salt(byte[]) pbes2Salt} value.</li>
+     *     <li>Derives a 256-bit Key Encryption Key with the PBES2-HS512 password-based key derivation algorithm,
+     *     using the provided password, iteration count, and input salt as arguments.</li>
+     *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
+     *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+     *     <li>Encrypts this newly-generated Content Encryption {@code SecretKey} with the {@code A256KW} key wrap
+     *      algorithm using the 256-bit derived password-based Key Encryption Key from step {@code #3},
+     *      producing encrypted key ciphertext.</li>
+     *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
+     *     Content Encryption {@code SecretKey} for JJWT to use to encrypt the entire JWE with associated
+     *     {@link AeadAlgorithm}.</li>
+     * </ol>
+     * <p>For JWE decryption, this algorithm:</p>
+     * <ol>
+     *     <li>Obtains the required PBKDF2 input salt from the
+     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">&quot;p2s&quot;
+     *     (PBES2 Salt Input) Header Parameter</a></li>
+     *     <li>Obtains the required PBKDF2 iteration count from the
+     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">&quot;p2c&quot;
+     *     (PBES2 Count) Header Parameter</a></li>
+     *     <li>Derives the 256-bit Key Encryption Key with the PBES2-HS512 password-based key derivation algorithm,
+     *     using the provided password, obtained salt input, and obtained iteration count as arguments.</li>
+     *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
+     *     <li>Decrypts the encrypted key ciphertext with with the {@code A256KW} key unwrap
+     *      algorithm using the 256-bit derived password-based Key Encryption Key from step {@code #3},
+     *      producing the decryption key plaintext.</li>
+     *     <li>Returns the decryption key plaintext as a {@link SecretKey} for JJWT to use to decrypt the entire
+     *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
+     * </ol>
+     */
     public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
 
     /**
