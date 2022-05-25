@@ -375,7 +375,7 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> a symmetric Content
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a symmetric Content
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -395,7 +395,7 @@ public final class KeyAlgorithms {
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> the symmetric Content
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the symmetric Content
      *      Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -417,7 +417,7 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> a 128-bit symmetric Key
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a 128-bit symmetric Key
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -440,7 +440,7 @@ public final class KeyAlgorithms {
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> the symmetric Key
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the symmetric Key
      *      Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -465,7 +465,7 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> a 192-bit symmetric Key
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a 192-bit symmetric Key
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -489,7 +489,7 @@ public final class KeyAlgorithms {
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> the 192-bit symmetric
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the 192-bit symmetric
      *      Key Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -514,7 +514,7 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> a 256-bit symmetric Key
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a 256-bit symmetric Key
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -538,7 +538,7 @@ public final class KeyAlgorithms {
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives<a/> the 256-bit symmetric
+     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the 256-bit symmetric
      *      Key Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
