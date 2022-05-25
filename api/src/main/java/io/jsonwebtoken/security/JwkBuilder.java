@@ -27,6 +27,9 @@ import java.util.Set;
  * Builder subtypes support additional JWK properties specific to different types of cryptographic keys
  * (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
  *
+ * @param <K> the type of Java {@link Key} represented by the constructed JWK.
+ * @param <J> the type of {@link Jwk} created by the builder
+ * @param <T> the type of the builder, for subtype method chaining
  * @see SecretJwkBuilder
  * @see RsaPublicJwkBuilder
  * @see RsaPrivateJwkBuilder

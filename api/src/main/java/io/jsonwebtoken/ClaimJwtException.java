@@ -40,8 +40,14 @@ public abstract class ClaimJwtException extends JwtException {
     @Deprecated
     public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not present in the JWT claims.";
 
+    /**
+     * The header associated with the Claims that failed validation.
+     */
     private final Header<?> header;
 
+    /**
+     * The Claims that failed validation.
+     */
     private final Claims claims;
 
     /**

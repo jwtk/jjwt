@@ -37,6 +37,8 @@ import java.security.Key;
  * <p>{@code SignatureAlgorithm} extends {@link Identifiable}: the value returned from
  * {@link Identifiable#getId() getId()} will be used as the JWS &quot;alg&quot; protected header value.</p>
  *
+ * @param <S> the type of {@link Key} used to create digital signatures or message authentication codes
+ * @param <V> the type of {@link Key} used to verify digital signatures or message authentication codes
  * @since JJWT_RELEASE_VERSION
  */
 public interface SignatureAlgorithm<S extends Key, V extends Key> extends Identifiable {

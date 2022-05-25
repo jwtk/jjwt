@@ -26,6 +26,7 @@ import java.security.Key;
  * <p>The content to verify will be available via {@link #getContent()}, the previously-computed signature or MAC will
  * be available via {@link #getDigest()}, and the verification key will be available via {@link #getKey()}.</p>
  *
+ * @param <K> the type of {@link Key} used to verify a digital siganture or message authentication code
  * @since JJWT_RELEASE_VERSION
  */
 public interface VerifySignatureRequest<K extends Key> extends SignatureRequest<K>, DigestSupplier {

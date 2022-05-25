@@ -30,6 +30,12 @@ package io.jsonwebtoken;
  */
 public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
+    /**
+     * Constructs a new instance, where all default method implementations throw an {@link UnsupportedJwtException}.
+     */
+    public JwtHandlerAdapter() {
+    }
+
     @Override
     public T onPlaintextJwt(Jwt<?, String> jwt) {
         throw new UnsupportedJwtException("Unsigned plaintext JWTs are not supported.");

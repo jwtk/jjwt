@@ -120,7 +120,7 @@ public class DefaultRsaSignatureAlgorithm<S extends RSAKey & PrivateKey, V exten
     @Override
     protected boolean doVerify(final VerifySignatureRequest<V> request) throws Exception {
         final Key key = request.getKey();
-        if (key instanceof PrivateKey) { //legacy support only
+        if (key instanceof PrivateKey) { //legacy support only TODO: remove for 1.0
             return super.doVerify(request);
         }
         return execute(request, Signature.class, new CheckedFunction<Signature, Boolean>() {

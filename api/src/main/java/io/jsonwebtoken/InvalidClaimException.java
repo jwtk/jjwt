@@ -25,7 +25,14 @@ package io.jsonwebtoken;
  */
 public class InvalidClaimException extends ClaimJwtException {
 
+    /**
+     * The name of the invalid claim.
+     */
     private String claimName;
+
+    /**
+     * The claim value that could not be validated.
+     */
     private Object claimValue;
 
     /**

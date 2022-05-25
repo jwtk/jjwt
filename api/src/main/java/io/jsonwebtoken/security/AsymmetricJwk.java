@@ -23,6 +23,7 @@ import java.util.List;
 /**
  * JWK representation of an asymmetric (public or private) cryptographic key.
  *
+ * @param <K> the type of {@link java.security.PublicKey} or {@link java.security.PrivateKey} represented by this JWK.
  * @since JJWT_RELEASE_VERSION
  */
 public interface AsymmetricJwk<K extends Key> extends Jwk<K> {

@@ -1,11 +1,11 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.IdRegistry;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 
+import java.security.Key;
 import java.util.Collection;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.SignatureAlgorithms implementation
@@ -49,8 +49,14 @@ public final class SignatureAlgorithmsBridge {
         SignatureAlgorithm<?, ?> instance = findById(id);
         if (instance == null) {
             String msg = "Unrecognized JWA SignatureAlgorithm identifier: " + id;
-            throw new UnsupportedJwtException(msg);
+            throw new IllegalArgumentException(msg);
         }
         return instance;
+    }
+
+    public static SignatureAlgorithm<?, ?> forSigningKey(Key key) {
+        @SuppressWarnings("deprecation")
+        io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
+        return forId(alg.getValue());
     }
 }

@@ -22,6 +22,7 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureAlgorithms;
 
 import java.security.Key;
 import java.security.Provider;
@@ -384,8 +385,40 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      */
     JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs);
 
+    /**
+     * Adds the specified signature algorithms to the parser's total set of supported signature algorithms,
+     * overwriting any previously-added algorithms with the same {@link SignatureAlgorithm#getId() id}s.
+     *
+     * <p>There may be only one registered {@code SignatureAlgorithm} per algorithm {@code id}, and the {@code sigAlgs}
+     * collection is added in iteration order; if a duplicate id is found when iterating the {@code sigAlgs}
+     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     *
+     * <p>Finally, the {@link SignatureAlgorithms#values() JWA standard signature algorithms} are added last,
+     * <em>after</em> those in the {@code sigAlgs} collection, to ensure that JWA standard algorithms cannot be
+     * accidentally replaced.</p>
+     *
+     * @param sigAlgs collection of signature algorithms to add to the parser's total set of supported signature
+     *                algorithms.
+     * @return the builder for method chaining.
+     */
     JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs);
 
+    /**
+     * Adds the specified key management algorithms to the parser's total set of supported key algorithms,
+     * overwriting any previously-added algorithms with the same {@link KeyAlgorithm#getId() id}s.
+     *
+     * <p>There may be only one registered {@code KeyAlgorithm} per algorithm {@code id}, and the {@code keyAlgs}
+     * collection is added in iteration order; if a duplicate id is found when iterating the {@code keyAlgs}
+     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     *
+     * <p>Finally, the {@link io.jsonwebtoken.security.KeyAlgorithms#values() JWA standard key management algorithms}
+     * are added last, <em>after</em> those in the {@code keyAlgs} collection, to ensure that JWA standard algorithms
+     * cannot be accidentally replaced.</p>
+     *
+     * @param keyAlgs collection of key management algorithms to add to the parser's total set of supported key
+     *                management algorithms.
+     * @return the builder for method chaining.
+     */
     JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs);
 
     /**

@@ -35,6 +35,7 @@ import java.security.Key;
  * {@code JWE Encrypted Key} (such as an initialization vector, authentication tag, ephemeral key, etc) is expected
  * to be available in the JWE protected header, accessible via {@link #getHeader()}.</p>
  *
+ * @param <K> the type of {@link Key} used during the request to obtain the resulting decryption key.
  * @since JJWT_RELEASE_VERSION
  */
 public interface DecryptionKeyRequest<K extends Key> extends KeyRequest<K>, Message {

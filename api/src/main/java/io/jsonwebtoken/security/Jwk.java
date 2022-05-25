@@ -80,6 +80,7 @@ import java.util.Set;
  * interact with the JWK's {@link #toKey() toKey()} instance directly instead of accessing
  * JWK internal serialization fields.</p>
  *
+ * @param <K> The type of Java {@link Key} represented by this JWK
  * @since JJWT_RELEASE_VERSION
  */
 public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {

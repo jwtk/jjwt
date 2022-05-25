@@ -148,7 +148,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
     @Override
     public T signWith(Key key) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
-        SignatureAlgorithm<Key, ?> alg = (SignatureAlgorithm<Key, ?>) SignatureAlgorithms.forSigningKey(key);
+        SignatureAlgorithm<Key, ?> alg = (SignatureAlgorithm<Key, ?>) SignatureAlgorithmsBridge.forSigningKey(key);
         return signWith(key, alg);
     }
 

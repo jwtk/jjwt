@@ -15,11 +15,24 @@
   allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
   the old enum-based static utility methods did not.
 
-#### Backwards Compatibility Warning
+#### Backwards Compatibility Breaking Changes
+
+* Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
+  [RFC 7518, Section 3.6](https://datatracker.ietf.org/doc/html/rfc7518#section-3.6). If you require parsing of
+  unsecured JWTs, you may call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
+  implications of doing so as mentioned in that method's JavaDoc before doing so.
 
 * `io.jsonwebtoken.JwtHandlerAdapter` has been changed to add the `abstract` modifier.  This class was never intended
   to be instantiated directly, and is provided for subclassing benefits.  The missing modifier has been added to ensure
   the class is used as it had always been intended.
+
+* `io.jsonwebtokne.gson.io.GsonSerializer` now requires `Gson` instances that have a registered
+  `GsonSupplierSerializer` type adapter, for example:
+  ```java
+  new GsonBuilder()
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)    
+    .disableHtmlEscaping().create();
+  ```
 
 ### 0.11.5
 

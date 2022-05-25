@@ -38,6 +38,7 @@ import java.security.Key;
  * (such as an initialization vector, authentication tag, ephemeral key, etc) is expected to be available in
  * the JWE protected header, accessible via {@link #getHeader()}.</p>
  *
+ * @param <K> the type of key used to perform cryptographic operations during the request.
  * @since JJWT_RELEASE_VERSION
  */
 public interface KeyRequest<K extends Key> extends Request, KeySupplier<K> {

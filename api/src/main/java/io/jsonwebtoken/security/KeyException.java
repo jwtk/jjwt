@@ -23,10 +23,21 @@ package io.jsonwebtoken.security;
  */
 public class KeyException extends SecurityException {
 
+    /**
+     * Creates a new instance with the specified explanation message.
+     *
+     * @param message the message explaining why the exception is thrown.
+     */
     public KeyException(String message) {
         super(message);
     }
 
+    /**
+     * Creates a new instance with the specified explanation message and underlying cause.
+     *
+     * @param msg   the message explaining why the exception is thrown.
+     * @param cause the underlying cause that resulted in this exception being thrown.
+     */
     public KeyException(String msg, Exception cause) {
         super(msg, cause);
     }

@@ -25,6 +25,9 @@ import java.util.Collection;
  * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>.
  *
  * @see AeadAlgorithm
+ * @see #values()
+ * @see #forId(String) 
+ * @see #findById(String)
  * @since JJWT_RELEASE_VERSION
  */
 public final class EncryptionAlgorithms {
@@ -81,32 +84,33 @@ public final class EncryptionAlgorithms {
     }
 
     /**
-     * AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined by
+     * {@code AES_128_CBC_HMAC_SHA_256} authenticated encryption algorithm as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.3">RFC 7518, Section 5.2.3</a>.  This algorithm
-     * requires a 256 bit (32 byte) key.
+     * requires a 256-bit (32 byte) key.
      */
     public static final AeadAlgorithm A128CBC_HS256 = forId("A128CBC-HS256");
 
     /**
-     * AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined by
+     * {@code AES_192_CBC_HMAC_SHA_384} authenticated encryption algorithm, as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.4">RFC 7518, Section 5.2.4</a>. This algorithm
-     * requires a 384 bit (48 byte) key.
+     * requires a 384-bit (48 byte) key.
      */
     public static final AeadAlgorithm A192CBC_HS384 = forId("A192CBC-HS384");
 
     /**
-     * AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined by
+     * {@code AES_256_CBC_HMAC_SHA_512} authenticated encryption algorithm, as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.5">RFC 7518, Section 5.2.5</a>.  This algorithm
-     * requires a 512 bit (64 byte) key.
+     * requires a 512-bit (64 byte) key.
      */
     public static final AeadAlgorithm A256CBC_HS512 = forId("A256CBC-HS512");
 
     /**
      * &quot;AES GCM using 128-bit key&quot; as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
-     * algorithm requires a 128 bit (16 byte) key.
+     * algorithm requires a 128-bit (16 byte) key.
      *
      * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath. If on Java 7 or earlier, BouncyCastle will be used automatically if found in the runtime
      * classpath.</p>
      */
     public static final AeadAlgorithm A128GCM = forId("A128GCM");
@@ -114,9 +118,10 @@ public final class EncryptionAlgorithms {
     /**
      * &quot;AES GCM using 192-bit key&quot; as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
-     * algorithm requires a 192 bit (24 byte) key.
+     * algorithm requires a 192-bit (24 byte) key.
      *
      * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath. If on Java 7 or earlier, BouncyCastle will be used automatically if found in the runtime
      * classpath.</p>
      */
     public static final AeadAlgorithm A192GCM = forId("A192GCM");
@@ -124,9 +129,10 @@ public final class EncryptionAlgorithms {
     /**
      * &quot;AES GCM using 256-bit key&quot; as defined by
      * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
-     * algorithm requires a 256 bit (32 byte) key.
+     * algorithm requires a 256-bit (32 byte) key.
      *
      * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath. If on Java 7 or earlier, BouncyCastle will be used automatically if found in the runtime
      * classpath.</p>
      */
     public static final AeadAlgorithm A256GCM = forId("A256GCM");

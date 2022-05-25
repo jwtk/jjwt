@@ -35,6 +35,8 @@ import java.security.PublicKey;
  * <p>The resulting {@code pair} is guaranteed to have the correct algorithm parameters and length/strength necessary
  * for that exact {@code anAsymmetricKeySignatureAlgorithm} instance.</p>
  *
+ * @param <S> The type of {@link PrivateKey} used to create signatures
+ * @param <V> the type of {@link PublicKey} used to verify signatures
  * @since JJWT_RELEASE_VERSION
  */
 public interface AsymmetricKeySignatureAlgorithm<S extends PrivateKey, V extends PublicKey>

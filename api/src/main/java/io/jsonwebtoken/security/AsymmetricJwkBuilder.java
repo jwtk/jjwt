@@ -134,7 +134,33 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
 
     //T withX509KeyUse(boolean enable);
 
+    /**
+     * If the {@code enable} argument is {@code true}, compute the SHA-1 thumbprint of the first
+     * {@link X509Certificate} in the configured {@link #setX509CertificateChain(List) x509CertificateChain}, and set
+     * the resulting value as the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.8">{@code x5t}
+     * (X.509 Certificate SHA-1 Thumbprint) parameter</a>.
+     *
+     * <p>If no chain has been configured, or {@code enable} is {@code false}, the builder will not compute nor add a
+     * {@code x5t} value.</p>
+     *
+     * @param enable whether to compute the SHA-1 thumbprint on the first available X.509 Certificate and set
+     *               the resulting value as the {@code x5t} value.
+     * @return the builder for method chaining.
+     */
     T withX509Sha1Thumbprint(boolean enable);
 
+    /**
+     * If the {@code enable} argument is {@code true}, compute the SHA-256 thumbprint of the first
+     * {@link X509Certificate} in the configured {@link #setX509CertificateChain(List) x509CertificateChain}, and set
+     * the resulting value as the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.9">{@code x5t#S256}
+     * (X.509 Certificate SHA-256 Thumbprint) parameter</a>.
+     *
+     * <p>If no chain has been configured, or {@code enable} is {@code false}, the builder will not compute nor add a
+     * {@code x5t#S256} value.</p>
+     *
+     * @param enable whether to compute the SHA-1 thumbprint on the first available X.509 Certificate and set
+     *               the resulting value as the {@code x5t} value.
+     * @return the builder for method chaining.
+     */
     T withX509Sha256Thumbprint(boolean enable);
 }

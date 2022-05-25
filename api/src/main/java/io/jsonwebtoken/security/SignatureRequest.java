@@ -25,6 +25,7 @@ import java.security.Key;
  * <p>The content for signature input will be available via {@link #getContent()}, and the key used to compute
  * the signature will be available via {@link #getKey()}.</p>
  *
+ * @param <K> the type of {@link Key} used to compute a digital signature or message authentication code
  * @since JJWT_RELEASE_VERSION
  */
 public interface SignatureRequest<K extends Key> extends CryptoRequest<K> {

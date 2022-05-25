@@ -30,6 +30,9 @@ import java.util.List;
  * A prototypical {@link JwkBuilder} that coerces to a more type-specific builder based on the {@link Key} that will
  * be represented as a JWK.
  *
+ * @param <K> the type of Java {@link Key} represented by the created {@link Jwk}.
+ * @param <J> the type of {@link Jwk} created by the builder
+ * @param <T> the type of the builder, for subtype method chaining
  * @since JJWT_RELEASE_VERSION
  */
 public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends JwkBuilder<K, J, T> {

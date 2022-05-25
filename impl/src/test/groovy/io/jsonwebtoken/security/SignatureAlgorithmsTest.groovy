@@ -1,6 +1,6 @@
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.UnsupportedJwtException
+
 import org.junit.Test
 
 import static org.junit.Assert.assertNull
@@ -27,7 +27,7 @@ class SignatureAlgorithmsTest {
         }
     }
 
-    @Test(expected = UnsupportedJwtException)
+    @Test(expected = IllegalArgumentException)
     void testForIdWithInvalidId() {
         //unlike the 'find' paradigm, 'for' requires the value to exist
         SignatureAlgorithms.forId('invalid')

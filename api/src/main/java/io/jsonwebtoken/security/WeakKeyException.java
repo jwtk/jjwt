@@ -23,6 +23,11 @@ package io.jsonwebtoken.security;
  */
 public class WeakKeyException extends InvalidKeyException {
 
+    /**
+     * Creates a new instance with the specified explanation message.
+     *
+     * @param message the message explaining why the exception is thrown.
+     */
     public WeakKeyException(String message) {
         super(message);
     }

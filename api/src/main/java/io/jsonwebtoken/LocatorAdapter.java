@@ -24,8 +24,24 @@ import io.jsonwebtoken.lang.Assert;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public class LocatorAdapter<T> implements Locator<T> {
+public abstract class LocatorAdapter<T> implements Locator<T> {
 
+    /**
+     * Constructs a new instance, where all default method implementations return {@code null}.
+     */
+    public LocatorAdapter() {
+    }
+
+    /**
+     * Inspects the specified header, and delegates to the respective
+     * {@link #locate(JweHeader)}, {@link #locate(JwsHeader)} or {@link #doLocate(Header)} methods if the encountered
+     * header is a {@link JweHeader}, {@link JwsHeader} or Unprotected {@link Header}.
+     *
+     * @param header the JWT header to inspect; may be an instance of {@link Header}, {@link JwsHeader} or
+     *               {@link JweHeader} depending on if the respective JWT is an unprotected JWT, JWS or JWE.
+     * @return an object referenced in the specified header, or {@code null} if the referenced object cannot be found
+     * or does not exist.
+     */
     @Override
     public final T locate(Header<?> header) {
         Assert.notNull(header, "Header cannot be null.");
@@ -40,14 +56,38 @@ public class LocatorAdapter<T> implements Locator<T> {
         }
     }
 
+    /**
+     * Returns an object referenced in the specified JWE header, or {@code null} if the referenced
+     * object cannot be found or does not exist.
+     *
+     * @param header the header of an encountered JWE.
+     * @return an object referenced in the specified JWE header, or {@code null} if the referenced
+     * object cannot be found or does not exist.
+     */
     protected T locate(JweHeader header) {
         return null;
     }
 
+    /**
+     * Returns an object referenced in the specified JWS header, or {@code null} if the referenced
+     * object cannot be found or does not exist.
+     *
+     * @param header the header of an encountered JWS.
+     * @return an object referenced in the specified JWS header, or {@code null} if the referenced
+     * object cannot be found or does not exist.
+     */
     protected T locate(JwsHeader header) {
         return null;
     }
 
+    /**
+     * Returns an object referenced in the specified Unprotected JWT header, or {@code null} if the referenced
+     * object cannot be found or does not exist.
+     *
+     * @param header the header of an encountered JWE.
+     * @return an object referenced in the specified Unprotected JWT header, or {@code null} if the referenced
+     * object cannot be found or does not exist.
+     */
     protected T doLocate(Header<?> header) {
         return null;
     }
