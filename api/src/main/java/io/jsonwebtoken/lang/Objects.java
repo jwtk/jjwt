@@ -197,7 +197,7 @@ public final class Objects {
      * @param array the array to append to (can be <code>null</code>)
      * @param <A>   the type of each element in the specified {@code array}
      * @param obj   the object to append
-     * @param <O>   the type of the specified object, which must equal to or extend the {@code &lt;A&gt;} type.
+     * @param <O>   the type of the specified object, which must be equal to or extend the <code>&lt;A&gt;</code> type.
      * @return the new array (of the same component type; never <code>null</code>)
      */
     public static <A, O extends A> A[] addObjectToArray(A[] array, O obj) {
