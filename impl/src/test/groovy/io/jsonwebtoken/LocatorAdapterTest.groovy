@@ -25,7 +25,7 @@ class LocatorAdapterTest {
     @Test
     void testJwtHeaderWithoutOverride() {
         Header input = new DefaultHeader()
-        Locator locator = new LocatorAdapter()
+        Locator locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header)
     }
 
@@ -44,7 +44,7 @@ class LocatorAdapterTest {
     @Test
     void testJwsHeaderWithoutOverride() {
         Header input = new DefaultJwsHeader()
-        Locator locator = new LocatorAdapter()
+        Locator locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header)
     }
 
@@ -63,7 +63,7 @@ class LocatorAdapterTest {
     @Test
     void testJweHeaderWithoutOverride() {
         JweHeader input = new DefaultJweHeader()
-        def locator = new LocatorAdapter()
+        def locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header)
     }
 }
