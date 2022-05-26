@@ -33,6 +33,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
@@ -49,6 +50,7 @@ import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
 import io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.KeyAlgorithmsBridge;
+import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
@@ -173,7 +175,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
 
-    private final Function<Header<?>, Key> keyLocator;
+    private final Locator<? extends Key> keyLocator;
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
@@ -193,9 +195,7 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("DeprecatedIsStillUsed") // will remove before 1.0
     @Deprecated
     public DefaultJwtParser() {
-        ConstantKeyLocator constantKeyLocator = new ConstantKeyLocator(null, null);
-        this.keyLocator = constantKeyLocator;
-        this.signingKeyResolver = constantKeyLocator;
+        this.keyLocator = new ConstantKeyLocator(null, null);
         this.signatureAlgorithmLocator = sigFn(Collections.<SignatureAlgorithm<?, ?>>emptyList());
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
@@ -208,7 +208,7 @@ public class DefaultJwtParser implements JwtParser {
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
                      boolean enableUnsecuredJws,
-                     Function<Header<?>, Key> keyLocator,
+                     Locator<? extends Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
                      Claims expectedClaims,
@@ -220,7 +220,7 @@ public class DefaultJwtParser implements JwtParser {
                      Collection<AeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
         this.enableUnsecuredJws = enableUnsecuredJws;
-        this.signingKeyResolver = Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
+        this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
@@ -363,6 +363,64 @@ public class DefaultJwtParser implements JwtParser {
         return header != null && Strings.hasText(header.getContentType());
     }
 
+    private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
+                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver,
+                                 Claims claims, String payload) {
+
+        Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
+
+        SignatureAlgorithm<?, Key> algorithm;
+        try {
+            algorithm = (SignatureAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
+        } catch (UnsupportedJwtException e) {
+            //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
+            String msg = "Unsupported signature algorithm '" + alg + "'";
+            throw new SignatureException(msg, e);
+        }
+        Assert.stateNotNull(algorithm, "JWS Signature Algorithm cannot be null.");
+
+        //digitally signed, let's assert the signature:
+        Key key;
+        if (claims != null) {
+            key = resolver.resolveSigningKey(jwsHeader, claims);
+        } else {
+            key = resolver.resolveSigningKey(jwsHeader, payload);
+        }
+        if (key == null) {
+            String msg = "Cannot verify JWS signature: unable to locate signature verification key for JWS with header: " + jwsHeader;
+            throw new UnsupportedJwtException(msg);
+        }
+
+        //re-create the jwt part without the signature.  This is what is needed for signature verification:
+        String jwtWithoutSignature = tokenized.getProtected() + SEPARATOR_CHAR + tokenized.getBody();
+
+        byte[] data = jwtWithoutSignature.getBytes(StandardCharsets.US_ASCII);
+        byte[] signature = base64UrlDecode(tokenized.getDigest(), "JWS signature");
+
+        try {
+            VerifySignatureRequest<Key> request =
+                    new DefaultVerifySignatureRequest<>(this.provider, null, data, key, signature);
+
+            if (!algorithm.verify(request)) {
+                String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
+                        "asserted and should not be trusted.";
+                throw new SignatureException(msg);
+            }
+        } catch (WeakKeyException e) {
+            throw e;
+        } catch (InvalidKeyException | IllegalArgumentException e) {
+            String algId = algorithm.getId();
+            String msg = "The parsed JWT indicates it was signed with the '" + algId + "' signature " +
+                    "algorithm, but the provided " + key.getClass().getName() + " key may " +
+                    "not be used to verify " + algId + " signatures.  Because the specified " +
+                    "key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                    "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
+                    "trusted.  Another possibility is that the parser was provided the incorrect " +
+                    "signature verification key, but this cannot be assumed for security reasons.";
+            throw new UnsupportedJwtException(msg, e);
+        }
+    }
+
     @Override
     public Jwt<?, ?> parse(String compact) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
@@ -438,7 +496,7 @@ public class DefaultJwtParser implements JwtParser {
 
         byte[] iv = null;
         byte[] tag = null;
-        if (tokenized instanceof TokenizedJwe) { //need to decrypt the ciphertext
+        if (tokenized instanceof TokenizedJwe) {
 
             TokenizedJwe tokenizedJwe = (TokenizedJwe) tokenized;
             JweHeader jweHeader = (JweHeader) header;
@@ -486,7 +544,7 @@ public class DefaultJwtParser implements JwtParser {
             @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgorithmLocator.apply(jweHeader);
             Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
-            final Key key = this.keyLocator.apply(jweHeader);
+            final Key key = this.keyLocator.locate(jweHeader);
             if (key == null) {
                 String msg = "Cannot decrypt JWE payload: unable to locate key for JWE with header: " + jweHeader;
                 throw new UnsupportedJwtException(msg);
@@ -505,9 +563,13 @@ public class DefaultJwtParser implements JwtParser {
                     new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
             Message result = encAlg.decrypt(decryptRequest);
             bytes = result.getContent();
+
+        } else if (Strings.hasText(base64UrlDigest) && this.signingKeyResolver == null) { //TODO: for 1.0, remove the == null check
+            // not using a signing key resolver, so we can verify the signature before reading the body, which is
+            // always safer:
+            verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
         }
 
-        //TODO: Only allow decompression after JWS signature verification:
         CompressionCodec compressionCodec = compressionCodecLocator.apply(header);
         if (compressionCodec != null) {
             bytes = compressionCodec.decompress(bytes);
@@ -540,64 +602,10 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Signature =================
-        if (jwt instanceof Jws) { // it's a JWS, validate the signature
-
-            Jws<?> jws = (Jws<?>) jwt;
-
-            final JwsHeader jwsHeader = jws.getHeader();
-
-            SignatureAlgorithm<?, Key> algorithm;
-            try {
-                algorithm = (SignatureAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
-            } catch (UnsupportedJwtException e) {
-                //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
-                String msg = "Unsupported signature algorithm '" + alg + "'";
-                throw new SignatureException(msg, e);
-            }
-            Assert.stateNotNull(algorithm, "JWS Signature Algorithm cannot be null.");
-
-            Assert.stateNotNull(this.signingKeyResolver, "SigningKeyResolver cannot be null (invariant).");
-
-            //digitally signed, let's assert the signature:
-            Key key;
-            if (claims != null) {
-                key = signingKeyResolver.resolveSigningKey(jwsHeader, claims);
-            } else {
-                key = signingKeyResolver.resolveSigningKey(jwsHeader, payload);
-            }
-            if (key == null) {
-                String msg = "Cannot verify JWS signature: unable to locate signature verification key for JWS with header: " + jwsHeader;
-                throw new UnsupportedJwtException(msg);
-            }
-
-            //re-create the jwt part without the signature.  This is what is needed for signature verification:
-            String jwtWithoutSignature = tokenized.getProtected() + SEPARATOR_CHAR + tokenized.getBody();
-
-            byte[] data = jwtWithoutSignature.getBytes(StandardCharsets.US_ASCII);
-            byte[] signature = base64UrlDecode(tokenized.getDigest(), "JWS signature");
-
-            try {
-                VerifySignatureRequest<Key> request =
-                        new DefaultVerifySignatureRequest<>(this.provider, null, data, key, signature);
-
-                if (!algorithm.verify(request)) {
-                    String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
-                            "asserted and should not be trusted.";
-                    throw new SignatureException(msg);
-                }
-            } catch (WeakKeyException e) {
-                throw e;
-            } catch (InvalidKeyException | IllegalArgumentException e) {
-                String algId = algorithm.getId();
-                String msg = "The parsed JWT indicates it was signed with the '" + algId + "' signature " +
-                        "algorithm, but the provided " + key.getClass().getName() + " key may " +
-                        "not be used to verify " + algId + " signatures.  Because the specified " +
-                        "key reflects a specific and expected algorithm, and the JWT does not reflect " +
-                        "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                        "trusted.  Another possibility is that the parser was provided the incorrect " +
-                        "signature verification key, but this cannot be assumed for security reasons.";
-                throw new UnsupportedJwtException(msg, e);
-            }
+        if (Strings.hasText(base64UrlDigest) && signingKeyResolver != null) { // TODO: remove for 1.0
+            // A SigningKeyResolver has been configured, and due to it's API, we have to verify the signature after
+            // parsing the body.  This can be a security risk, so it needs to be removed before 1.0
+            verifySignature(tokenized, ((JwsHeader) header), alg, this.signingKeyResolver, claims, payload);
         }
 
         final boolean allowSkew = this.allowedClockSkewMillis > 0;

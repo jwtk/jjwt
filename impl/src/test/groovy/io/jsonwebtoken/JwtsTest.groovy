@@ -19,10 +19,7 @@ import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
 import io.jsonwebtoken.impl.lang.Services
-import io.jsonwebtoken.impl.security.ConstantKeyLocator
-import io.jsonwebtoken.impl.security.DirectKeyAlgorithm
-import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm
-import io.jsonwebtoken.impl.security.TestKeys
+import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
@@ -161,12 +158,15 @@ class JwtsTest {
      */
     @Test
     void testParseMalformedClaims() {
+        def key = TestKeys.HS256
         def h = base64Url('{"alg":"HS256"}')
         def c = base64Url('{"sub":"joe","exp":"-42-"}')
-        def sig = 'IA=='
+        def payload = ("$h.$c" as String).getBytes(StandardCharsets.UTF_8)
+        def result = SignatureAlgorithms.HS256.sign(new DefaultSignatureRequest<SecretKey>(null, null, payload, key))
+        def sig = Encoders.BASE64URL.encode(result)
         def compact = "$h.$c.$sig" as String
         try {
-            Jwts.parserBuilder().build().parseClaimsJws(compact)
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
             fail()
         } catch (MalformedJwtException e) {
             String expected = 'Invalid claims: Invalid JWT Claim \'exp\' (Expiration Time) value: -42-. Cause: ' +

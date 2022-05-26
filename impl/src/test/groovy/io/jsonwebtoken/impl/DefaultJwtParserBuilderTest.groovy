@@ -70,7 +70,7 @@ class DefaultJwtParserBuilderTest {
                     .build()
             fail()
         } catch (IllegalStateException e) {
-            String msg = "Both 'keyLocator' and 'decryptionKey' cannot be configured. Prefer 'keyLocator' if possible."
+            String msg = "Both 'keyLocator' and 'decryptWith' key cannot be configured. Prefer 'keyLocator' if possible."
             assertEquals msg, e.getMessage()
         }
     }

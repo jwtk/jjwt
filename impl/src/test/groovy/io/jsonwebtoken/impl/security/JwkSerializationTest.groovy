@@ -93,7 +93,6 @@ class JwkSerializationTest {
 
         // Ensure no Groovy or Java toString prints out secret values:
         assertEquals '[kid:id, kty:oct, k:<redacted>]', "$jwk" as String // groovy gstring
-        println jwk.toString()
         assertEquals '{kid=id, kty=oct, k=<redacted>}', jwk.toString() // java toString
 
         //but serialization prints the real value:

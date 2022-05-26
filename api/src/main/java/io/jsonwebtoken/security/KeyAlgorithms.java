@@ -44,9 +44,13 @@ public final class KeyAlgorithms {
     //private static final Class<?>[] ESTIMATE_ITERATIONS_ARG_TYPES = new Class[]{KeyAlgorithm.class, long.class};
 
     /**
-     * Returns all JWA-standard Key Management algorithms as an unmodifiable collection.
+     * Returns all JWA-standard
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4">Key Management Algorithms</a> as an
+     * unmodifiable collection.
      *
-     * @return all JWA-standard Key Management algorithms as an unmodifiable collection.
+     * @return all JWA-standard
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4">Key Management Algorithms</a> as an
+     * unmodifiable collection.
      */
     public static Collection<KeyAlgorithm<?, ?>> values() {
         return Classes.invokeStatic(BRIDGE_CLASS, "values", null, (Object[]) null);
@@ -81,7 +85,7 @@ public final class KeyAlgorithms {
      * @see #findById(String)
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC 7518, Section 4.1</a>
      */
-    public static KeyAlgorithm<?, ?> forId(String id) {
+    public static KeyAlgorithm<?, ?> forId(String id) throws IllegalArgumentException {
         return forId0(id);
     }
 

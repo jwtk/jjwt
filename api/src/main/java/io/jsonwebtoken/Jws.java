@@ -28,5 +28,5 @@ public interface Jws<B> extends Jwt<JwsHeader, B> {
      *
      * @return the verified JWS signature as a Base64Url string.
      */
-    String getSignature();
+    String getSignature(); //TODO for 1.0: return a byte[]
 }

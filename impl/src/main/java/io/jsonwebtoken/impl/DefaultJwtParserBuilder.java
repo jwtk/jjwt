@@ -18,14 +18,11 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
-import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
-import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.LocatorFunction;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.Decoder;
@@ -65,7 +62,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private boolean enableUnsecuredJws = false;
 
-    private Function<Header<?>, Key> keyLocator;
+    private Locator<? extends Key> keyLocator;
 
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
@@ -237,8 +234,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setKeyLocator(Locator<Key> keyLocator) {
-        Assert.notNull(keyLocator, "Key locator cannot be null.");
-        this.keyLocator = new LocatorFunction<>(keyLocator);
+        this.keyLocator = Assert.notNull(keyLocator, "Key locator cannot be null.");
         return this;
     }
 
@@ -261,7 +257,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         }
 
         if (this.keyLocator != null && this.decryptionKey != null) {
-            String msg = "Both 'keyLocator' and 'decryptionKey' cannot be configured. Prefer 'keyLocator' if possible.";
+            String msg = "Both 'keyLocator' and 'decryptWith' key cannot be configured. Prefer 'keyLocator' if possible.";
             throw new IllegalStateException(msg);
         }
 
@@ -269,14 +265,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             this.keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
-        if (this.signingKeyResolver == null) {
-            this.signingKeyResolver = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
-        }
-
         // Invariants.  If these are ever violated, it's an error in this class implementation
         // (we default to non-null instances, and the setters should never allow null):
         Assert.stateNotNull(this.keyLocator, "Key locator should never be null.");
-        Assert.stateNotNull(this.signingKeyResolver, "SigningKeyResolver should never be null.");
         Assert.stateNotNull(this.compressionCodecResolver, "CompressionCodecResolver should never be null.");
 
         return new ImmutableJwtParser(new DefaultJwtParser(

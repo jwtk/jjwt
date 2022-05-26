@@ -612,7 +612,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      *                             the specified algorithm.
      * @see #signWith(Key)
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION to use a more the more flexible {@link io.jsonwebtoken.security.SignatureAlgorithm}.
+     * @deprecated since JJWT_RELEASE_VERSION to use the more flexible {@link io.jsonwebtoken.security.SignatureAlgorithm}.
      */
     @Deprecated
     T signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException;
