@@ -240,7 +240,7 @@ public final class Keys {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);
         }
-        AsymmetricKeySignatureAlgorithm<?, ?> asalg = ((AsymmetricKeySignatureAlgorithm<?, ?>) salg);
+        AsymmetricKeySignatureAlgorithm asalg = ((AsymmetricKeySignatureAlgorithm) salg);
         return asalg.keyPairBuilder().build().toJavaKeyPair();
     }
 

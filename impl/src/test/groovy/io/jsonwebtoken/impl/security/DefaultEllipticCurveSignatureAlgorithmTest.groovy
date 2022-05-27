@@ -3,13 +3,11 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.SignatureAlgorithms
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
-import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
 import java.security.*
 import java.security.interfaces.ECPrivateKey
@@ -19,12 +17,13 @@ import java.security.spec.ECPoint
 import java.security.spec.EllipticCurve
 import java.security.spec.X509EncodedKeySpec
 
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
 class DefaultEllipticCurveSignatureAlgorithmTest {
 
-    static Collection<EllipticCurveSignatureAlgorithm> algs() {
-        return SignatureAlgorithms.values().findAll({ it instanceof EllipticCurveSignatureAlgorithm })
+    static Collection<DefaultEllipticCurveSignatureAlgorithm> algs() {
+        return SignatureAlgorithms.values().findAll({ it instanceof DefaultEllipticCurveSignatureAlgorithm })
     }
 
     @Test
@@ -38,20 +37,25 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     }
 
     @Test
-    void testSignWithoutEcKey() {
-        def key = new SecretKeySpec(new byte[1], 'foo')
-        def data = "foo".getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultSignatureRequest(null, null, data, key)
+    void testValidateKeyWithoutEcKey() {
+        def key = createMock(PublicKey)
+        replay key
         algs().each {
-            try {
-                it.sign(req)
-            } catch (InvalidKeyException expected) {
-                String msg = "Elliptic Curve signing keys must be ECKeys " +
-                        "(implement java.security.interfaces.ECKey). Provided key type: " +
-                        "javax.crypto.spec.SecretKeySpec."
-                assertEquals msg, expected.getMessage()
-            }
+            it.validateKey(key, false)
+            //no exception - can't check for ECKey fields (e.g. PKCS11 or HSM key)
         }
+        verify key
+    }
+
+    @Test
+    void testIsValidRAndSWithoutEcKey() {
+        def key = createMock(PublicKey)
+        replay key
+        algs().each {
+            it.isValidRAndS(key, Bytes.EMPTY)
+            //no exception - can't check for ECKey fields (e.g. PKCS11 or HSM key)
+        }
+        verify key
     }
 
     @Test
@@ -99,22 +103,6 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
                     "384 bits (48 bytes) per " +
                     "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
             assertEquals msg, expected.getMessage()
-        }
-    }
-
-    @Test
-    void testVerifyWithoutEcKey() {
-        def key = new SecretKeySpec(new byte[1], 'foo')
-        def request = new DefaultVerifySignatureRequest(null, null, new byte[1], key, new byte[1])
-        algs().each {
-            try {
-                it.verify(request)
-            } catch (InvalidKeyException e) {
-                String msg = "Elliptic Curve verification keys must be ECKeys " +
-                        "(implement java.security.interfaces.ECKey). Provided key type: " +
-                        "javax.crypto.spec.SecretKeySpec."
-                assertEquals msg, e.getMessage()
-            }
         }
     }
 

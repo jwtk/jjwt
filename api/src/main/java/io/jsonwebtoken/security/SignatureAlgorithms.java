@@ -27,7 +27,7 @@ import java.util.Collection;
  *
  * @since JJWT_RELEASE_VERSION
  */
-@SuppressWarnings({"rawtypes", "JavadocLinkAsPlainText"})
+@SuppressWarnings({"JavadocLinkAsPlainText"})
 public final class SignatureAlgorithms {
 
     // Prevent instantiation
@@ -118,21 +118,21 @@ public final class SignatureAlgorithms {
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
      * requires a 2048-bit key.
      */
-    public static final RsaSignatureAlgorithm RS256 = forId0("RS256");
+    public static final AsymmetricKeySignatureAlgorithm RS256 = forId0("RS256");
 
     /**
      * {@code RSASSA-PKCS1-v1_5 using SHA-384} signature algorithm as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
      * requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
      */
-    public static final RsaSignatureAlgorithm RS384 = forId0("RS384");
+    public static final AsymmetricKeySignatureAlgorithm RS384 = forId0("RS384");
 
     /**
      * {@code RSASSA-PKCS1-v1_5 using SHA-512} signature algorithm as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
      * requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
      */
-    public static final RsaSignatureAlgorithm RS512 = forId0("RS512");
+    public static final AsymmetricKeySignatureAlgorithm RS512 = forId0("RS512");
 
     /**
      * {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256} signature algorithm as defined by
@@ -143,7 +143,7 @@ public final class SignatureAlgorithms {
      * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
      * classpath.</p>
      */
-    public static final RsaSignatureAlgorithm PS256 = forId0("PS256");
+    public static final AsymmetricKeySignatureAlgorithm PS256 = forId0("PS256");
 
     /**
      * {@code RSASSA-PSS using SHA-384 and MGF1 with SHA-384} signature algorithm as defined by
@@ -154,7 +154,7 @@ public final class SignatureAlgorithms {
      * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
      * classpath.</p>
      */
-    public static final RsaSignatureAlgorithm PS384 = forId0("PS384");
+    public static final AsymmetricKeySignatureAlgorithm PS384 = forId0("PS384");
 
     /**
      * {@code RSASSA-PSS using SHA-512 and MGF1 with SHA-512} signature algorithm as defined by
@@ -165,26 +165,26 @@ public final class SignatureAlgorithms {
      * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
      * classpath.</p>
      */
-    public static final RsaSignatureAlgorithm PS512 = forId0("PS512");
+    public static final AsymmetricKeySignatureAlgorithm PS512 = forId0("PS512");
 
     /**
      * {@code ECDSA using P-256 and SHA-256} signature algorithm as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
      * requires a 256-bit key.
      */
-    public static final EllipticCurveSignatureAlgorithm ES256 = forId0("ES256");
+    public static final AsymmetricKeySignatureAlgorithm ES256 = forId0("ES256");
 
     /**
      * {@code ECDSA using P-384 and SHA-384} signature algorithm as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
      * requires a 384-bit key.
      */
-    public static final EllipticCurveSignatureAlgorithm ES384 = forId0("ES384");
+    public static final AsymmetricKeySignatureAlgorithm ES384 = forId0("ES384");
 
     /**
      * {@code ECDSA using P-521 and SHA-512} signature algorithm as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
      * requires a 521-bit key.
      */
-    public static final EllipticCurveSignatureAlgorithm ES512 = forId0("ES512");
+    public static final AsymmetricKeySignatureAlgorithm ES512 = forId0("ES512");
 }

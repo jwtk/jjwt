@@ -42,9 +42,9 @@ class JwksTest {
     private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build()
 
     private static String srandom() {
-        byte[] random = new byte[16];
+        byte[] random = new byte[16]
         Randoms.secureRandom().nextBytes(random)
-        return Encoders.BASE64URL.encode(random);
+        return Encoders.BASE64URL.encode(random)
     }
 
     static void testProperty(String name, String id, def val, def expectedFieldValue = val) {
@@ -295,7 +295,7 @@ class JwksTest {
     void testInvalidCurvePoint() {
         def algs = [SignatureAlgorithms.ES256, SignatureAlgorithms.ES384, SignatureAlgorithms.ES512]
 
-        for (EllipticCurveSignatureAlgorithm alg : algs) {
+        for (AsymmetricKeySignatureAlgorithm alg : algs) {
 
             def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
             ECPublicKey pubKey = pair.getPublic() as ECPublicKey

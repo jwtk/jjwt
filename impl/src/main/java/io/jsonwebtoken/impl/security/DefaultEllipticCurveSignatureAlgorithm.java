@@ -4,7 +4,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.EllipticCurveSignatureAlgorithm;
+import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SignatureException;
@@ -22,8 +22,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 
 // @since JJWT_RELEASE_VERSION
-public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey, V extends ECKey & PublicKey>
-        extends AbstractSignatureAlgorithm<S, V> implements EllipticCurveSignatureAlgorithm<S, V> {
+public class DefaultEllipticCurveSignatureAlgorithm
+        extends AbstractSignatureAlgorithm<PrivateKey, PublicKey> implements AsymmetricKeySignatureAlgorithm {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 512.";
     private static final String KEY_TYPE_MSG_PATTERN =
@@ -90,8 +90,8 @@ public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey
     }
 
     @Override
-    public KeyPairBuilder<V, S> keyPairBuilder() {
-        return new DefaultKeyPairBuilder<V, S>("EC", this.KEY_PAIR_GEN_PARAMS)
+    public KeyPairBuilder<PublicKey, PrivateKey> keyPairBuilder() {
+        return new DefaultKeyPairBuilder<>("EC", this.KEY_PAIR_GEN_PARAMS)
                 .setProvider(getProvider()).setRandom(Randoms.secureRandom());
     }
 
@@ -107,29 +107,31 @@ public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey
     protected void validateKey(Key key, boolean signing) {
 
         // https://github.com/jwtk/jjwt/issues/68:
-        // Instead of checking for an instance of ECPrivateKey, check for ECKey and PrivateKey separately:
-        assertKey(key, ECKey.class, signing);
         Class<?> requiredType = signing ? PrivateKey.class : PublicKey.class;
         assertKey(key, requiredType, signing);
 
-        final String name = getId();
-        ECKey ecKey = (ECKey) key;
-        BigInteger order = ecKey.getParams().getOrder();
-        int orderBitLength = order.bitLength();
-        int sigFieldByteLength = fieldByteLength(orderBitLength);
-        int concatByteLength = sigFieldByteLength * 2;
+        // Some PKCS11 providers and HSMs won't expose the ECKey interface, so we have to check to see if we can cast
+        // If so, we can provide the additional safety checks:
+        if (key instanceof ECKey) {
+            final String name = getId();
+            ECKey ecKey = (ECKey) key;
+            BigInteger order = ecKey.getParams().getOrder();
+            int orderBitLength = order.bitLength();
+            int sigFieldByteLength = fieldByteLength(orderBitLength);
+            int concatByteLength = sigFieldByteLength * 2;
 
-        if (concatByteLength != this.signatureByteLength) {
-            String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " +
-                    Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " +
-                    Bytes.bitsMsg(this.orderBitLength) + " per " +
-                    "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
-            throw new InvalidKeyException(msg);
+            if (concatByteLength != this.signatureByteLength) {
+                String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " +
+                        Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " +
+                        Bytes.bitsMsg(this.orderBitLength) + " per " +
+                        "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
+                throw new InvalidKeyException(msg);
+            }
         }
     }
 
     @Override
-    protected byte[] doSign(final SignatureRequest<S> request) {
+    protected byte[] doSign(final SignatureRequest<PrivateKey> request) {
         return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
@@ -141,10 +143,21 @@ public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey
         });
     }
 
-    @Override
-    protected boolean doVerify(final VerifySignatureRequest<V> request) {
+    protected boolean isValidRAndS(PublicKey key, byte[] concatSignature) {
+        if (key instanceof ECKey) { //Some PKCS11 providers and HSMs won't expose the ECKey interface, so we have to check first
+            ECKey ecKey = (ECKey) key;
+            BigInteger order = ecKey.getParams().getOrder();
+            BigInteger r = new BigInteger(1, Arrays.copyOfRange(concatSignature, 0, sigFieldByteLength));
+            BigInteger s = new BigInteger(1, Arrays.copyOfRange(concatSignature, sigFieldByteLength, concatSignature.length));
+            return r.signum() >= 1 && s.signum() >= 1 && r.compareTo(order) < 0 && s.compareTo(order) < 0;
+        }
+        return true;
+    }
 
-        final ECKey key = request.getKey();
+    @Override
+    protected boolean doVerify(final VerifySignatureRequest<PublicKey> request) {
+
+        final PublicKey key = request.getKey();
 
         return execute(request, Signature.class, new CheckedFunction<Signature, Boolean>() {
             @Override
@@ -172,10 +185,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey
                         }
                     } else {
                         //guard for JVM security bug CVE-2022-21449:
-                        BigInteger order = key.getParams().getOrder();
-                        BigInteger r = new BigInteger(1, Arrays.copyOfRange(concatSignature, 0, sigFieldByteLength));
-                        BigInteger s = new BigInteger(1, Arrays.copyOfRange(concatSignature, sigFieldByteLength, concatSignature.length));
-                        if (r.signum() < 1 || s.signum() < 1 || r.compareTo(order) >= 0 || s.compareTo(order) >= 0) {
+                        if (!isValidRAndS(key, concatSignature)) {
                             return false;
                         }
 
@@ -185,7 +195,7 @@ public class DefaultEllipticCurveSignatureAlgorithm<S extends ECKey & PrivateKey
                         derSignature = transcodeConcatToDER(concatSignature);
                     }
 
-                    sig.initVerify(request.getKey());
+                    sig.initVerify(key);
                     sig.update(request.getContent());
                     return sig.verify(derSignature);
 

@@ -1,23 +1,28 @@
 package io.jsonwebtoken.impl.security
 
+
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.SignatureAlgorithms
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
-import javax.crypto.spec.SecretKeySpec
 import java.security.KeyPairGenerator
+import java.security.PublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-import static org.easymock.EasyMock.createMock
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
 class DefaultRsaSignatureAlgorithmTest {
 
+    static Collection<DefaultRsaSignatureAlgorithm> algs() {
+        return SignatureAlgorithms.values().findAll({ it.id.startsWith("RS") || it.id.startsWith("PS") })
+    }
+
     @Test
     void testKeyPairBuilder() {
-        SignatureAlgorithms.values().findAll({it.id.startsWith("RS") || it.id.startsWith("PS")}).each {
+        algs().each {
             def pair = it.keyPairBuilder().build()
             assertNotNull pair.public
             assertTrue pair.public instanceof RSAPublicKey
@@ -33,13 +38,14 @@ class DefaultRsaSignatureAlgorithmTest {
     }
 
     @Test
-    void testValidateKeyRsaKey() {
-        def request = new DefaultSignatureRequest(null, null, new byte[1], new SecretKeySpec(new byte[1], 'foo'))
-        try {
-            SignatureAlgorithms.RS256.sign(request)
-        } catch (InvalidKeyException e) {
-            assertTrue e.getMessage().contains("must be an RSAKey")
+    void testValidateKeyWithoutRsaKey() {
+        def key = createMock(PublicKey)
+        replay key
+        algs().each {
+            it.validateKey(key, false)
+            //no exception - can't check for RSAKey fields (e.g. PKCS11 or HSM key)
         }
+        verify key
     }
 
     @Test
@@ -60,7 +66,7 @@ class DefaultRsaSignatureAlgorithmTest {
         def pair = gen.generateKeyPair()
 
         def request = new DefaultSignatureRequest(null, null, new byte[1], pair.getPrivate())
-        SignatureAlgorithms.values().findAll({it.id.startsWith('RS') || it.id.startsWith('PS')}).each {
+        SignatureAlgorithms.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
             try {
                 it.sign(request)
             } catch (WeakKeyException expected) {

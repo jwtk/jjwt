@@ -25,15 +25,15 @@ public final class SignatureAlgorithmsBridge {
             new MacSignatureAlgorithm(256),
             new MacSignatureAlgorithm(384),
             new MacSignatureAlgorithm(512),
-            new DefaultRsaSignatureAlgorithm<>(256, 2048),
-            new DefaultRsaSignatureAlgorithm<>(384, 3072),
-            new DefaultRsaSignatureAlgorithm<>(512, 4096),
-            new DefaultRsaSignatureAlgorithm<>(256, 2048, 256),
-            new DefaultRsaSignatureAlgorithm<>(384, 3072, 384),
-            new DefaultRsaSignatureAlgorithm<>(512, 4096, 512),
-            new DefaultEllipticCurveSignatureAlgorithm<>(256),
-            new DefaultEllipticCurveSignatureAlgorithm<>(384),
-            new DefaultEllipticCurveSignatureAlgorithm<>(521)
+            new DefaultRsaSignatureAlgorithm(256, 2048),
+            new DefaultRsaSignatureAlgorithm(384, 3072),
+            new DefaultRsaSignatureAlgorithm(512, 4096),
+            new DefaultRsaSignatureAlgorithm(256, 2048, 256),
+            new DefaultRsaSignatureAlgorithm(384, 3072, 384),
+            new DefaultRsaSignatureAlgorithm(512, 4096, 512),
+            new DefaultEllipticCurveSignatureAlgorithm(256),
+            new DefaultEllipticCurveSignatureAlgorithm(384),
+            new DefaultEllipticCurveSignatureAlgorithm(521)
         ));
     }
 
