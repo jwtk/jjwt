@@ -1,5 +1,6 @@
 package io.jsonwebtoken.security;
 
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -22,5 +23,5 @@ public interface KeyPairBuilderSupplier<A extends PublicKey, B extends PrivateKe
      * @return a new {@link KeyPairBuilder} that will create new secure-random {@link KeyPair}s with a length and
      * parameters sufficient for use with the component's associated cryptographic algorithm.
      */
-    KeyPairBuilder<A, B> keyPairBuilder();
+    KeyPairBuilder keyPairBuilder();
 }

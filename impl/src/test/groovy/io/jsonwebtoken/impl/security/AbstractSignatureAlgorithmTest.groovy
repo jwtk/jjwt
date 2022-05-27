@@ -19,15 +19,15 @@ class AbstractSignatureAlgorithmTest {
     @Test
     void testSignAndVerifyWithExplicitProvider() {
         Provider provider = Security.getProvider('BC')
-        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build()
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
-        byte[] signature = SignatureAlgorithms.RS256.sign(new DefaultSignatureRequest<Key>(provider, null, data, pair.getPrivate()))
+        byte[] signature = SignatureAlgorithms.RS256.sign(new DefaultSignatureRequest<>(provider, null, data, pair.getPrivate()))
         assertTrue SignatureAlgorithms.RS256.verify(new DefaultVerifySignatureRequest(provider, null, data, pair.getPublic(), signature))
     }
 
     @Test
     void testSignFailsWithAnExternalException() {
-        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build()
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSignatureAlgorithm() {
             @Override
@@ -46,7 +46,7 @@ class AbstractSignatureAlgorithmTest {
 
     @Test
     void testVerifyFailsWithExternalException() {
-        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+        def pair = SignatureAlgorithms.RS256.keyPairBuilder().build()
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSignatureAlgorithm() {
             @Override

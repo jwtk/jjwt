@@ -1,16 +1,14 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.KeyPair;
 import io.jsonwebtoken.security.KeyPairBuilder;
 
-import java.security.PrivateKey;
+import java.security.KeyPair;
 import java.security.Provider;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
-public class DefaultKeyPairBuilder<A extends PublicKey, B extends PrivateKey> implements KeyPairBuilder<A, B> {
+public class DefaultKeyPairBuilder implements KeyPairBuilder {
 
     private final String jcaName;
     private final int bitLength;
@@ -30,7 +28,8 @@ public class DefaultKeyPairBuilder<A extends PublicKey, B extends PrivateKey> im
         this.bitLength = 0;
     }
 
-    protected java.security.KeyPair generateJdkPair() throws io.jsonwebtoken.security.SecurityException {
+    @Override
+    public KeyPair build() {
         JcaTemplate template = new JcaTemplate(this.jcaName, this.provider, this.random);
         if (this.params != null) {
             return template.generateKeyPair(this.params);
@@ -40,21 +39,13 @@ public class DefaultKeyPairBuilder<A extends PublicKey, B extends PrivateKey> im
     }
 
     @Override
-    public KeyPair<A, B> build() {
-        java.security.KeyPair pair = generateJdkPair();
-        @SuppressWarnings("unchecked") A publicKey = (A) pair.getPublic();
-        @SuppressWarnings("unchecked") B privateKey = (B) pair.getPrivate();
-        return new DefaultKeyPair<>(publicKey, privateKey);
-    }
-
-    @Override
-    public KeyPairBuilder<A, B> setProvider(Provider provider) {
+    public KeyPairBuilder setProvider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
     @Override
-    public KeyPairBuilder<A, B> setRandom(SecureRandom random) {
+    public KeyPairBuilder setRandom(SecureRandom random) {
         this.random = random;
         return this;
     }

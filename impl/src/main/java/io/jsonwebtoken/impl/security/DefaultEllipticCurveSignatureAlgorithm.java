@@ -90,9 +90,10 @@ public class DefaultEllipticCurveSignatureAlgorithm
     }
 
     @Override
-    public KeyPairBuilder<PublicKey, PrivateKey> keyPairBuilder() {
-        return new DefaultKeyPairBuilder<>("EC", this.KEY_PAIR_GEN_PARAMS)
-                .setProvider(getProvider()).setRandom(Randoms.secureRandom());
+    public KeyPairBuilder keyPairBuilder() {
+        return new DefaultKeyPairBuilder("EC", this.KEY_PAIR_GEN_PARAMS)
+                .setProvider(getProvider())
+                .setRandom(Randoms.secureRandom());
     }
 
     private static void assertKey(Key key, Class<?> type, boolean signing) {

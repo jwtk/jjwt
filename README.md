@@ -667,12 +667,6 @@ algorithms, use an algorithm's respective `keyPairBuilder()` method:
 KeyPair keyPair = SignatureAlgorithms.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
 ```
 
-The `keyPair` instance returned is a `io.jsonwebtoken.security.KeyPair`, which is essentially the same thing
-as the JDK's `java.security.KeyPair` class, except it provides generics type-safety, for example, 
-`KeyPair<ECPublicKey, ECPrivateKey>` or `KeyPair<RSAPublicKey, RSAPrivateKey>`.  If you want to convert this type-safe
-instance to the standard JDK type-erased instance, just call `keyPair.toJdkKeyPair()` and you'll get a
-`java.security.KeyPair` as expected.
-
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
 public key (`keyPair.getPublic()`) to parse/verify a JWS.
 

@@ -208,7 +208,7 @@ class KeysTest {
 
             if (alg instanceof DefaultRsaSignatureAlgorithm) {
 
-                def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+                def pair = alg.keyPairBuilder().build()
                 assertNotNull pair
 
                 PublicKey pub = pair.getPublic()
@@ -221,7 +221,7 @@ class KeysTest {
 
             } else if (alg instanceof DefaultEllipticCurveSignatureAlgorithm) {
 
-                def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+                def pair = alg.keyPairBuilder().build()
                 assertNotNull pair
 
                 int len = alg.orderBitLength

@@ -39,7 +39,7 @@ import static org.junit.Assert.*
 class JwksTest {
 
     private static final SecretKey SKEY = SignatureAlgorithms.HS256.keyBuilder().build()
-    private static final KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build()
+    private static final java.security.KeyPair EC_PAIR = SignatureAlgorithms.ES256.keyPairBuilder().build()
 
     private static String srandom() {
         byte[] random = new byte[16]
@@ -261,7 +261,7 @@ class JwksTest {
 
         for (def alg : algs) {
 
-            def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+            def pair = alg.keyPairBuilder().build()
             PublicKey pub = pair.getPublic()
             PrivateKey priv = pair.getPrivate()
 
@@ -279,8 +279,8 @@ class JwksTest {
 
             // test pair
             privJwk = pub instanceof ECKey ?
-                    Jwks.builder().setKeyPairEc(pair.toJavaKeyPair()).setPublicKeyUse("sig").build() :
-                    Jwks.builder().setKeyPairRsa(pair.toJavaKeyPair()).setPublicKeyUse("sig").build()
+                    Jwks.builder().setKeyPairEc(pair).setPublicKeyUse("sig").build() :
+                    Jwks.builder().setKeyPairRsa(pair).setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
@@ -297,7 +297,7 @@ class JwksTest {
 
         for (AsymmetricKeySignatureAlgorithm alg : algs) {
 
-            def pair = alg.keyPairBuilder().build() as io.jsonwebtoken.security.KeyPair
+            def pair = alg.keyPairBuilder().build()
             ECPublicKey pubKey = pair.getPublic() as ECPublicKey
 
             EcPublicJwk jwk = Jwks.builder().setKey(pubKey).build()

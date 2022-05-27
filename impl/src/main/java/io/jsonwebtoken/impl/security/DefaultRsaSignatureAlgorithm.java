@@ -62,8 +62,10 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSignatureAlgorithm<Pri
     }
 
     @Override
-    public KeyPairBuilder<PublicKey, PrivateKey> keyPairBuilder() {
-        return new DefaultKeyPairBuilder<>("RSA", this.preferredKeyBitLength).setProvider(getProvider()).setRandom(Randoms.secureRandom());
+    public KeyPairBuilder keyPairBuilder() {
+        return new DefaultKeyPairBuilder("RSA", this.preferredKeyBitLength)
+                .setProvider(getProvider())
+                .setRandom(Randoms.secureRandom());
     }
 
     @Override
