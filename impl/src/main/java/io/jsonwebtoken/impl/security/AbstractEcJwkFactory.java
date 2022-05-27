@@ -190,8 +190,8 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         final BigInteger Qy = Q.getAffineY();
         final BigInteger prime = ((ECFieldFp) curve.getField()).getP();
         final BigInteger slope = Qy.subtract(Py).multiply(Qx.subtract(Px).modInverse(prime)).mod(prime);
-        final BigInteger Rx = (slope.modPow(TWO, prime).subtract(Px)).subtract(Qx).mod(prime);
-        final BigInteger Ry = Qy.negate().mod(prime).add(slope.multiply(Qx.subtract(Rx))).mod(prime);
+        final BigInteger Rx = slope.pow(2).subtract(Px).subtract(Qx).mod(prime);
+        final BigInteger Ry = slope.multiply(Px.subtract(Rx)).subtract(Py).mod(prime);
 
         return new ECPoint(Rx, Ry);
     }
@@ -206,9 +206,9 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         final BigInteger Py = P.getAffineY();
         final BigInteger p = ((ECFieldFp) curve.getField()).getP();
         final BigInteger a = curve.getA();
-        final BigInteger s = ((Px.pow(2)).multiply(THREE).add(a)).multiply(Py.multiply(TWO).modInverse(p));
-        final BigInteger x = s.pow(2).subtract(Px.multiply(TWO)).mod(p);
-        final BigInteger y = (Py.negate()).add(s.multiply(Px.subtract(x))).mod(p);
+        final BigInteger s = THREE.multiply(Px.pow(2)).add(a).mod(p).multiply(TWO.multiply(Py).modInverse(p)).mod(p);
+        final BigInteger x = s.pow(2).subtract(TWO.multiply(Px)).mod(p);
+        final BigInteger y = s.multiply(Px.subtract(x)).subtract(Py).mod(p);
 
         return new ECPoint(x, y);
     }
@@ -219,7 +219,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
 
     // visible for testing
     protected ECPublicKey derivePublic(KeyFactory keyFactory, ECPublicKeySpec spec) throws InvalidKeySpecException {
-        return (ECPublicKey)keyFactory.generatePublic(spec);
+        return (ECPublicKey) keyFactory.generatePublic(spec);
     }
 
     protected ECPublicKey derivePublic(final JwkContext<ECPrivateKey> ctx) {
