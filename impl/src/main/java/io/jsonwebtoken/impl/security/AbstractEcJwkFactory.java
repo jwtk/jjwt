@@ -109,6 +109,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
      * @param point a point that may or may not be defined on the specified elliptic curve
      * @return {@code true} if a given elliptic curve contains the specified {@code point}, {@code false} otherwise.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     static boolean contains(EllipticCurve curve, ECPoint point) {
 
         if (ECPoint.POINT_INFINITY.equals(point)) {

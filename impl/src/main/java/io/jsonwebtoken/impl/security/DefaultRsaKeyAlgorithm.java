@@ -13,14 +13,12 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAKey & PrivateKey> extends CryptoAlgorithm
-    implements RsaKeyAlgorithm<E, D> {
+public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements RsaKeyAlgorithm {
 
     private final AlgorithmParameterSpec SPEC; //can be null
 
@@ -34,9 +32,9 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<E> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<PublicKey> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
-        final E kek = Assert.notNull(request.getKey(), "Request key encryption key cannot be null.");
+        final PublicKey kek = Assert.notNull(request.getKey(), "Request key encryption key cannot be null.");
         final SecretKey cek = generateKey(request);
 
         byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
@@ -55,9 +53,9 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
     }
 
     @Override
-    public SecretKey getDecryptionKey(DecryptionKeyRequest<D> request) throws SecurityException {
+    public SecretKey getDecryptionKey(DecryptionKeyRequest<PrivateKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        final D kek = Assert.notNull(request.getKey(), "Request key decryption key cannot be null.");
+        final PrivateKey kek = Assert.notNull(request.getKey(), "Request key decryption key cannot be null.");
         final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Request content (encrypted key) cannot be null or empty.");
 
         return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
@@ -68,7 +66,7 @@ public class DefaultRsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAK
                 } else {
                     cipher.init(Cipher.UNWRAP_MODE, kek, SPEC);
                 }
-                Key key = cipher.unwrap(cekBytes, "AES", Cipher.SECRET_KEY);
+                Key key = cipher.unwrap(cekBytes, AesAlgorithm.KEY_ALG_NAME, Cipher.SECRET_KEY);
                 Assert.state(key instanceof SecretKey, "Cipher unwrap must return a SecretKey instance.");
                 return (SecretKey) key;
             }

@@ -17,14 +17,12 @@ package io.jsonwebtoken.security;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAKey;
 
 /**
- * A {@link KeyAlgorithm} that produces JWE Encrypted Keys via RSA cryptography.
+ * A {@link KeyAlgorithm} that uses RSA cryptography; an RSA {@link PublicKey} is used to wrap (encrypt) the
+ * AEAD encryption key, and an RSA {@link PrivateKey} is used to unwrap (decrypt) the AEAD decryption key.
  *
- * @param <E> the type of RSA public key used to obtain the AEAD encryption key
- * @param <D> the type of RSA private key used to obtain the AEAD decryption key
  * @since JJWT_RELEASE_VERSION
  */
-public interface RsaKeyAlgorithm<E extends RSAKey & PublicKey, D extends RSAKey & PrivateKey> extends KeyAlgorithm<E, D> {
+public interface RsaKeyAlgorithm extends KeyAlgorithm<PublicKey, PrivateKey> {
 }
