@@ -180,20 +180,25 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setSigningKey(byte[] key) {
-        Assert.notEmpty(key, "signing key cannot be null or empty.");
+        Assert.notEmpty(key, "signature verification key cannot be null or empty.");
         return setSigningKey(Keys.hmacShaKeyFor(key));
     }
 
     @Override
     public JwtParserBuilder setSigningKey(String base64EncodedSecretKey) {
-        Assert.hasText(base64EncodedSecretKey, "signing key cannot be null or empty.");
+        Assert.hasText(base64EncodedSecretKey, "signature verification key cannot be null or empty.");
         byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
         return setSigningKey(bytes);
     }
 
     @Override
     public JwtParserBuilder setSigningKey(final Key key) {
-        this.signatureVerificationKey = Assert.notNull(key, "signing key cannot be null.");
+        return verifyWith(key);
+    }
+
+    @Override
+    public JwtParserBuilder verifyWith(Key key) {
+        this.signatureVerificationKey = Assert.notNull(key, "signature verification key cannot be null.");
         return setSigningKeyResolver(new ConstantKeyLocator(key, null));
     }
 

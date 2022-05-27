@@ -32,7 +32,8 @@ public final class KeyAlgorithmsBridge {
     public static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY;
 
     static {
-        REGISTRY = new IdRegistry<>(Collections.of(
+        //noinspection RedundantTypeArguments
+        REGISTRY = new IdRegistry<>(Collections.<KeyAlgorithm<?, ?>>of(
             new DirectKeyAlgorithm(),
             new AesWrapKeyAlgorithm(128),
             new AesWrapKeyAlgorithm(192),

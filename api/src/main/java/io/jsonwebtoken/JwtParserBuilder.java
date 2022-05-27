@@ -34,8 +34,8 @@ import java.util.Map;
  * A builder to construct a {@link JwtParser}. Example usage:
  * <pre>{@code
  *     Jwts.parserBuilder()
- *         .setSigningKey(...)
  *         .requireIssuer("https://issuer.example.com")
+ *         .verifyWith(...)
  *         .build()
  *         .parse(jwtString)
  * }</pre>
@@ -192,8 +192,17 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
 
     /**
-     * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
-     * a JWS (no signature), this key is not used.
+     * <p><b>Deprecation Notice</b></p>
+     *
+     * <p>This method has been deprecated since JJWT_RELEASE_VERSION and will be removed before 1.0.  It was not
+     * readily obvious to many JJWT users that this method was for bytes that pertained <em>only</em> to HMAC
+     * {@code SecretKey}s, and could be confused with keys of other types.  It is better to obtain a type-safe
+     * {@link Key} instance and call the {@link #verifyWith(Key)} instead.</p>
+     *
+     * <p>Previous Documentation</p>
+     *
+     * <p>Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
+     * a JWS (no signature), this key is not used.</p>
      *
      * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
      * (as the {@code alg} header parameter).</p>
@@ -203,21 +212,13 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the algorithm-specific signature verification key used to validate any discovered JWS digital
      *            signature.
      * @return the parser builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(Key)} for type safety and name congruence
+     * with the {@link #decryptWith(Key)} method.
      */
+    @Deprecated
     JwtParserBuilder setSigningKey(byte[] key);
 
     /**
-     * Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
-     * a JWS (no signature), this key is not used.
-     *
-     * <p>Note that this key <em>MUST</em> be a valid key for the signature algorithm found in the JWT header
-     * (as the {@code alg} header parameter).</p>
-     *
-     * <p>This method overwrites any previously set key.</p>
-     *
-     * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
-     * byte array is used to invoke {@link #setSigningKey(byte[])}.</p>
-     *
      * <p><b>Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0</b></p>
      *
      * <p>This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
@@ -238,23 +239,52 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
      * signature operations.</p>
      *
-     * <p>Finally, please use the {@link #setSigningKey(Key) setSigningKey(Key)} instead, as this method (and likely the
-     * {@code byte[]} variant) will be removed before the 1.0.0 release.</p>
+     * <p>Finally, please use the {@link #verifyWith(Key)} method instead, as this method (and likely
+     * {@link #setSigningKey(byte[])}) will be removed before the 1.0.0 release.</p>
      *
-     * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signature verification key to use to validate
-     *                               any discovered JWS digital signature.
+     * <p><b>Previous JavaDoc</b></p>
+     *
+     * <p>This is a convenience method that equates to the following:</p>
+     *
+     * <blockquote><pre>
+     * byte[] bytes = Decoders.{@link io.jsonwebtoken.io.Decoders#BASE64 BASE64}.decode(base64EncodedSecretKey);
+     * Key key = Keys.{@link io.jsonwebtoken.security.Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor}(bytes);
+     * return {@link #verifyWith(Key) verifyWith}(key);</pre></blockquote>
+     *
+     * @param base64EncodedSecretKey BASE64-encoded HMAC-SHA key bytes used to create a Key which will be used to
+     *                              verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
-     * @deprecated in favor of {@link #setSigningKey(Key)} as explained in the above <b>Deprecation Notice</b>,
+     * @deprecated in favor of {@link #verifyWith(Key)} as explained in the above <b>Deprecation Notice</b>,
      * and will be removed in 1.0.0.
      */
     @Deprecated
     JwtParserBuilder setSigningKey(String base64EncodedSecretKey);
 
     /**
+     * <p><b>Deprecation Notice</b></p>
+     *
+     * <p>This method is being renamed to accurately reflect its purpose - the key is not technically a signing key,
+     * it is a signature verification key, and the two concepts can be different, especially with asymmetric key
+     * cryptography.  The method has been deprecated since JJWT_RELEASE_VERSION in favor of
+     * {@link #verifyWith(Key)} for type safety, to reflect accurate naming of the concept, and for name congruence
+     * with the {@link #decryptWith(Key)} method.</p>
+     *
+     * <p>This method merely delegates directly to {@link #verifyWith(Key)}.</p>
+     *
+     * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
+     *            signatures.
+     * @return the parser builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(Key)} for naming congruence with the
+     * {@link #decryptWith(Key)} method.
+     */
+    @Deprecated
+    JwtParserBuilder setSigningKey(Key key);
+
+    /**
      * Sets the signature verification key used to verify all encountered JWS signatures. If the encountered JWT
      * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
      *
-     * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
+     * <p>This is a convenience method to use in a specific scenario: when the parser will only ever encounter
      * JWSs with signatures that can always be verified by a single key.  This also implies that this key
      * <em>MUST</em> be a valid key for the signature algorithm ({@code alg} header) used for the JWS.</p>
      *
@@ -265,11 +295,11 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p>Calling this method overrides any previously set signature verification key.</p>
      *
-     * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
-     *            signatures.
+     * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder setSigningKey(Key key);
+    JwtParserBuilder verifyWith(Key key);
 
     /**
      * Sets the decryption key to be used to decrypt all encountered JWEs.  If the encountered JWT string is not a
@@ -306,15 +336,16 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
      *
      * <pre>
-     * Jws&lt;Claims&gt; jws = Jwts.parser().setKeyLocator(new Locator&lt;Header,Key&gt;() {
+     * Jws&lt;Claims&gt; jws = Jwts.parserBuilder().setKeyLocator(new Locator&lt;Key&gt;() {
      *         &#64;Override
-     *         public Key locate(Header header) {
+     *         public Key locate(Header&lt;?&gt; header) {
      *             if (header instanceof JwsHeader) {
      *                 return getSignatureVerificationKey((JwsHeader)header); // implement me
      *             } else {
      *                 return getDecryptionKey((JweHeader)header); // implement me
      *             }
      *         }})
+     *     .build()
      *     .parseClaimsJws(compact);
      * </pre>
      *
@@ -356,12 +387,9 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>
      *
-     * <p>This method should only be used if a signing key is not provided by the other {@code setSigningKey*} builder
-     * methods.</p>
-     *
      * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #setKeyLocator(Locator)}
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
