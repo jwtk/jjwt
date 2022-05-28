@@ -61,8 +61,7 @@ class RSAOtherPrimeInfoConverter implements Converter<RSAOtherPrimeInfo, Object>
             throw new MalformedKeyException("RSA JWK 'oth' (Other Prime Info) element map cannot be empty.");
         }
 
-        // Need to add the values to a Context instance to satisfy the API contract of the getRequired* methods
-        // called below.  It's less than ideal, but it works:
+        // Need a Context instance to satisfy the API contract of the getRequired* methods below.
         JwkContext<?> ctx = new DefaultJwkContext<>(FIELDS);
         for (Map.Entry<?, ?> entry : m.entrySet()) {
             String name = String.valueOf(entry.getKey());

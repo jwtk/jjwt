@@ -15,11 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.impl.JwtMap;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.impl.lang.ValueGetter;
@@ -45,18 +43,12 @@ public class DefaultValueGetter implements ValueGetter {
     }
 
     private String name() {
-        if (values instanceof JweHeader) {
-            return "JWE header";
-        } else if (values instanceof JwsHeader) {
-            return "JWS header";
-        } else if (values instanceof Header) {
-            return "JWT header";
-        } else if (values instanceof Jwk || values instanceof JwkContext) {
-            Object value = values.get(AbstractJwk.KTY.getId());
-            if (DefaultSecretJwk.TYPE_VALUE.equals(value)) {
-                value = "Secret";
-            }
-            return value instanceof String ? value + " JWK" : "JWK";
+        Object nameable = values;
+        if (nameable instanceof AbstractJwk) {
+            nameable = ((AbstractJwk<?>) values).context;
+        }
+        if (nameable instanceof JwtMap) {
+            return ((JwtMap) nameable).getName();
         } else {
             return "Map";
         }

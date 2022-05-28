@@ -11,6 +11,7 @@ import org.junit.Before
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.atomic.AtomicInteger
 
 import static org.junit.Assert.*
 
@@ -99,6 +100,84 @@ class DefaultJweHeaderTest {
     @Test
     void testGetName() {
         assertEquals 'JWE header', header.getName()
+    }
+
+    @Test
+    void testP2cByte() {
+        header.put('p2c', Byte.MAX_VALUE)
+        assertEquals 127, header.getPbes2Count()
+    }
+
+    @Test
+    void testP2cShort() {
+        header.put('p2c', Short.MAX_VALUE)
+        assertEquals 32767, header.getPbes2Count()
+    }
+    @Test
+    void testP2cInt() {
+        header.put('p2c', Integer.MAX_VALUE)
+        assertEquals 0x7fffffff as Integer, header.getPbes2Count()
+    }
+
+    @Test
+    void testP2cAtomicInteger() {
+        header.put('p2c', new AtomicInteger(Integer.MAX_VALUE))
+        assertEquals 0x7fffffff as Integer, header.getPbes2Count()
+    }
+
+    @Test
+    void testP2cString() {
+        header.put('p2c', "100")
+        assertEquals 100, header.getPbes2Count()
+    }
+
+    @Test
+    void testP2cZero() {
+        try {
+            header.put('p2c', 0)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: 0. " +
+                    "Cause: Value is not a positive integer."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testP2cNegative() {
+        try {
+            header.put('p2c', -1)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: -1. " +
+                    "Cause: Value is not a positive integer."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testP2cTooLarge() {
+        try {
+            header.put('p2c', Long.MAX_VALUE)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: 9223372036854775807. " +
+                    "Cause: Value cannot be represented as a java.lang.Integer."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testP2cDecimal() {
+        double d = 42.2348423d
+        try {
+            header.put('p2c', d)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: $d. " +
+                    "Cause: Value cannot be represented as a java.lang.Integer."
+            assertEquals msg, expected.getMessage()
+        }
     }
 
     @Test

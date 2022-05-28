@@ -159,7 +159,7 @@ public class JwtMap implements Map<String, Object> {
         return retval;
     }
 
-    protected String getName() {
+    public String getName() {
         return "Map";
     }
 

@@ -58,7 +58,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "JWT Claim";
     }
 

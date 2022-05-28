@@ -34,7 +34,7 @@ public class DefaultJwsHeader extends AbstractProtectedHeader<JwsHeader> impleme
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "JWS header";
     }
 }

@@ -53,7 +53,7 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "JWT header";
     }
 

@@ -90,7 +90,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         Object value = values.get(AbstractJwk.KTY.getId());
         if (DefaultSecretJwk.TYPE_VALUE.equals(value)) {
             value = "Secret";

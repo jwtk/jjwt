@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.PositiveIntegerConverter;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -19,7 +20,8 @@ import java.util.Set;
 public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> implements JweHeader {
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
-    public static final Field<Integer> P2C = Fields.builder(Integer.class).setId("p2c").setName("PBES2 Count").build();
+    public static final Field<Integer> P2C = Fields.builder(Integer.class)
+            .setConverter(PositiveIntegerConverter.INSTANCE).setId("p2c").setName("PBES2 Count").build();
     public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input").build();
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
@@ -35,7 +37,7 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "JWE header";
     }
 

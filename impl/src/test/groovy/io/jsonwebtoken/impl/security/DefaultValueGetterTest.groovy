@@ -10,6 +10,8 @@ import io.jsonwebtoken.security.MalformedKeyException
 import org.junit.Test
 
 import javax.crypto.SecretKey
+import java.security.interfaces.ECPublicKey
+import java.security.interfaces.RSAPublicKey
 
 import static org.junit.Assert.*
 
@@ -40,8 +42,8 @@ class DefaultValueGetterTest {
     }
 
     @Test
-    void testJwkName() {
-        def ctx = new DefaultJwkContext().setId('id')
+    void testJwkContextName() {
+        def ctx = new DefaultJwkContext<>().setId('id')
         def getter = new DefaultValueGetter(ctx)
         assertEquals 'JWK', getter.name()
     }
@@ -55,10 +57,17 @@ class DefaultValueGetterTest {
     }
 
     @Test
-    void testJwkContextName() {
-        def ctx = new DefaultJwkContext<>().setId('id')
-        def getter = new DefaultValueGetter(ctx)
-        assertEquals 'JWK', getter.name()
+    void testEcJwkName() {
+        def jwk = Jwks.builder().setKey(TestKeys.ES256.pair.public as ECPublicKey).build()
+        def getter = new DefaultValueGetter(jwk)
+        assertEquals 'EC JWK', getter.name()
+    }
+
+    @Test
+    void testRsaJwkName() {
+        def jwk = Jwks.builder().setKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def getter = new DefaultValueGetter(jwk)
+        assertEquals 'RSA JWK', getter.name()
     }
 
     @Test
