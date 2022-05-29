@@ -54,28 +54,6 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
     RsaPublicJwkBuilder forKey(RSAPublicKey key);
 
     /**
-     * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
-     * The first {@code X509Certificate} in the chain (at array index 0) <em>MUST</em> contain an {@link RSAPublicKey}
-     * instance when calling the certificate's {@link X509Certificate#getPublicKey() getPublicKey()} method.
-     *
-     * @param chain the {@link X509Certificate} chain to inspect to find the {@link RSAPublicKey} to represent as a
-     *              {@link RsaPublicJwk}.
-     * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
-     */
-    RsaPublicJwkBuilder forRsaChain(X509Certificate... chain);
-
-    /**
-     * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
-     * The first {@code X509Certificate} in the chain (at list index 0) <em>MUST</em> contain an {@link RSAPublicKey}
-     * instance when calling the certificate's {@link X509Certificate#getPublicKey() getPublicKey()} method.
-     *
-     * @param chain the {@link X509Certificate} chain to inspect to find the {@link RSAPublicKey} to represent as a
-     *              {@link RsaPublicJwk}.
-     * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
-     */
-    RsaPublicJwkBuilder forRsaChain(List<X509Certificate> chain);
-
-    /**
      * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java {@link RSAPrivateKey}. If
      * possible, it is recommended to also call the resulting builder's
      * {@link RsaPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method with the private key's matching
@@ -95,6 +73,19 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @return the builder coerced as an {@link EcPublicJwkBuilder}.
      */
     EcPublicJwkBuilder forKey(ECPublicKey key);
+
+    /**
+     * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java {@link ECPrivateKey}. If
+     * possible, it is recommended to also call the resulting builder's
+     * {@link EcPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method with the private key's matching
+     * {@link PublicKey} for better performance.  See the
+     * {@link EcPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} and {@link PrivateJwk} JavaDoc for more
+     * information.
+     *
+     * @param key the {@link ECPublicKey} to represent as an {@link EcPublicJwk}.
+     * @return the builder coerced as a {@link EcPrivateJwkBuilder}.
+     */
+    EcPrivateJwkBuilder forKey(ECPrivateKey key);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -119,17 +110,39 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
     EcPublicJwkBuilder forEcChain(List<X509Certificate> chain);
 
     /**
-     * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java {@link ECPrivateKey}. If
-     * possible, it is recommended to also call the resulting builder's
-     * {@link EcPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method with the private key's matching
-     * {@link PublicKey} for better performance.  See the
-     * {@link EcPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} and {@link PrivateJwk} JavaDoc for more
-     * information.
+     * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java Elliptic Curve
+     * {@link KeyPair}.  The pair's {@link KeyPair#getPublic() public key} <em>MUST</em> be an
+     * {@link ECPublicKey} instance.  The pair's {@link KeyPair#getPrivate() private key} <em>MUST</em> be an
+     * {@link ECPrivateKey} instance.
      *
-     * @param key the {@link ECPublicKey} to represent as an {@link EcPublicJwk}.
-     * @return the builder coerced as a {@link EcPrivateJwkBuilder}.
+     * @param keyPair the EC {@link KeyPair} to represent as an {@link EcPrivateJwk}.
+     * @return the builder coerced as an {@link EcPrivateJwkBuilder}.
+     * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link ECPublicKey} and
+     *                                  {@link ECPrivateKey} instances.
      */
-    EcPrivateJwkBuilder forKey(ECPrivateKey key);
+    EcPrivateJwkBuilder forEcKeyPair(KeyPair keyPair) throws IllegalArgumentException;
+
+    /**
+     * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
+     * The first {@code X509Certificate} in the chain (at array index 0) <em>MUST</em> contain an {@link RSAPublicKey}
+     * instance when calling the certificate's {@link X509Certificate#getPublicKey() getPublicKey()} method.
+     *
+     * @param chain the {@link X509Certificate} chain to inspect to find the {@link RSAPublicKey} to represent as a
+     *              {@link RsaPublicJwk}.
+     * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
+     */
+    RsaPublicJwkBuilder forRsaChain(X509Certificate... chain);
+
+    /**
+     * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
+     * The first {@code X509Certificate} in the chain (at list index 0) <em>MUST</em> contain an {@link RSAPublicKey}
+     * instance when calling the certificate's {@link X509Certificate#getPublicKey() getPublicKey()} method.
+     *
+     * @param chain the {@link X509Certificate} chain to inspect to find the {@link RSAPublicKey} to represent as a
+     *              {@link RsaPublicJwk}.
+     * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
+     */
+    RsaPublicJwkBuilder forRsaChain(List<X509Certificate> chain);
 
     /**
      * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java RSA
@@ -143,17 +156,4 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      *                                  {@link RSAPrivateKey} instances.
      */
     RsaPrivateJwkBuilder forRsaKeyPair(KeyPair keyPair) throws IllegalArgumentException;
-
-    /**
-     * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java Elliptic Curve
-     * {@link KeyPair}.  The pair's {@link KeyPair#getPublic() public key} <em>MUST</em> be an
-     * {@link ECPublicKey} instance.  The pair's {@link KeyPair#getPrivate() private key} <em>MUST</em> be an
-     * {@link ECPrivateKey} instance.
-     *
-     * @param keyPair the EC {@link KeyPair} to represent as an {@link EcPrivateJwk}.
-     * @return the builder coerced as an {@link EcPrivateJwkBuilder}.
-     * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link ECPublicKey} and
-     *                                  {@link ECPrivateKey} instances.
-     */
-    EcPrivateJwkBuilder forEcKeyPair(KeyPair keyPair) throws IllegalArgumentException;
 }
