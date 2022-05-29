@@ -133,7 +133,7 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
 
         if (compressionCodec != null) {
             plaintext = compressionCodec.compress(plaintext);
-            jweHeader.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
+            jweHeader.setCompressionAlgorithm(compressionCodec.getId());
         }
 
         KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, this.key, jweHeader, enc);

@@ -378,7 +378,7 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
         byte[] bytes = this.payload != null ? payload.getBytes(Strings.UTF_8) : claimsSerializer.apply(claims);
 
         if (Arrays.length(bytes) > 0 && compressionCodec != null) {
-            header.setCompressionAlgorithm(compressionCodec.getAlgorithmName());
+            header.setCompressionAlgorithm(compressionCodec.getId());
             bytes = compressionCodec.compress(bytes);
         }
 

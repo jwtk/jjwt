@@ -19,6 +19,7 @@ import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Strings;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +32,22 @@ import java.io.OutputStream;
  * @since 0.6.0
  */
 public abstract class AbstractCompressionCodec implements CompressionCodec {
+
+    protected final String id;
+
+    protected AbstractCompressionCodec(String id) {
+        this.id = Assert.hasText(Strings.clean(id), "id argument cannot be null or empty.");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getAlgorithmName() {
+        return getId();
+    }
 
     //package-protected for a point release.  This can be made protected on a minor release (0.11.0, 0.12.0, 1.0, etc).
     //TODO: make protected on a minor release

@@ -25,31 +25,30 @@ import org.junit.Test
 class AbstractCompressionCodecTest {
     static class ExceptionThrowingCodec extends AbstractCompressionCodec {
 
+        ExceptionThrowingCodec() {
+            super("Test")
+        }
+
         @Override
         protected byte[] doCompress(byte[] payload) throws IOException {
             throw new IOException("Test Exception")
         }
 
         @Override
-        String getAlgorithmName() {
-            return "Test"
-        }
-
-        @Override
         protected byte[] doDecompress(byte[] payload) throws IOException {
-            throw new IOException("Test Decompress Exception");
+            throw new IOException("Test Decompress Exception")
         }
     }
 
     @Test(expected = CompressionException.class)
     void testCompressWithException() {
-        CompressionCodec codecUT = new ExceptionThrowingCodec();
-        codecUT.compress(new byte[0]);
+        CompressionCodec codecUT = new ExceptionThrowingCodec()
+        codecUT.compress(new byte[0])
     }
 
     @Test(expected = CompressionException.class)
     void testDecompressWithException() {
-        CompressionCodec codecUT = new ExceptionThrowingCodec();
-        codecUT.decompress(new byte[0]);
+        CompressionCodec codecUT = new ExceptionThrowingCodec()
+        codecUT.decompress(new byte[0])
     }
 }

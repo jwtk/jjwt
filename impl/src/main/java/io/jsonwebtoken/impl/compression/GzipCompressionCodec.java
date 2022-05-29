@@ -39,9 +39,8 @@ public class GzipCompressionCodec extends AbstractCompressionCodec implements Co
         }
     };
 
-    @Override
-    public String getAlgorithmName() {
-        return GZIP;
+    public GzipCompressionCodec() {
+        super(GZIP);
     }
 
     @Override

@@ -38,6 +38,7 @@ import java.security.PublicKey
 
 import static org.junit.Assert.*
 
+@SuppressWarnings(['GrDeprecatedAPIUsage', 'GrUnnecessarySemicolon'])
 class DeprecatedJwtsTest {
 
     private static Date now() {
@@ -126,6 +127,7 @@ class DeprecatedJwtsTest {
         // carriage return + newline, so we have to include them in the test payload to assert our encoded output
         // matches what is in the spec:
 
+        //noinspection HttpUrlsUsage
         def payload = '{"iss":"joe",\r\n' +
                 ' "exp":1300819380,\r\n' +
                 ' "http://example.com/is_root":true}'
@@ -393,7 +395,7 @@ class DeprecatedJwtsTest {
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
             @Override
-            String getAlgorithmName() {
+            String getId() {
                 return "CUSTOM"
             }
         }).compact()
@@ -402,6 +404,7 @@ class DeprecatedJwtsTest {
             @Override
             CompressionCodec resolveCompressionCodec(Header header) {
                 String algorithm = header.getCompressionAlgorithm()
+                //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
                     return CompressionCodecs.GZIP
                 } else {
@@ -431,7 +434,7 @@ class DeprecatedJwtsTest {
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
             @Override
-            String getAlgorithmName() {
+            String getId() {
                 return "CUSTOM"
             }
         }).compact()
@@ -555,6 +558,7 @@ class DeprecatedJwtsTest {
 
         String jws = Jwts.builder().setSubject("Foo").signWith(key, alg).compact()
 
+        //noinspection GroovyUnusedCatchParameter
         try {
             Jwts.parser().setSigningKey(weakKey).parseClaimsJws(jws)
             fail('parseClaimsJws must fail for weak keys')
@@ -726,6 +730,7 @@ class DeprecatedJwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert [alg: alg.name()] == token.header
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
@@ -742,6 +747,7 @@ class DeprecatedJwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.header == [alg: alg.name()]
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims
@@ -764,6 +770,7 @@ class DeprecatedJwtsTest {
 
         def token = Jwts.parser().setSigningKey(key).parse(jwt)
 
+        //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.header == [alg: alg.name()]
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.body == claims

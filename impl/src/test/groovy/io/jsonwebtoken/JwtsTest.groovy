@@ -481,7 +481,7 @@ class JwtsTest {
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
             @Override
-            String getAlgorithmName() {
+            String getId() {
                 return "CUSTOM"
             }
         }).compact()
@@ -520,7 +520,7 @@ class JwtsTest {
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
             @Override
-            String getAlgorithmName() {
+            String getId() {
                 return "CUSTOM"
             }
         }).compact()

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.compression
 
 import io.jsonwebtoken.CompressionCodec
+import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.CompressionException
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.io.FakeServiceDescriptorClassLoader
@@ -23,12 +24,7 @@ import io.jsonwebtoken.impl.lang.Services
 import org.junit.Assert
 import org.junit.Test
 
-import io.jsonwebtoken.CompressionCodecs
-
-import static org.hamcrest.CoreMatchers.hasItem
-import static org.hamcrest.CoreMatchers.instanceOf
-import static org.hamcrest.CoreMatchers.is
-import static org.hamcrest.CoreMatchers.nullValue
+import static org.hamcrest.CoreMatchers.*
 import static org.hamcrest.MatcherAssert.assertThat
 
 class DefaultCompressionCodecResolverTest {
@@ -68,6 +64,7 @@ class DefaultCompressionCodecResolverTest {
 
     @Test
     void emptyCompressionAlgInHeaderTest() {
+        //noinspection GroovyUnusedCatchParameter
         try {
             new DefaultCompressionCodecResolver().byName("")
             Assert.fail("Expected IllegalArgumentException to be thrown")

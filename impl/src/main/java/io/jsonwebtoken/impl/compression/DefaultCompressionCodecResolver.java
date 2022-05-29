@@ -58,11 +58,11 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
     public DefaultCompressionCodecResolver() {
         Map<String, CompressionCodec> codecMap = new HashMap<>();
         for (CompressionCodec codec : Services.loadAll(CompressionCodec.class)) {
-            codecMap.put(codec.getAlgorithmName().toUpperCase(), codec);
+            codecMap.put(codec.getId().toUpperCase(), codec);
         }
 
-        codecMap.put(CompressionCodecs.DEFLATE.getAlgorithmName().toUpperCase(), CompressionCodecs.DEFLATE);
-        codecMap.put(CompressionCodecs.GZIP.getAlgorithmName().toUpperCase(), CompressionCodecs.GZIP);
+        codecMap.put(CompressionCodecs.DEFLATE.getId().toUpperCase(), CompressionCodecs.DEFLATE);
+        codecMap.put(CompressionCodecs.GZIP.getId().toUpperCase(), CompressionCodecs.GZIP);
 
         codecs = Collections.unmodifiableMap(codecMap);
     }

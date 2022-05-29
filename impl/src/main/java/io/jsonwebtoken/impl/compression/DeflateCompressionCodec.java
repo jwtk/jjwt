@@ -42,9 +42,8 @@ public class DeflateCompressionCodec extends AbstractCompressionCodec {
         }
     };
 
-    @Override
-    public String getAlgorithmName() {
-        return DEFLATE;
+    public DeflateCompressionCodec() {
+        super(DEFLATE);
     }
 
     @Override
