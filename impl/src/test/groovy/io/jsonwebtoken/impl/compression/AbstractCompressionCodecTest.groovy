@@ -55,6 +55,11 @@ class AbstractCompressionCodecTest {
     }
 
     @Test
+    void testGetId() {
+        assertEquals "Test", new ExceptionThrowingCodec().getId()
+    }
+
+    @Test
     void testAlgorithmName() {
         assertEquals "Test", new ExceptionThrowingCodec().getAlgorithmName()
     }

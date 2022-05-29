@@ -33,7 +33,7 @@ import java.io.OutputStream;
  */
 public abstract class AbstractCompressionCodec implements CompressionCodec {
 
-    protected final String id;
+    private final String id;
 
     protected AbstractCompressionCodec(String id) {
         this.id = Assert.hasText(Strings.clean(id), "id argument cannot be null or empty.");
