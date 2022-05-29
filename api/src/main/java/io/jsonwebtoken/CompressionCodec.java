@@ -21,7 +21,7 @@ package io.jsonwebtoken;
  * <p><b>&quot;zip&quot; identifier</b></p>
  *
  * <p>{@code CompressionCodec} extends {@code Identifiable}; the value returned from
- * {@link Identifiable#getId() getId()} will be used as the JWT's
+ * {@link Identifiable#getId() getId()} will be used as the JWT
  * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.</p>
  *
  * @see CompressionCodecs#DEFLATE
@@ -31,14 +31,15 @@ package io.jsonwebtoken;
 public interface CompressionCodec extends Identifiable {
 
     /**
-     * The algorithm name to use as the JWT's
+     * The algorithm name to use as the JWT
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
      *
-     * @return the algorithm name to use as the JWT's
+     * @return the algorithm name to use as the JWT
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Identifiable#getId()} to ensure congruence with
      * all other identifiable algorithms.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     String getAlgorithmName();
 
