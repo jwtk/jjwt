@@ -2,11 +2,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.lang.Collections
-import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
-import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.KeyBuilderSupplier
-import io.jsonwebtoken.security.SecretKeyBuilder
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.*
 
 import javax.crypto.SecretKey
 import java.security.KeyPair
@@ -24,6 +20,7 @@ class TestKeys {
     static SecretKey HS256 = SignatureAlgorithms.HS256.keyBuilder().build()
     static SecretKey HS384 = SignatureAlgorithms.HS384.keyBuilder().build()
     static SecretKey HS512 = SignatureAlgorithms.HS512.keyBuilder().build()
+    static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static {

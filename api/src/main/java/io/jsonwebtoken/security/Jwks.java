@@ -29,7 +29,9 @@ public final class Jwks {
     private Jwks() {
     } //prevent instantiation
 
-    private static final String CNAME = "io.jsonwebtoken.impl.security.DefaultProtoJwkBuilder";
+    private static final String BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultProtoJwkBuilder";
+
+    private static final String PARSERBUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
 
     /**
      * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
@@ -37,6 +39,16 @@ public final class Jwks {
      * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
      */
     public static ProtoJwkBuilder<?, ?, ?> builder() {
-        return Classes.newInstance(CNAME);
+        return Classes.newInstance(BUILDER_CLASSNAME);
     }
+
+    /**
+     * Return a new thread-safe {@link JwkParserBuilder} to parse JSON strings into {@link Jwk} instances.
+     *
+     * @return a new thread-safe {@link JwkParserBuilder} to parse JSON strings into {@link Jwk} instances.
+     */
+    public static JwkParserBuilder parserBuilder() {
+        return Classes.newInstance(PARSERBUILDER_CLASSNAME);
+    }
+
 }
