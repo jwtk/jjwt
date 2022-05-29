@@ -19,6 +19,8 @@ import io.jsonwebtoken.CompressionCodec
 import io.jsonwebtoken.CompressionException
 import org.junit.Test
 
+import static org.junit.Assert.assertEquals
+
 /**
  * @since 0.6.0
  */
@@ -50,5 +52,10 @@ class AbstractCompressionCodecTest {
     void testDecompressWithException() {
         CompressionCodec codecUT = new ExceptionThrowingCodec()
         codecUT.decompress(new byte[0])
+    }
+
+    @Test
+    void testAlgorithmName() {
+        assertEquals "Test", new ExceptionThrowingCodec().getAlgorithmName()
     }
 }
