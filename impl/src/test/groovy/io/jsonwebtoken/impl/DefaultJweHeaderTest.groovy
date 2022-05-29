@@ -55,7 +55,7 @@ class DefaultJweHeaderTest {
 
     @Test
     void testJwk() {
-        EcPrivateJwk jwk = Jwks.builder().setKeyPairEc(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         header.setJwk(pubJwk)
         assertEquals pubJwk, header.getJwk()

@@ -58,14 +58,14 @@ class DefaultValueGetterTest {
 
     @Test
     void testEcJwkName() {
-        def jwk = Jwks.builder().setKey(TestKeys.ES256.pair.public as ECPublicKey).build()
+        def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
         def getter = new DefaultValueGetter(jwk)
         assertEquals 'EC JWK', getter.name()
     }
 
     @Test
     void testRsaJwkName() {
-        def jwk = Jwks.builder().setKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwks.builder().forKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
         def getter = new DefaultValueGetter(jwk)
         assertEquals 'RSA JWK', getter.name()
     }
@@ -86,7 +86,7 @@ class DefaultValueGetterTest {
 
     @Test
     void testMalformedJwk() {
-        def jwk = Jwks.builder().setKey(TestKeys.A128GCM).put('foo', 42).build()
+        def jwk = Jwks.builder().forKey(TestKeys.A128GCM).put('foo', 42).build()
         def getter = new DefaultValueGetter(jwk)
         try {
             getter.getRequiredString('foo')

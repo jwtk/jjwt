@@ -27,7 +27,7 @@ class EcdhKeyAlgorithmTest {
         ECPrivateKey decryptionKey = TestKeys.ES256.pair.private as ECPrivateKey
 
         def header = new DefaultJweHeader()
-        def jwk = Jwks.builder().setKey(TestKeys.HS256).build() //something other than an EC public key
+        def jwk = Jwks.builder().forKey(TestKeys.HS256).build() //something other than an EC public key
         header.put('epk', jwk)
 
         DecryptionKeyRequest req = new DefaultDecryptionKeyRequest(null, null, decryptionKey, header, EncryptionAlgorithms.A128GCM, 'test'.getBytes())
@@ -47,7 +47,7 @@ class EcdhKeyAlgorithmTest {
         ECPrivateKey decryptionKey = TestKeys.ES256.pair.private as ECPrivateKey // Expected curve for this is P-256
 
         def header = new DefaultJweHeader()
-        def pubJwk = Jwks.builder().setKey(TestKeys.ES256.pair.public as ECPublicKey).build()
+        def pubJwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
         def jwk = new LinkedHashMap(pubJwk) // copy fields so we can mutate
         // We have a public JWK for a point on the curve, now swap out the x coordinate for something invalid:
         jwk.put('x', 'Kg')
@@ -76,7 +76,7 @@ class EcdhKeyAlgorithmTest {
 
         def header = new DefaultJweHeader()
         // This uses curve P-384 instead, does not match private key, so it's unexpected:
-        def jwk = Jwks.builder().setKey(TestKeys.ES384.pair.public as ECPublicKey).build()
+        def jwk = Jwks.builder().forKey(TestKeys.ES384.pair.public as ECPublicKey).build()
         header.put('epk', jwk)
 
         DecryptionKeyRequest req = new DefaultDecryptionKeyRequest(null, null, decryptionKey, header, EncryptionAlgorithms.A128GCM, 'test'.getBytes())

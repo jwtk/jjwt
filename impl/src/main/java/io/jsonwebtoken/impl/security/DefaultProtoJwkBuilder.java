@@ -31,12 +31,12 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
     }
 
     @Override
-    public SecretJwkBuilder setKey(SecretKey key) {
+    public SecretJwkBuilder forKey(SecretKey key) {
         return new AbstractJwkBuilder.DefaultSecretJwkBuilder(this.jwkContext, key);
     }
 
     @Override
-    public RsaPublicJwkBuilder setKey(RSAPublicKey key) {
+    public RsaPublicJwkBuilder forKey(RSAPublicKey key) {
         return new AbstractAsymmetricJwkBuilder.DefaultRsaPublicJwkBuilder(this.jwkContext, key);
     }
 
@@ -52,7 +52,7 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
         X509Certificate cert = chain.get(0);
         PublicKey key = cert.getPublicKey();
         RSAPublicKey pubKey = KeyPairs.assertKey(key, RSAPublicKey.class, "The first X509Certificate's ");
-        return setKey(pubKey).setX509CertificateChain(chain);
+        return forKey(pubKey).setX509CertificateChain(chain);
     }
 
     @Override
@@ -67,35 +67,35 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
         X509Certificate cert = chain.get(0);
         PublicKey key = cert.getPublicKey();
         ECPublicKey pubKey = KeyPairs.assertKey(key, ECPublicKey.class, "The first X509Certificate's ");
-        return setKey(pubKey).setX509CertificateChain(chain);
+        return forKey(pubKey).setX509CertificateChain(chain);
     }
 
     @Override
-    public RsaPrivateJwkBuilder setKey(RSAPrivateKey key) {
+    public RsaPrivateJwkBuilder forKey(RSAPrivateKey key) {
         return new AbstractAsymmetricJwkBuilder.DefaultRsaPrivateJwkBuilder(this.jwkContext, key);
     }
 
     @Override
-    public EcPublicJwkBuilder setKey(ECPublicKey key) {
+    public EcPublicJwkBuilder forKey(ECPublicKey key) {
         return new AbstractAsymmetricJwkBuilder.DefaultEcPublicJwkBuilder(this.jwkContext, key);
     }
 
     @Override
-    public EcPrivateJwkBuilder setKey(ECPrivateKey key) {
+    public EcPrivateJwkBuilder forKey(ECPrivateKey key) {
         return new AbstractAsymmetricJwkBuilder.DefaultEcPrivateJwkBuilder(this.jwkContext, key);
     }
 
     @Override
-    public RsaPrivateJwkBuilder setKeyPairRsa(KeyPair pair) {
+    public RsaPrivateJwkBuilder forRsaKeyPair(KeyPair pair) {
         RSAPublicKey pub = KeyPairs.getKey(pair, RSAPublicKey.class);
         RSAPrivateKey priv = KeyPairs.getKey(pair, RSAPrivateKey.class);
-        return setKey(priv).setPublicKey(pub);
+        return forKey(priv).setPublicKey(pub);
     }
 
     @Override
-    public EcPrivateJwkBuilder setKeyPairEc(KeyPair pair) {
+    public EcPrivateJwkBuilder forEcKeyPair(KeyPair pair) {
         ECPublicKey pub = KeyPairs.getKey(pair, ECPublicKey.class);
         ECPrivateKey priv = KeyPairs.getKey(pair, ECPrivateKey.class);
-        return setKey(priv).setPublicKey(pub);
+        return forKey(priv).setPublicKey(pub);
     }
 }

@@ -78,7 +78,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithJwk() {
-        EcPrivateJwk jwk = Jwks.builder().setKeyPairEc(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         header.setJwk(pubJwk)
         assertEquals pubJwk, header.getJwk()
@@ -86,7 +86,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithMap() {
-        EcPrivateJwk jwk = Jwks.builder().setKeyPairEc(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         Map<String, ?> m = new LinkedHashMap<>(pubJwk)
         header.put('jwk', m)
@@ -108,7 +108,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithSecretJwk() {
-        SecretJwk jwk = Jwks.builder().setKey(TestKeys.HS256).build()
+        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
         try {
             header.put('jwk', jwk)
             fail()
@@ -121,7 +121,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithPrivateJwk() {
-        EcPrivateJwk jwk = Jwks.builder().setKeyPairEc(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         try {
             header.put('jwk', jwk)
             fail()

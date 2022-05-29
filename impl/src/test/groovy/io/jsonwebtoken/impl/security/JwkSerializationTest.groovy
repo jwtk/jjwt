@@ -88,7 +88,7 @@ class JwkSerializationTest {
     static void testSecretJwk(Serializer serializer, Deserializer deserializer) {
 
         def key = TestKeys.A128GCM
-        def jwk = Jwks.builder().setKey(key).setId('id').build()
+        def jwk = Jwks.builder().forKey(key).setId('id').build()
         assertWrapped(jwk, ['k'])
 
         // Ensure no Groovy or Java toString prints out secret values:
@@ -114,7 +114,7 @@ class JwkSerializationTest {
 
     static void testPrivateEcJwk(Serializer serializer, Deserializer deserializer) {
 
-        def jwk = Jwks.builder().setKeyPairEc(TestKeys.ES256.pair).setId('id').build()
+        def jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).setId('id').build()
         assertWrapped(jwk, ['d'])
 
         // Ensure no Groovy or Java toString prints out secret values:
@@ -164,7 +164,7 @@ class JwkSerializationTest {
 
     static void testPrivateRsaJwk(Serializer serializer, Deserializer deserializer) {
 
-        def jwk = Jwks.builder().setKeyPairRsa(TestKeys.RS256.pair).setId('id').build()
+        def jwk = Jwks.builder().forRsaKeyPair(TestKeys.RS256.pair).setId('id').build()
         def privateFieldNames = ['d', 'p', 'q', 'dp', 'dq', 'qi']
         assertWrapped(jwk, privateFieldNames)
 

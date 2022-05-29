@@ -52,14 +52,14 @@ class JwksTest {
         def key = name == 'publicKeyUse' || name == 'x509CertificateChain' ? EC_PAIR.public : SKEY
 
         //test non-null value:
-        def builder = Jwks.builder().setKey(key)
+        def builder = Jwks.builder().forKey(key)
         builder."set${cap}"(val)
         def jwk = builder.build()
         assertEquals val, jwk."get${cap}"()
         assertEquals expectedFieldValue, jwk."${id}"
 
         //test null value:
-        builder = Jwks.builder().setKey(key)
+        builder = Jwks.builder().forKey(key)
         try {
             builder."set${cap}"(null)
             fail("IAE should have been thrown")
@@ -71,7 +71,7 @@ class JwksTest {
         assertFalse jwk.containsKey(id)
 
         //test empty string value
-        builder = Jwks.builder().setKey(key)
+        builder = Jwks.builder().forKey(key)
         if (val instanceof String) {
             try {
                 builder."set${cap}"('   ' as String)
@@ -121,7 +121,7 @@ class JwksTest {
 
     @Test
     void testBuilderWithSecretKey() {
-        def jwk = Jwks.builder().setKey(SKEY).build()
+        def jwk = Jwks.builder().forKey(SKEY).build()
         assertEquals 'oct', jwk.getType()
         assertEquals 'oct', jwk.kty
         assertNotNull jwk.k
@@ -170,13 +170,13 @@ class JwksTest {
     @Test
     void testRandom() {
         def random = new SecureRandom()
-        def jwk = Jwks.builder().setKey(SKEY).setRandom(random).build()
+        def jwk = Jwks.builder().forKey(SKEY).setRandom(random).build()
         assertSame random, jwk.@context.getRandom()
     }
 
     @Test(expected = IllegalArgumentException)
     void testNullRandom() {
-        Jwks.builder().setKey(SKEY).setRandom(null).build()
+        Jwks.builder().forKey(SKEY).setRandom(null).build()
     }
 
     static void testThumbprint(int number) {
@@ -210,7 +210,7 @@ class JwksTest {
         Collection<SecretKeySignatureAlgorithm> algs = SignatureAlgorithms.values().findAll({ it instanceof SecretKeySignatureAlgorithm }) as Collection<SecretKeySignatureAlgorithm>
         for (def alg : algs) {
             SecretKey secretKey = alg.keyBuilder().build()
-            def jwk = Jwks.builder().setKey(secretKey).setId('id').build()
+            def jwk = Jwks.builder().forKey(secretKey).setId('id').build()
             assertEquals 'oct', jwk.getType()
             assertTrue jwk.containsKey('k')
             assertEquals 'id', jwk.getId()
@@ -222,7 +222,7 @@ class JwksTest {
     void testSecretKeyGetEncodedReturnsNull() {
         SecretKey key = new TestSecretKey(algorithm: "AES")
         try {
-            Jwks.builder().setKey(key).build()
+            Jwks.builder().forKey(key).build()
             fail()
         } catch (UnsupportedKeyException expected) {
             String expectedMsg = 'Unable to encode SecretKey to JWK: ' + SecretJwkFactory.ENCODED_UNAVAILABLE_MSG
@@ -243,7 +243,7 @@ class JwksTest {
             }
         }
         try {
-            Jwks.builder().setKey(key).build()
+            Jwks.builder().forKey(key).build()
             fail()
         } catch (UnsupportedKeyException expected) {
             String expectedMsg = 'Unable to encode SecretKey to JWK: ' + SecretJwkFactory.ENCODED_UNAVAILABLE_MSG
@@ -266,9 +266,9 @@ class JwksTest {
             PrivateKey priv = pair.getPrivate()
 
             // test individual keys
-            PublicJwk pubJwk = Jwks.builder().setKey(pub).setPublicKeyUse("sig").build()
+            PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
             assertEquals pub, pubJwk.toKey()
-            PrivateJwk privJwk = Jwks.builder().setKey(priv).setPublicKeyUse("sig").build()
+            PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             PublicJwk privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
@@ -279,8 +279,8 @@ class JwksTest {
 
             // test pair
             privJwk = pub instanceof ECKey ?
-                    Jwks.builder().setKeyPairEc(pair).setPublicKeyUse("sig").build() :
-                    Jwks.builder().setKeyPairRsa(pair).setPublicKeyUse("sig").build()
+                    Jwks.builder().forEcKeyPair(pair).setPublicKeyUse("sig").build() :
+                    Jwks.builder().forRsaKeyPair(pair).setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
@@ -300,12 +300,12 @@ class JwksTest {
             def pair = alg.keyPairBuilder().build()
             ECPublicKey pubKey = pair.getPublic() as ECPublicKey
 
-            EcPublicJwk jwk = Jwks.builder().setKey(pubKey).build()
+            EcPublicJwk jwk = Jwks.builder().forKey(pubKey).build()
 
             //try creating a JWK with a bad point:
             def badPubKey = new InvalidECPublicKey(pubKey)
             try {
-                Jwks.builder().setKey(badPubKey).build()
+                Jwks.builder().forKey(badPubKey).build()
             } catch (InvalidKeyException ike) {
                 String curveId = jwk.get('crv')
                 String msg = EcPublicJwkFactory.keyContainsErrorMessage(curveId)

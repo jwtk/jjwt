@@ -17,7 +17,7 @@ class AbstractJwkBuilderTest {
     private static final SecretKey SKEY = TestKeys.A256GCM
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder)Jwks.builder().setKey(SKEY)
+        return (AbstractJwkBuilder)Jwks.builder().forKey(SKEY)
     }
 
     @Test

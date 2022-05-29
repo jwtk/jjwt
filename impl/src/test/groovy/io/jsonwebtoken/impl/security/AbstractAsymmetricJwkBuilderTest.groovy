@@ -22,7 +22,7 @@ class AbstractAsymmetricJwkBuilderTest {
     private static final RSAPublicKey PUB_KEY = CERT.getPublicKey() as RSAPublicKey
 
     private static RsaPublicJwkBuilder builder() {
-        return Jwks.builder().setKey(PUB_KEY)
+        return Jwks.builder().forKey(PUB_KEY)
     }
 
     @Test
@@ -69,7 +69,7 @@ class AbstractAsymmetricJwkBuilderTest {
         def pair = TestKeys.ES256.pair
 
         //start with a public key builder
-        def builder = Jwks.builder().setKey(pair.public as ECPublicKey)
+        def builder = Jwks.builder().forKey(pair.public as ECPublicKey)
         assertTrue builder instanceof AbstractAsymmetricJwkBuilder.DefaultEcPublicJwkBuilder
 
         //applying the private key turns it into a private key builder

@@ -139,7 +139,7 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         ECPublicKey genPubKey = KeyPairs.getKey(pair, ECPublicKey.class);
         ECPrivateKey genPrivKey = KeyPairs.getKey(pair, ECPrivateKey.class);
         // This asserts that the generated public key (and therefore the request key) is on a JWK-supported curve:
-        final EcPublicJwk jwk = Jwks.builder().setKey(genPubKey).build();
+        final EcPublicJwk jwk = Jwks.builder().forKey(genPubKey).build();
 
         final SecretKey derived = deriveKey(request, publicKey, genPrivKey);
 

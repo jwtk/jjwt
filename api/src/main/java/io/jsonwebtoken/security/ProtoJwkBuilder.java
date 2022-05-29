@@ -43,7 +43,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @param key the {@link SecretKey} to represent as a {@link SecretJwk}.
      * @return the builder coerced as a {@link SecretJwkBuilder}.
      */
-    SecretJwkBuilder setKey(SecretKey key);
+    SecretJwkBuilder forKey(SecretKey key);
 
     /**
      * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link RSAPublicKey}.
@@ -51,7 +51,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @param key the {@link RSAPublicKey} to represent as a {@link RsaPublicJwk}.
      * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
      */
-    RsaPublicJwkBuilder setKey(RSAPublicKey key);
+    RsaPublicJwkBuilder forKey(RSAPublicKey key);
 
     /**
      * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -86,7 +86,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @param key the {@link RSAPublicKey} to represent as a {@link RsaPublicJwk}.
      * @return the builder coerced as an {@link RsaPrivateJwkBuilder}.
      */
-    RsaPrivateJwkBuilder setKey(RSAPrivateKey key);
+    RsaPrivateJwkBuilder forKey(RSAPrivateKey key);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link ECPublicKey}.
@@ -94,7 +94,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @param key the {@link ECPublicKey} to represent as a {@link EcPublicJwk}.
      * @return the builder coerced as an {@link EcPublicJwkBuilder}.
      */
-    EcPublicJwkBuilder setKey(ECPublicKey key);
+    EcPublicJwkBuilder forKey(ECPublicKey key);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -129,7 +129,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @param key the {@link ECPublicKey} to represent as an {@link EcPublicJwk}.
      * @return the builder coerced as a {@link EcPrivateJwkBuilder}.
      */
-    EcPrivateJwkBuilder setKey(ECPrivateKey key);
+    EcPrivateJwkBuilder forKey(ECPrivateKey key);
 
     /**
      * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java RSA
@@ -142,7 +142,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link RSAPublicKey} and
      *                                  {@link RSAPrivateKey} instances.
      */
-    RsaPrivateJwkBuilder setKeyPairRsa(KeyPair keyPair) throws IllegalArgumentException;
+    RsaPrivateJwkBuilder forRsaKeyPair(KeyPair keyPair) throws IllegalArgumentException;
 
     /**
      * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java Elliptic Curve
@@ -155,5 +155,5 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link ECPublicKey} and
      *                                  {@link ECPrivateKey} instances.
      */
-    EcPrivateJwkBuilder setKeyPairEc(KeyPair keyPair) throws IllegalArgumentException;
+    EcPrivateJwkBuilder forEcKeyPair(KeyPair keyPair) throws IllegalArgumentException;
 }

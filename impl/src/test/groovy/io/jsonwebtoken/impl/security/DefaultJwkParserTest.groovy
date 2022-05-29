@@ -48,7 +48,7 @@ class DefaultJwkParserTest {
         def serializer = Services.loadFirst(Serializer)
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().setKey(key).build()
+            def jwk = Jwks.builder().forKey(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
             def parsed = Jwks.parserBuilder().build().parse(json)
@@ -75,7 +75,7 @@ class DefaultJwkParserTest {
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().setKey(key).build()
+            def jwk = Jwks.builder().forKey(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
             def parsed = Jwks.parserBuilder().setProvider(provider).build().parse(json)
