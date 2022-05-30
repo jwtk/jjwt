@@ -7,6 +7,7 @@ import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
+import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Arrays;
@@ -60,42 +61,38 @@ public class DefaultJweBuilder extends DefaultJwtBuilder<JweBuilder> implements 
     }
 
     @Override
-    public JweBuilder encryptWith(final AeadAlgorithm enc) {
+    public JweBuilder encryptWith(AeadAlgorithm enc, SecretKey key) {
+        if (key instanceof PasswordKey) {
+            return encryptWith(enc, (PasswordKey) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()));
+        }
+        return encryptWith(enc, key, KeyAlgorithms.DIRECT);
+    }
+
+    @Override
+    public <K extends Key> JweBuilder encryptWith(final AeadAlgorithm enc, final K key, final KeyAlgorithm<K, ?> keyAlg) {
         this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
-        final String id = enc.getId();
-        Assert.hasText(id, "Encryption algorithm id cannot be null or empty.");
+        final String encId = Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
         this.encFunction = wrap(new Function<AeadRequest, AeadResult>() {
             @Override
             public AeadResult apply(AeadRequest request) {
                 return enc.encrypt(request);
             }
-        }, "%s encryption failed.", id);
-        return this;
-    }
+        }, "%s encryption failed.", encId);
 
-    @Override
-    public JweBuilder withKey(SecretKey key) {
-        if (key instanceof PasswordKey) {
-            return withKeyFrom((PasswordKey) key, KeyAlgorithms.PBES2_HS512_A256KW);
-        }
-        return withKeyFrom(key, KeyAlgorithms.DIRECT);
-    }
+        this.key = Assert.notNull(key, "Key cannot be null.");
 
-    @Override
-    public <K extends Key> JweBuilder withKeyFrom(K key, final KeyAlgorithm<K, ?> alg) {
-        this.key = Assert.notNull(key, "key cannot be null.");
         //noinspection unchecked
-        this.alg = (KeyAlgorithm<Key, ?>) Assert.notNull(alg, "KeyAlgorithm cannot be null.");
-        final KeyAlgorithm<Key, ?> keyAlg = this.alg;
-        final String id = alg.getId();
-        Assert.hasText(id, "KeyAlgorithm id cannot be null or empty.");
+        this.alg = (KeyAlgorithm<Key, ?>) Assert.notNull(keyAlg, "KeyAlgorithm cannot be null.");
+        final String algId = Assert.hasText(keyAlg.getId(), "KeyAlgorithm id cannot be null or empty.");
+        final KeyAlgorithm<Key, ?> alg = this.alg;
         String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
         this.algFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
             @Override
             public KeyResult apply(KeyRequest<Key> request) {
-                return keyAlg.getEncryptionKey(request);
+                return alg.getEncryptionKey(request);
             }
-        }, SecurityException.class, cekMsg, id);
+        }, SecurityException.class, cekMsg, algId);
+
         return this;
     }
 

@@ -4,7 +4,8 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.EncryptionAlgorithms
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 class DefaultJweBuilderTest {
 
@@ -41,20 +42,10 @@ class DefaultJweBuilderTest {
     }
 
     @Test
-    void testCompactWithoutEncryptionAlgorithm() {
-        def key = EncryptionAlgorithms.A128GCM.keyBuilder().build()
-        try {
-            builder().setIssuer("me").withKey(key).compact()
-        } catch (IllegalStateException ise) {
-            assertEquals 'Encryption algorithm is required.', ise.message
-        }
-    }
-
-    @Test
     void testCompactSimplestPayload() {
         def enc = EncryptionAlgorithms.A128GCM
         def key = enc.keyBuilder().build()
-        def jwe = builder().setPayload("me").encryptWith(enc).withKey(key).compact()
+        def jwe = builder().setPayload("me").encryptWith(enc, key).compact()
         def jwt = Jwts.parserBuilder().decryptWith(key).build().parsePlaintextJwe(jwe)
         assertEquals 'me', jwt.getBody()
     }
@@ -63,7 +54,7 @@ class DefaultJweBuilderTest {
     void testCompactSimplestClaims() {
         def enc = EncryptionAlgorithms.A128GCM
         def key = enc.keyBuilder().build()
-        def jwe = builder().setSubject('joe').encryptWith(enc).withKey(key).compact()
+        def jwe = builder().setSubject('joe').encryptWith(enc, key).compact()
         def jwt = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jwe)
         assertEquals 'joe', jwt.getBody().getSubject()
     }
@@ -89,8 +80,7 @@ class DefaultJweBuilderTest {
 
         new DefaultJweBuilder()
                 .setSubject('joe')
-                .encryptWith(enc)
-                .withKey(key)
+                .encryptWith(enc, key)
                 .compact()
 
         //TODO create assertions

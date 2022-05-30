@@ -13,7 +13,7 @@ class DefaultJweTest {
     void testEqualsAndHashCode() {
         def alg = EncryptionAlgorithms.A128CBC_HS256
         def key = alg.keyBuilder().build()
-        String compact = Jwts.jweBuilder().claim('foo', 'bar').encryptWith(alg).withKey(key).compact()
+        String compact = Jwts.jweBuilder().claim('foo', 'bar').encryptWith(alg, key).compact()
         def parser = Jwts.parserBuilder().decryptWith(key).build()
         def jwe1 = parser.parseClaimsJwe(compact)
         def jwe2 = parser.parseClaimsJwe(compact)

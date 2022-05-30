@@ -101,8 +101,7 @@ class RFC7518AppendixCTest {
                         .setAgreementPartyUInfo("Alice")
                         .setAgreementPartyVInfo("Bob"))
                 .claim("Hello", "World")
-                .encryptWith(EncryptionAlgorithms.A128GCM)
-                .withKeyFrom(bobJwk.toPublicJwk().toKey(), alg)
+                .encryptWith(EncryptionAlgorithms.A128GCM, bobJwk.toPublicJwk().toKey(), alg)
                 .compact()
 
         // Ensure the protected header produced by JJWT is identical to the one in the RFC:

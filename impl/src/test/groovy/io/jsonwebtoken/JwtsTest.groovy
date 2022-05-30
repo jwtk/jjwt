@@ -1060,7 +1060,7 @@ class JwtsTest {
             }
         }
 
-        def jwe = Jwts.jweBuilder().setSubject("joe").encryptWith(encAlg).withKey(key).compact()
+        def jwe = Jwts.jweBuilder().setSubject("joe").encryptWith(encAlg, key).compact()
 
         assertEquals 'joe', Jwts.parserBuilder()
                 .addEncryptionAlgorithms([encAlg])
@@ -1272,8 +1272,7 @@ class JwtsTest {
                 // encrypt:
                 String jwe = Jwts.jweBuilder()
                         .claim('foo', 'bar')
-                        .encryptWith(enc)
-                        .withKeyFrom(key, alg)
+                        .encryptWith(enc, key, alg)
                         .compact()
 
                 //decrypt:
@@ -1301,8 +1300,7 @@ class JwtsTest {
                 String jwe = Jwts.jweBuilder()
                         .claim('foo', 'bar')
                         .compressWith(codec)
-                        .encryptWith(enc)
-                        .withKey(key)
+                        .encryptWith(enc, key)
                         .compact()
 
                 //decompress and decrypt:
@@ -1331,8 +1329,7 @@ class JwtsTest {
                 // encrypt:
                 String jwe = Jwts.jweBuilder()
                         .claim('foo', 'bar')
-                        .encryptWith(enc)
-                        .withKeyFrom(key, alg)
+                        .encryptWith(enc, key, alg)
                         .compact()
 
                 //decrypt:
@@ -1353,8 +1350,7 @@ class JwtsTest {
         // encrypt:
         String jwe = Jwts.jweBuilder()
                 .claim('foo', 'bar')
-                .encryptWith(EncryptionAlgorithms.A256GCM)
-                .withKey(key) // does not use 'withKeyFrom', should default to strongest PBES2_HS512_A256KW
+                .encryptWith(EncryptionAlgorithms.A256GCM, key) // should auto choose KeyAlg PBES2_HS512_A256KW
                 .compact()
 
         //decrypt:
@@ -1387,8 +1383,7 @@ class JwtsTest {
                     // encrypt:
                     String jwe = Jwts.jweBuilder()
                             .claim('foo', 'bar')
-                            .encryptWith(enc) // does not use 'withKeyFrom'
-                            .withKeyFrom(pubKey, alg)
+                            .encryptWith(enc, pubKey, alg)
                             .compact()
 
                     //decrypt:
@@ -1423,8 +1418,7 @@ class JwtsTest {
                     // encrypt:
                     String jwe = Jwts.jweBuilder()
                             .claim('foo', 'bar')
-                            .encryptWith(enc)
-                            .withKeyFrom(pubKey, alg)
+                            .encryptWith(enc, pubKey, alg)
                             .compact()
 
                     //decrypt:
