@@ -1,7 +1,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -30,11 +31,11 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         return String.format(fmt, curveId, curveId);
     }
 
-    protected static String jwkContainsErrorMessage(String curveId, Map<String,?> jwk) {
+    protected static String jwkContainsErrorMessage(String curveId, Map<String, ?> jwk) {
         Assert.hasText(curveId, "curveId cannot be null or empty.");
         String fmt = "EC JWK x,y coordinates do not exist on elliptic curve '%s'. This " +
                 "could be due simply to an incorrectly-created JWK or possibly an attempted Invalid Curve Attack " +
-                "(see https://safecurves.cr.yp.to/twist.html for more information). JWK: %s";
+                "(see https://safecurves.cr.yp.to/twist.html for more information).";
         return String.format(fmt, curveId, jwk);
     }
 
@@ -68,10 +69,10 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
     @Override
     protected EcPublicJwk createJwkFromValues(final JwkContext<ECPublicKey> ctx) {
 
-        ValueGetter getter = new DefaultValueGetter(ctx);
-        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CRV.getId());
-        BigInteger x = getter.getRequiredBigInt(DefaultEcPublicJwk.X.getId(), false);
-        BigInteger y = getter.getRequiredBigInt(DefaultEcPublicJwk.Y.getId(), false);
+        FieldReadable reader = new RequiredFieldReader(ctx);
+        String curveId = reader.get(DefaultEcPublicJwk.CRV);
+        BigInteger x = reader.get(DefaultEcPublicJwk.X);
+        BigInteger y = reader.get(DefaultEcPublicJwk.Y);
 
         ECParameterSpec spec = getCurveByJwaId(curveId);
         ECPoint point = new ECPoint(x, y);

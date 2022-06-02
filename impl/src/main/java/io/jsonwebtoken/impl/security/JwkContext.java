@@ -1,6 +1,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.Nameable;
 
 import java.net.URI;
 import java.security.Key;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface JwkContext<K extends Key> extends Identifiable, Map<String,Object> {
+public interface JwkContext<K extends Key> extends Identifiable, Map<String,Object>, FieldReadable, Nameable {
 
     JwkContext<K> setId(String id);
 

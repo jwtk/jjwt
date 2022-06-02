@@ -38,6 +38,11 @@ class AbstractJwkTest {
     }
 
     @Test
+    void testGetFieldValue() {
+        assertEquals 'test', jwk.get(AbstractJwk.KTY)
+    }
+
+    @Test
     void testContainsValue() {
         assertTrue jwk.containsValue('test')
         assertFalse jwk.containsValue('bar')

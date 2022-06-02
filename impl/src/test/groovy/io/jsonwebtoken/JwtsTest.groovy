@@ -147,8 +147,7 @@ class JwtsTest {
             fail()
         } catch (MalformedJwtException e) {
             String expected = 'Invalid protected header: Invalid JWS header \'jku\' (JWK Set URL) value: 42. ' +
-                    'Cause: Values must be either String or java.net.URI instances. ' +
-                    'Value type found: java.lang.Integer.'
+                    'Values must be either String or java.net.URI instances. Value type found: java.lang.Integer.'
             assertEquals expected, e.getMessage()
         }
     }
@@ -169,7 +168,7 @@ class JwtsTest {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
             fail()
         } catch (MalformedJwtException e) {
-            String expected = 'Invalid claims: Invalid JWT Claim \'exp\' (Expiration Time) value: -42-. Cause: ' +
+            String expected = 'Invalid claims: Invalid JWT Claim \'exp\' (Expiration Time) value: -42-. ' +
                     'String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics exhausted. ' +
                     'Cause: Unparseable date: "-42-"'
             assertEquals expected, e.getMessage()

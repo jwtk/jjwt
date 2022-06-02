@@ -1,12 +1,15 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.PositiveIntegerConverter;
-import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.impl.lang.RequiredBitLengthConverter;
+import io.jsonwebtoken.impl.security.JwkConverter;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.EcPublicJwk;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -20,13 +23,26 @@ import java.util.Set;
 public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> implements JweHeader {
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
-    public static final Field<Integer> P2C = Fields.builder(Integer.class)
-            .setConverter(PositiveIntegerConverter.INSTANCE).setId("p2c").setName("PBES2 Count").build();
-    public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input").build();
+
+    public static final Field<EcPublicJwk> EPK = Fields.builder(EcPublicJwk.class)
+            .setId("epk").setName("Ephemeral Public Key")
+            .setConverter(JwkConverter.EC_PUBLIC_JWK).build();
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
 
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractProtectedHeader.FIELDS, ENCRYPTION_ALGORITHM, P2C, P2S, APU, APV);
+    // https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1 says 96 bits required:
+    public static final Field<byte[]> IV = Fields.bytes("iv", "Initialization Vector")
+            .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 96)).build();
+
+    // https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2 says 128 bits required:
+    public static final Field<byte[]> TAG = Fields.bytes("tag", "Authentication Tag")
+            .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 128)).build();
+
+    public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input").build();
+    public static final Field<Integer> P2C = Fields.builder(Integer.class)
+            .setConverter(PositiveIntegerConverter.INSTANCE).setId("p2c").setName("PBES2 Count").build();
+
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractProtectedHeader.FIELDS, ENCRYPTION_ALGORITHM, EPK, APU, APV, IV, TAG, P2S, P2C);
 
     public DefaultJweHeader() {
         super(FIELDS);
@@ -53,34 +69,13 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
 //    }
 
     @Override
-    public Integer getPbes2Count() {
-        return idiomaticGet(P2C);
-    }
-
-    @Override
-    public JweHeader setPbes2Count(int count) {
-        put(P2C, count);
-        return this;
-    }
-
-    public byte[] getPbes2Salt() {
-        return idiomaticGet(P2S);
-    }
-
-    public JweHeader setPbes2Salt(byte[] salt) {
-        put(P2S, salt);
-        return this;
+    public EcPublicJwk getEphemeralPublicKey() {
+        return idiomaticGet(EPK);
     }
 
     @Override
     public byte[] getAgreementPartyUInfo() {
         return idiomaticGet(APU);
-    }
-
-    @Override
-    public String getAgreementPartyUInfoString() {
-        byte[] bytes = getAgreementPartyUInfo();
-        return Arrays.length(bytes) == 0 ? null : new String(bytes, StandardCharsets.UTF_8);
     }
 
     @Override
@@ -101,12 +96,6 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     }
 
     @Override
-    public String getAgreementPartyVInfoString() {
-        byte[] bytes = getAgreementPartyVInfo();
-        return Arrays.length(bytes) == 0 ? null : new String(bytes, StandardCharsets.UTF_8);
-    }
-
-    @Override
     public JweHeader setAgreementPartyVInfo(byte[] info) {
         put(APV, info);
         return this;
@@ -116,5 +105,36 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     public JweHeader setAgreementPartyVInfo(String info) {
         byte[] bytes = Strings.hasText(info) ? info.getBytes(StandardCharsets.UTF_8) : null;
         return setAgreementPartyVInfo(bytes);
+    }
+
+    @Override
+    public byte[] getInitializationVector() {
+        return idiomaticGet(IV);
+    }
+
+    @Override
+    public byte[] getAuthenticationTag() {
+        return idiomaticGet(TAG);
+    }
+
+    public byte[] getPbes2Salt() {
+        return idiomaticGet(P2S);
+    }
+
+//    @Override
+//    public JweHeader setPbes2Salt(byte[] salt) {
+//        put(P2S, salt);
+//        return this;
+//    }
+
+    @Override
+    public Integer getPbes2Count() {
+        return idiomaticGet(P2C);
+    }
+
+    @Override
+    public JweHeader setPbes2Count(int count) {
+        put(P2C, count);
+        return this;
     }
 }

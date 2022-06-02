@@ -62,7 +62,7 @@ public class JwtDateConverter implements Converter<Date, Object> {
         } else if (v instanceof String) {
             return parseIso8601Date((String) v); //ISO-8601 parsing since 0.10.0
         } else {
-            String msg = "Cannot create Date from Object of type " + v.getClass().getName() + " with value: " + v;
+            String msg = "Cannot create Date from object of type " + v.getClass().getName() + ".";
             throw new IllegalArgumentException(msg);
         }
     }

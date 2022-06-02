@@ -119,7 +119,8 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
 
     @Override
     public T setHeader(Map<String, ?> header) {
-        this.header = new DefaultHeader<>(header);
+        //noinspection rawtypes
+        this.header = new DefaultHeader(header);
         return (T) this;
     }
 
@@ -134,7 +135,8 @@ public class DefaultJwtBuilder<T extends JwtBuilder<T>> implements JwtBuilder<T>
 
     protected Header<?> ensureHeader() {
         if (this.header == null) {
-            this.header = new DefaultHeader<>();
+            //noinspection rawtypes
+            this.header = new DefaultHeader();
         }
         return this.header;
     }

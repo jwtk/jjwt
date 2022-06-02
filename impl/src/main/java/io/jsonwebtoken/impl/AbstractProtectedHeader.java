@@ -3,9 +3,9 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
-import io.jsonwebtoken.impl.lang.PublicJwkConverter;
 import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
 import io.jsonwebtoken.impl.security.AbstractJwk;
+import io.jsonwebtoken.impl.security.JwkConverter;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.PublicJwk;
 
@@ -25,9 +25,11 @@ import java.util.Set;
 public abstract class AbstractProtectedHeader<T extends ProtectedHeader<T>> extends DefaultHeader<T> implements ProtectedHeader<T> {
 
     static final Field<URI> JKU = Fields.uri("jku", "JWK Set URL");
-    @SuppressWarnings("rawtypes")
-    static final Field<PublicJwk> JWK = Fields.builder(PublicJwk.class).setId("jwk").setName("JSON Web Key")
-            .setConverter(new PublicJwkConverter()).build();
+
+    @SuppressWarnings("unchecked")
+    static final Field<PublicJwk<?>> JWK = Fields.builder((Class<PublicJwk<?>>) (Class<?>) PublicJwk.class)
+            .setId("jwk").setName("JSON Web Key")
+            .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
 
     static final Set<Field<?>> FIELDS = Collections.concat(DefaultHeader.FIELDS, CRIT, JKU, JWK, AbstractJwk.KID,

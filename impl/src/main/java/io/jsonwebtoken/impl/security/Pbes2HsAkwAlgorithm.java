@@ -6,7 +6,8 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.CheckedSupplier;
 import io.jsonwebtoken.impl.lang.Conditions;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -166,7 +167,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
             request.getSecureRandom(), derivedKek, request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 
-        request.getHeader().setPbes2Salt(inputSalt); //retain for recipients
+        request.getHeader().put(DefaultJweHeader.P2S.getId(), inputSalt); //retain for recipients
 
         return result;
     }
@@ -176,11 +177,10 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final PasswordKey key = Assert.notNull(request.getKey(), "Request Key cannot be null.");
-
-        ValueGetter getter = new DefaultValueGetter(header);
-        final byte[] inputSalt = getter.getRequiredBytes(DefaultJweHeader.P2S.getId());
+        FieldReadable reader = new RequiredFieldReader(header);
+        final byte[] inputSalt = reader.get(DefaultJweHeader.P2S);
+        final int iterations = reader.get(DefaultJweHeader.P2C);
         final byte[] rfcSalt = Bytes.concat(SALT_PREFIX, inputSalt);
-        final int iterations = getter.getRequiredPositiveInteger(DefaultJweHeader.P2C.getId());
         final char[] password = key.getPassword(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 

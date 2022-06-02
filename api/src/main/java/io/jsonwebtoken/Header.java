@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @since 0.1
  */
-public interface Header<T extends Header> extends Map<String, Object> {
+public interface Header<T extends Header<T>> extends Map<String, Object> {
 
     /**
      * JWT {@code Type} (typ) value: <code>"JWT"</code>

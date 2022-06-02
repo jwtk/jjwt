@@ -41,4 +41,16 @@ class RSAOtherPrimeInfoConverterTest {
             assertEquals msg, expected.getMessage()
         }
     }
+
+    @Test
+    void testApplyFromWithMalformedMap() {
+        try {
+            RSAOtherPrimeInfoConverter.INSTANCE.applyFrom(['r':2])
+            fail()
+        } catch (MalformedKeyException expected) {
+            String msg = "Invalid JWK 'r' (Prime Factor) value <redacted>. Values must be either String or " +
+                    "java.math.BigInteger instances. Value type found: java.lang.Integer."
+            assertEquals msg, expected.getMessage()
+        }
+    }
 }

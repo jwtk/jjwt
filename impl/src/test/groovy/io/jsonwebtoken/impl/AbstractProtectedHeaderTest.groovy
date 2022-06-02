@@ -1,6 +1,9 @@
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
+import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
 import io.jsonwebtoken.security.Jwks
@@ -16,11 +19,39 @@ class AbstractProtectedHeaderTest {
 
     @Before
     void setUp() {
-        header = new DefaultJwsHeader() // extends AbstractProtectedHeader
+        header = new AbstractProtectedHeader(AbstractProtectedHeader.FIELDS) {}
     }
 
     @Test
-    void testJku() {
+    void testKeyId() {
+        def kid = 'foo'
+        header.setKeyId(kid)
+        assertEquals kid, header.get('kid')
+        assertEquals kid, header.getKeyId()
+    }
+
+    @Test
+    void testKeyIdNonString() {
+        try {
+            header.put('kid', 42)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWT header 'kid' (Key ID) value: 42. Unsupported value type. " +
+                    "Expected: java.lang.String, found: java.lang.Integer"
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testSetJku() {
+        URI uri = URI.create('https://github.com')
+        header.setJwkSetUrl(uri)
+        assertEquals uri.toString(), header.get('jku')
+        assertEquals uri, header.getJwkSetUrl()
+    }
+
+    @Test
+    void testPutJkuUri() {
         URI uri = URI.create('https://google.com')
         header.put('jku', uri)
         assertEquals uri.toString(), header.get('jku')
@@ -28,7 +59,7 @@ class AbstractProtectedHeaderTest {
     }
 
     @Test
-    void testJkuString() { //test canonical/idiomatic conversion
+    void testPutJkuString() {
         String url = 'https://google.com'
         URI uri = URI.create(url)
         header.put('jku', url)
@@ -37,19 +68,15 @@ class AbstractProtectedHeaderTest {
     }
 
     @Test
-    void testX509Url() {
-        URI uri = URI.create('https://google.com')
-        header.setX509Url(uri)
-        assertEquals uri, header.getX509Url()
-    }
-
-    @Test
-    void testX509UrlString() { //test canonical/idiomatic conversion
-        String url = 'https://google.com'
-        URI uri = URI.create(url)
-        header.put('x5u', url)
-        assertEquals url, header.get('x5u')
-        assertEquals uri, header.getX509Url()
+    void testPutJkuNonString() {
+        try {
+            header.put('jku', 42)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWT header 'jku' (JWK Set URL) value: 42. Values must be either String or " +
+                    "java.net.URI instances. Value type found: java.lang.Integer."
+            assertEquals msg, expected.getMessage()
+        }
     }
 
     @Test
@@ -70,8 +97,8 @@ class AbstractProtectedHeaderTest {
             header.put('jwk', 42)
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWS header 'jwk' (JSON Web Key) value: 42. Cause: Unsupported value type - " +
-                    "expected a Map or Jwk instance.  Type found: java.lang.Integer"
+            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: 42. " +
+                    "Value must be a Jwk<?> or Map<String,?>. Type found: java.lang.Integer."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -100,8 +127,8 @@ class AbstractProtectedHeaderTest {
             header.put('jwk', m)
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWS header 'jwk' (JSON Web Key) value: {42=hello}. Cause: Unsupported 'jwk' map " +
-                    "value - all JWK map keys must be Strings.  Encountered key '42' of type java.lang.Integer"
+            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {42=hello}. JWK map keys must be Strings. " +
+                    "Encountered key '42' of type java.lang.Integer."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -113,8 +140,8 @@ class AbstractProtectedHeaderTest {
             header.put('jwk', jwk)
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWS header 'jwk' (JSON Web Key) value: {kty=oct, k=<redacted>}. Cause: " +
-                    "Unsupported JWK map - JWK values must represent a PublicJwk, not a SecretJwk."
+            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {kty=oct, k=<redacted>}. " +
+                    "Value must be a Public JWK, not a Secret JWK."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -126,12 +153,63 @@ class AbstractProtectedHeaderTest {
             header.put('jwk', jwk)
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWS header 'jwk' (JSON Web Key) value: {kty=EC, crv=P-256, " +
+            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {kty=EC, crv=P-256, " +
                     "x=xNKMMIsawShLG4LYxpNP0gqdgK_K69UXCLt3AE3zp-Q, y=_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk, " +
-                    "d=<redacted>}. Cause: Unsupported JWK map - JWK values must represent a PublicJwk, " +
-                    "not a PrivateJwk."
+                    "d=<redacted>}. Value must be a Public JWK, not an EC Private JWK."
             assertEquals msg, expected.getMessage()
         }
+    }
+
+    @Test
+    void testX509Url() {
+        URI uri = URI.create('https://google.com')
+        header.setX509Url(uri)
+        assertEquals uri, header.getX509Url()
+    }
+
+    @Test
+    void testX509UrlString() { //test canonical/idiomatic conversion
+        String url = 'https://google.com'
+        URI uri = URI.create(url)
+        header.put('x5u', url)
+        assertEquals url, header.get('x5u')
+        assertEquals uri, header.getX509Url()
+    }
+
+    @Test
+    void testX509CertChain() {
+        def bundle = TestKeys.RS256
+        List<String> encodedCerts = Collections.of(Encoders.BASE64.encode(bundle.cert.getEncoded()))
+        header.setX509CertificateChain(bundle.chain)
+        assertEquals bundle.chain, header.getX509CertificateChain()
+        assertEquals encodedCerts, header.get('x5c')
+    }
+
+    @Test
+    void testX509CertSha1Thumbprint() {
+        byte[] thumbprint = new byte[16] // simulate
+        Randoms.secureRandom().nextBytes(thumbprint)
+        String encoded = Encoders.BASE64URL.encode(thumbprint)
+        header.setX509CertificateSha1Thumbprint(thumbprint)
+        assertArrayEquals thumbprint, header.getX509CertificateSha1Thumbprint()
+        assertEquals encoded, header.get('x5t')
+    }
+
+    @Test
+    void testX509CertSha256Thumbprint() {
+        byte[] thumbprint = new byte[32] // simulate
+        Randoms.secureRandom().nextBytes(thumbprint)
+        String encoded = Encoders.BASE64URL.encode(thumbprint)
+        header.setX509CertificateSha256Thumbprint(thumbprint)
+        assertArrayEquals thumbprint, header.getX509CertificateSha256Thumbprint()
+        assertEquals encoded, header.get('x5t#S256')
+    }
+
+    @Test
+    void testCritical() {
+        Set<String> crits = Collections.setOf('foo', 'bar')
+        header.setCritical(crits)
+        assertEquals crits, header.getCritical()
     }
 
     @Test

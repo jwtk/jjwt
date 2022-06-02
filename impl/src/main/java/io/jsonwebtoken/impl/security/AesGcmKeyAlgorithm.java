@@ -1,9 +1,11 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
@@ -55,8 +57,8 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
 
         String encodedIv = Encoders.BASE64URL.encode(iv);
         String encodedTag = Encoders.BASE64URL.encode(tag);
-        request.getHeader().put("iv", encodedIv);
-        request.getHeader().put("tag", encodedTag);
+        request.getHeader().put(DefaultJweHeader.IV.getId(), encodedIv);
+        request.getHeader().put(DefaultJweHeader.TAG.getId(), encodedTag);
 
         return new DefaultKeyResult(cek, ciphertext);
     }
@@ -67,9 +69,9 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         final SecretKey kek = assertKey(request);
         final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
         final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        final ValueGetter getter = new DefaultValueGetter(header);
-        final byte[] tag = getter.getRequiredBytes("tag", this.tagBitLength / Byte.SIZE);
-        final byte[] iv = getter.getRequiredBytes("iv", this.ivBitLength / Byte.SIZE);
+        final FieldReadable reader = new RequiredFieldReader(header);
+        final byte[] tag = reader.get(DefaultJweHeader.TAG);
+        final byte[] iv = reader.get(DefaultJweHeader.IV);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:

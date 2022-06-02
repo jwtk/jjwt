@@ -38,6 +38,7 @@ class DefaultTokenizedJwt implements TokenizedJwt {
         if (Strings.hasText(getDigest())) {
             return new DefaultJwsHeader(m);
         }
-        return new DefaultHeader<>(m);
+        //noinspection unchecked
+        return new DefaultHeader(m);
     }
 }

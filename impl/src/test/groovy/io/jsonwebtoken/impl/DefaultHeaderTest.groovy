@@ -43,6 +43,15 @@ class DefaultHeaderTest {
     }
 
     @Test
+    void testAlgorithm() {
+        header.setAlgorithm('foo')
+        assertEquals 'foo', header.getAlgorithm()
+
+        header = new DefaultHeader([alg: 'bar'])
+        assertEquals 'bar', header.getAlgorithm()
+    }
+
+    @Test
     void testSetCompressionAlgorithm() {
         header.setCompressionAlgorithm("DEF")
         assertEquals "DEF", header.getCompressionAlgorithm()

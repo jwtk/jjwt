@@ -21,9 +21,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * Returns the {@code jku} (JWK Set URL) value that refers to a
      * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
      * resource containing JSON-encoded Public Keys, or {@code null} if not present.  When present in a
-     * {@link JwsHeader}, the first public key in the JWK Set <em>must</em> be the public key used to sign the JWS.
-     * When present in a {@link JweHeader}, the first public key in the JWK Set <em>must</em> be the public key used
-     * during encryption.
+     * {@link JwsHeader}, the first public key in the JWK Set <em>must</em> be the public key complement of the private
+     * key used to sign the JWS. When present in a {@link JweHeader}, the first public key in the JWK Set <em>must</em>
+     * be the public key used during encryption.
      *
      * @return a URI that refers to a <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
      * resource for a set of JSON-encoded Public Keys, or {@code null} if not present.
@@ -33,11 +33,12 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
     URI getJwkSetUrl();
 
     /**
-     * Sets the {@code jku} (JWK Set URL) value that refers to a <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
+     * Sets the {@code jku} (JWK Set URL) value that refers to a
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
      * resource containing JSON-encoded Public Keys, or {@code null} if not present.  When set for a
-     * {@link JwsHeader}, the first public key in the JWK Set <em>must</em> be the public key used to sign the JWS.
-     * When set for a {@link JweHeader}, the first public key in the JWK Set <em>must</em> be the public key used
-     * during encryption.
+     * {@link JwsHeader}, the first public key in the JWK Set <em>must</em> be the public key complement of the
+     * private key used to sign the JWS. When set for a {@link JweHeader}, the first public key in the JWK Set
+     * <em>must</em> be the public key used during encryption.
      *
      * @param uri a URI that refers to a <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
      *            resource containing JSON-encoded Public Keys
@@ -49,9 +50,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
 
     /**
      * Returns the {@code jwk} (JSON Web Key) associated with the JWT.  When present in a {@link JwsHeader}, the
-     * {@code jwk} corresponds to the public key used to digitally sign the JWS.  When present in a {@link JweHeader},
-     * the {@code jwk} is the public key to which the JWE was encrypted, and may be used to determine the private key
-     * needed to decrypt the JWE.
+     * {@code jwk} is the public key complement of the private key used to digitally sign the JWS.  When present in a
+     * {@link JweHeader}, the {@code jwk} is the public key to which the JWE was encrypted, and may be used to
+     * determine the private key needed to decrypt the JWE.
      *
      * @return the {@code jwk} (JSON Web Key) associated with the header.
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.3">JWS {@code jwk} (JSON Web Key) Header Parameter</a>
@@ -61,9 +62,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
 
     /**
      * Sets the {@code jwk} (JSON Web Key) associated with the JWT.  When set for a {@link JwsHeader}, the
-     * {@code jwk} corresponds to the public key used to digitally sign the JWS.  When set for a {@link JweHeader},
-     * the {@code jwk} is the public key to which the JWE was encrypted, and may be used to determine the private key
-     * needed to decrypt the JWE.
+     * {@code jwk} is the public key complement of the private key used to digitally sign the JWS.  When set for a
+     * {@link JweHeader}, the {@code jwk} is the public key to which the JWE was encrypted, and may be used to
+     * determine the private key needed to decrypt the JWE.
      *
      * @param jwk the {@code jwk} (JSON Web Key) associated with the header.
      * @return the header for method chaining
@@ -77,7 +78,7 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      *
      * <p>The keyId header parameter is a hint indicating which key was used to secure a JWS or JWE.  This
      * parameter allows originators to explicitly signal a change of key to recipients.  The structure of the keyId
-     * value is unspecified. Its value is a case-sensitive string.</p>
+     * value is unspecified. Its value is a CaSe-SeNsItIvE string.</p>
      *
      * <p>When used with a JWK, the keyId value is used to match a JWK {@code keyId} parameter value.</p>
      *
@@ -109,9 +110,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * chain associated with the JWT, or {@code null} if not present.
      *
      * <p>When present in a {@link JwsHeader}, the certificate or certificate chain
-     * corresponds to the public key used to digitally sign the JWS.  When present in a {@link JweHeader}, the
-     * certificate or certificate chain corresponds to the public key to which the JWE was encrypted, and may be
-     * used to determine the private key needed to decrypt the JWE.</p>
+     * corresponds to the public key complement of the private key used to digitally sign the JWS.  When present in a
+     * {@link JweHeader}, the certificate or certificate chain corresponds to the public key to which the JWE was
+     * encrypted, and may be used to determine the private key needed to decrypt the JWE.</p>
      *
      * <p>Each certificate in the resource <em>MUST</em> be in PEM-encoded form, with each certificate delimited as
      * specified in <a href="https://datatracker.ietf.org/doc/html/rfc4945#section-6.1">Section 6.1 of RFC 4945</a>.</p>
@@ -127,10 +128,10 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * Sets the {@code x5u} (X.509 URL) that refers to a resource for the X.509 public key certificate or certificate
      * chain associated with the JWT. A {@code null} value will remove the property from the JSON map.
      *
-     * <p>When set for a {@link JwsHeader}, the certificate or certificate chain
-     * corresponds to the public key used to digitally sign the JWS.  When present in a {@link JweHeader}, the
-     * certificate or certificate chain corresponds to the public key to which the JWE was encrypted, and may be
-     * used to determine the private key needed to decrypt the JWE.</p>
+     * <p>When set for a {@link JwsHeader}, the certificate or first certificate in the chain contains
+     * the public key complement of the private key used to digitally sign the JWS.  When present in a
+     * {@link JweHeader}, the certificate or first certificate in the chain contains the public key to which the JWE was
+     * encrypted, and may be used to determine the private key needed to decrypt the JWE.</p>
      *
      * <p>Each certificate in the resource <em>MUST</em> be in PEM-encoded form, with each certificate delimited as
      * specified in <a href="https://datatracker.ietf.org/doc/html/rfc4945#section-6.1">Section 6.1 of RFC 4945</a>.</p>
@@ -147,9 +148,10 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * Returns the {@code x5c} (X.509 Certificate Chain) associated with the JWT, or {@code null} if not present.
      *
      * <p>When present in a {@link JwsHeader},
-     * the first certificate (at list index 0) corresponds to the public key used to digitally sign the JWS.  When
-     * present in a {@link JweHeader}, the first certificate (at list index 0) corresponds to the public key to which
-     * the JWE was encrypted, and may be used to determine the private key needed to decrypt the JWE.</p>
+     * the first certificate (at list index 0) is the public key complement of the private key used to digitally sign
+     * the JWS.  When present in a {@link JweHeader}, the first certificate (at list index 0) contains the
+     * public key to which the JWE was encrypted, and may be used to determine the private key needed to decrypt the
+     * JWE.</p>
      *
      * <p>The initial certificate <em>MAY</em> be followed by additional certificates, with each subsequent
      * certificate being the one used to certify the previous one.</p>
@@ -164,11 +166,10 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * Sets the {@code x5c} (X.509 Certificate Chain) associated with the JWT. A {@code null} value will remove the
      * property from the JSON map.
      *
-     * <p>When set for a {@link JwsHeader},
-     * the first certificate (at list index 0) <em>MUST</em> correspond to the public key used to digitally sign the
-     * JWS.  When set for a {@link JweHeader}, the first certificate (at list index 0) <em>MUST</em> correspond to the
-     * public key to which the JWE was encrypted, and may be used to determine the private key needed to decrypt the
-     * JWE.</p>
+     * <p>When set for a {@link JwsHeader}, the first certificate (at list index 0) <em>MUST</em> contain the
+     * public key complement of the private key used to digitally sign the JWS.  When set for a {@link JweHeader}, the
+     * first certificate (at list index 0) <em>MUST</em> contain the public key to which the JWE was encrypted, and
+     * may be used to determine the private key needed to decrypt the JWE.</p>
      *
      * <p>The initial certificate <em>MAY</em> be followed by additional certificates, with each subsequent
      * certificate being the one used to certify the previous one.</p>
@@ -184,9 +185,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * Returns the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      * X.509 Certificate associated with the JWT, or {@code null} if not present.
      *
-     * <p>When present in a {@link JwsHeader}, it is the thumbprint of the X.509 certificate corresponding to the key
-     * used to digitally sign the JWS.  When present in a {@link JweHeader}, it is the thumbprint of the X.509
-     * Certificate corresponding to the public key to which the JWE was encrypted, and may be used to determine the
+     * <p>When present in a {@link JwsHeader}, it is the thumbprint of the X.509 certificate complement of the private
+     * key used to digitally sign the JWS.  When present in a {@link JweHeader}, it is the thumbprint of the X.509
+     * Certificate containing the public key to which the JWE was encrypted, and may be used to determine the
      * private key needed to decrypt the JWE.</p>
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
@@ -203,9 +204,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * X.509 Certificate associated with the JWT. A {@code null} value will remove the
      * property from the JSON map.
      *
-     * <p>When set for a {@link JwsHeader}, it is the thumbprint of the X.509 certificate corresponding to the key
+     * <p>When set for a {@link JwsHeader}, it is the thumbprint of the X.509 certificate complement of the private key
      * used to digitally sign the JWS.  When set for a {@link JweHeader}, it is the thumbprint of the X.509
-     * Certificate corresponding to the public key to which the JWE was encrypted, and may be used to determine the
+     * Certificate containing the public key to which the JWE was encrypted, and may be used to determine the
      * private key needed to decrypt the JWE.</p>
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
@@ -222,9 +223,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * Returns the {@code x5t#S256} (X.509 Certificate SHA-256 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      * X.509 Certificate associated with the JWT, or {@code null} if not present.
      *
-     * <p>When present in a {@link JwsHeader}, it is the thumbprint of the X.509 certificate corresponding to the key
-     * used to digitally sign the JWS.  When present in a {@link JweHeader}, it is the thumbprint of the X.509
-     * Certificate corresponding to the public key to which the JWE was encrypted, and may be used to determine the
+     * <p>When present in a {@link JwsHeader}, it is the thumbprint of the X.509 certificate complement of the private
+     * key used to digitally sign the JWS.  When present in a {@link JweHeader}, it is the thumbprint of the X.509
+     * Certificate containing to the public key to which the JWE was encrypted, and may be used to determine the
      * private key needed to decrypt the JWE.</p>
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
@@ -241,9 +242,9 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * X.509 Certificate associated with the JWT. A {@code null} value will remove the
      * property from the JSON map.
      *
-     * <p>When set for a {@link JwsHeader}, it is the thumbprint of the X.509 certificate corresponding to the key
+     * <p>When set for a {@link JwsHeader}, it is the thumbprint of the X.509 certificate complement of the private key
      * used to digitally sign the JWS.  When set for a {@link JweHeader}, it is the thumbprint of the X.509
-     * Certificate corresponding to the public key to which the JWE was encrypted, and may be used to determine the
+     * Certificate containing the public key to which the JWE was encrypted, and may be used to determine the
      * private key needed to decrypt the JWE.</p>
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>

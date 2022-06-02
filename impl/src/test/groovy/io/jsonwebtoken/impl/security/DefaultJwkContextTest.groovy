@@ -23,33 +23,47 @@ class DefaultJwkContextTest {
 
     @Test
     void testGetName() {
-        def header = new DefaultJwkContext()
-        assertEquals 'JWK', header.getName()
+        def ctx = new DefaultJwkContext()
+        assertEquals 'JWK', ctx.getName()
     }
 
     @Test
-    void testGetNameWhenSecretKey() {
-        def header = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
-        header.put('kty', 'oct')
-        assertEquals 'Secret JWK', header.getName()
+    void testGetNameWhenSecretJwk() {
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        ctx.put('kty', 'oct')
+        assertEquals 'Secret JWK', ctx.getName()
+    }
+
+    @Test
+    void testGetNameWithGenericPublicKey() {
+        def ctx = new DefaultJwkContext()
+        ctx.setKey(TestKeys.ES256.pair.public)
+        assertEquals 'Public JWK', ctx.getName()
+    }
+
+    @Test
+    void testGetNameWithGenericPrivateKey() {
+        def ctx = new DefaultJwkContext()
+        ctx.setKey(TestKeys.ES256.pair.private)
+        assertEquals 'Private JWK', ctx.getName()
     }
 
     @Test
     void testGStringPrintsRedactedValues() {
         // DO NOT REMOVE THIS METHOD: IT IS CRITICAL TO ENSURE GROOVY STRINGS DO NOT LEAK SECRET/PRIVATE KEY MATERIAL
-        def header = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
-        header.put('kty', 'oct')
-        header.put('k', 'test')
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        ctx.put('kty', 'oct')
+        ctx.put('k', 'test')
         String s = '[kty:oct, k:<redacted>]'
-        assertEquals "$s", "$header"
+        assertEquals "$s", "$ctx"
     }
 
     @Test
     void testGStringToStringPrintsRedactedValues() {
-        def header = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
-        header.put('kty', 'oct')
-        header.put('k', 'test')
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        ctx.put('kty', 'oct')
+        ctx.put('k', 'test')
         String s = '{kty=oct, k=<redacted>}'
-        assertEquals "$s", "${header.toString()}"
+        assertEquals "$s", "${ctx.toString()}"
     }
 }

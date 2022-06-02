@@ -32,7 +32,7 @@ public class PositiveIntegerConverter implements Converter<Integer, Object> {
             }
         }
         if (i <= 0) {
-            String msg = "Value is not a positive integer.";
+            String msg = "Value must be a positive integer.";
             throw new IllegalArgumentException(msg);
         }
         return i;

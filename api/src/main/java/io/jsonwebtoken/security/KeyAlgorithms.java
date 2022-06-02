@@ -304,7 +304,7 @@ public final class KeyAlgorithms {
      *     <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP
      *     PBKDF2 recommendations</a> and then that value is set as the JWE header {@code pbes2Count} value.</li>
      *     <li>Generates a new secure-random salt input and sets it as the JWE header
-     *     {@link JweHeader#setPbes2Salt(byte[]) pbes2Salt} value.</li>
+     *     {@link JweHeader#getPbes2Salt() pbes2Salt} value.</li>
      *     <li>Derives a 128-bit Key Encryption Key with the PBES2-HS256 password-based key derivation algorithm,
      *     using the provided password, iteration count, and input salt as arguments.</li>
      *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
@@ -349,7 +349,7 @@ public final class KeyAlgorithms {
      *     <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP
      *     PBKDF2 recommendations</a> and then that value is set as the JWE header {@code pbes2Count} value.</li>
      *     <li>Generates a new secure-random salt input and sets it as the JWE header
-     *     {@link JweHeader#setPbes2Salt(byte[]) pbes2Salt} value.</li>
+     *     {@link JweHeader#getPbes2Salt() pbes2Salt} value.</li>
      *     <li>Derives a 192-bit Key Encryption Key with the PBES2-HS384 password-based key derivation algorithm,
      *     using the provided password, iteration count, and input salt as arguments.</li>
      *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
@@ -394,7 +394,7 @@ public final class KeyAlgorithms {
      *     <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP
      *     PBKDF2 recommendations</a> and then that value is set as the JWE header {@code pbes2Count} value.</li>
      *     <li>Generates a new secure-random salt input and sets it as the JWE header
-     *     {@link JweHeader#setPbes2Salt(byte[]) pbes2Salt} value.</li>
+     *     {@link JweHeader#getPbes2Salt() pbes2Salt} value.</li>
      *     <li>Derives a 256-bit Key Encryption Key with the PBES2-HS512 password-based key derivation algorithm,
      *     using the provided password, iteration count, and input salt as arguments.</li>
      *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a

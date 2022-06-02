@@ -22,6 +22,7 @@ import io.jsonwebtoken.lang.Collections;
 
 import java.net.URI;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -91,11 +92,28 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public String getName() {
-        Object value = values.get(AbstractJwk.KTY.getId());
+        String value = get(AbstractJwk.KTY);
         if (DefaultSecretJwk.TYPE_VALUE.equals(value)) {
             value = "Secret";
         }
-        return value != null ? value + " JWK" : "JWK";
+        StringBuilder sb = value != null ? new StringBuilder(value) : new StringBuilder();
+        K key = getKey();
+        if (key instanceof PublicKey) {
+            if (sb.length() != 0) {
+                sb.append(' ');
+            }
+            sb.append("Public");
+        } else if (key instanceof PrivateKey) {
+            if (sb.length() != 0) {
+                sb.append(' ');
+            }
+            sb.append("Private");
+        }
+        if (sb.length() != 0) {
+            sb.append(' ');
+        }
+        sb.append("JWK");
+        return sb.toString();
     }
 
     @Override

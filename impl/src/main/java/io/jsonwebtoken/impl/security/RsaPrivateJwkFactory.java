@@ -1,10 +1,9 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -32,13 +31,10 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
     //All RSA Private fields _except_ for PRIVATE_EXPONENT.  That is always required:
     private static final Set<Field<BigInteger>> OPTIONAL_PRIVATE_FIELDS = Collections.setOf(
-        DefaultRsaPrivateJwk.FIRST_PRIME, DefaultRsaPrivateJwk.SECOND_PRIME,
-        DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT,
-        DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT
+            DefaultRsaPrivateJwk.FIRST_PRIME, DefaultRsaPrivateJwk.SECOND_PRIME,
+            DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT,
+            DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT
     );
-
-    static final Converter<List<RSAOtherPrimeInfo>, Object> RSA_OTHER_PRIMES_CONVERTER =
-        Converters.forList(RSAOtherPrimeInfoConverter.INSTANCE);
 
     private static final String PUBKEY_ERR_MSG = "JwkContext publicKey must be an " + RSAPublicKey.class.getName() + " instance.";
 
@@ -59,12 +55,12 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         }
 
         String msg = "Unable to derive RSAPublicKey from RSAPrivateKey implementation [" +
-            key.getClass().getName() + "].  Supported keys implement the " +
-            RSAPrivateCrtKey.class.getName() + " or " + RSAMultiPrimePrivateCrtKey.class.getName() +
-            " interfaces.  If the specified RSAPrivateKey cannot be one of these two, you must explicitly " +
-            "provide an RSAPublicKey in addition to the RSAPrivateKey, as the " +
-            "[JWA RFC, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) " +
-            "requires public values to be present in private RSA JWKs.";
+                key.getClass().getName() + "].  Supported keys implement the " +
+                RSAPrivateCrtKey.class.getName() + " or " + RSAMultiPrimePrivateCrtKey.class.getName() +
+                " interfaces.  If the specified RSAPrivateKey cannot be one of these two, you must explicitly " +
+                "provide an RSAPublicKey in addition to the RSAPrivateKey, as the " +
+                "[JWA RFC, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) " +
+                "requires public values to be present in private RSA JWKs.";
         throw new UnsupportedKeyException(msg);
     }
 
@@ -126,7 +122,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
             put(ctx, DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT, ckey.getCrtCoefficient());
             List<RSAOtherPrimeInfo> infos = Arrays.asList(ckey.getOtherPrimeInfo());
             if (!Collections.isEmpty(infos)) {
-                put(ctx,DefaultRsaPrivateJwk.OTHER_PRIMES_INFO, infos);
+                put(ctx, DefaultRsaPrivateJwk.OTHER_PRIMES_INFO, infos);
             }
         }
 
@@ -136,8 +132,9 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
     @Override
     protected RsaPrivateJwk createJwkFromValues(JwkContext<RSAPrivateKey> ctx) {
 
-        final ValueGetter getter = new DefaultValueGetter(ctx);
-        final BigInteger privateExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.PRIVATE_EXPONENT.getId(), true);
+        final FieldReadable reader = new RequiredFieldReader(ctx);
+
+        final BigInteger privateExponent = reader.get(DefaultRsaPrivateJwk.PRIVATE_EXPONENT);
 
         //The [JWA Spec, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
@@ -165,26 +162,22 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         KeySpec spec;
 
         if (containsOptional) { //if any one optional field exists, they are all required per JWA Section 6.3.2:
-            BigInteger firstPrime = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FIRST_PRIME.getId(), true);
-            BigInteger secondPrime = getter.getRequiredBigInt(DefaultRsaPrivateJwk.SECOND_PRIME.getId(), true);
-            BigInteger firstCrtExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT.getId(), true);
-            BigInteger secondCrtExponent = getter.getRequiredBigInt(DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT.getId(), true);
-            BigInteger firstCrtCoefficient = getter.getRequiredBigInt(DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT.getId(), true);
+            BigInteger firstPrime = reader.get(DefaultRsaPrivateJwk.FIRST_PRIME);
+            BigInteger secondPrime = reader.get(DefaultRsaPrivateJwk.SECOND_PRIME);
+            BigInteger firstCrtExponent = reader.get(DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT);
+            BigInteger secondCrtExponent = reader.get(DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT);
+            BigInteger firstCrtCoefficient = reader.get(DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT);
 
             // Other Primes Info is actually optional even if the above ones are required:
             if (ctx.containsKey(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())) {
-
-                Object value = ctx.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId());
-                List<RSAOtherPrimeInfo> otherPrimes = RSA_OTHER_PRIMES_CONVERTER.applyFrom(value);
-
+                List<RSAOtherPrimeInfo> otherPrimes = reader.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO);
                 RSAOtherPrimeInfo[] arr = new RSAOtherPrimeInfo[Collections.size(otherPrimes)];
                 otherPrimes.toArray(arr);
-
                 spec = new RSAMultiPrimePrivateCrtKeySpec(modulus, publicExponent, privateExponent, firstPrime,
-                    secondPrime, firstCrtExponent, secondCrtExponent, firstCrtCoefficient, arr);
+                        secondPrime, firstCrtExponent, secondCrtExponent, firstCrtCoefficient, arr);
             } else {
                 spec = new RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent, firstPrime, secondPrime,
-                    firstCrtExponent, secondCrtExponent, firstCrtCoefficient);
+                        firstCrtExponent, secondCrtExponent, firstCrtCoefficient);
             }
         } else {
             spec = new RSAPrivateKeySpec(modulus, privateExponent);

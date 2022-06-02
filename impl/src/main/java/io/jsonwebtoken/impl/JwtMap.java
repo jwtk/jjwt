@@ -16,9 +16,12 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
 import java.lang.reflect.Array;
@@ -27,7 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class JwtMap implements Map<String, Object> {
+public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
     protected final Map<String, Field<?>> FIELDS;
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
@@ -50,6 +53,11 @@ public class JwtMap implements Map<String, Object> {
         putAll(values);
     }
 
+    @Override
+    public String getName() {
+        return "Map";
+    }
+
     public static boolean isReduceableToNull(Object v) {
         return v == null ||
                 (v instanceof String && !Strings.hasText((String) v)) ||
@@ -65,6 +73,18 @@ public class JwtMap implements Map<String, Object> {
     @SuppressWarnings("unchecked")
     protected <T> T idiomaticGet(Field<T> field) {
         return (T) this.idiomaticValues.get(field.getId());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T get(Field<T> field) {
+        Assert.notNull(field, "Field cannot be null.");
+        final String id = Assert.hasText(field.getId(), "Field id cannot be null or empty.");
+        Object value = idiomaticValues.get(id);
+        if (value == null) {
+            return null;
+        }
+        return (T) value; // should always be the field type - if not, it's a misuse of the API
     }
 
     @Override
@@ -149,18 +169,24 @@ public class JwtMap implements Map<String, Object> {
             Assert.notNull(idiomaticValue, "Converter's resulting idiomaticValue cannot be null.");
             canonicalValue = field.applyTo(idiomaticValue);
             Assert.notNull(canonicalValue, "Converter's resulting canonicalValue cannot be null.");
-        } catch (IllegalArgumentException e) {
-            Object sval = field.isSecret() ? RedactedSupplier.REDACTED_VALUE : rawValue;
-            String msg = "Invalid " + getName() + " " + field + " value: " + sval + ". Cause: " + e.getMessage();
+        } catch (Exception e) {
+            StringBuilder sb = new StringBuilder(100);
+            sb.append("Invalid ").append(getName()).append(" ").append(field).append(" value");
+            if (field.isSecret()) {
+                sb.append(" ").append(RedactedSupplier.REDACTED_VALUE);
+            } else //noinspection StatementWithEmptyBody
+                if (rawValue instanceof byte[]) {
+                    // don't do anything
+                } else {
+                    sb.append(": ").append(Objects.nullSafeToString(rawValue));
+                }
+            sb.append(". ").append(e.getMessage());
+            String msg = sb.toString();
             throw new IllegalArgumentException(msg, e);
         }
         Object retval = nullSafePut(id, canonicalValue);
         this.idiomaticValues.put(id, idiomaticValue);
         return retval;
-    }
-
-    public String getName() {
-        return "Map";
     }
 
     @Override

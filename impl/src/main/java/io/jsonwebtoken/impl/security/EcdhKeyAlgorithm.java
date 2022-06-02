@@ -1,9 +1,11 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -11,7 +13,6 @@ import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.EcKeyAlgorithm;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyLengthSupplier;
@@ -29,17 +30,15 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
-import java.util.Map;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
 class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey> extends CryptoAlgorithm
-    implements EcKeyAlgorithm<E, D> {
+        implements EcKeyAlgorithm<E, D> {
 
     protected static final String JCA_NAME = "ECDH";
     protected static final String DEFAULT_ID = JCA_NAME + "-ES";
-    protected static final String EPHEMERAL_PUBLIC_KEY = "epk";
 
     // Per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2, 2nd paragraph:
     //    Key derivation is performed using the Concat KDF, as defined in
@@ -85,8 +84,8 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
 
     protected String getConcatKDFAlgorithmId(AeadAlgorithm enc) {
         return this.WRAP_ALG instanceof DirectKeyAlgorithm ?
-            Assert.hasText(enc.getId(), "AeadAlgorithm id cannot be null or empty.") :
-            getId();
+                Assert.hasText(enc.getId(), "AeadAlgorithm id cannot be null or empty.") :
+                getId();
     }
 
     private byte[] createOtherInfo(int keydatalen, String AlgorithmID, byte[] PartyUInfo, byte[] PartyVInfo) {
@@ -101,17 +100,17 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         // Values and order defined in https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2 and
         // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf section 5.8.1.2 :
         return Bytes.concat(
-            Bytes.toBytes(algIdBytes.length), algIdBytes, // AlgorithmID
-            Bytes.toBytes(PartyUInfo.length), PartyUInfo, // PartyUInfo
-            Bytes.toBytes(PartyVInfo.length), PartyVInfo, // PartyVInfo
-            Bytes.toBytes(keydatalen),                    // SuppPubInfo per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
-            Bytes.EMPTY                                   // SuppPrivInfo empty per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
+                Bytes.toBytes(algIdBytes.length), algIdBytes, // AlgorithmID
+                Bytes.toBytes(PartyUInfo.length), PartyUInfo, // PartyUInfo
+                Bytes.toBytes(PartyVInfo.length), PartyVInfo, // PartyVInfo
+                Bytes.toBytes(keydatalen),                    // SuppPubInfo per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
+                Bytes.EMPTY                                   // SuppPrivInfo empty per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
         );
     }
 
     private int getKeyBitLength(AeadAlgorithm enc) {
         int bitLength = this.WRAP_ALG instanceof KeyLengthSupplier ?
-            ((KeyLengthSupplier)this.WRAP_ALG).getKeyBitLength() : enc.getKeyBitLength();
+                ((KeyLengthSupplier) this.WRAP_ALG).getKeyBitLength() : enc.getKeyBitLength();
         return Assert.gt(bitLength, 0, "Algorithm keyBitLength must be > 0");
     }
 
@@ -144,10 +143,10 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         final SecretKey derived = deriveKey(request, publicKey, genPrivKey);
 
         DefaultKeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(request.getProvider(), request.getSecureRandom(),
-            derived, request.getHeader(), request.getEncryptionAlgorithm());
+                derived, request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = WRAP_ALG.getEncryptionKey(wrapReq);
 
-        header.put(EPHEMERAL_PUBLIC_KEY, jwk);
+        header.put(DefaultJweHeader.EPK.getId(), jwk);
 
         return result;
     }
@@ -159,27 +158,20 @@ class EcdhKeyAlgorithm<E extends ECKey & PublicKey, D extends ECKey & PrivateKey
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         D privateKey = Assert.notNull(request.getKey(), "Request key cannot be null.");
 
-        ValueGetter getter = new DefaultValueGetter(header);
-        Map<String, ?> epkValues = getter.getRequiredMap(EPHEMERAL_PUBLIC_KEY);
-        // This call will assert the EPK, if valid, is also on a JWA-supported NIST curve:
-        Jwk<?> jwk = Jwks.builder().putAll(epkValues).build();
-        if (!(jwk instanceof EcPublicJwk)) {
-            String msg = "JWE Header '" + EPHEMERAL_PUBLIC_KEY + "' (Ephemeral Public Key) value is not an " +
-                "EllipticCurve Public JWK as required.";
-            throw new InvalidKeyException(msg);
-        }
-        EcPublicJwk epk = (EcPublicJwk) jwk;
+        FieldReadable reader = new RequiredFieldReader(header);
+        EcPublicJwk epk = reader.get(DefaultJweHeader.EPK);
+
         // While the EPK might be on a JWA-supported NIST curve, it must be on the private key's exact curve:
         if (!EcPublicJwkFactory.contains(privateKey.getParams().getCurve(), epk.toKey().getW())) {
-            String msg = "JWE Header '" + EPHEMERAL_PUBLIC_KEY + "' (Ephemeral Public Key) value does not represent " +
-                "a point on the expected curve.";
+            String msg = "JWE Header " + DefaultJweHeader.EPK + " value does not represent " +
+                    "a point on the expected curve.";
             throw new InvalidKeyException(msg);
         }
 
         final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),
-            request.getSecureRandom(), derived, header, request.getEncryptionAlgorithm(), request.getContent());
+                request.getSecureRandom(), derived, header, request.getEncryptionAlgorithm(), request.getContent());
 
         return WRAP_ALG.getDecryptionKey(unwrapReq);
     }

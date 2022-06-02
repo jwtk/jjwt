@@ -17,8 +17,9 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Fields;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.MalformedKeyException;
 
@@ -61,17 +62,21 @@ class RSAOtherPrimeInfoConverter implements Converter<RSAOtherPrimeInfo, Object>
             throw new MalformedKeyException("RSA JWK 'oth' (Other Prime Info) element map cannot be empty.");
         }
 
-        // Need a Context instance to satisfy the API contract of the getRequired* methods below.
+        // Need a Context instance to satisfy the API contract of the reader.get* methods below.
         JwkContext<?> ctx = new DefaultJwkContext<>(FIELDS);
-        for (Map.Entry<?, ?> entry : m.entrySet()) {
-            String name = String.valueOf(entry.getKey());
-            ctx.put(name, entry.getValue());
+        try {
+            for (Map.Entry<?, ?> entry : m.entrySet()) {
+                String name = String.valueOf(entry.getKey());
+                ctx.put(name, entry.getValue());
+            }
+        } catch (Exception e) {
+            throw new MalformedKeyException(e.getMessage(), e);
         }
 
-        final ValueGetter getter = new DefaultValueGetter(ctx);
-        BigInteger prime = getter.getRequiredBigInt(PRIME_FACTOR.getId(), true);
-        BigInteger primeExponent = getter.getRequiredBigInt(FACTOR_CRT_EXPONENT.getId(), true);
-        BigInteger crtCoefficient = getter.getRequiredBigInt(FACTOR_CRT_COEFFICIENT.getId(), true);
+        FieldReadable reader = new RequiredFieldReader(ctx);
+        BigInteger prime = reader.get(PRIME_FACTOR);
+        BigInteger primeExponent = reader.get(FACTOR_CRT_EXPONENT);
+        BigInteger crtCoefficient = reader.get(FACTOR_CRT_COEFFICIENT);
 
         return new RSAOtherPrimeInfo(prime, primeExponent, crtCoefficient);
     }

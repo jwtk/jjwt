@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security
 
-
+import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.EncryptionAlgorithms
@@ -21,50 +21,21 @@ import static org.junit.Assert.fail
 class EcdhKeyAlgorithmTest {
 
     @Test
-    void testDecryptionWithoutEcPublicJwk() {
+    void testDecryptionWithMissingEcPublicJwk() {
 
         def alg = new EcdhKeyAlgorithm()
         ECPrivateKey decryptionKey = TestKeys.ES256.pair.private as ECPrivateKey
 
         def header = new DefaultJweHeader()
-        def jwk = Jwks.builder().forKey(TestKeys.HS256).build() //something other than an EC public key
-        header.put('epk', jwk)
 
         DecryptionKeyRequest req = new DefaultDecryptionKeyRequest(null, null, decryptionKey, header, EncryptionAlgorithms.A128GCM, 'test'.getBytes())
 
         try {
             alg.getDecryptionKey(req)
             fail()
-        } catch (InvalidKeyException expected) {
-            assertEquals("JWE Header 'epk' (Ephemeral Public Key) value is not an EllipticCurve Public JWK as required.", expected.getMessage())
-        }
-    }
-
-    @Test
-    void testDecryptionWithEcPublicJwkWithInvalidPoint() {
-
-        def alg = new EcdhKeyAlgorithm()
-        ECPrivateKey decryptionKey = TestKeys.ES256.pair.private as ECPrivateKey // Expected curve for this is P-256
-
-        def header = new DefaultJweHeader()
-        def pubJwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
-        def jwk = new LinkedHashMap(pubJwk) // copy fields so we can mutate
-        // We have a public JWK for a point on the curve, now swap out the x coordinate for something invalid:
-        jwk.put('x', 'Kg')
-
-        // now set the epk header as the invalid/manipulated jwk:
-        header.put('epk', jwk)
-
-        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest(null, null, decryptionKey,
-                header, EncryptionAlgorithms.A128GCM, 'test'.getBytes())
-
-        try {
-            alg.getDecryptionKey(req)
-            fail()
-        } catch (InvalidKeyException expected) {
-            String msg = expected.getMessage()
-            String expectedMsg = EcPublicJwkFactory.jwkContainsErrorMessage(pubJwk.crv as String, jwk)
-            assertEquals(expectedMsg, msg)
+        } catch (MalformedJwtException expected) {
+            String msg = "JWE header is missing required 'epk' (Ephemeral Public Key) value."
+            assertEquals msg, expected.getMessage()
         }
     }
 

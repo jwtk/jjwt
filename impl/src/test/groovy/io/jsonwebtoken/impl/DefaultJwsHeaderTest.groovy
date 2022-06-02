@@ -22,15 +22,6 @@ import static org.junit.Assert.assertEquals
 class DefaultJwsHeaderTest {
 
     @Test
-    void testKeyId() {
-
-        def h = new DefaultJwsHeader()
-
-        h.setKeyId('foo')
-        assertEquals h.getKeyId(), 'foo'
-    }
-
-    @Test
     void testGetName() {
         def header = new DefaultJwsHeader()
         assertEquals 'JWS header', header.getName()

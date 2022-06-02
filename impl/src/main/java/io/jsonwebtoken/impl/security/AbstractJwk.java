@@ -1,7 +1,9 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -13,7 +15,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
+public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadable, Nameable {
 
     static final Field<String> ALG = Fields.string("alg", "Algorithm");
     public static final Field<String> KID = Fields.string("kid", "Key ID");
@@ -34,6 +36,11 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
     @Override
     public String getType() {
         return this.context.getType();
+    }
+
+    @Override
+    public String getName() {
+        return this.context.getName();
     }
 
     @Override
@@ -88,6 +95,11 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K> {
         } else {
             return val;
         }
+    }
+
+    @Override
+    public <T> T get(Field<T> field) {
+        return this.context.get(field);
     }
 
     @Override

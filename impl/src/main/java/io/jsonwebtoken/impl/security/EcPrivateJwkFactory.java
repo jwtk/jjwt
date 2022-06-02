@@ -1,7 +1,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.ValueGetter;
+import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
@@ -56,9 +57,9 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
     @Override
     protected EcPrivateJwk createJwkFromValues(final JwkContext<ECPrivateKey> ctx) {
 
-        ValueGetter getter = new DefaultValueGetter(ctx);
-        String curveId = getter.getRequiredString(DefaultEcPublicJwk.CRV.getId());
-        BigInteger d = getter.getRequiredBigInt(DefaultEcPrivateJwk.D.getId(), true);
+        FieldReadable reader = new RequiredFieldReader(ctx);
+        String curveId = reader.get(DefaultEcPublicJwk.CRV);
+        BigInteger d = reader.get(DefaultEcPrivateJwk.D);
 
         // We don't actually need the public x,y point coordinates for JVM lookup, but the
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
