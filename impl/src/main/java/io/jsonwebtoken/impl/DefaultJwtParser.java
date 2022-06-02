@@ -165,7 +165,7 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("deprecation") // will remove for 1.0
     private SigningKeyResolver signingKeyResolver;
 
-    private Function<Header<?>, CompressionCodec> compressionCodecLocator;
+    private Locator<CompressionCodec> compressionCodecLocator;
 
     private final boolean enableUnsecuredJws;
 
@@ -214,7 +214,7 @@ public class DefaultJwtParser implements JwtParser {
                      Claims expectedClaims,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
-                     CompressionCodecResolver compressionCodecResolver,
+                     Locator<CompressionCodec> compressionCodecLocator,
                      Collection<SignatureAlgorithm<?, ?>> extraSigAlgs,
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
                      Collection<AeadAlgorithm> extraEncAlgs) {
@@ -230,7 +230,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signatureAlgorithmLocator = sigFn(extraSigAlgs);
         this.keyAlgorithmLocator = keyFn(extraKeyAlgs);
         this.encryptionAlgorithmLocator = encFn(extraEncAlgs);
-        this.compressionCodecLocator = new CompressionCodecLocator(compressionCodecResolver);
+        this.compressionCodecLocator = Assert.notNull(compressionCodecLocator, "CompressionCodec locator cannot be null.");
     }
 
     @Override
@@ -570,7 +570,7 @@ public class DefaultJwtParser implements JwtParser {
             verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
         }
 
-        CompressionCodec compressionCodec = compressionCodecLocator.apply(header);
+        CompressionCodec compressionCodec = compressionCodecLocator.locate(header);
         if (compressionCodec != null) {
             bytes = compressionCodec.decompress(bytes);
         }

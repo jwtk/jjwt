@@ -15,6 +15,10 @@
   allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
   the old enum-based static utility methods did not.
 
+* `io.jsonwebtoken.CompressionCodec` now inherits `io.jsonwebtoken.Identifiable` and `getId()` is preferred over
+  the now-deprecated `getAlgorithmName()` method.  This was to guarantee API congruence with all other JWT-identifiable
+  algorithm names that can be set as a header value.
+
 #### Backwards Compatibility Breaking Changes
 
 * Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 

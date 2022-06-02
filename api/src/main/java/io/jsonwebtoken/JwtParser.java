@@ -221,7 +221,7 @@ public interface JwtParser {
      * @param key the algorithm-specific signature verification key used to validate any discovered JWS digital
      *            signature.
      * @return the parser for method chaining.
-     * @deprecated see {@link JwtParserBuilder#setSigningKey(byte[])}.
+     * @deprecated in favor of {@link JwtParserBuilder#verifyWith(Key)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
@@ -267,7 +267,7 @@ public interface JwtParser {
      * @param base64EncodedSecretKey the BASE64-encoded algorithm-specific signature verification key to use to validate
      *                               any discovered JWS digital signature.
      * @return the parser for method chaining.
-     * @deprecated see {@link JwtParserBuilder#setSigningKey(String)}.
+     * @deprecated in favor of {@link JwtParserBuilder#verifyWith(Key)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
@@ -287,7 +287,7 @@ public interface JwtParser {
      * @param key the algorithm-specific signature verification key to use to validate any discovered JWS digital
      *            signature.
      * @return the parser for method chaining.
-     * @deprecated see {@link JwtParserBuilder#setSigningKey(Key)}.
+     * @deprecated in favor of {@link JwtParserBuilder#verifyWith(Key)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
@@ -322,7 +322,7 @@ public interface JwtParser {
      * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
      * @return the parser for method chaining.
      * @since 0.4
-     * @deprecated see {@link JwtParserBuilder#setSigningKeyResolver(SigningKeyResolver)}.
+     * @deprecated in favor of {@link JwtParserBuilder#setKeyLocator(Locator)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>
@@ -336,10 +336,10 @@ public interface JwtParser {
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to
      * decompress the JWT body. If the parsed JWT is not compressed, this resolver is not used.
      *
-     * <p><b>NOTE:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
-     * (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWT body correctly.  This method is only
-     * useful if the compact JWT was compressed with JJWT &gt;= 0.6.0 or another library that you know implements
-     * the same behavior.</p>
+     * <p><b>NOTE:</b> Compression is not defined by the JWS Specification - only the JWE Specification - and it is
+     * not expected that other libraries (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWS
+     * body correctly.  This method is only useful if the compact JWT was compressed with JJWT &gt;= 0.6.0 or another
+     * library that you know implements the same behavior.</p>
      *
      * <p><b>Default Support</b></p>
      *
@@ -354,7 +354,7 @@ public interface JwtParser {
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
      * @return the parser for method chaining.
      * @since 0.6.0
-     * @deprecated see {@link JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver)}.
+     * @deprecated in favor of {@link JwtParserBuilder#setCompressionCodecLocator(Locator)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>

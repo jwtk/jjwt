@@ -454,10 +454,10 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to
      * decompress the JWT body. If the parsed JWT is not compressed, this resolver is not used.
      *
-     * <p><b>NOTE:</b> Compression is not defined by the JWT Specification, and it is not expected that other libraries
-     * (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWT body correctly.  This method is only
-     * useful if the compact JWT was compressed with JJWT &gt;= 0.6.0 or another library that you know implements
-     * the same behavior.</p>
+     * <p><b>NOTE:</b> Compression is not defined by the JWS Specification - only the JWE Specification - and it is
+     * not expected that other libraries (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWS
+     * body correctly.  This method is only useful if the compact JWS was compressed with JJWT &gt;= 0.6.0 or
+     * another library that you know implements the same behavior.</p>
      *
      * <p><b>Default Support</b></p>
      *
@@ -466,14 +466,42 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
      *
-     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement
-     * your own {@link CompressionCodecResolver} and specify that via this method and also when
+     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must
+     * implement your own {@link CompressionCodecResolver} and specify that via this method and also when
      * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} JWTs.</p>
      *
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
      * @return the parser builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #setCompressionCodecLocator(Locator)} to use the
+     * congruent {@code Locator} concept used elsewhere (such as {@link #setKeyLocator(Locator)}).
      */
+    @Deprecated
     JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
+
+    /**
+     * Sets the {@link CompressionCodec} {@code Locator} used to acquire the {@code CompressionCodec} that should be
+     * used to decompress the JWT body.
+     *
+     * <p><b>NOTE:</b> Compression is not defined by the JWS Specification - only the JWE Specification - and it is
+     * not expected that other libraries (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWS
+     * body correctly.  This method is only useful if the compact JWS was compressed with JJWT &gt;= 0.6.0 or
+     * another library that you know implements the same behavior.</p>
+     *
+     * <p><b>Default Support</b></p>
+     *
+     * <p>JJWT's default {@link JwtParser} implementation supports both the
+     * {@link CompressionCodecs#DEFLATE DEFLATE}
+     * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
+     * specify a {@code CompressionCodec} {@link Locator} in these cases.</p>
+     *
+     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must
+     * implement your own {@code CompressionCodec} {@link Locator} and specify that via this method and also when
+     * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} JWTs.</p>
+     *
+     * @param locator the compression codec locator used to decompress the JWT body.
+     * @return the parser builder for method chaining.
+     */
+    JwtParserBuilder setCompressionCodecLocator(Locator<CompressionCodec> locator);
 
     /**
      * Perform Base64Url decoding with the specified Decoder

@@ -20,13 +20,15 @@ import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Locator;
+import io.jsonwebtoken.impl.IdRegistry;
+import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Default implementation of {@link CompressionCodecResolver} that supports the following:
@@ -43,56 +45,44 @@ import java.util.Map;
  * <p>If you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement your own
  * {@link CompressionCodecResolver} and specify that when
  * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} and
- * {@link io.jsonwebtoken.JwtParser#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
+ * {@link io.jsonwebtoken.JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
  * @see DeflateCompressionCodec
  * @see GzipCompressionCodec
  * @since 0.6.0
  */
-public class DefaultCompressionCodecResolver implements CompressionCodecResolver {
+public class DefaultCompressionCodecResolver implements CompressionCodecResolver, Locator<CompressionCodec> {
 
-    private static final String MISSING_COMPRESSION_MESSAGE = "Unable to find an implementation for compression algorithm [%s] using java.util.ServiceLoader. Ensure you include a backing implementation .jar in the classpath, for example jjwt-impl.jar, or your own .jar for custom implementations.";
+    private static final String MISSING_COMPRESSION_MESSAGE = "Unable to find an implementation for compression " +
+            "algorithm [%s] using java.util.ServiceLoader. Ensure you include a backing implementation .jar in " +
+            "the classpath, for example jjwt-impl.jar, or your own .jar for custom implementations.";
 
-    private final Map<String, CompressionCodec> codecs;
+    private final Registry<String, CompressionCodec> codecs;
 
     public DefaultCompressionCodecResolver() {
-        Map<String, CompressionCodec> codecMap = new HashMap<>();
-        for (CompressionCodec codec : Services.loadAll(CompressionCodec.class)) {
-            codecMap.put(codec.getId().toUpperCase(), codec);
-        }
-
-        codecMap.put(CompressionCodecs.DEFLATE.getId().toUpperCase(), CompressionCodecs.DEFLATE);
-        codecMap.put(CompressionCodecs.GZIP.getId().toUpperCase(), CompressionCodecs.GZIP);
-
-        codecs = Collections.unmodifiableMap(codecMap);
+        Set<CompressionCodec> codecs = new LinkedHashSet<>(Services.loadAll(CompressionCodec.class));
+        codecs.add(CompressionCodecs.DEFLATE); // standard ones are added last so they can't be accidentally replaced
+        codecs.add(CompressionCodecs.GZIP);
+        this.codecs = new IdRegistry<>(codecs);
     }
 
     @Override
-    public CompressionCodec resolveCompressionCodec(Header header) {
-        String cmpAlg = getAlgorithmFromHeader(header);
-
-        final boolean hasCompressionAlgorithm = Strings.hasText(cmpAlg);
-
-        if (!hasCompressionAlgorithm) {
+    public CompressionCodec locate(Header<?> header) {
+        Assert.notNull(header, "Header cannot be null.");
+        String id = header.getCompressionAlgorithm();
+        if (!Strings.hasText(id)) {
             return null;
         }
-        return byName(cmpAlg);
-    }
-
-    private String getAlgorithmFromHeader(Header header) {
-        Assert.notNull(header, "header cannot be null.");
-
-        return header.getCompressionAlgorithm();
-    }
-
-    private CompressionCodec byName(String name) {
-        Assert.hasText(name, "'name' must not be empty");
-
-        CompressionCodec codec = codecs.get(name.toUpperCase());
+        CompressionCodec codec = codecs.apply(id);
         if (codec == null) {
-            throw new CompressionException(String.format(MISSING_COMPRESSION_MESSAGE, name));
+            String msg = String.format(MISSING_COMPRESSION_MESSAGE, id);
+            throw new CompressionException(msg);
         }
-
         return codec;
+    }
+
+    @Override
+    public CompressionCodec resolveCompressionCodec(Header<?> header) {
+        return locate(header);
     }
 }

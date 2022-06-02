@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
@@ -20,13 +21,13 @@ public class IdRegistry<T extends Identifiable> implements Registry<String, T> {
             String id = Assert.hasText(Strings.clean(instance.getId()), "All Identifiable instances within the collection cannot have a null or empty id.");
             m.put(id, instance);
         }
-        this.INSTANCES = java.util.Collections.unmodifiableMap(m);
+        this.INSTANCES = Collections.immutable(m);
     }
 
     @Override
     public T apply(String id) {
         Assert.hasText(id, "id argument cannot be null or empty.");
-        //try constant time lookup first.  This will satisfy 99% of invocations:
+        //try constant-time lookup first.  This will satisfy 99% of invocations:
         T instance = INSTANCES.get(id);
         if (instance != null) {
             return instance;

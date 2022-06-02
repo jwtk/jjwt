@@ -16,8 +16,7 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.jsonwebtoken.JwtParser
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.security.ConstantKeyLocator
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Decoder
@@ -131,6 +130,18 @@ class DefaultJwtParserBuilderTest {
         } catch (IllegalArgumentException expected) {
             assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
         }
+    }
+
+    @Test
+    void testCompressionCodecLocator() {
+        Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
+            @Override
+            CompressionCodec locate(Header<?> header) {
+                return null;
+            }
+        }
+        def parser = Jwts.parserBuilder().setCompressionCodecLocator(locator).build()
+        assertSame locator, parser.jwtParser.compressionCodecLocator
     }
 
     @Test

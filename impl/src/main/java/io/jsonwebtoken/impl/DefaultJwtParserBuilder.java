@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
+import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
@@ -67,7 +68,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
 
-    private CompressionCodecResolver compressionCodecResolver = new DefaultCompressionCodecResolver();
+    private Locator<CompressionCodec> compressionCodecLocator =
+            new CompressionCodecLocator(new DefaultCompressionCodecResolver());
 
     private final Collection<AeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
 
@@ -244,9 +246,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
-        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
-        this.compressionCodecResolver = compressionCodecResolver;
+    public JwtParserBuilder setCompressionCodecLocator(Locator<CompressionCodec> locator) {
+        this.compressionCodecLocator = Assert.notNull(locator, "CompressionCodec locator cannot be null.");
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver resolver) {
+        Assert.notNull(resolver, "compressionCodecResolver cannot be null.");
+        this.compressionCodecLocator = new CompressionCodecLocator(resolver);
         return this;
     }
 
@@ -273,7 +281,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         // Invariants.  If these are ever violated, it's an error in this class implementation
         // (we default to non-null instances, and the setters should never allow null):
         Assert.stateNotNull(this.keyLocator, "Key locator should never be null.");
-        Assert.stateNotNull(this.compressionCodecResolver, "CompressionCodecResolver should never be null.");
+        Assert.stateNotNull(this.compressionCodecLocator, "CompressionCodec Locator should never be null.");
 
         return new ImmutableJwtParser(new DefaultJwtParser(
                 provider,
@@ -285,7 +293,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 expectedClaims,
                 base64UrlDecoder,
                 new JwtDeserializer<>(deserializer),
-                compressionCodecResolver,
+                compressionCodecLocator,
                 extraSignatureAlgorithms,
                 extraKeyAlgorithms,
                 extraEncryptionAlgorithms
