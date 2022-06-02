@@ -228,7 +228,7 @@ public final class Keys {
      * @param alg the {@code SignatureAlgorithm} to inspect to determine which asymmetric algorithm to use.
      * @return a new {@link KeyPair} suitable for use with the specified asymmetric algorithm.
      * @throws IllegalArgumentException if {@code alg} is not an asymmetric algorithm
-     * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link AsymmetricKeySignatureAlgorithm} instance's
+     * @deprecated since JJWT_RELEASE_VERSION in favor of your preferred {@link AsymmetricKeySignatureAlgorithm} instance's
      * {@link AsymmetricKeySignatureAlgorithm#keyPairBuilder() keyPairBuilder()} method directly.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")

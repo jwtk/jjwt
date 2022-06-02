@@ -30,7 +30,11 @@ package io.jsonwebtoken;
  * {@link io.jsonwebtoken.JwtParser#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
  * @since 0.6.0
+ * @deprecated in favor of {@link Locator}
+ * @see JwtParserBuilder#setCompressionCodecLocator(Locator)
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated
 public interface CompressionCodecResolver {
 
     /**

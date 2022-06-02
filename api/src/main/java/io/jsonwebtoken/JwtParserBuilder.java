@@ -319,6 +319,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder decryptWith(Key key);
 
@@ -410,6 +411,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param encAlgs collection of AEAD encryption algorithms to add to the parser's total set of supported
      *                encryption algorithms.
      * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs);
 
@@ -429,6 +431,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param sigAlgs collection of signature algorithms to add to the parser's total set of supported signature
      *                algorithms.
      * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs);
 
@@ -447,6 +450,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param keyAlgs collection of key management algorithms to add to the parser's total set of supported key
      *                management algorithms.
      * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs);
 
@@ -500,6 +504,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param locator the compression codec locator used to decompress the JWT body.
      * @return the parser builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder setCompressionCodecLocator(Locator<CompressionCodec> locator);
 
