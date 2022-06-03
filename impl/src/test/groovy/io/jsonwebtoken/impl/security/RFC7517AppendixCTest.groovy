@@ -268,7 +268,7 @@ class RFC7517AppendixCTest {
         assertArrayEquals RFC_SHARED_PASSPHRASE_BYTES, RFC_SHARED_PASSPHRASE.getBytes(StandardCharsets.UTF_8)
 
         //ensure that the KeyAlgorithm reflects test harness values:
-        def encAlg = new HmacAesAeadAlgorithm(128) {
+        def enc = new HmacAesAeadAlgorithm(128) {
             @Override
             SecretKeyBuilder keyBuilder() {
                 return new FixedSecretKeyBuilder(RFC_CEK)
@@ -280,7 +280,7 @@ class RFC7517AppendixCTest {
             }
         }
         //noinspection unused
-        def keyAlg = new Pbes2HsAkwAlgorithm(128) {
+        def alg = new Pbes2HsAkwAlgorithm(128) {
             @Override
             protected byte[] generateInputSalt(KeyRequest<? extends Key> request) {
                 return RFC_P2S
@@ -308,22 +308,17 @@ class RFC7517AppendixCTest {
 
         PasswordKey key = Keys.forPassword(RFC_SHARED_PASSPHRASE.toCharArray())
 
-        String compact = Jwts.jweBuilder()
+        String compact = Jwts.builder()
                 .setPayload(RFC_JWK_JSON)
-                .setHeader(Jwts.jweHeader()
-                        .setContentType('jwk+json')
-                        .setPbes2Count(RFC_P2C))
-                .encryptWith(encAlg, key, keyAlg)
-                .serializeToJsonWith(serializer) //ensure JJWT created the header as expected with an assertion serializer
+                .setHeader(Jwts.jweHeader().setContentType('jwk+json').setPbes2Count(RFC_P2C))
+                .encryptWith(enc, key, alg)
+                .serializeToJsonWith(serializer) //ensure header created as expected with an assertion serializer
                 .compact()
 
         assertEquals RFC_COMPACT_JWE, compact
 
         //ensure we can decrypt now:
-        Jwe<String> jwe = Jwts.parserBuilder()
-                .decryptWith(key)
-                .build()
-                .parsePlaintextJwe(compact)
+        Jwe<String> jwe = Jwts.parserBuilder().decryptWith(key).build().parsePlaintextJwe(compact)
 
         assertEquals RFC_JWK_JSON, jwe.getBody()
     }

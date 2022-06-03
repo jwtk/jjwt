@@ -1,8 +1,6 @@
 package io.jsonwebtoken.security
 
 import io.jsonwebtoken.UnsupportedJwtException
-import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm
-import org.junit.Ignore
 import org.junit.Test
 
 import java.security.Key
@@ -83,6 +81,7 @@ class KeyAlgorithmsTest {
         assertNull KeyAlgorithms.findById('invalid')
     }
 
+    /*
     @Test
     @Ignore // temporarily until we decide if this API will remain
     void testEstimateIterations() {
@@ -91,4 +90,5 @@ class KeyAlgorithmsTest {
         int result = KeyAlgorithms.estimateIterations(KeyAlgorithms.PBES2_HS256_A128KW, desiredMillis)
         assertTrue result > Pbes2HsAkwAlgorithm.MIN_RECOMMENDED_ITERATIONS
     }
+     */
 }

@@ -2,16 +2,11 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.impl.DefaultJweHeader
-import io.jsonwebtoken.security.EncryptionAlgorithms
-import io.jsonwebtoken.security.KeyAlgorithms
-import io.jsonwebtoken.security.KeyRequest
-import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.PasswordKey
-import org.junit.Ignore
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 @SuppressWarnings('SpellCheckingInspection')
 class Pbes2HsAkwAlgorithmTest {
@@ -36,8 +31,8 @@ class Pbes2HsAkwAlgorithmTest {
         }
     }
 
-    @Ignore
     // for manual/developer testing only.  Takes a long time and there is no deterministic output to assert
+    /*
     @Test
     void test() {
 
@@ -70,4 +65,5 @@ class Pbes2HsAkwAlgorithmTest {
         println "Average duration: $avg"
         println "scale factor: ${desiredMillis / avg}"
     }
+     */
 }

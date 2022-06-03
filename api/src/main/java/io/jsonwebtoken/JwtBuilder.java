@@ -19,7 +19,10 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.WeakKeyException;
@@ -35,12 +38,11 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * A builder for constructing JWTs.
+ * A builder for constructing Unprotected JWTs, Signed JWTs (aka 'JWS's) and Encrypted JWTs (aka 'JWE's).
  *
- * @param <T> the type of builder returned from various builder configuration methods.
  * @since 0.1
  */
-public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
+public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JCA Provider to use during cryptographic signing or encryption operations, or {@code null} if the
@@ -51,7 +53,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    T setProvider(Provider provider);
+    JwtBuilder setProvider(Provider provider);
 
     /**
      * Sets the {@link SecureRandom} to use during cryptographic signing or encryption operations, or {@code null} if
@@ -62,7 +64,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    T setSecureRandom(SecureRandom secureRandom);
+    JwtBuilder setSecureRandom(SecureRandom secureRandom);
 
     /**
      * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
@@ -71,7 +73,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param header the header to set (and potentially replace any existing header).
      * @return the builder for method chaining.
      */
-    T setHeader(Header<?> header); //replaces any existing header with the specified header.
+    JwtBuilder setHeader(Header<?> header); //replaces any existing header with the specified header.
 
     /**
      * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
@@ -80,7 +82,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param header the header to set (and potentially replace any existing header).
      * @return the builder for method chaining.
      */
-    T setHeader(Map<String, ?> header);
+    JwtBuilder setHeader(Map<String, ?> header);
 
     /**
      * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method
@@ -89,9 +91,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param params the header name/value pairs to append to the header.
      * @return the builder for method chaining.
      */
-    T setHeaderParams(Map<String, ?> params);
-
-    //sets the specified header parameter, overwriting any previous value under the same name.
+    JwtBuilder setHeaderParams(Map<String, ?> params);
 
     /**
      * Applies the specified name/value pair to the header.  If a header does not yet exist at the time this method
@@ -101,18 +101,37 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param value the header parameter value
      * @return the builder for method chaining.
      */
-    T setHeaderParam(String name, Object value);
+    JwtBuilder setHeaderParam(String name, Object value);
 
     /**
-     * Sets the JWT's payload to be a plaintext (non-JSON) string.  If you want the JWT body to be JSON, use the
-     * {@link #setClaims(Claims)} or {@link #setClaims(java.util.Map)} methods instead.
+     * Sets the JWT's payload to be a plaintext (non-JSON) string.
+     *
+     * <p>This is a convenience method that is effectively the same as:</p>
+     * <blockquote><pre>
+     * {@link #setPayload(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
+     *
+     * <p>If you want the JWT body to be JSON, use the
+     * {@link #setClaims(Claims)} or {@link #setClaims(java.util.Map)} methods instead.</p>
      *
      * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
      * @param payload the plaintext (non-JSON) string that will be the body of the JWT.
      * @return the builder for method chaining.
      */
-    T setPayload(String payload);
+    JwtBuilder setPayload(String payload);
+
+    /**
+     * Sets the JWT payload as byte array, which will be Base64Url-encoded during {@link #compact() compaction}.
+     * If you want the JWT body to be JSON, use the {@link #setClaims(Claims)} or
+     * {@link #setClaims(java.util.Map)} methods instead.
+     *
+     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     *
+     * @param payload the (non-JSON) byte array that will be the body of the JWT.
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder setPayload(byte[] payload);
 
     /**
      * Sets the JWT payload to be a JSON Claims instance.  If you do not want the JWT body to be JSON and instead want
@@ -123,7 +142,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param claims the JWT claims to be set as the JWT body.
      * @return the builder for method chaining.
      */
-    T setClaims(Claims claims);
+    JwtBuilder setClaims(Claims claims);
 
     /**
      * Sets the JWT payload to be a JSON Claims instance populated by the specified name/value pairs.  If you do not
@@ -135,7 +154,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @param claims the JWT claims to be set as the JWT body.
      * @return the builder for method chaining.
      */
-    T setClaims(Map<String, ?> claims);
+    JwtBuilder setClaims(Map<String, ?> claims);
 
     /**
      * Adds all given name/value pairs to the JSON Claims in the payload. If a Claims instance does not yet exist at the
@@ -147,7 +166,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder for method chaining.
      * @since 0.8
      */
-    T addClaims(Map<String, ?> claims);
+    JwtBuilder addClaims(Map<String, ?> claims);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">
@@ -174,7 +193,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setIssuer(String iss);
+    JwtBuilder setIssuer(String iss);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.2">
@@ -201,7 +220,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setSubject(String sub);
+    JwtBuilder setSubject(String sub);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
@@ -228,7 +247,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setAudience(String aud);
+    JwtBuilder setAudience(String aud);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">
@@ -257,7 +276,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setExpiration(Date exp);
+    JwtBuilder setExpiration(Date exp);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
@@ -286,7 +305,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setNotBefore(Date nbf);
+    JwtBuilder setNotBefore(Date nbf);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
@@ -315,7 +334,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setIssuedAt(Date iat);
+    JwtBuilder setIssuedAt(Date iat);
 
     /**
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">
@@ -346,7 +365,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      */
     @Override
     //only for better/targeted JavaDoc
-    T setId(String jti);
+    JwtBuilder setId(String jti);
 
     /**
      * Sets a custom JWT Claims parameter value.  A {@code null} value will remove the property from the Claims.
@@ -371,7 +390,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder instance for method chaining.
      * @since 0.2
      */
-    T claim(String name, Object value);
+    JwtBuilder claim(String name, Object value);
 
     /**
      * Signs the constructed JWT with the specified key using the key's <em>recommended signature algorithm</em>
@@ -499,7 +518,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @see #signWith(Key, io.jsonwebtoken.security.SignatureAlgorithm)
      * @since 0.10.0
      */
-    T signWith(Key key) throws InvalidKeyException;
+    JwtBuilder signWith(Key key) throws InvalidKeyException;
 
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
@@ -523,7 +542,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * This method will be removed in the 1.0 release.
      */
     @Deprecated
-    T signWith(SignatureAlgorithm alg, byte[] secretKey) throws InvalidKeyException;
+    JwtBuilder signWith(SignatureAlgorithm alg, byte[] secretKey) throws InvalidKeyException;
 
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
@@ -570,7 +589,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * method will be removed in the 1.0 release.
      */
     @Deprecated
-    T signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException;
+    JwtBuilder signWith(SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException;
 
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
@@ -585,11 +604,11 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
      *                             the specified algorithm.
      * @see #signWith(Key)
-     * @deprecated since 0.10.0: use {@link #signWith(Key, SignatureAlgorithm)} instead.  This method will be removed
-     * in the 1.0 release.
+     * @deprecated since 0.10.0. Use {@link #signWith(Key, io.jsonwebtoken.security.SignatureAlgorithm)} instead.
+     * This method will be removed before the 1.0 release.
      */
     @Deprecated
-    T signWith(SignatureAlgorithm alg, Key key) throws InvalidKeyException;
+    JwtBuilder signWith(SignatureAlgorithm alg, Key key) throws InvalidKeyException;
 
     /**
      * <p><b>Deprecation Notice</b></p>
@@ -615,7 +634,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @deprecated since JJWT_RELEASE_VERSION to use the more flexible {@link #signWith(Key, io.jsonwebtoken.security.SignatureAlgorithm)}.
      */
     @Deprecated
-    T signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException;
+    JwtBuilder signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException;
 
     /**
      * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
@@ -633,7 +652,55 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @see #signWith(Key)
      * @since JJWT_RELEASE_VERSION
      */
-    <K extends Key> T signWith(K key, io.jsonwebtoken.security.SignatureAlgorithm<K, ?> alg) throws InvalidKeyException;
+    <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SignatureAlgorithm<K, ?> alg) throws InvalidKeyException;
+
+    /**
+     * Encrypts the constructed JWT with the specified {@code enc}ryption algorithm using the provided
+     * symmetric {@code key}, producing a JWE.  Because it is a symmetric key, the party decrypting the resulting
+     * JWE must also have access to the same key.
+     *
+     * <p>This method is a convenience method that delegates to
+     * {@link #encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(enc, key, KeyAlgorithm)}
+     * based on the {@code key} argument:</p>
+     * <ul>
+     *     <li>If the provided {@code key} is an instance of {@link io.jsonwebtoken.security.PasswordKey PasswordKey},
+     *     the {@code KeyAlgorithm} used will be one of the three JWA-standard password-based key algorithms
+     *      ({@link KeyAlgorithms#PBES2_HS256_A128KW PBES2_HS256_A128KW},
+     *      {@link KeyAlgorithms#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
+     *      {@link KeyAlgorithms#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
+     *      {@link AeadAlgorithm#getKeyBitLength() key length} requirement.</li>
+     *     <li>If the {@code key} is otherwise a standard {@code SecretKey}, the {@code KeyAlgorithm} will be
+     *     {@link KeyAlgorithms#DIRECT}, indicating that {@code key} should be used directly with the
+     *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
+     *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
+     *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's
+     *     {@link AeadAlgorithm#keyBuilder() keyBuilder}.</li>
+     * </ul>
+     *
+     * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE.
+     * @param key the symmetric encryption key to use with the {@code enc} algorithm.
+     * @return the JWE builder for method chaining.
+     */
+    JwtBuilder encryptWith(AeadAlgorithm enc, SecretKey key);
+
+    /**
+     * Encrypts the constructed JWT with the specified {@code enc} algorithm using the symmetric key produced by
+     * the {@code keyAlg} when invoked with the specified {@code key}, producing a JWE.  In other words, the
+     * {@code keyAlg} is first invoked with the specified {@code key}, and that produces a {@link SecretKey} result.
+     * This resulting {@code SecretKey} is then used with the {@code enc} algorithm to encrypt the JWT, producing
+     * a JWE.
+     *
+     * <p>The {@link KeyAlgorithms} utility class makes available all Key Algorithms defined by the JWA
+     * specification.</p>
+     *
+     * @param enc    the {@link AeadAlgorithm} used to encrypt the JWE.
+     * @param key    the key used to call the provided {@code keyAlg} instance.
+     * @param keyAlg the key management algorithm that will produce the symmetric {@code SecretKey} to use with the
+     *               {@code enc} algorithm.
+     * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
+     * @return the JWE builder for method chaining.
+     */
+    <K extends Key> JwtBuilder encryptWith(AeadAlgorithm enc, K key, KeyAlgorithm<K, ?> keyAlg);
 
     /**
      * Compresses the JWT body using the specified {@link CompressionCodec}.
@@ -658,7 +725,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @see io.jsonwebtoken.CompressionCodecs
      * @since 0.6.0
      */
-    T compressWith(CompressionCodec codec);
+    JwtBuilder compressWith(CompressionCodec codec);
 
     /**
      * Perform Base64Url encoding with the specified Encoder.
@@ -670,7 +737,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder for method chaining.
      * @since 0.10.0
      */
-    T base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
+    JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
 
     /**
      * Performs object-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
@@ -684,7 +751,7 @@ public interface JwtBuilder<T extends JwtBuilder<T>> extends ClaimsMutator<T> {
      * @return the builder for method chaining.
      * @since 0.10.0
      */
-    T serializeToJsonWith(Serializer<Map<String, ?>> serializer);
+    JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

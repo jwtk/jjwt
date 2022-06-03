@@ -19,7 +19,16 @@
   the now-deprecated `getAlgorithmName()` method.  This was to guarantee API congruence with all other JWT-identifiable
   algorithm names that can be set as a header value.
 
-#### Backwards Compatibility Breaking Changes
+#### Backwards Compatibility Warnings and Potential Breaking Changes
+
+* `JwtBuilder` has a new `setPayload(byte[])` method that allows any kind of content within a JWT, not just Strings. 
+  The existing `setPayload(String)` method implementation has been changed to delegate to this new `setPayload(byte[])`
+  method with the argument's UTF-8 bytes, for example `setPayload(aString.getBytes(StandardCharsets.UTF_8))`.
+
+* Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
+  was thrown. If there was a problem when serializing the JWT claims, an `IllegalArgumentException` was
+  thrown.  This has been changed up to ensure consistency: any serialization problem with either headers or claims
+  will throw a `io.jsonwebtoken.io.SerializationException`.
 
 * Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
   [RFC 7518, Section 3.6](https://datatracker.ietf.org/doc/html/rfc7518#section-3.6). If you require parsing of
@@ -27,7 +36,7 @@
   implications of doing so as mentioned in that method's JavaDoc before doing so.
 
 * `io.jsonwebtoken.JwtHandlerAdapter` has been changed to add the `abstract` modifier.  This class was never intended
-  to be instantiated directly, and is provided for subclassing benefits.  The missing modifier has been added to ensure
+  to be instantiated directly, and is provided for subclassing only.  The missing modifier has been added to ensure
   the class is used as it had always been intended.
 
 * `io.jsonwebtokne.gson.io.GsonSerializer` now requires `Gson` instances that have a registered

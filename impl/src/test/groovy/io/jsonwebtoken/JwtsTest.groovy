@@ -1059,7 +1059,7 @@ class JwtsTest {
             }
         }
 
-        def jwe = Jwts.jweBuilder().setSubject("joe").encryptWith(encAlg, key).compact()
+        def jwe = Jwts.builder().setSubject("joe").encryptWith(encAlg, key).compact()
 
         assertEquals 'joe', Jwts.parserBuilder()
                 .addEncryptionAlgorithms([encAlg])
@@ -1269,7 +1269,7 @@ class JwtsTest {
                         enc.keyBuilder().build()
 
                 // encrypt:
-                String jwe = Jwts.jweBuilder()
+                String jwe = Jwts.builder()
                         .claim('foo', 'bar')
                         .encryptWith(enc, key, alg)
                         .compact()
@@ -1296,7 +1296,7 @@ class JwtsTest {
                 SecretKey key = enc.keyBuilder().build()
 
                 // encrypt and compress:
-                String jwe = Jwts.jweBuilder()
+                String jwe = Jwts.builder()
                         .claim('foo', 'bar')
                         .compressWith(codec)
                         .encryptWith(enc, key)
@@ -1326,7 +1326,7 @@ class JwtsTest {
             for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
 
                 // encrypt:
-                String jwe = Jwts.jweBuilder()
+                String jwe = Jwts.builder()
                         .claim('foo', 'bar')
                         .encryptWith(enc, key, alg)
                         .compact()
@@ -1347,7 +1347,7 @@ class JwtsTest {
         PasswordKey key = Keys.forPassword("12345678".toCharArray())
 
         // encrypt:
-        String jwe = Jwts.jweBuilder()
+        String jwe = Jwts.builder()
                 .claim('foo', 'bar')
                 .encryptWith(EncryptionAlgorithms.A256GCM, key) // should auto choose KeyAlg PBES2_HS512_A256KW
                 .compact()
@@ -1380,7 +1380,7 @@ class JwtsTest {
                 for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
 
                     // encrypt:
-                    String jwe = Jwts.jweBuilder()
+                    String jwe = Jwts.builder()
                             .claim('foo', 'bar')
                             .encryptWith(enc, pubKey, alg)
                             .compact()
@@ -1415,7 +1415,7 @@ class JwtsTest {
                 for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
 
                     // encrypt:
-                    String jwe = Jwts.jweBuilder()
+                    String jwe = Jwts.builder()
                             .claim('foo', 'bar')
                             .encryptWith(enc, pubKey, alg)
                             .compact()

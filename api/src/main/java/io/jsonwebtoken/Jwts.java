@@ -166,18 +166,7 @@ public final class Jwts {
      * @return a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
      * strings.
      */
-    public static JwtBuilder<?> builder() {
+    public static JwtBuilder builder() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder");
-    }
-
-    /**
-     * Returns a new {@link JweBuilder} instance that can be configured and then used to create encrypted JWT compact
-     * serialized strings.
-     *
-     * @return a new {@link JweBuilder} instance that can be configured and then used to create encrypted JWT compact
-     * serialized strings.
-     */
-    public static JweBuilder jweBuilder() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJweBuilder");
     }
 }

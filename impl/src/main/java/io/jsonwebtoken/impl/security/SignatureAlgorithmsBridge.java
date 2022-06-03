@@ -54,9 +54,10 @@ public final class SignatureAlgorithmsBridge {
         return instance;
     }
 
-    public static SignatureAlgorithm<?, ?> forSigningKey(Key key) {
+    @SuppressWarnings("unchecked")
+    public static <K extends Key> SignatureAlgorithm<K, ?> forSigningKey(K key) {
         @SuppressWarnings("deprecation")
         io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return forId(alg.getValue());
+        return (SignatureAlgorithm<K, ?>) forId(alg.getValue());
     }
 }

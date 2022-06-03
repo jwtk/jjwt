@@ -114,7 +114,7 @@ class RFC7516AppendixA3Test {
             }
         }
 
-        String compact = Jwts.jweBuilder()
+        String compact = Jwts.builder()
                 .setPayload(PLAINTEXT)
                 .encryptWith(enc, kek, KeyAlgorithms.A128KW)
                 .compact()

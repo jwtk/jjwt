@@ -83,7 +83,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         // implementation to see the assertion:
         this.HASH_BYTE_LENGTH = hashBitLength / Byte.SIZE;
 
-        // If the JweBuilder caller doesn't specify an iteration count, fall back to OWASP best-practice recommendations
+        // If the JwtBuilder caller doesn't specify an iteration count, fall back to OWASP best-practice recommendations
         // per https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
         if (hashBitLength >= 512) {
             DEFAULT_ITERATIONS = DEFAULT_SHA512_ITERATIONS;

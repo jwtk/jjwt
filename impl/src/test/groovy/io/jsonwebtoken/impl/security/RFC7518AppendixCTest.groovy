@@ -96,7 +96,7 @@ class RFC7518AppendixCTest {
             }
         }
 
-        String jwe = Jwts.jweBuilder()
+        String jwe = Jwts.builder()
                 .setHeader(Jwts.jweHeader()
                         .setAgreementPartyUInfo("Alice")
                         .setAgreementPartyVInfo("Bob"))

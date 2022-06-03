@@ -19,12 +19,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
-import io.jsonwebtoken.io.Encoder
-import io.jsonwebtoken.io.EncodingException
-import io.jsonwebtoken.io.SerializationException
-import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.impl.security.TestKeys
+import io.jsonwebtoken.io.*
 import io.jsonwebtoken.security.*
+import org.junit.Before
 import org.junit.Test
 
 import javax.crypto.KeyGenerator
@@ -37,6 +37,13 @@ import static org.junit.Assert.*
 class DefaultJwtBuilderTest {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    private DefaultJwtBuilder builder
+
+    @Before
+    void setUp() {
+        this.builder = new DefaultJwtBuilder()
+    }
 
     @Test
     void testSetProvider() {
@@ -216,18 +223,23 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactWithoutPayloadOrClaims() {
-        def compact = new DefaultJwtBuilder().compact()
+        def serializer = Services.loadFirst(Serializer.class)
+        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg':'none']))
+        assertEquals "$header.." as String, new DefaultJwtBuilder().compact()
+    }
 
-        assertTrue compact.endsWith("..")
+    @Test
+    void testNullPayloadString() {
+        String payload = null
+        def serializer = Services.loadFirst(Serializer.class)
+        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg':'none']))
+        assertEquals "$header.." as String, builder.setPayload((String)payload).compact()
     }
 
     @Test
     void testCompactWithBothPayloadAndClaims() {
-        def b = new DefaultJwtBuilder()
-        b.setPayload('foo')
-        b.claim('a', 'b')
         try {
-            b.compact()
+            builder.setPayload('foo').claim('a', 'b').compact()
             fail()
         } catch (IllegalStateException ise) {
             assertEquals ise.message, "Both 'payload' and 'claims' cannot both be specified. Choose either one."
@@ -250,7 +262,7 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
-    void testBase64UrlEncodeError() {
+    void testHeaderSerializationErrorException() {
         def serializer = new Serializer() {
             @Override
             byte[] serialize(Object o) throws SerializationException {
@@ -261,8 +273,8 @@ class DefaultJwtBuilderTest {
         try {
             b.setPayload('foo').compact()
             fail()
-        } catch (IllegalStateException ise) {
-            assertEquals ise.cause.message, 'foo'
+        } catch (SerializationException expected) {
+            assertEquals 'Unable to serialize header to JSON. Cause: foo', expected.getMessage()
         }
     }
 
@@ -274,14 +286,15 @@ class DefaultJwtBuilderTest {
                 throw new SerializationException('dummy text', new Exception())
             }
         }
-        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
-        def c = Jwts.claims().setSubject("Joe");
-
+        def b = new DefaultJwtBuilder()
+                .setSubject("Joe") // ensures claims instance
+                .compressWith(CompressionCodecs.DEFLATE)
+                .serializeToJsonWith(serializer)
         try {
-            b.setClaims(c).compressWith(CompressionCodecs.DEFLATE).compact()
+            b.compact()
             fail()
-        } catch (IllegalArgumentException iae) {
-            assertEquals 'Unable to serialize claims to JSON. Cause: dummy text', iae.message
+        } catch (SerializationException expected) {
+            assertEquals 'Unable to serialize claims to JSON. Cause: dummy text', expected.message
         }
     }
 
@@ -439,4 +452,57 @@ class DefaultJwtBuilderTest {
         assertEquals 'bar', Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getBody().get('foo')
     }
 
+    @Test
+    void testSignWithNoneAlgorithm() {
+        def key = TestKeys.HS256
+        try {
+            builder.signWith(key, SignatureAlgorithms.NONE)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "The 'none' SignatureAlgorithm cannot be used to sign JWTs."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testCompactSimplestPayload() {
+        def enc = EncryptionAlgorithms.A128GCM
+        def key = enc.keyBuilder().build()
+        def jwe = builder.setPayload("me").encryptWith(enc, key).compact()
+        def jwt = Jwts.parserBuilder().decryptWith(key).build().parsePlaintextJwe(jwe)
+        assertEquals 'me', jwt.getBody()
+    }
+
+    @Test
+    void testCompactSimplestClaims() {
+        def enc = EncryptionAlgorithms.A128GCM
+        def key = enc.keyBuilder().build()
+        def jwe = builder.setSubject('joe').encryptWith(enc, key).compact()
+        def jwt = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jwe)
+        assertEquals 'joe', jwt.getBody().getSubject()
+    }
+
+    @Test
+    void testSignWithAndEncryptWith() {
+        def key = TestKeys.HS256
+        try {
+            builder.signWith(key).encryptWith(EncryptionAlgorithms.A128GCM, key).compact()
+            fail()
+        } catch (IllegalStateException expected) {
+            String msg = "Both 'signWith' and 'encryptWith' cannot be specified - choose either."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testEmptyPayloadAndClaimsJwe() {
+        def key = TestKeys.HS256
+        try {
+            builder.encryptWith(EncryptionAlgorithms.A128GCM, key).compact()
+            fail()
+        } catch (IllegalStateException expected) {
+            String msg = "Encrypted JWTs must have either 'claims' or a non-empty 'payload'."
+            assertEquals msg, expected.getMessage()
+        }
+    }
 }
