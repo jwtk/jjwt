@@ -316,94 +316,45 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setIssuer(String iss) {
-        if (Strings.hasText(iss)) {
-            ensureClaims().setIssuer(iss);
-        } else {
-            if (this.claims != null) {
-                claims.setIssuer(iss);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.ISSUER.getId(), iss);
     }
 
     @Override
     public JwtBuilder setSubject(String sub) {
-        if (Strings.hasText(sub)) {
-            ensureClaims().setSubject(sub);
-        } else {
-            if (this.claims != null) {
-                claims.setSubject(sub);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.SUBJECT.getId(), sub);
     }
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        if (Strings.hasText(aud)) {
-            ensureClaims().setAudience(aud);
-        } else {
-            if (this.claims != null) {
-                claims.setAudience(aud);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.AUDIENCE.getId(), aud);
     }
 
     @Override
     public JwtBuilder setExpiration(Date exp) {
-        if (exp != null) {
-            ensureClaims().setExpiration(exp);
-        } else {
-            if (this.claims != null) {
-                //noinspection ConstantConditions
-                this.claims.setExpiration(exp);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.EXPIRATION.getId(), exp);
     }
 
     @Override
     public JwtBuilder setNotBefore(Date nbf) {
-        if (nbf != null) {
-            ensureClaims().setNotBefore(nbf);
-        } else {
-            if (this.claims != null) {
-                //noinspection ConstantConditions
-                this.claims.setNotBefore(nbf);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.NOT_BEFORE.getId(), nbf);
     }
 
     @Override
     public JwtBuilder setIssuedAt(Date iat) {
-        if (iat != null) {
-            ensureClaims().setIssuedAt(iat);
-        } else {
-            if (this.claims != null) {
-                //noinspection ConstantConditions
-                this.claims.setIssuedAt(iat);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.ISSUED_AT.getId(), iat);
     }
 
     @Override
     public JwtBuilder setId(String jti) {
-        if (Strings.hasText(jti)) {
-            ensureClaims().setId(jti);
-        } else {
-            if (this.claims != null) {
-                claims.setId(jti);
-            }
-        }
-        return this;
+        return claim(DefaultClaims.JTI.getId(), jti);
     }
 
     @Override
     public JwtBuilder claim(String name, Object value) {
         Assert.hasText(name, "Claim property name cannot be null or empty.");
+        if (value instanceof String && !Strings.hasText((String)value)) {
+            value = null;
+        }
         if (this.claims == null) {
             if (value != null) {
                 ensureClaims().put(name, value);
@@ -415,7 +366,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 this.claims.put(name, value);
             }
         }
-
         return this;
     }
 
@@ -510,7 +460,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, this.key, header, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
 
-        Assert.state(keyResult != null, "KeyAlgorithm must return a KeyResult.");
+        Assert.stateNotNull(keyRequest, "KeyAlgorithm must return a KeyResult.");
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getContent(), "KeyResult must return an encrypted key byte array, even if empty.");
 

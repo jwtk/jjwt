@@ -196,6 +196,13 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testClaimEmptyString() {
+        String value = ' '
+        builder.claim('foo', value)
+        assertNull builder.claims // shouldn't auto-create claims instance
+    }
+
+    @Test
     void testExistingClaimsAndSetClaim() {
         def b = new DefaultJwtBuilder()
         def c = Jwts.claims()
