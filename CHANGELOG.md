@@ -23,22 +23,33 @@
 
 #### Backwards Compatibility Warnings and Breaking Changes
 
+* `io.jsonwebtoken.Header` has been changed to accept a type-parameter for sub-type method return values, i.e.
+  `io.jsonwebtoken.Header&lt;T extends Header&gt;` and a new `io.jsonwebtoken.UnprotectedHeader` interface has been
+  introduced to represent the concrete type of header without integrity protection.  This new `UnprotectedHeader` is
+  to be used where the previous generic `Header` (non-`JweHeader` and non-`JwsHeader`) interface was used.
+
+
+* Accordingly the `Jwts.header()` and `Jwts.header(Map<String,?>)` now return instances of `UnprotectedHeader` instead
+  of just `Header`.
+
+
 * JWTs that do not contain JSON Claims now have a body type of `byte[]` instead of `String` (that is, `Jws<byte[]>`
-  instead of `Jws<String>`).  This is because JWTs, 
-  along with the `cty` (Content Type) header, are capable of handling _any_ type of payload, not just Strings. 
-  The previous JJWT releases never accounted for this, and now the API accurately reflects the JWT RFC specification 
-  payload capabilities.  This change has impacted the following JJWT APIs:
+  instead of `Jws<String>`).  This is because JWTs, along with the `cty` (Content Type) header, are capable of
+  handling _any_ type of payload, not just Strings. The previous JJWT releases never accounted for this, and now the
+  API accurately reflects the JWT RFC specification payload capabilities. Additionally, the name of `plaintext` has
+  been changed to `payload` in method names and JavaDoc to accurately reflect the JWT specifications' taxonomy. This
+  change has impacted the following JJWT APIs:
 
-  * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and 
-    `Jws<String> parsePlaintextJws(String plaintextJws)` methods have been changed to
-    `Jwt<Header, byte[]> parsePlaintextJwt(String plaintextJwt)` and
-    `Jws<byte[]> parsePlaintextJws(String plaintextJws)` respectively.
+  * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
+    `Jws&lt;String&gt; parsePlaintextJws(String plaintextJws)` methods have been changed to
+    `Jwt<UnprotectedHeader, byte[]> parsePayloadJwt(String plaintextJwt)` and
+    `Jws<byte[]> parsePayloadJws(String plaintextJws)` respectively.
 
-  * `JwtHandler`'s `onPlaintextJwt` and `onPlaintextJws` method argument types have been changed from `String` to 
-    `byte[]`.
+  * `JwtHandler`'s `onPlaintextJwt(String)` and `onPlaintextJws(String)` methods have been changed to
+    `onPayloadJwt(byte[])` and `onPayloadJws(byte[])` respectively.
 
-  * `io.jsonwebtoken.JwtHandlerAdapter` has been changed to reflect the above-mentioned `String`-to-`byte[]` argument 
-    changes, as well adding the `abstract` modifier.  This class was never intended
+  * `io.jsonwebtoken.JwtHandlerAdapter` has been changed to reflect the above-mentioned name and `String`-to-`byte[]` 
+    argument changes, as well adding the `abstract` modifier.  This class was never intended
     to be instantiated directly, and is provided for subclassing only.  The missing modifier has been added to ensure
     the class is used as it had always been intended.
 
