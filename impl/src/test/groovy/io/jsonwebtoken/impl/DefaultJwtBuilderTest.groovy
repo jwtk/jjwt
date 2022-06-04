@@ -477,7 +477,7 @@ class DefaultJwtBuilderTest {
         def enc = EncryptionAlgorithms.A128GCM
         def key = enc.keyBuilder().build()
         def jwe = builder.setPayload("me").encryptWith(enc, key).compact()
-        def jwt = Jwts.parserBuilder().decryptWith(key).build().parsePlaintextJwe(jwe)
+        def jwt = Jwts.parserBuilder().decryptWith(key).build().parsePayloadJwe(jwe)
         assertEquals 'me', new String(jwt.getBody(), StandardCharsets.UTF_8)
     }
 

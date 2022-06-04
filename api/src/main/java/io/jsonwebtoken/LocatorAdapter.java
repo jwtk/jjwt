@@ -19,8 +19,8 @@ import io.jsonwebtoken.lang.Assert;
 
 /**
  * Adapter pattern implementation for the {@link Locator} interface.  Subclasses can override any of the
- * {@link #locate(Header)}, {@link #locate(JwsHeader)}, or {@link #locate(JwsHeader)} methods for type-specific logic if
- * desired when the encountered header is an unprotected JWT, JWS or JWE respectively.
+ * {@link #locate(UnprotectedHeader)}, {@link #locate(JwsHeader)}, or {@link #locate(JwsHeader)} methods for
+ * type-specific logic if desired when the encountered header is an unprotected JWT, JWS or JWE respectively.
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -34,8 +34,8 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
 
     /**
      * Inspects the specified header, and delegates to the respective
-     * {@link #locate(JweHeader)}, {@link #locate(JwsHeader)} or {@link #doLocate(Header)} methods if the encountered
-     * header is a {@link JweHeader}, {@link JwsHeader} or Unprotected {@link Header}.
+     * {@link #locate(JweHeader)}, {@link #locate(JwsHeader)} or {@link #locate(UnprotectedHeader)} methods if the
+     * encountered header is a {@link JweHeader}, {@link JwsHeader}, or {@link UnprotectedHeader}.
      *
      * @param header the JWT header to inspect; may be an instance of {@link Header}, {@link JwsHeader} or
      *               {@link JweHeader} depending on if the respective JWT is an unprotected JWT, JWS or JWE.
@@ -52,7 +52,8 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
             JweHeader jweHeader = (JweHeader) header;
             return locate(jweHeader);
         } else {
-            return doLocate(header);
+            Assert.isInstanceOf(UnprotectedHeader.class, header, "Unrecognized Header type.");
+            return locate((UnprotectedHeader) header);
         }
     }
 
@@ -88,7 +89,7 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
      * @return an object referenced in the specified Unprotected JWT header, or {@code null} if the referenced
      * object cannot be found or does not exist.
      */
-    protected T doLocate(Header<?> header) {
+    protected T locate(UnprotectedHeader header) {
         return null;
     }
 }

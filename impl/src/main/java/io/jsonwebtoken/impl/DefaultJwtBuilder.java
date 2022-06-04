@@ -143,10 +143,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public JwtBuilder setHeader(Map<String, ?> header) {
-        this.header = new DefaultHeader(header);
+        this.header = new DefaultUnprotectedHeader(header);
         return this;
     }
 
@@ -161,8 +160,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     protected Header<?> ensureHeader() {
         if (this.header == null) {
-            //noinspection rawtypes
-            this.header = new DefaultHeader();
+            this.header = new DefaultUnprotectedHeader();
         }
         return this.header;
     }
@@ -352,7 +350,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder claim(String name, Object value) {
         Assert.hasText(name, "Claim property name cannot be null or empty.");
-        if (value instanceof String && !Strings.hasText((String)value)) {
+        if (value instanceof String && !Strings.hasText((String) value)) {
             value = null;
         }
         if (this.claims == null) {
@@ -464,7 +462,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getContent(), "KeyResult must return an encrypted key byte array, even if empty.");
 
-        header.put(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
+        header.put(AbstractHeader.ALGORITHM.getId(), keyAlg.getId());
         header.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
         byte[] headerBytes = this.headerSerializer.apply(header);

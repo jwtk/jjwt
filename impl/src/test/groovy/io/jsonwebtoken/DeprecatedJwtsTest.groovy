@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
@@ -83,13 +83,13 @@ class DeprecatedJwtsTest {
     @Test
     void testHeaderWithNoArgs() {
         def header = Jwts.header()
-        assertTrue header instanceof DefaultHeader
+        assertTrue header instanceof DefaultUnprotectedHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
         def header = Jwts.header([alg: "HS256"])
-        assertTrue header instanceof DefaultHeader
+        assertTrue header instanceof DefaultUnprotectedHeader
         assertEquals header.alg, 'HS256'
     }
 
@@ -454,7 +454,7 @@ class DeprecatedJwtsTest {
         String compact = Jwts.builder().setPayload(payload).signWith(alg, key)
                 .compressWith(CompressionCodecs.DEFLATE).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
+        def jws = Jwts.parser().setSigningKey(key).parsePayloadJws(compact)
 
         byte[] parsed = jws.body
 

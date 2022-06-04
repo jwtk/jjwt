@@ -21,13 +21,13 @@ import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 
-class DefaultHeaderTest {
+class AbstractHeaderTest {
     
-    private DefaultHeader header
+    private AbstractHeader header
     
     @Before
     void setUp() {
-        header = new DefaultHeader()
+        header = new AbstractHeader(AbstractHeader.FIELDS){}
     }
 
     @Test
@@ -47,7 +47,7 @@ class DefaultHeaderTest {
         header.setAlgorithm('foo')
         assertEquals 'foo', header.getAlgorithm()
 
-        header = new DefaultHeader([alg: 'bar'])
+        header = new AbstractHeader(AbstractHeader.FIELDS, [alg: 'bar']){}
         assertEquals 'bar', header.getAlgorithm()
     }
 
@@ -66,7 +66,7 @@ class DefaultHeaderTest {
 
     @Test
     void testGetName() {
-        def header = new DefaultHeader()
+        def header = new AbstractHeader(AbstractHeader.FIELDS){}
         assertEquals 'JWT header', header.getName()
     }
 }

@@ -83,13 +83,13 @@ class JwtsTest {
     @Test
     void testHeaderWithNoArgs() {
         def header = Jwts.header()
-        assertTrue header instanceof DefaultHeader
+        assertTrue header instanceof DefaultUnprotectedHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
         def header = Jwts.header([alg: "HS256"])
-        assertTrue header instanceof DefaultHeader
+        assertTrue header instanceof DefaultUnprotectedHeader
         assertEquals 'HS256', header.alg
     }
 
@@ -552,7 +552,7 @@ class JwtsTest {
         String compact = Jwts.builder().setPayload(payload).signWith(key, alg)
                 .compressWith(CompressionCodecs.DEFLATE).compact()
 
-        def jws = Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
+        def jws = Jwts.parserBuilder().setSigningKey(key).build().parsePayloadJws(compact)
 
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 

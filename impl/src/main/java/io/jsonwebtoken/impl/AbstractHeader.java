@@ -24,7 +24,7 @@ import io.jsonwebtoken.lang.Strings;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header<T> {
+public abstract class AbstractHeader<T extends Header<T>> extends JwtMap implements Header<T> {
 
     static final Field<String> TYPE = Fields.string(Header.TYPE, "Type");
     static final Field<String> CONTENT_TYPE = Fields.string(Header.CONTENT_TYPE, "Content Type");
@@ -36,20 +36,12 @@ public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header
 
     static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
 
-    protected DefaultHeader(Set<Field<?>> fieldSet) {
+    protected AbstractHeader(Set<Field<?>> fieldSet) {
         super(fieldSet);
     }
 
-    protected DefaultHeader(Set<Field<?>> fieldSet, Map<String, ?> values) {
+    protected AbstractHeader(Set<Field<?>> fieldSet, Map<String, ?> values) {
         super(fieldSet, values);
-    }
-
-    public DefaultHeader() {
-        this(FIELDS);
-    }
-
-    public DefaultHeader(Map<String, ?> map) {
-        this(FIELDS, map);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import org.junit.Test
 
 import static org.junit.Assert.assertNull
@@ -12,21 +12,21 @@ class LocatorAdapterTest {
 
     @Test
     void testJwtHeader() {
-        Header input = new DefaultHeader()
+        UnprotectedHeader input = new DefaultUnprotectedHeader()
         def locator = new LocatorAdapter() {
             @Override
-            protected Object doLocate(Header header) {
+            protected Object locate(UnprotectedHeader header) {
                 return header
             }
         }
-        assertSame input, locator.locate(input as Header)
+        assertSame input, locator.locate(input)
     }
 
     @Test
     void testJwtHeaderWithoutOverride() {
-        Header input = new DefaultHeader()
+        UnprotectedHeader input = new DefaultUnprotectedHeader()
         Locator locator = new LocatorAdapter() {}
-        assertNull locator.locate(input as Header)
+        assertNull locator.locate(input)
     }
 
     @Test

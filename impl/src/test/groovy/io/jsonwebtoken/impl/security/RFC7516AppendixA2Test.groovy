@@ -153,7 +153,7 @@ class RFC7516AppendixA2Test {
         RsaPrivateJwk jwk = Jwks.builder().putAll(KEK_VALUES).build() as RsaPrivateJwk
         RSAPrivateKey privKey = jwk.toKey()
 
-        Jwe<byte[]> jwe = Jwts.parserBuilder().decryptWith(privKey).build().parsePlaintextJwe(COMPLETE_JWE)
+        Jwe<byte[]> jwe = Jwts.parserBuilder().decryptWith(privKey).build().parsePayloadJwe(COMPLETE_JWE)
         assertEquals PLAINTEXT, new String(jwe.getBody(), StandardCharsets.UTF_8)
     }
 }

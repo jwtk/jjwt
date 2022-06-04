@@ -1,9 +1,9 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.UnsupportedJwtException
-import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
+import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -53,6 +53,6 @@ class ConstantKeyLocatorTest {
     @Test
     void testApply() {
         def locator = new ConstantKeyLocator(null, null)
-        assertNull locator.apply(new DefaultHeader())
+        assertNull locator.apply(new DefaultUnprotectedHeader())
     }
 }

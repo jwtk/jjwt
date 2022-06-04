@@ -104,7 +104,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setHeaderParam(String name, Object value);
 
     /**
-     * Sets the JWT's payload to be a plaintext (non-JSON) string.
+     * Sets the JWT payload to the string's UTF-8-encoded bytes.
      *
      * <p>This is a convenience method that is effectively the same as:</p>
      * <blockquote><pre>

@@ -34,27 +34,30 @@ public final class Jwts {
     }
 
     /**
-     * Creates a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.  As this
-     * is a less common use of JWTs, consider using the {@link #jwsHeader()} factory method instead if you will later
-     * digitally sign the JWT.
+     * Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
+     * JWTs.  As this is a less common use of JWTs, consider using the respective {@link #jwsHeader()} or
+     * {@link #jweHeader()} factory methods instead if you will later digitally sign or encrypt the JWT.
      *
-     * @return a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.
+     * @return a new {@link UnprotectedHeader} instance suitable for <em>unprotected</em> (not digitally signed or
+     * encrypted) JWTs.
      */
-    public static Header<?> header() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultHeader");
+    public static UnprotectedHeader header() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultUnprotectedHeader");
     }
 
     /**
-     * Creates a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs, populated
-     * with the specified name/value pairs.  As this is a less common use of JWTs, consider using the
-     * {@link #jwsHeader(java.util.Map)} factory method instead if you will later digitally sign the JWT.
+     * Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
+     * JWTs, populated with the specified name/value pairs.  As this is a less common use of JWTs, consider using the
+     * {@link #jwsHeader(Map)} or {@link #jweHeader(Map)} factory methods instead if you will later digitally sign or
+     * encrypt the JWT.
      *
-     * @param header map of name/value pairs used to create a <em>plaintext</em> (not digitally signed) JWT
+     * @param header map of name/value pairs used to create an unprotected (not digitally signed or encrypted) JWT
      *               {@code Header} instance.
-     * @return a new {@link Header} instance suitable for <em>plaintext</em> (not digitally signed) JWTs.
+     * @return a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
+     * JWTs.
      */
-    public static Header<?> header(Map<String, Object> header) {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultHeader", MAP_ARG, header);
+    public static UnprotectedHeader header(Map<String, Object> header) {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultUnprotectedHeader", MAP_ARG, header);
     }
 
     /**

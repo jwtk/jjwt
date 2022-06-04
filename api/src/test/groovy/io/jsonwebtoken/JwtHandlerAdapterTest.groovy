@@ -33,7 +33,7 @@ class JwtHandlerAdapterTest {
     @Test
     void testOnPlaintextJwt() {
         try {
-            handler.onPlaintextJwt(null)
+            handler.onPayloadJwt(null)
             fail()
         } catch (UnsupportedJwtException e) {
             assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'

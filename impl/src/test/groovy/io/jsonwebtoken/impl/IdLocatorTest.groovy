@@ -15,7 +15,7 @@ class IdLocatorTest {
     void missingRequiredHeaderValueTest() {
         def msg = 'foo is required'
         def loc = new IdLocator('foo', msg, DummyIdFn.INSTANCE, DummyHeaderFn.INSTANCE)
-        def header = new DefaultHeader()
+        def header = new DefaultUnprotectedHeader()
         try {
             loc.apply(header)
             fail()
@@ -27,7 +27,7 @@ class IdLocatorTest {
     @Test
     void unlocatableJwtHeaderInstanceTest() {
         def loc = new IdLocator('foo', 'foo', DummyIdFn.INSTANCE, DummyHeaderFn.INSTANCE)
-        def header = new DefaultHeader([foo: 'foo'])
+        def header = new DefaultUnprotectedHeader([foo: 'foo'])
         try {
             loc.apply(header)
         } catch (UnsupportedJwtException expected) {
@@ -62,17 +62,18 @@ class IdLocatorTest {
 
     private static class DummyIdFn implements Function<String, String> {
         static final DummyIdFn INSTANCE = new DummyIdFn()
+
         @Override
         String apply(String s) {
             return null
         }
     }
 
-    private static class DummyHeaderFn implements Function<Header<?>, String> {
+    private static class DummyHeaderFn implements Function<Header, String> {
         static final DummyHeaderFn INSTANCE = new DummyHeaderFn()
 
         @Override
-        String apply(Header<?> header) {
+        String apply(Header header) {
             return null
         }
     }

@@ -38,6 +38,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.UnprotectedHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Bytes;
@@ -119,14 +120,14 @@ public class DefaultJwtParser implements JwtParser {
                     "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an  " +
-            DefaultHeader.ALGORITHM + " header value of '" + SignatureAlgorithms.NONE.getId() +
+            AbstractHeader.ALGORITHM + " header value of '" + SignatureAlgorithms.NONE.getId() +
             "') are disallowed by default as mandated by " +
             "https://datatracker.ietf.org/doc/html/rfc7518#section-3.6. If you wish to allow them to be " +
             "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
             "security considerations covered in that method's JavaDoc before doing so). Header: ";
 
     private static final String JWE_NONE_MSG =
-            "JWEs do not support key management " + DefaultHeader.ALGORITHM +
+            "JWEs do not support key management " + AbstractHeader.ALGORITHM +
                     " header value 'none' per https://datatracker.ietf.org/doc/html/rfc7518#section-4.1";
 
     private static final String JWS_NONE_SIG_MISMATCH_MSG =
@@ -148,7 +149,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private static Function<JwsHeader, SignatureAlgorithm<?, ?>> sigFn(Collection<SignatureAlgorithm<?, ?>> extras) {
-        return locFn(DefaultHeader.ALGORITHM.getId(), MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
+        return locFn(AbstractHeader.ALGORITHM.getId(), MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
@@ -818,35 +819,35 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             Object body = jwt.getBody();
             if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<?, Claims>) jwt);
+                return handler.onClaimsJwt((Jwt<UnprotectedHeader, Claims>) jwt);
             } else {
-                return handler.onPlaintextJwt((Jwt<?, byte[]>) jwt);
+                return handler.onPayloadJwt((Jwt<UnprotectedHeader, byte[]>) jwt);
             }
         }
     }
 
     @Override
-    public Jwt<?, byte[]> parsePlaintextJwt(String plaintextJwt) {
-        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<?, byte[]>>() {
+    public Jwt<UnprotectedHeader, byte[]> parsePayloadJwt(String plaintextJwt) {
+        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<UnprotectedHeader, byte[]>>() {
             @Override
-            public Jwt<?, byte[]> onPlaintextJwt(Jwt<?, byte[]> jwt) {
+            public Jwt<UnprotectedHeader, byte[]> onPayloadJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
                 return jwt;
             }
         });
     }
 
     @Override
-    public Jwt<?, Claims> parseClaimsJwt(String claimsJwt) {
-        return parse(claimsJwt, new JwtHandlerAdapter<Jwt<?, Claims>>() {
+    public Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String claimsJwt) {
+        return parse(claimsJwt, new JwtHandlerAdapter<Jwt<UnprotectedHeader, Claims>>() {
             @Override
-            public Jwt<?, Claims> onClaimsJwt(Jwt<?, Claims> jwt) {
+            public Jwt<UnprotectedHeader, Claims> onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt) {
                 return jwt;
             }
         });
     }
 
     @Override
-    public Jws<byte[]> parsePlaintextJws(String plaintextJws) {
+    public Jws<byte[]> parsePayloadJws(String plaintextJws) {
         return parse(plaintextJws, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
             public Jws<byte[]> onPlaintextJws(Jws<byte[]> jws) {
@@ -866,7 +867,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwe<byte[]> parsePlaintextJwe(String plaintextJwe) throws JwtException {
+    public Jwe<byte[]> parsePayloadJwe(String plaintextJwe) throws JwtException {
         return parse(plaintextJwe, new JwtHandlerAdapter<Jwe<byte[]>>() {
             @Override
             public Jwe<byte[]> onPlaintextJwe(Jwe<byte[]> jwe) {

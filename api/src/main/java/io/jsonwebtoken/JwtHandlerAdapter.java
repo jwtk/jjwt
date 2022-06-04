@@ -37,12 +37,12 @@ public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
     }
 
     @Override
-    public T onPlaintextJwt(Jwt<?, byte[]> jwt) {
+    public T onPayloadJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
         throw new UnsupportedJwtException("Unsigned plaintext JWTs are not supported.");
     }
 
     @Override
-    public T onClaimsJwt(Jwt<?, Claims> jwt) {
+    public T onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt) {
         throw new UnsupportedJwtException("Unsigned Claims JWTs are not supported.");
     }
 

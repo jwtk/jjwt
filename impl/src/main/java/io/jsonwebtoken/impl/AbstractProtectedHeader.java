@@ -22,7 +22,7 @@ import java.util.Set;
  * @param <T> specific header type to return from mutation/setter methods for method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public abstract class AbstractProtectedHeader<T extends ProtectedHeader<T>> extends DefaultHeader<T> implements ProtectedHeader<T> {
+public abstract class AbstractProtectedHeader<T extends ProtectedHeader<T>> extends AbstractHeader<T> implements ProtectedHeader<T> {
 
     static final Field<URI> JKU = Fields.uri("jku", "JWK Set URL");
 
@@ -32,7 +32,7 @@ public abstract class AbstractProtectedHeader<T extends ProtectedHeader<T>> exte
             .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
 
-    static final Set<Field<?>> FIELDS = Collections.concat(DefaultHeader.FIELDS, CRIT, JKU, JWK, AbstractJwk.KID,
+    static final Set<Field<?>> FIELDS = Collections.concat(AbstractHeader.FIELDS, CRIT, JKU, JWK, AbstractJwk.KID,
             AbstractAsymmetricJwk.X5U, AbstractAsymmetricJwk.X5C, AbstractAsymmetricJwk.X5T, AbstractAsymmetricJwk.X5T_S256);
 
     protected AbstractProtectedHeader(Set<Field<?>> fieldSet) {

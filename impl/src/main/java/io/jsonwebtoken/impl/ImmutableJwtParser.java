@@ -19,7 +19,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
@@ -28,6 +27,7 @@ import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.UnprotectedHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
@@ -156,32 +156,32 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public <H extends Header<H>> Jwt<H, byte[]> parsePlaintextJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parsePlaintextJwt(plaintextJwt);
+    public Jwt<UnprotectedHeader, byte[]> parsePayloadJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parsePayloadJwt(jwt);
     }
 
     @Override
-    public <H extends Header<H>> Jwt<H, Claims> parseClaimsJwt(String claimsJwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parseClaimsJwt(claimsJwt);
+    public Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parseClaimsJwt(jwt);
     }
 
     @Override
-    public Jws<byte[]> parsePlaintextJws(String plaintextJws) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parsePlaintextJws(plaintextJws);
+    public Jws<byte[]> parsePayloadJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parsePayloadJws(jws);
     }
 
     @Override
-    public Jws<Claims> parseClaimsJws(String claimsJws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parseClaimsJws(claimsJws);
+    public Jws<Claims> parseClaimsJws(String jws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parseClaimsJws(jws);
     }
 
     @Override
-    public Jwe<byte[]> parsePlaintextJwe(String plaintextJwe) throws JwtException {
-        return this.jwtParser.parsePlaintextJwe(plaintextJwe);
+    public Jwe<byte[]> parsePayloadJwe(String jwe) throws JwtException {
+        return this.jwtParser.parsePayloadJwe(jwe);
     }
 
     @Override
-    public Jwe<Claims> parseClaimsJwe(String claimsJwe) throws JwtException {
-        return this.jwtParser.parseClaimsJwe(claimsJwe);
+    public Jwe<Claims> parseClaimsJwe(String jwe) throws JwtException {
+        return this.jwtParser.parseClaimsJwe(jwe);
     }
 }
