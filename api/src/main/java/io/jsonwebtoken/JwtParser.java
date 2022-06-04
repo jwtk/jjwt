@@ -29,6 +29,7 @@ import java.util.Map;
  *
  * @since 0.1
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 public interface JwtParser {
 
     /**
@@ -518,7 +519,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since 0.2
      */
-    <H extends Header<H>> Jwt<H, String> parsePlaintextJwt(String plaintextJwt)
+    <H extends Header<H>> Jwt<H, byte[]> parsePlaintextJwt(String plaintextJwt)
             throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
@@ -578,7 +579,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since 0.2
      */
-    Jws<String> parsePlaintextJws(String plaintextJws)
+    Jws<byte[]> parsePlaintextJws(String plaintextJws)
             throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException;
 
     /**
@@ -637,7 +638,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since JJWT_RELEASE_VERSION
      */
-    Jwe<String> parsePlaintextJwe(String plaintextJwe)
+    Jwe<byte[]> parsePlaintextJwe(String plaintextJwe)
             throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SecurityException, IllegalArgumentException;
 
     /**

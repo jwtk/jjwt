@@ -4,6 +4,8 @@ import io.jsonwebtoken.impl.DefaultClaims
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import org.junit.Test
 
+import java.nio.charset.StandardCharsets
+
 import static org.junit.Assert.assertSame
 
 class LocatingKeyResolverTest {
@@ -27,7 +29,7 @@ class LocatingKeyResolverTest {
         def key = TestKeys.HS256
         def locator = new ConstantKeyLocator(key, null)
         def header = new DefaultJwsHeader()
-        def payload = 'hello world'
+        def payload = 'hello world'.getBytes(StandardCharsets.UTF_8)
         assertSame key, new LocatingKeyResolver(locator).resolveSigningKey(header, payload)
     }
 }

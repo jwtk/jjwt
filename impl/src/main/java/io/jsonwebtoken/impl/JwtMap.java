@@ -174,12 +174,12 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
             sb.append("Invalid ").append(getName()).append(" ").append(field).append(" value");
             if (field.isSecret()) {
                 sb.append(" ").append(RedactedSupplier.REDACTED_VALUE);
-            } else //noinspection StatementWithEmptyBody
-                if (rawValue instanceof byte[]) {
-                    // don't do anything
-                } else {
-                    sb.append(": ").append(Objects.nullSafeToString(rawValue));
-                }
+            } else if (!(rawValue instanceof byte[])) {
+                // don't print raw byte array gibberish.  We can't base64[url] encode it either because that could
+                // make the exception message confusing: the developer would see an encoded string and could think
+                // that was the rawValue specified when it wasn't.
+                sb.append(": ").append(Objects.nullSafeToString(rawValue));
+            }
             sb.append(". ").append(e.getMessage());
             String msg = sb.toString();
             throw new IllegalArgumentException(msg, e);

@@ -63,13 +63,13 @@ public interface SigningKeyResolver {
     Key resolveSigningKey(JwsHeader header, Claims claims);
 
     /**
-     * Returns the signing key that should be used to validate a digital signature for the Plaintext JWS with the
-     * specified header and plaintext payload.
+     * Returns the signing key that should be used to validate a digital signature for the Payload JWS with the
+     * specified header and byte array payload.
      *
      * @param header    the header of the JWS to validate
-     * @param plaintext the plaintext body of the JWS to validate
-     * @return the signing key that should be used to validate a digital signature for the Plaintext JWS with the
-     * specified header and plaintext payload.
+     * @param payload the byte array body of the JWS to validate
+     * @return the signing key that should be used to validate a digital signature for the Payload JWS with the
+     * specified header and byte array payload.
      */
-    Key resolveSigningKey(JwsHeader header, String plaintext);
+    Key resolveSigningKey(JwsHeader header, byte[] payload);
 }

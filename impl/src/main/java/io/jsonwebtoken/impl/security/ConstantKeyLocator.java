@@ -1,6 +1,11 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.LocatorAdapter;
+import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.lang.Function;
 
 import java.security.Key;
@@ -22,7 +27,7 @@ public class ConstantKeyLocator extends LocatorAdapter<Key> implements SigningKe
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, String plaintext) {
+    public Key resolveSigningKey(JwsHeader header, byte[] payload) {
         return locate(header);
     }
 

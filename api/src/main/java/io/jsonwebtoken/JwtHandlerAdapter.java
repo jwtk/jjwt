@@ -37,7 +37,7 @@ public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
     }
 
     @Override
-    public T onPlaintextJwt(Jwt<?, String> jwt) {
+    public T onPlaintextJwt(Jwt<?, byte[]> jwt) {
         throw new UnsupportedJwtException("Unsigned plaintext JWTs are not supported.");
     }
 
@@ -47,7 +47,7 @@ public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
     }
 
     @Override
-    public T onPlaintextJws(Jws<String> jws) {
+    public T onPlaintextJws(Jws<byte[]> jws) {
         throw new UnsupportedJwtException("Signed plaintext JWTs are not supported.");
     }
 
@@ -57,7 +57,7 @@ public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
     }
 
     @Override
-    public T onPlaintextJwe(Jwe<String> jwe) {
+    public T onPlaintextJwe(Jwe<byte[]> jwe) {
         throw new UnsupportedJwtException("Encrypted plaintext JWTs are not supported.");
     }
 

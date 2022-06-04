@@ -214,6 +214,20 @@ class JwtsTest {
     }
 
     @Test
+    void testParseClaimsWithLeadingAndTrailingWhitespace() {
+        String whitespaceChars = ' \t \n \r '
+        String claimsJson = whitespaceChars + '{"sub":"joe"}' + whitespaceChars
+
+        String header = Encoders.BASE64URL.encode('{"alg":"none"}'.getBytes(StandardCharsets.UTF_8))
+        String claims = Encoders.BASE64URL.encode(claimsJson.getBytes(StandardCharsets.UTF_8))
+
+        String compact = header + '.' + claims + '.'
+        def jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parseClaimsJwt(compact)
+        assertEquals 'none', jwt.header.getAlgorithm()
+        assertEquals 'joe', jwt.body.getSubject()
+    }
+
+    @Test
     void testParseWithNoPeriods() {
         try {
             Jwts.parserBuilder().build().parse('foo')
@@ -540,11 +554,9 @@ class JwtsTest {
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parsePlaintextJws(compact)
 
-        String parsed = jws.body
-
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
-        assertEquals "this is my test for a payload", parsed
+        assertEquals "this is my test for a payload", new String(jws.body, StandardCharsets.UTF_8)
     }
 
     @Test

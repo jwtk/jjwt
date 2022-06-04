@@ -26,6 +26,7 @@ import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
 import javax.crypto.SecretKey
+import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
 
 import static io.jsonwebtoken.DateTestUtils.truncateMillis
@@ -168,9 +169,9 @@ class JwtParserTest {
 
         assertTrue Jwts.parserBuilder().build().isSigned(compact)
 
-        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(base64Encodedkey).build().parse(compact)
+        def jwt = Jwts.parserBuilder().setSigningKey(base64Encodedkey).build().parse(compact)
 
-        assertEquals jwt.body, payload
+        assertEquals payload, new String(jwt.body as byte[], StandardCharsets.UTF_8)
     }
 
     @Test
@@ -183,32 +184,27 @@ class JwtParserTest {
 
         assertTrue Jwts.parserBuilder().build().isSigned(compact)
 
-        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(key).build().parse(compact)
+        def jwt = Jwts.parserBuilder().setSigningKey(key).build().parse(compact)
 
-        assertEquals payload, jwt.body
+        assertEquals payload, new String(jwt.body as byte[], StandardCharsets.UTF_8)
     }
 
     @Test
     void testParseNullPayload() {
         SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
-
         String compact = Jwts.builder().signWith(key).compact()
-
         assertTrue Jwts.parserBuilder().build().isSigned(compact)
 
-        Jwt<Header, String> jwt = Jwts.parserBuilder().setSigningKey(key).build().parse(compact)
-
-        assertEquals '', jwt.body
+        def jwt = Jwts.parserBuilder().setSigningKey(key).build().parse(compact)
+        assertEquals '', new String(jwt.body as byte[], StandardCharsets.UTF_8)
     }
 
     @Test
     void testParseNullPayloadWithoutKey() {
         String compact = Jwts.builder().compact()
-
-        Jwt<Header, String> jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact)
-
+        def jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact)
         assertEquals 'none', jwt.header.alg
-        assertEquals '', jwt.body
+        assertEquals '', new String(jwt.body as byte[], StandardCharsets.UTF_8)
     }
 
     @Test
@@ -310,9 +306,9 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setPayload(payload).compact()
 
-        Jwt<Header, String> jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parsePlaintextJwt(compact)
+        def jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parsePlaintextJwt(compact)
 
-        assertEquals jwt.getBody(), payload
+        assertEquals payload, new String(jwt.body, StandardCharsets.UTF_8)
     }
 
     @Test
@@ -462,12 +458,12 @@ class JwtParserTest {
 
         String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
 
-        Jwt<Header, String> jwt = Jwts.parserBuilder().
+        def jwt = Jwts.parserBuilder().
                 setSigningKey(key).
                 build().
                 parsePlaintextJws(compact)
 
-        assertEquals jwt.getBody(), payload
+        assertEquals payload, new String(jwt.body, StandardCharsets.UTF_8)
     }
 
     @Test
@@ -768,14 +764,14 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, byte[] payload) {
                 return key
             }
         }
 
-        Jws<String> jws = Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
+        def jws = Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
 
-        assertEquals jws.getBody(), inputPayload
+        assertEquals inputPayload, new String(jws.body, StandardCharsets.UTF_8)
     }
 
     @Test
@@ -789,7 +785,7 @@ class JwtParserTest {
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKeyBytes(JwsHeader header, String payload) {
+            byte[] resolveSigningKeyBytes(JwsHeader header, byte[] payload) {
                 return randomKey()
             }
         }
@@ -817,9 +813,9 @@ class JwtParserTest {
             Jwts.parserBuilder().setSigningKeyResolver(signingKeyResolver).build().parsePlaintextJws(compact)
             fail()
         } catch (UnsupportedJwtException ex) {
-            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support plaintext ' +
-                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, String) ' +
-                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, String) method.'
+            assertEquals ex.getMessage(), 'The specified SigningKeyResolver implementation does not support payload ' +
+                    'JWS signing key resolution.  Consider overriding either the resolveSigningKey(JwsHeader, byte[]) ' +
+                    'method or, for HMAC algorithms, the resolveSigningKeyBytes(JwsHeader, byte[]) method.'
         }
     }
 

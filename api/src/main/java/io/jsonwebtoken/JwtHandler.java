@@ -17,7 +17,7 @@ package io.jsonwebtoken;
 
 /**
  * A JwtHandler is invoked by a {@link io.jsonwebtoken.JwtParser JwtParser} after parsing a JWT to indicate the exact
- * type of JWT or JWS parsed.
+ * type of JWT, JWS or JWE parsed.
  *
  * @param <T> the type of object to return to the parser caller after handling the parsed JWT.
  * @since 0.2
@@ -26,16 +26,17 @@ public interface JwtHandler<T> {
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * a plaintext JWT.  A plaintext JWT has a String (non-JSON) body payload and it is not cryptographically signed.
+     * a plaintext Unprotected JWT.  A plaintext JWT has a non-JSON byte array body payload that is not
+     * cryptographically signed or encrypted.
      *
      * @param jwt the parsed plaintext JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
      */
-    T onPlaintextJwt(Jwt<?, String> jwt);
+    T onPlaintextJwt(Jwt<?, byte[]> jwt);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * a Claims JWT.  A Claims JWT has a {@link Claims} body and it is not cryptographically signed.
+     * a Claims JWT.  A Claims JWT has a {@link Claims} body that is not cryptographically signed or encrypted.
      *
      * @param jwt the parsed claims JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
@@ -44,7 +45,7 @@ public interface JwtHandler<T> {
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * a plaintext JWS.  A plaintext JWS is a JWT with a String (non-JSON) body (payload) that has been
+     * a plaintext JWS.  A plaintext JWS is a JWT with a (non-JSON) byte array body (payload) that has been
      * cryptographically signed.
      *
      * <p>This method will only be invoked if the cryptographic signature can be successfully verified.</p>
@@ -52,7 +53,7 @@ public interface JwtHandler<T> {
      * @param jws the parsed plaintext JWS
      * @return any object to be used after inspecting the JWS, or {@code null} if no return value is necessary.
      */
-    T onPlaintextJws(Jws<String> jws);
+    T onPlaintextJws(Jws<byte[]> jws);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
@@ -76,7 +77,7 @@ public interface JwtHandler<T> {
      * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
      * @since JJWT_RELEASE_VERSION
      */
-    T onPlaintextJwe(Jwe<String> jwe);
+    T onPlaintextJwe(Jwe<byte[]> jwe);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is

@@ -28,6 +28,7 @@ import org.junit.Before
 import org.junit.Test
 
 import javax.crypto.KeyGenerator
+import java.nio.charset.StandardCharsets
 import java.security.Provider
 import java.security.SecureRandom
 
@@ -477,7 +478,7 @@ class DefaultJwtBuilderTest {
         def key = enc.keyBuilder().build()
         def jwe = builder.setPayload("me").encryptWith(enc, key).compact()
         def jwt = Jwts.parserBuilder().decryptWith(key).build().parsePlaintextJwe(jwe)
-        assertEquals 'me', jwt.getBody()
+        assertEquals 'me', new String(jwt.getBody(), StandardCharsets.UTF_8)
     }
 
     @Test

@@ -146,7 +146,7 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public Jwt<?,?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parse(jwt);
     }
 
@@ -156,7 +156,7 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public <H extends Header<H>> Jwt<H, String> parsePlaintextJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public <H extends Header<H>> Jwt<H, byte[]> parsePlaintextJwt(String plaintextJwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parsePlaintextJwt(plaintextJwt);
     }
 
@@ -166,7 +166,7 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jws<String> parsePlaintextJws(String plaintextJws) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public Jws<byte[]> parsePlaintextJws(String plaintextJws) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parsePlaintextJws(plaintextJws);
     }
 
@@ -176,7 +176,7 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwe<String> parsePlaintextJwe(String plaintextJwe) throws JwtException {
+    public Jwe<byte[]> parsePlaintextJwe(String plaintextJwe) throws JwtException {
         return this.jwtParser.parsePlaintextJwe(plaintextJwe);
     }
 

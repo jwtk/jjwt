@@ -339,6 +339,7 @@ public class DefaultJwtParser implements JwtParser {
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
         Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
@@ -363,9 +364,82 @@ public class DefaultJwtParser implements JwtParser {
         return header != null && Strings.hasText(header.getContentType());
     }
 
+
+    /**
+     * Returns {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
+     * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
+     * {@link Character#isWhitespace(char)}.  This does not guarantee JSON, just that it is likely JSON and
+     * should be passed to a JSON Deserializer to see if it is actually JSON.  If this {@code returns false}, it
+     * should be considered a byte[] payload and <em>not</em> delegated to a JSON Deserializer.
+     *
+     * @param payload the byte array that could be JSON
+     * @return {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
+     * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
+     * {@link Character#isWhitespace(char)}
+     * @since JJWT_RELEASE_VERSION
+     */
+    private static boolean isLikelyJson(byte[] payload) {
+
+        // !payload.isEmpty() && !hasContentType(header) && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}'
+
+        int len = Bytes.length(payload);
+        if (len == 0) {
+            return false;
+        }
+
+        int maxIndex = len - 1;
+        int jsonStartIndex = -1; // out of bounds means didn't find any
+        int jsonEndIndex = len; // out of bounds means didn't find any
+
+        for (int i = 0; i < len; i++) {
+            int c = payload[i];
+            if (c == '{') {
+                jsonStartIndex = i;
+                break;
+            }
+        }
+        if (jsonStartIndex == -1) { //exhausted entire string, didn't find starting '{'
+            return false;
+        }
+        if (jsonStartIndex > 0) {
+            // we found content at the start of the payload, but before the first '{' character, so we need to check
+            // to see if any of it when UTF-8 encoded is not whitespace. If not, it can't be a JSON object.
+            byte[] leading = new byte[jsonStartIndex];
+            System.arraycopy(payload, 0, leading, 0, jsonStartIndex);
+            String s = new String(leading, StandardCharsets.UTF_8);
+            if (Strings.hasText(s)) { // found something before '{' that isn't whitespace; can't be a valid JSON object
+                return false;
+            }
+        }
+
+        for (int i = maxIndex; i > jsonStartIndex; i--) {
+            int c = payload[i];
+            if (c == '}') {
+                jsonEndIndex = i;
+                break;
+            }
+        }
+
+        if (jsonEndIndex > maxIndex) { // found start '{' char, but no closing '} char. Can't be a JSON object
+            return false;
+        }
+
+        if (jsonEndIndex < maxIndex) {
+            // we found content at the end of the payload, after the last '}' character.  We need to check to see if
+            // any of it when UTF-8 encoded is not whitespace. If so, it's not a JSON object.
+            int size = maxIndex - jsonEndIndex;
+            byte[] trailing = new byte[size];
+            System.arraycopy(payload, jsonEndIndex + 1, trailing, 0, size);
+            String s = new String(trailing, StandardCharsets.UTF_8);
+            return !Strings.hasText(s); // just whitespace after last '}', we can assume JSON and try and parse it
+        }
+
+        return true;
+    }
+
     private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
                                  @SuppressWarnings("deprecation") SigningKeyResolver resolver,
-                                 Claims claims, String payload) {
+                                 Claims claims, byte[] payload) {
 
         Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
 
@@ -444,8 +518,7 @@ public class DefaultJwtParser implements JwtParser {
 
         // =============== Header =================
         final byte[] headerBytes = base64UrlDecode(base64UrlHeader, "protected header");
-        String origValue = new String(headerBytes, Strings.UTF_8);
-        Map<String, ?> m = readValue(origValue, "protected header");
+        Map<String, ?> m = readValue(headerBytes, "protected header");
         Header<?> header;
         try {
             header = tokenized.createHeader(m);
@@ -488,8 +561,8 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Body =================
-        byte[] bytes = base64UrlDecode(tokenized.getBody(), "payload");
-        if (tokenized instanceof TokenizedJwe && Arrays.length(bytes) == 0) { // Only JWS body can be empty per https://github.com/jwtk/jjwt/pull/540
+        byte[] payload = base64UrlDecode(tokenized.getBody(), "payload");
+        if (tokenized instanceof TokenizedJwe && Arrays.length(payload) == 0) { // Only JWS body can be empty per https://github.com/jwtk/jjwt/pull/540
             String msg = "Compact JWE strings MUST always contain a payload (ciphertext).";
             throw new MalformedJwtException(msg);
         }
@@ -560,9 +633,9 @@ public class DefaultJwtParser implements JwtParser {
             }
 
             DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(this.provider, null, bytes, cek, aad, tag, iv);
+                    new DefaultAeadResult(this.provider, null, payload, cek, aad, tag, iv);
             Message result = encAlg.decrypt(decryptRequest);
-            bytes = result.getContent();
+            payload = result.getContent();
 
         } else if (Strings.hasText(base64UrlDigest) && this.signingKeyResolver == null) { //TODO: for 1.0, remove the == null check
             // not using a signing key resolver, so we can verify the signature before reading the body, which is
@@ -572,13 +645,18 @@ public class DefaultJwtParser implements JwtParser {
 
         CompressionCodec compressionCodec = compressionCodecLocator.locate(header);
         if (compressionCodec != null) {
-            bytes = compressionCodec.decompress(bytes);
+            payload = compressionCodec.decompress(payload);
         }
 
-        String payload = new String(bytes, Strings.UTF_8);
-
         Claims claims = null;
-        if (!payload.isEmpty() && !hasContentType(header) && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}') { //likely to be json, parse it:
+        if (!hasContentType(header) // If there is a content type set, then the application using JJWT is expected
+                //                     to convert the byte payload themselves based on this content type
+                //                     https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+                //
+                //                     "This parameter is ignored by JWS implementations; any processing of this
+                //                      parameter is performed by the JWS application."
+                //
+                && isLikelyJson(payload)) { // likely to be json, parse it:
             Map<String, ?> claimsMap = readValue(payload, "claims");
             try {
                 claims = new DefaultClaims(claimsMap);
@@ -729,7 +807,7 @@ public class DefaultJwtParser implements JwtParser {
             if (body instanceof Claims) {
                 return handler.onClaimsJws((Jws<Claims>) jws);
             } else {
-                return handler.onPlaintextJws((Jws<String>) jws);
+                return handler.onPlaintextJws((Jws<byte[]>) jws);
             }
         } else if (jwt instanceof Jwe) {
             Jwe<?> jwe = (Jwe<?>) jwt;
@@ -737,23 +815,23 @@ public class DefaultJwtParser implements JwtParser {
             if (body instanceof Claims) {
                 return handler.onClaimsJwe((Jwe<Claims>) jwe);
             } else {
-                return handler.onPlaintextJwe((Jwe<String>) jwe);
+                return handler.onPlaintextJwe((Jwe<byte[]>) jwe);
             }
         } else {
             Object body = jwt.getBody();
             if (body instanceof Claims) {
                 return handler.onClaimsJwt((Jwt<?, Claims>) jwt);
             } else {
-                return handler.onPlaintextJwt((Jwt<?, String>) jwt);
+                return handler.onPlaintextJwt((Jwt<?, byte[]>) jwt);
             }
         }
     }
 
     @Override
-    public Jwt<?, String> parsePlaintextJwt(String plaintextJwt) {
-        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<?, String>>() {
+    public Jwt<?, byte[]> parsePlaintextJwt(String plaintextJwt) {
+        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<?, byte[]>>() {
             @Override
-            public Jwt<?, String> onPlaintextJwt(Jwt<?, String> jwt) {
+            public Jwt<?, byte[]> onPlaintextJwt(Jwt<?, byte[]> jwt) {
                 return jwt;
             }
         });
@@ -770,10 +848,10 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jws<String> parsePlaintextJws(String plaintextJws) {
-        return parse(plaintextJws, new JwtHandlerAdapter<Jws<String>>() {
+    public Jws<byte[]> parsePlaintextJws(String plaintextJws) {
+        return parse(plaintextJws, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
-            public Jws<String> onPlaintextJws(Jws<String> jws) {
+            public Jws<byte[]> onPlaintextJws(Jws<byte[]> jws) {
                 return jws;
             }
         });
@@ -790,10 +868,10 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwe<String> parsePlaintextJwe(String plaintextJwe) throws JwtException {
-        return parse(plaintextJwe, new JwtHandlerAdapter<Jwe<String>>() {
+    public Jwe<byte[]> parsePlaintextJwe(String plaintextJwe) throws JwtException {
+        return parse(plaintextJwe, new JwtHandlerAdapter<Jwe<byte[]>>() {
             @Override
-            public Jwe<String> onPlaintextJwe(Jwe<String> jwe) {
+            public Jwe<byte[]> onPlaintextJwe(Jwe<byte[]> jwe) {
                 return jwe;
             }
         });
@@ -818,12 +896,12 @@ public class DefaultJwtParser implements JwtParser {
         }
     }
 
-    protected Map<String, ?> readValue(String val, final String name) {
+    protected Map<String, ?> readValue(byte[] bytes, final String name) {
         try {
-            byte[] bytes = val.getBytes(Strings.UTF_8);
             return deserializer.deserialize(bytes);
         } catch (MalformedJwtException | DeserializationException e) {
-            throw new MalformedJwtException("Unable to read " + name + " JSON: " + val, e);
+            String s = new String(bytes, StandardCharsets.UTF_8);
+            throw new MalformedJwtException("Unable to read " + name + " JSON: " + s, e);
         }
     }
 }

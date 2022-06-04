@@ -32,6 +32,7 @@ import org.junit.Test
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -455,11 +456,11 @@ class DeprecatedJwtsTest {
 
         def jws = Jwts.parser().setSigningKey(key).parsePlaintextJws(compact)
 
-        String parsed = jws.body
+        byte[] parsed = jws.body
 
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
-        assertEquals "this is my test for a payload", parsed
+        assertEquals "this is my test for a payload", new String(parsed, StandardCharsets.UTF_8)
     }
 
     @Test
