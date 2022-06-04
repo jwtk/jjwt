@@ -380,8 +380,6 @@ public class DefaultJwtParser implements JwtParser {
      */
     private static boolean isLikelyJson(byte[] payload) {
 
-        // !payload.isEmpty() && !hasContentType(header) && payload.charAt(0) == '{' && payload.charAt(payload.length() - 1) == '}'
-
         int len = Bytes.length(payload);
         if (len == 0) {
             return false;
@@ -398,12 +396,12 @@ public class DefaultJwtParser implements JwtParser {
                 break;
             }
         }
-        if (jsonStartIndex == -1) { //exhausted entire string, didn't find starting '{'
+        if (jsonStartIndex == -1) { //exhausted entire payload, didn't find starting '{', can't be a JSON object
             return false;
         }
         if (jsonStartIndex > 0) {
             // we found content at the start of the payload, but before the first '{' character, so we need to check
-            // to see if any of it when UTF-8 encoded is not whitespace. If not, it can't be a JSON object.
+            // to see if any of it (when UTF-8 decoded) is not whitespace. If so, it can't be a valid JSON object.
             byte[] leading = new byte[jsonStartIndex];
             System.arraycopy(payload, 0, leading, 0, jsonStartIndex);
             String s = new String(leading, StandardCharsets.UTF_8);
@@ -425,13 +423,13 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         if (jsonEndIndex < maxIndex) {
-            // we found content at the end of the payload, after the last '}' character.  We need to check to see if
-            // any of it when UTF-8 encoded is not whitespace. If so, it's not a JSON object.
+            // We found content at the end of the payload, after the last '}' character.  We need to check to see if
+            // any of it (when UTF-8 decoded) is not whitespace. If so, it's not a valid JSON object payload.
             int size = maxIndex - jsonEndIndex;
             byte[] trailing = new byte[size];
             System.arraycopy(payload, jsonEndIndex + 1, trailing, 0, size);
             String s = new String(trailing, StandardCharsets.UTF_8);
-            return !Strings.hasText(s); // just whitespace after last '}', we can assume JSON and try and parse it
+            return !Strings.hasText(s); // if just whitespace after last '}', we can assume JSON and try and parse it
         }
 
         return true;
