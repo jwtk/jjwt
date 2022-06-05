@@ -74,7 +74,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         this(hashBitLength(keyBitLength), new AesWrapKeyAlgorithm(keyBitLength));
     }
 
-    private Pbes2HsAkwAlgorithm(int hashBitLength, KeyAlgorithm<SecretKey, SecretKey> wrapAlg) {
+    protected Pbes2HsAkwAlgorithm(int hashBitLength, KeyAlgorithm<SecretKey, SecretKey> wrapAlg) {
         super(idFor(hashBitLength, wrapAlg), "PBKDF2WithHmacSHA" + hashBitLength);
         this.wrapAlg = wrapAlg; // no need to assert non-null due to 'idFor' implementation above
 
