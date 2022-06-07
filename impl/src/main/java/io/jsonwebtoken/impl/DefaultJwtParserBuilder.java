@@ -30,6 +30,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -68,14 +69,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
 
-    private Locator<CompressionCodec> compressionCodecLocator =
-            new CompressionCodecLocator(new DefaultCompressionCodecResolver());
+    private Locator<CompressionCodec> compressionCodecLocator;
 
     private final Collection<AeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
 
     private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgorithms = new LinkedHashSet<>();
 
     private final Collection<SignatureAlgorithm<?, ?>> extraSignatureAlgorithms = new LinkedHashSet<>();
+
+    private final Collection<CompressionCodec> extraCompressionCodecs = new LinkedHashSet<>();
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
@@ -211,6 +213,13 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
+    public JwtParserBuilder addCompressionCodecs(Collection<CompressionCodec> codecs) {
+        Assert.notEmpty(codecs, "Additional CompressionCodec collection cannot be null or empty.");
+        this.extraCompressionCodecs.addAll(codecs);
+        return this;
+    }
+
+    @Override
     public JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs) {
         Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
         this.extraEncryptionAlgorithms.addAll(encAlgs);
@@ -276,6 +285,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
         if (this.keyLocator == null) {
             this.keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
+        }
+
+        if (this.compressionCodecLocator != null && !Collections.isEmpty(extraCompressionCodecs)) {
+            String msg = "Both 'addCompressionCodecs' and 'compressionCodecLocator' " +
+                    "(or 'compressionCodecResolver') cannot be specified. Choose either.";
+            throw new IllegalStateException(msg);
+        }
+        if (this.compressionCodecLocator == null) {
+            this.compressionCodecLocator = new DefaultCompressionCodecResolver(extraCompressionCodecs);
         }
 
         // Invariants.  If these are ever violated, it's an error in this class implementation

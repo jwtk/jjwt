@@ -112,7 +112,7 @@ class DefaultJwtParserBuilderTest {
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
 
-        assertEquals 'bar', p.setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
+        assertEquals 'bar', p.verifyWith(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test
@@ -136,12 +136,38 @@ class DefaultJwtParserBuilderTest {
     void testCompressionCodecLocator() {
         Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
             @Override
-            CompressionCodec locate(Header<?> header) {
-                return null;
+            CompressionCodec locate(Header<? extends Header> header) {
+                return null
             }
         }
-        def parser = Jwts.parserBuilder().setCompressionCodecLocator(locator).build()
+        def parser = builder.setCompressionCodecLocator(locator).build()
         assertSame locator, parser.jwtParser.compressionCodecLocator
+    }
+
+    @Test
+    void testAddCompressionCodecs() {
+        def codec = new TestCompressionCodec(id: 'test')
+        def parser = builder.addCompressionCodecs([codec] as Set<CompressionCodec>).build()
+        def header = Jwts.header().setCompressionAlgorithm(codec.getId())
+        assertSame codec, parser.jwtParser.compressionCodecLocator.locate(header)
+    }
+
+    @Test
+    void testCompressionCodecLocatorAndExtraCompressionCodecs() {
+        def codec = new TestCompressionCodec(id: 'test')
+        Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
+            @Override
+            CompressionCodec locate(Header<? extends Header> header) {
+                return null
+            }
+        }
+        try {
+            builder.setCompressionCodecLocator(locator).addCompressionCodecs([codec] as Set<CompressionCodec>).build()
+            fail()
+        } catch (IllegalStateException expected) {
+            String msg = "Both 'addCompressionCodecs' and 'compressionCodecLocator' (or 'compressionCodecResolver') cannot be specified. Choose either."
+            assertEquals msg, expected.getMessage()
+        }
     }
 
     @Test
@@ -161,5 +187,30 @@ class DefaultJwtParserBuilderTest {
         // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating
         assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
         assertSame deserializer, parser.jwtParser.deserializer.deserializer
+    }
+
+    static class TestCompressionCodec implements CompressionCodec {
+
+        String id
+
+        @Override
+        String getAlgorithmName() {
+            return this.id
+        }
+
+        @Override
+        byte[] compress(byte[] content) throws CompressionException {
+            return new byte[0]
+        }
+
+        @Override
+        byte[] decompress(byte[] compressed) throws CompressionException {
+            return new byte[0]
+        }
+
+        @Override
+        String getId() {
+            return this.id
+        }
     }
 }

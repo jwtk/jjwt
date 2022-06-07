@@ -27,6 +27,8 @@ import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -38,8 +40,10 @@ import java.util.Set;
  * nothing and returns {@code null} to the caller, indicating no compression was used.</li>
  * <li>If the header has a {@code zip} value of {@code DEF}, a {@link DeflateCompressionCodec} will be returned.</li>
  * <li>If the header has a {@code zip} value of {@code GZIP}, a {@link GzipCompressionCodec} will be returned.</li>
- * <li>If the header has any other {@code zip} value, a {@link CompressionException} is thrown to reflect an
- * unrecognized algorithm.</li>
+ * <li>If the header has any other {@code zip} value, it tries to find corresponding {@code CompressionCodec} that
+ * matches that {@link CompressionCodec#getId() id}. If it finds a match, it returns it.</li>
+ * <li>If a matching {@code CompressionCodec} is not found for the specified {@code zip} value,
+ * a {@link CompressionException} is thrown to reflect an unrecognized algorithm.</li>
  * </ul>
  *
  * <p>If you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement your own
@@ -54,13 +58,21 @@ import java.util.Set;
 public class DefaultCompressionCodecResolver implements CompressionCodecResolver, Locator<CompressionCodec> {
 
     private static final String MISSING_COMPRESSION_MESSAGE = "Unable to find an implementation for compression " +
-            "algorithm [%s] using java.util.ServiceLoader. Ensure you include a backing implementation .jar in " +
-            "the classpath, for example jjwt-impl.jar, or your own .jar for custom implementations.";
+            "algorithm [%s] using java.util.ServiceLoader or via any specified extra CompressionCodec instances. " +
+            "Ensure you include a backing implementation .jar in the classpath, for example jjwt-impl.jar, or " +
+            "your own .jar for custom implementations, or use the JwtParser.addCompressionCodecs configuration " +
+            "method.";
 
     private final Registry<String, CompressionCodec> codecs;
 
     public DefaultCompressionCodecResolver() {
+        this(Collections.<CompressionCodec>emptySet());
+    }
+
+    public DefaultCompressionCodecResolver(Collection<CompressionCodec> extraCodecs) {
+        Assert.notNull(extraCodecs, "extraCodecs cannot be null.");
         Set<CompressionCodec> codecs = new LinkedHashSet<>(Services.loadAll(CompressionCodec.class));
+        codecs.addAll(extraCodecs);
         codecs.add(CompressionCodecs.DEFLATE); // standard ones are added last so they can't be accidentally replaced
         codecs.add(CompressionCodecs.GZIP);
         this.codecs = new IdRegistry<>(codecs);
