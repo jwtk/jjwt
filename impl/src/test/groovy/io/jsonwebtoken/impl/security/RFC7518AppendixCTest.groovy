@@ -118,6 +118,6 @@ class RFC7518AppendixCTest {
                 .build().parseClaimsJwe(jwe)
 
         assertEquals RFC_HEADER, claimsJwe.getHeader()
-        assertEquals "World", claimsJwe.getBody().get("Hello")
+        assertEquals "World", claimsJwe.getPayload().get("Hello")
     }
 }

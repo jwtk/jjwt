@@ -27,7 +27,7 @@ public class ConstantKeyLocator extends LocatorAdapter<Key> implements SigningKe
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, byte[] payload) {
+    public Key resolveSigningKey(JwsHeader header, byte[] content) {
         return locate(header);
     }
 

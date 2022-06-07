@@ -250,7 +250,7 @@ class DefaultJwtBuilderTest {
             builder.setPayload('foo').claim('a', 'b').compact()
             fail()
         } catch (IllegalStateException ise) {
-            assertEquals ise.message, "Both 'payload' and 'claims' cannot both be specified. Choose either one."
+            assertEquals ise.message, "Both 'content' and 'claims' cannot both be specified. Choose either one."
         }
     }
 
@@ -457,7 +457,7 @@ class DefaultJwtBuilderTest {
                 .claim('foo', 'bar')
                 .compact()
 
-        assertEquals 'bar', Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getBody().get('foo')
+        assertEquals 'bar', Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test
@@ -477,8 +477,8 @@ class DefaultJwtBuilderTest {
         def enc = EncryptionAlgorithms.A128GCM
         def key = enc.keyBuilder().build()
         def jwe = builder.setPayload("me").encryptWith(enc, key).compact()
-        def jwt = Jwts.parserBuilder().decryptWith(key).build().parsePayloadJwe(jwe)
-        assertEquals 'me', new String(jwt.getBody(), StandardCharsets.UTF_8)
+        def jwt = Jwts.parserBuilder().decryptWith(key).build().parseContentJwe(jwe)
+        assertEquals 'me', new String(jwt.getPayload(), StandardCharsets.UTF_8)
     }
 
     @Test
@@ -487,7 +487,7 @@ class DefaultJwtBuilderTest {
         def key = enc.keyBuilder().build()
         def jwe = builder.setSubject('joe').encryptWith(enc, key).compact()
         def jwt = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jwe)
-        assertEquals 'joe', jwt.getBody().getSubject()
+        assertEquals 'joe', jwt.getPayload().getSubject()
     }
 
     @Test
@@ -509,7 +509,7 @@ class DefaultJwtBuilderTest {
             builder.encryptWith(EncryptionAlgorithms.A128GCM, key).compact()
             fail()
         } catch (IllegalStateException expected) {
-            String msg = "Encrypted JWTs must have either 'claims' or a non-empty 'payload'."
+            String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'."
             assertEquals msg, expected.getMessage()
         }
     }

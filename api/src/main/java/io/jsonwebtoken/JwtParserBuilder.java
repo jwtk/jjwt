@@ -252,7 +252,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * return {@link #verifyWith(Key) verifyWith}(key);</pre></blockquote>
      *
      * @param base64EncodedSecretKey BASE64-encoded HMAC-SHA key bytes used to create a Key which will be used to
-     *                              verify all encountered JWS digital signatures.
+     *                               verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
      * @deprecated in favor of {@link #verifyWith(Key)} as explained in the above <b>Deprecation Notice</b>,
      * and will be removed in 1.0.0.
@@ -372,7 +372,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * a JWS's signature.  If the parsed String is not a JWS (no signature), this resolver is not used.</p>
      *
      * <p>Specifying a {@code SigningKeyResolver} is necessary when the signing key is not already known before parsing
-     * the JWT and the JWT header or payload (plaintext body or Claims) must be inspected first to determine how to
+     * the JWT and the JWT header or payload (content byte array or Claims) must be inspected first to determine how to
      * look up the signing key.  Once returned by the resolver, the JwtParser will then verify the JWS signature with the
      * returned key.  For example:</p>
      *

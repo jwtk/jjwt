@@ -85,7 +85,7 @@ class DefaultJwtParserTest {
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
 
-        assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getBody().get('foo')
+        assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test(expected = MalformedJwtException)

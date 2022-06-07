@@ -325,4 +325,19 @@ class DefaultJweHeaderTest {
         //ensure that even though a Base64Url string was set, we get back a byte[]:
         assertArrayEquals salt, header.getPbes2Salt()
     }
+
+    @Test
+    void testPbe2SaltInputTooSmall() {
+        byte[] salt = new byte[7] // RFC requires a minimum of 64 bits (8 bytes), so we go 1 byte less
+        Randoms.secureRandom().nextBytes(salt)
+        String val = Encoders.BASE64URL.encode(salt)
+        try {
+            header.put('p2s', val)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Invalid JWE header 'p2s' (PBES2 Salt Input) value: $val. " +
+                    "Byte array must be at least 64 bits (8 bytes). Found 56 bits (7 bytes)"
+            assertEquals msg, expected.getMessage()
+        }
+    }
 }

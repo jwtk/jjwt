@@ -22,6 +22,7 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Services;
@@ -70,7 +71,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     protected Header<?> header;
     protected Claims claims;
-    protected byte[] payload;
+    protected byte[] content;
 
     private SignatureAlgorithm<Key, ?> sigAlg = SignatureAlgorithms.NONE;
     private Function<SignatureRequest<Key>, byte[]> signFunction;
@@ -278,13 +279,22 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder setPayload(String payload) {
         byte[] bytes = payload != null ? payload.getBytes(StandardCharsets.UTF_8) : null;
-        return setPayload(bytes);
+        return setContent(bytes);
     }
 
     @Override
-    public JwtBuilder setPayload(byte[] payload) {
-        this.payload = payload;
+    public JwtBuilder setContent(byte[] content) {
+        this.content = content;
         return this;
+    }
+
+    @Override
+    public JwtBuilder setContent(byte[] content, String cty) {
+        Assert.notEmpty(content, "content byte array cannot be null or empty.");
+        Assert.hasText(cty, "Content Type String cannot be null or empty.");
+        cty = CompactMediaTypeIdConverter.INSTANCE.applyFrom(cty);
+        ensureHeader().setContentType(cty);
+        return setContent(content);
     }
 
     protected Claims ensureClaims() {
@@ -377,16 +387,16 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException(msg);
         }
 
-        if (Objects.isEmpty(payload) && Collections.isEmpty(claims)) {
+        if (Objects.isEmpty(content) && Collections.isEmpty(claims)) {
             if (jwe) { // JWE payload can never be empty:
-                String msg = "Encrypted JWTs must have either 'claims' or a non-empty 'payload'.";
+                String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'.";
                 throw new IllegalStateException(msg);
             } else { //JWS or Unprotected JWT payloads can be empty
-                payload = Bytes.EMPTY;
+                content = Bytes.EMPTY;
             }
         }
-        if (!Objects.isEmpty(payload) && !Collections.isEmpty(claims)) {
-            throw new IllegalStateException("Both 'payload' and 'claims' cannot both be specified. Choose either one.");
+        if (!Objects.isEmpty(content) && !Collections.isEmpty(claims)) {
+            throw new IllegalStateException("Both 'content' and 'claims' cannot both be specified. Choose either one.");
         }
 
         Header<?> header = ensureHeader();
@@ -396,24 +406,24 @@ public class DefaultJwtBuilder implements JwtBuilder {
             serializeToJsonWith(Services.loadFirst(Serializer.class));
         }
 
-        byte[] body = payload;
+        byte[] payload = content;
         if (!Collections.isEmpty(claims)) {
-            body = claimsSerializer.apply(claims);
+            payload = claimsSerializer.apply(claims);
         }
-        if (!Objects.isEmpty(body) && compressionCodec != null) {
-            body = compressionCodec.compress(body);
+        if (!Objects.isEmpty(payload) && compressionCodec != null) {
+            payload = compressionCodec.compress(payload);
             header.setCompressionAlgorithm(compressionCodec.getId());
         }
 
         if (jwe) {
             JweHeader jweHeader = header instanceof JweHeader ? (JweHeader) header : new DefaultJweHeader(header);
-            return encrypt(jweHeader, body);
+            return encrypt(jweHeader, payload);
         } else {
-            return compact(header, body);
+            return compact(header, payload);
         }
     }
 
-    private String compact(Header<?> header, byte[] body) {
+    private String compact(Header<?> header, byte[] payload) {
 
         Assert.stateNotNull(sigAlg, "SignatureAlgorithm is required."); // invariant
 
@@ -425,7 +435,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         byte[] headerBytes = headerSerializer.apply(header);
         String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
-        String base64UrlEncodedBody = base64UrlEncoder.encode(body);
+        String base64UrlEncodedBody = base64UrlEncoder.encode(payload);
 
         String jwt = base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
@@ -446,14 +456,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return jwt;
     }
 
-    private String encrypt(JweHeader header, byte[] body) {
+    private String encrypt(JweHeader header, byte[] payload) {
 
         Assert.stateNotNull(key, "Key is required."); // set by encryptWith*
         Assert.stateNotNull(enc, "Encryption algorithm is required."); // set by encryptWith*
         Assert.stateNotNull(encFunction, "Encryption function cannot be null.");
         Assert.stateNotNull(keyAlg, "KeyAlgorithm is required."); //set by encryptWith*
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
-        Assert.notEmpty(body, "JWE content bytes cannot be empty."); // JWE invariant (JWS can be empty however)
+        Assert.notEmpty(payload, "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
         KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, this.key, header, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
@@ -469,7 +479,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
-        AeadRequest encRequest = new DefaultAeadRequest(provider, secureRandom, body, cek, aad);
+        AeadRequest encRequest = new DefaultAeadRequest(provider, secureRandom, payload, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");

@@ -21,7 +21,7 @@ package io.jsonwebtoken;
  * known/expected for a particular use case.
  *
  * <p>All of the methods in this implementation throw exceptions: overridden methods represent
- * scenarios expected by calling code in known situations.  It would be unexpected to receive a JWS or JWT that did
+ * scenarios expected by calling code in known situations.  It would be unexpected to receive a JWT that did
  * not match parsing expectations, so all non-overridden methods throw exceptions to indicate that the JWT
  * input was unexpected.</p>
  *
@@ -30,25 +30,19 @@ package io.jsonwebtoken;
  */
 public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
-    /**
-     * Constructs a new instance, where all default method implementations throw an {@link UnsupportedJwtException}.
-     */
-    public JwtHandlerAdapter() {
-    }
-
     @Override
-    public T onPayloadJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
-        throw new UnsupportedJwtException("Unsigned plaintext JWTs are not supported.");
+    public T onContentJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
+        throw new UnsupportedJwtException("Unprotected content JWTs are not supported.");
     }
 
     @Override
     public T onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt) {
-        throw new UnsupportedJwtException("Unsigned Claims JWTs are not supported.");
+        throw new UnsupportedJwtException("Unprotected Claims JWTs are not supported.");
     }
 
     @Override
-    public T onPlaintextJws(Jws<byte[]> jws) {
-        throw new UnsupportedJwtException("Signed plaintext JWTs are not supported.");
+    public T onContentJws(Jws<byte[]> jws) {
+        throw new UnsupportedJwtException("Signed content JWTs are not supported.");
     }
 
     @Override
@@ -57,8 +51,8 @@ public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
     }
 
     @Override
-    public T onPlaintextJwe(Jwe<byte[]> jwe) {
-        throw new UnsupportedJwtException("Encrypted plaintext JWTs are not supported.");
+    public T onContentJwe(Jwe<byte[]> jwe) {
+        throw new UnsupportedJwtException("Encrypted content JWTs are not supported.");
     }
 
     @Override

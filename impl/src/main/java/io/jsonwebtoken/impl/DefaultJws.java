@@ -19,11 +19,11 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.lang.Objects;
 
-public class DefaultJws<B> extends DefaultJwt<JwsHeader, B> implements Jws<B> {
+public class DefaultJws<P> extends DefaultJwt<JwsHeader, P> implements Jws<P> {
 
     private final String signature;
 
-    public DefaultJws(JwsHeader header, B body, String signature) {
+    public DefaultJws(JwsHeader header, P body, String signature) {
         super(header, body);
         this.signature = signature;
     }
@@ -34,8 +34,8 @@ public class DefaultJws<B> extends DefaultJwt<JwsHeader, B> implements Jws<B> {
     }
 
     @Override
-    public String toString() {
-        return super.toString() + ",signature=" + signature;
+    protected StringBuilder toStringBuilder() {
+        return super.toStringBuilder().append(",signature=").append(signature);
     }
 
     @Override
@@ -53,6 +53,6 @@ public class DefaultJws<B> extends DefaultJwt<JwsHeader, B> implements Jws<B> {
 
     @Override
     public int hashCode() {
-        return Objects.nullSafeHashCode(getHeader(), getBody(), signature);
+        return Objects.nullSafeHashCode(getHeader(), getPayload(), signature);
     }
 }

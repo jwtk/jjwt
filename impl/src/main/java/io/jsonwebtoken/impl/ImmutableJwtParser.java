@@ -156,8 +156,8 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<UnprotectedHeader, byte[]> parsePayloadJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parsePayloadJwt(jwt);
+    public Jwt<UnprotectedHeader, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parseContentJwt(jwt);
     }
 
     @Override
@@ -166,8 +166,8 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jws<byte[]> parsePayloadJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
-        return this.jwtParser.parsePayloadJws(jws);
+    public Jws<byte[]> parseContentJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return this.jwtParser.parseContentJws(jws);
     }
 
     @Override
@@ -176,8 +176,8 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwe<byte[]> parsePayloadJwe(String jwe) throws JwtException {
-        return this.jwtParser.parsePayloadJwe(jwe);
+    public Jwe<byte[]> parseContentJwe(String jwe) throws JwtException {
+        return this.jwtParser.parseContentJwe(jwe);
     }
 
     @Override

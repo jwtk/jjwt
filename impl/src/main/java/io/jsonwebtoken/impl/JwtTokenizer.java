@@ -16,7 +16,7 @@ public class JwtTokenizer {
         Assert.hasText(jwt, "Argument cannot be null or empty.");
 
         String protectedHeader = ""; //Both JWS and JWE
-        String body = ""; //JWS Payload or JWE Ciphertext
+        String body = ""; //JWS payload or JWE Ciphertext
         String encryptedKey = ""; //JWE only
         String iv = ""; //JWE only
         String digest; //JWS Signature or JWE AAD Tag

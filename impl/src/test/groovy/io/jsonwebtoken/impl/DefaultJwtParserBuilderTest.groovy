@@ -112,7 +112,7 @@ class DefaultJwtParserBuilderTest {
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
 
-        assertEquals 'bar', p.setSigningKey(key).build().parseClaimsJws(jws).getBody().get('foo')
+        assertEquals 'bar', p.setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test

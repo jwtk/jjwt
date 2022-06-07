@@ -34,19 +34,22 @@
 
 
 * JWTs that do not contain JSON Claims now have a body type of `byte[]` instead of `String` (that is, `Jws<byte[]>`
-  instead of `Jws<String>`).  This is because JWTs, along with the `cty` (Content Type) header, are capable of
+  instead of `Jws<String>`).  This is because JWTs, when used with the `cty` (Content Type) header, are capable of
   handling _any_ type of payload, not just Strings. The previous JJWT releases never accounted for this, and now the
   API accurately reflects the JWT RFC specification payload capabilities. Additionally, the name of `plaintext` has
-  been changed to `payload` in method names and JavaDoc to accurately reflect the JWT specifications' taxonomy. This
+  been changed to `content` in method names and JavaDoc to accurately reflect this taxonomy. This
   change has impacted the following JJWT APIs:
+
+  * The `JwtBuilder`'s `setPayload(String)` method has been deprecated in favor of two new methods:
+    `setContent(byte[])` and `setContent(byte[], String contentType)`.
 
   * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
     `Jws&lt;String&gt; parsePlaintextJws(String plaintextJws)` methods have been changed to
-    `Jwt<UnprotectedHeader, byte[]> parsePayloadJwt(String plaintextJwt)` and
-    `Jws<byte[]> parsePayloadJws(String plaintextJws)` respectively.
+    `Jwt<UnprotectedHeader, byte[]> parseContentJwt(String plaintextJwt)` and
+    `Jws<byte[]> parseContentJws(String plaintextJws)` respectively.
 
   * `JwtHandler`'s `onPlaintextJwt(String)` and `onPlaintextJws(String)` methods have been changed to
-    `onPayloadJwt(byte[])` and `onPayloadJws(byte[])` respectively.
+    `onContentJwt(byte[])` and `onContentJws(byte[])` respectively.
 
   * `io.jsonwebtoken.JwtHandlerAdapter` has been changed to reflect the above-mentioned name and `String`-to-`byte[]` 
     argument changes, as well adding the `abstract` modifier.  This class was never intended

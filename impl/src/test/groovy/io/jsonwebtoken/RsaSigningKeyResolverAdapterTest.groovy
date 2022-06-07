@@ -35,7 +35,7 @@ class RsaSigningKeyResolverAdapterTest {
         Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(pair.public).build().parseClaimsJws(compact)
 
         try {
-            new SigningKeyResolverAdapter().resolveSigningKey(jws.header, jws.body)
+            new SigningKeyResolverAdapter().resolveSigningKey(jws.header, jws.payload)
             fail()
         } catch (IllegalArgumentException iae) {
             assertEquals "The default resolveSigningKey(JwsHeader, Claims) implementation cannot be used for asymmetric key algorithms (RSA, Elliptic Curve).  Override the resolveSigningKey(JwsHeader, Claims) method instead and return a Key instance appropriate for the RS256 algorithm.", iae.message

@@ -41,6 +41,7 @@ public interface Header<T extends Header<T>> extends Map<String, Object> {
 
     /**
      * JWT {@code Type} (typ) value: <code>"JWT"</code>
+     *
      * @deprecated since JJWT_RELEASE_VERSION - this constant is never used within the JJWT codebase.
      */
     @Deprecated
@@ -79,16 +80,16 @@ public interface Header<T extends Header<T>> extends Map<String, Object> {
     String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
     /**
-     * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
-     * <code>typ</code></a> (type) header value or {@code null} if not present.
+     * Returns the <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-5.1">
+     * <code>typ</code> (Type)</a> header value or {@code null} if not present.
      *
      * @return the {@code typ} header value or {@code null} if not present.
      */
     String getType();
 
     /**
-     * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.1">
-     * <code>typ</code></a> (Type) header value.  A {@code null} value will remove the property from the JSON map.
+     * Sets the JWT <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-5.1">
+     * <code>typ</code> (Type)</a> header value.  A {@code null} value will remove the property from the JSON map.
      *
      * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
      * @return the {@code Header} instance for method chaining.
@@ -96,35 +97,51 @@ public interface Header<T extends Header<T>> extends Map<String, Object> {
     T setType(String typ);
 
     /**
-     * Returns the <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.2">
-     * <code>cty</code></a> (Content Type) header value or {@code null} if not present.
+     * Returns the <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10">
+     * <code>cty</code> (Content Type)</a> header value or {@code null} if not present.
      *
-     * <p>In the normal case where nested signing or encryption operations are not employed (i.e. a compact
-     * serialization JWT), the use of this header parameter is NOT RECOMMENDED.  In the case that nested
-     * signing or encryption is employed, this Header Parameter MUST be present; in this case, the value MUST be
-     * {@code JWT}, to indicate that a Nested JWT is carried in this JWT.  While media type names are not
-     * case-sensitive, it is RECOMMENDED that {@code JWT} always be spelled using uppercase characters for
-     * compatibility with legacy implementations.  See
-     * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#appendix-A.2">JWT Appendix A.2</a> for
-     * an example of a Nested JWT.</p>
+     * <p>The <code>cty</code> (Content Type) Header Parameter is used by applications to declare the
+     * <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">IANA MediaType</a> of the content
+     * (the payload).  This is intended for use by the application when more than
+     * one kind of object could be present in the Payload; the application can use this value to disambiguate among
+     * the different kinds of objects that might be present.  It will typically not be used by applications when
+     * the kind of object is already known.  This parameter is ignored by JWT implementations (like JJWT); any
+     * processing of this parameter is performed by the JWS application.  Use of this Header Parameter is OPTIONAL.</p>
+     *
+     * <p>To keep messages compact in common situations, it is RECOMMENDED that producers omit an
+     * <b><code>application/</code></b> prefix of a media type value in a {@code cty} Header Parameter when
+     * no other '<b>/</b>' appears in the media type value.  A recipient using the media type value <em>MUST</em>
+     * treat it as if <b><code>application/</code></b> were prepended to any {@code cty} value not containing a
+     * '<b>/</b>'. For instance, a {@code cty} value of <b><code>example</code></b> <em>SHOULD</em> be used to
+     * represent the <b><code>application/example</code></b> media type, whereas the media type
+     * <b><code>application/example;part=&quot;1/2&quot;</code></b> cannot be shortened to
+     * <b><code>example;part=&quot;1/2&quot;</code></b>.</p>
      *
      * @return the {@code typ} header parameter value or {@code null} if not present.
      */
     String getContentType();
 
     /**
-     * Sets the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5.2">
-     * <code>cty</code></a> (Content Type) header parameter value.  A {@code null} value will remove the property from
+     * Sets the JWT <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10">
+     * <code>cty</code> (Content Type)</a> header parameter value.  A {@code null} value will remove the property from
      * the JSON map.
      *
-     * <p>In the normal case where nested signing or encryption operations are not employed (i.e. a compact
-     * serialization JWT), the use of this header parameter is NOT RECOMMENDED.  In the case that nested
-     * signing or encryption is employed, this Header Parameter MUST be present; in this case, the value MUST be
-     * {@code JWT}, to indicate that a Nested JWT is carried in this JWT.  While media type names are not
-     * case-sensitive, it is RECOMMENDED that {@code JWT} always be spelled using uppercase characters for
-     * compatibility with legacy implementations.  See
-     * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#appendix-A.2">JWT Appendix A.2</a> for
-     * an example of a Nested JWT.</p>
+     * <p>The <code>cty</code> (Content Type) Header Parameter is used by applications to declare the
+     * <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">IANA MediaType</a> of the content
+     * (the payload).  This is intended for use by the application when more than
+     * one kind of object could be present in the Payload; the application can use this value to disambiguate among
+     * the different kinds of objects that might be present.  It will typically not be used by applications when
+     * the kind of object is already known.  This parameter is ignored by JWT implementations (like JJWT); any
+     * processing of this parameter is performed by the JWS application.  Use of this Header Parameter is OPTIONAL.</p>
+     *
+     * <p>To keep messages compact in common situations, it is RECOMMENDED that producers omit an
+     * <b><code>application/</code></b> prefix of a media type value in a {@code cty} Header Parameter when
+     * no other '<b>/</b>' appears in the media type value.  A recipient using the media type value <em>MUST</em>
+     * treat it as if <b><code>application/</code></b> were prepended to any {@code cty} value not containing a
+     * '<b>/</b>'. For instance, a {@code cty} value of <b><code>example</code></b> <em>SHOULD</em> be used to
+     * represent the <b><code>application/example</code></b> media type, whereas the media type
+     * <b><code>application/example;part=&quot;1/2&quot;</code></b> cannot be shortened to
+     * <b><code>example;part=&quot;1/2&quot;</code></b>.</p>
      *
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
      * @return the {@code Header} instance for method chaining.

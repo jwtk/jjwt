@@ -802,43 +802,43 @@ public class DefaultJwtParser implements JwtParser {
 
         if (jwt instanceof Jws) {
             Jws<?> jws = (Jws<?>) jwt;
-            Object body = jws.getBody();
+            Object body = jws.getPayload();
             if (body instanceof Claims) {
                 return handler.onClaimsJws((Jws<Claims>) jws);
             } else {
-                return handler.onPlaintextJws((Jws<byte[]>) jws);
+                return handler.onContentJws((Jws<byte[]>) jws);
             }
         } else if (jwt instanceof Jwe) {
             Jwe<?> jwe = (Jwe<?>) jwt;
-            Object body = jwe.getBody();
+            Object body = jwe.getPayload();
             if (body instanceof Claims) {
                 return handler.onClaimsJwe((Jwe<Claims>) jwe);
             } else {
-                return handler.onPlaintextJwe((Jwe<byte[]>) jwe);
+                return handler.onContentJwe((Jwe<byte[]>) jwe);
             }
         } else {
-            Object body = jwt.getBody();
+            Object body = jwt.getPayload();
             if (body instanceof Claims) {
                 return handler.onClaimsJwt((Jwt<UnprotectedHeader, Claims>) jwt);
             } else {
-                return handler.onPayloadJwt((Jwt<UnprotectedHeader, byte[]>) jwt);
+                return handler.onContentJwt((Jwt<UnprotectedHeader, byte[]>) jwt);
             }
         }
     }
 
     @Override
-    public Jwt<UnprotectedHeader, byte[]> parsePayloadJwt(String plaintextJwt) {
-        return parse(plaintextJwt, new JwtHandlerAdapter<Jwt<UnprotectedHeader, byte[]>>() {
+    public Jwt<UnprotectedHeader, byte[]> parseContentJwt(String compact) {
+        return parse(compact, new JwtHandlerAdapter<Jwt<UnprotectedHeader, byte[]>>() {
             @Override
-            public Jwt<UnprotectedHeader, byte[]> onPayloadJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
+            public Jwt<UnprotectedHeader, byte[]> onContentJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
                 return jwt;
             }
         });
     }
 
     @Override
-    public Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String claimsJwt) {
-        return parse(claimsJwt, new JwtHandlerAdapter<Jwt<UnprotectedHeader, Claims>>() {
+    public Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String compact) {
+        return parse(compact, new JwtHandlerAdapter<Jwt<UnprotectedHeader, Claims>>() {
             @Override
             public Jwt<UnprotectedHeader, Claims> onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt) {
                 return jwt;
@@ -847,18 +847,18 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jws<byte[]> parsePayloadJws(String plaintextJws) {
-        return parse(plaintextJws, new JwtHandlerAdapter<Jws<byte[]>>() {
+    public Jws<byte[]> parseContentJws(String compact) {
+        return parse(compact, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
-            public Jws<byte[]> onPlaintextJws(Jws<byte[]> jws) {
+            public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
                 return jws;
             }
         });
     }
 
     @Override
-    public Jws<Claims> parseClaimsJws(String claimsJws) {
-        return parse(claimsJws, new JwtHandlerAdapter<Jws<Claims>>() {
+    public Jws<Claims> parseClaimsJws(String compact) {
+        return parse(compact, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
                 return jws;
@@ -867,18 +867,18 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwe<byte[]> parsePayloadJwe(String plaintextJwe) throws JwtException {
-        return parse(plaintextJwe, new JwtHandlerAdapter<Jwe<byte[]>>() {
+    public Jwe<byte[]> parseContentJwe(String compact) throws JwtException {
+        return parse(compact, new JwtHandlerAdapter<Jwe<byte[]>>() {
             @Override
-            public Jwe<byte[]> onPlaintextJwe(Jwe<byte[]> jwe) {
+            public Jwe<byte[]> onContentJwe(Jwe<byte[]> jwe) {
                 return jwe;
             }
         });
     }
 
     @Override
-    public Jwe<Claims> parseClaimsJwe(String claimsJwe) throws JwtException {
-        return parse(claimsJwe, new JwtHandlerAdapter<Jwe<Claims>>() {
+    public Jwe<Claims> parseClaimsJwe(String compact) throws JwtException {
+        return parse(compact, new JwtHandlerAdapter<Jwe<Claims>>() {
             @Override
             public Jwe<Claims> onClaimsJwe(Jwe<Claims> jwe) {
                 return jwe;

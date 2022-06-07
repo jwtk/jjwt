@@ -209,10 +209,10 @@ class RFC7520Section4Test {
         assertEquals FIGURE_13, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().verifyWith(jwk.toPublicJwk().toKey()).build().parsePayloadJws(result)
+        def parsed = Jwts.parserBuilder().verifyWith(jwk.toPublicJwk().toKey()).build().parseContentJws(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
-        assertEquals FIGURE_7, utf8(parsed.body)
+        assertEquals FIGURE_7, utf8(parsed.payload)
     }
 
     @Test
@@ -255,11 +255,11 @@ class RFC7520Section4Test {
         // the signature to guarantee a round trip works as expected:
         def parsed = Jwts.parserBuilder()
                 .verifyWith(jwk.toPublicJwk().toKey())
-                .build().parsePayloadJws(result)
+                .build().parseContentJws(result)
 
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals kid, parsed.header.getKeyId()
-        assertEquals FIGURE_7, utf8(parsed.body)
+        assertEquals FIGURE_7, utf8(parsed.payload)
     }
 
     @Test
@@ -300,11 +300,11 @@ class RFC7520Section4Test {
         // the signature to guarantee a round trip works as expected:
         def parsed = Jwts.parserBuilder()
                 .verifyWith(jwk.toPublicJwk().toKey())
-                .build().parsePayloadJws(result)
+                .build().parseContentJws(result)
 
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
-        assertEquals FIGURE_7, utf8(parsed.body)
+        assertEquals FIGURE_7, utf8(parsed.payload)
     }
 
     @Test
@@ -339,10 +339,10 @@ class RFC7520Section4Test {
         assertEquals FIGURE_34, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().verifyWith(key).build().parsePayloadJws(result)
+        def parsed = Jwts.parserBuilder().verifyWith(key).build().parseContentJws(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
-        assertEquals FIGURE_7, utf8(parsed.body)
+        assertEquals FIGURE_7, utf8(parsed.payload)
     }
 
     @Test
@@ -380,13 +380,13 @@ class RFC7520Section4Test {
         assertEquals FIGURE_41, detached
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().verifyWith(key).build().parsePayloadJws(result)
+        def parsed = Jwts.parserBuilder().verifyWith(key).build().parseContentJws(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
-        assertEquals FIGURE_7, utf8(parsed.body)
+        assertEquals FIGURE_7, utf8(parsed.payload)
     }
 
-    // void testSection4_6() {}  we don't support the non-compact JSON serialization yet
-    // void testSection4_7() {}  we don't support the non-compact JSON serialization yet
-    // void testSection4_8() {}  we don't support the non-compact JSON serialization yet
+    // void testSection4_6() {}  we don't support non-compact JSON serialization yet
+    // void testSection4_7() {}  we don't support non-compact JSON serialization yet
+    // void testSection4_8() {}  we don't support non-compact JSON serialization yet
 }

@@ -18,44 +18,44 @@ public final class Bytes {
 
     public static byte[] toBytes(int i) {
         return new byte[]{
-            (byte) (i >>> 24),
-            (byte) (i >>> 16),
-            (byte) (i >>> 8),
-            (byte) i
+                (byte) (i >>> 24),
+                (byte) (i >>> 16),
+                (byte) (i >>> 8),
+                (byte) i
         };
     }
 
     public static byte[] toBytes(long l) {
         return new byte[]{
-            (byte) (l >>> 56),
-            (byte) (l >>> 48),
-            (byte) (l >>> 40),
-            (byte) (l >>> 32),
-            (byte) (l >>> 24),
-            (byte) (l >>> 16),
-            (byte) (l >>> 8),
-            (byte) l
+                (byte) (l >>> 56),
+                (byte) (l >>> 48),
+                (byte) (l >>> 40),
+                (byte) (l >>> 32),
+                (byte) (l >>> 24),
+                (byte) (l >>> 16),
+                (byte) (l >>> 8),
+                (byte) l
         };
     }
 
     public static long toLong(byte[] bytes) {
         Assert.isTrue(Arrays.length(bytes) == LONG_BYTE_LENGTH, LONG_REQD_MSG);
         return ((bytes[0] & 0xFFL) << 56) |
-            ((bytes[1] & 0xFFL) << 48) |
-            ((bytes[2] & 0xFFL) << 40) |
-            ((bytes[3] & 0xFFL) << 32) |
-            ((bytes[4] & 0xFFL) << 24) |
-            ((bytes[5] & 0xFFL) << 16) |
-            ((bytes[6] & 0xFFL) << 8) |
-            (bytes[7] & 0xFFL);
+                ((bytes[1] & 0xFFL) << 48) |
+                ((bytes[2] & 0xFFL) << 40) |
+                ((bytes[3] & 0xFFL) << 32) |
+                ((bytes[4] & 0xFFL) << 24) |
+                ((bytes[5] & 0xFFL) << 16) |
+                ((bytes[6] & 0xFFL) << 8) |
+                (bytes[7] & 0xFFL);
     }
 
     public static int toInt(byte[] bytes) {
         Assert.isTrue(Arrays.length(bytes) == INT_BYTE_LENGTH, INT_REQD_MSG);
         return ((bytes[0] & 0xFF) << 24) |
-            ((bytes[1] & 0xFF) << 16) |
-            ((bytes[2] & 0xFF) << 8) |
-            (bytes[3] & 0xFF);
+                ((bytes[1] & 0xFF) << 16) |
+                ((bytes[2] & 0xFF) << 8) |
+                (bytes[3] & 0xFF);
     }
 
     public static byte[] concat(byte[]... arrays) {

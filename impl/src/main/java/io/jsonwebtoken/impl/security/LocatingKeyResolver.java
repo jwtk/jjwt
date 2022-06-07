@@ -23,7 +23,7 @@ public class LocatingKeyResolver implements SigningKeyResolver {
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, byte[] payload) {
+    public Key resolveSigningKey(JwsHeader header, byte[] content) {
         return this.locator.locate(header);
     }
 }

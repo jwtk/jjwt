@@ -43,7 +43,7 @@ class Issue542Test {
             PublicKey key = TestCertificates.readTestPublicKey(alg)
             String jws = JWS_0_10_7_VALUES[alg]
             def token = Jwts.parser().setSigningKey(key).parseClaimsJws(jws)
-            assert 'joe' == token.body.getIssuer()
+            assert 'joe' == token.payload.getIssuer()
         }
     }
 
@@ -56,7 +56,7 @@ class Issue542Test {
         for (alg in algs) {
             PrivateKey privateKey = TestCertificates.readTestPrivateKey(alg)
             String jws = Jwts.builder().setIssuer('joe').signWith(privateKey, alg).compact()
-            println "private static String ${alg.id()}_0_10_7 = '$jws'"
+            println "private static String ${alg.getId()}_0_10_7 = '$jws'"
         }
     }
 }

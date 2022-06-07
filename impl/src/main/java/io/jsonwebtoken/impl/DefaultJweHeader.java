@@ -38,7 +38,9 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     public static final Field<byte[]> TAG = Fields.bytes("tag", "Authentication Tag")
             .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 128)).build();
 
-    public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input").build();
+    // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1 says at least 64 bits (8 bytes) is required:
+    public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input")
+            .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 64, false)).build();
     public static final Field<Integer> P2C = Fields.builder(Integer.class)
             .setConverter(PositiveIntegerConverter.INSTANCE).setId("p2c").setName("PBES2 Count").build();
 

@@ -104,54 +104,96 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setHeaderParam(String name, Object value);
 
     /**
-     * Sets the JWT payload to the string's UTF-8-encoded bytes.
+     * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
+     * {@link Header#getContentType() contentType} header value so the JWT recipient may inspect that value to
+     * determine how to convert the byte array to the final data type as desired. In this case, consider using
+     * {@link #setContent(byte[], String)} instead.
      *
      * <p>This is a convenience method that is effectively the same as:</p>
      * <blockquote><pre>
-     * {@link #setPayload(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
+     * {@link #setContent(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
      *
-     * <p>If you want the JWT body to be JSON, use the
+     * <p>If you want the JWT payload to be JSON, use the
      * {@link #setClaims(Claims)} or {@link #setClaims(java.util.Map)} methods instead.</p>
      *
      * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
-     * @param payload the plaintext (non-JSON) string that will be the body of the JWT.
+     * @param payload the string used to set UTF-8-encoded bytes as the JWT payload.
      * @return the builder for method chaining.
+     * @see #setContent(byte[])
+     * @see #setContent(byte[], String)
+     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #setContent(byte[])} or {@link #setContent(byte[], String)}
+     * because both Claims and Content are technically 'payloads', so this method name is misleading.
      */
+    @Deprecated
     JwtBuilder setPayload(String payload);
 
     /**
-     * Sets the JWT payload as byte array, which will be Base64Url-encoded during {@link #compact() compaction}.
-     * If you want the JWT body to be JSON, use the {@link #setClaims(Claims)} or
-     * {@link #setClaims(java.util.Map)} methods instead.
+     * Sets the JWT payload to be the specified content byte array.
      *
-     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <p><b>Content Type Recommendation</b></p>
      *
-     * @param payload the (non-JSON) byte array that will be the body of the JWT.
+     * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use
+     * the given byte array without additional metadata, it is strongly recommended to use the
+     * {@link #setContent(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
+     * can inspect the {@code cty} header to know how to handle the byte array without ambiguity.</p>
+     *
+     * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     *
+     * @param content the content byte array to use as the JWT payload
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setPayload(byte[] payload);
+    JwtBuilder setContent(byte[] content);
 
     /**
-     * Sets the JWT payload to be a JSON Claims instance.  If you do not want the JWT body to be JSON and instead want
-     * it to be a plaintext string, use the {@link #setPayload(String)} method instead.
+     * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
+     * {@link Header#setContentType(String) contentType} header value to a compact {@code cty} media type
+     * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
+     * {@code cty} value to determine how to convert the byte array to the final content type as desired.
+     *
+     * <p><b>Compact Media Type Identifier</b></p>
+     *
+     * <p>As a convenience, this method will automatically trim any <code><b>application/</b></code> prefix from the
+     * {@code cty} string if possible according to the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10">JWT specification recommendations</a>.</p>
+     *
+     * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
+     * method - instead call {@link #setContent(byte[])} and {@link Header#setContentType(String)} independently.</p>
+     *
+     * <p>If you want the JWT payload to be JSON claims, use the {@link #setClaims(Claims)} or
+     * {@link #setClaims(java.util.Map)} methods instead.</p>
+     *
+     * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     *
+     * @param content the content byte array that will be the JWT payload.  Cannot be null or empty.
+     * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if either {@code payload} or {@code cty} are null or empty.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder setContent(byte[] content, String cty) throws IllegalArgumentException;
+
+    /**
+     * Sets the JWT payload to be a JSON Claims instance.  If you do not want the JWT payload to be JSON claims and
+     * instead want it to be a byte array representing any type of content, use the {@link #setContent(byte[])}
+     * method instead.
      *
      * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
-     * @param claims the JWT claims to be set as the JWT body.
+     * @param claims the JWT claims to be set as the JWT payload.
      * @return the builder for method chaining.
      */
     JwtBuilder setClaims(Claims claims);
 
     /**
      * Sets the JWT payload to be a JSON Claims instance populated by the specified name/value pairs.  If you do not
-     * want the JWT body to be JSON and instead want it to be a plaintext string, use the {@link #setPayload(String)}
-     * method instead.
+     * want the JWT payload to be JSON claims and instead want it to be a byte array for any content, use the
+     * {@link #setContent(byte[])} or {@link #setContent(byte[], String)} methods instead.
      *
-     * <p>The payload* and claims* properties are mutually exclusive - only one of the two may be used.</p>
+     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
-     * @param claims the JWT claims to be set as the JWT body.
+     * @param claims the JWT Claims to be set as the JWT payload.
      * @return the builder for method chaining.
      */
     JwtBuilder setClaims(Map<String, ?> claims);
@@ -162,7 +204,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
-     * @param claims the JWT claims to be added to the JWT body.
+     * @param claims the JWT Claims to be added to the JWT payload.
      * @return the builder for method chaining.
      * @since 0.8
      */
@@ -172,7 +214,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">
      * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setIssuer(String) issuer} field with the specified value.  This allows you to write
      * code like this:</p>
      *
@@ -199,7 +241,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.2">
      * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setSubject(String) subject} field with the specified value.  This allows you to write
      * code like this:</p>
      *
@@ -226,7 +268,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
      * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setAudience(String) audience} field with the specified value.  This allows you to write
      * code like this:</p>
      *
@@ -255,7 +297,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setExpiration(java.util.Date) expiration} field with the specified value.  This allows
      * you to write code like this:</p>
      *
@@ -284,7 +326,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setNotBefore(java.util.Date) notBefore} field with the specified value.  This allows
      * you to write code like this:</p>
      *
@@ -313,7 +355,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>The value is the timestamp when the JWT was created.</p>
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setIssuedAt(java.util.Date) issuedAt} field with the specified value.  This allows
      * you to write code like this:</p>
      *
@@ -344,7 +386,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * manner that ensures that there is a negligible probability that the same value will be accidentally
      * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.</p>
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
      * the Claims {@link Claims#setId(String) id} field with the specified value.  This allows
      * you to write code like this:</p>
      *
@@ -370,7 +412,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Sets a custom JWT Claims parameter value.  A {@code null} value will remove the property from the Claims.
      *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT body and then set the
+     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set the
      * named property on the Claims instance using the Claims {@link Claims#put(Object, Object) put} method. This allows
      * you to write code like this:</p>
      *
@@ -703,7 +745,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     <K extends Key> JwtBuilder encryptWith(AeadAlgorithm enc, K key, KeyAlgorithm<K, ?> keyAlg);
 
     /**
-     * Compresses the JWT body using the specified {@link CompressionCodec}.
+     * Compresses the JWT payload using the specified {@link CompressionCodec}.
      *
      * <p>If your compact JWTs are large, and you want to reduce their total size during network transmission, this
      * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
@@ -741,7 +783,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Performs object-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
-     * JWT/JWS/JWT headers and claims Maps to JSON strings as required by the JWT specification.
+     * JWT/JWS/JWE headers and claims Maps to JSON strings as required by the JWT specification.
      *
      * <p>If this method is not called, JJWT will use whatever serializer it can find at runtime, checking for the
      * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found

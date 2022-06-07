@@ -75,13 +75,13 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, byte[] payload) {
+    public Key resolveSigningKey(JwsHeader header, byte[] content) {
         SignatureAlgorithm alg = SignatureAlgorithm.forName(header.getAlgorithm());
         Assert.isTrue(alg.isHmac(), "The default resolveSigningKey(JwsHeader, byte[]) implementation cannot " +
                 "be used for asymmetric key algorithms (RSA, Elliptic Curve).  " +
                 "Override the resolveSigningKey(JwsHeader, byte[]) method instead and return a " +
                 "Key instance appropriate for the " + alg.name() + " algorithm.");
-        byte[] keyBytes = resolveSigningKeyBytes(header, payload);
+        byte[] keyBytes = resolveSigningKeyBytes(header, content);
         return new SecretKeySpec(keyBytes, alg.getJcaName());
     }
 
@@ -106,17 +106,17 @@ public class SigningKeyResolverAdapter implements SigningKeyResolver {
 
     /**
      * Convenience method invoked by {@link #resolveSigningKey(JwsHeader, byte[])} that obtains the necessary signing
-     * key bytes.  This implementation simply throws an exception: if the JWS parsed is a payload JWS, you must
+     * key bytes.  This implementation simply throws an exception: if the JWS parsed is a content JWS, you must
      * override this method or the {@link #resolveSigningKey(JwsHeader, byte[])} method instead.
      *
      * @param header  the parsed {@link JwsHeader}
-     * @param payload the byte array payload
+     * @param content the byte array payload
      * @return the signing key bytes to use to verify the JWS signature.
      */
     @SuppressWarnings("unused")
-    public byte[] resolveSigningKeyBytes(JwsHeader header, byte[] payload) {
+    public byte[] resolveSigningKeyBytes(JwsHeader header, byte[] content) {
         throw new UnsupportedJwtException("The specified SigningKeyResolver implementation does not support " +
-                "payload JWS signing key resolution.  Consider overriding either the " +
+                "content JWS signing key resolution.  Consider overriding either the " +
                 "resolveSigningKey(JwsHeader, byte[]) method or, for HMAC algorithms, the " +
                 "resolveSigningKeyBytes(JwsHeader, byte[]) method.");
     }

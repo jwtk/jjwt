@@ -31,12 +31,12 @@ class JwtHandlerAdapterTest {
     }
 
     @Test
-    void testOnPlaintextJwt() {
+    void testOnContentJwt() {
         try {
-            handler.onPayloadJwt(null)
+            handler.onContentJwt(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned plaintext JWTs are not supported.'
+            assertEquals 'Unprotected content JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -46,17 +46,17 @@ class JwtHandlerAdapterTest {
             handler.onClaimsJwt(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unprotected Claims JWTs are not supported.', e.getMessage()
         }
     }
 
     @Test
-    void testOnPlaintextJws() {
+    void testOnContentJws() {
         try {
-            handler.onPlaintextJws(null)
+            handler.onContentJws(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed plaintext JWTs are not supported.'
+            assertEquals 'Signed content JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -66,17 +66,17 @@ class JwtHandlerAdapterTest {
             handler.onClaimsJws(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Signed Claims JWTs are not supported.'
+            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
         }
     }
 
     @Test
-    void testOnPlaintextJwe() {
+    void testOnContentJwe() {
         try {
-            handler.onPlaintextJwe(null)
+            handler.onContentJwe(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Encrypted plaintext JWTs are not supported.'
+            assertEquals 'Encrypted content JWTs are not supported.', e.getMessage()
         }
     }
 
@@ -86,7 +86,7 @@ class JwtHandlerAdapterTest {
             handler.onClaimsJwe(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals e.getMessage(), 'Encrypted Claims JWTs are not supported.'
+            assertEquals 'Encrypted Claims JWTs are not supported.', e.getMessage()
         }
     }
 }

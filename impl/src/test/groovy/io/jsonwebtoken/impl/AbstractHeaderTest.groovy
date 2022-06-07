@@ -39,7 +39,8 @@ class AbstractHeaderTest {
     @Test
     void testContentType() {
         header.setContentType('bar')
-        assertEquals header.getContentType(), 'bar'
+        assertEquals 'bar', header.getContentType()
+        assertEquals 'bar', header.get('cty')
     }
 
     @Test

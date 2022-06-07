@@ -2,15 +2,16 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 
-public class DefaultJwe<B> extends DefaultJwt<JweHeader, B> implements Jwe<B> {
+public class DefaultJwe<P> extends DefaultJwt<JweHeader, P> implements Jwe<P> {
 
     private final byte[] iv;
     private final byte[] aadTag;
 
-    public DefaultJwe(JweHeader header, B body, byte[] iv, byte[] aadTag) {
+    public DefaultJwe(JweHeader header, P body, byte[] iv, byte[] aadTag) {
         super(header, body);
         this.iv = Assert.notEmpty(iv, "Initialization vector cannot be null or empty.");
         this.aadTag = Assert.notEmpty(aadTag, "AAD tag cannot be null or empty.");
@@ -27,21 +28,29 @@ public class DefaultJwe<B> extends DefaultJwt<JweHeader, B> implements Jwe<B> {
     }
 
     @Override
+    protected StringBuilder toStringBuilder() {
+        StringBuilder sb = super.toStringBuilder();
+        sb.append(",iv=").append(Encoders.BASE64URL.encode(this.iv));
+        sb.append(",tag=").append(Encoders.BASE64URL.encode(this.aadTag));
+        return sb;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
         if (obj instanceof Jwe) {
-            Jwe<?> jwe = (Jwe<?>)obj;
+            Jwe<?> jwe = (Jwe<?>) obj;
             return super.equals(jwe) &&
-                Objects.nullSafeEquals(iv, jwe.getInitializationVector()) &&
-                Objects.nullSafeEquals(aadTag, jwe.getAadTag());
+                    Objects.nullSafeEquals(iv, jwe.getInitializationVector()) &&
+                    Objects.nullSafeEquals(aadTag, jwe.getAadTag());
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.nullSafeHashCode(getHeader(), getBody(), iv, aadTag);
+        return Objects.nullSafeHashCode(getHeader(), getPayload(), iv, aadTag);
     }
 }

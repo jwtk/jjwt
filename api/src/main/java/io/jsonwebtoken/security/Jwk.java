@@ -25,8 +25,8 @@ import java.util.Set;
 /**
  * A JWK is an immutable set of name/value pairs that represent a cryptographic key as defined by
  * <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}
- * interface represents JWK properties accessible for any JWK.  Subtypes will have additional JWK properties
- * specific to different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
+ * interface represents properties common to all JWKs.  Subtypes will have additional properties specific to
+ * different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
  *
  * <p><b>Immutability</b></p>
  *
@@ -34,8 +34,8 @@ import java.util.Set;
  * {@link Map} interface purely out of convenience: to allow easy marshalling to JSON as well as name/value
  * pair access and key/value iteration, and other conveniences provided by the Map interface.  Attempting to call any of
  * the {@link Map} interface's mutation methods however (such as {@link Map#put(Object, Object) put},
- * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will result in an
- * {@link UnsupportedOperationException} being thrown.</p>
+ * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
+ * {@link UnsupportedOperationException}.</p>
  *
  * <p><b>Identification</b></p>
  *
@@ -62,7 +62,7 @@ import java.util.Set;
  * &lt;redacted&gt;</pre></blockquote>
  * <p>instead of the actual/raw {@code k} value.</p>
  *
- * <p>Similarly, if the attempting to print the entire JWK:</p>
+ * <p>Similarly, if attempting to print the entire JWK:</p>
  * <blockquote><pre>
  * System.out.println(aSecretJwk);</pre></blockquote>
  * <p>You would see the following substring in the output:</p>
@@ -87,7 +87,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 
     /**
      * Returns the JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">{@code alg} (Algorithm) parameter</a> value
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">{@code alg} (Algorithm)</a> value
      * or {@code null} if not present.
      *
      * @return the JWK {@code alg} value or {@code null} if not present.

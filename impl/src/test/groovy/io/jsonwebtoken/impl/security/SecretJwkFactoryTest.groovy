@@ -30,6 +30,15 @@ class SecretJwkFactoryTest {
     }
 
     @Test
+    void testSignOpSetsKeyHmacSHA256() {
+        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk result = Jwks.builder().putAll(jwk).setOperations(["sign"] as Set<String>).build() as SecretJwk
+        assertNull result.getAlgorithm()
+        assertNull result.get('use')
+        assertEquals 'HmacSHA256', result.toKey().getAlgorithm()
+    }
+
+    @Test
     void testJwkHS384AlgSetsKeyJcaNameCorrectly() {
         SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS384).build()
         SecretJwk result = Jwks.builder().putAll(jwk).put('alg', 'HS384').build() as SecretJwk
@@ -37,9 +46,27 @@ class SecretJwkFactoryTest {
     }
 
     @Test
+    void testSignOpSetsKeyHmacSHA384() {
+        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS384).build()
+        SecretJwk result = Jwks.builder().putAll(jwk).setOperations(["sign"] as Set<String>).build() as SecretJwk
+        assertNull result.getAlgorithm()
+        assertNull result.get('use')
+        assertEquals 'HmacSHA384', result.toKey().getAlgorithm()
+    }
+
+    @Test
     void testJwkHS512AlgSetsKeyJcaNameCorrectly() {
         SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS512).build()
         SecretJwk result = Jwks.builder().putAll(jwk).put('alg', 'HS512').build() as SecretJwk
+        assertEquals 'HmacSHA512', result.toKey().getAlgorithm()
+    }
+
+    @Test
+    void testSignOpSetsKeyHmacSHA512() {
+        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS512).build()
+        SecretJwk result = Jwks.builder().putAll(jwk).setOperations(["sign"] as Set<String>).build() as SecretJwk
+        assertNull result.getAlgorithm()
+        assertNull result.get('use')
         assertEquals 'HmacSHA512', result.toKey().getAlgorithm()
     }
 

@@ -279,7 +279,6 @@ class RFC7517AppendixCTest {
                 return RFC_IV
             }
         }
-        //noinspection unused
         def alg = new Pbes2HsAkwAlgorithm(128) {
             @Override
             protected byte[] generateInputSalt(KeyRequest<? extends Key> request) {
@@ -318,8 +317,8 @@ class RFC7517AppendixCTest {
         assertEquals RFC_COMPACT_JWE, compact
 
         //ensure we can decrypt now:
-        Jwe<byte[]> jwe = Jwts.parserBuilder().decryptWith(key).build().parsePayloadJwe(compact)
+        Jwe<byte[]> jwe = Jwts.parserBuilder().decryptWith(key).build().parseContentJwe(compact)
 
-        assertEquals RFC_JWK_JSON, new String(jwe.getBody(), StandardCharsets.UTF_8)
+        assertEquals RFC_JWK_JSON, new String(jwe.getPayload(), StandardCharsets.UTF_8)
     }
 }

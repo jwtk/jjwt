@@ -17,7 +17,10 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.io.Encoders
 import org.junit.Test
+
+import java.nio.charset.StandardCharsets
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotEquals
@@ -26,9 +29,18 @@ class DefaultJwtTest {
 
     @Test
     void testToString() {
-        String compact = Jwts.builder().setHeaderParam('foo', 'bar').setAudience('jsmith').compact();
-        Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parseClaimsJwt(compact);
-        assertEquals 'header={foo=bar, alg=none},body={aud=jsmith}', jwt.toString()
+        String compact = Jwts.builder().setHeaderParam('foo', 'bar').setAudience('jsmith').compact()
+        Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parseClaimsJwt(compact)
+        assertEquals 'header={foo=bar, alg=none},payload={aud=jsmith}', jwt.toString()
+    }
+
+    @Test
+    void testByteArrayPayloadToString() {
+        byte[] bytes = 'hello JJWT'.getBytes(StandardCharsets.UTF_8)
+        String encoded = Encoders.BASE64URL.encode(bytes)
+        String compact = Jwts.builder().setHeaderParam('foo', 'bar').setContent(bytes).compact()
+        Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parseContentJwt(compact)
+        assertEquals "header={foo=bar, alg=none},payload=$encoded" as String, jwt.toString()
     }
 
     @Test
@@ -42,5 +54,18 @@ class DefaultJwtTest {
         assertEquals jwt2, jwt2
         assertEquals jwt1, jwt2
         assertEquals jwt1.hashCode(), jwt2.hashCode()
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testBodyAndPayloadSame() {
+        String compact = Jwts.builder().claim('foo', 'bar').compact()
+        def parser = Jwts.parserBuilder().enableUnsecuredJws().build()
+        def jwt1 = parser.parseClaimsJwt(compact)
+        def jwt2 = parser.parseClaimsJwt(compact)
+        assertEquals jwt1.getBody(), jwt1.getPayload()
+        assertEquals jwt2.getBody(), jwt2.getPayload()
+        assertEquals jwt1.getBody(), jwt2.getBody()
+        assertEquals jwt1.getPayload(), jwt2.getPayload()
     }
 }

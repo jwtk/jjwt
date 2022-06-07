@@ -120,7 +120,7 @@ class DeprecatedJwtsTest {
     }
 
     @Test
-    void testPlaintextJwtString() {
+    void testContentJwtString() {
 
         // Assert exact output per example at https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
 
@@ -141,7 +141,7 @@ class DeprecatedJwtsTest {
     }
 
     @Test
-    void testParsePlaintextToken() {
+    void testParseContentToken() {
 
         def claims = [iss: 'joe', exp: later(), 'http://example.com/is_root': true]
 
@@ -454,7 +454,7 @@ class DeprecatedJwtsTest {
         String compact = Jwts.builder().setPayload(payload).signWith(alg, key)
                 .compressWith(CompressionCodecs.DEFLATE).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).parsePayloadJws(compact)
+        def jws = Jwts.parser().setSigningKey(key).parseContentJws(compact)
 
         byte[] parsed = jws.body
 
@@ -581,7 +581,7 @@ class DeprecatedJwtsTest {
             Jwts.parserBuilder().enableUnsecuredJws().setSigningKey(key).build().parseClaimsJws(notSigned)
             fail('parseClaimsJws must fail for unsigned JWTs')
         } catch (UnsupportedJwtException expected) {
-            assertEquals expected.message, 'Unsigned Claims JWTs are not supported.'
+            assertEquals 'Unprotected Claims JWTs are not supported.', expected.message
         }
     }
 

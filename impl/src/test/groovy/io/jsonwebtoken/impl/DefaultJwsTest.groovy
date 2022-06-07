@@ -31,7 +31,7 @@ class DefaultJwsTest {
         def jws = new DefaultJws<String>(header, 'foo', 'sig')
 
         assertSame jws.getHeader(), header
-        assertEquals jws.getBody(), 'foo'
+        assertEquals jws.getPayload(), 'foo'
         assertEquals jws.getSignature(), 'sig'
     }
 
@@ -40,11 +40,11 @@ class DefaultJwsTest {
         //create random signing key for testing:
         def alg = SignatureAlgorithms.HS256
         def key = alg.keyBuilder().build()
-        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact();
+        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         int i = compact.lastIndexOf('.')
         String signature = compact.substring(i + 1)
-        def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
-        assertEquals 'header={alg=HS256},body={foo=bar},signature=' + signature, jws.toString()
+        def jws = Jwts.parserBuilder().verifyWith(key).build().parseClaimsJws(compact)
+        assertEquals 'header={alg=HS256},payload={foo=bar},signature=' + signature, jws.toString()
     }
 
     @Test
@@ -52,7 +52,7 @@ class DefaultJwsTest {
         def alg = SignatureAlgorithms.HS256
         def key = alg.keyBuilder().build()
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
-        def parser = Jwts.parserBuilder().setSigningKey(key).build()
+        def parser = Jwts.parserBuilder().verifyWith(key).build()
         def jws1 = parser.parseClaimsJws(compact)
         def jws2 = parser.parseClaimsJws(compact)
         assertNotEquals jws1, 'hello' as String
