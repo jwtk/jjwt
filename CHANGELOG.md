@@ -3,11 +3,11 @@
 ### JJWT_RELEASE_VERSION
 
 * The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of a new 
-  `io.jsonwebtoken.security.SignatureAlgorithm` interface.  Also, a new `io.jsonwebtoken.security.SignatureAlgorithms` 
-  static helper class enumerates all the standard JWA algorithms as expected, exactly like the old enum.  This change
-  was made because enums are a static concept by design and cannot support custom values: those who wanted to use custom
-  signature algorithms could not do so until now.  The new interface now allows anyone to plug in and support custom
-  algorithms with JJWT as desired.
+  `io.jsonwebtoken.security.SignatureAlgorithm` interface to allow custom algorithm implementations.  Also, 
+  a new `io.jsonwebtoken.security.SignatureAlgorithms` static helper class enumerates all the standard JWA algorithms 
+  as expected, exactly like the old enum.  This change was made because enums are a static concept by design and 
+  cannot support custom values: those who wanted to use custom signature algorithms could not do so until now.  The 
+  new interface now allows anyone to plug in and support custom algorithms with JJWT as desired.
 
 
 * Similarly, as the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
@@ -17,11 +17,16 @@
   the old enum-based static utility methods did not.
 
 
-* `io.jsonwebtoken.CompressionCodec` now inherits `io.jsonwebtoken.Identifiable` and `getId()` is preferred over
-  the now-deprecated `getAlgorithmName()` method.  This was to guarantee API congruence with all other JWT-identifiable
-  algorithm names that can be set as a header value.
+* `io.jsonwebtoken.Jwt`'s `getBody()` method has been deprecated in favor of a new `getPayload()` method to
+  reflect correct JWT specification nomenclature/taxonomy.
+
+
+* `io.jsonwebtoken.CompressionCodec` now inherits a new `io.jsonwebtoken.Identifiable` interface and its `getId()`
+  method is preferred over the now-deprecated `getAlgorithmName()` method.  This is to guarantee API congruence with 
+  all other JWT-identifiable algorithm names that can be set as a header value.
 
 #### Backwards Compatibility Warnings and Breaking Changes
+
 
 * `io.jsonwebtoken.Header` has been changed to accept a type-parameter for sub-type method return values, i.e.
   `io.jsonwebtoken.Header&lt;T extends Header&gt;` and a new `io.jsonwebtoken.UnprotectedHeader` interface has been
@@ -29,19 +34,22 @@
   to be used where the previous generic `Header` (non-`JweHeader` and non-`JwsHeader`) interface was used.
 
 
-* Accordingly the `Jwts.header()` and `Jwts.header(Map<String,?>)` now return instances of `UnprotectedHeader` instead
+* Accordingly, the `Jwts.header()` and `Jwts.header(Map<String,?>)` now return instances of `UnprotectedHeader` instead
   of just `Header`.
 
 
 * JWTs that do not contain JSON Claims now have a body type of `byte[]` instead of `String` (that is, `Jws<byte[]>`
-  instead of `Jws<String>`).  This is because JWTs, when used with the `cty` (Content Type) header, are capable of
-  handling _any_ type of payload, not just Strings. The previous JJWT releases never accounted for this, and now the
-  API accurately reflects the JWT RFC specification payload capabilities. Additionally, the name of `plaintext` has
-  been changed to `content` in method names and JavaDoc to accurately reflect this taxonomy. This
+  instead of `Jws&lt;String&gt;`).  This is because JWTs, especially when used with the `cty` (Content Type) header, 
+  are capable of handling _any_ type of payload, not just Strings. The previous JJWT releases never accounted for 
+  this, and now the API accurately reflects the JWT RFC specification payload capabilities. Additionally, the name 
+  of `plaintext` has been changed to `content` in method names and JavaDoc to accurately reflect this taxonomy. This
   change has impacted the following JJWT APIs:
 
   * The `JwtBuilder`'s `setPayload(String)` method has been deprecated in favor of two new methods:
-    `setContent(byte[])` and `setContent(byte[], String contentType)`.
+    `setContent(byte[])` and `setContent(byte[], String contentType)`.  These new methods allow any kind of content
+    within a JWT, not just Strings. The existing `setPayload(String)` method implementation has been changed to 
+    delegate to this new `setContent(byte[])` method with the argument's UTF-8 bytes, for example 
+    `setContent(aString.getBytes(StandardCharsets.UTF_8))`.
 
   * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
     `Jws&lt;String&gt; parsePlaintextJws(String plaintextJws)` methods have been changed to
@@ -58,10 +66,6 @@
 
   * `io.jsonwebtoken.SigningKeyResolver`'s `resolveSigningKey(JwsHeader, String)` method has been changed to
     `resolveSigningKey(JwsHeader, byte[])`.
-
-  * `JwtBuilder` has a new `setPayload(byte[])` method that allows any kind of content within a JWT, not just Strings. 
-    The existing `setPayload(String)` method implementation has been changed to delegate to this new `setPayload(byte[])`
-    method with the argument's UTF-8 bytes, for example `setPayload(aString.getBytes(StandardCharsets.UTF_8))`.
 
 
 * Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
