@@ -2,30 +2,95 @@
 
 ### JJWT_RELEASE_VERSION
 
-* The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of a new 
-  `io.jsonwebtoken.security.SignatureAlgorithm` interface to allow custom algorithm implementations.  Also, 
-  a new `io.jsonwebtoken.security.SignatureAlgorithms` static helper class enumerates all the standard JWA algorithms 
-  as expected, exactly like the old enum.  This change was made because enums are a static concept by design and 
-  cannot support custom values: those who wanted to use custom signature algorithms could not do so until now.  The 
-  new interface now allows anyone to plug in and support custom algorithms with JJWT as desired.
+#### New Features
 
+##### JSON Web Encryption (JWE) Support!
 
-* Similarly, as the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
-  accepted the now-deprecated `io.jsonwebtoken.SignatureAlgorithm` enum, they have also been deprecated in favor of 
-  calling new `keyBuilder()` or `keyPairBuilder()` methods on `SignatureAlgorithm` instances directly. The builders 
-  allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
-  the old enum-based static utility methods did not.
+This has been a long-awaited feature for JJWT, years in the making, and it is quite extensive - so many encryption 
+algorithms and key management algorithms are defined by the JWA specification, and new API concepts had to be 
+introduced for all of them, as well as extensive testing with RFC-defined test vectors.  The wait is over!  
+All JWA-defined encryption algorithms and key management algorithms are fully implemented and supported and 
+available immediately.  For example:
 
+```java
+AeadAlgorithm enc = EncryptionAlgorithms.A256GCM;
+SecretKey key = enc.keyBuilder().build();
+String compact = Jwts.builder().setSubject("Joe").encryptWith(enc, key).compact();
+
+Jwe<Claims> jwe = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(compact);
+```
+
+Many other RSA and Elliptic Curve examples are in the full README documentation. 
+
+##### JSON Web Key (JWK) Support!
+
+Representing cryptographic keys - SecretKeys, RSA Public and Private Keys, Elliptic Curve Public and 
+Private keys - as fully encoded JSON objects according to the JWK specification - is now fully implemented and
+supported.  The new `Jwks` utility class exists to create JWK builders and parsers as desired.  For example:
+
+```java
+SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build();
+SecretJwk jwk = Jwks.builder().forKey(key).build();
+assert key.equals(jwk.toKey());
+
+// or if receiving a JWK string:
+Jwk<?> parsedJwk = Jwks.parserBuilder().build().parse(jwkString);
+assert jwk.equals(parsedJwk);
+assert key.equals(parsedJwk.toKey());
+```
+
+Many JJWT users won't need to use JWKs explicitly, but some JWA Key Management Algorithms (and lots of RFC test 
+vectors) utilize JWKs when transmitting JWEs.  As this was required by JWE, it is now implemented in full for 
+JWE use as well as general-purpose JWK support.
+
+##### Better PKCS11 and Hardware Security Module (HSM) support
+
+Previous versions of JJWT enforced that Private Keys implemented the `RSAKey` and `ECKey` interfaces to enforce key 
+length requirements.  With this release, JJWT will still perform those checks when those data types are available, 
+but if not, as is common with keys from PKCS11 and HSM KeyStores, JJWT will still allow those Keys to be used, 
+expecting the underlying Security Provider to enforce any key requirements. This should reduce or eliminate any 
+custom code previously written to extend JJWT to use keys from those KeyStores or Providers.
+
+##### Custom Signature Algorithms
+
+The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of a new 
+`io.jsonwebtoken.security.SignatureAlgorithm` interface to allow custom algorithm implementations.  Also, a new 
+`io.jsonwebtoken.security.SignatureAlgorithms` static helper class enumerates all the standard JWA algorithms as 
+expected, exactly like the old enum.  This change was made because enums are a static concept by design and cannot 
+support custom values: those who wanted to use custom signature algorithms could not do so until now.  The new 
+interface now allows anyone to plug in and support custom algorithms with JJWT as desired.
+
+##### KeyBuilder and KeyPairBuilder
+
+Because the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
+accepted the now-deprecated `io.jsonwebtoken.SignatureAlgorithm` enum, they have also been deprecated in favor of 
+calling new `keyBuilder()` or `keyPairBuilder()` methods on `SignatureAlgorithm` instances directly.  For example:
+
+```java
+SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build();
+KeyPair pair = SignatureAlgorithms.RS256.keyPairBuilder().build();
+```
+
+The builders allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
+the old enum-based static utility methods did not.
+
+##### Preparation for 1.0
+
+Now that the JWE and JWK specifications are implemented, only a few things remain for JJWT to be considered at 
+version 1.0.  We have been waiting to apply the 1.0 release version number until the entire set of JWT specifications 
+are fully supported and we drop JDK 7 support (to allow users to use JDK 8 APIs).  To that end, we have had to 
+deprecate some concepts, or in some rare cases, completely break backwards compatibility to ensure the transition to 
+1.0 (and JDK 8 APIs) are possible.  Any backwards-incompatible changes are listed in the next section below.
+
+#### Backwards Compatibility Breaking Changes, Warnings and Deprecations
 
 * `io.jsonwebtoken.Jwt`'s `getBody()` method has been deprecated in favor of a new `getPayload()` method to
   reflect correct JWT specification nomenclature/taxonomy.
 
 
 * `io.jsonwebtoken.CompressionCodec` now inherits a new `io.jsonwebtoken.Identifiable` interface and its `getId()`
-  method is preferred over the now-deprecated `getAlgorithmName()` method.  This is to guarantee API congruence with 
+  method is preferred over the now-deprecated `getAlgorithmName()` method.  This is to guarantee API congruence with
   all other JWT-identifiable algorithm names that can be set as a header value.
-
-#### Backwards Compatibility Warnings and Breaking Changes
 
 
 * `io.jsonwebtoken.Header` has been changed to accept a type-parameter for sub-type method return values, i.e.
@@ -38,18 +103,20 @@
   of just `Header`.
 
 
-* JWTs that do not contain JSON Claims now have a body type of `byte[]` instead of `String` (that is, `Jws<byte[]>`
-  instead of `Jws&lt;String&gt;`).  This is because JWTs, especially when used with the `cty` (Content Type) header, 
-  are capable of handling _any_ type of payload, not just Strings. The previous JJWT releases never accounted for 
-  this, and now the API accurately reflects the JWT RFC specification payload capabilities. Additionally, the name 
-  of `plaintext` has been changed to `content` in method names and JavaDoc to accurately reflect this taxonomy. This
-  change has impacted the following JJWT APIs:
+##### Breaking Changes
+
+* **JWTs that do not contain JSON Claims now have a payload type of `byte[]` instead of `String`** (that is, 
+  `Jws<byte[]>` instead of `Jws&lt;String&gt;`).  This is because JWTs, especially when used with the 
+  `cty` (Content Type) header, are capable of handling _any_ type of payload, not just Strings. The previous JJWT 
+  releases never accounted for this, and now the API accurately reflects the JWT RFC specification payload 
+  capabilities. Additionally, the name of `plaintext` has been changed to `content` in method names and JavaDoc to 
+  reflect this taxonomy. This change has impacted the following JJWT APIs:
 
   * The `JwtBuilder`'s `setPayload(String)` method has been deprecated in favor of two new methods:
     `setContent(byte[])` and `setContent(byte[], String contentType)`.  These new methods allow any kind of content
     within a JWT, not just Strings. The existing `setPayload(String)` method implementation has been changed to 
     delegate to this new `setContent(byte[])` method with the argument's UTF-8 bytes, for example 
-    `setContent(aString.getBytes(StandardCharsets.UTF_8))`.
+    `setContent(payloadString.getBytes(StandardCharsets.UTF_8))`.
 
   * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
     `Jws&lt;String&gt; parsePlaintextJws(String plaintextJws)` methods have been changed to

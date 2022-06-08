@@ -89,10 +89,11 @@ enforcement.
  * Fully functional on all JDKs and Android
  * Automatic security best practices and assertions
  * Easy to learn and read API
- * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE auto-completion to write code quickly
+ * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
+   auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with enforced 100% test code coverage.  Literally every single method, statement and 
-   conditional branch variant in the entire codebase is tested and required to pass on every build.
+ * Extremely stable implementation with over 1,000+ tests and enforced 100% test code coverage.  Literally every single
+   method, statement and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
     * HS256: HMAC using SHA-256
     * HS384: HMAC using SHA-384
@@ -140,7 +141,7 @@ enforcement.
  * Convenience enhancements beyond the specification such as
     * Body compression for any large JWT, not just JWEs
     * Claims assertions (requiring specific values)
-    * Claim POJO marshaling and unmarshaling when using a compatible JSON parser (e.g. Jackson)
+    * Claim POJO marshaling and unmarshalling when using a compatible JSON parser (e.g. Jackson)
     * Secure Key generation based on desired JWA algorithms
     * and more...
     
@@ -148,7 +149,6 @@ enforcement.
 ### Currently Unsupported Features
 
 * [Non-compact](https://tools.ietf.org/html/rfc7515#section-7.2) serialization and parsing.
-* JWE (Encryption for JWT)
 
 These features will be implemented in a future release.  Community contributions are welcome!
 
@@ -159,7 +159,8 @@ These features will be implemented in a future release.  Community contributions
 ### Getting Help
 
 If you have trouble using JJWT, please first read the documentation on this page before asking questions.  We try 
-very hard to ensure JJWT's documentation is robust, categorized with a table of contents, and up to date for each release.
+very hard to ensure JJWT's documentation is robust, categorized with a table of contents, and up to date for each 
+release.
 
 <a name="help-questions"></a>
 #### Questions
@@ -182,7 +183,8 @@ usability question, instead please
 [ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false), or try Slack or Gittr as 
 described above.
 
-**If a GitHub Issue is created that does not represent actionable work for JJWT's codebase, it will be promptly closed.**
+**If a GitHub Issue is created that does not represent actionable work for JJWT's codebase, it will be promptly 
+closed.**
 
 <a name="help-issues"></a>
 #### Bugs and Feature Requests
@@ -206,7 +208,7 @@ However, if you want or feel the need to change JJWT's functionality or core cod
 without [creating a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) and discussing your desired 
 changes **first**, _before you start working on it_.
 
-It would be a shame to reject your earnest and genuinely appreciated pull request if it might not align with the 
+It would be a shame to reject your earnest and genuinely-appreciated pull request if it might not align with the 
 project's goals, design expectations or planned functionality.  We've sadly had to reject large PRs in the past because
 they were out of sync with project or design expectations - all because the PR author didn't first check in with 
 the team first before working on a solution.
@@ -232,24 +234,32 @@ Don't know what a JSON Web Token is? Read on. Otherwise, jump on down to the [In
 
 JWT is a means of transmitting information between two parties in a compact, verifiable form.
 
-The bits of information encoded in the body of a JWT are called `claims`. The expanded form of the JWT is in a JSON format, so each `claim` is a key in the JSON object.
+The data included within the body of a JWT is called the `payload`.  A JWT payload can be anything at all - anything
+that can be represented as a byte array, such as Strings, images, or even documents.  However, because JWT is based on
+JSON, most people like the payload to be JSON that represents data about a user or computer or similar identity concept.
+In this case, the payload is called a JSON `Claims` object, and each name/value pair within that object is called a 
+`claim` - Each bit of information 'claims' something about an identity.
  
-JWTs can be cryptographically signed (making it a [JWS](https://tools.ietf.org/html/rfc7515)) or encrypted (making it a [JWE](https://tools.ietf.org/html/rfc7516)).
+JWTs can be cryptographically signed (making it a [JWS](https://tools.ietf.org/html/rfc7515)) or encrypted (making it 
+a [JWE](https://tools.ietf.org/html/rfc7516)).
 
-This adds a powerful layer of verifiability to the user of JWTs. The receiver has a high degree of confidence that the JWT has not been tampered with by verifying the signature, for instance.
+This adds a powerful layer of verifiability to the user of JWTs. The receiver has a high degree of confidence that the 
+JWT has not been tampered with by verifying the signature, for instance.
 
-The compact representation of a signed JWT is a string that has three parts, each separated by a `.`:
+The compact representation of a JWT is a String of Base64URL-encoded substrings delimited by period characters `.`:
 
 ```
 eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.ipevRNuRP6HflG8cFKnmUPtypruRC4fb1DWtoLL62SY
 ```
 
-Each part is [Base64URL](https://en.wikipedia.org/wiki/Base64)-encoded. The first part is the header, which at a 
-minimum needs to specify the algorithm used to sign the JWT. The second part is the body. This part has all 
-the claims of this JWT encoded in it. The final part is the signature. It's computed by passing a combination of 
-the header and body through the algorithm specified in the header.
+A JWS has 3 substring tokens delimited by period characters, anda a JWE has 5 substring tokens delimited by period 
+characters. Each part is [Base64URL](https://en.wikipedia.org/wiki/Base64)-encoded. For a JWS (for example), the 
+first part is the header, which at a minimum needs to specify the algorithm used to sign the JWT. The second part is 
+the body. This part has all the claims of this JWT encoded in it. The final part is the signature. It's computed by 
+passing a combination of the header and body through the algorithm specified in the header.  JWEs are slightly 
+different, and we'll discuss those in detail later on in the <a href="#jwe">JWE</a> section.
  
-If you pass the first two parts through a base 64 url decoder, you'll get the following (formatting added for 
+If you pass the first two parts of a JWS through a base 64 url decoder, you'll get the following (formatting added for 
 clarity):
 
 `header`
@@ -294,18 +304,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.11.5</version>
+    <version>JJWT_RELEASE_VERSION</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.11.5</version>
+    <version>JJWT_RELEASE_VERSION</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-    <version>0.11.5</version>
+    <version>JJWT_RELEASE_VERSION</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
@@ -325,11 +335,11 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    compile 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.11.5',
+    compile 'io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION'
+    runtime 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION',
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
     //'org.bouncycastle:bcprov-jdk15on:1.70',
-    'io.jsonwebtoken:jjwt-jackson:0.11.5' // or 'io.jsonwebtoken:jjwt-gson:0.11.5' for gson
+    'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION' // or 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION' for gson
 }
 ```
 
@@ -345,9 +355,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5' 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.11.5') {
+    api 'io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION' 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:JJWT_RELEASE_VERSION') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -396,7 +406,9 @@ you more quickly and efficiently.
 <a name="quickstart"></a>
 ## Quickstart
 
-Most complexity is hidden behind a convenient and readable builder-based [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface), great for relying on IDE auto-completion to write code quickly.  Here's an example:
+Most complexity is hidden behind a convenient and readable builder-based 
+[fluent interface](http://en.wikipedia.org/wiki/Fluent_interface), great for relying on IDE auto-completion to write 
+code quickly.  Here's an example:
 
 ```java
 import io.jsonwebtoken.Jwts;
@@ -531,7 +543,7 @@ This is called a 'JWS' - short for _signed_ JWT.
 
 Of course, no one would want to do this manually in code, and worse, if you get anything wrong, you could cause 
 security problems or weaknesses.  As a result, JJWT was created to handle all of this for you: JJWT completely 
-automates both the creation of JWSs as well as the parsing and verification of JWSs for you.
+automates both the creation of JWSs and the parsing and verification of JWSs for you.
 
 But before we dig in to showing you how to create a JWS using JJWT, let's briefly discuss Signature Algorithms and 
 Keys, specifically as they relate to the JWT specifications.  Understanding them is critical to being able to create a 
@@ -569,7 +581,7 @@ exception.
 This is not because we want to make your life difficult, we promise! The reason why the JWT specification, and 
 consequently JJWT, mandates key lengths is that the security model of a particular algorithm can completely break 
 down if you don't adhere to the mandatory key properties of the algorithm, effectively having no security at all.  No 
-one wants completely insecure JWTs, right?  Neither would we.
+one wants completely insecure JWTs, right?  Right!
 
 So what are the requirements?
 
@@ -595,7 +607,7 @@ This means:
 JWT RSA signature algorithms `RS256`, `RS384`, `RS512`, `PS256`, `PS384` and `PS512` all require a minimum key length
 (aka an RSA modulus bit length) of `2048` bits per RFC 7512 Sections 
 [3.3](https://tools.ietf.org/html/rfc7518#section-3.3) and [3.5](https://tools.ietf.org/html/rfc7518#section-3.5). 
-Anything smaller than this (such as 1024 bits) will be rejected with an `InvalidKeyException`.
+Anything smaller than this (such as 1024 bits) will be rejected with an `WeakKeyException`.
 
 That said, in keeping with best practices and increasing key lengths for security longevity, JJWT 
 recommends that you use:
@@ -1368,7 +1380,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.11.5</version>
+    <version>JJWT_RELEASE_VERSION</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1377,7 +1389,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION'
 }
 ```
 
@@ -1480,7 +1492,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-gson</artifactId>
-    <version>0.11.5</version>
+    <version>JJWT_RELEASE_VERSION</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -1489,7 +1501,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-gson:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION'
 }
 ```
 
