@@ -94,7 +94,7 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
 
 
 * `io.jsonwebtoken.Header` has been changed to accept a type-parameter for sub-type method return values, i.e.
-  `io.jsonwebtoken.Header&lt;T extends Header&gt;` and a new `io.jsonwebtoken.UnprotectedHeader` interface has been
+  `io.jsonwebtoken.Header<T extends Header>` and a new `io.jsonwebtoken.UnprotectedHeader` interface has been
   introduced to represent the concrete type of header without integrity protection.  This new `UnprotectedHeader` is
   to be used where the previous generic `Header` (non-`JweHeader` and non-`JwsHeader`) interface was used.
 
@@ -106,7 +106,7 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
 ##### Breaking Changes
 
 * **JWTs that do not contain JSON Claims now have a payload type of `byte[]` instead of `String`** (that is, 
-  `Jws<byte[]>` instead of `Jws&lt;String&gt;`).  This is because JWTs, especially when used with the 
+  `Jws<byte[]>` instead of `Jws<String>`).  This is because JWTs, especially when used with the 
   `cty` (Content Type) header, are capable of handling _any_ type of payload, not just Strings. The previous JJWT 
   releases never accounted for this, and now the API accurately reflects the JWT RFC specification payload 
   capabilities. Additionally, the name of `plaintext` has been changed to `content` in method names and JavaDoc to 
@@ -119,7 +119,7 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
     `setContent(payloadString.getBytes(StandardCharsets.UTF_8))`.
 
   * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
-    `Jws&lt;String&gt; parsePlaintextJws(String plaintextJws)` methods have been changed to
+    `Jws<String> parsePlaintextJws(String plaintextJws)` methods have been changed to
     `Jwt<UnprotectedHeader, byte[]> parseContentJwt(String plaintextJwt)` and
     `Jws<byte[]> parseContentJws(String plaintextJws)` respectively.
 
@@ -143,11 +143,11 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
 
 * Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
   [RFC 7518, Section 3.6](https://datatracker.ietf.org/doc/html/rfc7518#section-3.6). If you require parsing of
-  unsecured JWTs, you may call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
+  unsecured JWTs, you must call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
   implications of doing so as mentioned in that method's JavaDoc before doing so.
 
 
-* `io.jsonwebtokne.gson.io.GsonSerializer` now requires `Gson` instances that have a registered
+* `io.jsonwebtoken.gson.io.GsonSerializer` now requires `Gson` instances that have a registered
   `GsonSupplierSerializer` type adapter, for example:
   ```java
   new GsonBuilder()
