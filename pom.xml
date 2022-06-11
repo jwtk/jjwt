@@ -152,6 +152,7 @@
         <module>api</module>
         <module>impl</module>
         <module>extensions</module>
+        <module>tdjar</module>
     </modules>
 
     <dependencyManagement>
@@ -159,6 +160,11 @@
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
