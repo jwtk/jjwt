@@ -45,17 +45,15 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      * <em>MUST</em> be validated, as per
      * <a href="https://datatracker.ietf.org/doc/html/rfc6125#section-6">Section 6 of RFC 6125</a>.</p>
      *
-     * <p>
-     *     <ul>
-     *         <li>When set for a {@link JwsHeader}, the certificate or first certificate in the chain contains
-     *             the public key complement of the private key used to digitally sign the JWS.</li>
-     *         <li>When set for {@link JweHeader}, the certificate or first certificate in the chain contains the
-     *             public key to which the JWE was encrypted, and may be used to determine the private key needed to
-     *             decrypt the JWE.</li>
-     *         <li>When set for an {@link AsymmetricJwk}, the certificate or first certificate in the chain
-     *             <em>MUST</em> contain the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When set for a {@link JwsHeader}, the certificate or first certificate in the chain contains
+     *         the public key complement of the private key used to digitally sign the JWS.</li>
+     *     <li>When set for {@link JweHeader}, the certificate or first certificate in the chain contains the
+     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+     *         decrypt the JWE.</li>
+     *     <li>When set for an {@link AsymmetricJwk}, the certificate or first certificate in the chain
+     *         <em>MUST</em> contain the public key represented by the JWK.</li>
+     * </ul>
      *
      * @param uri the {@code x5u} (X.509 URL) that refers to a resource for the X.509 public key certificate or
      *            certificate chain associated with the JWT or JWK.
@@ -71,19 +69,15 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      * property from the JSON map. The initial certificate <em>MAY</em> be followed by additional certificates, with
      * each subsequent certificate being the one used to certify the previous one.
      *
-     * <p>
-     *     <ul>
-     *         <li>When set for a {@link JwsHeader}, the first certificate (at list index 0) <em>MUST</em> contain
-     *             the public key complement of the private key used to digitally sign the JWS.</li>
-     *         <li>When set for {@link JweHeader}, the first certificate (at list index 0) <em>MUST</em> contain the
-     *             public key to which the JWE was encrypted, and may be used to determine the private key needed to
-     *             decrypt the JWE.</li>
-     *         <li>When set for an {@link AsymmetricJwk}, the first certificate (at list index 0) <em>MUST</em> contain
-     *             the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
-     *
-     * <p></p>
+     * <ul>
+     *     <li>When set for a {@link JwsHeader}, the first certificate (at list index 0) <em>MUST</em> contain
+     *         the public key complement of the private key used to digitally sign the JWS.</li>
+     *     <li>When set for {@link JweHeader}, the first certificate (at list index 0) <em>MUST</em> contain the
+     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+     *         decrypt the JWE.</li>
+     *     <li>When set for an {@link AsymmetricJwk}, the first certificate (at list index 0) <em>MUST</em> contain
+     *         the public key represented by the JWK.</li>
+     * </ul>
      *
      * @param chain the {@code x5c} (X.509 Certificate Chain) of the associated JWT or JWK.
      * @return the header/builder for method chaining.
@@ -100,17 +94,15 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
      *
-     * <p>
-     *     <ul>
-     *         <li>When set for a {@link JwsHeader}, it is the SHA-1 thumbprint of the X.509 certificate complement of
-     *             the private key used to digitally sign the JWS.</li>
-     *         <li>When set for {@link JweHeader}, it is the thumbprint of the X.509 Certificate containing the
-     *             public key to which the JWE was encrypted, and may be used to determine the private key needed to
-     *             decrypt the JWE.</li>
-     *         <li>When set for an {@link AsymmetricJwk}, it is the thumbprint of the X.509 certificate containing the
-     *             public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When set for a {@link JwsHeader}, it is the SHA-1 thumbprint of the X.509 certificate complement of
+     *         the private key used to digitally sign the JWS.</li>
+     *     <li>When set for {@link JweHeader}, it is the thumbprint of the X.509 Certificate containing the
+     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+     *         decrypt the JWE.</li>
+     *     <li>When set for an {@link AsymmetricJwk}, it is the thumbprint of the X.509 certificate containing the
+     *         public key represented by the JWK.</li>
+     * </ul>
      *
      * @param thumbprint the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      *                   X.509 Certificate associated with the JWT or JWK
@@ -128,17 +120,15 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
      *
-     * <p>
-     *     <ul>
-     *         <li>When set for a {@link JwsHeader}, it is the SHA-256 thumbprint of the X.509 certificate complement
-     *             of the private key used to digitally sign the JWS.</li>
-     *         <li>When set for {@link JweHeader}, it is the SHA-256 thumbprint of the X.509 Certificate containing the
-     *             public key to which the JWE was encrypted, and may be used to determine the private key needed to
-     *             decrypt the JWE.</li>
-     *         <li>When set for a {@link AsymmetricJwk}, it is the SHA-256 thumbprint of the X.509 certificate
-     *             containing the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When set for a {@link JwsHeader}, it is the SHA-256 thumbprint of the X.509 certificate complement
+     *         of the private key used to digitally sign the JWS.</li>
+     *     <li>When set for {@link JweHeader}, it is the SHA-256 thumbprint of the X.509 Certificate containing the
+     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+     *         decrypt the JWE.</li>
+     *     <li>When set for a {@link AsymmetricJwk}, it is the SHA-256 thumbprint of the X.509 certificate
+     *         containing the public key represented by the JWK.</li>
+     * </ul>
      *
      * @param thumbprint the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      *                   X.509 Certificate associated with the JWT or JWK

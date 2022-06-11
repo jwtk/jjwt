@@ -45,17 +45,15 @@ public interface X509Accessor {
      * <em>MUST</em> be validated, as per
      * <a href="https://datatracker.ietf.org/doc/html/rfc6125#section-6">Section 6 of RFC 6125</a>.</p>
      *
-     * <p>
-     *     <ul>
-     *         <li>When present in a {@link JwsHeader}, the certificate or first certificate in the chain corresponds
-     *             the public key complement of the private key used to digitally sign the JWS.</li>
-     *         <li>When present in a {@link JweHeader}, the certificate or certificate chain corresponds to the
-     *             public key to which the JWE was encrypted, and may be used to determine the private key needed to
-     *             decrypt the JWE.</li>
-     *         <li>When present in an {@link AsymmetricJwk}, the certificate or first certificate in the chain
-     *             <em>MUST</em> contain the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When present in a {@link JwsHeader}, the certificate or first certificate in the chain corresponds
+     *         the public key complement of the private key used to digitally sign the JWS.</li>
+     *     <li>When present in a {@link JweHeader}, the certificate or certificate chain corresponds to the
+     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+     *         decrypt the JWE.</li>
+     *     <li>When present in an {@link AsymmetricJwk}, the certificate or first certificate in the chain
+     *         <em>MUST</em> contain the public key represented by the JWK.</li>
+     * </ul>
      *
      * @return the {@code x5u} (X.509 URL) that refers to a resource for the associated X.509 public key certificate or
      * certificate chain.
@@ -70,17 +68,15 @@ public interface X509Accessor {
      * certificate <em>MAY</em> be followed by additional certificates, with each subsequent certificate being the
      * one used to certify the previous one.
      *
-     * <p>
-     *     <ul>
-     *         <li>When present in a {@link JwsHeader}, the first certificate (at list index 0) <em>MUST</em> contain
-     *             the public key complement of the private key used to digitally sign the JWS.</li>
-     *         <li>When present in a {@link JweHeader}, the first certificate (at list index 0) <em>MUST</em> contain
-     *             the public key to which the JWE was encrypted, and may be used to determine the private key needed to
-     *             decrypt the JWE.</li>
-     *         <li>When present in an {@link AsymmetricJwk}, the first certificate (at list index 0)
-     *             <em>MUST</em> contain the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When present in a {@link JwsHeader}, the first certificate (at list index 0) <em>MUST</em> contain
+     *         the public key complement of the private key used to digitally sign the JWS.</li>
+     *     <li>When present in a {@link JweHeader}, the first certificate (at list index 0) <em>MUST</em> contain
+     *         the public key to which the JWE was encrypted, and may be used to determine the private key needed to
+     *         decrypt the JWE.</li>
+     *     <li>When present in an {@link AsymmetricJwk}, the first certificate (at list index 0)
+     *         <em>MUST</em> contain the public key represented by the JWK.</li>
+     * </ul>
      *
      * @return the associated {@code x5c} (X.509 Certificate Chain), or {@code null} if not present.
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">JWK <code>x5c</code> (X.509 Certificate Chain) Parameter</a>
@@ -95,17 +91,15 @@ public interface X509Accessor {
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
      *
-     * <p>
-     *     <ul>
-     *         <li>When present in a {@link JwsHeader}, it is the SHA-1 thumbprint of the X.509 certificate complement
-     *             of the private key used to digitally sign the JWS.</li>
-     *         <li>When present in a {@link JweHeader}, it is the SHA-1 thumbprint of the X.509 Certificate containing
-     *             the public key to which the JWE was encrypted, and may be used to determine the private key
-     *             needed to decrypt the JWE.</li>
-     *         <li>When present in an {@link AsymmetricJwk}, it is the SHA-1 thumbprint of the X.509 certificate
-     *             containing the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When present in a {@link JwsHeader}, it is the SHA-1 thumbprint of the X.509 certificate complement
+     *         of the private key used to digitally sign the JWS.</li>
+     *     <li>When present in a {@link JweHeader}, it is the SHA-1 thumbprint of the X.509 Certificate containing
+     *         the public key to which the JWE was encrypted, and may be used to determine the private key
+     *         needed to decrypt the JWE.</li>
+     *     <li>When present in an {@link AsymmetricJwk}, it is the SHA-1 thumbprint of the X.509 certificate
+     *         containing the public key represented by the JWK.</li>
+     * </ul>
      *
      * @return the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      * associated X.509 Certificate, or {@code null} if not present
@@ -121,17 +115,15 @@ public interface X509Accessor {
      *
      * <p>Note that certificate thumbprints are also sometimes known as certificate fingerprints.</p>
      *
-     * <p>
-     *     <ul>
-     *         <li>When present in a {@link JwsHeader}, it is the SHA-256 thumbprint of the X.509 certificate complement
-     *             of the private key used to digitally sign the JWS.</li>
-     *         <li>When present in a {@link JweHeader}, it is the SHA-256 thumbprint of the X.509 Certificate containing
-     *             the public key to which the JWE was encrypted, and may be used to determine the private key
-     *             needed to decrypt the JWE.</li>
-     *         <li>When present in an {@link AsymmetricJwk}, it is the SHA-256 thumbprint of the X.509 certificate
-     *             containing the public key represented by the JWK.</li>
-     *     </ul>
-     * </p>
+     * <ul>
+     *     <li>When present in a {@link JwsHeader}, it is the SHA-256 thumbprint of the X.509 certificate complement
+     *         of the private key used to digitally sign the JWS.</li>
+     *     <li>When present in a {@link JweHeader}, it is the SHA-256 thumbprint of the X.509 Certificate containing
+     *         the public key to which the JWE was encrypted, and may be used to determine the private key
+     *         needed to decrypt the JWE.</li>
+     *     <li>When present in an {@link AsymmetricJwk}, it is the SHA-256 thumbprint of the X.509 certificate
+     *         containing the public key represented by the JWK.</li>
+     * </ul>
      *
      * @return the {@code x5t#S256} (X.509 Certificate SHA-256 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      * associated X.509 Certificate, or {@code null} if not present
