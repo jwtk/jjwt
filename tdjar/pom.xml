@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>jjwt</artifactId>
-    <name>JJWT :: Convenience .jar</name>
+    <name>JJWT :: Legacy Transitive Dependency Jar</name>
     <description>Legacy dependency. Please update your dependencies as documented here: https://github.com/jwtk/jjwt#installation</description>
     <packaging>jar</packaging>
 

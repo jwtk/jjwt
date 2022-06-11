@@ -152,7 +152,7 @@
         <module>api</module>
         <module>impl</module>
         <module>extensions</module>
-        <module>all</module>
+        <module>tdjar</module>
     </modules>
 
     <dependencyManagement>

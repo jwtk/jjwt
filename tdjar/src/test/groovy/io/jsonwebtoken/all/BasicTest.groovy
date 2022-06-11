@@ -1,17 +1,12 @@
 package io.jsonwebtoken.all
 
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Header
-import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.JwtParser
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import static org.hamcrest.CoreMatchers.equalTo
-import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.CoreMatchers.notNullValue
+import static org.hamcrest.MatcherAssert.assertThat
 
 /**
  * This test ensures that the included dependency are all that is needed to use JJWT.
