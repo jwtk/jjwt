@@ -1,6 +1,21 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.lang.Assert
+import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
 import io.jsonwebtoken.security.Jwks
@@ -52,16 +67,42 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1Thumbprint() {
+        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        def x5t = DefaultHashAlgorithm.SHA1.hash(request)
+        def encoded = Encoders.BASE64URL.encode(x5t)
+        def jwk = builder().setX509CertificateSha1Thumbprint(x5t).build()
+        assertArrayEquals x5t, jwk.getX509CertificateSha1Thumbprint()
+        assertEquals encoded, jwk.get(AbstractAsymmetricJwk.X5T.getId())
+    }
+
+    @Test
+    void testX509CertificateSha1ThumbprintEnabled() {
+        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        def x5t = DefaultHashAlgorithm.SHA1.hash(request)
+        def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha1Thumbprint(true).build()
-        Assert.notEmpty(jwk.getX509CertificateSha1Thumbprint())
-        Assert.hasText(jwk.get(AbstractAsymmetricJwk.X5T.getId()) as String)
+        assertArrayEquals x5t, jwk.getX509CertificateSha1Thumbprint()
+        assertEquals encoded, jwk.get(AbstractAsymmetricJwk.X5T.getId())
     }
 
     @Test
     void testX509CertificateSha256Thumbprint() {
+        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
+        def encoded = Encoders.BASE64URL.encode(x5tS256)
+        def jwk = builder().setX509CertificateSha256Thumbprint(x5tS256).build()
+        assertArrayEquals x5tS256, jwk.getX509CertificateSha256Thumbprint()
+        assertEquals encoded, jwk.get(AbstractAsymmetricJwk.X5T_S256.getId())
+    }
+
+    @Test
+    void testX509CertificateSha256ThumbprintEnabled() {
+        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
+        def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()
-        Assert.notEmpty(jwk.getX509CertificateSha256Thumbprint())
-        Assert.hasText(jwk.get(AbstractAsymmetricJwk.X5T_S256.getId()) as String)
+        assertArrayEquals x5tS256, jwk.getX509CertificateSha256Thumbprint()
+        assertEquals encoded, jwk.get(AbstractAsymmetricJwk.X5T_S256.getId())
     }
 
     @Test

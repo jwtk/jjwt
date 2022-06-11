@@ -1,8 +1,24 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Nameable;
+import io.jsonwebtoken.security.X509Mutator;
 
 import java.net.URI;
 import java.security.Key;
@@ -14,7 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface JwkContext<K extends Key> extends Identifiable, Map<String,Object>, FieldReadable, Nameable {
+public interface JwkContext<K extends Key> extends Identifiable, Map<String, Object>, FieldReadable, Nameable,
+        X509Mutator<JwkContext<K>> {
 
     JwkContext<K> setId(String id);
 
@@ -36,19 +53,11 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String,Obje
 
     URI getX509Url();
 
-    JwkContext<K> setX509Url(URI url);
-
     List<X509Certificate> getX509CertificateChain();
-
-    JwkContext<K> setX509CertificateChain(List<X509Certificate> x5c);
 
     byte[] getX509CertificateSha1Thumbprint();
 
-    JwkContext<K> setX509CertificateSha1Thumbprint(byte[] x5t);
-
     byte[] getX509CertificateSha256Thumbprint();
-
-    JwkContext<K> setX509CertificateSha256Thumbprint(byte[] x5ts256);
 
     K getKey();
 

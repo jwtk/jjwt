@@ -15,10 +15,7 @@
  */
 package io.jsonwebtoken.security;
 
-import java.net.URI;
 import java.security.Key;
-import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,7 +27,7 @@ import java.util.Set;
  * @since JJWT_RELEASE_VERSION
  */
 public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>, T extends AsymmetricJwkBuilder<K, J, T>>
-        extends JwkBuilder<K, J, T> {
+        extends JwkBuilder<K, J, T>, X509Builder<T> {
 
     /**
      * Sets the JWK
@@ -83,84 +80,5 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      */
     T setPublicKeyUse(String use) throws IllegalArgumentException;
 
-    /**
-     * Sets the JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">{@code x5c} (X.509 Certificate Chain)
-     * parameter</a> value as a type-safe <code>List&lt;{@link X509Certificate}&gt;</code>.
-     *
-     * <p>The certificate chain is a {@code List} of {@link X509Certificate}s.  The certificate containing the
-     * key value <em>MUST</em> be the first in the list (at list index {@code 0}).  This <em>MAY</em> be
-     * followed by additional certificates, with each subsequent certificate being the one used to certify the
-     * previous one.  The key in the first certificate <em>MUST</em> match the public key represented by other
-     * members of the JWK.</p>
-     *
-     * @param chain the JWK {@code x5c} value as a type-safe <code>List&lt;{@link X509Certificate}&gt;</code>.
-     * @return the builder for method chaining.
-     * @throws IllegalArgumentException if the {@code chain} is null or empty.
-     */
-    T setX509CertificateChain(List<X509Certificate> chain) throws IllegalArgumentException;
-
-    /**
-     * Sets the JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.6">{@code x5u} (X.509 URL)
-     * parameter</a> value as a {@link URI} instance. A {@code null} value will remove the property from the JWK.
-     *
-     * <p>The URI <em>MUST</em> refer to a resource for an X.509 public key certificate or certificate chain that
-     * conforms to <a href="https://datatracker.ietf.org/doc/html/rfc5280">RFC 5280</a> in PEM-encoded form, with
-     * each certificate delimited as specified in
-     * <a href="https://datatracker.ietf.org/doc/html/rfc4945#section-6.1">Section 6.1 of RFC 4945</a>.
-     * The key in the first certificate <em>MUST</em> match the public key represented by other members of
-     * the JWK.  The protocol used to acquire the resource <em>MUST</em> provide integrity protection; an HTTP GET
-     * request to retrieve the certificate <em>MUST</em> use
-     * <a href="https://datatracker.ietf.org/doc/html/rfc2818">HTTP over TLS</a>; the identity of the server
-     * <em>MUST</em> be validated, as per
-     * <a href="https://datatracker.ietf.org/doc/html/rfc6125#section-6">Section 6 of RFC 6125</a>.
-     *
-     * <p>While there is no requirement that optional JWK members providing key usage, algorithm, or other
-     * information be present when the {@code x5u} member is used, doing so may improve interoperability for
-     * applications that do not handle
-     * <a href="https://datatracker.ietf.org/doc/html/rfc5280">PKIX certificates [RFC5280]</a>.  If other members
-     * are present, the contents of those members <em>MUST</em> be semantically consistent with the related fields
-     * in the first certificate.  For instance, if the {@link #setPublicKeyUse(String) use (Public Key Use)} value is
-     * set, then it <em>MUST</em> correspond to the usage that is specified in the certificate, when it includes
-     * this information.  Similarly, if the {@link #setAlgorithm(String) alg (Algorithm)} value is present, it
-     * <em>MUST</em> correspond to the algorithm specified in the certificate.</p>
-     *
-     * @param uri the JWK {@code x5u} X.509 URL value as a {@link URI}.
-     * @return the builder for method chaining.
-     * @throws IllegalArgumentException if {@code uri} is {@code null}.
-     */
-    T setX509Url(URI uri) throws IllegalArgumentException;
-
     //T withX509KeyUse(boolean enable);
-
-    /**
-     * If the {@code enable} argument is {@code true}, compute the SHA-1 thumbprint of the first
-     * {@link X509Certificate} in the configured {@link #setX509CertificateChain(List) x509CertificateChain}, and set
-     * the resulting value as the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.8">{@code x5t}
-     * (X.509 Certificate SHA-1 Thumbprint) parameter</a>.
-     *
-     * <p>If no chain has been configured, or {@code enable} is {@code false}, the builder will not compute nor add a
-     * {@code x5t} value.</p>
-     *
-     * @param enable whether to compute the SHA-1 thumbprint on the first available X.509 Certificate and set
-     *               the resulting value as the {@code x5t} value.
-     * @return the builder for method chaining.
-     */
-    T withX509Sha1Thumbprint(boolean enable);
-
-    /**
-     * If the {@code enable} argument is {@code true}, compute the SHA-256 thumbprint of the first
-     * {@link X509Certificate} in the configured {@link #setX509CertificateChain(List) x509CertificateChain}, and set
-     * the resulting value as the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.9">{@code x5t#S256}
-     * (X.509 Certificate SHA-256 Thumbprint) parameter</a>.
-     *
-     * <p>If no chain has been configured, or {@code enable} is {@code false}, the builder will not compute nor add a
-     * {@code x5t#S256} value.</p>
-     *
-     * @param enable whether to compute the SHA-1 thumbprint on the first available X.509 Certificate and set
-     *               the resulting value as the {@code x5t} value.
-     * @return the builder for method chaining.
-     */
-    T withX509Sha256Thumbprint(boolean enable);
 }

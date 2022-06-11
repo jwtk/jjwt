@@ -26,10 +26,8 @@ class DefaultJwsTest {
 
     @Test
     void testConstructor() {
-
-        JwsHeader header = Jwts.jwsHeader()
+        JwsHeader header = new DefaultJwsHeader()
         def jws = new DefaultJws<String>(header, 'foo', 'sig')
-
         assertSame jws.getHeader(), header
         assertEquals jws.getPayload(), 'foo'
         assertEquals jws.getSignature(), 'sig'

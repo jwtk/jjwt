@@ -37,6 +37,7 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
@@ -151,6 +152,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
+    public JwtBuilder setHeader(Builder<? extends Header<?>> builder) {
+        Assert.notNull(builder, "Builder cannot be null.");
+        Header<?> header = builder.build();
+        this.header = Assert.notNull(header, "Builder cannot produce a null Header instance.");
+        return this;
+    }
+
+    @Override
     public JwtBuilder setHeaderParams(Map<String, ?> params) {
         if (!Collections.isEmpty(params)) {
             Header<?> header = ensureHeader();
@@ -183,14 +192,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public <K extends Key> JwtBuilder signWith(K key, final SignatureAlgorithm<K, ?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        this.key = key;
-        //noinspection unchecked
-        this.sigAlg = (SignatureAlgorithm<Key, ?>) alg;
-        String id = Assert.hasText(this.sigAlg.getId(), "SignatureAlgorithm id cannot be null or empty.");
+        String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
         if (SignatureAlgorithms.NONE.getId().equalsIgnoreCase(id)) {
             String msg = "The 'none' SignatureAlgorithm cannot be used to sign JWTs.";
             throw new IllegalArgumentException(msg);
         }
+        this.key = key;
+        //noinspection unchecked
+        this.sigAlg = (SignatureAlgorithm<Key, ?>) alg;
         this.signFunction = Functions.wrap(new Function<SignatureRequest<Key>, byte[]>() {
             @Override
             public byte[] apply(SignatureRequest<Key> request) {

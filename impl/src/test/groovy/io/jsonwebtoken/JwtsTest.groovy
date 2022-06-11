@@ -107,19 +107,6 @@ class JwtsTest {
     }
 
     @Test
-    void testJweHeaderWithNoArgs() {
-        def header = Jwts.jweHeader()
-        assertTrue header instanceof DefaultJweHeader
-    }
-
-    @Test
-    void testJweHeaderWithMapArg() {
-        def header = Jwts.jweHeader([enc: 'foo'])
-        assertTrue header instanceof DefaultJweHeader
-        assertEquals 'foo', header.getEncryptionAlgorithm()
-    }
-
-    @Test
     void testClaims() {
         Claims claims = Jwts.claims()
         assertNotNull claims

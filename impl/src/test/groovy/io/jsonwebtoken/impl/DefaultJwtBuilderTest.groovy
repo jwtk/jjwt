@@ -257,7 +257,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactWithJwsHeader() {
         def b = new DefaultJwtBuilder()
-        b.setHeader(Jwts.jwsHeader().setKeyId('a'))
+        b.setHeader(Jwts.headerBuilder().setKeyId('a'))
         b.setPayload('foo')
         def alg = SignatureAlgorithm.HS256
         def key = Keys.secretKeyFor(alg)
@@ -310,7 +310,7 @@ class DefaultJwtBuilderTest {
     void testSignWithKeyOnly() {
 
         def b = new DefaultJwtBuilder()
-        b.setHeader(Jwts.jwsHeader().setKeyId('a'))
+        b.setHeader(Jwts.headerBuilder().setKeyId('a'))
         b.setPayload('foo')
 
         def key = KeyGenerator.getInstance('HmacSHA256').generateKey()

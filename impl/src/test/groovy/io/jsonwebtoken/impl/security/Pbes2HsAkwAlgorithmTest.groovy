@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.JweHeader
@@ -20,7 +35,7 @@ class Pbes2HsAkwAlgorithmTest {
     void testInsufficientIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
-            JweHeader header = Jwts.jweHeader().setPbes2Count(iterations)
+            JweHeader header = Jwts.headerBuilder().setPbes2Count(iterations).build() as JweHeader
             KeyRequest<PasswordKey> req = new DefaultKeyRequest<>(null, null, KEY, header, EncryptionAlgorithms.A256GCM)
             try {
                 alg.getEncryptionKey(req)

@@ -19,6 +19,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -83,6 +84,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      */
     JwtBuilder setHeader(Map<String, ?> header);
+
+    /**
+     * Sets (and replaces) any existing header with the header resulting from the specified builder's
+     * {@link Builder#build()} result.
+     *
+     * @param builder the builder to use to obtain the header
+     * @return the JwtBuilder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder setHeader(Builder<? extends Header<?>> builder);
 
     /**
      * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method

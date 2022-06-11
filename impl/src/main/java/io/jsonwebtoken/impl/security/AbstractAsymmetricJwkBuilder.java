@@ -1,11 +1,22 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AsymmetricJwk;
 import io.jsonwebtoken.security.AsymmetricJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwk;
@@ -38,30 +49,19 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         T extends AsymmetricJwkBuilder<K, J, T>>
         extends AbstractJwkBuilder<K, J, T> implements AsymmetricJwkBuilder<K, J, T> {
 
-    protected boolean computeX509Sha1Thumbprint;
-    /**
-     * Boolean object indicates 3 states: 1) not configured 2) configured as true, 3) configured as false
-     */
-    protected Boolean computeX509Sha256Thumbprint = null;
     protected Boolean applyX509KeyUse = null;
     private KeyUseStrategy keyUseStrategy = DefaultKeyUseStrategy.INSTANCE;
 
-    private static final Function<X509Certificate, byte[]> GET_X509_BYTES =
-            Functions.wrapFmt(new CheckedFunction<X509Certificate, byte[]>() {
-                @Override
-                public byte[] apply(X509Certificate cert) throws Exception {
-                    return cert.getEncoded();
-                }
-            }, MalformedKeyException.class, "Unable to access X509Certificate encoded bytes necessary to compute thumbprint. Certificate: %s");
+    private final DefaultX509Builder<T> x509Builder;
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
+        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, tthis(), MalformedKeyException.class);
     }
 
     AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, K key, Set<Field<?>> fields) {
         super(new DefaultJwkContext<>(fields, b.jwkContext, key));
-        this.computeX509Sha1Thumbprint = b.computeX509Sha1Thumbprint;
-        this.computeX509Sha256Thumbprint = b.computeX509Sha256Thumbprint;
+        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, tthis(), MalformedKeyException.class);
         this.applyX509KeyUse = b.applyX509KeyUse;
         this.keyUseStrategy = b.keyUseStrategy;
     }
@@ -83,15 +83,13 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     @Override
     public T setX509CertificateChain(List<X509Certificate> chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
-        this.jwkContext.setX509CertificateChain(chain);
-        return tthis();
+        return this.x509Builder.setX509CertificateChain(chain);
     }
 
     @Override
-    public T setX509Url(URI url) {
-        Assert.notNull(url, "X509Url cannot be null.");
-        this.jwkContext.setX509Url(url);
-        return tthis();
+    public T setX509Url(URI uri) {
+        Assert.notNull(uri, "X509Url cannot be null.");
+        return this.x509Builder.setX509Url(uri);
     }
 
     /*
@@ -103,40 +101,31 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
      */
 
     @Override
+    public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
+        return this.x509Builder.setX509CertificateSha1Thumbprint(thumbprint);
+    }
+
+    @Override
+    public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
+        return this.x509Builder.setX509CertificateSha256Thumbprint(thumbprint);
+    }
+
+    @Override
     public T withX509Sha1Thumbprint(boolean enable) {
-        this.computeX509Sha1Thumbprint = enable;
-        return tthis();
+        return this.x509Builder.withX509Sha1Thumbprint(enable);
     }
 
     @Override
     public T withX509Sha256Thumbprint(boolean enable) {
-        this.computeX509Sha256Thumbprint = enable;
-        return tthis();
-    }
-
-    private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {
-        byte[] encoded = GET_X509_BYTES.apply(cert);
-        ContentRequest request =
-                new DefaultContentRequest(this.jwkContext.getProvider(), this.jwkContext.getRandom(), encoded);
-        return alg.hash(request);
+        return this.x509Builder.withX509Sha256Thumbprint(enable);
     }
 
     @Override
     public J build() {
-        X509Certificate firstCert = null;
-        List<X509Certificate> chain = this.jwkContext.getX509CertificateChain();
-        if (!Collections.isEmpty(chain)) {
-            firstCert = chain.get(0);
-        }
-
 //        if (applyX509KeyUse == null) { //if not specified, enable by default if possible:
 //            applyX509KeyUse = firstCert != null && !Strings.hasText(this.jwkContext.getPublicKeyUse());
 //        }
-        if (computeX509Sha256Thumbprint == null) { //if not specified, enable by default if possible:
-            computeX509Sha256Thumbprint = firstCert != null && !computeX509Sha1Thumbprint;
-        }
 
-        if (firstCert != null) {
 //            if (applyX509KeyUse) {
 //                KeyUsage usage = new KeyUsage(firstCert);
 //                String use = keyUseStrategy.toJwkValue(usage);
@@ -144,15 +133,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 //                    setPublicKeyUse(use);
 //                }
 //            }
-            if (computeX509Sha1Thumbprint) {
-                byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA1);
-                this.jwkContext.setX509CertificateSha1Thumbprint(thumbprint);
-            }
-            if (computeX509Sha256Thumbprint) {
-                byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA256);
-                this.jwkContext.setX509CertificateSha256Thumbprint(thumbprint);
-            }
-        }
+        this.x509Builder.apply();
         return super.build();
     }
 

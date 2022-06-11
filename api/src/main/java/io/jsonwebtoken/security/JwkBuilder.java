@@ -15,8 +15,9 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.lang.MapMutator;
+
 import java.security.Key;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,27 +38,8 @@ import java.util.Set;
  * @see EcPrivateJwkBuilder
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends SecurityBuilder<J, T> {
-
-    /**
-     * Set a single JWK property by name. If the {@code value} is {@code null}, an empty array, an empty
-     * {@link java.util.Collection}, or an empty {@link Map}, the property will be removed from the JWK.
-     *
-     * @param name  the name of the JWK property
-     * @param value the value to set for the property name
-     * @return the builder for method chaining.
-     */
-    T put(String name, Object value);
-
-    /**
-     * Sets one or more JWK properties by name.  If any {@code name} has a value that is {@code null}, an empty array,
-     * an empty {@link java.util.Collection}, or an empty {@link Map}, the property will be removed from the JWK.
-     *
-     * @param values one or more name/value pairs to set on the JWK.
-     * @return the builder for method chaining.
-     * @throws IllegalArgumentException if {@code values} is {@code null} or empty.
-     */
-    T putAll(Map<String, ?> values) throws IllegalArgumentException;
+public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
+        extends MapMutator<String, Object, T>, SecurityBuilder<J, T> {
 
     /**
      * Sets the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">{@code alg} (Algorithm)

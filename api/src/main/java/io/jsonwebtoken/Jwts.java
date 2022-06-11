@@ -35,11 +35,13 @@ public final class Jwts {
 
     /**
      * Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
-     * JWTs.  As this is a less common use of JWTs, consider using the respective {@link #jwsHeader()} or
-     * {@link #jweHeader()} factory methods instead if you will later digitally sign or encrypt the JWT.
+     * JWTs.  Because {@code Header} extends {@link Map} and map mutation methods cannot support method chaining,
+     * consider using the more flexible {@link #headerBuilder()} method instead, which does support method
+     * chaining and other builder conveniences not available on the {@link UnprotectedHeader} interface.
      *
      * @return a new {@link UnprotectedHeader} instance suitable for <em>unprotected</em> (not digitally signed or
      * encrypted) JWTs.
+     * @see #headerBuilder()
      */
     public static UnprotectedHeader header() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultUnprotectedHeader");
@@ -47,23 +49,41 @@ public final class Jwts {
 
     /**
      * Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
-     * JWTs, populated with the specified name/value pairs.  As this is a less common use of JWTs, consider using the
-     * {@link #jwsHeader(Map)} or {@link #jweHeader(Map)} factory methods instead if you will later digitally sign or
-     * encrypt the JWT.
+     * JWTs, populated with the specified name/value pairs. Because {@code Header} extends {@link Map} and map
+     * mutation methods cannot support method chaining, consider using the more flexible {@link #headerBuilder()}
+     * method instead, which does support method chaining and other builder conveniences not available on the
+     * {@link UnprotectedHeader} interface.
      *
      * @param header map of name/value pairs used to create an unprotected (not digitally signed or encrypted) JWT
      *               {@code Header} instance.
      * @return a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
      * JWTs.
+     * @see #headerBuilder()
      */
     public static UnprotectedHeader header(Map<String, Object> header) {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultUnprotectedHeader", MAP_ARG, header);
     }
 
     /**
-     * Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's).
+     * Returns a new {@link DynamicHeaderBuilder} that can build any type of {@link Header} instance depending on
+     * which builder properties are set.
+     *
+     * @return a new {@link DynamicHeaderBuilder} that can build any type of {@link Header} instance depending on
+     * which builder properties are set.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static DynamicHeaderBuilder headerBuilder() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultDynamicHeaderBuilder");
+    }
+
+    /**
+     * Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's). Because {@code Header}
+     * extends {@link Map} and map mutation methods cannot support method chaining, consider using the
+     * more flexible {@link #headerBuilder()} method instead, which does support method chaining, as well as other
+     * convenience builder methods not available via the {@link JwsHeader} interface.
      *
      * @return a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's).
+     * @see #headerBuilder()
      * @see JwtBuilder#setHeader(Header)
      */
     public static JwsHeader jwsHeader() {
@@ -72,40 +92,19 @@ public final class Jwts {
 
     /**
      * Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
-     * specified name/value pairs.
+     * specified name/value pairs.  Because {@code Header} extends {@link Map} and map mutation methods cannot
+     * support method chaining, consider using the more flexible {@link #headerBuilder()} method instead,
+     * which does support method chaining and other builder conveniences not available on the
+     * {@link JwsHeader} interface directly.
      *
      * @param header map of name/value pairs used to create a new {@link JwsHeader} instance.
      * @return a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
      * specified name/value pairs.
+     * @see #headerBuilder()
      * @see JwtBuilder#setHeader(Header)
      */
     public static JwsHeader jwsHeader(Map<String, Object> header) {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwsHeader", MAP_ARG, header);
-    }
-
-    /**
-     * Returns a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's).
-     *
-     * @return a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's).
-     * @see JwtBuilder#setHeader(Header)
-     * @since JJWT_RELEASE_VERSION
-     */
-    public static JweHeader jweHeader() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJweHeader");
-    }
-
-    /**
-     * Returns a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's), populated with the
-     * specified name/value pairs.
-     *
-     * @param header initial name/value pairs to add to the created {@code Header} before returning.
-     * @return a new {@link JweHeader} instance suitable for encrypted JWTs (aka 'JWE's), populated with the
-     * specified name/value pairs.
-     * @see JwtBuilder#setHeader(Header)
-     * @since JJWT_RELEASE_VERSION
-     */
-    public static JweHeader jweHeader(Map<String, Object> header) {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJweHeader", MAP_ARG, header);
     }
 
     /**
