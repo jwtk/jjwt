@@ -403,13 +403,13 @@ public class DefaultJwtParser implements JwtParser {
                 throw e;
             } catch (InvalidKeyException | IllegalArgumentException e) {
                 String algName = algorithm.getValue();
-                String msg = "The parsed JWT indicates it was signed with the " + algName + " signature " +
-                    "algorithm, but the specified signing key of type " + key.getClass().getName() +
-                    " may not be used to validate " + algName + " signatures.  Because the specified " +
-                    "signing key reflects a specific and expected algorithm, and the JWT does not reflect " +
+                String msg = "The parsed JWT indicates it was signed with the '" + algName + "' signature " +
+                    "algorithm, but the provided " + key.getClass().getName() + " key may " +
+                    "not be used to verify " + algName + " signatures.  Because the specified " +
+                    "key reflects a specific and expected algorithm, and the JWT does not reflect " +
                     "this algorithm, it is likely that the JWT was not expected and therefore should not be " +
-                    "trusted.  Another possibility is that the parser was configured with the incorrect " +
-                    "signing key, but this cannot be assumed for security reasons.";
+                    "trusted.  Another possibility is that the parser was provided the incorrect " +
+                    "signature verification key, but this cannot be assumed for security reasons.";
                 throw new UnsupportedJwtException(msg, e);
             }
 

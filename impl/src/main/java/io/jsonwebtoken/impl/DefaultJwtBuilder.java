@@ -120,6 +120,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
+        createSigner(alg, key); // since 0.11.5: fail fast if key cannot be used for alg.
         this.algorithm = alg;
         this.key = key;
         return this;

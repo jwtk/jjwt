@@ -19,11 +19,15 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.SignatureException;
 
+import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.security.interfaces.ECKey;
 import java.security.spec.ECGenParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,16 +42,43 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
     private static final Map<SignatureAlgorithm, String> EC_CURVE_NAMES = createEcCurveNames();
 
     private static Map<SignatureAlgorithm, String> createEcCurveNames() {
-        Map<SignatureAlgorithm, String> m = new HashMap<SignatureAlgorithm, String>(); //alg to ASN1 OID name
+        Map<SignatureAlgorithm, String> m = new HashMap<>(); //alg to ASN1 OID name
         m.put(SignatureAlgorithm.ES256, "secp256r1");
         m.put(SignatureAlgorithm.ES384, "secp384r1");
         m.put(SignatureAlgorithm.ES512, "secp521r1");
         return m;
     }
 
+    protected static String byteSizeString(int bytesLength) {
+        return bytesLength + " bytes (" + (bytesLength * Byte.SIZE) + " bits)";
+    }
+
+    protected final int requiredSignatureByteLength;
+    protected final int fieldByteLength;
+
     protected EllipticCurveProvider(SignatureAlgorithm alg, Key key) {
         super(alg, key);
         Assert.isTrue(alg.isEllipticCurve(), "SignatureAlgorithm must be an Elliptic Curve algorithm.");
+        if (!(key instanceof ECKey)) {
+            String msg = "Elliptic Curve signatures require an ECKey. The provided key of type " +
+                    key.getClass().getName() + " is not a " + ECKey.class.getName() + " instance.";
+            throw new InvalidKeyException(msg);
+        }
+        this.requiredSignatureByteLength = getSignatureByteArrayLength(alg);
+        this.fieldByteLength = this.requiredSignatureByteLength / 2;
+
+        ECKey ecKey = (ECKey) key; // can cast here because of the Assert.isTrue assertion above
+        BigInteger order = ecKey.getParams().getOrder();
+        int keyFieldByteLength = (order.bitLength() + 7) / Byte.SIZE; //for ES512 (can be 65 or 66, this ensures 66)
+        int concatByteLength = keyFieldByteLength * 2;
+
+        if (concatByteLength != this.requiredSignatureByteLength) {
+            String msg = "EllipticCurve key has a field size of " +
+                    byteSizeString(keyFieldByteLength) + ", but " + alg.name() + " requires a field size of " +
+                    byteSizeString(this.fieldByteLength) + " per [RFC 7518, Section 3.4 (validation)]" +
+                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
+            throw new InvalidKeyException(msg);
+        }
     }
 
     /**
@@ -147,16 +178,15 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
     /**
      * Returns the expected signature byte array length (R + S parts) for
-     * the specified ECDSA algorithm.
+     * the specified ECDSA algorithm.  Expected lengths are mandated by
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">JWA RFC 7518, Section 3.4</a>.
      *
      * @param alg The ECDSA algorithm. Must be supported and not
      *            {@code null}.
      * @return The expected byte array length for the signature.
      * @throws JwtException If the algorithm is not supported.
      */
-    public static int getSignatureByteArrayLength(final SignatureAlgorithm alg)
-        throws JwtException {
-
+    public static int getSignatureByteArrayLength(final SignatureAlgorithm alg) throws JwtException {
         switch (alg) {
             case ES256:
                 return 64;
@@ -179,7 +209,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * @return The ECDSA JWS encoded signature.
      * @throws JwtException If the ASN.1/DER signature format is invalid.
      */
-    public static byte[] transcodeSignatureToConcat(final byte[] derSignature, int outputLength) throws JwtException {
+    public static byte[] transcodeDERToConcat(final byte[] derSignature, int outputLength) throws JwtException {
 
         if (derSignature.length < 8 || derSignature[0] != 48) {
             throw new JwtException("Invalid ECDSA signature format");
@@ -212,9 +242,9 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
         rawLen = Math.max(rawLen, outputLength / 2);
 
         if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset
-            || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength
-            || derSignature[offset] != 2
-            || derSignature[offset + 2 + rLength] != 2) {
+                || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength
+                || derSignature[offset] != 2
+                || derSignature[offset + 2 + rLength] != 2) {
             throw new JwtException("Invalid ECDSA signature format");
         }
 
@@ -237,7 +267,16 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
      * @return The ASN.1/DER encoded signature.
      * @throws JwtException If the ECDSA JWS signature format is invalid.
      */
-    public static byte[] transcodeSignatureToDER(byte[] jwsSignature) throws JwtException {
+    public static byte[] transcodeConcatToDER(byte[] jwsSignature) throws JwtException {
+        try {
+            return concatToDER(jwsSignature);
+        } catch (Exception e) { // CVE-2022-21449 guard
+            String msg = "Invalid ECDSA signature format.";
+            throw new SignatureException(msg, e);
+        }
+    }
+
+    private static byte[] concatToDER(byte[] jwsSignature) throws ArrayIndexOutOfBoundsException {
 
         int rawLen = jwsSignature.length / 2;
 
@@ -273,7 +312,7 @@ public abstract class EllipticCurveProvider extends SignatureProvider {
 
         int offset;
 
-        final byte derSignature[];
+        final byte[] derSignature;
 
         if (len < 128) {
             derSignature = new byte[2 + 2 + j + 2 + l];

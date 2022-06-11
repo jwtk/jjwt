@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.DateFormats;
+
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collection;
@@ -62,9 +63,7 @@ public class JwtMap implements Map<String, Object> {
         }
     }
 
-    /**
-     * @since 0.10.0
-     */
+    // @since 0.10.0
     private static Date parseIso8601Date(String s, String name) throws IllegalArgumentException {
         try {
             return DateFormats.parseIso8601Date(s);
@@ -74,22 +73,20 @@ public class JwtMap implements Map<String, Object> {
         }
     }
 
-    /**
-     * @since 0.10.0
-     */
+    // @since 0.10.0
     protected static Date toSpecDate(Object v, String name) {
         if (v == null) {
             return null;
         } else if (v instanceof Number) {
             // https://github.com/jwtk/jjwt/issues/122:
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
+            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
             long seconds = ((Number) v).longValue();
             v = seconds * 1000;
         } else if (v instanceof String) {
             // https://github.com/jwtk/jjwt/issues/122
             // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because Because java.util.Date requires milliseconds, we need to multiply by 1000:
+            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
             try {
                 long seconds = Long.parseLong((String) v);
                 v = seconds * 1000;
@@ -172,8 +169,9 @@ public class JwtMap implements Map<String, Object> {
         if (m == null) {
             return;
         }
-        for (String s : m.keySet()) {
-            put(s, m.get(s));
+        for (Map.Entry <? extends String, ?>entry : m.entrySet()) {
+            String s = entry.getKey();
+            put(s, entry.getValue());
         }
     }
 

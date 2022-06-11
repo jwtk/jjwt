@@ -19,10 +19,12 @@ import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.crypto.EllipticCurveProvider
+import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
@@ -37,6 +39,28 @@ import java.security.PublicKey
 import static org.junit.Assert.*
 
 class JwtsTest {
+
+    private static Date now() {
+        return dateWithOnlySecondPrecision(System.currentTimeMillis());
+    }
+
+    private static int later() {
+        def date = laterDate(10000)
+        def seconds = date.getTime() / 1000
+        return seconds as int
+    }
+
+    private static Date laterDate(int seconds) {
+        def millis = seconds * 1000L
+        def time = System.currentTimeMillis() + millis
+        return dateWithOnlySecondPrecision(time)
+    }
+
+    private static Date dateWithOnlySecondPrecision(long millis) {
+        long seconds = (millis / 1000) as long
+        long secondOnlyPrecisionMillis = seconds * 1000
+        return new Date(secondOnlyPrecisionMillis)
+    }
 
     protected static String base64Url(String s) {
         byte[] bytes = s.getBytes(Strings.UTF_8)
@@ -243,31 +267,9 @@ class JwtsTest {
         assertNull claims.getAudience()
     }
 
-    private static Date now() {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis());
-    }
-
-    private static int later() {
-        return laterDate().getTime() / 1000;
-    }
-
-    private static Date laterDate(int seconds) {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis() + (seconds * 1000));
-    }
-
-    private static Date laterDate() {
-        return laterDate(10000);
-    }
-
-    private static Date dateWithOnlySecondPrecision(long millis) {
-        long seconds = millis / 1000;
-        long secondOnlyPrecisionMillis = seconds * 1000;
-        return new Date(secondOnlyPrecisionMillis);
-    }
-
     @Test
     void testConvenienceExpiration() {
-        Date then = laterDate();
+        Date then = laterDate(10000);
         String compact = Jwts.builder().setExpiration(then).compact();
         Claims claims = Jwts.parserBuilder().build().parse(compact).body as Claims
         def claimedDate = claims.getExpiration()
@@ -574,6 +576,71 @@ class JwtsTest {
             fail('parseClaimsJws must fail for weak keys')
         } catch (WeakKeyException expected) {
         }
+    }
+
+    /**
+     * @since 0.11.5
+     */
+    @Test
+    void testBuilderWithEcdsaPublicKey() {
+        def builder = Jwts.builder().setSubject('foo')
+        def pair = Keys.keyPairFor(SignatureAlgorithm.ES256)
+        try {
+            builder.signWith(pair.public, SignatureAlgorithm.ES256) //public keys can't be used to create signatures
+        } catch (InvalidKeyException expected) {
+            String msg = "ECDSA signing keys must be PrivateKey instances."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    /**
+     * @since 0.11.5 as part of testing guards against JVM CVE-2022-21449
+     */
+    @Test
+    void testBuilderWithMismatchedEllipticCurveKeyAndAlgorithm() {
+        def builder = Jwts.builder().setSubject('foo')
+        def pair = Keys.keyPairFor(SignatureAlgorithm.ES384)
+        try {
+            builder.signWith(pair.private, SignatureAlgorithm.ES256) //ES384 keys can't be used to create ES256 signatures
+        } catch (InvalidKeyException expected) {
+            String msg = "EllipticCurve key has a field size of 48 bytes (384 bits), but ES256 requires a " +
+                    "field size of 32 bytes (256 bits) per [RFC 7518, Section 3.4 (validation)]" +
+                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    /**
+     * @since 0.11.5 as part of testing guards against JVM CVE-2022-21449
+     */
+    @Test
+    void testParserWithMismatchedEllipticCurveKeyAndAlgorithm() {
+        def pair = Keys.keyPairFor(SignatureAlgorithm.ES256)
+        def jws = Jwts.builder().setSubject('foo').signWith(pair.private).compact()
+        def parser = Jwts.parserBuilder().setSigningKey(Keys.keyPairFor(SignatureAlgorithm.ES384).public).build()
+        try {
+            parser.parseClaimsJws(jws)
+        } catch (UnsupportedJwtException expected) {
+            String msg = 'The parsed JWT indicates it was signed with the \'ES256\' signature algorithm, but ' +
+                    'the provided sun.security.ec.ECPublicKeyImpl key may not be used to verify ES256 signatures.  ' +
+                    'Because the specified key reflects a specific and expected algorithm, and the JWT does not ' +
+                    'reflect this algorithm, it is likely that the JWT was not expected and therefore should not ' +
+                    'be trusted.  Another possibility is that the parser was provided the incorrect signature ' +
+                    'verification key, but this cannot be assumed for security reasons.'
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    /**
+     * @since 0.11.5 as part of testing guards against JVM CVE-2022-21449
+     */
+    @Test(expected=io.jsonwebtoken.security.SignatureException)
+    void testEcdsaInvalidSignatureValue() {
+        def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
+        def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
+        String jws = withoutSignature + '.' + invalidEncodedSignature
+        def keypair = EllipticCurveProvider.generateKeyPair(SignatureAlgorithm.ES256)
+        Jwts.parserBuilder().setSigningKey(keypair.public).build().parseClaimsJws(jws)
     }
 
     //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20

@@ -225,6 +225,7 @@ public final class Collections {
      * Find a single value of the given type in the given Collection.
      * @param collection the Collection to search
      * @param type the type to look for
+     * @param <T> the generic type parameter for {@code type}
      * @return a value of the given type found if there is a clear match,
      * or <code>null</code> if none or more than one such value found
      */
@@ -320,6 +321,11 @@ public final class Collections {
      * Marshal the elements from the given enumeration into an array of the given type.
      * Enumeration elements must be assignable to the type of the given array. The array
      * returned will be a different instance than the array given.
+     * @param enumeration the collection to convert to an array
+     * @param array an array instance that matches the type of array to return
+     * @param <A> the element type of the array that will be created
+     * @param <E> the element type contained within the enumeration.
+     * @return a new array of type {@code A} that contains the elements in the specified {@code enumeration}.
      */
     public static <A,E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
         ArrayList<A> elements = new ArrayList<A>();
@@ -332,6 +338,7 @@ public final class Collections {
     /**
      * Adapt an enumeration to an iterator.
      * @param enumeration the enumeration
+     * @param <E> the type of elements in the enumeration
      * @return the iterator
      */
     public static <E> Iterator<E> toIterator(Enumeration<E> enumeration) {

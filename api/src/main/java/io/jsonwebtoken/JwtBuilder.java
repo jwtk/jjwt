@@ -21,6 +21,7 @@ import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -365,7 +366,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Signs the constructed JWT using the specified algorithm with the specified key, producing a JWS.
      *
-     * <h4>Deprecation Notice: Deprecated as of 0.10.0</h4>
+     * <p><b>Deprecation Notice: Deprecated as of 0.10.0</b></p>
      *
      * <p>Use {@link Keys Keys}.{@link Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor(bytes)} to
      * obtain the {@code Key} and then invoke {@link #signWith(Key)} or {@link #signWith(Key, SignatureAlgorithm)}.</p>
@@ -390,7 +391,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>This is a convenience method: the string argument is first BASE64-decoded to a byte array and this resulting
      * byte array is used to invoke {@link #signWith(SignatureAlgorithm, byte[])}.</p>
      *
-     * <h4>Deprecation Notice: Deprecated as of 0.10.0, will be removed in the 1.0 release.</h4>
+     * <p><b>Deprecation Notice: Deprecated as of 0.10.0, will be removed in the 1.0 release.</b></p>
      *
      * <p>This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
      * cryptographic operations are always binary (byte arrays), and many people were confused as to how bytes were
@@ -410,13 +411,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
      * signature operations.</p>
      *
-     * <p>To perform the correct logic with base64EncodedSecretKey strings with JJWT >= 0.10.0, you may do this:
+     * <p>To perform the correct logic with base64EncodedSecretKey strings with JJWT &gt;= 0.10.0, you may do this:</p>
      * <pre><code>
      * byte[] keyBytes = {@link Decoders Decoders}.{@link Decoders#BASE64 BASE64}.{@link Decoder#decode(Object) decode(base64EncodedSecretKey)};
      * Key key = {@link Keys Keys}.{@link Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor(keyBytes)};
      * jwtBuilder.signWith(key); //or {@link #signWith(Key, SignatureAlgorithm)}
      * </code></pre>
-     * </p>
      *
      * <p>This method will be removed in the 1.0 release.</p>
      *
@@ -475,12 +475,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
      * certain length.  Using compression can help ensure the compact JWT fits within that length.  However, NOTE:</p>
      *
-     * <h3>Compatibility Warning</h3>
+     * <p><b>Compatibility Warning</b></p>
      *
      * <p>The JWT family of specifications defines compression only for JWE (Json Web Encryption)
      * tokens.  Even so, JJWT will also support compression for JWS tokens as well if you choose to use it.
      * However, be aware that <b>if you use compression when creating a JWS token, other libraries may not be able to
-     * parse that JWS token</b>.  When using compression for JWS tokens, be sure that that all parties accessing the
+     * parse that JWS token</b>.  When using compression for JWS tokens, be sure that all parties accessing the
      * JWS token support compression for JWS.</p>
      *
      * <p>Compression when creating JWE tokens however should be universally accepted for any
