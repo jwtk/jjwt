@@ -70,6 +70,10 @@ enforcement.
     * [Decompression](#jws-read-decompression)
     <!-- * [Error Handling](#jws-read-errors) -->
 * [Encrypted JWTs](#jwe)
+* [Key Lookup](#key-locator)
+  * [Custom Key Locator](#key-locator-custom)
+    * [Key Locator Strategy](#key-locator-custom-strategy)
+    * [Key Locator Key Types](#key-locator-custom-keytypes)
 * [Compression](#compression)
   * [Custom Compression Codec](#compression-custom)
   * [Custom Compression Codec Locator](#compression-custom-locator)
@@ -1083,13 +1087,17 @@ For example:
     .build()
     .parseClaimsJws(jwsString);
   ```
+
+<a name="jws-read-key-locator"></a><a name="jws-read-key-resolver"></a> <!-- retain old section link -->
+#### Verification Key Locator
   
-But you might have noticed something - what if your application doesn't use just a single SecretKey or KeyPair? What
+But you might have noticed something - what if your application doesn't use just a single `SecretKey` or `KeyPair`? What
 if JWSs can be created with different `SecretKey`s or public/private keys, or a combination of both?  How do you
 know which key to specify if you can't inspect the JWT first?
 
 In these cases, you can't call the `JwtParserBuilder`'s `verifyWith` method with a single key - instead, you'll need
-Key Locator.  Please see the [Key Lookup](#key-locator) section to see how to dynamically obtain different keys.
+Key Locator.  Please see the [Key Lookup](#key-locator) section to see how to dynamically obtain different keys when
+parsing JWSs or JWEs.
 
 <a name="jws-read-claims"></a>
 #### Claim Assertions
@@ -1205,6 +1213,9 @@ received, at parse time, so you can't 'hard code' any verification or decryption
 `verifyWith` or `decryptWith` methods.  Those are only to be used when the same key is used to verify or decrypt
 *all* JWSs or JWEs, which won't work for dynamically signed or encrypted JWTs.
 
+<a name="key-locator-custom"></a>
+### Custom Key Locator
+
 Instead, you'll need to implement the `Locator<Key>` interface and specify an instance on the
 `JwtParserBuilder` via the `setKeyLocator` method. For example:
 
@@ -1237,6 +1248,9 @@ or verifying any JWS signature or decrypting any JWE ciphertext_. This allows yo
 for any information that can help you look up the `Key` to use for verifying _that specific jwt_.  This is very 
 powerful for applications with more complex security models that might use different keys at different times or for 
 different users or customers.
+
+<a name="key-locator-custom-strategy"></a>
+#### Key Locator Strategy
 
 Which data might you inspect?
 
@@ -1308,7 +1322,11 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
 > the `kid` (Key ID) header value or perhaps a public key thumbprint.  You will find the implementation is much 
 > simpler and easier to maintain over time, and also creates smaller headers for compact transmission.
 
-Finally, remember that:
+<a name="key-locator-custom-keytypes"></a>
+#### Key Locator Key Types
+
+Regardless of which implementation strategy you choose, remember to return the appropriate type of key depending
+on the type of JWS or JWE algorithm used.  That is:
 
 * for JWS:
   * For HMAC-based signature algorithms, the returned verification key should be a `SecretKey`, and, 
