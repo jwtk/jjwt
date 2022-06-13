@@ -19,8 +19,9 @@ import io.jsonwebtoken.lang.Assert;
 
 /**
  * Adapter pattern implementation for the {@link Locator} interface.  Subclasses can override any of the
- * {@link #locate(UnprotectedHeader)}, {@link #locate(JwsHeader)}, or {@link #locate(JweHeader)} methods for
- * type-specific logic if desired when the encountered header is an unprotected JWT, JWS or JWE respectively.
+ * {@link #locate(UnprotectedHeader)}, {@link #locate(ProtectedHeader)}, {@link #locate(JwsHeader)}, or
+ * {@link #locate(JweHeader)} methods for type-specific logic if desired when the encountered header is an
+ * unprotected JWT, or an integrity-protected JWT (either a JWS or JWE).
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -33,11 +34,11 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
     }
 
     /**
-     * Inspects the specified header, and delegates to the respective
-     * {@link #locate(JweHeader)}, {@link #locate(JwsHeader)} or {@link #locate(UnprotectedHeader)} methods if the
-     * encountered header is a {@link JweHeader}, {@link JwsHeader}, or {@link UnprotectedHeader}.
+     * Inspects the specified header, and delegates to the {@link #locate(UnprotectedHeader)} method if the header
+     * is an {@link UnprotectedHeader} or the {@link #locate(ProtectedHeader)} method if the header is either a
+     * {@link JwsHeader} or {@link JweHeader}.
      *
-     * @param header the JWT header to inspect; may be an instance of {@link Header}, {@link JwsHeader} or
+     * @param header the JWT header to inspect; may be an instance of {@link UnprotectedHeader}, {@link JwsHeader} or
      *               {@link JweHeader} depending on if the respective JWT is an unprotected JWT, JWS or JWE.
      * @return an object referenced in the specified header, or {@code null} if the referenced object cannot be found
      * or does not exist.
@@ -45,12 +46,9 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
     @Override
     public final T locate(Header<?> header) {
         Assert.notNull(header, "Header cannot be null.");
-        if (header instanceof JwsHeader) {
-            JwsHeader jwsHeader = (JwsHeader) header;
-            return locate(jwsHeader);
-        } else if (header instanceof JweHeader) {
-            JweHeader jweHeader = (JweHeader) header;
-            return locate(jweHeader);
+        if (header instanceof ProtectedHeader<?>) {
+            ProtectedHeader<?> protectedHeader = (ProtectedHeader<?>) header;
+            return locate(protectedHeader);
         } else {
             Assert.isInstanceOf(UnprotectedHeader.class, header, "Unrecognized Header type.");
             return locate((UnprotectedHeader) header);
@@ -58,8 +56,27 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
     }
 
     /**
-     * Returns an object referenced in the specified JWE header, or {@code null} if the referenced
+     * Returns an object referenced in the specified {@link ProtectedHeader}, or {@code null} if the referenced
+     * object cannot be found or does not exist.  This is a convenience method that delegates to
+     * {@link #locate(JwsHeader)} if the {@code header} is a {@link JwsHeader} or {@link #locate(JweHeader)} if the
+     * {@code header} is a {@link JweHeader}.
+     *
+     * @param header the protected header of an encountered JWS or JWE.
+     * @return an object referenced in the specified {@link ProtectedHeader}, or {@code null} if the referenced
      * object cannot be found or does not exist.
+     */
+    protected T locate(ProtectedHeader<?> header) {
+        if (header instanceof JwsHeader) {
+            return locate((JwsHeader) header);
+        } else {
+            Assert.isInstanceOf(JweHeader.class, header, "Unrecognized ProtectedHeader type.");
+            return locate((JweHeader) header);
+        }
+    }
+
+    /**
+     * Returns an object referenced in the specified JWE header, or {@code null} if the referenced
+     * object cannot be found or does not exist.  Default implementation simply returns {@code null}.
      *
      * @param header the header of an encountered JWE.
      * @return an object referenced in the specified JWE header, or {@code null} if the referenced
@@ -71,7 +88,7 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
 
     /**
      * Returns an object referenced in the specified JWS header, or {@code null} if the referenced
-     * object cannot be found or does not exist.
+     * object cannot be found or does not exist. Default implementation simply returns {@code null}.
      *
      * @param header the header of an encountered JWS.
      * @return an object referenced in the specified JWS header, or {@code null} if the referenced
@@ -83,7 +100,7 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
 
     /**
      * Returns an object referenced in the specified Unprotected JWT header, or {@code null} if the referenced
-     * object cannot be found or does not exist.
+     * object cannot be found or does not exist. Default implementation simply returns {@code null}.
      *
      * @param header the header of an encountered JWE.
      * @return an object referenced in the specified Unprotected JWT header, or {@code null} if the referenced

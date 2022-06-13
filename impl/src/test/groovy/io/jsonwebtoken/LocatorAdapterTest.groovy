@@ -12,21 +12,21 @@ class LocatorAdapterTest {
 
     @Test
     void testJwtHeader() {
-        UnprotectedHeader input = new DefaultUnprotectedHeader()
+        Header input = new DefaultUnprotectedHeader()
         def locator = new LocatorAdapter() {
             @Override
             protected Object locate(UnprotectedHeader header) {
                 return header
             }
         }
-        assertSame input, locator.locate(input)
+        assertSame input, locator.locate(input as Header /* force Groovy to avoid signature erasure */)
     }
 
     @Test
     void testJwtHeaderWithoutOverride() {
-        UnprotectedHeader input = new DefaultUnprotectedHeader()
+        Header input = new DefaultUnprotectedHeader()
         Locator locator = new LocatorAdapter() {}
-        assertNull locator.locate(input)
+        assertNull locator.locate(input as Header /* force Groovy to avoid signature erasure */)
     }
 
     @Test

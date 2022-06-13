@@ -63,7 +63,7 @@ enforcement.
     * [Compression](#jws-create-compression)
   * [Read a JWS](#jws-read)
     * [Verification Key](#jws-read-key)
-      * [Find the Verification Key at Runtime](#jws-read-key-resolver)
+      * [Find the Verification Key at Runtime](#jws-read-key-locator)
     * [Claims Assertions](#jws-read-claims)
     * [Accounting for Clock Skew](#jws-read-clock)
       * [Custom Clock](#jws-read-clock-custom)
@@ -72,6 +72,7 @@ enforcement.
 * [Encrypted JWTs](#jwe)
 * [Compression](#compression)
   * [Custom Compression Codec](#compression-custom)
+  * [Custom Compression Codec Locator](#compression-custom-locator)
 * [JSON Processor](#json)
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
@@ -92,52 +93,61 @@ enforcement.
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Extremely stable implementation with over 1,000+ tests and enforced 100% test code coverage.  Literally every single
+ * Stable implementation with over 1,000+ tests and enforced 100% test code coverage.  Literally every single
    method, statement and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
-    * HS256: HMAC using SHA-256
-    * HS384: HMAC using SHA-384
-    * HS512: HMAC using SHA-512
-    * ES256: ECDSA using P-256 and SHA-256
-    * ES384: ECDSA using P-384 and SHA-384
-    * ES512: ECDSA using P-521 and SHA-512
-    * RS256: RSASSA-PKCS-v1_5 using SHA-256
-    * RS384: RSASSA-PKCS-v1_5 using SHA-384
-    * RS512: RSASSA-PKCS-v1_5 using SHA-512
-    * PS256: RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup>1</sup>
-    * PS384: RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup>1</sup>
-    * PS512: RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup>1</sup>
-    
-    <sup>1. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
- * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
-    * A128CBC-HS256: AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3)
-    * A192CBC-HS384: AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.4](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4)
-    * A256CBC-HS512: AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.5](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5)
-    * A128GCM: AES GCM using 128-bit key<sup>2</sup>
-    * A192GCM: AES GCM using 192-bit key<sup>2</sup>
-    * A256GCM: AES GCM using 256-bit key<sup>2</sup>
-    
-    <sup>2. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
- * All Key Management Algorithms for obtaining JWE encryption and decryption keys: 
-   * RSA1_5: RSAES-PKCS1-v1_5
-   * RSA-OAEP: RSAES OAEP using default parameters
-   * RSA-OAEP-256: RSAES OAEP using SHA-256 and MGF1 with SHA-256
-   * A128KW: AES Key Wrap with default initial value using 128-bit key
-   * A192KW: AES Key Wrap with default initial value using 192-bit key
-   * A256KW: AES Key Wrap with default initial value using 256-bit key
-   * dir: Direct use of a shared symmetric key as the CEK
-   * ECDH-ES: Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF
-   * ECDH-ES+A128KW: ECDH-ES using Concat KDF and CEK wrapped with "A128KW"
-   * ECDH-ES+A192KW: ECDH-ES using Concat KDF and CEK wrapped with "A192KW"
-   * ECDH-ES+A256KW: ECDH-ES using Concat KDF and CEK wrapped with "A256KW"
-   * A128GCMKW: Key wrapping with AES GCM using 128-bit key<sup>3</sup>
-   * A192GCMKW: Key wrapping with AES GCM using 192-bit key<sup>3</sup>
-   * A256GCMKW: Key wrapping with AES GCM using 256-bit key<sup>3</sup>
-   * PBES2-HS256+A128KW: PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup>3</sup>
-   * PBES2-HS384+A192KW: PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup>3</sup>
-   * PBES2-HS512+A256KW: PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup>3</sup>
+   
+   | Identifier | Signature Algorithm |
+   |------------|---------------------|
+   | `HS256` | HMAC using SHA-256 |
+   | `HS384` | HMAC using SHA-384 |
+   | `HS512` | HMAC using SHA-512 |
+   | `ES256` | ECDSA using P-256 and SHA-256 |
+   | `ES384` | ECDSA using P-384 and SHA-384 |
+   | `ES512` | ECDSA using P-521 and SHA-512 |
+   | `RS256` | RSASSA-PKCS-v1_5 using SHA-256 |
+   | `RS384` | RSASSA-PKCS-v1_5 using SHA-384 |
+   | `RS512` | RSASSA-PKCS-v1_5 using SHA-512 |
+   | `PS256` | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
+   | `PS384` | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
+   | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
+    <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-   <sup>3. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+ * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
+   
+   | Identifier | Encryption Algorithm |
+   |------------|----------------------|
+   | `A128CBC-HS256` | AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) |
+   | `A192CBC-HS384` | AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.4](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) |
+   | `A256CBC-HS512` | AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.5](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) |
+   | `A128GCM` | AES GCM using 128-bit key<sup><b>2</b></sup> |
+   | `A192GCM` | AES GCM using 192-bit key<sup><b>2</b></sup> |
+   | `A256GCM` | AES GCM using 256-bit key<sup><b>2</b></sup> |
+   <sup><b>2</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+ * All Key Management Algorithms for obtaining JWE encryption and decryption keys: 
+   
+   | Identifier | Key Management Algorithm |
+   |------------|--------------------------|   
+   | `RSA1_5` | RSAES-PKCS1-v1_5 |
+   | `RSA-OAEP` | RSAES OAEP using default parameters |
+   | `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256 |
+   | `A128KW` | AES Key Wrap with default initial value using 128-bit key |
+   | `A192KW` | AES Key Wrap with default initial value using 192-bit key |
+   | `A256KW` | AES Key Wrap with default initial value using 256-bit key |
+   | `dir` | Direct use of a shared symmetric key as the CEK |
+   | `ECDH-ES` | Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF |
+   | `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW" |
+   | `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW" |
+   | `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW" |
+   | `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>3</b></sup> |
+   | `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>3</b></sup> |
+   | `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>3</b></sup> |
+   | `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup> |
+   | `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup> |
+   | `PBES2-HS512+A256KW` | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
+   <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+   
  * Convenience enhancements beyond the specification such as
     * Body compression for any large JWT, not just JWEs
     * Claims assertions (requiring specific values)
@@ -230,59 +240,83 @@ to discuss or ask questions first if you're not sure. :)
 <a name="overview"></a>
 ## What is a JSON Web Token?
 
-Don't know what a JSON Web Token is? Read on. Otherwise, jump on down to the [Installation](#Installation) section.
+JSON Web Token (JWT) is a _general-purpose_ text-based messaging format for transmitting information in a compact
+and secure way.  Contrary to popular belief, JWT is _not_ just useful for sending and receiving identity tokens 
+around the internet (even if that is the most common use case).  JWTs can be used as a message for _any_ type of data.
 
-JWT is a means of transmitting information between two parties in a compact, verifiable form.
+A JWT in its simplest form contains two parts:
 
-The data included within the body of a JWT is called the `payload`.  A JWT payload can be anything at all - anything
-that can be represented as a byte array, such as Strings, images, or even documents.  However, because JWT is based on
-JSON, most people like the payload to be JSON that represents data about a user or computer or similar identity concept.
-In this case, the payload is called a JSON `Claims` object, and each name/value pair within that object is called a 
-`claim` - Each bit of information 'claims' something about an identity.
- 
-JWTs can be cryptographically signed (making it a [JWS](https://tools.ietf.org/html/rfc7515)) or encrypted (making it 
-a [JWE](https://tools.ietf.org/html/rfc7516)).
+  1. The primary data within the JWT, called the `payload`, and
+  2. A JSON `Object` with name/value pairs that represent metadata about the `payload` and the 
+     message itself, called the `header`.
 
-This adds a powerful layer of verifiability to the user of JWTs. The receiver has a high degree of confidence that the 
-JWT has not been tampered with by verifying the signature, for instance.
+A nice feature of JWTs is that they can be secured in various ways, such as via cryptographic signatures
+or encryption, which we'll cover later.  For now, just know that security is built-in to the JWT specifications, which 
+makes JWT a great candidate for sending _secure_ messages, such as identity tokens.
 
-The compact representation of a JWT is a String of Base64URL-encoded substrings delimited by period characters `.`:
+And because JWT is a general-purpose messaging format, a JWT `payload` can be absolutely anything at all - 
+anything that can be represented as a byte array, such as Strings, images, or even documents. However, because a 
+JWT `header` is a JSON `Object`, it would make sense that a JWT `payload` could also be a JSON 
+`Object` as well.  In these cases, many developers like the `payload` to be JSON that represents data about a user
+or computer or similar identity concept. When used this way, the `payload` is called a JSON `Claims` object, and each 
+name/value pair within that object is called a `claim` - each piece of information within 'claims' something about
+an identity.
+
+While it is fine to 'claim' something about an identity, anyone can do that. What's important is that you _trust_
+the claims are made by a person or computer you trust.  To that end, JWT's can be cryptographically 
+signed (making it what we call a [JWS](https://tools.ietf.org/html/rfc7515)) or encrypted (making it 
+a [JWE](https://tools.ietf.org/html/rfc7516)).  This adds a powerful layer of verifiability to the JWT - a
+JWS or JWE recipient can have a high degree of confidence it comes from someone they trust
+by verifying a signature or decrypting it. It is this feature of verifiability that makes JWT a good choice
+for sending and receiving secure information, like identity claims.
+
+Finally, JSON with whitespace for human readability is nice, but it doesn't make for a very efficient communication
+format.  Therefore, JWTs can be _compacted_ (and even compressed) to a minimal representation - basically 
+Base64URL-encoded strings - so they can be transmitted around the internet (or in URLs) more efficiently.
+
+### JWS Example
+
+The following example is a compact representation of a JWT that has been digitally signed (called a 'JWS'):
 
 ```
 eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.ipevRNuRP6HflG8cFKnmUPtypruRC4fb1DWtoLL62SY
 ```
 
-A JWS has 3 substring tokens delimited by period characters, anda a JWE has 5 substring tokens delimited by period 
-characters. Each part is [Base64URL](https://en.wikipedia.org/wiki/Base64)-encoded. For a JWS (for example), the 
-first part is the header, which at a minimum needs to specify the algorithm used to sign the JWT. The second part is 
-the body. This part has all the claims of this JWT encoded in it. The final part is the signature. It's computed by 
-passing a combination of the header and body through the algorithm specified in the header.  JWEs are slightly 
-different, and we'll discuss those in detail later on in the <a href="#jwe">JWE</a> section.
+A JWS has 3 substrings delimited by period characters, and a JWE (which we will see later) has 5 substring tokens 
+delimited by period characters. Each part is [Base64URL](https://en.wikipedia.org/wiki/Base64)-encoded.
+
+The first substring is the `header`, which if you Base64URL-decoded it, you would see that it is a JSON `Object` that
+at a minimum, needs to specify the algorithm used to sign the JWT.  The second substring is the Base64URL-encoded 
+`payload`.  The last substring is the Base64URL-encoded digitial signature that verifies the JWS.  It is computed
+by passing a combination of the `header` and `payload` together through the algorithm specified in the `header`.
+
+JWEs and their 5 substrings are slightly different, but we'll discuss those in detail later on in the 
+<a href="#jwe">JWE</a> section.
  
-If you pass the first two parts of a JWS through a base 64 url decoder, you'll get the following (formatting added for 
+If you Base64URL-decode the first two parts of the above example JWS, you would see the following (formatting added for 
 clarity):
 
 `header`
-```
+```json
 {
   "alg": "HS256"
 }
 ```
 
-`body`
-```
+`payload`
+```json
 {
   "sub": "Joe"
 }
 ```
 
-In this case, the information we have is that the HMAC using SHA-256 algorithm was used to sign the JWT. And, the 
-body has a single claim, `sub` with value `Joe`.
+In this case, the information we have is that the `HMAC using SHA-256` algorithm was used to sign the JWT. And, the 
+payload has a single claim, `sub` with value `Joe`.
 
 There are a number of standard claims, called [Registered Claims](https://tools.ietf.org/html/rfc7519#section-4.1), 
-in the specification and `sub` (for subject) is one of them.
+in the specification and `sub` (for 'Subject') is one of them.
 
-To compute the signature, you need a secret key to sign it. We'll cover keys and algorithms later.
+To compute the signature, you need a secret or private key to sign it. We'll cover keys and algorithms later.
 
 <a name="install"></a>
 ## Installation
@@ -337,7 +371,7 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 dependencies {
     compile 'io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION'
     runtime 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION',
-    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms on JDK <= 10
     //'org.bouncycastle:bcprov-jdk15on:1.70',
     'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION' // or 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION' for gson
 }
@@ -441,23 +475,22 @@ eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.1KP0SsvENi7Uz1oQc07aXTL7kpQG5jBNIybqr60A
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-assert Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getBody().getSubject().equals("Joe");
+assert Jwts.parserBuilder().verifyWith(key).build().parseClaimsJws(jws).getPayload().getSubject().equals("Joe");
 ```
 
 **NOTE: Ensure you call the `parseClaimsJws` method** (since there are many similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
 
-There are two things going on here. The `key` from before is being used to validate the signature of the JWT. If it 
+There are two things going on here. The `key` from before is being used to verify the signature of the JWT. If it 
 fails to verify the JWT, a `SignatureException` (which extends from `JwtException`) is thrown. Assuming the JWT is 
-validated, we parse out the claims and assert that that subject is set to `Joe`.
-
-You have to love code one-liners that pack a punch!
+verified, we parse out the claims and assert that that subject is set to `Joe`.  You have to love code one-liners 
+that pack a punch!
 
 But what if parsing or signature validation failed?  You can catch `JwtException` and react accordingly:
 
 ```java
 try {
 
-    Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compactJws);
+    Jwts.parserBuilder().verifyWith(key).build().parseClaimsJws(compactJws);
 
     //OK, we can trust this JWT
 
@@ -466,6 +499,9 @@ try {
     //don't trust the JWT!
 }
 ```
+
+Now that we've had a quickstart 'taste' of how to create and verify a JWS, the next section covers all the details on
+JWS you'll need to use them in your applications.
 
 <a name="jws"></a>
 ## Signed JWTs
@@ -481,7 +517,7 @@ JWT fails authenticity or integrity checks, we should always reject that JWT bec
 
 So how is a JWT signed?  Let's walk through it with some easy-to-read pseudocode:
 
-1. Assume we have a JWT with a JSON header and body (aka 'Claims') as follows:
+1. Assume we have a JWT with a JSON header and payload (aka 'Claims') as follows:
   
    **header**
    ```
@@ -568,7 +604,7 @@ key algorithms - identified by the following names:
 * `PS384`: RSASSA-PSS using SHA-384 and MGF1 with SHA-384
 * `PS512`: RSASSA-PSS using SHA-512 and MGF1 with SHA-512
 
-These are all represented in the `io.jsonwebtoken.security.SignatureAlgorithms` enum class.
+These are all represented in the `io.jsonwebtoken.security.SignatureAlgorithms` utility class.
 
 What's really important about these algorithms - other than their security properties - is that the JWT specification
 [RFC 7518, Sections 3.2 through 3.5](https://tools.ietf.org/html/rfc7518#section-3)
@@ -712,7 +748,7 @@ String jws = Jwts.builder() // (1)
 <a name="jws-create-header"></a>
 #### Header Parameters
 
-A JWT Header provides metadata about the contents, format and cryptographic operations relevant to the JWT's Claims.
+A JWT Header provides metadata about the contents, format and cryptographic operations relevant to the JWT's `payload`.
 
 If you need to set one or more JWT header parameters, such as the `kid` 
 [(Key ID) header parameter](https://tools.ietf.org/html/rfc7515#section-4.1.4), you can simply call
@@ -736,14 +772,14 @@ depending on the signature algorithm or compression algorithm used.
 <a name="jws-create-header-instance"></a>
 ##### Header Instance
 
-If you want to specify the entire header at once, you can use the `Jwts.header()` method and build up the header
-paramters with it:
+If you want to specify the entire header at once, you can use the `Jwts.headerBuilder()` method and build up the header
+parameters with it:
 
 ```java
 
-Header header = Jwts.header();
-
-populate(header); //implement me
+Header<?> header = Jwts.headerBuilder()
+        // set header properties here
+        .build();
 
 String jws = Jwts.builder()
 
@@ -753,15 +789,15 @@ String jws = Jwts.builder()
 
 ```
 
-**NOTE**: Calling `setHeader` will overwrite any existing header name/value pairs with the same names that might have 
-already been set. In all cases however, JJWT will still set (and overwrite) any `alg` and `zip` headers regardless 
+**NOTE**: Per standard Java `setter` idioms, `setHeader` will replace any and all existing header name/value pairs. 
+Even so, JJWT will still set (and overwrite) any `alg` and `zip` headers regardless 
 if those are in the specified `header` object or not.
 
 <a name="jws-create-header-map"></a>
 ##### Header Map
 
-If you want to specify the entire header at once and you don't want to use `Jwts.header()`, you can use `JwtBuilder` 
-`setHeader(Map)` method instead:
+If you want to specify the entire header at once and you don't want to use `Jwts.headerBuilder()`, you can use 
+`JwtBuilder` `setHeader(Map)` method instead:
 
 ```java
 
@@ -776,14 +812,15 @@ String jws = Jwts.builder()
 ```
 
 
-**NOTE**: Calling `setHeader` will overwrite any existing header name/value pairs with the same names that might have 
-already been set. In all cases however, JJWT will still set (and overwrite) any `alg` and `zip` headers regardless 
+**NOTE**: Per standard Java `setter` idioms, `setHeader` will replace any and all existing header name/value pairs.
+Even so, JJWT will still set (and overwrite) any `alg` and `zip` headers regardless
 if those are in the specified `header` object or not.
 
 <a name="jws-create-claims"></a>
 #### Claims
 
-Claims are a JWT's 'body' and contain the information that the JWT creator wishes to present to the JWT recipient(s).
+A JWT `payload` may contain assertions or claims for a JWT recipient. In this case, the `payload` is a 'claims' JSON
+`Object`, and JJWT conveniently supports this with a type-safe `Claims` instance.
 
 <a name="jws-create-claims-standard"></a>
 ##### Standard Claims
@@ -857,8 +894,9 @@ String jws = Jwts.builder()
 
 ```
 
-**NOTE**: Calling `setClaims` will overwrite any existing claim name/value pairs with the same names that might have 
-already been set.
+**NOTE**: Per standard Java `setter` idioms, calling `setClaims` will fully replace any existing claim name/value 
+pairs.  If you want to add (append) claims in bulk, and not fully replace them, use the `JwtBuilder`'s `addClaims` 
+method instead. 
 
 <a name="jws-create-claims-map"></a>
 ###### Claims Map
@@ -878,13 +916,14 @@ String jws = Jwts.builder()
 
 ```
 
-**NOTE**: Calling `setClaims` will overwrite any existing claim name/value pairs with the same names that might have 
-already been set.
+**NOTE**: Per standard Java `setter` idioms, calling `setClaims` will fully replace any existing claim name/value
+pairs.  If you want to add (append) claims in bulk, and not fully replace them, use the `JwtBuilder`'s `addClaims`
+method instead.
 
 <a name="jws-create-key"></a>
 #### Signing Key
 
-It is recommended that you specify the signing key by calling call the `JwtBuilder`'s `signWith` method and let JJWT
+It is usually recommended to specify the signing key by calling the `JwtBuilder`'s `signWith` method and let JJWT
 determine the most secure algorithm allowed for the specified key.:
 
 ```java
@@ -914,7 +953,7 @@ The same selection logic applies for Elliptic Curve `PrivateKey`s.
 <a name="jws-create-key-secret"></a>
 ##### SecretKey Formats
 
-If you want to sign a JWS using HMAC-SHA algorithms and you have a secret key `String` or 
+If you want to sign a JWS using HMAC-SHA algorithms, and you have a secret key `String` or 
 [encoded byte array](https://docs.oracle.com/javase/8/docs/api/java/security/Key.html#getEncoded--), you will need
 to convert it into a `SecretKey` instance to use as the `signWith` method argument.
 
@@ -964,14 +1003,14 @@ prefers `RS512` for keys >= 4096 bits, followed by `RS384` for keys >= 3072 bits
 bits.
 
 **In all cases however, regardless of your chosen algorithms, JJWT will assert that the specified key is allowed to be 
-used for that algorithm according to the JWT specification requirements.**
+used for that algorithm when possible according to the JWT specification requirements.**
 
 <a name="jws-create-compression"></a>
 #### JWS Compression
 
 If your JWT claims set is large (contains a lot of data), and you are certain that JJWT will also be the same library 
 that reads/parses your JWS, you might want to compress the JWS to reduce its size.  Note that this is
-*not* a standard feature for JWS and is not likely to be supported by other JWT libraries.
+*not* a standard feature for JWS (only JWE) and is not likely to be supported by other JWT libraries for JWS tokens.
 
 Please see the main [Compression](#compression) section to see how to compress and decompress JWTs.
 
@@ -987,8 +1026,8 @@ You read (parse) a JWS as follows:
 5. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
    exceptions and causes for failure later.
 
-<sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a `SigningKeyResolver` 
-which [we'll cover later](#jws-read-key-resolver).</sup>
+<sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a Key `Locator` 
+which [we'll cover later](#jws-read-key-locator).</sup>
 
 For example:
 
@@ -997,7 +1036,7 @@ Jws<Claims> jws;
 
 try {
     jws = Jwts.parserBuilder()  // (1)
-    .setSigningKey(key)         // (2)
+    .verifyWith(key)            // (2)
     .build()                    // (3)
     .parseClaimsJws(jwsString); // (4)
     
@@ -1009,24 +1048,26 @@ catch (JwtException ex) {       // (5)
 }
 ```
 
-**NOTE: If you are expecting a JWS, always call `JwtParser`'s `parseClaimsJws` method** (and not one of the other similar methods 
-available) as this guarantees the correct security model for parsing signed JWTs.
+**NOTE: If you are expecting a JWS with a claims `payload`, always call `JwtParser`'s `parseClaimsJws` method** 
+(and not one of the other similar methods available) as this guarantees the correct security model for parsing signed 
+claims JWTs.
 
 <a name="jws-read-key"></a>
 #### Verification Key
 
-The most important thing to do when reading a JWS is to specify the key to use to verify the JWS's
+The most important thing to do when reading a JWS is to specify the key used to verify the JWS's
 cryptographic signature.  If signature verification fails, the JWT cannot be safely trusted and should be 
 discarded.
 
 So which key do we use for verification?
 
-* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParserBuilder`.  For example:
+* If the jws was signed with a `SecretKey`, the same `SecretKey` should be specified on the `JwtParserBuilder`.  
+For example:
 
   ```java
   Jwts.parserBuilder()
       
-    .setSigningKey(secretKey) // <----
+    .verifyWith(secretKey) // <----
     
     .build()
     .parseClaimsJws(jwsString);
@@ -1037,7 +1078,7 @@ So which key do we use for verification?
   ```java
   Jwts.parserBuilder()
       
-    .setSigningKey(publicKey) // <---- publicKey, not privateKey
+    .verifyWith(publicKey) // <---- publicKey, not privateKey
     
     .build()
     .parseClaimsJws(jwsString);
@@ -1047,92 +1088,8 @@ But you might have noticed something - what if your application doesn't use just
 if JWSs can be created with different `SecretKey`s or public/private keys, or a combination of both?  How do you
 know which key to specify if you can't inspect the JWT first?
 
-In these cases, you can't call the `JwtParserBuilder`'s `setSigningKey` method with a single key - instead, you'll need
-to use a `SigningKeyResolver`, covered next.
-
-<a name="jws-read-key-resolver"></a>
-##### Signing Key Resolver
-
-If your application expects JWSs that can be signed with different keys, you won't call the `setSigningKey` method.
-Instead, you'll need to implement the 
-`SigningKeyResolver` interface and specify an instance on the `JwtParserBuilder` via the `setSigningKeyResolver` method.  
-For example:
-
-```java
-SigningKeyResolver signingKeyResolver = getMySigningKeyResolver();
-
-Jwts.parserBuilder()
-
-    .setSigningKeyResolver(signingKeyResolver) // <----
-    
-    .build()
-    .parseClaimsJws(jwsString);
-```
-
-You can simplify things a little by extending from the `SigningKeyResolverAdapter` and implementing the 
-`resolveSigningKey(JwsHeader, Claims)` method.  For example:
-
-```java
-public class MySigningKeyResolver extends SigningKeyResolverAdapter {
-    
-    @Override
-    public Key resolveSigningKey(JwsHeader jwsHeader, Claims claims) {
-        // implement me
-    }
-}
-```
-
-The `JwtParser` will invoke the `resolveSigningKey` method after parsing the JWS JSON, but _before verifying the
-jws signature_.  This allows you to inspect the `JwsHeader` and `Claims` arguments for any information that can
-help you look up the `Key` to use for verifying _that specific jws_.  This is very powerful for applications
-with more complex security models that might use different keys at different times or for different users or customers.
-
-Which data might you inspect?
-
-The JWT specification's supported way to do this is to set a `kid` (Key ID) field in the JWS header when the JWS is 
-being created, for example:
-
-```java
-
-Key signingKey = getSigningKey();
-
-String keyId = getKeyId(signingKey); //any mechanism you have to associate a key with an ID is fine
-
-String jws = Jwts.builder()
-    
-    .setHeaderParam(JwsHeader.KEY_ID, keyId) // 1
-    
-    .signWith(signingKey)                    // 2
-    
-    .compact();
-```
-
-Then during parsing, your `SigningKeyResolver` can inspect the `JwsHeader` to get the `kid` and then use that value
-to look up the key from somewhere, like a database.  For example:
-
-```java
-public class MySigningKeyResolver extends SigningKeyResolverAdapter {
-    
-    @Override
-    public Key resolveSigningKey(JwsHeader jwsHeader, Claims claims) {
-        
-        //inspect the header or claims, lookup and return the signing key
-        
-        String keyId = jwsHeader.getKeyId(); //or any other field that you need to inspect
-        
-        Key key = lookupVerificationKey(keyId); //implement me
-        
-        return key;
-    }
-}
-```
-
-Note that inspecting the `jwsHeader.getKeyId()` is just the most common approach to look up a key - you could 
-inspect any number of header fields or claims to determine how to lookup the verification key.  It is all based on 
-how the JWS was created.
-
-Finally remember that for HMAC algorithms, the returned verification key should be a `SecretKey`, and for asymmetric 
-algorithms, the key returned should be a `PublicKey` (not a `PrivateKey`).
+In these cases, you can't call the `JwtParserBuilder`'s `verifyWith` method with a single key - instead, you'll need
+Key Locator.  Please see the [Key Lookup](#key-locator) section to see how to dynamically obtain different keys.
 
 <a name="jws-read-claims"></a>
 #### Claim Assertions
@@ -1146,8 +1103,8 @@ otherwise you may not trust the token.  You can do that by using one of the vari
 
 ```java
 try {
-    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
-} catch(InvalidClaimException ice) {
+    Jwts.parserBuilder().requireSubject("jsmith").verifyWith(key).build().parseClaimsJws(s);
+} catch (InvalidClaimException ice) {
     // the sub field was missing or did not have a 'jsmith' value
 }
 ```
@@ -1157,7 +1114,7 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 
 ```java
 try {
-    Jwts.parserBuilder().requireSubject("jsmith").setSigningKey(key).build().parseClaimsJws(s);
+    Jwts.parserBuilder().requireSubject("jsmith").verifyWith(key).build().parseClaimsJws(s);
 } catch(MissingClaimException mce) {
     // the parsed JWT did not have the sub field
 } catch(IncorrectClaimException ice) {
@@ -1169,7 +1126,7 @@ You can also require custom fields by using the `require(fieldName, requiredFiel
 
 ```java
 try {
-    Jwts.parserBuilder().require("myfield", "myRequiredValue").setSigningKey(key).build().parseClaimsJws(s);
+    Jwts.parserBuilder().require("myfield", "myRequiredValue").verifyWith(key).build().parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
     // the 'myfield' field was missing or did not have a 'myRequiredValue' value
 }
@@ -1235,6 +1192,132 @@ Please see the [Compression](#compression) section below to see how to decompres
 
 TODO: NOTE: A128GCM, A192GCM, A256GCM algorithms require JDK 8 or BouncyCastle.
 
+<a name="key-locator"></a>
+## Key Lookup
+
+It is common in many applications to receive JWTs that can be encrypted or signed by different cryptographic keys.  For
+example, maybe a JWT created to assert a specific user identity uses a Key specific to that exact user. Or perhaps JWTs
+specific to a particular customer all use that customer's Key.  Or maybe your application creates JWTs that are 
+encrypted with a private key specific to your application for your own use (e.g. a user session token).
+
+In all of these and similar scenarios, you won't know which key was used to sign or encrypt a JWT until the JWT is 
+received, at parse time, so you can't 'hard code' any verification or decryption key using the `JwtParserBuilder`'s
+`verifyWith` or `decryptWith` methods.  Those are only to be used when the same key is used to verify or decrypt
+*all* JWSs or JWEs, which won't work for dynamically signed or encrypted JWTs.
+
+Instead, you'll need to implement the `Locator<Key>` interface and specify an instance on the
+`JwtParserBuilder` via the `setKeyLocator` method. For example:
+
+```java
+Locator<Key> keyLocator = getMyKeyLocator();
+
+Jwts.parserBuilder()
+
+    .setKeyLocator(keyLocator) // <----
+    
+    .build()
+    // ... etc ...
+```
+
+A `Locator<Key>` is used to lookup _both_ JWS signature verification keys _and_ JWE decryption keys.  You need to
+determine which type of key to return based on information in the JWT `header`, for example:
+
+```java
+public class MyKeyLocator extends LocatorAdapter<Key> {
+    
+    @Override
+    public Key locate(ProtectedHeader<?> header) { // a JwsHeader or JweHeader
+        // implement me
+    }
+}
+```
+
+The `JwtParser` will invoke the `locate` method after parsing the JWS `header`, but _before parsing the `payload`, 
+or verifying any JWS signature or decrypting any JWE ciphertext_. This allows you to inspect the `JwsHeader` argument 
+for any information that can help you look up the `Key` to use for verifying _that specific jwt_.  This is very 
+powerful for applications with more complex security models that might use different keys at different times or for 
+different users or customers.
+
+Which data might you inspect?
+
+The JWT specifications' preferred way to do this is to set a `kid` (Key ID) header value when the JWT is
+being created, for example:
+
+```java
+
+Key key = getSigningKey(); // or getEncryptionKey() for JWE
+
+String keyId = getKeyId(key); //any mechanism you have to associate a key with an ID is fine
+
+String jws = Jwts.builder()
+        
+    .setHeader(Jwts.headerBuilder().setKeyId(keyId))     // <--- add `kid` header
+    
+    .signWith(key)                                       // for JWS
+    //.encryptWith(encryptionAlg, keyManagementAlg, key) // for JWE
+    .compact();
+```
+
+Then during parsing, your `Locator<Key>` implementation can inspect the `header` to get the `kid` value and then use it
+to look up the verification or decryption key from somewhere, like a database, keystore or Hardware Security Module 
+(HSM).  For example:
+
+```java
+public class MyKeyLocator extends LocatorAdapter<Key> {
+    
+    @Override
+    public Key locate(ProtectedHeader<?> header) { // both JwsHeader and JweHeader extend ProtectedHeader
+        
+        //inspect the header, lookup and return the verification key
+        String keyId = header.getKeyId(); //or any other field that you need to inspect
+
+        Key key = lookupKey(keyId); //implement me
+
+        return key;
+    }
+}
+```
+
+Note that inspecting the `header.getKeyId()` is just the most common approach to look up a key - you could
+inspect any number of header fields to determine how to lookup the verification or decryption key.  It is all based on
+how the JWT was created.
+
+If you extend `LocatorAdapter<Key>` as shown above, but for some reason have different lookup strategies for 
+signature verification keys versus decryption keys, you can forego the `locate(ProtectedHeader<?>)` method in favor of
+two respective `locate(JwsHeader)` and `locate(JweHeader)` methods:
+
+```java
+public class MyKeyLocator extends LocatorAdapter<Key> {
+    
+    @Override
+    public Key locate(JwsHeader header) {
+        String keyId = header.getKeyId(); //or any other field that you need to inspect
+        return lookupSignatureVerificationKey(keyId); //implement me
+    }
+    
+    @Override
+    public Key locate(JweHeader header) {
+        String keyId = header.getKeyId(); //or any other field that you need to inspect
+        return lookupDecryptionKey(keyId); //implement me
+    }
+}
+```
+> :information_source: **Simpler Lookup**:
+> If possible, try to keep the key lookup strategy the same between JWSs and JWEs (i.e. using 
+> only `locate(ProtectedHeader<?>)`), preferably using only
+> the `kid` (Key ID) header value or perhaps a public key thumbprint.  You will find the implementation is much 
+> simpler and easier to maintain over time, and also creates smaller headers for compact transmission.
+
+Finally, remember that:
+
+* for JWS:
+  * For HMAC-based signature algorithms, the returned verification key should be a `SecretKey`, and, 
+  * For asymmetric signature algorithms, the returned verification key should be a `PublicKey` (not a `PrivateKey`).
+* for JWE:
+  * For JWE direct encryption, the returned decryption key should be a `SecretKey`.
+  * For password-based key derivation algorithms, the returned decryption key should be a `PasswordKey`.
+  * For asymmetric key management algorithms, the returned decryption key should be a `PrivateKey` (not a `PublicKey`).
+
 <a name="compression"></a>
 ## Compression
 
@@ -1242,10 +1325,11 @@ TODO: NOTE: A128GCM, A192GCM, A256GCM algorithms require JDK 8 or BouncyCastle.
 JJWT supports both**.  If you are positive that a JWS you create with JJWT will _also_ be parsed with JJWT, you 
 can use this feature with JWSs, otherwise it is best to only use it for JWEs.  
 
-If a JWT's Claims set is sufficiently large - that is, it contains a lot of name/value pairs, or individual values are 
-very large or verbose - you can reduce the size of the created JWS by compressing the claims body.
+If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
+name/value pairs (or individual values are very large or verbose) - you can reduce the size of the compact JWT by 
+compressing the payload.
 
-This might be important to you if the resulting JWS is used in a URL for example, since URLs are best kept under 
+This might be important to you if the resulting JWT is used in a URL for example, since URLs are best kept under 
 4096 characters due to browser, user mail agent, or HTTP gateway compatibility issues.  Smaller JWTs also help reduce 
 bandwidth utilization, which may or may not be important depending on your application's volume or needs.
 
@@ -1261,41 +1345,82 @@ example:
 ```
 
 If you use the `DEFLATE` or `GZIP` Compression Codecs - that's it, you're done.  You don't have to do anything during 
-parsing or configure the `JwtParser` for compression - JJWT will automatically decompress the body as expected.
+parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress the body as expected.
 
 <a name="compression-custom"></a>
 ### Custom Compression Codec
 
-If however, you used your own custom compression codec when creating the JWT (via `JwtBuilder` `compressWith`), then
-you need to supply the codec to the `JwtParserBuilder` using the `setCompressionCodecResolver` method.  For example:
+If the default `DEFLATE` or `GZIP` compression codecs are not suitable for your needs, you can create your own 
+`CompressionCodec` implementation(s).
+
+Just as you would with the default codecs, you may specify that you want a JWT compressed by calling the `JwtBuilder`'s
+`compressWith` method, supplying your custom implementation instance.   When you call `compressWith`, the JWT `payload`
+will be compressed with your algorithm, and the 
+[`zip` (Compression Algorithm)](https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3) 
+header will automatically be set to the value returned by your codec's `getId()` method as specified in the JWT
+specification.
+
+However, the `JwtParser` needs to be aware of this custom codec as well, so it can use it while parsing. You do this 
+by calling the `JwtParserBuilder`'s `addCompressionCodecs` method.  For example:
 
 ```java
-CompressionCodecResolver ccr = new MyCompressionCodecResolver();
+CompressionCodec myCodec = new MyCompressionCodec();
 
 Jwts.parserBuilder()
 
-    .setCompressionCodecResolver(ccr) // <----
+    .addCompressionCodecs(Collections.of(myCodec)) // <----
     
     // .. etc ...
 ```
 
-Typically a `CompressionCodecResolver` implementation will inspect the `zip` header to find out what algorithm was
+This adds additional `CompressionCodec` implementations to the parser's overall total set of supported codecs (which
+already includes the `DEFLATE` and `GZIP` codecs by default).
+
+The parser will then automatically check to see if the JWT `zip` header has been set to see if a compression codec
+algorithm has been used to compress the JWT.  If set, the parser will automatically look up your `CompressionCodec` by
+its `getId()` value, and use it to decompress the JWT.
+
+<a name="compression-custom-locator"></a>
+### Compression Codec Locator
+
+If for some reason the default `addCompressionCodecs` and lookup-by-id behavior already supported by the 
+`JwtParserBuilder` is not sufficient for your needs, you can implement your own `Locator<CompressionCodec>` to look 
+up the codec.
+
+Typically, a `Locator<CompressionCodec>` implementation will inspect the `zip` header to find out what algorithm was
 used and then return a codec instance that supports that algorithm.  For example:
 
 ```java
-public class MyCompressionCodecResolver implements CompressionCodecResolver {
+public class MyCompressionCodecLocator implements Locator<CompressionCodec> {
         
     @Override
-    public CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
+    public CompressionCodec locate(Header<?> header) {
         
-        String alg = header.getCompressionAlgorithm();
+        String id = header.getCompressionAlgorithm(); // 'zip' header
             
-        CompressionCodec codec = getCompressionCodec(alg); //implement me
+        CompressionCodec codec = getCompressionCodec(id); //implement me
             
         return codec;
     }
 }
 ```
+
+Your custom `Locator<CompressionCodec>` can then inspect any other header as necessary.
+
+You then provide your custom `Locator<CompressionCodec>` to the `JwtParserBuilder` as follows:
+
+```java
+Locator<CompressionCodec> myCodecLocator = new MyCompressionCodecLocator();
+
+Jwts.parserBuilder()
+
+    .setCompressionCodecLocator(myCodecLocator) // <----
+    
+    // .. etc ...
+```
+
+Again, this is only necessary if the JWT-standard `zip` header lookup default behavior already supported by the 
+`JwtParser` is not sufficient.
 
 <a name="json"></a>
 ## JSON Support
