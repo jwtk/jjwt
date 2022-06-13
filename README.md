@@ -73,7 +73,7 @@ enforcement.
 * [Key Lookup](#key-locator)
   * [Custom Key Locator](#key-locator-custom)
     * [Key Locator Strategy](#key-locator-custom-strategy)
-    * [Key Locator Key Types](#key-locator-custom-keytypes)
+    * [Key Locator Return Values](#key-locator-custom-retvals)
 * [Compression](#compression)
   * [Custom Compression Codec](#compression-custom)
   * [Custom Compression Codec Locator](#compression-custom-locator)
@@ -102,7 +102,7 @@ enforcement.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
    | Identifier | Signature Algorithm |
-   |------------|---------------------|
+   | --- | --- |
    | `HS256` | HMAC using SHA-256 |
    | `HS384` | HMAC using SHA-384 |
    | `HS512` | HMAC using SHA-512 |
@@ -115,24 +115,26 @@ enforcement.
    | `PS256` | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
    | `PS384` | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
    | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
-    <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+   <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
    
    | Identifier | Encryption Algorithm |
-   |------------|----------------------|
+   | --- | --- |
    | `A128CBC-HS256` | AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) |
    | `A192CBC-HS384` | AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.4](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) |
    | `A256CBC-HS512` | AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.5](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) |
    | `A128GCM` | AES GCM using 128-bit key<sup><b>2</b></sup> |
    | `A192GCM` | AES GCM using 192-bit key<sup><b>2</b></sup> |
    | `A256GCM` | AES GCM using 256-bit key<sup><b>2</b></sup> |
+   
    <sup><b>2</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * All Key Management Algorithms for obtaining JWE encryption and decryption keys: 
    
    | Identifier | Key Management Algorithm |
-   |------------|--------------------------|   
+   | --- | --- |   
    | `RSA1_5` | RSAES-PKCS1-v1_5 |
    | `RSA-OAEP` | RSAES OAEP using default parameters |
    | `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256 |
@@ -150,6 +152,7 @@ enforcement.
    | `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup> |
    | `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup> |
    | `PBES2-HS512+A256KW` | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
+      
    <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
    
  * Convenience enhancements beyond the specification such as
@@ -1216,8 +1219,9 @@ received, at parse time, so you can't 'hard code' any verification or decryption
 <a name="key-locator-custom"></a>
 ### Custom Key Locator
 
-Instead, you'll need to implement the `Locator<Key>` interface and specify an instance on the
-`JwtParserBuilder` via the `setKeyLocator` method. For example:
+If you need to support dynamic key resolution when encountering JWTs, you'll need to implement 
+the `Locator<Key>` interface and specify an instance on the `JwtParserBuilder` via the `setKeyLocator` method. For 
+example:
 
 ```java
 Locator<Key> keyLocator = getMyKeyLocator();
@@ -1231,7 +1235,7 @@ Jwts.parserBuilder()
 ```
 
 A `Locator<Key>` is used to lookup _both_ JWS signature verification keys _and_ JWE decryption keys.  You need to
-determine which type of key to return based on information in the JWT `header`, for example:
+determine which key to return based on information in the JWT `header`, for example:
 
 ```java
 public class MyKeyLocator extends LocatorAdapter<Key> {
@@ -1243,8 +1247,8 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
 }
 ```
 
-The `JwtParser` will invoke the `locate` method after parsing the JWS `header`, but _before parsing the `payload`, 
-or verifying any JWS signature or decrypting any JWE ciphertext_. This allows you to inspect the `JwsHeader` argument 
+The `JwtParser` will invoke the `locate` method after parsing the JWT `header`, but _before parsing the `payload`, 
+or verifying any JWS signature or decrypting any JWE ciphertext_. This allows you to inspect the `header` argument 
 for any information that can help you look up the `Key` to use for verifying _that specific jwt_.  This is very 
 powerful for applications with more complex security models that might use different keys at different times or for 
 different users or customers.
@@ -1252,10 +1256,10 @@ different users or customers.
 <a name="key-locator-custom-strategy"></a>
 #### Key Locator Strategy
 
-Which data might you inspect?
+What data might you inspect to determine how to lookup a signature verification or decryption key?
 
-The JWT specifications' preferred way to do this is to set a `kid` (Key ID) header value when the JWT is
-being created, for example:
+The JWT specifications' preferred approach is to set a `kid` (Key ID) header value when the JWT is being created, 
+for example:
 
 ```java
 
@@ -1297,8 +1301,8 @@ inspect any number of header fields to determine how to lookup the verification 
 how the JWT was created.
 
 If you extend `LocatorAdapter<Key>` as shown above, but for some reason have different lookup strategies for 
-signature verification keys versus decryption keys, you can forego the `locate(ProtectedHeader<?>)` method in favor of
-two respective `locate(JwsHeader)` and `locate(JweHeader)` methods:
+signature verification keys versus decryption keys, you can forego overriding the `locate(ProtectedHeader<?>)` method 
+in favor of two respective `locate(JwsHeader)` and `locate(JweHeader)` methods:
 
 ```java
 public class MyKeyLocator extends LocatorAdapter<Key> {
@@ -1322,8 +1326,8 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
 > the `kid` (Key ID) header value or perhaps a public key thumbprint.  You will find the implementation is much 
 > simpler and easier to maintain over time, and also creates smaller headers for compact transmission.
 
-<a name="key-locator-custom-keytypes"></a>
-#### Key Locator Key Types
+<a name="key-locator-custom-retvals"></a>
+#### Key Locator Return Values
 
 Regardless of which implementation strategy you choose, remember to return the appropriate type of key depending
 on the type of JWS or JWE algorithm used.  That is:
