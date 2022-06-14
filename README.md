@@ -151,7 +151,7 @@ enforcement.
    | `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>3</b></sup> |
    | `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup> |
    | `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup> |
-   | `PBES2-HS512+A256KW` | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
+   | <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
       
    <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
    
