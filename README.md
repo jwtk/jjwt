@@ -7,8 +7,7 @@
 JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM
 and Android.
 
-JJWT is a pure Java implementation based 
-exclusively on the [JWT](https://tools.ietf.org/html/rfc7519), 
+JJWT is a pure Java implementation based exclusively on the [JWT](https://tools.ietf.org/html/rfc7519), 
 [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), 
 [JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications and 
 open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
@@ -154,7 +153,17 @@ enforcement.
    | <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
       
    <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+ * Creating, parsing and verifying JSON Web Keys (JWKs) in all standard JWA key formats using native Java `Key` types:
    
+   | JWK Key Format | Java `Key` Type | JJWT `Jwk` Type |
+   |---------------|-----------------| --- |
+   | Symmetric Key  | `SecretKey`    | `SecretJwk`     |
+   | Elliptic Curve Public Key | `ECPublicKey`  | `EcPublicJwk`   |
+   | Elliptic Curve Private Key | `ECPrivateKey` | `EcPrivateJwk`  |
+   | RSA Public Key | `RSAPublicKey` | `RsaPublicJwk`  |
+   | RSA Private Key | `RSAPrivateKey` | `RsaPrivateJwk` |
+
  * Convenience enhancements beyond the specification such as
     * Body compression for any large JWT, not just JWEs
     * Claims assertions (requiring specific values)
