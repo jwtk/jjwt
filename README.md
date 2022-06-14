@@ -119,10 +119,10 @@ enforcement.
    <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
-   
+ 
    | Identifier | Encryption Algorithm |
    | --------------- | --- |
-   | `A128CBC-HS256` | AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) |
+   | <code nowrap>A128CBC-HS256</code> | AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) |
    | `A192CBC-HS384` | AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.4](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) |
    | `A256CBC-HS512` | AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.5](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) |
    | `A128GCM` | AES GCM using 128-bit key<sup><b>2</b></sup> |
