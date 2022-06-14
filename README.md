@@ -102,7 +102,7 @@ enforcement.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
    | Identifier | Signature Algorithm |
-   | ----- | --- |
+   | ------- | --- |
    | `HS256` | HMAC using SHA-256 |
    | `HS384` | HMAC using SHA-384 |
    | `HS512` | HMAC using SHA-512 |
@@ -121,7 +121,7 @@ enforcement.
  * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
    
    | Identifier | Encryption Algorithm |
-   | ----- | --- |
+   | --------------- | --- |
    | `A128CBC-HS256` | AES_128_CBC_HMAC_SHA_256 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) |
    | `A192CBC-HS384` | AES_192_CBC_HMAC_SHA_384 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.4](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) |
    | `A256CBC-HS512` | AES_256_CBC_HMAC_SHA_512 authenticated encryption algorithm, as defined in [RFC 7518, Section 5.2.5](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) |
