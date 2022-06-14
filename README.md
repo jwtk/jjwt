@@ -165,7 +165,7 @@ enforcement.
    | RSA Private Key | `RSAPrivateKey` | `RsaPrivateJwk` |
 
  * Convenience enhancements beyond the specification such as
-    * Body compression for any large JWT, not just JWEs
+    * Payload compression for any large JWT, not just JWEs
     * Claims assertions (requiring specific values)
     * Claim POJO marshaling and unmarshalling when using a compatible JSON parser (e.g. Jackson)
     * Secure Key generation based on desired JWA algorithms
@@ -517,7 +517,8 @@ try {
 ```
 
 Now that we've had a quickstart 'taste' of how to create and verify a JWS, the next section covers all the details on
-JWS you'll need to use them in your applications.
+JWS you'll need to use them in your applications.  If you want to create an encrypted JWT (a 'JWE') instead, feel
+free to jump to the [JWE section](#jwe).
 
 <a name="jws"></a>
 ## Signed JWTs
@@ -542,7 +543,7 @@ So how is a JWT signed?  Let's walk through it with some easy-to-read pseudocode
    }
    ```
    
-   **body**
+   **payload**
    ```
    {
      "sub": "Joe"
@@ -1202,15 +1203,388 @@ guarantee deterministic behavior.
 <a name="jws-read-decompression"></a>
 #### JWS Decompression
 
-If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the `JwtParserBuilder`
-how to resolve your `CompressionCodec` to decompress the JWT.
+If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the 
+`JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
 
 <a name="jwe"></a>
 ## Encrypted JWTs
 
-TODO: NOTE: A128GCM, A192GCM, A256GCM algorithms require JDK 8 or BouncyCastle.
+The JWT specification also provides for the ability to encrypt and decrypt a JWT.  Encrypting a JWT:
+
+1. guarantees that no-one other than the intended JWT recipient can see the JWT `payload` (it is confidential), and 
+2. guarantees that no-one has manipulated or changed the JWT after it was created (its integrity is maintained).
+
+These two properties - confidentiality and integrity - assure us that an encrypted JWT contains a `paylaod` that 
+no-one else can see, _nor_ has anyone changed or altered the data in transit.
+
+Encryption and confidentiality seem somewhat obvious: if you encrypt a message, it is confidential by the notion that
+random 3rd parties cannot make sense of the encrypted message. But some might be surprised to know that **_general 
+encryption does _not_ guarantee that someone hasn't tampered/altered an encrypted message in transit_**.  Most of us 
+assume that if a message can be decrypted, then the message would be authentic and unchanged - after all, if you can 
+decrypt it, it must not have been tampered with, right? Because if it was changed, decryption would surely fail, right?
+
+Unfortunately, this is not actually guaranteed in all cryptographic ciphers. There are certain attack vectors where 
+it is possible to change an encrypted payload (called 'ciphertext'), and still have the message recipient be able to 
+successfully decrypt the (modified) payload.  In these cases, the ciphertext integrity was not maintained - a 
+malicious 3rd party could intercept a message and change the payload content, even if they don't understand what is 
+inside the payload, and the message recipient could never know.
+
+To combat this, there is a category of encryption algorithms that both ensure confidentiality _and_ integrity of the 
+ciphertext data.  These types of algorithms are called 
+[Authenticated Encryption](https://en.wikipedia.org/wiki/Authenticated_encryption) algorithms.
+
+As a result, to ensure JWTs do not suffer from this problem, the JWE specifications require that any encryption
+algorithm used to encrypt a JWT _MUST_ be an Authenticated Encryption algorithm.  JWT users can be sufficiently 
+confident their encrypted JWTs maintain the properties of both confidentiality and integrity.
+
+<a name="jwe-enc"></a>
+### JWE Encryption Algorithms
+
+The JWT specification defines 6 standard Authenticated Encryption algorithms used to encrypt a JWT `payload`:
+
+| Identifier | Required Key Bit Length | Encryption Algorithm |
+| --- | --- | --- |
+| <code>A128CBC&#8209;HS256</code> | 256 | [AES_128_CBC_HMAC_SHA_256](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) authenticated encryption algorithm |
+| `A192CBC-HS384` | 384 | [AES_192_CBC_HMAC_SHA_384](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) authenticated encryption algorithm |
+| `A256CBC-HS512` | 512 | [AES_256_CBC_HMAC_SHA_512](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) authenticated encryption algorithm |
+| `A128GCM` | 128 | AES GCM using 128-bit key<sup><b>1</b></sup> |
+| `A192GCM` | 192 | AES GCM using 192-bit key<sup><b>1</b></sup> |
+| `A256GCM` | 256 | AES GCM using 256-bit key<sup><b>1</b></sup> |
+
+These are all represented in the `io.jsonwebtoken.security.EncryptionAlgorithms` utility class as implementations of
+the `io.jsonwebtoken.security.AeadAlgorithm` interface.
+
+As shown in the table above, each algorithm requires a key of sufficient length.  The JWT specification
+[RFC 7518, Sections 5.2.3 through 5.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3)
+_requires_ (mandates) that you MUST use keys that are sufficiently strong for a chosen algorithm.  This means that 
+JJWT - a specification-compliant library - will also enforce that you use sufficiently strong keys
+for the algorithms you choose.  If you provide a weak key for a given algorithm, JJWT will reject it and throw an
+exception.
+
+The reason why the JWT specification, and consequently JJWT, mandates key lengths is that the security model of a 
+particular algorithm can completely break down if you don't adhere to the mandatory key properties of the algorithm, 
+effectively having no security at all.
+
+<a name="jwe-enc-symmetric"></a>
+#### Symmetric Ciphers
+
+You might have noticed something about the above Authenticated Encryption algorithms: they're all variants of the 
+AES algorithm, and AES always uses a symmetric (secret) key to perform encryption and decryption.  That's kind of 
+strange, isn't it?
+
+What about RSA and Elliptic Curve asymmetric key cryptography? And Diffie-Hellman key exchange?  What about 
+password-based key derivation algorithms? Surely any of those could be desirable depending on the use case, no?
+
+Yes, they definitely can, and the JWT specifications do support them, albeit in a roundabout way:  those other 
+algorithms _are_ indeed supported and used, but they aren't used to encrypt the JWT `payload` directly.  They are 
+used to _produce_ the actual key used to encrypt the `JWT` payload.
+
+This is all done via the JWT specification's concept of a Key Management Algorithm, covered next.  After we cover that, 
+we'll show you how to encrypt and parse your own JWTs with the `JwtBuilder` and `JwtParserBuilder`.
+
+<a name="jwe-alg"></a>
+### JWE Key Management Algorithms
+
+As stated above, all standard JWA Encryption Algorithms are AES-based authenticated encryption algorithms.  So what 
+about RSA and Elliptic Curve cryptography? And password-based key derivation, or Diffie-Hellman exchange?
+
+All of those are supported as well, but they are not used directly for encryption. They are used to _produce_ the 
+key that will be used to directly encrypt the JWT `payload`.
+
+That is, JWT encryption can be thought of a two-step process, shown in the following pseudocode:
+
+```groovy
+
+Key algorithmKey = getKeyManagementAlgorithmKey(); // PublicKey, SecretKey, or PasswordKey
+
+SecretKey contentEncryptionKey = keyManagementAlgorithm.produceEncryptionKey(algorithmKey); // 1
+
+byte[] ciphertext = encryptionAlgorithm.encrypt(payload, contentEncryptionKey);             // 2
+```
+
+Steps:
+
+1. Use the `algorithmKey` to produce the actual key that will be used to encrypt the payload.  The JWT specifications
+   call this result the 'Content Encryption Key'.
+2. Take the resulting Content Encryption Key and use it directly with the Authenticated Encryption algorithm to
+   actually encrypt the JWT `payload`.
+
+So why the indirection?  Why not just use any `PublicKey`, `SecretKey` or `PasswordKey` to encrypt the `payload`
+_directly_ ?
+
+There are quite a few reasons for this.
+
+1. Asymmetric key encryption (like RSA and Elliptic Curve) tends to be slow.  Like _really_ slow.  Symmetric key
+   cipher algorithms in contrast are _really fast_.  This matters a lot in production applications that could be 
+   handling a JWT on every HTTP request, which could be thousands per second.
+2. RSA encryption (for example) can only encrypt a relatively small amount of data. A 2048-bit RSA key can only 
+   encrypt up to a maximum of 245 bytes.  A 4096-bit RSA key can only encrypt up to a maximum of 501 bytes.  There are
+   plenty of JWTs that can exceed 245 bytes, and that would make RSA unusable.
+3. Passwords usually make for very poor encryption keys - they often have poor entropy, or they themselves are
+   often too short to be used directly with algorithms that mandate minimum key lengths to help ensure safety.
+
+For these reasons and more, using one secure algorithm to generate or encrypt a key used for another (very fast) secure
+algorithm has been proven to be a great way to increase security exposure through many more secure algorithms while 
+also still resulting in very fast and secure output.  This is after all how TLS (for https encryption) works - 
+two parties can use more complex cryptography (like RSA or Elliptic Curve) to negotiate a small, fast encryption key. 
+This is done during the 'TLS handshake' to produce a 'session key'.
+
+So the JWT specifications work much in the same way: one key from any number of various algorithm types can be used
+to produce a final symmetric key, and that symmetric key is used to encrypt the JWT `payload`.
+
+<a name="jwe-alg-standard"></a>
+#### JWE Standard Key Management Algorithms
+
+The JWT specification defines 17 standard Key Management Algorithms used to produce the `payload` encryption key:
+
+| Identifier | Key Management Algorithm |
+| --- | --- |   
+| `RSA1_5` | RSAES-PKCS1-v1_5 |
+| `RSA-OAEP` | RSAES OAEP using default parameters |
+| `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256 |
+| `A128KW` | AES Key Wrap with default initial value using 128-bit key |
+| `A192KW` | AES Key Wrap with default initial value using 192-bit key |
+| `A256KW` | AES Key Wrap with default initial value using 256-bit key |
+| `dir` | Direct use of a shared symmetric key as the CEK |
+| `ECDH-ES` | Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF |
+| `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW" |
+| `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW" |
+| `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW" |
+| `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>3</b></sup> |
+| `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>3</b></sup> |
+| `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>3</b></sup> |
+| `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup> |
+| `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup> |
+| <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
+
+<sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+These are all represented in the `io.jsonwebtoken.security.KeyAlgorithms` utility class as implementations of
+the `io.jsonwebtoken.security.KeyAlgorithm` interface.
+
+<a name="jwe-create"></a>
+### Creating a JWE
+
+Now that we know the difference between a JWE Encryption Algorithm and a JWE Key Management Algorithm, how do we use
+them to encrypt a JWT?
+
+You create an encrypted JWT (called a 'JWE') as follows:
+
+1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
+2. Call `JwtBuilder` methods to add [header](#jws-create-header) parameters and [claims](#jws-create-claims) as desired.
+3. Call the `encryptWith` method, specifying the Encryption Algorithm, Key Algorithm, and Key you want to use.
+4. Finally, call the `compact()` method to compact and encrypt, producing the final jwe.
+
+For example:
+
+```java
+String jwe = Jwts.builder()                              // (1)
+
+    .setSubject("Bob")                                   // (2) 
+
+    .encryptWith(encryptionAlgorithm, key, keyAlgorithm) // (3)
+     
+    .compact();                                          // (4)
+```
+
+Before calling `compact()`,  you may set any [header](#jws-create-header) parameters and [claims](#jws-create-claims) 
+exactly the same way as described for JWS.
+
+<a name="jwe-create-compression"></a>
+#### JWE Compression
+
+If your JWT payload or Claims set is large (contains a lot of data), you might want to compress the JWE to reduce 
+its size.  Please see the main [Compression](#compression) section to see how to compress and decompress JWTs.
+
+<a name="jwe-read"></a>
+### Reading a JWE
+
+You read (parse) a JWE as follows:
+
+1. Use the `Jwts.parserBuilder()` method to create a `JwtParserBuilder` instance.
+2. Specify `SecretKey`, `PasswordKey`, or asymmetric `PublicKey` you want to use to decrypt the JWE.<sup>1</sup>
+3. Call the `build()` method on the `JwtParserBuilder` to return a thread-safe `JwtParser`.
+4. Finally, call either the `parseClaimsJwe` or `parseContentJwe` method with your jwe `String`, producing the 
+   original JWE.
+5. The entire call is wrapped in a try/catch block in case decryption or integrity verification fails.  We'll cover
+   exceptions and causes for failure later.
+
+<sup>1. If you don't know which key to use at the time of parsing, you can look up the key using a Key `Locator`
+which [we'll cover later](#key-locator).</sup>
+
+For example:
+
+```java
+Jwe<Claims> jwe;
+
+try {
+    jwe = Jwts.parserBuilder()  // (1)
+    .decryptWith(key)           // (2)
+    .build()                    // (3)
+    .parseClaimsJwe(jweString); // (4)
+    
+    // we can safely trust the JWT
+     
+catch (JwtException ex) {       // (5)
+    
+    // we *cannot* use the JWT as intended by its creator
+}
+```
+> **Note**
+> **Expected Payload Type** If you are expecting a JWE with a Claims `payload`, always call the `JwtParser` 
+> `parseClaimsJws` method.
+
+<a name="jwe-read-key"></a>
+#### Decryption Key
+
+The most important thing to do when reading a JWE is to specify the key used during decryption.  If decryption or
+integrity protection checks fail, the JWT cannot be safely trusted and should be discarded.
+
+So which key do we use for decryption?
+
+* If the jwe was encrypted _directly_ with a `SecretKey`, the same `SecretKey` must be specified on the 
+  `JwtParserBuilder`. For example:
+
+  ```java
+  Jwts.parserBuilder()
+      
+    .decryptWith(secretKey) // <----
+    
+    .build()
+    .parseClaimsJws(jwsString);
+  ```
+* If the jwe was encrypted using a key produced by a Password-based key derivation `KeyAlgorithm`, the same 
+  `PasswordKey` must be specified on the `JwtParserBuilder`. For example:
+
+  ```java
+  Jwts.parserBuilder()
+      
+    .decryptWith(passwordKey) // <---- a `PasswordKey` instance
+    
+    .build()
+    .parseClaimsJws(jwsString);
+  ```
+* If the jwe was encrypted with a key produced by an asymmetric `KeyAlgorithm`, the corresponding `PrivateKey` (not 
+  the `PublicKey`) must be specified on the `JwtParserBuilder`.  For example:
+
+  ```java
+  Jwts.parserBuilder()
+      
+    .decryptWith(privateKey) // <---- a `PrivateKey`, not a `PublicKey`
+    
+    .build()
+    .parseClaimsJws(jwsString);
+  ```
+
+<a name="jwe-read-key-locator"></a>
+#### Decryption Key Locator
+
+What if your application doesn't use just a single `SecretKey` or `KeyPair`? What
+if JWEs can be created with different `SecretKey`s, `PasswordKey`s or public/private keys, or a combination of all of 
+them?  How do you know which key to specify if you can't inspect the JWT first?
+
+In these cases, you can't call the `JwtParserBuilder`'s `decryptWith` method with a single key - instead, you'll need
+Key Locator.  Please see the [Key Lookup](#key-locator) section to see how to dynamically obtain different keys when
+parsing JWSs or JWEs.
+
+<a name="jws-read-claims"></a>
+#### Claim Assertions
+
+You can enforce that the JWS you are parsing conforms to expectations that you require and are important for your
+application.
+
+For example, let's say that you require that the JWS you are parsing has a specific `sub` (subject) value,
+otherwise you may not trust the token.  You can do that by using one of the various `require`* methods on the
+`JwtParserBuilder`:
+
+```java
+try {
+    Jwts.parserBuilder().requireSubject("jsmith").verifyWith(key).build().parseClaimsJws(s);
+} catch (InvalidClaimException ice) {
+    // the sub field was missing or did not have a 'jsmith' value
+}
+```
+
+If it is important to react to a missing vs an incorrect value, instead of catching `InvalidClaimException`,
+you can catch either `MissingClaimException` or `IncorrectClaimException`:
+
+```java
+try {
+    Jwts.parserBuilder().requireSubject("jsmith").verifyWith(key).build().parseClaimsJws(s);
+} catch(MissingClaimException mce) {
+    // the parsed JWT did not have the sub field
+} catch(IncorrectClaimException ice) {
+    // the parsed JWT had a sub field, but its value was not equal to 'jsmith'
+}
+```
+
+You can also require custom fields by using the `require(fieldName, requiredFieldValue)` method - for example:
+
+```java
+try {
+    Jwts.parserBuilder().require("myfield", "myRequiredValue").verifyWith(key).build().parseClaimsJws(s);
+} catch(InvalidClaimException ice) {
+    // the 'myfield' field was missing or did not have a 'myRequiredValue' value
+}
+```
+(or, again, you could catch either `MissingClaimException` or `IncorrectClaimException` instead).
+
+Please see the `JwtParserBuilder` class and/or JavaDoc for a full list of the various `require`* methods you may use for claims
+assertions.
+
+<a name="jws-read-clock"></a>
+#### Accounting for Clock Skew
+
+When parsing a JWT, you might find that `exp` or `nbf` claim assertions fail (throw exceptions) because the clock on
+the parsing machine is not perfectly in sync with the clock on the machine that created the JWT.  This can cause
+obvious problems since `exp` and `nbf` are time-based assertions, and clock times need to be reliably in sync for shared
+assertions.
+
+You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParserBuilder`'s
+`setAllowedClockSkewSeconds`. For example:
+
+```java
+long seconds = 3 * 60; //3 minutes
+
+Jwts.parserBuilder()
+    
+    .setAllowedClockSkewSeconds(seconds) // <----
+    
+    // ... etc ...
+    .build()
+    .parseClaimsJws(jwt);
+```
+This ensures that clock differences between the machines can be ignored. Two or three minutes should be more than
+enough; it would be fairly strange if a production machine's clock was more than 5 minutes difference from most
+atomic clocks around the world.
+
+<a name="jws-read-clock-custom"></a>
+##### Custom Clock Support
+
+If the above `setAllowedClockSkewSeconds` isn't sufficient for your needs, the timestamps created
+during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParserBuilder`'s `setClock`
+method with an implementation of the `io.jsonwebtoken.Clock` interface.  For example:
+
+ ```java
+Clock clock = new MyClock();
+
+Jwts.parserBuilder().setClock(myClock) //... etc ...
+``` 
+
+The `JwtParser`'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
+as most would expect.  However, supplying your own clock could be useful, especially when writing test cases to
+guarantee deterministic behavior.
+
+<a name="jws-read-decompression"></a>
+#### JWS Decompression
+
+If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the
+`JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
+
+Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
+
 
 <a name="key-locator"></a>
 ## Key Lookup
@@ -1376,7 +1750,8 @@ example:
 ```
 
 If you use the `DEFLATE` or `GZIP` Compression Codecs - that's it, you're done.  You don't have to do anything during 
-parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress the body as expected.
+parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress the payload as 
+expected.
 
 <a name="compression-custom"></a>
 ### Custom Compression Codec
@@ -1582,7 +1957,8 @@ By default JJWT will only convert simple claim types: String, Date, Long, Intege
 new JacksonDeserializer(Maps.of("user", User.class).build())
 ```
 
-This would trigger the value in the `user` claim to be deserialized into the custom type of `User`.  Given the claims body of:
+This would trigger the value in the `user` claim to be deserialized into the custom type of `User`.  Given the claims 
+payload of:
 
 ```json
 {
@@ -1605,7 +1981,7 @@ Jwts.parserBuilder()
 
     .parseClaimsJwt(aJwtString)
 
-    .getBody()
+    .getPayload()
     
     .get("user", User.class) // <-----
 ```

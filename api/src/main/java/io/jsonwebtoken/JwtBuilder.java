@@ -709,8 +709,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Encrypts the constructed JWT with the specified {@code enc}ryption algorithm using the provided
-     * symmetric {@code key}, producing a JWE.  Because it is a symmetric key, the party decrypting the resulting
-     * JWE must also have access to the same key.
+     * symmetric {@code key}, producing a JWE.  Because it is a symmetric key, the JWE recipient
+     * must also have access to the same key to decrypt.
      *
      * <p>This method is a convenience method that delegates to
      * {@link #encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(enc, key, KeyAlgorithm)}
