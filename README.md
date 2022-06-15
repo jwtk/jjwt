@@ -520,6 +520,379 @@ Now that we've had a quickstart 'taste' of how to create and verify a JWS, the n
 JWS you'll need to use them in your applications.  If you want to create an encrypted JWT (a 'JWE') instead, feel
 free to jump to the [JWE section](#jwe).
 
+<a name="jwt"></a>
+## JWTs
+
+As discussed in the [overview](#overview), a JWT in its simplest form contains two parts:
+
+1. The primary data within the JWT, called the `payload`, and
+2. A JSON `Object` with name/value pairs that represent metadata about the `payload` and the
+   message itself, called the `header`.
+
+Once these exist, they can be _compacted_ into a small text form suitable for network transmission or embedding in
+URLs.
+
+So how is a compact JWT created and what does it look like? Let's walk through a simplified version of the process
+with some pseudocode:
+
+1. Assume we have a JWT with a JSON `header` and a simple text message payload:
+
+   **header**
+   ```
+   {
+     "alg": "none"
+   }
+   ```
+
+   **payload**
+   ```
+   The true sign of intelligence is not knowledge but imagination.
+   ```
+
+2. Remove all unnecessary whitespace in the JSON:
+
+   ```groovy
+   String header = '{"alg":"none"}'
+   String payload = 'The true sign of intelligence is not knowledge but imagination.'
+   ```
+
+3. Get the UTF-8 bytes and Base64URL-encode each:
+
+   ```groovy
+   String encodedHeader = base64URLEncode( header.getBytes("UTF-8") )
+   String encodedPayload = base64URLEncode( payload.getBytes("UTF-8") )
+   ```
+
+4. Concatenate the encoded header and claims delimited by period ('.') character:
+
+   ```groovy
+   String concatenated = encodedHeader + '.' + encodedPayload
+   ```
+
+Add a final period character, and the final concatenated compact JWT String looks like this:
+
+```
+eyJhbGciOiJub25lIn0.VGhlIHRydWUgc2lnbiBvZiBpbnRlbGxpZ2VuY2UgaXMgbm90IGtub3dsZWRnZSBidXQgaW1hZ2luYXRpb24u.
+```
+
+This is called an 'unprotected' JWT because no security was involved - no digital signatures or encryption to 
+'protect' the JWT and ensure it cannot be changed by untrusted parties.  If we wanted to digitally sign the compact 
+form so that we could at least guarantee that no-one changes the data without us knowing, we could add on a few more
+steps:
+
+5. Use a sufficiently-strong cryptographic secret or private key, along with a signing algorithm of your choice
+    (we'll use HMAC-SHA-256 here), and sign the concatenated string:
+
+    ```groovy
+    Key key = getMySigningKey()
+    byte[] signature = hmacSha256( concatenated, key )
+    ```
+
+6. Because signatures are always byte arrays, Base64URL-encode the signature and append a period character '.' and
+   add it to the concatenated string:
+
+   ```groovy
+   String jws = concatenated + '.' + base64URLEncode( signature )
+   ```
+
+There, now we have a protected JWT that has been digitally signed - a _signed_ JWT, called a 'JWS' for short. Our 
+example `jws` result looks like this:
+
+```
+eyJhbGciOiJIUzI1NiJ9.VGhlIHRydWUgc2lnbiBvZiBpbnRlbGxpZ2VuY2UgaXMgbm90IGtub3dsZWRnZSBidXQgaW1hZ2luYXRpb24u.8z9EMiioI8553YG85gVu31EWb026Qb_NPKpXjiQx4To
+```
+
+Of course, no one would want to do this manually in code, and worse, if you get anything wrong, you could cause serious
+security problems or weaknesses.  As a result, JJWT was created to handle all of this for you: JJWT completely
+automates both the creation of and parsing of JWTs, handling digital signatures and encryption as well.
+
+Before we cover the specifics of JWT and digital signatures or encryption, we'll first cover the features of JWT
+creation and parsing that are common to all forms of JWTs - Unprotected JWTs, digitally signed JWTs (called a `JWS`s), 
+and encrypted JWTs (called a `JWE`).
+
+<a name="jwt-create"></a>
+### Creating a JWT
+
+You create a JWT as follows:
+
+1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
+2. Call `JwtBuilder` methods to add header parameters and `payload` content or claims as desired.
+3. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT, respectively.
+4. Call the `compact()` method to produce the resulting compact JWT string.
+
+For example:
+
+```java
+String jwt = Jwts.builder()                                     // (1)
+        
+    .setContent("Hello World".getBytes(StandardCharsets.UTF_8)) // (2) any type of byte[] content 
+    //.setSubject("Bob")                                        //     or 'claims' instead
+        
+    //.signWith(signingKey)                                     // (3) if signing
+    //.encryptWith(encryptionAlg, keyAlg, key)                  //     if encrypting
+        
+    .compact();                                                 // (4)
+```
+
+Either `byte[]` content may be specified (via `setContent`) _or_ JSON claims 
+(such as `setSubject` and other claims methods, or via `setClaims`), but not both.  Choose either.
+
+If you don't use `signWith` or `encryptWith`, an Unprotected JWT will be created. Using `signWith` will produce a
+digitally signed JWT, called a `JWS`.  Similarly, `encryptWith` will produce an encrypted JWT, called a `JWE`.
+Either `signWith` or `encryptWith` may be used - calling both will result in an error.
+
+<a name="jwt-header"></a>
+#### JWT Header
+
+A JWT header is a JSON `Object` that provides metadata about the contents, format, and any cryptographic operations
+relevant to the JWT `payload`.  JJWT provides a number of ways of setting the header and/or multiple header
+parameters (name/value pairs).
+
+<a name="jwt-header-builder"></a>
+##### Header Builder
+
+The easiest and recommended way to set one or more JWT header parameters (name/value pairs) is to call 
+`JwtBuilder` `setHeader` with `Jwts.headerBuilder()`. For example:
+
+```java
+String jwt = Jwts.builder()
+        
+    .setHeader(Jwts.headerBuilder()   // <----
+        .setContentType("text/plain")
+        .setKeyId("aKeyId")
+        .put("someName", "anyValue")
+        .putAll(anotherMap)
+        // ... etc ...
+    )    
+    // ... etc ...
+    .compact();
+```
+
+In addition to type-safe setter methods, `Jwts.headerBuilder()` can also support arbitrary name/value pairs via
+`put` and `putAll` as shown above.  It can also support automatically calculating
+X.509 thumbprints and other builder-style benefits that the other `JwtBuilder` `setHeader`* methods do not support. 
+For this reason, `Jwts.headerBuilder()` is the recommended way to set a JWT header and is preferred over the other
+approaches listed next.
+
+> **Note**
+> 
+> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
+> as needed.
+
+<a name="jwt-header-params"></a>
+##### Header Parameters
+
+Another way of setting header parameters is to call `JwtBuilder` `setHeaderParam` one or more times as needed:
+
+```java
+String jwt = Jwts.builder()
+
+    .setHeaderParam("kid", "myKeyId")
+    
+    // ... etc ...
+
+```
+
+Each time `setHeaderParam` is called, it simply appends the key-value pair to an internal `Header` instance,
+potentially overwriting any existing identically-named key/value pair.
+
+The downside with this approach is that you lose any type-safe setter methods or additional builder utility methods
+available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
+
+> **Note**
+>
+> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
+> as needed.
+
+<a name="jwt-header-map"></a>
+##### Header Map
+
+If you want to specify the entire header at once, and you don't want to use `Jwts.headerBuilder()`, you can use
+`JwtBuilder` `setHeader(Map)` method instead:
+
+```java
+
+Map<String,Object> header = getMyHeaderMap(); //implement me
+
+String jwt = Jwts.builder()
+
+    .setHeader(header)
+    
+    // ... etc ...
+
+```
+
+**NOTE**: Per standard Java `setter` idioms, `setHeader` is a _full replacement_ operation - it will replace any
+and all existing header name/value pairs.
+
+The downside with this approach is that you lose any type-safe setter methods or additional builder utility methods
+available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
+
+> **Note**
+>
+> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
+> as needed.
+
+<a name="jwt-payload"></a>
+#### JWT Payload
+
+A JWT `payload` can be anything at all - anything that can be represented as a byte array, such as text, images, 
+documents, and more.  But since a JWT `header` is always JSON, it makes sense that the `payload` could also be JSON,
+especially for representing identity claims.
+
+As a result, the `JwtBuilder` supports two distinct payload options:
+
+* `setContent` if you would like the `payload` to be arbitrary byte array content, and
+* `setClaims` (and supporting helper methods) if you would like the `payload` to be a JSON Claims `Object`.
+
+Either option may be used, but not both.  Calling both methods will result in a build error.
+
+<a name="jwt-content"></a>
+##### Arbitrary Content
+
+You can set the JWT `payload` to be any arbitrary byte array content by using the `JwtBuilder` `setContent` method.
+For example:
+
+```java
+byte[] content = "Hello World".getBytes(StandardCharsets.UTF_8);
+
+String jwt = Jwts.builder()
+
+    .setContent(content, "text/plain") // <---
+    
+    // ... etc ...
+        
+    .build();
+```
+
+Notice this particular example of `setContent` uses the two-argument convenience variant:
+1. The first argument is the actual byte content to set as the JWT payload
+2. The second argument is a String identifier of an IANA Media Type.
+
+The second argument will cause the `JwtBuilder` to automatically set the `cty` (Content Type) header according to the
+JWT specification's [recommended compact format](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10).
+
+This two-argument variant is typically recommended over the single-argument `setContent(byte[])` method because it
+guarantees the JWT recipient can inspect the `cty` header to determine how to convert the `payload` byte array into
+a final form that the application can use.
+
+Without setting the `cty` header, the JWT recipient _must_ know via out-of-band (external) information how to process
+the byte array, which is usually less convenient and always requires code changes if the content format ever changes.
+
+<a name="jwt-claims"></a>
+##### JWT Claims
+
+Instead of a content byte array, a JWT `payload` may instead contain assertions or claims for a JWT recipient. In 
+this case, the `payload` is a 'claims' JSON `Object`, and JJWT conveniently supports this with a type-safe 
+`Claims` instance.
+
+<a name="jwt-claims-standard"></a>
+###### Standard Claims
+
+The `JwtBuilder` provides convenient setter methods for standard registered Claim names defined in the JWT
+specification.  They are:
+
+* `setIssuer`: sets the [`iss` (Issuer) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.1)
+* `setSubject`: sets the [`sub` (Subject) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.2)
+* `setAudience`: sets the [`aud` (Audience) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.3)
+* `setExpiration`: sets the [`exp` (Expiration Time) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.4)
+* `setNotBefore`: sets the [`nbf` (Not Before) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.5)
+* `setIssuedAt`: sets the [`iat` (Issued At) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.6)
+* `setId`: sets the [`jti` (JWT ID) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.7)
+
+For example:
+
+```java
+
+String jws = Jwts.builder()
+
+    .setIssuer("me")
+    .setSubject("Bob")
+    .setAudience("you")
+    .setExpiration(expiration) //a java.util.Date
+    .setNotBefore(notBefore) //a java.util.Date 
+    .setIssuedAt(new Date()) // for example, now
+    .setId(UUID.randomUUID()) //just an example id
+    
+    /// ... etc ...
+```
+
+<a name="jwt-claims-custom"></a>
+###### Custom Claims
+
+If you need to set one or more custom claims that don't match the standard setter method claims shown above, you
+can simply call `JwtBuilder` `claim` one or more times as needed:
+
+```java
+String jws = Jwts.builder()
+
+    .claim("hello", "world")
+    
+    // ... etc ...
+
+```
+
+Each time `claim` is called, it simply appends the key-value pair to an internal `Claims` instance, potentially
+overwriting any existing identically-named key/value pair.
+
+Obviously, you do not need to call `claim` for any [standard claim name](#jws-create-claims-standard), and it is
+recommended instead to call the standard respective setter method as this enhances readability.
+
+<a name="jwt-claims-instance"></a>
+###### Claims Instance
+
+If you want to specify all claims at once, you can use the `Jwts.claims()` method and build up the claims
+with it:
+
+```java
+
+Claims claims = Jwts.claims();
+
+populate(claims); //implement me
+
+String jws = Jwts.builder()
+
+    .setClaims(claims)
+    
+    // ... etc ...
+
+```
+
+**NOTE**: Per standard Java `setter` idioms, calling `setClaims` will fully replace any existing claim name/value
+pairs.  If you want to add (append) claims in bulk, and not fully replace them, use the `JwtBuilder`'s `addClaims`
+method instead.
+
+<a name="jwt-claims-map"></a>
+###### Claims Map
+
+If you want to specify all claims at once, and you don't want to use `Jwts.claims()`, you can use `JwtBuilder`
+`setClaims(Map)` method instead:
+
+```java
+
+Map<String,Object> claims = getMyClaimsMap(); //implement me
+
+String jws = Jwts.builder()
+
+    .setClaims(claims)
+    
+    // ... etc ...
+
+```
+
+**NOTE**: Per standard Java `setter` idioms, calling `setClaims` will fully replace any existing claim name/value
+pairs.  If you want to add (append) claims in bulk, and not fully replace them, use the `JwtBuilder`'s `addClaims`
+method instead.
+
+<a name="jwt-compression"></a>
+#### JWT Compression
+
+If your JWT payload is large (contains a lot of data), you might want to compress the JWT to reduce its size.  Note 
+that this is *not* a standard feature for all JWTs - only JWEs - and is not likely to be supported by other JWT 
+libraries for non-JWE tokens.  JJWT supports it for JWTs, JWSs and JWEs however.
+
+Please see the main [Compression](#compression) section to see how to compress and decompress JWTs.
+
 <a name="jws"></a>
 ## Signed JWTs
 
@@ -1592,7 +1965,7 @@ Please see the [Compression](#compression) section below to see how to decompres
 It is common in many applications to receive JWTs that can be encrypted or signed by different cryptographic keys.  For
 example, maybe a JWT created to assert a specific user identity uses a Key specific to that exact user. Or perhaps JWTs
 specific to a particular customer all use that customer's Key.  Or maybe your application creates JWTs that are 
-encrypted with a private key specific to your application for your own use (e.g. a user session token).
+encrypted with a key specific to your application for your own use (e.g. a user session token).
 
 In all of these and similar scenarios, you won't know which key was used to sign or encrypt a JWT until the JWT is 
 received, at parse time, so you can't 'hard code' any verification or decryption key using the `JwtParserBuilder`'s
@@ -1726,9 +2099,9 @@ on the type of JWS or JWE algorithm used.  That is:
 <a name="compression"></a>
 ## Compression
 
-**The JWT specification only standardizes this feature for JWEs (Encrypted JWTs) and not JWSs (Signed JWTs), however
-JJWT supports both**.  If you are positive that a JWS you create with JJWT will _also_ be parsed with JJWT, you 
-can use this feature with JWSs, otherwise it is best to only use it for JWEs.  
+**The JWT specification only standardizes this feature for JWEs (Encrypted JWTs) and not Unprotected JWTs or JWSs 
+(Signed JWTs), however JJWT supports all three**.  If you are positive that a JWT you create with JJWT will 
+_also_ be parsed with JJWT, you can use this feature with any JWT, otherwise it is best to only use it for JWEs.  
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
 name/value pairs (or individual values are very large or verbose) - you can reduce the size of the compact JWT by 
