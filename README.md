@@ -414,7 +414,7 @@ dependencies {
     }
     // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms
     // AND also enable the BouncyCastle provider as shown below
-    //runtimeOnly('org.bouncycastle:bcprov-jdk15on:1.70')
+    //implementation('org.bouncycastle:bcprov-jdk15on:1.70')
 }
 ```
 
@@ -463,7 +463,7 @@ class MainActivity : AppCompatActivity() {
 <a name="install-understandingdependencies"></a>
 ### Understanding JJWT Dependencies
 
-Notice the above dependency declarations all have only one compile-time dependency and the rest are declared as 
+Notice the above JJWT dependency declarations all have only one compile-time dependency and the rest are declared as 
 _runtime_ dependencies.
 
 This is because JJWT is designed so you only depend on the APIs that are explicitly designed for you to use in
