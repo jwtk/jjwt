@@ -436,7 +436,7 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 ```
 
 <a name="install-android-bc"></a>
-#### BouncyCastle
+#### Bouncy Castle
 
 If you want to use JWT RSASSA-PSS algorithms (i.e. `PS256`, `PS384`, and `PS512`), or you just want to ensure your 
 Android application is running a 'real' version of BouncyCastle, you will need to:
