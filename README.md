@@ -37,6 +37,7 @@ enforcement.
   * [Android Projects](#install-android)
     * [Dependencies](#install-android-dependencies)
     * [Proguard Exclusions](#install-android-proguard)
+    * [Bouncy Castle](#install-android-bc)
   * [Understanding JJWT Dependencies](#install-understandingdependencies)
 * [Quickstart](#quickstart)
 * [Signed JWTs](#jws)
@@ -396,7 +397,8 @@ dependencies {
 <a name="install-android"></a>
 ### Android Projects
 
-Android projects will want to define the following dependencies and Proguard exclusions:
+Android projects will want to define the following dependencies and Proguard exclusions, and optional
+BouncyCastle `Provider`:
 
 <a name="install-android-dependencies"></a>
 #### Dependencies
@@ -405,13 +407,14 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api 'io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION' 
+    api('io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION')
+    runtimeOnly('io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION') 
     runtimeOnly('io.jsonwebtoken:jjwt-orgjson:JJWT_RELEASE_VERSION') {
-        exclude group: 'org.json', module: 'json' //provided by Android natively
+        exclude(group: 'org.json', module: 'json') //provided by Android natively
     }
-    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-    //runtimeOnly 'org.bouncycastle:bcprov-jdk15on:1.70'
+    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms
+    // AND also enable the BouncyCastle provider as shown below
+    //runtimeOnly('org.bouncycastle:bcprov-jdk15on:1.70')
 }
 ```
 
@@ -430,6 +433,31 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 -keep class org.bouncycastle.** { *; }
 -keepnames class org.bouncycastle.** { *; }
 -dontwarn org.bouncycastle.**
+```
+
+<a name="install-android-bc"></a>
+#### BouncyCastle
+
+If you want to use JWT RSASSA-PSS algorithms (i.e. `PS256`, `PS384`, and `PS512`), or you just want to ensure your 
+Android application is running a 'real' version of BouncyCastle, you will need to:
+1. Uncomment the BouncyCastle dependency as commented above in the [dependencies](#install-android-dependencies) section.
+2. Remove the legacy Android custom `BC` provider and register the updated/correct one.
+
+Provider registration needs to be done _early_ in the application's lifecycle, preferably in your application's 
+main `Activity` class as a static initialization block.  For example:
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        init {
+            Security.removeProvider("BC") //remove old/legacy Android-provided BC provider
+            Security.addProvider(BouncyCastleProvider()) // add 'real'/correct BC provider
+        }
+    }
+
+    // ... etc ...
+}
 ```
 
 <a name="install-understandingdependencies"></a>
