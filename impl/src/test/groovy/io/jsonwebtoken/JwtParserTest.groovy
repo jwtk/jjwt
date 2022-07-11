@@ -20,9 +20,11 @@ import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
+import org.hamcrest.CoreMatchers
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -210,18 +212,22 @@ class JwtParserTest {
     @Test
     void testParseWithExpiredJwt() {
 
-        Date exp = new Date(System.currentTimeMillis() - 1000)
+        // Test with a fixed clock to assert full exception message
+        long testTime = 1657552537573L
+        Clock fixedClock = new FixedClock(testTime)
+
+        Date exp = new Date(testTime - 1000)
 
         String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
-            Jwts.parserBuilder().enableUnsecuredJws().build().parse(compact)
+            Jwts.parserBuilder().enableUnsecuredJws().setClock(fixedClock).build().parse(compact)
             fail()
         } catch (ExpiredJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT expired at ')
-
-            //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
-            assertTrue e.getMessage().contains('Z, a difference of ')
+            // https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
+            // https://github.com/jwtk/jjwt/issues/660 (show differences as now - expired)
+            assertEquals e.getMessage(), "JWT expired at 2022-07-11T15:15:36Z. Current time: " +
+                    "2022-07-11T15:15:37Z, a difference of 1573 milliseconds.  Allowed clock skew: 0 milliseconds."
         }
     }
 

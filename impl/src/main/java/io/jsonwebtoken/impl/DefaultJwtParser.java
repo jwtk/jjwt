@@ -704,7 +704,7 @@ public class DefaultJwtParser implements JwtParser {
                     String expVal = DateFormats.formatIso8601(exp, false);
                     String nowVal = DateFormats.formatIso8601(now, false);
 
-                    long differenceMillis = maxTime - exp.getTime();
+                    long differenceMillis = nowTime - exp.getTime();
 
                     String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of " +
                             differenceMillis + " milliseconds.  Allowed clock skew: " +
