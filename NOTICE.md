@@ -8,7 +8,7 @@ have been retained and are repeated here per that code's requirements:
 Licence (BSD):
 ==============
 
-Copyright (c) 2004, Mikael Grev, MiG InfoCom AB. (base64 @ miginfocom . com)
+Copyright (c) 2004, Mikael Grev, MiG InfoCom AB. (base64 @ miginfocom . com)sss
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
