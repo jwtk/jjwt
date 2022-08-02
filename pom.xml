@@ -126,7 +126,7 @@
         <jdk.version>1.7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.12.7</jackson.version>
+        <jackson.version>2.12.7.1</jackson.version>
         <orgjson.version>20220320</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
