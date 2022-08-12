@@ -1006,7 +1006,7 @@ try {
         
     .build()                   // (3)
         
-    .parse(compact);           // (4) or parseClaimsJws, parseClaimsJwe, parseContentJws, parseContentJwe, etc
+    .parse(compact);           // (4) or parseClaimsJws, parseClaimsJwe, parseContentJws, etc
     
     // we can safely trust the JWT
      
@@ -1016,7 +1016,8 @@ catch (JwtException ex) {      // (5)
 }
 ```
 
-> **Info**
+> **Note**
+> 
 > **Type-safe JWTs:** If you are certain your parser will only ever encounter a specific kind of JWT (for example, you only 
 > ever use signed JWTs with `Claims` payloads, or encrypted JWTs with `byte[]` content payloads, etc), you can call the 
 > associated typesafe `parseClaimsJws`, `parseClaimsJwe`, (etc) method variant instead of the generic `parse` method. 
@@ -1223,6 +1224,7 @@ key algorithms:
 | `PS256` | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
 | `PS384` | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
 | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
+
 <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
 These are all represented as constants in the `io.jsonwebtoken.security.SignatureAlgorithms` utility class.
