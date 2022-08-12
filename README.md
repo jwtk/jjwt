@@ -79,10 +79,7 @@ enforcement.
     * [Compression](#jws-create-compression)
   * [Read a JWS](#jws-read)
     * [Verification Key](#jws-read-key)
-      * [Find the Verification Key Dynamically](#jws-read-key-locator)
-    * [Claims Assertions](#jws-read-claims)
-    * [Accounting for Clock Skew](#jws-read-clock)
-      * [Custom Clock](#jws-read-clock-custom)
+    * [Verification Key Locator](#jws-read-key-locator)
     * [Decompression](#jws-read-decompression)
     <!-- * [Error Handling](#jws-read-errors) -->
 * [Encrypted JWTs](#jwe)
@@ -612,7 +609,8 @@ your applications and all other internal implementation details - that can chang
 runtime-only dependencies.  This is an extremely important point if you want to ensure stable JJWT usage and
 upgrades over time:
 
-> **WARNING**
+> **Warning**
+> 
 > **JJWT guarantees semantic versioning compatibility for all of its artifacts _except_ the `jjwt-impl` .jar.  No such 
 guarantee is made for the `jjwt-impl` .jar and internal changes in that .jar can happen at any time.  Never add the 
 `jjwt-impl` .jar to your project with `compile` scope - always declare it with `runtime` scope.**
@@ -670,6 +668,7 @@ verified, we parse out the claims and assert that that subject is set to `Joe`. 
 that pack a punch!
 
 > **Note**
+> 
 > **Type-safe JWTs:** To get a type-safe `Claims` JWT result, call the `parseClaimsJws` method (since there are many
 similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
 
@@ -718,7 +717,8 @@ String jwt = Jwts.builder()                     // (1)
 (such as `setSubject` and other claims methods, or via `setClaims`), but not both.
 * Either digital signatures (`signWith`) or encryption (`encryptWith`) may be used, but not both.
 
-> **WARNING**
+> **Warning**
+> 
 > **Unprotected JWTs**: If you do not use the `signWith` or `encryptWith` builder methods, **an Unprotected JWT will be 
 > created, which offers no security protection at all**.  If you need security protection, consider either 
 > [digitally signing](#jws) or [encrypting](#jwe) the JWT before calling the `compact()` builder method.
@@ -756,7 +756,8 @@ X.509 thumbprints and other builder-style benefits that the other `JwtBuilder` `
 For this reason, `Jwts.headerBuilder()` is the recommended way to set a JWT header and is preferred over the other
 approaches listed next.
 
-> **Note** 
+> **Note**
+> 
 > **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
 > as needed.
 
@@ -781,6 +782,7 @@ The downside with this approach is that you lose any type-safe setter methods or
 available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
 
 > **Note**
+> 
 > **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
 > as needed.
 
@@ -802,13 +804,16 @@ String jwt = Jwts.builder()
 
 ```
 
-**NOTE**: Per standard Java `setter` idioms, `setHeader` is a _full replacement_ operation - it will replace any
-and all existing header name/value pairs.
+> **Warning**
+> 
+> Per standard Java `setter` idioms, `setHeader` is a _full replacement_ operation - it will replace any
+> and all existing header name/value pairs.
 
 The downside with this approach is that you lose any type-safe setter methods or additional builder utility methods
 available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
 
 > **Note**
+> 
 > **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
 > as needed.
 
@@ -937,7 +942,8 @@ String jws = Jwts.builder()
 
 ```
 
-> **NOTE**
+> **Warning**
+> 
 > Per standard Java `setter` idioms, calling `setClaims` will fully replace all existing claim name/value
 pairs with the specified values.  If you want to add (append) claims in bulk, and not fully replace them, use the 
 > `JwtBuilder`'s `addClaims` method instead.
@@ -960,7 +966,8 @@ String jws = Jwts.builder()
 
 ```
 
-> **NOTE**
+> **Warning**
+>
 > Per standard Java `setter` idioms, calling `setClaims` will fully replace all existing claim name/value
 pairs with the specified values.  If you want to add (append) claims in bulk, and not fully replace them, use the
 > `JwtBuilder`'s `addClaims` method instead.
@@ -1218,11 +1225,13 @@ key algorithms:
 | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
 <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented in the `io.jsonwebtoken.security.SignatureAlgorithms` utility class as constants with names
-matching the standard `Identifier`s.
+These are all represented as constants in the `io.jsonwebtoken.security.SignatureAlgorithms` utility class.
 
-What's really important about these algorithms - other than their security properties - is that the JWT specification
-[RFC 7518, Sections 3.2 through 3.5](https://tools.ietf.org/html/rfc7518#section-3)
+<a name="jws-key"></a>
+### Signature Algorithms Keys
+
+What's really important about the above standard signature algorithms - other than their security properties - is that 
+the JWT specification [RFC 7518, Sections 3.2 through 3.5](https://tools.ietf.org/html/rfc7518#section-3)
 _requires_ (mandates) that you MUST use keys that are sufficiently strong for a chosen algorithm.
 
 This means that JJWT - a specification-compliant library - will also enforce that you use sufficiently strong keys
@@ -1234,10 +1243,7 @@ consequently JJWT, mandates key lengths is that the security model of a particul
 down if you don't adhere to the mandatory key properties of the algorithm, effectively having no security at all.  No
 one wants completely insecure JWTs, right?  Right!
 
-<a name="jws-key"></a>
-### Signature Algorithms Keys
-
-All JWS standard signature algorithms have required key length requirements.  So what are the requirements?
+So what are the key strength requirements?
 
 <a name="jws-key-hmacsha"></a>
 #### HMAC-SHA
@@ -1336,10 +1342,12 @@ KeyPair keyPair = SignatureAlgorithms.RS256.keyPairBuilder().build(); //or RS384
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
 public key (`keyPair.getPublic()`) to parse/verify a JWS.
 
-**NOTE: The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider 
-(like BouncyCastle) in the runtime classpath.**  If you are using JDK 10 or earlier and you want to use them, see 
-the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are natively 
-supported by the JDK.
+> **Note**
+> 
+> The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider
+> (like BouncyCastle) in the runtime classpath.**  If you are using JDK 10 or earlier and you want to use them, see
+> the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are natively
+> supported by the JDK.
 
 <a name="jws-create"></a>
 ### Creating a JWS
@@ -1390,8 +1398,10 @@ algorithm and automatically set the `alg` header to `RS512`.
 
 The same selection logic applies for Elliptic Curve `PrivateKey`s.
 
-**NOTE: You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
-`PublicKey` for signing with an `InvalidKeyException`.
+> **Note**
+> 
+> You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
+> `PublicKey` for signing with an `InvalidKeyException`.
 
 <a name="jws-create-key-secret"></a>
 ##### SecretKey Formats
@@ -1455,6 +1465,7 @@ If your JWT claims set is large (contains a lot of data), and you are certain th
 that reads/parses your JWS, you might want to compress the JWS to reduce its size.  
 
 > **Warning**
+> 
 > **Not Standard for JWS**: JJWT supports compression for JWS, but it is not a standard feature for JWS.  The
 > JWT RFC specifications standardize this _only_ for JWEs, and it is not likely to be supported by other JWT libraries
 > for JWS.  Use JWS compression only if you are certain that JJWT (or another library that supports JWS compression) 
@@ -1597,8 +1608,8 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 | `A192GCM` | 192 | AES GCM using 192-bit key<sup><b>1</b></sup> |
 | `A256GCM` | 256 | AES GCM using 256-bit key<sup><b>1</b></sup> |
 
-These are all represented in the `io.jsonwebtoken.security.EncryptionAlgorithms` utility class as implementations of
-the `io.jsonwebtoken.security.AeadAlgorithm` interface.
+These are all represented as constants in the `io.jsonwebtoken.security.EncryptionAlgorithms` utility class as 
+implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
 
 As shown in the table above, each algorithm requires a key of sufficient length.  The JWT specification
 [RFC 7518, Sections 5.2.3 through 5.3](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3)
@@ -1776,7 +1787,9 @@ catch (JwtException ex) {       // (5)
     // we *cannot* use the JWT as intended by its creator
 }
 ```
-> **Info**
+
+> **Note**
+> 
 > **Expected Payload Type:** 
 > * If you are expecting a JWE with a Claims `payload`, call the `JwtParser`'s `parseClaimsJwe` method.
 > * If you are expecting a JWE with a content `payload`, call the `JwtParser`'s `parseContentJwe` method.
@@ -2108,9 +2121,11 @@ They are checked in order, and the first one found is used:
 3. JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a 
    project runtime dependency.
    
-   **NOTE:** `org.json` APIs are natively enabled in Android environments so this is the recommended JSON processor for 
-   Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple 
-   Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshalling.
+   > **Note**
+   > 
+   > `org.json` APIs are natively enabled in Android environments so this is the recommended JSON processor for
+   > Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple
+   > Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshalling.
 
 **If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or 
 `io.jsonwebtoken:jjwt-gson` dependency** (or implement your own Serializer and Deserializer if desired). **But beware**, 
@@ -2246,10 +2261,12 @@ Jwts.parserBuilder()
     .get("user", User.class) // <-----
 ```
 
-**NOTE:** Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor 
-[described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative 
-consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced 
-parsing options, [configure the mapper directly](#json-jackson).
+> **Note**
+> 
+> Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor
+> [described above](#json-jackson). This is because JJWT configures an `ObjectMapper` directly and could have negative
+> consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced
+> parsing options, [configure the mapper directly](#json-jackson).
 
 <a name="json-gson"></a>
 ### Gson JSON Processor
