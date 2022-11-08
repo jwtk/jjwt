@@ -200,7 +200,7 @@ enforcement.
 
 * [Non-compact](https://tools.ietf.org/html/rfc7515#section-7.2) serialization and parsing.
 
-These features will be implemented in a future release.  Community contributions are welcome!
+This feature will be implemented in a future release.  Community contributions are welcome!
 
 <a name="community"></a>
 ## Community
@@ -291,15 +291,15 @@ A JWT in its simplest form contains two parts:
      message itself, called the `header`.
 
 A JWT `payload` can be absolutely anything at all - anything that can be represented as a byte array, such as Strings, 
-images, documents, etc. And because a JWT `header` is a JSON `Object`, it would make sense that a JWT 
-`payload` could also be a JSON `Object` as well.
+images, documents, etc.
 
-In many cases, developers like the `payload` to be JSON that 
+But because a JWT `header` is a JSON `Object`, it would make sense that a JWT `payload` could also be a JSON 
+`Object` as well. In many cases, developers like the `payload` to be JSON that 
 represents data about a user or computer or similar identity concept. When used this way, the `payload` is called a 
 JSON `Claims` object, and each name/value pair within that object is called a `claim` - each piece of information 
 within 'claims' something about an identity.
 
-While it is useful to 'claim' something about an identity, really anyone can do that. What's important is that you 
+And while it is useful to 'claim' something about an identity, really anyone can do that. What's important is that you 
 _trust_ the claims by verifying they come from a person or computer you trust.
 
 A nice feature of JWTs is that they can be secured in various ways. A JWT can be cryptographically signed (making it 
@@ -311,7 +311,7 @@ for sending and receiving secure information, like identity claims.
 
 Finally, JSON with whitespace for human readability is nice, but it doesn't make for a very efficient message
 format.  Therefore, JWTs can be _compacted_ (and even compressed) to a minimal representation - basically 
-Base64URL-encoded strings - so they can be transmitted around the web (such as in HTTP headers or URLs) more efficiently.
+Base64URL-encoded strings - so they can be transmitted around the web more efficiently, such as in HTTP headers or URLs.
 
 <a name="overview-example-jwt"></a>
 ### JWT Example
@@ -388,7 +388,7 @@ cannot be changed by a 3rd party without us knowing.
    }
    ```
 
-   In this case, the `header` indicates that the `HMAC using SHA-256` algorithm will be used to cryptographically sign 
+   In this case, the `header` indicates that the `HS256` (HMAC using SHA-256) algorithm will be used to cryptographically sign 
    the JWT. Also, the `payload` JSON object has a single claim, `sub` with value `Joe`.
    
    There are a number of standard claims, called [Registered Claims](https://tools.ietf.org/html/rfc7519#section-4.1),
@@ -446,7 +446,7 @@ automates both the creation of JWSs and the parsing and verification of JWSs for
 
 So far we have seen an unprotected JWT and a cryptographically signed JWT (called a 'JWS').  One of the things 
 that is inherent to both of these two is that all the information within them can be seen by anyone - all the data in 
-both the header and the payload is publicly visible.  JWS just guarantees the data hasn't been changed by anyone - 
+both the header and the payload is publicly visible.  JWS just ensures the data hasn't been changed by anyone - 
 it doesn't prevent anyone from seeing it.  Many times, this is just fine because the data within them is not
 sensitive information.
 
@@ -579,7 +579,7 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 If you want to use JWT RSASSA-PSS algorithms (i.e. `PS256`, `PS384`, and `PS512`), or you just want to ensure your 
 Android application is running an updated version of BouncyCastle, you will need to:
 1. Uncomment the BouncyCastle dependency as commented above in the [dependencies](#install-android-dependencies) section.
-2. Remove the legacy Android custom `BC` provider and register the updated one.
+2. Replace the legacy Android custom `BC` provider with the updated one.
 
 Provider registration needs to be done _early_ in the application's lifecycle, preferably in your application's 
 main `Activity` class as a static initialization block.  For example:
@@ -646,7 +646,7 @@ How easy was that!?
 In this case, we are:
  
  1. *building* a JWT that will have the 
-[registered claim](https://tools.ietf.org/html/rfc7519#section-4.1) `sub` (subject) set to `Joe`. We are then
+[registered claim](https://tools.ietf.org/html/rfc7519#section-4.1) `sub` (Subject) set to `Joe`. We are then
  2. *signing* the JWT using a key suitable for the HMAC-SHA-256 algorithm.  Finally, we are
  3. *compacting* it into its final `String` form.  A signed JWT is called a 'JWS'.
 
@@ -659,7 +659,7 @@ eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJKb2UifQ.1KP0SsvENi7Uz1oQc07aXTL7kpQG5jBNIybqr60A
 Now let's verify the JWT (you should always discard JWTs that don't match an expected signature):
 
 ```java
-assert Jwts.parserBuilder().verifyWith(key).build().parseClaimsJws(jws).getPayload().getSubject().equals("Joe");
+assert Jwts.parserBuilder().verify With(key).build().parseClaimsJws(jws).getPayload().getSubject().equals("Joe");
 ```
 
 There are two things going on here. The `key` from before is being used to verify the signature of the JWT. If it 
@@ -695,7 +695,7 @@ Now that we've had a quickstart 'taste' of how to create and parse JWTs, let's c
 You create a JWT as follows:
 
 1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
-2. Call builder methods to [add header parameters](#jwt-header-builder) and `payload` [content](#jwt-content) or [claims](#jwt-claims) as desired.
+2. Call builder methods to add [`header` parameters](#jwt-header-builder) and `payload` [content](#jwt-content) or [claims](#jwt-claims) as desired.
 3. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT, respectively.
 4. Call the `compact()` method to produce the resulting compact JWT string.
 
@@ -707,14 +707,14 @@ String jwt = Jwts.builder()                     // (1)
     .setSubject("Bob")                          // (2) JSON Claims, or
     //.setContent(aByteArray, "text/plain")     //     any byte[] content, with media type
         
-    //.signWith(signingKey)                     // (3) if signing
+    .signWith(signingKey)                       // (3) if signing, or
     //.encryptWith(encryptionAlg, keyAlg, key)  //     if encrypting
         
     .compact();                                 // (4)
 ```
 
-* Either `byte[]` content may be specified (via `setContent`) _or_ JSON claims 
-(such as `setSubject` and other claims methods, or via `setClaims`), but not both.
+* The JWT `payload` may be either `byte[]` content (via `setContent`) _or_ JSON Claims 
+(such as `setSubject`, `setClaims`, etc), but not both.
 * Either digital signatures (`signWith`) or encryption (`encryptWith`) may be used, but not both.
 
 > **Warning**
@@ -740,8 +740,8 @@ The easiest and recommended way to set one or more JWT header parameters (name/v
 String jwt = Jwts.builder()
         
     .setHeader(Jwts.headerBuilder()   // <----
-        .setContentType("text/plain")
         .setKeyId("aKeyId")
+        .setX509Url(aUri)
         .put("someName", "anyValue")
         .putAll(anotherMap)
         // ... etc ...
@@ -1020,7 +1020,7 @@ catch (JwtException ex) {      // (5)
 > 
 > **Type-safe JWTs:** If you are certain your parser will only ever encounter a specific kind of JWT (for example, you only 
 > ever use signed JWTs with `Claims` payloads, or encrypted JWTs with `byte[]` content payloads, etc), you can call the 
-> associated typesafe `parseClaimsJws`, `parseClaimsJwe`, (etc) method variant instead of the generic `parse` method. 
+> associated type-safe `parseClaimsJws`, `parseClaimsJwe`, (etc) method variant instead of the generic `parse` method. 
 > 
 > These `parse*` methods will return the type-safe JWT you are expecting, for example, a `Jws<Claims>` or `Jwe<byte[]>` 
 > instead of a generic `Jwt<?,?>` instance.
@@ -1402,7 +1402,7 @@ The same selection logic applies for Elliptic Curve `PrivateKey`s.
 
 > **Note**
 > 
-> You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
+> **You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
 > `PublicKey` for signing with an `InvalidKeyException`.
 
 <a name="jws-create-key-secret"></a>
@@ -1588,7 +1588,7 @@ successfully decrypt the (modified) payload.  In these cases, the ciphertext int
 malicious 3rd party could intercept a message and change the payload content, even if they don't understand what is 
 inside the payload, and the message recipient could never know.
 
-To combat this, there is a category of encryption algorithms that both ensure confidentiality _and_ integrity of the 
+To combat this, there is a category of encryption algorithms that ensures                                                                                 both confidentiality _and_ integrity of the 
 ciphertext data.  These types of algorithms are called 
 [Authenticated Encryption](https://en.wikipedia.org/wiki/Authenticated_encryption) algorithms.
 
@@ -1609,6 +1609,7 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 | `A128GCM` | 128 | AES GCM using 128-bit key<sup><b>1</b></sup> |
 | `A192GCM` | 192 | AES GCM using 192-bit key<sup><b>1</b></sup> |
 | `A256GCM` | 256 | AES GCM using 256-bit key<sup><b>1</b></sup> |
+<sup><b>1. </b>Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
 These are all represented as constants in the `io.jsonwebtoken.security.EncryptionAlgorithms` utility class as 
 implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
@@ -1634,7 +1635,7 @@ strange, isn't it?
 What about RSA and Elliptic Curve asymmetric key cryptography? And Diffie-Hellman key exchange?  What about 
 password-based key derivation algorithms? Surely any of those could be desirable depending on the use case, no?
 
-Yes, they definitely can, and the JWT specifications do support them, albeit in a roundabout way:  those other 
+Yes, they definitely can, and the JWT specifications do support them, albeit indirectly:  those other 
 algorithms _are_ indeed supported and used, but they aren't used to encrypt the JWT `payload` directly.  They are 
 used to _produce_ the actual key used to encrypt the `JWT` payload.
 
@@ -1650,7 +1651,7 @@ about RSA and Elliptic Curve cryptography? And password-based key derivation, or
 All of those are supported as well, but they are not used directly for encryption. They are used to _produce_ the 
 key that will be used to directly encrypt the JWT `payload`.
 
-That is, JWT encryption can be thought of a two-step process, shown in the following pseudocode:
+That is, JWT encryption can be thought of as a two-step process, shown in the following pseudocode:
 
 ```groovy
 
@@ -1683,7 +1684,7 @@ There are quite a few reasons for this.
    often too short to be used directly with algorithms that mandate minimum key lengths to help ensure safety.
 
 For these reasons and more, using one secure algorithm to generate or encrypt a key used for another (very fast) secure
-algorithm has been proven to be a great way to increase security exposure through many more secure algorithms while 
+algorithm has been proven to be a great way to increase security through many more secure algorithms while 
 also still resulting in very fast and secure output.  This is after all how TLS (for https encryption) works - 
 two parties can use more complex cryptography (like RSA or Elliptic Curve) to negotiate a small, fast encryption key. 
 This is done during the 'TLS handshake' to produce a 'session key'.
@@ -1877,7 +1878,7 @@ received, at parse time, so you can't 'hard code' any verification or decryption
 <a name="key-locator-custom"></a>
 ### Custom Key Locator
 
-If you need to support dynamic key resolution when encountering JWTs, you'll need to implement 
+If you need to support dynamic key lookup when encountering JWTs, you'll need to implement 
 the `Locator<Key>` interface and specify an instance on the `JwtParserBuilder` via the `setKeyLocator` method. For 
 example:
 
@@ -2001,9 +2002,10 @@ on the type of JWS or JWE algorithm used.  That is:
 <a name="compression"></a>
 ## Compression
 
-**The JWT specification only standardizes this feature for JWEs (Encrypted JWTs) and not Unprotected JWTs or JWSs 
-(Signed JWTs), however JJWT supports all three**.  If you are positive that a JWT you create with JJWT will 
-_also_ be parsed with JJWT, you can use this feature with any JWT, otherwise it is best to only use it for JWEs.  
+**The JWT specification only standardizes this feature for JWEs (Encrypted JWTs) however JJWT supports it for JWS
+(Signed JWTs) as well**.  If you are positive that a JWT you create with JJWT 
+will _also_ be parsed with JJWT, you can use this feature with both JWEs and JWSs, otherwise it is best to only use it 
+for JWEs.
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
 name/value pairs (or individual values are very large or verbose) - you can reduce the size of the compact JWT by 
@@ -2027,6 +2029,10 @@ example:
 If you use the `DEFLATE` or `GZIP` Compression Codecs - that's it, you're done.  You don't have to do anything during 
 parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress the payload as 
 expected.
+
+> **Note**
+> JJWT does not support compression for Unprotected JWTs because they are susceptible to various compression 
+> vulnerability attacks (memory exhaustion, denial of service, etc.).
 
 <a name="compression-custom"></a>
 ### Custom Compression Codec
@@ -2510,7 +2516,7 @@ Jwts.parserBuilder()
 
 ## Author
 
-Maintained by Les Hazlewood &amp; the community :heart:
+Maintained by Les Hazlewood &amp; the extended Java community :heart:
 
 <a name="license"></a>
 ## License
