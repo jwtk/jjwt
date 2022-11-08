@@ -1601,14 +1601,14 @@ confident their encrypted JWTs maintain the properties of both confidentiality a
 
 The JWT specification defines 6 standard Authenticated Encryption algorithms used to encrypt a JWT `payload`:
 
-| Identifier | Required Key Bit Length | Encryption Algorithm |
-| --- | --- | --- |
-| <code>A128CBC&#8209;HS256</code> | 256 | [AES_128_CBC_HMAC_SHA_256](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) authenticated encryption algorithm |
-| `A192CBC-HS384` | 384 | [AES_192_CBC_HMAC_SHA_384](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) authenticated encryption algorithm |
-| `A256CBC-HS512` | 512 | [AES_256_CBC_HMAC_SHA_512](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) authenticated encryption algorithm |
-| `A128GCM` | 128 | AES GCM using 128-bit key<sup><b>1</b></sup> |
-| `A192GCM` | 192 | AES GCM using 192-bit key<sup><b>1</b></sup> |
-| `A256GCM` | 256 | AES GCM using 256-bit key<sup><b>1</b></sup> |
+| Identifier                       | Required&nbsp;Key&nbsp;Bit&nbsp;Length | Encryption Algorithm                                                                                                       |
+|----------------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| <code>A128CBC&#8209;HS256</code> | 256                                    | [AES_128_CBC_HMAC_SHA_256](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3) authenticated encryption algorithm |
+| `A192CBC-HS384`                  | 384                                    | [AES_192_CBC_HMAC_SHA_384](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.4) authenticated encryption algorithm |
+| `A256CBC-HS512`                  | 512                                    | [AES_256_CBC_HMAC_SHA_512](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5) authenticated encryption algorithm |
+| `A128GCM`                        | 128                                    | AES GCM using 128-bit key<sup><b>1</b></sup>                                                                               |
+| `A192GCM`                        | 192                                    | AES GCM using 192-bit key<sup><b>1</b></sup>                                                                               |
+| `A256GCM`                        | 256                                    | AES GCM using 256-bit key<sup><b>1</b></sup>                                                                               |
 <sup><b>1. </b>Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
 These are all represented as constants in the `io.jsonwebtoken.security.EncryptionAlgorithms` utility class as 
