@@ -6,7 +6,6 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPrivateJwk
-import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -155,13 +154,6 @@ class RFC7516AppendixA1Test {
         assertArrayEquals AAD_BYTES, encodedHeader.getBytes(StandardCharsets.US_ASCII)
         assertArrayEquals CIPHERTEXT, decode(encodedCiphertext)
         assertArrayEquals TAG, decode(encodedTag)
-
-
-
-        println Jwts.builder().setContent(PLAINTEXT.getBytes(StandardCharsets.UTF_8)).signWith(TestKeys.HS256, SignatureAlgorithms.HS256).compact()
-
-
-
 
         //read the RFC Test JWK to get the private key for decrypting
         RsaPrivateJwk jwk = Jwks.builder().putAll(KEK_VALUES).build() as RsaPrivateJwk
