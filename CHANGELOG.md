@@ -2,6 +2,9 @@
 
 ### JJWT_RELEASE_VERSION
 
+* Adds a simplified "starter" jar that automatically pulls in `jjwt-api`, `jjwt-impl` and `jjwt-jackson`, useful when
+  upgrading from the older `io.jsonwebtoken:jjwt:*` to the project's current flexible module structure.
+
 #### New Features
 
 ##### JSON Web Encryption (JWE) Support!
@@ -170,7 +173,7 @@ their JVM in a timely manner.
 However, even with these additional JJWT security guards, the root cause of the issue is the JVM, so it **strongly
 recommended** to upgrade your JVM to version
 15.0.7, 17.0.3, or 18.0.1 or later to ensure the bug does not surface elsewhere in your application code or any other
-third party library in your application that may not contain similar security guards.
+third party library in your application that may not contain similar security guards. 
 
 Issues included in this patch are listed in the [JJWT 0.11.5 milestone](https://github.com/jwtk/jjwt/milestone/26?closed=1).
 
