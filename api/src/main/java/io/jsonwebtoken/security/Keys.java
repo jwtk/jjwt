@@ -245,26 +245,26 @@ public final class Keys {
     }
 
     /**
-     * Returns a new {@link PasswordKey} suitable for use with password-based key derivation algorithms.
+     * Returns a new {@link Password} instance suitable for use with password-based key derivation algorithms.
      *
-     * <p><b>Usage Note</b>: Using {@code PasswordKey}s outside of key derivation contexts will likely
-     * fail. See the {@link PasswordKey} JavaDoc for more, and also note the <b>Password Safety</b> section below.</p>
+     * <p><b>Usage Note</b>: Using {@code Password}s outside of key derivation contexts will likely
+     * fail. See the {@link Password} JavaDoc for more, and also note the <b>Password Safety</b> section below.</p>
      *
      * <p><b>Password Safety</b></p>
      *
-     * <p>Instances returned by this method directly share the specified {@code password} character array argument -
-     * changes to that char array will be reflected in the returned key, and similarly, any call to the key's
-     * {@link PasswordKey#destroy()} method will clear/overwrite the shared char array. This is to ensure that
-     * any clearing of the source password char array for security/safety reasons also guarantees the key is also
-     * cleared and vice versa.  However, as is standard for JCA keys, calling {@link PasswordKey#getPassword()} will
-     * return a separate independent clone of the underlying character array.</p>
+     * <p>Instances returned by this method use a <em>clone</em> of the specified {@code password} character array
+     * argument - changes to the argument array will NOT be reflected in the returned key, and vice versa.  If you wish
+     * to clear a {@code Password} instance to ensure it is no longer usable, call its {@link Password#destroy()}
+     * method will clear/overwrite its internal cloned char array. Also note that each subsequent call to
+     * {@link Password#toCharArray()} will also return a new clone of the underlying password character array per
+     * standard JCE key behavior.</p>
      *
-     * @param password the raw password character array to use with password-based key derivation algorithms.
-     * @return a new {@link PasswordKey} that shares the specified {@code password} character array.
-     * @see PasswordKey#getPassword()
+     * @param password the raw password character array to clone for use with password-based key derivation algorithms.
+     * @return a new {@link Password} instance that wraps a new clone of the specified {@code password} character array.
+     * @see Password#toCharArray()
      * @since JJWT_RELEASE_VERSION
      */
-    public static PasswordKey forPassword(char[] password) {
+    public static Password forPassword(char[] password) {
         return Classes.invokeStatic(BRIDGE_CLASS, "forPassword", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
     }
 }

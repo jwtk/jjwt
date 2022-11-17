@@ -26,7 +26,7 @@ import static org.junit.Assert.fail
 @SuppressWarnings('SpellCheckingInspection')
 class Pbes2HsAkwAlgorithmTest {
 
-    private static PasswordKey KEY = Keys.forPassword("12345678".toCharArray())
+    private static Password KEY = Keys.forPassword("12345678".toCharArray())
     private static List<Pbes2HsAkwAlgorithm> ALGS = [KeyAlgorithms.PBES2_HS256_A128KW,
                                                      KeyAlgorithms.PBES2_HS384_A192KW,
                                                      KeyAlgorithms.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
@@ -36,7 +36,7 @@ class Pbes2HsAkwAlgorithmTest {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
             JweHeader header = Jwts.headerBuilder().setPbes2Count(iterations).build() as JweHeader
-            KeyRequest<PasswordKey> req = new DefaultKeyRequest<>(null, null, KEY, header, EncryptionAlgorithms.A256GCM)
+            KeyRequest<Password> req = new DefaultKeyRequest<>(null, null, KEY, header, EncryptionAlgorithms.A256GCM)
             try {
                 alg.getEncryptionKey(req)
                 fail()

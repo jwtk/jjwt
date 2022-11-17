@@ -24,30 +24,30 @@ import javax.security.auth.Destroyable;
  * <p><b>Usage Warning</b></p>
  *
  * <p>Because raw passwords should never be used as direct inputs for cryptographic operations (such as authenticated
- * hashing or encryption) - and only for derivation algorithms (like password-based encryption) - {@code PasswordKey}
+ * hashing or encryption) - and only for derivation algorithms (like password-based encryption) - {@code Password}
  * instances will throw an exception when used in these invalid contexts.  Specifically, calling a
- * {@code PasswordKey}'s {@link PasswordKey#getEncoded() getEncoded()} method (as would be done automatically by the
+ * {@code Password}'s {@link Password#getEncoded() getEncoded()} method (as would be done automatically by the
  * JCA subsystem during direct cryptographic operations) will throw an
  * {@link UnsupportedOperationException UnsupportedOperationException}.</p>
  *
- * @see #getPassword()
+ * @see #toCharArray()
  * @since JJWT_RELEASE_VERSION
  */
-public interface PasswordKey extends SecretKey, Destroyable {
+public interface Password extends SecretKey, Destroyable {
 
     /**
-     * Returns a clone of the underlying password character array represented by this Key.  Like all
+     * Returns a new clone of the underlying password character array for use during derivation algorithms.  Like all
      * {@code SecretKey} implementations, if you wish to clear the backing password character array for
-     * safety/security reasons, call the Key's {@link #destroy()} method, ensuring that both the password is cleared
-     * and the key instance can no longer be used.
+     * safety/security reasons, call the {@link #destroy()} method, ensuring that both the character array is cleared
+     * and the {@code Password} instance can no longer be used.
      *
      * <p><b>Usage</b></p>
      *
-     * <p>Because a clone is returned from this method, it is expected that callers will clear the resulting clone from
-     * memory as soon as possible to reduce password exposure.  For example:
+     * <p>Because a new clone is returned from this method each time it is invoked, it is expected that callers will
+     * clear the resulting clone from memory as soon as possible to reduce password exposure.  For example:
      *
      * <pre><code>
-     * char[] clonedPassword = aPasswordKey.getPassword();
+     * char[] clonedPassword = aPassword.toCharArray();
      * try {
      *     doSomethingWithPassword(clonedPassword);
      * } finally {
@@ -56,7 +56,7 @@ public interface PasswordKey extends SecretKey, Destroyable {
      * }
      * </code></pre>
      *
-     * @return a clone of the underlying password character array represented by this Key.
+     * @return a clone of the underlying password character array.
      */
-    char[] getPassword();
+    char[] toCharArray();
 }

@@ -22,7 +22,9 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
-    private static final String ENCODED_UNAVAILABLE_MSG = "SecretKey argument does not have any encoded bytes, or " + "the key's backing JCA Provider is preventing key.getEncoded() from returning any bytes.  It is not " + "possible to represent the SecretKey instance as a JWK.";
+    private static final String ENCODED_UNAVAILABLE_MSG = "SecretKey argument does not have any encoded bytes, or " +
+            "the key's backing JCA Provider is preventing key.getEncoded() from returning any bytes.  It is not " +
+            "possible to represent the SecretKey instance as a JWK.";
 
     SecretJwkFactory() {
         super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class);
@@ -68,7 +70,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         long requiredBitLen = alg.getKeyBitLength();
         if (bitLen != requiredBitLen) {
             // Implementors note:  Don't print out any information about the `bytes` value itself - size,
-            // content, etc, as it is considered secret material:
+            // content, etc., as it is considered secret material:
             String msg = "Secret JWK " + AbstractJwk.ALG + " value is '" + alg.getId() + "', but the " + DefaultSecretJwk.K + " length does not equal the '" + alg.getId() + "' length requirement of " + Bytes.bitsMsg(requiredBitLen) + ". This discrepancy could be the result of an algorithm " + "substitution attack or simply an erroneously constructed JWK. In either case, it is likely " + "to result in unexpected or undesired security consequences.";
             throw new MalformedKeyException(msg);
         }
@@ -101,7 +103,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
             jcaName = "HmacSHA" + Bytes.bitLength(bytes);
         }
         if (jcaName == null) { // not an HS* algorithm, no signature "use", no "sign" key op, so default to encryption:
-            jcaName = "AES";
+            jcaName = AesAlgorithm.KEY_ALG_NAME;
         }
 
         SecretKey key = new SecretKeySpec(bytes, jcaName);

@@ -334,7 +334,7 @@ public final class KeyAlgorithms {
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
+    public static final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = forId0("PBES2-HS256+A128KW");
 
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-384 and &quot;A192KW&quot; wrapping</code>
@@ -379,7 +379,7 @@ public final class KeyAlgorithms {
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
+    public static final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = forId0("PBES2-HS384+A192KW");
 
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-512 and &quot;A256KW&quot; wrapping</code>
@@ -424,7 +424,7 @@ public final class KeyAlgorithms {
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final KeyAlgorithm<PasswordKey, PasswordKey> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
+    public static final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = forId0("PBES2-HS512+A256KW");
 
     /**
      * Key Encryption with {@code RSAES-PKCS1-v1_5}, as defined by
@@ -689,7 +689,7 @@ public final class KeyAlgorithms {
     public static final EcKeyAlgorithm ECDH_ES_A256KW = forId0("ECDH-ES+A256KW");
 
     /*
-    public static int estimateIterations(KeyAlgorithm<PasswordKey, PasswordKey> alg, long desiredMillis) {
+    public static int estimateIterations(KeyAlgorithm<Password, Password> alg, long desiredMillis) {
         return Classes.invokeStatic(BRIDGE_CLASS, "estimateIterations", ESTIMATE_ITERATIONS_ARG_TYPES, alg, desiredMillis);
     }
      */

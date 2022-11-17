@@ -72,7 +72,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
         byte[] macKeyBytes = Arrays.copyOfRange(compositeKeyBytes, 0, halfCount);
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
-        final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, "AES");
+        final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
         final byte[] plaintext = Assert.notEmpty(req.getContent(), "Request content (plaintext) cannot be null or empty.");
         final byte[] aad = getAAD(req); //can be null if request associated data does not exist or is empty
@@ -130,7 +130,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
         byte[] macKeyBytes = Arrays.copyOfRange(compositeKeyBytes, 0, halfCount);
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
-        final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, "AES");
+        final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
         final byte[] ciphertext = Assert.notEmpty(req.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);

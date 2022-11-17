@@ -260,8 +260,8 @@ class KeysTest {
     @Test
     void testForPassword() {
         def password = "whatever".toCharArray()
-        PasswordKey key = Keys.forPassword(password)
-        assertArrayEquals password, key.getPassword()
-        assertTrue key instanceof DefaultPasswordKey
+        Password key = Keys.forPassword(password)
+        assertArrayEquals password, key.toCharArray()
+        assertTrue key instanceof DefaultPassword
     }
 }

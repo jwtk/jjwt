@@ -85,27 +85,7 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!-- temporary fix until official release of coverall-maven-plugin with clover support: -->
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-jwtk-coveralls-maven-plugin</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
-        </repository>
     </repositories>
-    <pluginRepositories>
-        <!-- temporary fix until official release of coverall-maven-plugin with clover support: -->
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-jwtk-coveralls-maven-plugin</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <properties>
 
@@ -594,7 +574,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- Temporarily host coveralls SNAPSHOT with clover support locally:  -->
                 <groupId>io.jsonwebtoken.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.4.1</version>

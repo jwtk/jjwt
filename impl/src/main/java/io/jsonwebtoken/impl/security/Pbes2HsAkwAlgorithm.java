@@ -13,18 +13,19 @@ import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.PasswordKey;
+import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PasswordKey, PasswordKey> {
+public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<Password, Password> {
 
     // See https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2 :
     private static final int DEFAULT_SHA256_ITERATIONS = 310000;
@@ -33,9 +34,9 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
     private static final int MIN_RECOMMENDED_ITERATIONS = 1000; // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2
     private static final String MIN_ITERATIONS_MSG_PREFIX =
-        "[JWA RFC 7518, Section 4.8.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2) " +
-            "recommends password-based-encryption iterations be greater than or equal to " +
-            MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
+            "[JWA RFC 7518, Section 4.8.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2) " +
+                    "recommends password-based-encryption iterations be greater than or equal to " +
+                    MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
 
     private final int HASH_BYTE_LENGTH;
     private final int DERIVED_KEY_BIT_LENGTH;
@@ -115,15 +116,15 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         PBEKeySpec spec = new PBEKeySpec(password, rfcSalt, iterations, DERIVED_KEY_BIT_LENGTH);
         try {
             SecretKey derived = factory.generateSecret(spec);
-            return new WrappedSecretKey(derived, "AES"); // needed to keep the Sun Provider happy.  BC doesn't care.
+            return new SecretKeySpec(derived.getEncoded(), AesAlgorithm.KEY_ALG_NAME); // needed to keep the Sun Provider happy
         } finally {
             spec.clearPassword();
         }
     }
 
     private SecretKey deriveKey(final KeyRequest<?> request, final char[] password, final byte[] salt, final int iterations) {
-        Assert.notEmpty(password, "Key password character array cannot be null or empty.");
         try {
+            Assert.notEmpty(password, "Key password character array cannot be null or empty.");
             return execute(request, SecretKeyFactory.class, new CheckedFunction<SecretKeyFactory, SecretKey>() {
                 @Override
                 public SecretKey apply(SecretKeyFactory factory) throws Exception {
@@ -147,10 +148,10 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<PasswordKey> request) throws SecurityException {
+    public KeyResult getEncryptionKey(KeyRequest<Password> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
-        final PasswordKey key = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
+        final Password key = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
         Integer p2c = request.getHeader().getPbes2Count();
         if (p2c == null) {
             p2c = DEFAULT_ITERATIONS;
@@ -159,7 +160,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final int iterations = assertIterations(p2c);
         byte[] inputSalt = generateInputSalt(request);
         final byte[] rfcSalt = toRfcSalt(inputSalt);
-        char[] password = key.getPassword(); // password will be safely cleaned/zeroed in deriveKey next:
+        char[] password = key.toCharArray(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
@@ -173,15 +174,15 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public SecretKey getDecryptionKey(DecryptionKeyRequest<PasswordKey> request) throws SecurityException {
+    public SecretKey getDecryptionKey(DecryptionKeyRequest<Password> request) throws SecurityException {
 
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        final PasswordKey key = Assert.notNull(request.getKey(), "Request Key cannot be null.");
+        final Password key = Assert.notNull(request.getKey(), "Request Key cannot be null.");
         FieldReadable reader = new RequiredFieldReader(header);
         final byte[] inputSalt = reader.get(DefaultJweHeader.P2S);
         final int iterations = reader.get(DefaultJweHeader.P2C);
         final byte[] rfcSalt = Bytes.concat(SALT_PREFIX, inputSalt);
-        final char[] password = key.getPassword(); // password will be safely cleaned/zeroed in deriveKey next:
+        final char[] password = key.toCharArray(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),

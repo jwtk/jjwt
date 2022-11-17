@@ -49,7 +49,7 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.PasswordKey;
+import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithms;
@@ -244,8 +244,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder encryptWith(AeadAlgorithm enc, SecretKey key) {
-        if (key instanceof PasswordKey) {
-            return encryptWith(enc, (PasswordKey) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()));
+        if (key instanceof Password) {
+            return encryptWith(enc, (Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()));
         }
         return encryptWith(enc, key, KeyAlgorithms.DIRECT);
     }
@@ -267,7 +267,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.keyAlg = (KeyAlgorithm<Key, ?>) Assert.notNull(keyAlg, "KeyAlgorithm cannot be null.");
         final String algId = Assert.hasText(keyAlg.getId(), "KeyAlgorithm id cannot be null or empty.");
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
-        String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
+        final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
         this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
             @Override
             public KeyResult apply(KeyRequest<Key> request) {

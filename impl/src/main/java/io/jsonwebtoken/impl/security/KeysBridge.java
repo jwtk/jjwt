@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.security.PasswordKey;
+import io.jsonwebtoken.security.Password;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
@@ -9,7 +9,7 @@ public final class KeysBridge {
     private KeysBridge() {
     }
 
-    public static PasswordKey forPassword(char[] password) {
-        return new DefaultPasswordKey(password);
+    public static Password forPassword(char[] password) {
+        return new DefaultPassword(password);
     }
 }

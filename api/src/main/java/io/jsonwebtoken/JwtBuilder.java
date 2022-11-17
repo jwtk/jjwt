@@ -25,6 +25,7 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -716,7 +717,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link #encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(enc, key, KeyAlgorithm)}
      * based on the {@code key} argument:</p>
      * <ul>
-     *     <li>If the provided {@code key} is an instance of {@link io.jsonwebtoken.security.PasswordKey PasswordKey},
+     *     <li>If the provided {@code key} is a {@link Password Password} instance,
      *     the {@code KeyAlgorithm} used will be one of the three JWA-standard password-based key algorithms
      *      ({@link KeyAlgorithms#PBES2_HS256_A128KW PBES2_HS256_A128KW},
      *      {@link KeyAlgorithms#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or

@@ -1,29 +1,29 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.security.Keys
-import io.jsonwebtoken.security.PasswordKey
+import io.jsonwebtoken.security.Password
 import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.*
 
 @SuppressWarnings('GroovyAccessibility')
-class DefaultPasswordKeyTest {
+class DefaultPasswordTest {
 
     private char[] PASSWORD
-    private DefaultPasswordKey KEY
+    private DefaultPassword KEY
 
     @Before
     void setup() {
         PASSWORD = "whatever".toCharArray()
-        KEY = new DefaultPasswordKey(PASSWORD)
+        KEY = new DefaultPassword(PASSWORD)
     }
 
     @Test
     void testNewInstance() {
-        assertArrayEquals PASSWORD, KEY.getPassword()
-        assertEquals DefaultPasswordKey.NONE_ALGORITHM, KEY.getAlgorithm()
-        assertEquals DefaultPasswordKey.RAW_FORMAT, KEY.getFormat()
+        assertArrayEquals PASSWORD, KEY.toCharArray()
+        assertEquals DefaultPassword.NONE_ALGORITHM, KEY.getAlgorithm()
+        assertNull KEY.getFormat()
     }
 
     @Test
@@ -32,7 +32,7 @@ class DefaultPasswordKeyTest {
             KEY.getEncoded()
             fail()
         } catch (UnsupportedOperationException expected) {
-            assertEquals DefaultPasswordKey.ENCODED_DISABLED_MSG, expected.getMessage()
+            assertEquals DefaultPassword.ENCODED_DISABLED_MSG, expected.getMessage()
         }
     }
 
@@ -40,7 +40,7 @@ class DefaultPasswordKeyTest {
     void testSymmetricChange() {
         //assert change in backing array changes key as well:
         PASSWORD[0] = 'b'
-        assertArrayEquals PASSWORD, KEY.getPassword()
+        assertArrayEquals PASSWORD, KEY.toCharArray()
     }
 
     @Test
@@ -67,33 +67,40 @@ class DefaultPasswordKeyTest {
     void testDestroyPreventsPassword() {
         KEY.destroy()
         try {
-            KEY.getPassword()
+            KEY.toCharArray()
             fail()
         } catch (IllegalStateException expected) {
-            assertEquals DefaultPasswordKey.DESTROYED_MSG, expected.getMessage()
+            assertEquals DefaultPassword.DESTROYED_MSG, expected.getMessage()
         }
     }
 
     @Test
     void testEquals() {
-        PasswordKey key2 = Keys.forPassword(PASSWORD)
-        assertArrayEquals KEY.getPassword(), key2.getPassword()
+        Password key2 = Keys.forPassword(PASSWORD)
+        assertArrayEquals KEY.toCharArray(), key2.toCharArray()
         assertEquals KEY, key2
         assertNotEquals KEY, new Object()
     }
 
     @Test
+    void testIdentityEquals() {
+        Password key = Keys.forPassword(PASSWORD)
+        assertTrue key.equals(key)
+        assertNotEquals KEY, new Object()
+    }
+
+    @Test
     void testHashCode() {
-        PasswordKey key2 = Keys.forPassword(PASSWORD)
-        assertArrayEquals KEY.getPassword(), key2.getPassword()
+        Password key2 = Keys.forPassword(PASSWORD)
+        assertArrayEquals KEY.toCharArray(), key2.toCharArray()
         assertEquals KEY.hashCode(), key2.hashCode()
     }
 
     @Test
     void testToString() {
-        assertEquals 'password=<redacted>', KEY.toString()
-        PasswordKey key2 = Keys.forPassword(PASSWORD)
-        assertArrayEquals KEY.getPassword(), key2.getPassword()
+        assertEquals '<redacted>', KEY.toString()
+        Password key2 = Keys.forPassword(PASSWORD)
+        assertArrayEquals KEY.toCharArray(), key2.toCharArray()
         assertEquals KEY.toString(), key2.toString()
     }
 

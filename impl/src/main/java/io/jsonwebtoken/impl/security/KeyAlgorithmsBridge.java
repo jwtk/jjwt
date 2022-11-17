@@ -72,7 +72,7 @@ public final class KeyAlgorithmsBridge {
     }
 
     /*
-    private static KeyAlgorithm<PasswordKey, PasswordKey> lean(final Pbes2HsAkwAlgorithm alg) {
+    private static KeyAlgorithm<Password, Password> lean(final Pbes2HsAkwAlgorithm alg) {
 
         // ensure we use the same key factory over and over so that time spent acquiring one is not repeated:
         JcaTemplate template = new JcaTemplate(alg.getJcaName(), null, Randoms.secureRandom());
@@ -89,9 +89,9 @@ public final class KeyAlgorithmsBridge {
 
         // ensure that the bare minimum steps are performed to hash, ensuring our time sampling pertains only to
         // hashing and not ancillary steps needed to setup the hashing/derivation
-        return new KeyAlgorithm<PasswordKey, PasswordKey>() {
+        return new KeyAlgorithm<Password, Password>() {
             @Override
-            public KeyResult getEncryptionKey(KeyRequest<PasswordKey> request) throws SecurityException {
+            public KeyResult getEncryptionKey(KeyRequest<Password> request) throws SecurityException {
                 int iterations = request.getHeader().getPbes2Count();
                 char[] password = request.getKey().getPassword();
                 try {
@@ -103,7 +103,7 @@ public final class KeyAlgorithmsBridge {
             }
 
             @Override
-            public SecretKey getDecryptionKey(DecryptionKeyRequest<PasswordKey> request) throws SecurityException {
+            public SecretKey getDecryptionKey(DecryptionKeyRequest<Password> request) throws SecurityException {
                 throw new UnsupportedOperationException("Not intended to be called.");
             }
 
@@ -126,7 +126,7 @@ public final class KeyAlgorithmsBridge {
         return chars;
     }
 
-    public static int estimateIterations(KeyAlgorithm<PasswordKey, PasswordKey> alg, long desiredMillis) {
+    public static int estimateIterations(KeyAlgorithm<Password, Password> alg, long desiredMillis) {
 
         // The number of computational samples that land in our 'sweet spot' timing range matching desiredMillis.
         // These samples will be averaged and the final average will be the return value of this method
@@ -152,9 +152,9 @@ public final class KeyAlgorithmsBridge {
         for (int i = 0; points.size() < NUM_SAMPLES; i++) {
 
             char[] password = randomChars(PASSWORD_LENGTH);
-            PasswordKey key = Keys.forPassword(password);
+            Password key = Keys.forPassword(password);
             HEADER.setPbes2Count(workFactor);
-            KeyRequest<PasswordKey> request = new DefaultKeyRequest<>(null, null, key, HEADER, ENC_ALG);
+            KeyRequest<Password> request = new DefaultKeyRequest<>(null, null, key, HEADER, ENC_ALG);
 
             long start = System.currentTimeMillis();
             alg.getEncryptionKey(request); // <-- Computation occurs here.  Don't need the result, just need to exec

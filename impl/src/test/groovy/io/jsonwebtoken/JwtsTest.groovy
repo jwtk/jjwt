@@ -1350,7 +1350,7 @@ class JwtsTest {
             it instanceof Pbes2HsAkwAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
-        PasswordKey key = Keys.forPassword("12345678".toCharArray())
+        Password key = Keys.forPassword("12345678".toCharArray())
 
         for (KeyAlgorithm alg : algs) {
 
@@ -1375,7 +1375,7 @@ class JwtsTest {
     @Test
     void testPasswordJweWithoutSpecifyingAlg() {
 
-        PasswordKey key = Keys.forPassword("12345678".toCharArray())
+        Password key = Keys.forPassword("12345678".toCharArray())
 
         // encrypt:
         String jwe = Jwts.builder()

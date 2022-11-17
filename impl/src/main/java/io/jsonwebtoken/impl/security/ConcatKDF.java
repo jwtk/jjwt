@@ -135,6 +135,6 @@ final class ConcatKDF extends CryptoAlgorithm {
             }
         });
 
-        return new SecretKeySpec(derivedKeyBytes, "AES");
+        return new SecretKeySpec(derivedKeyBytes, AesAlgorithm.KEY_ALG_NAME);
     }
 }
