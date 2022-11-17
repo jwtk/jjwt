@@ -8,21 +8,21 @@ import org.junit.Test
 import static org.junit.Assert.*
 
 @SuppressWarnings('GroovyAccessibility')
-class DefaultPasswordTest {
+class PasswordSpecTest {
 
     private char[] PASSWORD
-    private DefaultPassword KEY
+    private PasswordSpec KEY
 
     @Before
     void setup() {
         PASSWORD = "whatever".toCharArray()
-        KEY = new DefaultPassword(PASSWORD)
+        KEY = new PasswordSpec(PASSWORD)
     }
 
     @Test
     void testNewInstance() {
         assertArrayEquals PASSWORD, KEY.toCharArray()
-        assertEquals DefaultPassword.NONE_ALGORITHM, KEY.getAlgorithm()
+        assertEquals PasswordSpec.NONE_ALGORITHM, KEY.getAlgorithm()
         assertNull KEY.getFormat()
     }
 
@@ -32,7 +32,7 @@ class DefaultPasswordTest {
             KEY.getEncoded()
             fail()
         } catch (UnsupportedOperationException expected) {
-            assertEquals DefaultPassword.ENCODED_DISABLED_MSG, expected.getMessage()
+            assertEquals PasswordSpec.ENCODED_DISABLED_MSG, expected.getMessage()
         }
     }
 
@@ -70,7 +70,7 @@ class DefaultPasswordTest {
             KEY.toCharArray()
             fail()
         } catch (IllegalStateException expected) {
-            assertEquals DefaultPassword.DESTROYED_MSG, expected.getMessage()
+            assertEquals PasswordSpec.DESTROYED_MSG, expected.getMessage()
         }
     }
 

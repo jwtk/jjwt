@@ -10,6 +10,6 @@ public final class KeysBridge {
     }
 
     public static Password forPassword(char[] password) {
-        return new DefaultPassword(password);
+        return new PasswordSpec(password);
     }
 }

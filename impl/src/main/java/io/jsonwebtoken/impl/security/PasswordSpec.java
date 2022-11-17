@@ -4,20 +4,22 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.security.Password;
 
-public class DefaultPassword implements Password {
+import java.security.spec.KeySpec;
+
+public class PasswordSpec implements Password, KeySpec {
 
     private static final String NONE_ALGORITHM = "NONE";
     private static final String DESTROYED_MSG = "Password has been destroyed. Password character array may not be obtained.";
     private static final String ENCODED_DISABLED_MSG =
-        "getEncoded() is disabled for Password instances as they are intended to be used " +
-            "with key derivation algorithms only.  Passwords should never be used as direct inputs for " +
-            "cryptographic operations such as authenticated hashing or encryption; if you see this " +
-            "exception message, it is likely that the associated Password instance is being used incorrectly.";
+            "getEncoded() is disabled for Password instances as they are intended to be used " +
+                    "with key derivation algorithms only.  Passwords should never be used as direct inputs for " +
+                    "cryptographic operations such as authenticated hashing or encryption; if you see this " +
+                    "exception message, it is likely that the associated Password instance is being used incorrectly.";
 
     private volatile boolean destroyed;
     private final char[] password;
 
-    public DefaultPassword(char[] password) {
+    public PasswordSpec(char[] password) {
         this.password = Assert.notEmpty(password, "Password character array cannot be null or empty.");
     }
 
@@ -67,9 +69,9 @@ public class DefaultPassword implements Password {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof DefaultPassword) {
-            DefaultPassword other = (DefaultPassword) obj;
-            return this.destroyed == other.destroyed && Objects.nullSafeEquals(this.password, other.password);
+        if (obj instanceof PasswordSpec) {
+            PasswordSpec other = (PasswordSpec) obj;
+            return Objects.nullSafeEquals(this.password, other.password);
         }
         return false;
     }

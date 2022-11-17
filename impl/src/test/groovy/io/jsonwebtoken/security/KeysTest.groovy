@@ -262,6 +262,6 @@ class KeysTest {
         def password = "whatever".toCharArray()
         Password key = Keys.forPassword(password)
         assertArrayEquals password, key.toCharArray()
-        assertTrue key instanceof DefaultPassword
+        assertTrue key instanceof PasswordSpec
     }
 }
