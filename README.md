@@ -1656,7 +1656,7 @@ That is, JWT encryption can be thought of as a two-step process, shown in the fo
 
 ```groovy
 
-Key algorithmKey = getKeyManagementAlgorithmKey(); // PublicKey, SecretKey, or PasswordKey
+Key algorithmKey = getKeyManagementAlgorithmKey(); // PublicKey, SecretKey, or Password
 
 SecretKey contentEncryptionKey = keyManagementAlgorithm.produceEncryptionKey(algorithmKey); // 1
 
@@ -1670,7 +1670,7 @@ Steps:
 2. Take the resulting Content Encryption Key and use it directly with the Authenticated Encryption algorithm to
    actually encrypt the JWT `payload`.
 
-So why the indirection?  Why not just use any `PublicKey`, `SecretKey` or `PasswordKey` to encrypt the `payload`
+So why the indirection?  Why not just use any `PublicKey`, `SecretKey` or `Password` to encrypt the `payload`
 _directly_ ?
 
 There are quite a few reasons for this.
@@ -1764,7 +1764,7 @@ You read (parse) a JWE as follows:
 
 1. Use the `Jwts.parserBuilder()` method to create a `JwtParserBuilder` instance.
 2. Tell the `JwtParserBuilder` which key to use during decryption.  That can be either:
-   * A statically-configured `SecretKey`, `PasswordKey`, or asymmetric `PublicKey`, or,
+   * A statically-configured `SecretKey`, `Password`, or asymmetric `PublicKey`, or,
    * A dynamic [Key Locator](#key-locator) used to look up a key at runtime based on the JWE being parsed.
 3. Call the `JwtParserBuilder`'s `build()` method to create a thread-safe `JwtParser`.
 4. Parse the jwe string with the `JwtParser`'s `parseClaimsJwe` or `parseContentJwe` method.
@@ -1818,12 +1818,12 @@ So which key do we use for decryption?
     .parseClaimsJws(jwsString);
   ```
 * If the jwe was encrypted using a key produced by a Password-based key derivation `KeyAlgorithm`, the same 
-  `PasswordKey` must be specified on the `JwtParserBuilder`. For example:
+  `Password` must be specified on the `JwtParserBuilder`. For example:
 
   ```java
   Jwts.parserBuilder()
       
-    .decryptWith(passwordKey) // <---- a `PasswordKey` instance
+    .decryptWith(password) // <---- an `io.jsonwebtoken.security.Password` instance
     
     .build()
     .parseClaimsJws(jwsString);
@@ -1844,7 +1844,7 @@ So which key do we use for decryption?
 #### Decryption Key Locator
 
 What if your application doesn't use just a single `SecretKey` or `KeyPair`? What
-if JWEs can be created with different `SecretKey`s, `PasswordKey`s or public/private keys, or a combination of all of 
+if JWEs can be created with different `SecretKey`s, `Password`s or public/private keys, or a combination of all of 
 them?  How do you know which key to specify if you can't inspect the JWT first?
 
 In these cases, you can't call the `JwtParserBuilder`'s `decryptWith` method with a single key - instead, you'll need
@@ -1997,7 +1997,7 @@ on the type of JWS or JWE algorithm used.  That is:
   * For asymmetric signature algorithms, the returned verification key should be a `PublicKey` (not a `PrivateKey`).
 * for JWE:
   * For JWE direct encryption, the returned decryption key should be a `SecretKey`.
-  * For password-based key derivation algorithms, the returned decryption key should be a `PasswordKey`.
+  * For password-based key derivation algorithms, the returned decryption key should be a `io.jsonwebtoken.security.Password`.
   * For asymmetric key management algorithms, the returned decryption key should be a `PrivateKey` (not a `PublicKey`).
 
 <a name="compression"></a>
