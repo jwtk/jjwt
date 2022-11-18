@@ -1738,24 +1738,19 @@ The JWT RSA key management algorithms `RSA1_5`, `RSA-OAEP`, and `RSA-OAEP-256` a
 JWE recipient's RSA _public_ key during encryption.  This ensures that only the JWE recipient can decrypt 
 and read the JWE (using their RSA `private` key).
 
-These algorithms work as follows:
+During JWE creation, these algorithms:
 
-During JWE creation:
+* Generate a new secure-random Content Encryption Key (CEK) suitable for the desired [encryption algorithm](#jwe-enc).
+* Encrypt the JWE payload with the desired encryption algorithm using the new CEK, producing the JWE payload ciphertext.
+* Encrypt the CEK itself with the specified RSA key wrap algorithm using the JWE recipient's RSA public key.
+* Embed the payload ciphertext and encrypted CEK in the resulting JWE.
 
-* A new secure-random Content Encryption Key (CEK) suitable for the desired [AEAD encryption algorithm](#jwe-enc) 
-  is created.
-* This new CEK is used to encrypt the JWE payload with the desired [AEAD encryption algorithm](#jwe-enc), 
-  creating the JWE payload ciphertext.
-* The new CEK is itself encrypted with the specified RSA key wrap algorithm using the JWE recipient's RSA public key.
-* The payload ciphertext and encrypted CEK are both embedded in the resulting JWE.
+During JWE decryption, these algorithms:
 
-During JWE decryption:
-
-* The encrypted Content Encryption Key (CEK) embedded in the JWE is retrieved.
-* The JWE recipient's RSA private key is used to decrypt the encrypted CEK with the corresponding RSA key unwrap 
-  algorithm, producing the decrypted Content Encryption Key (CEK).
-* The decrypted CEK is used to decrypt the JWE ciphertext payload with the JWE's identified
-  [AEAD encryption algorithm](#jwe-enc).
+* Retrieve the encrypted Content Encryption Key (CEK) embedded in the JWE.
+* Decrypt the encrypted CEK with the discovered RSA key unwrap algorithm using the JWE recipient's RSA private key, 
+  producing the decrypted Content Encryption Key (CEK).
+* Decrypt the JWE ciphertext payload with the JWE's identified [encryption algorithm](#jwe-enc) using the decrypted CEK.
 
 > **Warning**
 >
@@ -1780,24 +1775,19 @@ longer-lived symmetric secret key.
 Because these particular algorithms use a symmetric secret key, they are best suited when the JWE creator and 
 receiver are the same, ensuring the secret key does not need to be shared with multiple parties.
 
-These algorithms work as follows:
+During JWE creation, these algorithms:
 
-During JWE creation:
+* Generate a new secure-random Content Encryption Key (CEK) suitable for the desired [encryption algorithm](#jwe-enc).
+* Encrypt the JWE payload with the desired encryption algorithm using the new CEK, producing the JWE payload ciphertext.
+* Encrypt the CEK itself with the specified AES key algorithm (either AES Key Wrap or AES with GCM encryption), 
+  producing the encrypted CEK.
+* Embed the payload ciphertext and encrypted CEK in the resulting JWE.
 
-* A new secure-random Content Encryption Key (CEK) suitable for the specified [AEAD encryption algorithm](#jwe-enc)
-  is generated.
-* This new CEK is used to encrypt the JWE payload with the specified [AEAD encryption algorithm](#jwe-enc),
-  producing the JWE payload ciphertext.
-* The symmetric secret key is used to encrypt this new CEK with the corresponding AES key algorithm (either AES Key 
-  Wrap or AES with GCM), producing the encrypted CEK.
-* The payload ciphertext and encrypted CEK are embedded in the resulting JWE.
+During JWE decryption, these algorithms:
 
-During JWE decryption:
-
-* The encrypted Content Encryption Key (CEK) embedded in the JWE is retrieved.
-* The symmetric secret key is used to decrypt the CEK with the corresponding AES key algorithm.
-* The decrypted Content Encryption Key is used to decrypt the JWE ciphertext payload with the JWE's discovered
-  [AEAD encryption algorithm](#jwe-enc).
+* Retrieve the encrypted Content Encryption Key (CEK) embedded in the JWE.
+* Decrypt the encrypted CEK with the discovered AES key algorithm using the symmetric secret key.
+* Decrypt the JWE ciphertext payload with the JWE's identified [encryption algorithm](#jwe-enc) using the decrypted CEK.
 
 > **Warning**
 >
@@ -1816,19 +1806,17 @@ same, ensuring the secret key does not need to be shared with multiple parties.
 This is the simplest key algorithm for direct encryption that does not perform any key encryption.  It is essentially
 a 'no op' key algorithm, allowing the shared key to be used to directly encrypt the JWT payload.
 
-This algorithm works as follows:
+During JWE creation, this algorithm:
 
-During JWE creation:
+* Encrypts the JWE payload with the desired encryption algorithm directly using the symmetric secret key, 
+  producing the JWE payload ciphertext.
+* Embeds the payload ciphertext in the resulting JWE.
 
-* The symmetric secret key is directly used to encrypt the JWE payload with the desired 
-  [AEAD encryption algorithm](#jwe-enc), creating the JWE payload ciphertext.
-* The ciphertext is embedded in the resulting JWE.
-* Because this algorithm does not produce an encrypted key value, an encrypted CEK is NOT embedded in the resulting JWE.
+Note that because this algorithm does not produce an encrypted key value, an encrypted CEK is _not_ embedded in the 
+resulting JWE.
 
-During JWE decryption:
-
-* The JWE payload ciphertext is decrypted using the JWE's discovered
-  [AEAD encryption algorithm](#jwe-enc) directly using the symmetric secret key. No encrypted CEK is used.
+During JWE decryption, this algorithm decrypts the JWE ciphertext payload with the JWE's 
+identified [encryption algorithm](#jwe-enc) directly using the symmetric secret key.  No encrypted CEK is used.
 
 > **Warning**
 >
@@ -1852,28 +1840,22 @@ expose the longer-lived (potentially weaker) password.
 Because these algorithms use a secret password, they are best suited when the JWE creator and receiver are the
 same, ensuring the secret password does not need to be shared with multiple parties.
 
-These algorithms work as follows:
+During JWE creation, these algorithms:
 
-During JWE creation:
+* Generate a new secure-random Content Encryption Key (CEK) suitable for the desired [encryption algorithm](#jwe-enc).
+* Encrypt the JWE payload with the desired encryption algorithm using the new CEK, producing the JWE payload ciphertext.
+* Derive a 'key encryption key' (KEK) with the desired "PBES2 with HMAC SHA" algorithm using the password, a suitable 
+  number of computational iterations, and a secure-random salt value.
+* Encrypt the generated CEK with the corresponding AES Key Wrap algorithm using the password-derived KEK.
+* Embed the payload ciphertext and encrypted CEK in the resulting JWE.
 
-* A new secure-random Content Encryption Key (CEK) suitable for the specified [AEAD encryption algorithm](#jwe-enc)
-  is generated.
-* This new CEK is used to encrypt the JWE payload with the specified [AEAD encryption algorithm](#jwe-enc),
-  producing the JWE payload ciphertext.
-* The password, along with a suitable number of computational iterations and a secure-random salt value, are used
-  as inputs to a corresponding "PBES2 with HMAC SHA" algorithm to derive a cryptographic key.
-* The new CEK is itself encrypted with the corresponding AES Key Wrap algorithm using the password-derived 
-  cryptographic key.
-* The ciphertext and encrypted CEK are embedded in the resulting JWE.
+During JWE decryption, these algorithms:
 
-During JWE decryption:
-
-* The encrypted Content Encryption Key (CEK) embedded in the JWE is retrieved.
-* The password, along with the number of iterations and salt value discovered in the JWE header, are used as inputs
-  to the discovered "PBES2 with HMAC SHA" algorithm to derive the cryptographic key.
-* The CEK is decrypted with the corresponding AES Key Unwrap algorithm using the password-derived cryptographic key.
-* The decrypted CEK is used to decrypt the JWE ciphertext payload with the JWE's discovered
-  [AEAD encryption algorithm](#jwe-enc).
+* Retrieve the encrypted Content Encryption Key (CEK) embedded in the JWE.
+* Derive the 'key encryption key' (KEK) with the discovered "PBES2 with HMAC SHA" algorithm using the password and the
+  number of computational iterations and secure-random salt value discovered in the JWE header.
+* Decrypt the encrypted CEK with the corresponding AES Key Unwrap algorithm using the password-derived KEK.
+* Decrypt the JWE ciphertext payload with the JWE's identified [encryption algorithm](#jwe-enc) using the decrypted CEK.
 
 <a name="jwe-alg-ecdhes"></a>
 ##### Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement
@@ -1883,55 +1865,52 @@ The JWT Elliptic Curve Diffie-Hellman Ephemeral Static key agreement algorithms 
 during encryption.  This ensures that only the JWE recipient can decrypt and read the JWE (using their Elliptic Curve 
 `private` key).
 
-These algorithms work as follows:
+During JWE creation, these algorithms:
 
-During JWE creation:
-
-* The Content Encryption Key (CEK) used to encrypt the JWE payload is obtained via the following:
-  * The JWE recipient's Elliptic Curve public key is inspected to discover its Curve.
-  * A _new_ ephemeral Elliptic Curve public/private key pair is secure-randomly generated somewhere on this same Curve.
-  * The ephmeral EC public Key is automatically added to the JWE 
+* Obtain the Content Encryption Key (CEK) used to encrypt the JWE payload as follows:
+  * Inspect the JWE recipient's Elliptic Curve public key and determine its Curve.
+  * Generate a new secure-random ephemeral Ellipic Curve public/private key pair on this same Curve.
+  * Add the ephemeral EC public key to the JWE 
     [epk header](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1) for inclusion in the final JWE.
-  * An ECDH shared secret is produced with the ECDH Key Agreement algorithm using the JWE recipient's EC public key 
+  * Produce an ECDH shared secret with the ECDH Key Agreement algorithm using the JWE recipient's EC public key
     and the ephemeral EC private key.
-  * A derived symmetric secret key is generated with the Concat Key Derivation Function
-    ([NIST.800-56A](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf), Section 5.8.1) using 
-    this ECDH shared secret and any provided 
+  * Derive a symmetric secret key with the Concat Key Derivation Function 
+    ([NIST.800-56A](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf), Section 5.8.1) using
+    this ECDH shared secret and any provided
     [PartyUInfo](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.2) and/or
     [PartyVInfo](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.3).
   * If the key algorithm is `ECDH-ES`:
-    * The derived symmetric secret key is used directly as the Content Encryption Key (CEK).
-    * No encrypted key is embedded in the resulting JWE.
+    * Use the Concat KDF-derived symmetric secret key directly as the Content Encryption Key (CEK). No encrypted key 
+      is created, nor embedded in the resulting JWE.
   * Otherwise, if the key algorithm is `ECDH-ES+A128KW`, `ECDH-ES+A192KW`, or `ECDH-ES+A256KW`:
-    * A new secure-random Content Encryption Key (CEK) suitable for the specified [AEAD encryption algorithm](#jwe-enc)
-      is generated.
-    * The Concat KDF-derived secret key is used to encrypt this new CEK with the corresponding AES Key Wrap algorithm, 
+    * Generate a new secure-random Content Encryption Key (CEK) suitable for the desired [encryption algorithm](#jwe-enc).
+    * Encrypt this new CEK with the corresponding AES Key Wrap algorithm using the Concat KDF-derived secret key, 
       producing the encrypted CEK.
-    * The encrypted CEK is embedded in the resulting JWE.
-* The resulting CEK is used to encrypt the JWE payload with the specified [AEAD encryption algorithm](#jwe-enc),
-  producing the JWE payload ciphertext.
-* The ciphertext is embedded in the resulting JWE.
+    * Embed the encrypted CEK in the resulting JWE.
+* Encrypt the JWE payload with the desired encryption algorithm using the obtained CEK, producing the JWE payload 
+  ciphertext.
+* Embed the payload ciphertext in the resulting JWE.
 
-During JWE decryption:
+During JWE decryption, these algorithms:
 
-* The required ephemeral Elliptic Curve public key is retrieved from the JWE's 
-  [epk header](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1).
-* The ephemeral EC public key is validated to ensure it exists on the same curve as the JWE recipient's EC private key.
-* The ECDH shared secret is produced with the ECDH Key Agreement algorithm using the JWE recipient's EC private key
-  and the ephemeral EC public key.
-* The derived symmetric secret key is generated with the Concat Key Derivation Function
-  ([NIST.800-56A](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf), Section 5.8.1) using
-  this ECDH shared secret and any provided
-  [PartyUInfo](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.2) and/or
-  [PartyVInfo](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.3).
-* If the key algorithm is `ECDH-ES`, the derived symmetric secret key is used directly as the Content Encryption Key 
-  (CEK).
-* Otherwise, if the key algorithm is `ECDH-ES+A128KW`, `ECDH-ES+A192KW`, or `ECDH-ES+A256KW`:
-    * Obtain the encrypted key ciphertext embedded in the JWE.
-    * Decrypt the encrypted key ciphertext with the associated AES Key Unwrap algorithm using the Concat KDF-derived
-      secret key, producing the unencrypted Content Encryption Key (CEK).
-* The resulting CEK is used to decrypt the JWE ciphertext payload with the JWE's discovered
-  [AEAD encryption algorithm](#jwe-enc).
+* Obtain the Content Encryption Key (CEK) used to decrypt the JWE payload as follows:
+  * Retrieve the required ephemeral Elliptic Curve public key from the JWE's 
+    [epk header](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1).
+  * Ensure the ephemeral EC public key exists on the same curve as the JWE recipient's EC private key.
+  * Produce the ECDH shared secret with the ECDH Key Agreement algorithm using the JWE recipient's EC private key
+    and the ephemeral EC public key.
+  * Derive a symmetric secret key with the Concat Key Derivation Function
+    ([NIST.800-56A](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf), Section 5.8.1) using
+    this ECDH shared secret and any 
+    [PartyUInfo](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.2) and/or
+    [PartyVInfo](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.3) found in the JWE header.
+  * If the key algorithm is `ECDH-ES`:
+    * Use the Concat KDF-derived secret key directly as the Content Encryption Key (CEK). No encrypted key is used.
+  * Otherwise, if the key algorithm is `ECDH-ES+A128KW`, `ECDH-ES+A192KW`, or `ECDH-ES+A256KW`:
+      * Obtain the encrypted key ciphertext embedded in the JWE.
+      * Decrypt the encrypted key ciphertext with the associated AES Key Unwrap algorithm using the Concat KDF-derived
+        secret key, producing the unencrypted Content Encryption Key (CEK).
+* Decrypt the JWE payload ciphertext with the JWE's discovered encryption algorithm using the obtained CEK.
 
 <a name="jwe-create"></a>
 ### Creating a JWE
