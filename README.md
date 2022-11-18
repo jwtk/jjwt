@@ -2671,27 +2671,11 @@ Jwts.parserBuilder()
 
 #### Example JWE using RSAES-PKCS1-v1_5 and AES_128_CBC_HMAC_SHA_256
 
+TBD - work in progress.
+
 Bob wants to send Alice an encrypted JWT with the plaintext payload "Live long and prosper."  Bob wants to use Alice's
 RSA _public_ key so he doesn't need a key of his own as well as ensure only Alice will be able to decrypt the
 payload.
-
-
-(without the quotes).
-
-In this scenario:
-
-1. Bob chooses the 'AES_128_CBC_HMAC_SHA_256' algorithm to encrypt the payload using a ne
-
-
-
-1. Bob chooses the `RSAES-PKCS1-v1_5` key algorithm to produce the key used to encrypt the payload.  This algorithm:
-   1. Automatically generates a new secure-random symmetric key to encrypt the payload, and
-   2. Encrypts this new key with Alice's RSA _public_ key (so only Alice can decrypt it), and finally,
-   3. Places the encrypted version of this new key in the header so Alice can find it.
-2. Bob chooses the 'AES_128_CBC_HMAC_SHA_256' algorithm to encrypt the payload using the key produced by the key algorithm.
-
-
-
 
 RSAES-PKCS1-v1_5 for key encryption and
 AES_128_CBC_HMAC_SHA_256 for content encryption.
