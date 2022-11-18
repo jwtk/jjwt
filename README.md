@@ -87,6 +87,11 @@ enforcement.
     * [JWE Symmetric Encryption](#jwe-enc-symmetric)
   * [JWE Key Management Algorithms](#jwe-alg)
     * [JWE Standard Key Management Algorithms](#jwe-alg-standard)
+      * [JWE RSA Key Encryption](#jwe-alg-rsa)
+      * [JWE AES Key Encryption](#jwe-alg-aes)
+      * [JWE Direct Key Encryption](#jwe-alg-dir)
+      * [JWE Password-based Key Encryption](#jwe-alg-pbes2)
+      * [JWE Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement](#jwe-alg-ecdhes)
   * [Create a JWE](#jwe-create)
     * [JWE Compression](#jwe-compression)
   * [Read a JWE](#jwe-read)
@@ -667,10 +672,10 @@ fails to verify the JWT, a `SignatureException` (which extends from `JwtExceptio
 verified, we parse out the claims and assert that that subject is set to `Joe`.  You have to love code one-liners 
 that pack a punch!
 
-> **Note**
+[> **Note**
 > 
 > **Type-safe JWTs:** To get a type-safe `Claims` JWT result, call the `parseClaimsJws` method (since there are many
-similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
+similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.]()
 
 But what if parsing or signature validation failed?  You can catch `JwtException` and react accordingly:
 
@@ -1698,30 +1703,182 @@ to produce a final symmetric key, and that symmetric key is used to encrypt the 
 
 The JWT specification defines 17 standard Key Management Algorithms used to produce the `payload` encryption key:
 
-| Identifier | Key Management Algorithm |
-| --- | --- |   
-| `RSA1_5` | RSAES-PKCS1-v1_5 |
-| `RSA-OAEP` | RSAES OAEP using default parameters |
-| `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256 |
-| `A128KW` | AES Key Wrap with default initial value using 128-bit key |
-| `A192KW` | AES Key Wrap with default initial value using 192-bit key |
-| `A256KW` | AES Key Wrap with default initial value using 256-bit key |
-| `dir` | Direct use of a shared symmetric key as the CEK |
+| Identifier | Key Management Algorithm                                                      |
+| --- |-------------------------------------------------------------------------------|   
+| `RSA1_5` | RSAES-PKCS1-v1_5                                                              |
+| `RSA-OAEP` | RSAES OAEP using default parameters                                           |
+| `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256                                |
+| `A128KW` | AES Key Wrap with default initial value using 128-bit key                     |
+| `A192KW` | AES Key Wrap with default initial value using 192-bit key                     |
+| `A256KW` | AES Key Wrap with default initial value using 256-bit key                     |
+| `dir` | Direct use of a shared symmetric key as the Content Encryption Key            |
 | `ECDH-ES` | Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF |
-| `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW" |
-| `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW" |
-| `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW" |
-| `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>3</b></sup> |
-| `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>3</b></sup> |
-| `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>3</b></sup> |
-| `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup> |
-| `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup> |
-| <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
+| `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW"                        |
+| `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW"                        |
+| `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"                        |
+| `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>3</b></sup>                |
+| `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>3</b></sup>                |
+| `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>3</b></sup>                |
+| `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup>              |
+| `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup>              |
+| <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup>              |
 
 <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
 These are all represented in the `io.jsonwebtoken.security.KeyAlgorithms` utility class as implementations of
 the `io.jsonwebtoken.security.KeyAlgorithm` interface.
+
+But 17 algorithms are a lot to choose from.  When would you use them?  We'll use the common cryptography examples of
+[Bob and Alice](https://en.wikipedia.org/wiki/Alice_and_Bob) to illustrate when these algorithms might be used.
+
+<a name="jwe-alg-rsa"></a>
+##### RSA Key Encryption
+
+The JWT RSA key management algorithms `RSA1_5`, `RSA-OAEP`, and `RSA-OAEP-256` are used when Bob wants to use 
+Alice's RSA _public_ key during encryption.  This ensures that only Alice can decrypt and read the JWE 
+(using her RSA `private` key).
+
+These algorithms work as follows:
+
+During JWE creation:
+
+* A new secure-random Content Encryption Key (CEK) suitable for the desired [AEAD encryption algorithm](#jwe-enc) 
+  is created.
+* This new CEK is used to encrypt the JWE payload with the desired [AEAD encryption algorithm](#jwe-enc), 
+  creating the JWE payload ciphertext.
+* The new CEK is itself encrypted with the specified RSA key wrap algorithm using the JWE recipient's RSA public key.
+* The payload ciphertext and encrypted CEK are both embedded in the resulting JWE.
+
+During JWE decryption:
+
+* The encrypted Content Encryption Key (CEK) embedded in the JWE is retrieved.
+* The JWE recipient's RSA private key is used to decrypt the encrypted CEK with the corresponding RSA key unwrap 
+  algorithm, producing the decrypted Content Encryption Key (CEK).
+* The decrypted CEK is used to decrypt the JWE ciphertext payload with the JWE's identified
+  [AEAD encryption algorithm](#jwe-enc).
+
+> **Warning**
+>
+> RFC 7518 Sections [4.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.2) and 
+> [4.3](https://datatracker.ietf.org/doc/html/rfc7518#section-4.3) _require_ (mandate) that RSA keys >= 2048 bits 
+> MUST be used with these algorithms. JJWT will throw an exception if it detects weaker keys being used.
+
+<a name="jwe-alg-aes"></a>
+##### AES Key Encryption
+
+The JWT AES key management algorithms `A128KW`, `A192KW`, `A256KW`, `A128GCMKW`, `A192GCMKW`, and `A256GCMKW` are 
+used when you have a symmetric secret key, but you don't want to use that secret key to directly 
+encrypt/decrypt the JWT.
+
+Instead, a new secure-random key is generated each time a JWE is created, and that new/random key is used to directly 
+encrypt/decrypt the JWT payload.  The secure-random key is itself encrypted with the symmetric secret key
+using the AES Wrap algorithm, and the encrypted key is embedded in the resulting.
+
+This allows the payload to be encrypted with a random short-lived key, reducing material exposure of the potentially 
+longer-lived symmetric secret key.
+
+Because these algorithms use a symmetric secret key, they are best suited when the JWE creator and receiver are the 
+same, ensuring the secret key does not need to be shared with multiple parties.
+
+These algorithms work as follows:
+
+During JWE creation:
+
+* A new secure-random Content Encryption Key (CEK) suitable for the specified [AEAD encryption algorithm](#jwe-enc)
+  is generated.
+* This new CEK is used to encrypt the JWE payload with the specified [AEAD encryption algorithm](#jwe-enc),
+  producing the JWE payload ciphertext.
+* The symmetric secret key is used to encrypt this new CEK with the corresponding AES key algorithm (either AES Key 
+  Wrap or AES with GCM), producing the encrypted CEK.
+* The payload ciphertext and encrypted CEK are embedded in the resulting JWE.
+
+During JWE decryption:
+
+* The encrypted Content Encryption Key (CEK) embedded in the JWE is retrieved.
+* The symmetric secret key is used to decrypt the CEK with the corresponding AES key algorithm.
+* The decrypted Content Encryption Key is used to decrypt the JWE ciphertext payload with the JWE's discovered
+  [AEAD encryption algorithm](#jwe-enc).
+
+> **Warning**
+>
+> The symmetric key used for the AES key algorithms MUST be 128, 192 or 256 bits as required by the specific AES 
+> key algorithm.  JJWT will throw an exception if it detects weaker keys than what is required.
+
+<a name="jwe-alg-dir"></a>
+##### Direct Key Encryption
+
+The JWT `dir` (direct) key management algorithm is used when you have a symmetric secret key, and you want to use it
+to directly encrypt the JWT payload.
+
+Because this algorithm uses a symmetric secret key, it is best suited when the JWE creator and receiver are the
+same, ensuring the secret key does not need to be shared with multiple parties.
+
+This is the simplest key algorithm for direct encryption that does not perform any key encryption.  It is essentially
+a 'no op' key algorithm, allowing the shared key to be used to directly encrypt the JWT payload.
+
+This algorithm works as follows:
+
+During JWE creation:
+
+* The symmetric secret key is directly used to encrypt the JWE payload with the desired 
+  [AEAD encryption algorithm](#jwe-enc), creating the JWE payload ciphertext.
+* The ciphertext is embedded in the resulting JWE.
+* Because this algorithm does not produce an encrypted key value, an encrypted CEK is NOT embedded in the resulting JWE.
+
+During JWE decryption:
+
+* The JWE payload ciphertext is decrypted using the JWE's discovered
+  [AEAD encryption algorithm](#jwe-enc) directly using the symmetric secret key. No encrypted CEK is used.
+
+> **Warning**
+>
+> The symmetric secret key MUST be 128, 192 or 256 bits as required by the associated 
+> [AEAD encryption algorithm](#jwe-enc) used to encrypt the payload. JJWT will throw an exception if it detects 
+> weaker keys than what is required.
+
+<a name="jwe-alg-pbes2"></a>
+##### Password-Based Key Encryption
+
+The JWT password-based key encryption algorithms `PBES2-HS256+A128KW`, `PBES2-HS384+A192KW`, and `PBES2-HS512+A256KW`
+are used when you want to use a password (character array) to encrypt and decrypt a JWT.
+
+However, because passwords are usually too weak or problematic to use directly in cryptographic contexts, these
+algorithms utilize key derivation techniques with work factors (e.g. computation iterations) and secure-random salts
+to produce stronger cryptographic keys suitable for cryptographic operations.
+
+This allows the payload to be encrypted with a random short-lived key, reducing the need to expose the longer-lived 
+(potentially weaker) password.
+
+Because these algorithms use a secret password, they are best suited when the JWE creator and receiver are the
+same, ensuring the secret password does not need to be shared with multiple parties.
+
+These algorithms work as follows:
+
+During JWE creation:
+
+* A new secure-random Content Encryption Key (CEK) suitable for the specified [AEAD encryption algorithm](#jwe-enc)
+  is generated.
+* This new CEK is used to encrypt the JWE payload with the specified [AEAD encryption algorithm](#jwe-enc),
+  producing the JWE payload ciphertext.
+* The password, along with a suitable number of computational iterations and a secure-random salt value, are used
+  as inputs to a corresponding "PBES2 with HMAC SHA" algorithm to derive a cryptographic key.
+* The new CEK is itself encrypted with the corresponding AES Key Wrap algorithm using the password-derived 
+  cryptographic key.
+* The ciphertext and encrypted CEK are embedded in the resulting JWE.
+
+During JWE decryption:
+
+* The encrypted Content Encryption Key (CEK) embedded in the JWE is retrieved.
+* The password, along with the number of iterations and salt value discovered in the JWE header, are used as inputs
+  to the discovered "PBES2 with HMAC SHA" algorithm to derive the cryptographic key.
+* The CEK is decrypted with the corresponding AES Key Unwrap algorithm using the password-derived cryptographic key.
+* The decrypted CEK is used to decrypt the JWE ciphertext payload with the JWE's discovered
+  [AEAD encryption algorithm](#jwe-enc).
+
+<a name="jwe-alg-ecdhes"></a>
+##### Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement
+
+TBD
 
 <a name="jwe-create"></a>
 ### Creating a JWE
@@ -2505,6 +2662,41 @@ Jwts.parserBuilder()
     
     // ... etc ...
 ```
+
+## Appendix
+
+### JWS Examples
+
+### JWE Examples
+
+#### Example JWE using RSAES-PKCS1-v1_5 and AES_128_CBC_HMAC_SHA_256
+
+Bob wants to send Alice an encrypted JWT with the plaintext payload "Live long and prosper."  Bob wants to use Alice's
+RSA _public_ key so he doesn't need a key of his own as well as ensure only Alice will be able to decrypt the
+payload.
+
+
+(without the quotes).
+
+In this scenario:
+
+1. Bob chooses the 'AES_128_CBC_HMAC_SHA_256' algorithm to encrypt the payload using a ne
+
+
+
+1. Bob chooses the `RSAES-PKCS1-v1_5` key algorithm to produce the key used to encrypt the payload.  This algorithm:
+   1. Automatically generates a new secure-random symmetric key to encrypt the payload, and
+   2. Encrypts this new key with Alice's RSA _public_ key (so only Alice can decrypt it), and finally,
+   3. Places the encrypted version of this new key in the header so Alice can find it.
+2. Bob chooses the 'AES_128_CBC_HMAC_SHA_256' algorithm to encrypt the payload using the key produced by the key algorithm.
+
+
+
+
+RSAES-PKCS1-v1_5 for key encryption and
+AES_128_CBC_HMAC_SHA_256 for content encryption.
+
+### JWK Examples
 
 ## Learn More
 
