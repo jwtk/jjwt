@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class DefaultEllipticCurveSignatureAlgorithm
         extends AbstractSignatureAlgorithm<PrivateKey, PublicKey> implements AsymmetricKeySignatureAlgorithm {
 
-    private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 512.";
+    private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 521.";
     private static final String KEY_TYPE_MSG_PATTERN =
             "Elliptic Curve {0} keys must be {1}s (implement {2}). Provided key type: {3}.";
 
