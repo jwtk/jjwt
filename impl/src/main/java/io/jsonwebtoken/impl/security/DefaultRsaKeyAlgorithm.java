@@ -7,12 +7,15 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import java.math.BigInteger;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
@@ -21,6 +24,8 @@ import java.security.spec.AlgorithmParameterSpec;
 public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey, PrivateKey> {
 
     private final AlgorithmParameterSpec SPEC; //can be null
+
+    private static final int MIN_KEY_BIT_LENGTH = 2048;
 
     public DefaultRsaKeyAlgorithm(String id, String jcaTransformationString) {
         this(id, jcaTransformationString, null);
@@ -31,10 +36,35 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
         this.SPEC = spec; //can be null
     }
 
+    private static String keyType(boolean encryption) {
+        return encryption ? "encryption" : "decryption";
+    }
+
+    protected void validate(Key key, boolean encryption) { // true = encryption, false = decryption
+        // Some PKCS11 providers and HSMs won't expose the RSAKey interface, so we have to check to see if we can cast
+        // If so, we can provide additional safety checks:
+        if (key instanceof RSAKey) {
+            RSAKey rsaKey = (RSAKey) key;
+            BigInteger modulus = Assert.notNull(rsaKey.getModulus(), "RSAKey modulus cannot be null.");
+            int size = modulus.bitLength();
+            if (size < MIN_KEY_BIT_LENGTH) {
+                String id = getId();
+                String section = id.startsWith("RSA1") ? "4.2" : "4.3";
+                String msg = "The RSA " + keyType(encryption) + " key's size (modulus) is " + size +
+                        " bits which is not secure enough for the " + id + " algorithm. " +
+                        "The JWT JWA Specification (RFC 7518, Section " + section + ") states that RSA keys MUST " +
+                        "have a size >= " + MIN_KEY_BIT_LENGTH + " bits. See " +
+                        "https://datatracker.ietf.org/doc/html/rfc7518#section-" + section + " for more information.";
+                throw new WeakKeyException(msg);
+            }
+        }
+    }
+
     @Override
     public KeyResult getEncryptionKey(final KeyRequest<PublicKey> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final PublicKey kek = Assert.notNull(request.getKey(), "Request key encryption key cannot be null.");
+        validate(kek, true);
         final SecretKey cek = generateKey(request);
 
         byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
@@ -56,6 +86,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
     public SecretKey getDecryptionKey(DecryptionKeyRequest<PrivateKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final PrivateKey kek = Assert.notNull(request.getKey(), "Request key decryption key cannot be null.");
+        validate(kek, false);
         final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Request content (encrypted key) cannot be null or empty.");
 
         return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {

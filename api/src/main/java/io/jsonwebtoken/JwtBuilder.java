@@ -694,6 +694,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
      *
+     * <p>The {@link SignatureAlgorithms} utility class makes available all standard signature algorithms defined in
+     * the JWA specification.</p>
+     *
      * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
      * However, this method can be useful if the recommended algorithm heuristics do not meet your needs or if
      * you want explicit control over the signature algorithm used with the specified key.</p>
@@ -705,17 +708,21 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
      *                             the specified algorithm.
      * @see #signWith(Key)
+     * @see SignatureAlgorithms
      * @since JJWT_RELEASE_VERSION
      */
     <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SignatureAlgorithm<? super K, ?> alg) throws InvalidKeyException;
 
     /**
-     * Encrypts the constructed JWT with the specified {@code enc}ryption algorithm using the provided
-     * symmetric {@code key}, producing a JWE.  Because it is a symmetric key, the JWE recipient
+     * Encrypts the constructed JWT with the specified symmetric {@code key} using the provided {@code enc}ryption
+     * algorithm, producing a JWE.  Because it is a symmetric key, the JWE recipient
      * must also have access to the same key to decrypt.
      *
+     * <p>The {@link io.jsonwebtoken.security.EncryptionAlgorithms EncryptionAlgorithms} utility class makes available
+     * all standard content encryption algorithms defined in the JWA specification.</p>
+     *
      * <p>This method is a convenience method that delegates to
-     * {@link #encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(enc, key, KeyAlgorithm)}
+     * {@link #encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(enc, key, KeyAlgorithm)}
      * based on the {@code key} argument:</p>
      * <ul>
      *     <li>If the provided {@code key} is a {@link Password Password} instance,
@@ -732,30 +739,34 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     {@link AeadAlgorithm#keyBuilder() keyBuilder}.</li>
      * </ul>
      *
-     * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE.
      * @param key the symmetric encryption key to use with the {@code enc} algorithm.
+     * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE.
      * @return the JWE builder for method chaining.
+     * @see io.jsonwebtoken.security.EncryptionAlgorithms EncryptionAlgorithms
      */
-    JwtBuilder encryptWith(AeadAlgorithm enc, SecretKey key);
+    JwtBuilder encryptWith(SecretKey key, AeadAlgorithm enc);
 
     /**
-     * Encrypts the constructed JWT with the specified {@code enc} algorithm using the symmetric key produced by
-     * the {@code keyAlg} when invoked with the specified {@code key}, producing a JWE.  In other words, the
+     * Encrypts the constructed JWT using the specified {@code enc} algorithm with the symmetric key produced by the
+     * {@code keyAlg} when invoked with the given {@code key},  producing a JWE.  In other words, the
      * {@code keyAlg} is first invoked with the specified {@code key}, and that produces a {@link SecretKey} result.
      * This resulting {@code SecretKey} is then used with the {@code enc} algorithm to encrypt the JWT, producing
      * a JWE.
      *
-     * <p>The {@link KeyAlgorithms} utility class makes available all Key Algorithms defined by the JWA
-     * specification.</p>
+     * <p>The {@link KeyAlgorithms} utility class makes available all standard Key Algorithms defined by the JWA
+     * specification, and the {@link io.jsonwebtoken.security.EncryptionAlgorithms EncryptionAlgorithms} makes
+     * available all standard content encryption algorithms defined in the JWA specification.</p>
      *
-     * @param enc    the {@link AeadAlgorithm} used to encrypt the JWE.
-     * @param key    the key used to call the provided {@code keyAlg} instance.
+     * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
+     * @param key    the key used to invoke the provided {@code keyAlg} instance.
      * @param keyAlg the key management algorithm that will produce the symmetric {@code SecretKey} to use with the
      *               {@code enc} algorithm.
-     * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
+     * @param enc    the {@link AeadAlgorithm} used to encrypt the JWE.
      * @return the JWE builder for method chaining.
+     * @see KeyAlgorithms
+     * @see io.jsonwebtoken.security.EncryptionAlgorithms EncryptionAlgorithms
      */
-    <K extends Key> JwtBuilder encryptWith(AeadAlgorithm enc, K key, KeyAlgorithm<? super K, ?> keyAlg);
+    <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);
 
     /**
      * Compresses the JWT payload using the specified {@link CompressionCodec}.

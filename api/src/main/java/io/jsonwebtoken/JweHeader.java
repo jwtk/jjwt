@@ -40,15 +40,15 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * <p>Note that there is no corresponding 'setter' method for this 'getter' because JJWT users set this value by
      * supplying an {@link AeadAlgorithm} to a {@link JwtBuilder} via one of its
-     * {@link JwtBuilder#encryptWith(AeadAlgorithm, SecretKey) encryptWith(AeadAlgorithm, SecretKey)} or
-     * {@link JwtBuilder#encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
+     * {@link JwtBuilder#encryptWith(SecretKey, AeadAlgorithm) encryptWith(AeadAlgorithm, SecretKey)} or
+     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
      * methods. JJWT will then set this {@code enc} header value automatically to the {@code AeadAlgorithm}'s
      * {@link AeadAlgorithm#getId() getId()} value during encryption.</p>
      *
      * @return the JWE {@code enc} (Encryption Algorithm) header value or {@code null} if not present.  This will
      * always be {@code non-null} on validly-constructed JWE instances, but could be {@code null} during construction.
-     * @see JwtBuilder#encryptWith(AeadAlgorithm, SecretKey)
-     * @see JwtBuilder#encryptWith(AeadAlgorithm, Key, KeyAlgorithm)
+     * @see JwtBuilder#encryptWith(SecretKey, AeadAlgorithm)
+     * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
      */
     String getEncryptionAlgorithm();
 
@@ -59,7 +59,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * <p>Note that there is no corresponding 'setter' method for this 'getter' because JJWT users set this value by
      * supplying an ECDH-ES {@link KeyAlgorithm} to a {@link JwtBuilder} via its
-     * {@link JwtBuilder#encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
+     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
      * method. The ECDH-ES {@code KeyAlgorithm} implementation will then set this {@code epk} header value
      * automatically when producing the encryption key.</p>
      *
@@ -108,7 +108,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * <p>Note that there is no corresponding 'setter' method for this 'getter' because JJWT users set this value by
      * supplying an AES GCM Wrap {@link KeyAlgorithm} to a {@link JwtBuilder} via its
-     * {@link JwtBuilder#encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
+     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
      * method. The AES GCM Wrap {@code KeyAlgorithm} implementation will then set this {@code iv} header value
      * automatically when producing the encryption key.</p>
      *
@@ -125,7 +125,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * <p>Note that there is no corresponding 'setter' method for this 'getter' because JJWT users set this value by
      * supplying an AES GCM Wrap {@link KeyAlgorithm} to a {@link JwtBuilder} via its
-     * {@link JwtBuilder#encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
+     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
      * method. The AES GCM Wrap {@code KeyAlgorithm} implementation will then set this {@code tag} header value
      * automatically when producing the encryption key.</p>
      *
@@ -155,7 +155,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * <p>Note that there is no corresponding 'setter' method for this 'getter' because JJWT users set this value by
      * supplying a password-based {@link KeyAlgorithm} to a {@link JwtBuilder} via its
-     * {@link JwtBuilder#encryptWith(AeadAlgorithm, Key, KeyAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
+     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(AeadAlgorithm, Key, KeyAlgorithm)}
      * method. The password-based {@code KeyAlgorithm} implementation will then set this {@code p2s} header value
      * automatically when producing the encryption key.</p>
      *

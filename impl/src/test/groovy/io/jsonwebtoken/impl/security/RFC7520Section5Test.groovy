@@ -468,7 +468,7 @@ class RFC7520Section5Test {
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
                 .setHeaderParam('kid', jwk.getId())
                 .setPayload(FIGURE_72)
-                .encryptWith(enc, key, alg)
+                .encryptWith(key, alg, enc)
                 .compact()
 
         assertEquals FIGURE_81, result
@@ -526,7 +526,7 @@ class RFC7520Section5Test {
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
                 .setHeaderParam('kid', jwk.getId())
                 .setPayload(FIGURE_72)
-                .encryptWith(enc, key, alg)
+                .encryptWith(key, alg, enc)
                 .compact()
 
         assertEquals FIGURE_92, result
@@ -587,7 +587,7 @@ class RFC7520Section5Test {
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
                 .setHeader(Jwts.headerBuilder().setContentType(cty).setPbes2Count(p2c))
                 .setPayload(FIGURE_95)
-                .encryptWith(enc, key, alg)
+                .encryptWith(key, alg, enc)
                 .compact()
 
         assertEquals FIGURE_105, result
@@ -649,7 +649,7 @@ class RFC7520Section5Test {
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
                 .setHeaderParam('kid', jwk.getId())
                 .setPayload(FIGURE_72)
-                .encryptWith(enc, encKey, alg)
+                .encryptWith(encKey, alg, enc)
                 .compact()
 
         assertEquals FIGURE_117, result

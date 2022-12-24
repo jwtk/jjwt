@@ -243,15 +243,15 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder encryptWith(AeadAlgorithm enc, SecretKey key) {
+    public JwtBuilder encryptWith(SecretKey key, AeadAlgorithm enc) {
         if (key instanceof Password) {
-            return encryptWith(enc, (Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()));
+            return encryptWith((Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()), enc);
         }
-        return encryptWith(enc, key, KeyAlgorithms.DIRECT);
+        return encryptWith(key, KeyAlgorithms.DIRECT, enc);
     }
 
     @Override
-    public <K extends Key> JwtBuilder encryptWith(final AeadAlgorithm enc, final K key, final KeyAlgorithm<? super K, ?> keyAlg) {
+    public <K extends Key> JwtBuilder encryptWith(final K key, final KeyAlgorithm<? super K, ?> keyAlg, final AeadAlgorithm enc) {
         this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
         final String encId = Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
         this.encFunction = wrap(new Function<AeadRequest, AeadResult>() {
