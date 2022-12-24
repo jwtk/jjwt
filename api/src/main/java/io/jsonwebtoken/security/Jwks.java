@@ -47,7 +47,7 @@ public final class Jwks {
      *
      * @return a new thread-safe {@link JwkParserBuilder} to parse JSON strings into {@link Jwk} instances.
      */
-    public static JwkParserBuilder parserBuilder() {
+    public static JwkParserBuilder parser() {
         return Classes.newInstance(PARSERBUILDER_CLASSNAME);
     }
 

@@ -180,7 +180,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_1() {
 
-        RsaPrivateJwk jwk = Jwks.parserBuilder().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
         def alg = SignatureAlgorithms.RS256
@@ -218,7 +218,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_2() {
 
-        RsaPrivateJwk jwk = Jwks.parserBuilder().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
         def alg = SignatureAlgorithms.PS384
@@ -265,7 +265,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_3() {
 
-        EcPrivateJwk jwk = Jwks.parserBuilder().build().parse(RFC7520Section3Test.FIGURE_2) as EcPrivateJwk
+        EcPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_2) as EcPrivateJwk
         ECPrivateKey key = jwk.toKey()
 
         def alg = SignatureAlgorithms.ES512
@@ -310,7 +310,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_4() {
 
-        SecretJwk jwk = Jwks.parserBuilder().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
+        SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
         def alg = SignatureAlgorithms.HS256
@@ -348,7 +348,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_5() {
 
-        SecretJwk jwk = Jwks.parserBuilder().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
+        SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
         def alg = SignatureAlgorithms.HS256

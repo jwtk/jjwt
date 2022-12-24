@@ -51,7 +51,7 @@ class DefaultJwkParserTest {
             def jwk = Jwks.builder().forKey(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
-            def parsed = Jwks.parserBuilder().build().parse(json)
+            def parsed = Jwks.parser().build().parse(json)
             assertEquals jwk, parsed
         }
     }
@@ -78,7 +78,7 @@ class DefaultJwkParserTest {
             def jwk = Jwks.builder().forKey(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
-            def parsed = Jwks.parserBuilder().setProvider(provider).build().parse(json)
+            def parsed = Jwks.parser().setProvider(provider).build().parse(json)
             assertEquals jwk, parsed
             assertSame provider, parsed.@context.@provider
         }

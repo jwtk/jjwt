@@ -23,7 +23,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.IncorrectClaimException;
-import io.jsonwebtoken.InvalidClaimException;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.Jws;
@@ -764,31 +763,18 @@ public class DefaultJwtParser implements JwtParser {
                 } catch (Exception e) {
                     String msg = "JWT Claim '" + expectedClaimName + "' was expected to be a Date, but its value " +
                             "cannot be converted to a Date using current heuristics.  Value: " + actualClaimValue;
-                    throw new IncorrectClaimException(header, claims, msg);
+                    throw new IncorrectClaimException(header, claims, expectedClaimName, expectedClaimValue, msg);
                 }
             }
 
-            InvalidClaimException invalidClaimException = null;
-
             if (actualClaimValue == null) {
-
                 String msg = String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
                         expectedClaimName, expectedClaimValue);
-
-                invalidClaimException = new MissingClaimException(header, claims, msg);
-
+                throw new MissingClaimException(header, claims, expectedClaimName, expectedClaimValue, msg);
             } else if (!expectedClaimValue.equals(actualClaimValue)) {
-
                 String msg = String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
                         expectedClaimName, expectedClaimValue, actualClaimValue);
-
-                invalidClaimException = new IncorrectClaimException(header, claims, msg);
-            }
-
-            if (invalidClaimException != null) {
-                invalidClaimException.setClaimName(expectedClaimName);
-                invalidClaimException.setClaimValue(expectedClaimValue);
-                throw invalidClaimException;
+                throw new IncorrectClaimException(header, claims, expectedClaimName, expectedClaimValue, msg);
             }
         }
     }

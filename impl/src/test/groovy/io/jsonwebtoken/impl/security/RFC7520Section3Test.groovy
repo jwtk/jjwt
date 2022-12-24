@@ -113,7 +113,7 @@ class RFC7520Section3Test {
                 SsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"
         }''')
 
-        EcPublicJwk jwk = Jwks.parserBuilder().build().parse(jwkString) as EcPublicJwk
+        EcPublicJwk jwk = Jwks.parser().build().parse(jwkString) as EcPublicJwk
         assertEquals 'EC', jwk.getType()
         assertEquals 'sig', jwk.getPublicKeyUse()
         assertEquals 'bilbo.baggins@hobbiton.example', jwk.getId()
@@ -123,7 +123,7 @@ class RFC7520Section3Test {
 
     @Test
     void testSection3_2() { // EC Private Key
-        EcPrivateJwk jwk = Jwks.parserBuilder().build().parse(FIGURE_2) as EcPrivateJwk
+        EcPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_2) as EcPrivateJwk
         assertEquals 'EC', jwk.getType()
         assertEquals 'sig', jwk.getPublicKeyUse()
         assertEquals 'bilbo.baggins@hobbiton.example', jwk.getId()
@@ -148,7 +148,7 @@ class RFC7520Section3Test {
           "e": "AQAB"
         }''')
 
-        RsaPublicJwk jwk = Jwks.parserBuilder().build().parse(s) as RsaPublicJwk
+        RsaPublicJwk jwk = Jwks.parser().build().parse(s) as RsaPublicJwk
         assertEquals 'RSA', jwk.getType()
         assertEquals 'sig', jwk.getPublicKeyUse()
         assertEquals 'bilbo.baggins@hobbiton.example', jwk.getId()
@@ -158,7 +158,7 @@ class RFC7520Section3Test {
 
     @Test
     void testSection3_4() { // RSA Private Key
-        RsaPrivateJwk jwk = Jwks.parserBuilder().build().parse(FIGURE_4) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_4) as RsaPrivateJwk
         assertEquals 'RSA', jwk.getType()
         assertEquals 'sig', jwk.getPublicKeyUse()
         assertEquals 'bilbo.baggins@hobbiton.example', jwk.getId()
@@ -169,7 +169,7 @@ class RFC7520Section3Test {
 
     @Test
     void testSection3_5() { // Symmetric Key (MAC)
-        SecretJwk jwk = Jwks.parserBuilder().build().parse(FIGURE_5) as SecretJwk
+        SecretJwk jwk = Jwks.parser().build().parse(FIGURE_5) as SecretJwk
         assertEquals 'oct', jwk.getType()
         assertEquals '018c0ae5-4d9b-471b-bfd6-eef314bc7037', jwk.getId()
         assertEquals 'sig', jwk.get('use')
@@ -180,7 +180,7 @@ class RFC7520Section3Test {
 
     @Test
     void testSection3_6() { // Symmetric Key (Encryption)
-        SecretJwk jwk = Jwks.parserBuilder().build().parse(FIGURE_6) as SecretJwk
+        SecretJwk jwk = Jwks.parser().build().parse(FIGURE_6) as SecretJwk
         assertEquals 'oct', jwk.getType()
         assertEquals '1e571774-2e08-40da-8308-e8d68773842d', jwk.getId()
         assertEquals 'enc', jwk.get('use')

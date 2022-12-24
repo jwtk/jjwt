@@ -722,7 +722,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * all standard content encryption algorithms defined in the JWA specification.</p>
      *
      * <p>This method is a convenience method that delegates to
-     * {@link #encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(enc, key, KeyAlgorithm)}
+     * {@link #encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(Key, KeyAlgorithm, AeadAlgorithm)}
      * based on the {@code key} argument:</p>
      * <ul>
      *     <li>If the provided {@code key} is a {@link Password Password} instance,

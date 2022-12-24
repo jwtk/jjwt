@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * A builder to construct a {@link JwkParser}.  Example usage:
  * <blockquote><pre>
- * Jwk&lt;?&gt; jwk = Jwks.parserBuilder()
+ * Jwk&lt;?&gt; jwk = Jwks.parser()
  *         .setProvider(aJcaProvider)         // optional
  *         .deserializeJsonWith(deserializer) // optional
  *         .build()

@@ -712,7 +712,7 @@ String jwt = Jwts.builder()                     // (1)
     //.setContent(aByteArray, "text/plain")     //     any byte[] content, with media type
         
     .signWith(signingKey)                       // (3) if signing, or
-    //.encryptWith(encryptionAlg, keyAlg, key)  //     if encrypting
+    //.encryptWith(key, keyAlg, encryptionAlg)  //     if encrypting
         
     .compact();                                 // (4)
 ```
@@ -1921,7 +1921,7 @@ You create an encrypted JWT (called a 'JWE') as follows:
 
 1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
 2. Call `JwtBuilder` methods to add [header](#jws-create-header) parameters and [claims](#jws-create-claims) as desired.
-3. Call the `encryptWith` method, specifying the Encryption Algorithm, Key Algorithm, and Key you want to use.
+3. Call the `encryptWith` method, specifying the Key, Key Algorithm, and Encryption Algorithm you want to use.
 4. Finally, call the `compact()` method to compact and encrypt, producing the final jwe.
 
 For example:
@@ -1931,7 +1931,7 @@ String jwe = Jwts.builder()                              // (1)
 
     .setSubject("Bob")                                   // (2) 
 
-    .encryptWith(encryptionAlgorithm, key, keyAlgorithm) // (3)
+    .encryptWith(key, keyAlgorithm, encryptionAlgorithm) // (3)
      
     .compact();                                          // (4)
 ```
@@ -2117,10 +2117,10 @@ String keyId = getKeyId(key); //any mechanism you have to associate a key with a
 
 String jws = Jwts.builder()
         
-    .setHeader(Jwts.headerBuilder().setKeyId(keyId))     // <--- add `kid` header
+    .setHeader(Jwts.headerBuilder().setKeyId(keyId)) // <--- add `kid` header
     
-    .signWith(key)                                       // for JWS
-    //.encryptWith(encryptionAlg, keyManagementAlg, key) // for JWE
+    .signWith(key)                                   // for JWS
+    //.encryptWith(key, keyAlg, encryptionAlg)       // for JWE
     .compact();
 ```
 

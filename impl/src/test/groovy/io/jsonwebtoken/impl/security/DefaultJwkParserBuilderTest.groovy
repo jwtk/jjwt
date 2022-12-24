@@ -28,7 +28,7 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testDefault() {
-        def builder = Jwks.parserBuilder() as DefaultJwkParserBuilder
+        def builder = Jwks.parser() as DefaultJwkParserBuilder
         assertNotNull builder
         assertNull builder.provider
         assertNull builder.deserializer
@@ -40,14 +40,14 @@ class DefaultJwkParserBuilderTest {
     @Test
     void testProvider() {
         def provider = createMock(Provider)
-        def parser = Jwks.parserBuilder().setProvider(provider).build() as DefaultJwkParser
+        def parser = Jwks.parser().setProvider(provider).build() as DefaultJwkParser
         assertSame provider, parser.provider
     }
 
     @Test
     void testDeserializer() {
         def deserializer = createMock(Deserializer)
-        def parser = Jwks.parserBuilder().deserializeJsonWith(deserializer).build() as DefaultJwkParser
+        def parser = Jwks.parser().deserializeJsonWith(deserializer).build() as DefaultJwkParser
         assertSame deserializer, parser.deserializer
     }
 }

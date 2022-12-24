@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.JwkParserBuilder;
 import java.security.Provider;
 import java.util.Map;
 
-@SuppressWarnings("unused") //used via reflection by Jwks.parserBuilder()
+@SuppressWarnings("unused") //used via reflection by Jwks.parser()
 public class DefaultJwkParserBuilder implements JwkParserBuilder {
 
     private Provider provider;
