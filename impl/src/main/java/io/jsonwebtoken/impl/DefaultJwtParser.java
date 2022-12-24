@@ -44,6 +44,7 @@ import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;

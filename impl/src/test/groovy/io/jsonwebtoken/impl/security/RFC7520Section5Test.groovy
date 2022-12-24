@@ -618,7 +618,7 @@ class RFC7520Section5Test {
         def RFC_EPK = Jwks.parserBuilder().build().parse(FIGURE_111) as EcPrivateJwk
         def alg = new EcdhKeyAlgorithm(wrapAlg) {
             @Override
-            protected KeyPair generateKeyPair(KeyRequest request, ECParameterSpec spec) {
+            protected KeyPair generateKeyPair(Request request, ECParameterSpec spec) {
                 return new KeyPair(RFC_EPK.toPublicJwk().toKey(), RFC_EPK.toKey()) // ensure RFC value
             }
         }

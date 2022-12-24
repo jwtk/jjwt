@@ -3,9 +3,9 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
+import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.RsaKeyAlgorithm;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.Cipher;
@@ -18,7 +18,7 @@ import java.security.spec.AlgorithmParameterSpec;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements RsaKeyAlgorithm {
+public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey, PrivateKey> {
 
     private final AlgorithmParameterSpec SPEC; //can be null
 

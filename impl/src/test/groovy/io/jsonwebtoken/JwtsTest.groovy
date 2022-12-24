@@ -1398,7 +1398,7 @@ class JwtsTest {
         def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
         def algs = KeyAlgorithms.values().findAll({ it ->
-            it instanceof RsaKeyAlgorithm
+            it instanceof DefaultRsaKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
         for (KeyPair pair : pairs) {
@@ -1433,7 +1433,7 @@ class JwtsTest {
         def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
         def algs = KeyAlgorithms.values().findAll({ it ->
-            it instanceof EcKeyAlgorithm
+            it.getId().startsWith("ECDH-ES")
         })
 
         for (KeyPair pair : pairs) {

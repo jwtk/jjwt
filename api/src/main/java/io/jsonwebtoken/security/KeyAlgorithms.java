@@ -20,6 +20,8 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collection;
 
 /**
@@ -31,7 +33,6 @@ import java.util.Collection;
  * @see #forId(String)
  * @since JJWT_RELEASE_VERSION
  */
-@SuppressWarnings("rawtypes")
 public final class KeyAlgorithms {
 
     //prevent instantiation
@@ -429,7 +430,7 @@ public final class KeyAlgorithms {
     /**
      * Key Encryption with {@code RSAES-PKCS1-v1_5}, as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.2">RFC 7518 (JWA), Section 4.2</a>.
-     * This algorithm requires a 2048-bit key.
+     * This algorithm requires a key size of 2048 bits or larger.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -449,12 +450,12 @@ public final class KeyAlgorithms {
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
      * </ol>
      */
-    public static final RsaKeyAlgorithm RSA1_5 = forId0("RSA1_5");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = forId0("RSA1_5");
 
     /**
      * Key Encryption with {@code RSAES OAEP using default parameters}, as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.3">RFC 7518 (JWA), Section 4.3</a>.
-     * This algorithm requires a 2048-bit key.
+     * This algorithm requires a key size of 2048 bits or larger.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -474,12 +475,12 @@ public final class KeyAlgorithms {
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
      * </ol>
      */
-    public static final RsaKeyAlgorithm RSA_OAEP = forId0("RSA-OAEP");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = forId0("RSA-OAEP");
 
     /**
      * Key Encryption with {@code RSAES OAEP using SHA-256 and MGF1 with SHA-256}, as defined by
      * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.3">RFC 7518 (JWA), Section 4.3</a>.
-     * This algorithm requires a 2048-bit key.
+     * This algorithm requires a key size of 2048 bits or larger.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -499,11 +500,11 @@ public final class KeyAlgorithms {
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
      * </ol>
      */
-    public static final RsaKeyAlgorithm RSA_OAEP_256 = forId0("RSA-OAEP-256");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = forId0("RSA-OAEP-256");
 
     /**
      * Key Agreement with {@code ECDH-ES using Concat KDF} as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC J518 (JW), Section 4.6</a>.
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -540,12 +541,12 @@ public final class KeyAlgorithms {
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final EcKeyAlgorithm ECDH_ES = forId0("ECDH-ES");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = forId0("ECDH-ES");
 
     /**
      * Key Agreement with Key Wrapping via
      * <code>ECDH-ES using Concat KDF and CEK wrapped with &quot;A128KW&quot;</code> as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC J518 (JW), Section 4.6</a>.
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -588,12 +589,12 @@ public final class KeyAlgorithms {
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final EcKeyAlgorithm ECDH_ES_A128KW = forId0("ECDH-ES+A128KW");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = forId0("ECDH-ES+A128KW");
 
     /**
      * Key Agreement with Key Wrapping via
      * <code>ECDH-ES using Concat KDF and CEK wrapped with &quot;A192KW&quot;</code> as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC J518 (JW), Section 4.6</a>.
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -637,12 +638,12 @@ public final class KeyAlgorithms {
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final EcKeyAlgorithm ECDH_ES_A192KW = forId0("ECDH-ES+A192KW");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = forId0("ECDH-ES+A192KW");
 
     /**
      * Key Agreement with Key Wrapping via
      * <code>ECDH-ES using Concat KDF and CEK wrapped with &quot;A256KW&quot;</code> as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC J518 (JW), Section 4.6</a>.
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -686,7 +687,7 @@ public final class KeyAlgorithms {
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public static final EcKeyAlgorithm ECDH_ES_A256KW = forId0("ECDH-ES+A256KW");
+    public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = forId0("ECDH-ES+A256KW");
 
     /*
     public static int estimateIterations(KeyAlgorithm<Password, Password> alg, long desiredMillis) {

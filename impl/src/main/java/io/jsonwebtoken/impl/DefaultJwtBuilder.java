@@ -189,7 +189,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public <K extends Key> JwtBuilder signWith(K key, final SignatureAlgorithm<K, ?> alg) throws InvalidKeyException {
+    public <K extends Key> JwtBuilder signWith(K key, final SignatureAlgorithm<? super K, ?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
@@ -251,7 +251,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public <K extends Key> JwtBuilder encryptWith(final AeadAlgorithm enc, final K key, final KeyAlgorithm<K, ?> keyAlg) {
+    public <K extends Key> JwtBuilder encryptWith(final AeadAlgorithm enc, final K key, final KeyAlgorithm<? super K, ?> keyAlg) {
         this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
         final String encId = Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
         this.encFunction = wrap(new Function<AeadRequest, AeadResult>() {

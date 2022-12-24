@@ -10,7 +10,11 @@ public final class Conditions {
     private Conditions() {
     }
 
-    public static final Condition TRUE = new TrueCondition();
+    public static final Condition TRUE = of(true);
+
+    public static Condition of(boolean val) {
+        return new BooleanCondition(val);
+    }
 
     public static Condition not(Condition c) {
         return new NotCondition(c);
@@ -38,10 +42,16 @@ public final class Conditions {
         }
     }
 
-    private static final class TrueCondition implements Condition {
+    private static final class BooleanCondition implements Condition {
+        private final boolean value;
+
+        public BooleanCondition(boolean value) {
+            this.value = value;
+        }
+
         @Override
         public boolean test() {
-            return true;
+            return value;
         }
     }
 

@@ -91,7 +91,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
 
     @Override
     public KeyPairBuilder keyPairBuilder() {
-        return new DefaultKeyPairBuilder("EC", this.KEY_PAIR_GEN_PARAMS)
+        return new DefaultKeyPairBuilder(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, this.KEY_PAIR_GEN_PARAMS)
                 .setProvider(getProvider())
                 .setRandom(Randoms.secureRandom());
     }

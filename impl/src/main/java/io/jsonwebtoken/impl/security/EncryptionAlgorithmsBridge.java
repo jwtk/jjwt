@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.IdRegistry;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;

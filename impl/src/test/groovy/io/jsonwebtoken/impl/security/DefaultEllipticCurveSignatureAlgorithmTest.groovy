@@ -31,7 +31,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         try {
             new DefaultEllipticCurveSignatureAlgorithm(128)
         } catch (IllegalArgumentException iae) {
-            String msg = 'orderBitLength must equal 256, 384, or 512.'
+            String msg = 'orderBitLength must equal 256, 384, or 521.'
             assertEquals msg, iae.getMessage()
         }
     }

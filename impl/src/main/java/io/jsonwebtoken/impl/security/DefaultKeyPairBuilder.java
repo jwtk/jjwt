@@ -16,6 +16,12 @@ public class DefaultKeyPairBuilder implements KeyPairBuilder {
     private Provider provider;
     private SecureRandom random;
 
+    public DefaultKeyPairBuilder(String jcaName) {
+        this.jcaName = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
+        this.bitLength = 0;
+        this.params = null;
+    }
+
     public DefaultKeyPairBuilder(String jcaName, int bitLength) {
         this.jcaName = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
         this.bitLength = Assert.gt(bitLength, 0, "bitLength must be a positive integer greater than 0");
@@ -33,8 +39,10 @@ public class DefaultKeyPairBuilder implements KeyPairBuilder {
         JcaTemplate template = new JcaTemplate(this.jcaName, this.provider, this.random);
         if (this.params != null) {
             return template.generateKeyPair(this.params);
-        } else {
+        } else if (this.bitLength > 0) {
             return template.generateKeyPair(this.bitLength);
+        } else {
+            return template.generateKeyPair();
         }
     }
 

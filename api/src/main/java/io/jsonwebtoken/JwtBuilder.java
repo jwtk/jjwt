@@ -135,7 +135,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @see #setContent(byte[])
      * @see #setContent(byte[], String)
      * @deprecated since JJWT_RELEASE VERSION in favor of {@link #setContent(byte[])} or {@link #setContent(byte[], String)}
-     * because both Claims and Content are technically 'payloads', so this method name is misleading.
+     * because both Claims and Content are technically 'payloads', so this method name is misleading.  This method will
+     * be removed before the 1.0 release.
      */
     @Deprecated
     JwtBuilder setPayload(String payload);
@@ -706,7 +707,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @see #signWith(Key)
      * @since JJWT_RELEASE_VERSION
      */
-    <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SignatureAlgorithm<K, ?> alg) throws InvalidKeyException;
+    <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SignatureAlgorithm<? super K, ?> alg) throws InvalidKeyException;
 
     /**
      * Encrypts the constructed JWT with the specified {@code enc}ryption algorithm using the provided
@@ -754,7 +755,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
      * @return the JWE builder for method chaining.
      */
-    <K extends Key> JwtBuilder encryptWith(AeadAlgorithm enc, K key, KeyAlgorithm<K, ?> keyAlg);
+    <K extends Key> JwtBuilder encryptWith(AeadAlgorithm enc, K key, KeyAlgorithm<? super K, ?> keyAlg);
 
     /**
      * Compresses the JWT payload using the specified {@link CompressionCodec}.

@@ -47,6 +47,15 @@ public class JcaTemplate {
         });
     }
 
+    public KeyPair generateKeyPair() {
+        return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
+            @Override
+            public KeyPair apply(KeyPairGenerator gen) {
+                return gen.generateKeyPair();
+            }
+        });
+    }
+
     public KeyPair generateKeyPair(final int keyBitLength) {
         return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
             @Override
@@ -134,8 +143,8 @@ public class JcaTemplate {
 
         protected T doGetInstance() {
             return provider != null ?
-                Classes.<T>invokeStatic(clazz, METHOD_NAME, PROVIDER_ARGS, jcaName, provider) :
-                Classes.<T>invokeStatic(clazz, METHOD_NAME, NAME_ARGS, jcaName);
+                    Classes.<T>invokeStatic(clazz, METHOD_NAME, PROVIDER_ARGS, jcaName, provider) :
+                    Classes.<T>invokeStatic(clazz, METHOD_NAME, NAME_ARGS, jcaName);
         }
     }
 }

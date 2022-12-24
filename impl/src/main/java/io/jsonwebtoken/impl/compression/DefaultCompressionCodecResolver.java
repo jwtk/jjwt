@@ -21,7 +21,7 @@ import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Locator;
-import io.jsonwebtoken.impl.IdRegistry;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.lang.Assert;

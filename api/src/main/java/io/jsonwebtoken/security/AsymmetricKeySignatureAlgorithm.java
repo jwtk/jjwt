@@ -39,5 +39,5 @@ import java.security.PublicKey;
  * @since JJWT_RELEASE_VERSION
  */
 public interface AsymmetricKeySignatureAlgorithm
-        extends SignatureAlgorithm<PrivateKey, PublicKey>, KeyPairBuilderSupplier<PublicKey, PrivateKey> {
+        extends SignatureAlgorithm<PrivateKey, PublicKey>, KeyPairBuilderSupplier {
 }

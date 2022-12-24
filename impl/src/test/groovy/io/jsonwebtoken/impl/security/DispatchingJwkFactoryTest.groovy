@@ -40,7 +40,7 @@ class DispatchingJwkFactoryTest {
 
     @Test(expected = UnsupportedKeyException)
     void testUnknownKtyValue() {
-        def ctx = new DefaultJwkContext();
+        def ctx = new DefaultJwkContext()
         ctx.put('kty', 'foo')
         new DispatchingJwkFactory().createJwk(ctx)
     }

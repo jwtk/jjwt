@@ -98,7 +98,7 @@ class RFC7518AppendixCTest {
 
             //ensure keypair reflects required RFC test value:
             @Override
-            protected KeyPair generateKeyPair(KeyRequest request, ECParameterSpec spec) {
+            protected KeyPair generateKeyPair(Request request, ECParameterSpec spec) {
                 return aliceJwk.toKeyPair().toJavaKeyPair()
             }
 

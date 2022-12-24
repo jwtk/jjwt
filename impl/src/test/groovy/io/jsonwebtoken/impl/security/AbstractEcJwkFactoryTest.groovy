@@ -29,7 +29,7 @@ class AbstractEcJwkFactoryTest {
 
     @Test
     void testUnsupportedCurve() {
-        EllipticCurve curve = AbstractEcJwkFactory.getJcaParameterSpec('secp128r1').getCurve()
+        def curve = new EllipticCurve(new TestECField(fieldSize: 1), BigInteger.ONE, BigInteger.TEN)
         try {
             AbstractEcJwkFactory.getJwaIdByCurve(curve)
             fail()

@@ -7,61 +7,31 @@ import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
-import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldFp;
-import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> extends AbstractFamilyJwkFactory<K, J> {
 
     private static final BigInteger TWO = BigInteger.valueOf(2);
     private static final BigInteger THREE = BigInteger.valueOf(3);
-    private static final Map<String, ECParameterSpec> EC_SPECS_BY_JWA_ID;
-    private static final Map<EllipticCurve, String> JWA_IDS_BY_CURVE;
     private static final String UNSUPPORTED_CURVE_MSG = "The specified ECKey curve does not match a JWA standard curve id.";
 
-    private static ECParameterSpec getJcaParameterSpec(final String jcaAlgorithmName) throws IllegalStateException {
-        JcaTemplate template = new JcaTemplate("EC", null);
-        return template.execute(AlgorithmParameters.class, new CheckedFunction<AlgorithmParameters, ECParameterSpec>() {
-            @Override
-            public ECParameterSpec apply(AlgorithmParameters params) throws Exception {
-                params.init(new ECGenParameterSpec(jcaAlgorithmName));
-                return params.getParameterSpec(ECParameterSpec.class);
-            }
-        });
-    }
-
-    static {
-        EC_SPECS_BY_JWA_ID = new LinkedHashMap<>();
-        JWA_IDS_BY_CURVE = new LinkedHashMap<>();
-
-        // P-256 <--> secp256r1
-        // P-384 <--> secp384r1
-        // P-521 <--> secp521r1  (yes, this is supposed to be 521 and not 512)
-        int[] sizes = new int[]{256, 384, 521};
-
-        for (int i : sizes) {
-            final String jwaId = "P-" + i;
-            final String jcaId = "secp" + i + "r1";
-            ECParameterSpec spec = getJcaParameterSpec(jcaId);
-            EC_SPECS_BY_JWA_ID.put(jwaId, spec);
-            JWA_IDS_BY_CURVE.put(spec.getCurve(), jwaId);
-        }
-    }
-
     protected static ECParameterSpec getCurveByJwaId(String jwaCurveId) {
-        ECParameterSpec spec = EC_SPECS_BY_JWA_ID.get(jwaCurveId);
+        ECParameterSpec spec = null;
+        Curve curve = Curves.findById(jwaCurveId);
+        if (curve instanceof ECCurve) {
+            ECCurve ecCurve = (ECCurve) curve;
+            spec = ecCurve.toParameterSpec();
+        }
         if (spec == null) {
             String msg = "Unrecognized JWA curve id '" + jwaCurveId + "'";
             throw new UnsupportedKeyException(msg);
@@ -70,11 +40,11 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
     }
 
     protected static String getJwaIdByCurve(EllipticCurve curve) {
-        String jwaCurveId = JWA_IDS_BY_CURVE.get(curve);
-        if (jwaCurveId == null) {
+        ECCurve c = Curves.findBy(curve);
+        if (c == null) {
             throw new UnsupportedKeyException(UNSUPPORTED_CURVE_MSG);
         }
-        return jwaCurveId;
+        return c.getId();
     }
 
     /**
@@ -83,7 +53,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
      *
      * @param fieldSize  EC field size
      * @param coordinate EC point coordinate (e.g. x or y)
-     * @return A base64Url-encoded String representing the EC field per the RFC format
+     * @return A base64Url-encoded String representing the EC field element per the RFC format
      */
     // Algorithm defined in http://www.secg.org/sec1-v2.pdf Section 2.3.5
     static String toOctetString(int fieldSize, BigInteger coordinate) {

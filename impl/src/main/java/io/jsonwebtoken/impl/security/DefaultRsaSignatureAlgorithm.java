@@ -19,7 +19,9 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-// @since JJWT_RELEASE_VERSION
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 public class DefaultRsaSignatureAlgorithm extends AbstractSignatureAlgorithm<PrivateKey, PublicKey>
         implements AsymmetricKeySignatureAlgorithm {
 
