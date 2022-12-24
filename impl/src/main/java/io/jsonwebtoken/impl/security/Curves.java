@@ -19,14 +19,14 @@ public final class Curves {
     public static final Curve P_256 = new ECCurve("P-256", "secp256r1"); // JDK standard
     public static final Curve P_384 = new ECCurve("P-384", "secp384r1"); // JDK standard
     public static final Curve P_521 = new ECCurve("P-521", "secp521r1"); // JDK standard
-    public static final Curve X25519 = edwards("X25519"); // >= JDK 11
-    public static final Curve X448 = edwards("X448"); // >= JDK 11
-    public static final Curve Ed25519 = edwards("Ed25519"); // >= JDK 15
-    public static final Curve Ed448 = edwards("Ed448"); // >= JDK 15
+    public static final Curve X25519 = edwards("X25519"); // >= JDK 11 or BC is needed
+    public static final Curve X448 = edwards("X448"); // >= JDK 11 or BC is needed
+    public static final Curve Ed25519 = edwards("Ed25519"); // >= JDK 15 or BC is needed
+    public static final Curve Ed448 = edwards("Ed448"); // >= JDK 15 or BC is needed
 
     private static Curve edwards(final String name) {
         return new DefaultCurve(name, name, // JWT ID and JCA name happen to be identical
-                // fall back to BouncyCastle if >= JDK 11 or 15 if necessary:
+                // fall back to BouncyCastle if >= JDK 11 (for XDH curves) or 15 (for EdDSA curves) if necessary:
                 Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<KeyPairGenerator>() {
                             @Override
                             public KeyPairGenerator get() throws Exception {

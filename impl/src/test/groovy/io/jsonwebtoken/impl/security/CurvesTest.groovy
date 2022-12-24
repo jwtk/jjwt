@@ -3,6 +3,7 @@ package io.jsonwebtoken.impl.security
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
 class CurvesTest {
 
@@ -39,9 +40,20 @@ class CurvesTest {
             if (it instanceof ECCurve) {
                 assertEquals ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, pair.getPublic().getAlgorithm()
                 assertEquals ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, pair.getPrivate().getAlgorithm()
-            } else {
-                assertEquals it.getJcaName(), pair.getPublic().getAlgorithm()
-                assertEquals it.getJcaName(), pair.getPrivate().getAlgorithm()
+            } else { // edwards curve
+                String jcaName = it.getJcaName()
+                String pubAlg = pair.getPublic().getAlgorithm()
+                String privAlg = pair.getPrivate().getAlgorithm()
+
+                if (jcaName.startsWith('X')) { // X*** curves
+                    //BC will retain exact alg, OpenJDK >= 11 will use 'XDH' instead, both are valid:
+                    assertTrue(pubAlg.equals(jcaName) || pubAlg.equals('XDH'))
+                    assertTrue(privAlg.equals(jcaName) || privAlg.equals('XDH'))
+                } else { // Ed*** curves
+                    //BC will retain exact alg, OpenJDK >= 15 will use 'EdDSA' instead, both are valid:
+                    assertTrue(pubAlg.equals(jcaName) || pubAlg.equals('EdDSA'))
+                    assertTrue(privAlg.equals(jcaName) || privAlg.equals('EdDSA'))
+                }
             }
         }
     }
