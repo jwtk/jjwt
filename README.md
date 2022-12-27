@@ -2722,6 +2722,8 @@ This is an example showing how to digitally sign a JWT using an [HMAC](https://e
 
 Example:
 
+https://github.com/jwtk/jjwt/blob/0ef88912b7a64119f99d58fda26d8cae13b1bc8d/tdjar/src/test/java/io/jsonwebtoken/JavaReadmeTest.java#L20-L33
+
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
 SignatureAlgorithm alg = SignatureAlgorithms.HS256; // or HS384 or HS512
