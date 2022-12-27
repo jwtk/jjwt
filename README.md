@@ -2750,8 +2750,8 @@ In this example, Bob will sign a JWT using his RSA private key, and Alice can ve
 public key:
 
 ```java
-// Create a test key suitable for the desired RSA signature algorithm (PS* variants require JDK 8 or later):
-SignatureAlgorithm alg = SignatureAlgorithms.RS512; // or RS256, RS384, PS256, PS384, or PS512
+// Create a test key suitable for the desired RSA signature algorithm:
+SignatureAlgorithm alg = SignatureAlgorithms.RS512; //or RS256, RS384, PS256, PS384, or PS512
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his RSA private key:
@@ -2773,9 +2773,9 @@ assert "Alice".equals(subject);
 This is an example showing how to digitally sign and verify a JWT using the Elliptic Curve Digital Signature Algorithm.
 The JWT specifications define [3 standard ECDSA signing algorithms](#jws-alg):
 
-* `ES256`: ECDSA on NIST curve "P-256" and SHA-256. This requires an EC Key exactly 256 bits (32 bytes) long.
-* `ES384`: ECDSA on NIST curve "P-384" and SHA-384. This requires an EC Key exactly 384 bits (48 bytes) long.
-* `ES512`: ECDSA on NIST curve "P-521" and SHA-512. This requires an EC Key exactly 521 bits (65 or 66 bytes depending on format) long.
+* `ES256`: ECDSA using P-256 and SHA-256. This requires an EC Key exactly 256 bits (32 bytes) long.
+* `ES384`: ECDSA using P-384 and SHA-384. This requires an EC Key exactly 384 bits (48 bytes) long.
+* `ES512`: ECDSA using P-521 and SHA-512. This requires an EC Key exactly 521 bits (65 or 66 bytes depending on format) long.
 
 In this example, Bob will sign a JWT using his EC private key, and Alice can verify it came from Bob using Bob's EC
 public key:
@@ -2821,7 +2821,7 @@ Example:
 
 ```java
 // Create a test key suitable for the desired payload encryption algorithm:
-AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; // or A128GCM, A192GCM, A128CBC-HS256, A192CBC-HS384, or A256CBC-HS512
+AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A128GCM, A192GCM, A128CBC-HS256, A192CBC-HS384, or A256CBC-HS512
 SecretKey key = enc.keyBuilder().build();
 
 String message = "Live long and prosper.";
@@ -2849,16 +2849,16 @@ decrypt the JWT using her RSA private key:
 
 ```java
 // Create a test KeyPair suitable for the desired RSA key algorithm:
-KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.RSA_OAEP_256; // or RSA_OAEP or RSA1_5
+KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Chooose the Encryption Algorithm to encrypt the payload:
-AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; // or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
 String jwe = Jwts.builder()
     .setAudience("Alice")
-    .encryptWith(pair.getPublic(), alg, enc) <!-- Alice's RSA public key 
+    .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key 
     .compact();
 
 // Alice receives and decrypts the compact JWE:
@@ -2884,11 +2884,11 @@ efficient than the `A*KW` variants.
 
 ```java
 // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-SecretKeyAlgorithm alg = KeyAlgorithms.A256GCMKW; // or A192GCMKW, A128GCMKW, A256KW, A192KW, A128KW
+SecretKeyAlgorithm alg = KeyAlgorithms.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, A192KW, A128KW
 SecretKey key = alg.keyBuilder().build();
 
 // Chooose the Encryption Algorithm used to encrypt the payload:
-AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; // or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
         
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me").encryptWith(key, alg, enc).compact();
@@ -2913,16 +2913,16 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 
 ```java
 // Create a test KeyPair suitable for the desired EC key algorithm:
-KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; // or ECDH_ES_A192KW, ECDH_ES_128KW, or ECDH_ES
+KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //or ECDH_ES_A192KW, ECDH_ES_128KW, or ECDH_ES
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Chooose the Encryption Algorithm to encrypt the payload:
-AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; // or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's EC public key so only she may read it:
 String jwe = Jwts.builder()
     .setAudience("Alice")
-    .encryptWith(pair.getPublic(), alg, enc) <!-- Alice's EC public key
+    .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
     .compact();
 
 // Alice receives and decrypts the compact JWE:
@@ -2957,7 +2957,7 @@ KeyAlgorithm<Password, Password> alg = KeyAlgorithms.PBES2_HS512_A256KW; //or PB
 int pbkdf2Iterations = 120000;        
         
 // Chooose the Encryption Algorithm used to encrypt the payload:
-AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; // or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
         
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me")
