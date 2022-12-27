@@ -31,5 +31,6 @@ public class JavaReadmeTest {
         content = Jwts.parserBuilder().verifyWith(key).build().parseContentJws(jws).getPayload();
 
         assert message.equals(new String(content, StandardCharsets.UTF_8));
+
     }
 }
