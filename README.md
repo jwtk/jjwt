@@ -2927,7 +2927,7 @@ String jwe = Jwts.builder()
 
 // Alice receives and decrypts the compact JWE:
 String audience = Jwts.parserBuilder()
-    .decryptWith(pair.getPrivate()) // <-- Alice's RSA private key
+    .decryptWith(pair.getPrivate()) // <-- Alice's EC private key
     .build().parseClaimsJwe(jwe).getPayload().getAudience();
 
 assert "Alice".equals(audience);
