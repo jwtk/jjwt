@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals
 
 /**
  * Tests successful parsing/decryption of a 'JWE using RSAES-OAEP and AES GCM' as defined in
- * <a href="https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1">RFC 7516, Appendix A.1</a>
+ * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1">RFC 7516, Appendix A.1</a>
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -32,7 +32,7 @@ class RFC7516AppendixA1Test {
         return Decoders.BASE64URL.decode(val)
     }
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1 :
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1 :
     final static String PLAINTEXT = 'The true sign of intelligence is not knowledge but imagination.' as String
     final static byte[] PLAINTEXT_BYTES = [84, 104, 101, 32, 116, 114, 117, 101, 32, 115, 105, 103, 110, 32,
                                            111, 102, 32, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 99,
@@ -40,17 +40,17 @@ class RFC7516AppendixA1Test {
                                            101, 100, 103, 101, 32, 98, 117, 116, 32, 105, 109, 97, 103, 105,
                                            110, 97, 116, 105, 111, 110, 46] as byte[]
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.1 :
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.1 :
     final static String PROT_HEADER_STRING = '{"alg":"RSA-OAEP","enc":"A256GCM"}' as String
     final static String encodedHeader = 'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ' as String
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.2
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.2
     final static byte[] CEK_BYTES = [177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154,
                                      212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
                                      234, 64, 252] as byte[]
     final static SecretKey CEK = new SecretKeySpec(CEK_BYTES, "AES")
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.3
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.3
     final static Map<String, String> KEK_VALUES = [
             "kty": "RSA",
             "n"  : "oahUIoWw0K0usKNuOR6H4wkf4oBUXHTxRvgb48E-BVvxkeDNjbC4he8rUW" +
@@ -109,16 +109,16 @@ class RFC7516AppendixA1Test {
             '1860ppamavo35UgoRdbYaBcoh9QcfylQr66oc6vFWXRcZ_ZT2LawVCWTIy3brGPi' +
             '6UklfCpIMfIjf7iGdXKHzg' as String
 
-    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.4
+    // https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.4
     final static byte[] IV = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219] as byte[]
     final static String encodedIv = '48V1_ALb6US04U3b' as String
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.5
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.5
     final static byte[] AAD_BYTES = [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 83, 85, 48, 69,
                                      116, 84, 48, 70, 70, 85, 67, 73, 115, 73, 109, 86, 117, 89, 121, 73,
                                      54, 73, 107, 69, 121, 78, 84, 90, 72, 81, 48, 48, 105, 102, 81] as byte[]
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.6
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.6
     final static byte[] CIPHERTEXT = [229, 236, 166, 241, 53, 191, 115, 196, 174, 43, 73, 109, 39, 122,
                                       233, 96, 140, 206, 120, 52, 51, 237, 48, 11, 190, 219, 186, 80, 111,
                                       104, 50, 142, 47, 167, 59, 61, 181, 127, 196, 21, 40, 82, 242, 32,
@@ -130,7 +130,7 @@ class RFC7516AppendixA1Test {
     final static byte[] TAG = [92, 80, 104, 49, 133, 25, 161, 215, 173, 101, 219, 211, 136, 91, 210, 145] as byte[]
     final static String encodedTag = 'XFBoMYUZodetZdvTiFvSkQ'
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.7
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1.7
     final static String COMPLETE_JWE = '' +
             'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.' +
             'OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGe' +

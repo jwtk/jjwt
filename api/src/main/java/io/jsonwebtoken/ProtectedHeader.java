@@ -33,16 +33,16 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
 
     /**
      * Returns the {@code jku} (JWK Set URL) value that refers to a
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-5">JWK Set</a>
      * resource containing JSON-encoded Public Keys, or {@code null} if not present.  When present in a
      * {@link JwsHeader}, the first public key in the JWK Set <em>must</em> be the public key complement of the private
      * key used to sign the JWS. When present in a {@link JweHeader}, the first public key in the JWK Set <em>must</em>
      * be the public key used during encryption.
      *
-     * @return a URI that refers to a <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-5">JWK Set</a>
+     * @return a URI that refers to a <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-5">JWK Set</a>
      * resource for a set of JSON-encoded Public Keys, or {@code null} if not present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.2">JWS JWK Set URL</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.4">JWE JWK Set URL</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.2">JWS JWK Set URL</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.4">JWE JWK Set URL</a>
      */
     URI getJwkSetUrl();
 
@@ -53,8 +53,8 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * determine the private key needed to decrypt the JWE.
      *
      * @return the {@code jwk} (JSON Web Key) associated with the header.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.3">JWS {@code jwk} (JSON Web Key) Header Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.5">JWE {@code jwk} (JSON Web Key) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.3">JWS {@code jwk} (JSON Web Key) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.5">JWE {@code jwk} (JSON Web Key) Header Parameter</a>
      */
     PublicJwk<?> getJwk();
 
@@ -68,8 +68,8 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      * <p>When used with a JWK, the keyId value is used to match a JWK {@code keyId} parameter value.</p>
      *
      * @return the case-sensitive {@code kid} header value or {@code null} if not present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4">JWS Key ID</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.6">JWE Key ID</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.4">JWS Key ID</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6">JWE Key ID</a>
      */
     String getKeyId();
 
@@ -79,8 +79,8 @@ public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>
      *
      * @return the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
      * be understood and supported by the JWT recipient, or {@code null} if not present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.11">JWS {@code crit} (Critical) Header Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.13">JWS {@code crit} (Critical) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS {@code crit} (Critical) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS {@code crit} (Critical) Header Parameter</a>
      */
     Set<String> getCritical();
 }

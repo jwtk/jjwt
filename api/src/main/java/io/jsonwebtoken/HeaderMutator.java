@@ -24,7 +24,7 @@ package io.jsonwebtoken;
 public interface HeaderMutator<T extends HeaderMutator<T>> {
 
     /**
-     * Sets the JWT <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-5.1">
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1">
      * <code>typ</code> (Type)</a> header value.  A {@code null} value will remove the property from the JSON map.
      *
      * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
@@ -33,7 +33,7 @@ public interface HeaderMutator<T extends HeaderMutator<T>> {
     T setType(String typ);
 
     /**
-     * Sets the JWT <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10">
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">
      * <code>cty</code> (Content Type)</a> header parameter value.  A {@code null} value will remove the property from
      * the JSON map.
      *

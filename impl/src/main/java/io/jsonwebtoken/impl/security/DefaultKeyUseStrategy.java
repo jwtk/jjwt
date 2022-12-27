@@ -4,7 +4,7 @@ public class DefaultKeyUseStrategy implements KeyUseStrategy {
 
     static final KeyUseStrategy INSTANCE = new DefaultKeyUseStrategy();
 
-    // values from https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
+    // values from https://www.rfc-editor.org/rfc/rfc7517.html#section-4.2
     private static final String SIGNATURE = "sig";
     private static final String ENCRYPTION = "enc";
 

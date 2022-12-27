@@ -31,11 +31,11 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
 
     /**
      * Sets the JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.2">{@code use} (Public Key Use)
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.2">{@code use} (Public Key Use)
      * parameter</a> value. {@code use} values are CaSe-SeNsItIvE.  A {@code null} value will remove the property
      * from the JWK.
      *
-     * <p>The JWK specification <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.2">defines</a> the
+     * <p>The JWK specification <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.2">defines</a> the
      * following {@code use} values:</p>
      *
      * <table>
@@ -68,7 +68,7 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      * <p><b>Public Key Use vs Key Operations</b></p>
      *
      * <p>Per
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">JWK RFC 7517, Section 4.3, last paragraph</a>,
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">JWK RFC 7517, Section 4.3, last paragraph</a>,
      * the {@code use} (Public Key Use) and {@link #setOperations(Set) key_ops (Key Operations)} members
      * <em>SHOULD NOT</em> be used together; however, if both are used, the information they convey <em>MUST</em> be
      * consistent. Applications should specify which of these members they use, if either is to be used by the

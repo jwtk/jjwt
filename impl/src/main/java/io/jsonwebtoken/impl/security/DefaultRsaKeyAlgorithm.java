@@ -54,7 +54,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
                         " bits which is not secure enough for the " + id + " algorithm. " +
                         "The JWT JWA Specification (RFC 7518, Section " + section + ") states that RSA keys MUST " +
                         "have a size >= " + MIN_KEY_BIT_LENGTH + " bits. See " +
-                        "https://datatracker.ietf.org/doc/html/rfc7518#section-" + section + " for more information.";
+                        "https://www.rfc-editor.org/rfc/rfc7518.html#section-" + section + " for more information.";
                 throw new WeakKeyException(msg);
             }
         }

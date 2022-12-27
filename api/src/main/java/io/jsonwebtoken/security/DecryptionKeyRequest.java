@@ -26,9 +26,9 @@ import java.security.Key;
  * never {@code null}.</p>
  *
  * <p>Any encrypted key material (what the JWE specification calls the
- * <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-2">JWE Encrypted Key</a>) will
+ * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">JWE Encrypted Key</a>) will
  * be accessible via {@link #getContent()}. If present, the {@link KeyAlgorithm} will decrypt it to obtain the resulting
- * <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-2">Content Encryption Key (CEK)</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">Content Encryption Key (CEK)</a>.
  * This may be empty however depending on which {@link KeyAlgorithm} was used during JWE encryption.</p>
  *
  * <p>Finally, any public information necessary by the called {@link KeyAlgorithm} to decrypt any

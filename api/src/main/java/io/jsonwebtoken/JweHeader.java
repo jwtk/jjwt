@@ -53,7 +53,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
     String getEncryptionAlgorithm();
 
     /**
-     * Returns the <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">{@code epk} (Ephemeral
+     * Returns the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">{@code epk} (Ephemeral
      * Public Key)</a> header value created by the JWE originator for use with key agreement algorithms, or
      * {@code null} if not present.
      *
@@ -63,7 +63,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * method. The ECDH-ES {@code KeyAlgorithm} implementation will then set this {@code epk} header value
      * automatically when producing the encryption key.</p>
      *
-     * @return the <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">{@code epk} (Ephemeral
+     * @return the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">{@code epk} (Ephemeral
      * Public Key)</a> header value created by the JWE originator for use with key agreement algorithms, or
      * {@code null} if not present.
      * @see KeyAlgorithms#ECDH_ES
@@ -79,7 +79,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * @return any information about the JWE producer for use with key agreement algorithms, or {@code null} if not
      * present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
      * @see KeyAlgorithms#ECDH_ES
      * @see KeyAlgorithms#ECDH_ES_A128KW
      * @see KeyAlgorithms#ECDH_ES_A192KW
@@ -93,7 +93,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * @return any information about the JWE recipient for use with key agreement algorithms, or {@code null} if not
      * present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
      * @see KeyAlgorithms#ECDH_ES
      * @see KeyAlgorithms#ECDH_ES_A128KW
      * @see KeyAlgorithms#ECDH_ES_A192KW
@@ -102,7 +102,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
     byte[] getAgreementPartyVInfo();
 
     /**
-     * Returns the 96-bit <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     * Returns the 96-bit <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      * (Initialization Vector)</a> generated during key encryption, or {@code null} if not present.
      * Set by AES GCM {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} implementations.
      *
@@ -120,7 +120,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
     byte[] getInitializationVector();
 
     /**
-     * Returns the 128-bit <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     * Returns the 128-bit <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      * (Authentication Tag)</a> resulting from key encryption, or {@code null} if not present.
      *
      * <p>Note that there is no corresponding 'setter' method for this 'getter' because JJWT users set this value by
@@ -142,7 +142,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * @return the number of PBKDF2 iterations necessary to derive the key used during JWE encryption, or {@code null}
      * if not present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">JWE <code>p2c</code> (PBES2 Count) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">JWE <code>p2c</code> (PBES2 Count) Header Parameter</a>
      * @see KeyAlgorithms#PBES2_HS256_A128KW
      * @see KeyAlgorithms#PBES2_HS384_A192KW
      * @see KeyAlgorithms#PBES2_HS512_A256KW
@@ -161,7 +161,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      *
      * @return the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption, or
      * {@code null} if not present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
      * @see KeyAlgorithms#PBES2_HS256_A128KW
      * @see KeyAlgorithms#PBES2_HS384_A192KW
      * @see KeyAlgorithms#PBES2_HS512_A256KW

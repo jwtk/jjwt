@@ -22,7 +22,7 @@ import java.util.Collection;
 
 /**
  * Constant definitions and utility methods for all
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>.
  *
  * @see AeadAlgorithm
  * @see #values()
@@ -51,14 +51,14 @@ public final class EncryptionAlgorithms {
 
     /**
      * Returns the JWE Encryption Algorithm with the specified
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">{@code enc} algorithm identifier</a> or
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">{@code enc} algorithm identifier</a> or
      * {@code null} if a JWE-standard algorithm for the specified {@code id} cannot be found.  If a JWE-standard
      * instance must be resolved, consider using the {@link #forId(String)} method instead.
      *
      * @param id a JWE standard {@code enc} algorithm identifier
      * @return the associated standard Encryption Algorithm instance or {@code null} otherwise.
      * @see #forId(String)
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">RFC 7518, Section 5.1</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">RFC 7518, Section 5.1</a>
      */
     public static AeadAlgorithm findById(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
@@ -67,7 +67,7 @@ public final class EncryptionAlgorithms {
 
     /**
      * Returns the JWE Encryption Algorithm with the specified
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">{@code enc} algorithm identifier</a> or
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">{@code enc} algorithm identifier</a> or
      * throws an {@link IllegalArgumentException} if there is no JWE-standard algorithm for the specified
      * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link #findById(String)}
      * method instead.
@@ -76,7 +76,7 @@ public final class EncryptionAlgorithms {
      * @return the associated Encryption Algorithm instance.
      * @throws IllegalArgumentException if there is no JWE-standard algorithm for the specified identifier.
      * @see #findById(String)
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">RFC 7518, Section 5.1</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">RFC 7518, Section 5.1</a>
      */
     public static AeadAlgorithm forId(String id) throws IllegalArgumentException {
         Assert.hasText(id, "id cannot be null or empty.");

@@ -59,7 +59,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                 RSAPrivateCrtKey.class.getName() + " or " + RSAMultiPrimePrivateCrtKey.class.getName() +
                 " interfaces.  If the specified RSAPrivateKey cannot be one of these two, you must explicitly " +
                 "provide an RSAPublicKey in addition to the RSAPrivateKey, as the " +
-                "[JWA RFC, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) " +
+                "[JWA RFC, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) " +
                 "requires public values to be present in private RSA JWKs.";
         throw new UnsupportedKeyException(msg);
     }
@@ -96,7 +96,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
             rsaPublicKey = derivePublic(ctx);
         }
 
-        // The [JWA Spec](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1)
+        // The [JWA Spec](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.1)
         // requires public values to be present in private JWKs, so add them:
         JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, rsaPublicKey);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
@@ -136,7 +136,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         final BigInteger privateExponent = reader.get(DefaultRsaPrivateJwk.PRIVATE_EXPONENT);
 
-        //The [JWA Spec, Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) requires
+        //The [JWA Spec, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
         JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwkFromValues(pubCtx);

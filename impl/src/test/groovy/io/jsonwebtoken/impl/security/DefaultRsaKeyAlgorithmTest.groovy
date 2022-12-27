@@ -39,7 +39,7 @@ class DefaultRsaKeyAlgorithmTest {
                 String msg = "The RSA encryption key's size (modulus) is 1 bits which is not secure enough for " +
                         "the $id algorithm. The JWT JWA Specification (RFC 7518, Section $section) states that " +
                         "RSA keys MUST have a size >= 2048 bits. " +
-                        "See https://datatracker.ietf.org/doc/html/rfc7518#section-$section for more information."
+                        "See https://www.rfc-editor.org/rfc/rfc7518.html#section-$section for more information."
                 assertEquals(msg, e.getMessage())
             }
             verify(key)
@@ -60,7 +60,7 @@ class DefaultRsaKeyAlgorithmTest {
                 String msg = "The RSA decryption key's size (modulus) is 1 bits which is not secure enough for " +
                         "the $id algorithm. The JWT JWA Specification (RFC 7518, Section $section) states that " +
                         "RSA keys MUST have a size >= 2048 bits. " +
-                        "See https://datatracker.ietf.org/doc/html/rfc7518#section-$section for more information."
+                        "See https://www.rfc-editor.org/rfc/rfc7518.html#section-$section for more information."
                 assertEquals(msg, e.getMessage())
             }
             verify(key)

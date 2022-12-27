@@ -169,7 +169,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>As a convenience, this method will automatically trim any <code><b>application/</b></code> prefix from the
      * {@code cty} string if possible according to the
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10">JWT specification recommendations</a>.</p>
+     * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">JWT specification recommendations</a>.</p>
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
      * method - instead call {@link #setContent(byte[])} and {@link Header#setContentType(String)} independently.</p>

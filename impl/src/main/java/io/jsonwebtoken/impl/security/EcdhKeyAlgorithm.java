@@ -39,7 +39,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
     protected static final String JCA_NAME = "ECDH";
     protected static final String DEFAULT_ID = JCA_NAME + "-ES";
 
-    // Per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2, 2nd paragraph:
+    // Per https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2, 2nd paragraph:
     //    Key derivation is performed using the Concat KDF, as defined in
     //    Section 5.8.1 of [NIST.800-56A](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf),
     //    where the Digest Method is SHA-256.
@@ -91,21 +91,21 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
     private byte[] createOtherInfo(int keydatalen, String AlgorithmID, byte[] PartyUInfo, byte[] PartyVInfo) {
 
-        // https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2 "AlgorithmID":
+        // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2 "AlgorithmID":
         Assert.hasText(AlgorithmID, "AlgorithmId cannot be null or empty.");
         byte[] algIdBytes = AlgorithmID.getBytes(StandardCharsets.US_ASCII);
 
         PartyUInfo = Arrays.length(PartyUInfo) == 0 ? Bytes.EMPTY : PartyUInfo; // ensure not null
         PartyVInfo = Arrays.length(PartyVInfo) == 0 ? Bytes.EMPTY : PartyVInfo; // ensure not null
 
-        // Values and order defined in https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2 and
+        // Values and order defined in https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2 and
         // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf section 5.8.1.2 :
         return Bytes.concat(
                 Bytes.toBytes(algIdBytes.length), algIdBytes, // AlgorithmID
                 Bytes.toBytes(PartyUInfo.length), PartyUInfo, // PartyUInfo
                 Bytes.toBytes(PartyVInfo.length), PartyVInfo, // PartyVInfo
-                Bytes.toBytes(keydatalen),                    // SuppPubInfo per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
-                Bytes.EMPTY                                   // SuppPrivInfo empty per https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
+                Bytes.toBytes(keydatalen),                    // SuppPubInfo per https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2
+                Bytes.EMPTY                                   // SuppPrivInfo empty per https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2
         );
     }
 

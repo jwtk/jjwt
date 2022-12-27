@@ -79,7 +79,7 @@ public interface Header<T extends Header<T>> extends Map<String, Object>, Header
     String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
     /**
-     * Returns the <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-5.1">
+     * Returns the <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1">
      * <code>typ</code> (Type)</a> header value or {@code null} if not present.
      *
      * @return the {@code typ} header value or {@code null} if not present.
@@ -87,7 +87,7 @@ public interface Header<T extends Header<T>> extends Map<String, Object>, Header
     String getType();
 
     /**
-     * Returns the <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10">
+     * Returns the <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">
      * <code>cty</code> (Content Type)</a> header value or {@code null} if not present.
      *
      * <p>The <code>cty</code> (Content Type) Header Parameter is used by applications to declare the

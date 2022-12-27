@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue
 
 /**
  * Tests successful parsing/creation of RFC 7520, Section 3
- * <a href="https://datatracker.ietf.org/doc/html/rfc7520#section-3">JSON Web Key Examples</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7520.html#section-3">JSON Web Key Examples</a>.
  *
  * @since JJWT_RELEASE_VERSION
  */

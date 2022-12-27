@@ -46,7 +46,7 @@ public interface KeyRequest<K extends Key> extends Request, KeySupplier<K> {
     /**
      * Returns the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
      * {@code KeyRequest}.  {@link KeyAlgorithm} implementations that generate an ephemeral {@code SecretKey} to use
-     * as what the <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-2">JWE specification calls</a> a
+     * as what the <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">JWE specification calls</a> a
      * &quot;Content Encryption Key (CEK)&quot; should call the {@code AeadAlgorithm}'s
      * {@link AeadAlgorithm#keyBuilder() keyBuilder()} to obtain a builder that will create a key suitable for that
      * exact {@code AeadAlgorithm}.

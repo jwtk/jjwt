@@ -27,7 +27,7 @@ import java.security.interfaces.RSAPrivateCrtKey
 import static org.junit.Assert.*
 
 /**
- * https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.2
+ * https://www.rfc-editor.org/rfc/rfc7517.html#appendix-A.2
  */
 class RFC7517AppendixA2Test {
 

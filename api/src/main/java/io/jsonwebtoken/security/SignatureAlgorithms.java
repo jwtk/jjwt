@@ -23,7 +23,7 @@ import java.util.Collection;
 
 /**
  * Constant definitions and utility methods for all
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3">JWA (RFC 7518) Signature Algorithms</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">JWA (RFC 7518) Signature Algorithms</a>.
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -53,7 +53,7 @@ public final class SignatureAlgorithms {
      * {@link #forId(String)} instead.
      *
      * @param id a JWA-standard identifier defined in
-     *           <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.1">JWA RFC 7518, Section 3.1</a>
+     *           <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWA RFC 7518, Section 3.1</a>
      *           in the <code>&quot;alg&quot; Param Value</code> column.
      * @return the {@code SignatureAlgorithm} instance with the specified JWA-standard identifier, or
      * {@code null} if no algorithm with that identifier exists.
@@ -70,7 +70,7 @@ public final class SignatureAlgorithms {
      * If a result is not mandatory, consider using {@link #findById(String)} instead.
      *
      * @param id a JWA-standard identifier defined in
-     *           <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.1">JWA RFC 7518, Section 3.1</a>
+     *           <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWA RFC 7518, Section 3.1</a>
      *           in the <code>&quot;alg&quot; Param Value</code> column.
      * @return the {@code SignatureAlgorithm} instance with the specified JWA-standard identifier
      * @throws IllegalArgumentException is {@code id} is not a JWA-standard signature algorithm identifier.
@@ -87,56 +87,56 @@ public final class SignatureAlgorithms {
 
     /**
      * The &quot;none&quot; signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.6">RFC 7518, Section 3.6</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">RFC 7518, Section 3.6</a>.  This algorithm
      * is used only when creating unsecured (not integrity protected) JWSs and is not usable in any other scenario.
      */
     public static final SignatureAlgorithm<Key, Key> NONE = forId0("none");
 
     /**
      * {@code HMAC using SHA-256} message authentication algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
      * requires a 256-bit (32 byte) key.
      */
     public static final SecretKeySignatureAlgorithm HS256 = forId0("HS256");
 
     /**
      * {@code HMAC using SHA-384} message authentication algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
      * requires a 384-bit (48 byte) key.
      */
     public static final SecretKeySignatureAlgorithm HS384 = forId0("HS384");
 
     /**
      * {@code HMAC using SHA-512} message authentication algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
      * requires a 512-bit (64 byte) key.
      */
     public static final SecretKeySignatureAlgorithm HS512 = forId0("HS512");
 
     /**
      * {@code RSASSA-PKCS1-v1_5 using SHA-256} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
      * requires a 2048-bit key.
      */
     public static final AsymmetricKeySignatureAlgorithm RS256 = forId0("RS256");
 
     /**
      * {@code RSASSA-PKCS1-v1_5 using SHA-384} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
      * requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
      */
     public static final AsymmetricKeySignatureAlgorithm RS384 = forId0("RS384");
 
     /**
      * {@code RSASSA-PKCS1-v1_5 using SHA-512} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
      * requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
      */
     public static final AsymmetricKeySignatureAlgorithm RS512 = forId0("RS512");
 
     /**
      * {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
      * This algorithm requires a 2048-bit key.
      *
      * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
@@ -147,7 +147,7 @@ public final class SignatureAlgorithms {
 
     /**
      * {@code RSASSA-PSS using SHA-384 and MGF1 with SHA-384} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
      * This algorithm requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
      *
      * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
@@ -158,7 +158,7 @@ public final class SignatureAlgorithms {
 
     /**
      * {@code RSASSA-PSS using SHA-512 and MGF1 with SHA-512} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
      * This algorithm requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
      *
      * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
@@ -169,21 +169,21 @@ public final class SignatureAlgorithms {
 
     /**
      * {@code ECDSA using P-256 and SHA-256} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
      * requires a 256-bit key.
      */
     public static final AsymmetricKeySignatureAlgorithm ES256 = forId0("ES256");
 
     /**
      * {@code ECDSA using P-384 and SHA-384} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
      * requires a 384-bit key.
      */
     public static final AsymmetricKeySignatureAlgorithm ES384 = forId0("ES384");
 
     /**
      * {@code ECDSA using P-521 and SHA-512} signature algorithm as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
      * requires a 521-bit key.
      */
     public static final AsymmetricKeySignatureAlgorithm ES512 = forId0("ES512");

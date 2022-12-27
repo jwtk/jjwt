@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 /**
- * https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.3
+ * https://www.rfc-editor.org/rfc/rfc7517.html#appendix-A.3
  */
 class RFC7517AppendixA3Test {
 

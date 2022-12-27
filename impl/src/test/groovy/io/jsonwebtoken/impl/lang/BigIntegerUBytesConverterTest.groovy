@@ -34,7 +34,7 @@ class BigIntegerUBytesConverterTest {
     }
 
     /**
-     * Asserts https://datatracker.ietf.org/doc/html/rfc7518#section-2, 'Base64urlUInt' definition, last sentence:
+     * Asserts https://www.rfc-editor.org/rfc/rfc7518.html#section-2, 'Base64urlUInt' definition, last sentence:
      * <pre>Zero is represented as BASE64URL(single zero-valued octet), which is "AA".</pre>
      */
     @Test

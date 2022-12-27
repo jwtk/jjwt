@@ -84,7 +84,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
                 String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
                         "${Bytes.bitsMsg(it.orderBitLength)} per " +
-                        "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
+                        "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)." as String
                 assertEquals msg, expected.getMessage()
             }
         }
@@ -101,7 +101,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
                     "256 bits (32 bytes), but the 'ES384' algorithm requires EC Keys with " +
                     "384 bits (48 bytes) per " +
-                    "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
+                    "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -138,7 +138,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
                 String msg = "The provided Elliptic Curve verification key's size (aka Order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
                         "${Bytes.bitsMsg(it.orderBitLength)} per " +
-                        "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
+                        "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)." as String
                 assertEquals msg, expected.getMessage()
             }
         }
@@ -437,7 +437,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             String msg = "Unable to verify Elliptic Curve signature using provided ECPublicKey: Provided " +
                     "signature is $signedBytesString but ES512 signatures must be exactly 1056 bits (132 bytes) " +
                     "per [RFC 7518, Section 3.4 (validation)]" +
-                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)." as String
+                    "(https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)." as String
             assertEquals msg, expected.getMessage()
         }
     }

@@ -24,12 +24,12 @@ import java.security.Key;
  * <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signatures</a> or
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
  * authentication codes</a> as defined by the
- * <a href="https://datatracker.ietf.org/doc/html/rfc7515">JSON Web Signature (JWS)</a> specification.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7515.html">JSON Web Signature (JWS)</a> specification.
  *
  * <p><b>Standard Implementations</b></p>
  *
  * <p>Constant definitions and utility methods for all standard
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3">JWA (RFC 7518) Signature Algorithms</a> are
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">JWA (RFC 7518) Signature Algorithms</a> are
  * available via the {@link SignatureAlgorithms} utility class.</p>
  *
  * <p><b>&quot;alg&quot; identifier</b></p>

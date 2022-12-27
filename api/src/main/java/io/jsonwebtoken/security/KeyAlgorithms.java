@@ -26,7 +26,7 @@ import java.util.Collection;
 
 /**
  * Constant definitions and utility methods for all
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4">JWA (RFC 7518) Key Management Algorithms</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">JWA (RFC 7518) Key Management Algorithms</a>.
  *
  * @see #values()
  * @see #findById(String)
@@ -46,11 +46,11 @@ public final class KeyAlgorithms {
 
     /**
      * Returns all JWA-standard
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4">Key Management Algorithms</a> as an
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a> as an
      * unmodifiable collection.
      *
      * @return all JWA-standard
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4">Key Management Algorithms</a> as an
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a> as an
      * unmodifiable collection.
      */
     public static Collection<KeyAlgorithm<?, ?>> values() {
@@ -59,13 +59,13 @@ public final class KeyAlgorithms {
 
     /**
      * Returns the JWE Key Management Algorithm with the specified
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">{@code alg} key algorithm identifier</a> or
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">{@code alg} key algorithm identifier</a> or
      * {@code null} if an algorithm for the specified {@code id} cannot be found.  If a JWA-standard
      * instance must be resolved, consider using the {@link #forId(String)} method instead.
      *
      * @param id a JWA standard {@code alg} key algorithm identifier
      * @return the associated KeyAlgorithm instance or {@code null} otherwise.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC 7518, Section 4.1</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">RFC 7518, Section 4.1</a>
      * @see #forId(String)
      */
     public static KeyAlgorithm<?, ?> findById(String id) {
@@ -75,7 +75,7 @@ public final class KeyAlgorithms {
 
     /**
      * Returns the JWE Key Management Algorithm with the specified
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">{@code alg} key algorithm identifier</a> or
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">{@code alg} key algorithm identifier</a> or
      * throws an {@link IllegalArgumentException} if there is no JWE-standard algorithm for the specified
      * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link #findById(String)}
      * method instead.
@@ -84,7 +84,7 @@ public final class KeyAlgorithms {
      * @return the associated {@code KeyAlgorithm} instance.
      * @throws IllegalArgumentException if there is no JWA-standard algorithm for the specified identifier.
      * @see #findById(String)
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC 7518, Section 4.1</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">RFC 7518, Section 4.1</a>
      */
     public static KeyAlgorithm<?, ?> forId(String id) throws IllegalArgumentException {
         return forId0(id);
@@ -98,14 +98,14 @@ public final class KeyAlgorithms {
 
     /**
      * Key algorithm reflecting direct use of a shared symmetric key as the JWE AEAD encryption key, as defined
-     * by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.5">RFC 7518 (JWA), Section 4.5</a>.  This
+     * by <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.5">RFC 7518 (JWA), Section 4.5</a>.  This
      * algorithm does not produce encrypted key ciphertext.
      */
     public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = forId0("dir");
 
     /**
      * AES Key Wrap algorithm with default initial value using a 128-bit key, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.4">RFC 7518 (JWA), Section 4.4</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.4">RFC 7518 (JWA), Section 4.4</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -129,7 +129,7 @@ public final class KeyAlgorithms {
 
     /**
      * AES Key Wrap algorithm with default initial value using a 192-bit key, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.4">RFC 7518 (JWA), Section 4.4</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.4">RFC 7518 (JWA), Section 4.4</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -153,7 +153,7 @@ public final class KeyAlgorithms {
 
     /**
      * AES Key Wrap algorithm with default initial value using a 256-bit key, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.4">RFC 7518 (JWA), Section 4.4</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.4">RFC 7518 (JWA), Section 4.4</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -177,7 +177,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key wrap algorithm with AES GCM using a 128-bit key, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7">RFC 7518 (JWA), Section 4.7</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7">RFC 7518 (JWA), Section 4.7</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -188,10 +188,10 @@ public final class KeyAlgorithms {
      *     AES GCM Key Wrap algorithm with the generated Initialization Vector, producing encrypted key ciphertext
      *     and GCM authentication tag.</li>
      *     <li>Sets the generated initialization vector as the required
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
      *     <li>Sets the resulting GCM authentication tag as the required
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      *     (Authentication Tag) Header Parameter</a></li>
      *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
      *     {@code SecretKey} for JJWT to use to encrypt the entire JWE with associated {@link AeadAlgorithm}.</li>
@@ -200,10 +200,10 @@ public final class KeyAlgorithms {
      * <ol>
      *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Obtains the required initialization vector from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
      *     <li>Obtains the required GCM authentication tag from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      *     (Authentication Tag) Header Parameter</a></li>
      *     <li>Decrypts the encrypted key ciphertext with the 128-bit shared symmetric key, the initialization vector
      *     and GCM authentication tag using the AES GCM Key Unwrap algorithm, producing the decryption key
@@ -216,7 +216,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key wrap algorithm with AES GCM using a 192-bit key, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7">RFC 7518 (JWA), Section 4.7</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7">RFC 7518 (JWA), Section 4.7</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -227,10 +227,10 @@ public final class KeyAlgorithms {
      *     AES GCM Key Wrap algorithm with the generated Initialization Vector, producing encrypted key ciphertext
      *     and GCM authentication tag.</li>
      *     <li>Sets the generated initialization vector as the required
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
      *     <li>Sets the resulting GCM authentication tag as the required
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      *     (Authentication Tag) Header Parameter</a></li>
      *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
      *     {@code SecretKey} for JJWT to use to encrypt the entire JWE with associated {@link AeadAlgorithm}.</li>
@@ -239,10 +239,10 @@ public final class KeyAlgorithms {
      * <ol>
      *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Obtains the required initialization vector from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
      *     <li>Obtains the required GCM authentication tag from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      *     (Authentication Tag) Header Parameter</a></li>
      *     <li>Decrypts the encrypted key ciphertext with the 192-bit shared symmetric key, the initialization vector
      *     and GCM authentication tag using the AES GCM Key Unwrap algorithm, producing the decryption key \
@@ -255,7 +255,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key wrap algorithm with AES GCM using a 256-bit key, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7">RFC 7518 (JWA), Section 4.7</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7">RFC 7518 (JWA), Section 4.7</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -266,10 +266,10 @@ public final class KeyAlgorithms {
      *     AES GCM Key Wrap algorithm with the generated Initialization Vector, producing encrypted key ciphertext
      *     and GCM authentication tag.</li>
      *     <li>Sets the generated initialization vector as the required
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
      *     <li>Sets the resulting GCM authentication tag as the required
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      *     (Authentication Tag) Header Parameter</a></li>
      *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
      *     {@code SecretKey} for JJWT to use to encrypt the entire JWE with associated {@link AeadAlgorithm}.</li>
@@ -278,10 +278,10 @@ public final class KeyAlgorithms {
      * <ol>
      *     <li>Obtains the encrypted key ciphertext embedded in the received JWE.</li>
      *     <li>Obtains the required initialization vector from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1">&quot;iv&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1">&quot;iv&quot;
      *     (Initialization Vector) Header Parameter</a></li>
      *     <li>Obtains the required GCM authentication tag from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2">&quot;tag&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2">&quot;tag&quot;
      *     (Authentication Tag) Header Parameter</a></li>
      *     <li>Decrypts the encrypted key ciphertext with the 256-bit shared symmetric key, the initialization vector
      *     and GCM authentication tag using the AES GCM Key Unwrap algorithm, producing the decryption key \
@@ -295,7 +295,7 @@ public final class KeyAlgorithms {
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-256 and &quot;A128KW&quot; wrapping</code>
      * as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -320,10 +320,10 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required PBKDF2 input salt from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">&quot;p2s&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">&quot;p2s&quot;
      *     (PBES2 Salt Input) Header Parameter</a></li>
      *     <li>Obtains the required PBKDF2 iteration count from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">&quot;p2c&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">&quot;p2c&quot;
      *     (PBES2 Count) Header Parameter</a></li>
      *     <li>Derives the 128-bit Key Encryption Key with the PBES2-HS256 password-based key derivation algorithm,
      *     using the provided password, obtained salt input, and obtained iteration count as arguments.</li>
@@ -340,7 +340,7 @@ public final class KeyAlgorithms {
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-384 and &quot;A192KW&quot; wrapping</code>
      * as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -365,10 +365,10 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required PBKDF2 input salt from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">&quot;p2s&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">&quot;p2s&quot;
      *     (PBES2 Salt Input) Header Parameter</a></li>
      *     <li>Obtains the required PBKDF2 iteration count from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">&quot;p2c&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">&quot;p2c&quot;
      *     (PBES2 Count) Header Parameter</a></li>
      *     <li>Derives the 192-bit Key Encryption Key with the PBES2-HS384 password-based key derivation algorithm,
      *     using the provided password, obtained salt input, and obtained iteration count as arguments.</li>
@@ -385,7 +385,7 @@ public final class KeyAlgorithms {
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-512 and &quot;A256KW&quot; wrapping</code>
      * as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8">RFC 7518 (JWA), Section 4.8</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -410,10 +410,10 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required PBKDF2 input salt from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1">&quot;p2s&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">&quot;p2s&quot;
      *     (PBES2 Salt Input) Header Parameter</a></li>
      *     <li>Obtains the required PBKDF2 iteration count from the
-     *     <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2">&quot;p2c&quot;
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">&quot;p2c&quot;
      *     (PBES2 Count) Header Parameter</a></li>
      *     <li>Derives the 256-bit Key Encryption Key with the PBES2-HS512 password-based key derivation algorithm,
      *     using the provided password, obtained salt input, and obtained iteration count as arguments.</li>
@@ -429,7 +429,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key Encryption with {@code RSAES-PKCS1-v1_5}, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.2">RFC 7518 (JWA), Section 4.2</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.2">RFC 7518 (JWA), Section 4.2</a>.
      * This algorithm requires a key size of 2048 bits or larger.
      *
      * <p>During JWE creation, this algorithm:</p>
@@ -454,7 +454,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key Encryption with {@code RSAES OAEP using default parameters}, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.3">RFC 7518 (JWA), Section 4.3</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.3">RFC 7518 (JWA), Section 4.3</a>.
      * This algorithm requires a key size of 2048 bits or larger.
      *
      * <p>During JWE creation, this algorithm:</p>
@@ -479,7 +479,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key Encryption with {@code RSAES OAEP using SHA-256 and MGF1 with SHA-256}, as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.3">RFC 7518 (JWA), Section 4.3</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.3">RFC 7518 (JWA), Section 4.3</a>.
      * This algorithm requires a key size of 2048 bits or larger.
      *
      * <p>During JWE creation, this algorithm:</p>
@@ -504,7 +504,7 @@ public final class KeyAlgorithms {
 
     /**
      * Key Agreement with {@code ECDH-ES using Concat KDF} as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -512,13 +512,13 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a symmetric Content
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> a symmetric Content
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
      *     {@link JweHeader#getAgreementPartyVInfo() PartyVInfo}.</li>
      *     <li>Sets the generated EC key pair's Public Key as the required
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
      *     <li>Returns the derived symmetric {@code SecretKey} for JJWT to use to encrypt the entire JWE with the
      *     associated {@link AeadAlgorithm}. Encrypted key ciphertext is not produced with this algorithm, so
@@ -527,12 +527,12 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required ephemeral Elliptic Curve Public Key from the
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a>.</li>
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the symmetric Content
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> the symmetric Content
      *      Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -546,7 +546,7 @@ public final class KeyAlgorithms {
     /**
      * Key Agreement with Key Wrapping via
      * <code>ECDH-ES using Concat KDF and CEK wrapped with &quot;A128KW&quot;</code> as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -554,13 +554,13 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a 128-bit symmetric Key
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> a 128-bit symmetric Key
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
      *     {@link JweHeader#getAgreementPartyVInfo() PartyVInfo}.</li>
      *     <li>Sets the generated EC key pair's Public Key as the required
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
      *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
      *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
@@ -572,12 +572,12 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required ephemeral Elliptic Curve Public Key from the
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a>.</li>
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the symmetric Key
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> the symmetric Key
      *      Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -594,7 +594,7 @@ public final class KeyAlgorithms {
     /**
      * Key Agreement with Key Wrapping via
      * <code>ECDH-ES using Concat KDF and CEK wrapped with &quot;A192KW&quot;</code> as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -602,13 +602,13 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a 192-bit symmetric Key
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> a 192-bit symmetric Key
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
      *     {@link JweHeader#getAgreementPartyVInfo() PartyVInfo}.</li>
      *     <li>Sets the generated EC key pair's Public Key as the required
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
      *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
      *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
@@ -621,12 +621,12 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required ephemeral Elliptic Curve Public Key from the
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a>.</li>
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the 192-bit symmetric
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> the 192-bit symmetric
      *      Key Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
@@ -643,7 +643,7 @@ public final class KeyAlgorithms {
     /**
      * Key Agreement with Key Wrapping via
      * <code>ECDH-ES using Concat KDF and CEK wrapped with &quot;A256KW&quot;</code> as defined by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6">RFC 7518 (JWA), Section 4.6</a>.
      *
      * <p>During JWE creation, this algorithm:</p>
      * <ol>
@@ -651,13 +651,13 @@ public final class KeyAlgorithms {
      *     JWE recipient's EC Public Key.</li>
      *     <li>Generates a shared secret with the ECDH key agreement algorithm using the generated EC Private Key
      *     and the JWE recipient's EC Public Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> a 256-bit symmetric Key
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> a 256-bit symmetric Key
      *     Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *     generated shared secret and any available
      *     {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and
      *     {@link JweHeader#getAgreementPartyVInfo() PartyVInfo}.</li>
      *     <li>Sets the generated EC key pair's Public Key as the required
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
      *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
      *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
@@ -670,12 +670,12 @@ public final class KeyAlgorithms {
      * <p>For JWE decryption, this algorithm:</p>
      * <ol>
      *     <li>Obtains the required ephemeral Elliptic Curve Public Key from the
-     *      <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1">&quot;epk&quot;
+     *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
      *      (Ephemeral Public Key) Header Parameter</a>.</li>
      *     <li>Validates that the ephemeral Public Key is on the same curve as the recipient's EC Private Key.</li>
      *     <li>Obtains the shared secret with the ECDH key agreement algorithm using the obtained EC Public Key
      *      and the JWE recipient's EC Private Key.</li>
-     *     <li><a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2">Derives</a> the 256-bit symmetric
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.2">Derives</a> the 256-bit symmetric
      *      Key Encryption {@code SecretKey} with the Concat KDF algorithm using the
      *      obtained shared secret and any available
      *      {@link JweHeader#getAgreementPartyUInfo() PartyUInfo} and

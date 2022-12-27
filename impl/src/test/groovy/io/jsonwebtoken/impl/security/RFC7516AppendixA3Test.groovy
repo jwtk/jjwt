@@ -24,22 +24,22 @@ class RFC7516AppendixA3Test {
         return Decoders.BASE64URL.decode(val)
     }
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3 :
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3 :
     final static String PLAINTEXT = 'Live long and prosper.' as String
     final static byte[] PLAINTEXT_BYTES = [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32,
                                            112, 114, 111, 115, 112, 101, 114, 46] as byte[]
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.1 :
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.1 :
     final static String PROT_HEADER_STRING = '{"alg":"A128KW","enc":"A128CBC-HS256"}' as String
     final static String encodedHeader = 'eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0' as String
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.2.2
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.2.2
     final static byte[] CEK_BYTES = [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
                                      206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
                                      44, 207] as byte[]
     final static SecretKey CEK = new SecretKeySpec(CEK_BYTES, "AES")
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.3
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.3
     final static Map<String, String> KEK_VALUES = [
             "kty": "oct",
             "k"  : "GawgguFyGrWKav7AX4VKUg"
@@ -51,17 +51,17 @@ class RFC7516AppendixA3Test {
 
     final static String encodedEncryptedCek = '6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ' as String
 
-    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.4
+    // https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.4
     final static byte[] IV = [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101] as byte[]
     final static String encodedIv = 'AxY8DCtDaGlsbGljb3RoZQ' as String
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.5
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.5
     final static byte[] AAD_BYTES = [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 66, 77, 84, 73, 52,
                                      83, 49, 99, 105, 76, 67, 74, 108, 98, 109, 77, 105, 79, 105, 74, 66,
                                      77, 84, 73, 52, 81, 48, 74, 68, 76, 85, 104, 84, 77, 106, 85, 50, 73,
                                      110, 48] as byte[]
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.6
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.6
     final static byte[] CIPHERTEXT = [40, 57, 83, 181, 119, 33, 133, 148, 198, 185, 243, 24, 152, 230, 6,
                                       75, 129, 223, 127, 19, 210, 82, 183, 230, 168, 33, 215, 104, 143,
                                       112, 56, 102] as byte[]
@@ -70,7 +70,7 @@ class RFC7516AppendixA3Test {
     final static byte[] TAG = [83, 73, 191, 98, 104, 205, 211, 128, 201, 189, 199, 133, 32, 38, 194, 85] as byte[]
     final static String encodedTag = 'U0m_YmjN04DJvceFICbCVQ'
 
-    // defined in https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.7
+    // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.7
     final static String COMPLETE_JWE =
             'eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.' +
                     '6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ.' +
@@ -99,7 +99,7 @@ class RFC7516AppendixA3Test {
 
         // now ensure that when JJWT does the encryption (i.e. a compact value is produced from JJWT, not from the RFC text),
         // that the resulting compact string is identical to the RFC as described in
-        // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.8 :
+        // https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.8 :
 
         //ensure that the algorithm reflects the test harness values:
         AeadAlgorithm enc = new HmacAesAeadAlgorithm(128) {

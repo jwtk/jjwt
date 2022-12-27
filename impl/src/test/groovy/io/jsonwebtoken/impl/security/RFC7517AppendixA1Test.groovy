@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
 
 /**
- * https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.1
+ * https://www.rfc-editor.org/rfc/rfc7517.html#appendix-A.1
  */
 class RFC7517AppendixA1Test {
 

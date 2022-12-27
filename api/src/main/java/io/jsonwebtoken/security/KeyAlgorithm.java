@@ -28,14 +28,14 @@ import java.security.Key;
  * <a href="https://tools.ietf.org/html/rfc7516#section-2">{@code Key Management Mode}</a> concept.
  *
  * <p>All standard Key Algorithms are defined in
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">JWA (RFC 7518), Section 4.1</a>,
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">JWA (RFC 7518), Section 4.1</a>,
  * and they are all available as concrete instances via the {@link KeyAlgorithms} utility class.</p>
  *
  * <p><b>&quot;alg&quot; identifier</b></p>
  *
  * <p>{@code KeyAlgorithm} extends {@code Identifiable}: the value returned from
  * {@link Identifiable#getId() keyAlgorithm.getId()} will be used as the
- * <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.1">JWE &quot;alg&quot; protected header</a> value.</p>
+ * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1">JWE &quot;alg&quot; protected header</a> value.</p>
  *
  * @param <E> The type of key to use to obtain the AEAD encryption key
  * @param <D> The type of key to use to obtain the AEAD decryption key

@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * A {@link SecurityBuilder} that produces a JWK.  A JWK is an immutable set of name/value pairs that represent a
  * cryptographic key as defined by
- * <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}.
  * The {@code JwkBuilder} interface represents common JWK properties that may be specified for any type of JWK.
  * Builder subtypes support additional JWK properties specific to different types of cryptographic keys
  * (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
@@ -42,12 +42,12 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
         extends MapMutator<String, Object, T>, SecurityBuilder<J, T> {
 
     /**
-     * Sets the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">{@code alg} (Algorithm)
+     * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)
      * Parameter</a>.
      *
      * <p>The {@code alg} (algorithm) parameter identifies the algorithm intended for use with the key.  The
      * value specified should either be one of the values in the IANA
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.1">JSON Web Signature and Encryption
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">JSON Web Signature and Encryption
      * Algorithms</a> registry or be a value that contains a {@code Collision-Resistant Name}.  The {@code alg}
      * must be a CaSe-SeNsItIvE ASCII string.</p>
      *
@@ -58,7 +58,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     T setAlgorithm(String alg) throws IllegalArgumentException;
 
     /**
-     * Sets the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.5">{@code kid} (Key ID)
+     * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.5">{@code kid} (Key ID)
      * Parameter</a>.
      *
      * <p>The {@code kid} (key ID) parameter is used to match a specific key.  This is used, for instance,
@@ -78,14 +78,14 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     T setId(String kid) throws IllegalArgumentException;
 
     /**
-     * Sets the JWK <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">{@code key_ops}
+     * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
      * (Key Operations) Parameter</a> values.
      *
      * <p>The {@code key_ops} (key operations) parameter identifies the operation(s) for which the key is
      * intended to be used.  The {@code key_ops} parameter is intended for use cases in which public,
      * private, or symmetric keys may be present.</p>
      *
-     * <p>The JWK specification <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">defines</a> the
+     * <p>The JWK specification <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">defines</a> the
      * following values:</p>
      *
      * <table>

@@ -19,7 +19,7 @@ import javax.crypto.SecretKey;
 
 /**
  * JWK representation of a {@link SecretKey} as defined by the JWA (RFC 7518) specification section on
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.4">Parameters for Symmetric Keys</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.4">Parameters for Symmetric Keys</a>.
  *
  * <p>Note that the {@code SecretKey}-specific properties are not available as separate dedicated getter methods, as
  * most Java applications should rarely, if ever, need to access these individual key properties since they typically

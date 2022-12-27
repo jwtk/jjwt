@@ -57,9 +57,9 @@ public interface X509Accessor {
      *
      * @return the {@code x5u} (X.509 URL) that refers to a resource for the associated X.509 public key certificate or
      * certificate chain.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.6">JWK {@code x5u} (X.509 URL) Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.5">JWS {@code x5u} (X.509 URL) Header Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.7">JWE {@code x5u} (X.509 URL) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.6">JWK {@code x5u} (X.509 URL) Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.5">JWS {@code x5u} (X.509 URL) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.7">JWE {@code x5u} (X.509 URL) Header Parameter</a>
      */
     URI getX509Url();
 
@@ -79,9 +79,9 @@ public interface X509Accessor {
      * </ul>
      *
      * @return the associated {@code x5c} (X.509 Certificate Chain), or {@code null} if not present.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.7">JWK <code>x5c</code> (X.509 Certificate Chain) Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6">JWS <code>x5c</code> (X.509 Certificate Chain) Header Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.8">JWE <code>x5c</code> (X.509 Certificate Chain) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.7">JWK <code>x5c</code> (X.509 Certificate Chain) Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6">JWS <code>x5c</code> (X.509 Certificate Chain) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.8">JWE <code>x5c</code> (X.509 Certificate Chain) Header Parameter</a>
      */
     List<X509Certificate> getX509CertificateChain();
 
@@ -103,9 +103,9 @@ public interface X509Accessor {
      *
      * @return the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      * associated X.509 Certificate, or {@code null} if not present
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.8">JWK <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.7">JWS <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Header Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.9">JWE <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.8">JWK <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.7">JWS <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.9">JWE <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Header Parameter</a>
      */
     byte[] getX509CertificateSha1Thumbprint();
 
@@ -127,9 +127,9 @@ public interface X509Accessor {
      *
      * @return the {@code x5t#S256} (X.509 Certificate SHA-256 Thumbprint) (a.k.a. digest) of the DER-encoding of the
      * associated X.509 Certificate, or {@code null} if not present
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.9">JWK <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.8">JWS <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Header Parameter</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.10">JWE <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.9">JWK <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8">JWS <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.10">JWE <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Header Parameter</a>
      */
     byte[] getX509CertificateSha256Thumbprint();
 }

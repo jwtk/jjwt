@@ -17,7 +17,7 @@ package io.jsonwebtoken;
 
 /**
  * An encrypted JWT, called a &quot;JWE&quot;, per the
- * <a href="https://datatracker.ietf.org/doc/html/rfc7516">JWE (RFC 7516) Specification</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7516.html">JWE (RFC 7516) Specification</a>.
  *
  * @param <B> payload type, either {@link Claims} or {@code byte[]} content.
  * @since JJWT_RELEASE_VERSION

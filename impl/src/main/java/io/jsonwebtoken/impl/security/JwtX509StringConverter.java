@@ -18,9 +18,9 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
     static final JwtX509StringConverter INSTANCE = new JwtX509StringConverter();
 
     // Returns a Base64 encoded (NOT Base64Url encoded) string of the cert's encoded byte array per
-    // https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6
-    // https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.8
-    // https://datatracker.ietf.org/doc/html/rfc7517#section-4.7
+    // https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6
+    // https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.8
+    // https://www.rfc-editor.org/rfc/rfc7517.html#section-4.7
     @Override
     public String applyTo(X509Certificate cert) {
         Assert.notNull(cert, "X509Certificate cannot be null.");

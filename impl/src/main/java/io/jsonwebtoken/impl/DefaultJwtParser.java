@@ -99,12 +99,12 @@ public class DefaultJwtParser implements JwtParser {
     public static final String MISSING_JWS_ALG_MSG =
             "JWS header does not contain a required 'alg' (Algorithm) header parameter.  " +
                     "This header parameter is mandatory per the JWS Specification, Section 4.1.1. See " +
-                    "https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1 for more information.";
+                    "https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.1 for more information.";
 
     public static final String MISSING_JWE_ALG_MSG =
             "JWE header does not contain a required 'alg' (Algorithm) header parameter.  " +
                     "This header parameter is mandatory per the JWE Specification, Section 4.1.1. See " +
-                    "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.1 for more information.";
+                    "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1 for more information.";
 
     public static final String MISSING_JWS_DIGEST_MSG_FMT =
             "The JWS header references signature algorithm '%s' but the compact JWE string is missing the " +
@@ -117,18 +117,18 @@ public class DefaultJwtParser implements JwtParser {
     private static final String MISSING_ENC_MSG =
             "JWE header does not contain a required 'enc' (Encryption Algorithm) header parameter.  " +
                     "This header parameter is mandatory per the JWE Specification, Section 4.1.2. See " +
-                    "https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2 for more information.";
+                    "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an  " +
             AbstractHeader.ALGORITHM + " header value of '" + SignatureAlgorithms.NONE.getId() +
             "') are disallowed by default as mandated by " +
-            "https://datatracker.ietf.org/doc/html/rfc7518#section-3.6. If you wish to allow them to be " +
+            "https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to allow them to be " +
             "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
             "security considerations covered in that method's JavaDoc before doing so). Header: ";
 
     private static final String JWE_NONE_MSG =
             "JWEs do not support key management " + AbstractHeader.ALGORITHM +
-                    " header value 'none' per https://datatracker.ietf.org/doc/html/rfc7518#section-4.1";
+                    " header value 'none' per https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1";
 
     private static final String JWS_NONE_SIG_MISMATCH_MSG =
             "The JWS header references signature algorithm 'none' yet the " +
@@ -594,7 +594,7 @@ public class DefaultJwtParser implements JwtParser {
 
             // The AAD (Additional Authenticated Data) scheme for compact JWEs is to use the ASCII bytes of the
             // raw base64url text as the AAD, and NOT the base64url-decoded bytes per
-            // https://datatracker.ietf.org/doc/html/rfc7516#section-5.1, Step 14.
+            // https://www.rfc-editor.org/rfc/rfc7516.html#section-5.1, Step 14.
             final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
 
             base64Url = base64UrlDigest;
@@ -650,7 +650,7 @@ public class DefaultJwtParser implements JwtParser {
         Claims claims = null;
         if (!hasContentType(header) // If there is a content type set, then the application using JJWT is expected
                 //                     to convert the byte payload themselves based on this content type
-                //                     https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+                //                     https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
                 //
                 //                     "This parameter is ignored by JWS implementations; any processing of this
                 //                      parameter is performed by the JWS application."

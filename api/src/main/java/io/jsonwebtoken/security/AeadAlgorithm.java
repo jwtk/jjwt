@@ -22,9 +22,9 @@ import javax.crypto.SecretKey;
 /**
  * A cryptographic algorithm that performs
  * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">Authenticated encryption with additional data</a>.
- * Per <a href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2">JWE RFC 7516, Section 4.1.2</a>, all JWEs
+ * Per <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2">JWE RFC 7516, Section 4.1.2</a>, all JWEs
  * <em>MUST</em> use an AEAD algorithm to encrypt or decrypt the JWE payload/content.  Consequently, all
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-5.1">JWA &quot;enc&quot; algorithms</a> are AEAD
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA &quot;enc&quot; algorithms</a> are AEAD
  * algorithms, and they are accessible as concrete instances via the {@link EncryptionAlgorithms} utility class.
  *
  * <p><b>&quot;enc&quot; identifier</b></p>

@@ -8,7 +8,7 @@ public class BigIntegerUBytesConverter implements Converter<BigInteger, byte[]> 
 
     private static final String NEGATIVE_MSG =
         "JWA Base64urlUInt values MUST be >= 0 (non-negative) per the 'Base64urlUInt' definition in " +
-            "[JWA RFC 7518, Section 2](https://datatracker.ietf.org/doc/html/rfc7518#section-2)";
+            "[JWA RFC 7518, Section 2](https://www.rfc-editor.org/rfc/rfc7518.html#section-2)";
 
     @Override
     public byte[] applyTo(BigInteger bigInt) {

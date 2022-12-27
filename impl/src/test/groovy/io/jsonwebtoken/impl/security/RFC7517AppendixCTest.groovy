@@ -32,7 +32,7 @@ import java.security.Key
 import static org.junit.Assert.*
 
 /**
- * https://datatracker.ietf.org/doc/html/rfc7517#appendix-C
+ * https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C
  */
 @SuppressWarnings('SpellCheckingInspection')
 class RFC7517AppendixCTest {
@@ -41,7 +41,7 @@ class RFC7517AppendixCTest {
         return s.replaceAll('[\\s]', '')
     }
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.1
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.1
     private static final String RFC_JWK_JSON = rfcString('''
     {
       "kty":"RSA",
@@ -186,7 +186,7 @@ class RFC7517AppendixCTest {
              79, 85, 117, 57, 72, 67, 74, 45, 85, 115, 102, 83, 79, 73, 56, 34,
              125] as byte[]
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.2
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.2
     private static final String RFC_JWE_PROTECTED_HEADER_JSON = rfcString('''
     {
       "alg":"PBES2-HS256+A128KW",
@@ -204,13 +204,13 @@ class RFC7517AppendixCTest {
      andrK2pzb24ifQ
      ''')
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.3
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.3
     private static final byte[] RFC_CEK_BYTES = [111, 27, 25, 52, 66, 29, 20, 78, 92, 176, 56, 240, 65, 208, 82, 112,
                                                  161, 131, 36, 55, 202, 236, 185, 172, 129, 23, 153, 194, 195, 48,
                                                  253, 182] as byte[]
     private static final SecretKey RFC_CEK = new SecretKeySpec(RFC_CEK_BYTES, "AES")
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.4
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.4
     private static final String RFC_SHARED_PASSPHRASE = 'Thus from my lips, by yours, my sin is purged.'
     private static final byte[] RFC_SHARED_PASSPHRASE_BYTES = [
             84, 104, 117, 115, 32, 102, 114, 111, 109, 32, 109, 121, 32, 108,
@@ -227,10 +227,10 @@ class RFC7517AppendixCTest {
     private static final byte[] RFC_PBKDF2_DERIVED_KEY_BYTES =
             [110, 171, 169, 92, 129, 92, 109, 117, 233, 242, 116, 233, 170, 14, 24, 75]
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.6
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.6
     private static final byte[] RFC_IV = [97, 239, 99, 214, 171, 54, 216, 57, 145, 72, 7, 93, 34, 31, 149, 156] as byte[]
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.9
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.9
     private static final String RFC_COMPACT_JWE = rfcString('''
      eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJwMnMiOiIyV0NUY0paMVJ2ZF9DSn
      VKcmlwUTF3IiwicDJjIjo0MDk2LCJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiY3R5Ijoi

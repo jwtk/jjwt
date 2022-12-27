@@ -19,8 +19,8 @@ import java.security.interfaces.ECPublicKey;
 
 /**
  * JWK representation of an {@link ECPublicKey} as defined by the JWA (RFC 7518) specification sections on
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2">Parameters for Elliptic Curve Keys</a> and
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1">Parameters for Elliptic Curve Public Keys</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2">Parameters for Elliptic Curve Keys</a> and
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1">Parameters for Elliptic Curve Public Keys</a>.
  *
  * <p>Note that the various EC-specific properties are not available as separate dedicated getter methods, as most Java
  * applications should rarely, if ever, need to access these individual key properties since they typically represent

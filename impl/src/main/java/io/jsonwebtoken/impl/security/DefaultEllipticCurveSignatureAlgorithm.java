@@ -49,7 +49,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
     /**
      * Returns the correct byte length of an R or S field in a concat signature for the given EC Key order bit length.
      *
-     * <p>Per <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a>:
+     * <p>Per <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>:
      * <quote>
      * the Integer-to-OctetString Conversion
      * defined in Section 2.3.7 of SEC1 [SEC1] used to represent R and S as
@@ -69,7 +69,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
     /**
      * Returns {@code true} for Order bit lengths defined in the JWA specification, {@code false} otherwise.
      * Specifically, returns {@code true} <em>only</em> for values of {@code 256}, {@code 384} and {@code 521}.  See
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.4">RFC 7518, Section 3.4</a> for more.
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a> for more.
      *
      * @param orderBitLength the EC key Order bit length to check
      * @return {@code true} for Order bit lengths defined in the JWA specification, {@code false} otherwise.
@@ -125,7 +125,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
                 String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " +
                         Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " +
                         Bytes.bitsMsg(this.orderBitLength) + " per " +
-                        "[RFC 7518, Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
+                        "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
                 throw new InvalidKeyException(msg);
             }
         }
@@ -166,7 +166,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
                 byte[] concatSignature = request.getDigest();
                 byte[] derSignature;
                 try {
-                    // mandated per https://datatracker.ietf.org/doc/html/rfc7518#section-3.4 :
+                    // mandated per https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4 :
                     if (signatureByteLength != concatSignature.length) {
                         /*
                          * If the expected size is not valid for JOSE, fall back to ASN.1 DER signature IFF the application
@@ -181,7 +181,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
                         } else {
                             String msg = "Provided signature is " + Bytes.bytesMsg(concatSignature.length) + " but " +
                                     getId() + " signatures must be exactly " + Bytes.bytesMsg(signatureByteLength) + " per " +
-                                    "[RFC 7518, Section 3.4 (validation)](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).";
+                                    "[RFC 7518, Section 3.4 (validation)](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
                             throw new SignatureException(msg);
                         }
                     } else {

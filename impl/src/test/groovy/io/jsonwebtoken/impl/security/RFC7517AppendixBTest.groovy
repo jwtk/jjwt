@@ -10,7 +10,7 @@ import java.security.interfaces.RSAPublicKey
 import static org.junit.Assert.*
 
 /**
- * https://datatracker.ietf.org/doc/html/rfc7517#appendix-B
+ * https://www.rfc-editor.org/rfc/rfc7517.html#appendix-B
  */
 class RFC7517AppendixBTest {
 

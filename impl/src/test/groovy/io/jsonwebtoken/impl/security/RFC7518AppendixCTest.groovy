@@ -51,7 +51,7 @@ class RFC7518AppendixCTest {
         return Jwks.builder().putAll(m).build() as EcPrivateJwk
     }
 
-    // https://datatracker.ietf.org/doc/html/rfc7517#appendix-C.1
+    // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.1
     private static final String ALICE_EPHEMERAL_JWK_STRING = rfcString('''
     {"kty":"EC",
       "crv":"P-256",

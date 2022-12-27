@@ -53,7 +53,7 @@ class RsaPrivateJwkFactoryTest {
                     'java.security.interfaces.RSAMultiPrimePrivateCrtKey interfaces.  If the specified RSAPrivateKey ' +
                     'cannot be one of these two, you must explicitly provide an RSAPublicKey in addition to the ' +
                     'RSAPrivateKey, as the [JWA RFC, Section 6.3.2]' +
-                    '(https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2) requires public values to be ' +
+                    '(https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) requires public values to be ' +
                     'present in private RSA JWKs.'
             assertEquals msg, expected.getMessage()
         }

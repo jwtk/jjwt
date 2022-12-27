@@ -246,7 +246,7 @@ class RFC7520Section4Test {
                 .compact()
 
 
-        // As reminded in https://datatracker.ietf.org/doc/html/rfc7520#section-4.2, it is not possible to
+        // As reminded in https://www.rfc-editor.org/rfc/rfc7520.html#section-4.2, it is not possible to
         // generate the same exact signature because RSASSA-PSS uses random data during signature creation
         // so we at least assert that our result starts with the RFC value, ignoring the final signature
         assertTrue result.startsWith(FIGURE_20.substring(0, FIGURE_20.lastIndexOf('.')))
@@ -291,7 +291,7 @@ class RFC7520Section4Test {
                 .signWith(key, alg)
                 .compact()
 
-        // As reminded in https://datatracker.ietf.org/doc/html/rfc7520#section-4.3, it is not possible to
+        // As reminded in https://www.rfc-editor.org/rfc/rfc7520.html#section-4.3, it is not possible to
         // generate the same exact signature because RSASSA-PSS uses random data during signature creation
         // so we at least assert that our result starts with the RFC value, ignoring the final signature
         assertTrue result.startsWith(FIGURE_27.substring(0, FIGURE_27.lastIndexOf('.')))

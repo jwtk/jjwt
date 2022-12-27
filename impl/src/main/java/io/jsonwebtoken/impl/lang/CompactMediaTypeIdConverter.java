@@ -12,7 +12,7 @@ public final class CompactMediaTypeIdConverter implements Converter<String, Obje
     static String compactIfPossible(String cty) {
         Assert.hasText(cty, "Value cannot be null or empty.");
         if (Strings.startsWithIgnoreCase(cty, APP_MEDIA_TYPE_PREFIX)) {
-            // per https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10
+            // per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10
             // we can only use the compact form if no other '/' exists in the string
             for (int i = cty.length() - 1; i >= APP_MEDIA_TYPE_PREFIX.length(); i--) {
                 char c = cty.charAt(i);

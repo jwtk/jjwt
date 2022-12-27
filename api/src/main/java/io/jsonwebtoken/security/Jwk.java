@@ -24,7 +24,7 @@ import java.util.Set;
 
 /**
  * A JWK is an immutable set of name/value pairs that represent a cryptographic key as defined by
- * <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}
+ * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}
  * interface represents properties common to all JWKs.  Subtypes will have additional properties specific to
  * different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
  *
@@ -40,7 +40,7 @@ import java.util.Set;
  * <p><b>Identification</b></p>
  *
  * <p>{@code Jwk} extends {@link Identifiable} to support the
- * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.5">JWK {@code kid} parameter</a>. Calling
+ * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.5">JWK {@code kid} parameter</a>. Calling
  * {@link #getId() aJwk.getId()} is the type-safe idiomatic approach to the alternative equivalent of
  * {@code aJwk.get("kid")}. Either approach will return an id if one was originally set on the JWK, or {@code null} if
  * an id does not exist.</p>
@@ -87,7 +87,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 
     /**
      * Returns the JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">{@code alg} (Algorithm)</a> value
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)</a> value
      * or {@code null} if not present.
      *
      * @return the JWK {@code alg} value or {@code null} if not present.
@@ -96,11 +96,11 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 
     /**
      * Returns the JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">{@code key_ops} (Key Operations)
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops} (Key Operations)
      * parameter</a> values or {@code null} if not present.  Any values within the returned {@code Set} are
      * CaSe-SeNsItIvE.
      *
-     * <p>The JWK specification <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">defines</a> the
+     * <p>The JWK specification <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">defines</a> the
      * following values:</p>
      *
      * <table>
@@ -161,10 +161,10 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 
     /**
      * Returns the required JWK
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.1">{@code kty} (Key Type)
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.1">{@code kty} (Key Type)
      * parameter</a> value. A value is required and may not be {@code null}.
      *
-     * <p>The JWA specification <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.1">defines</a> the
+     * <p>The JWA specification <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.1">defines</a> the
      * following {@code kty} values:</p>
      *
      * <table>

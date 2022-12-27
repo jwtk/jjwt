@@ -30,15 +30,15 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
 
-    // https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.1 says 96 bits required:
+    // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1 says 96 bits required:
     public static final Field<byte[]> IV = Fields.bytes("iv", "Initialization Vector")
             .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 96)).build();
 
-    // https://datatracker.ietf.org/doc/html/rfc7518#section-4.7.1.2 says 128 bits required:
+    // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2 says 128 bits required:
     public static final Field<byte[]> TAG = Fields.bytes("tag", "Authentication Tag")
             .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 128)).build();
 
-    // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1 says at least 64 bits (8 bytes) is required:
+    // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1 says at least 64 bits (8 bytes) is required:
     public static final Field<byte[]> P2S = Fields.bytes("p2s", "PBES2 Salt Input")
             .setConverter(new RequiredBitLengthConverter(Converters.BASE64URL_BYTES, 64, false)).build();
     public static final Field<Integer> P2C = Fields.builder(Integer.class)

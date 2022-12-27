@@ -167,7 +167,7 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
 
 
 * Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
-  [RFC 7518, Section 3.6](https://datatracker.ietf.org/doc/html/rfc7518#section-3.6). If you require parsing of
+  [RFC 7518, Section 3.6](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6). If you require parsing of
   unsecured JWTs, you must call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
   implications of doing so as mentioned in that method's JavaDoc before doing so.
 

@@ -19,7 +19,7 @@ import io.jsonwebtoken.lang.Classes;
 
 /**
  * Utility methods for creating
- * <a href="https://datatracker.ietf.org/doc/html/rfc7517">JWKs (JSON Web Keys)</a> with a type-safe builder.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">JWKs (JSON Web Keys)</a> with a type-safe builder.
  *
  * @see #builder()
  * @since JJWT_RELEASE_VERSION

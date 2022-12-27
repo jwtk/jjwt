@@ -19,8 +19,8 @@ import java.security.interfaces.RSAPublicKey;
 
 /**
  * JWK representation of an {@link RSAPublicKey} as defined by the JWA (RFC 7518) specification sections on
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.3">Parameters for RSA Keys</a> and
- * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1">Parameters for RSA Public Keys</a>.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3">Parameters for RSA Keys</a> and
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.1">Parameters for RSA Public Keys</a>.
  *
  * <p>Note that the various RSA-specific properties are not available as separate dedicated getter methods, as most Java
  * applications should rarely, if ever, need to access these individual key properties since they typically represent

@@ -44,7 +44,7 @@ class CompactMediaTypeIdConverterTest {
     void testApplicationMediaType() {
         String cty = 'foo'
         String mediaType = "application/$cty"
-        // assert it has been automatically compacted per https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+        // assert it has been automatically compacted per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
         assertEquals cty, converter.applyTo(mediaType)
     }
 
@@ -52,28 +52,28 @@ class CompactMediaTypeIdConverterTest {
     void testCaseInsensitiveApplicationMediaType() { // media type values are case insensitive
         String cty = 'FoO'
         String mediaType = "aPpLiCaTiOn/$cty"
-        // assert it has been automatically compacted per https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+        // assert it has been automatically compacted per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
         assertEquals cty, converter.applyTo(mediaType)
     }
 
     @Test
     void testApplicationMediaTypeWithMoreThanOneForwardSlash() {
         String mediaType = "application/foo;part=1/2"
-        // cannot be compacted per https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+        // cannot be compacted per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
         assertEquals mediaType, converter.applyTo(mediaType)
     }
 
     @Test
     void testCaseInsensitiveApplicationMediaTypeWithMoreThanOneForwardSlash() {
         String mediaType = "aPpLiCaTiOn/foo;part=1/2"
-        // cannot be compacted per https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+        // cannot be compacted per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
         assertEquals mediaType, converter.applyTo(mediaType)
     }
 
     @Test
     void testApplicationMediaTypeWithMoreThanOneForwardSlash2() {
         String mediaType = "application//test"
-        // cannot be compacted per https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 :
+        // cannot be compacted per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
         assertEquals mediaType, converter.applyTo(mediaType)
     }
 }

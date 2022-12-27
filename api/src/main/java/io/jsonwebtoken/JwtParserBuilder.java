@@ -48,15 +48,15 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     /**
      * Enables parsing of Unsecured JWSs (JWTs an 'alg' (Algorithm) header value of
      * 'none'). <b>Be careful when calling this method - one should fully understand
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-8.5">Unsecured JWS Security Considerations</a>
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * before enabling this feature.</b>
      * <p>If this method is not called, Unsecured JWSs are disabled by default as mandated by
-     * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.6">RFC 7518, Section
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">RFC 7518, Section
      * 3.6</a>.</p>
      *
      * @return the builder for method chaining.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-8.5">Unsecured JWS Security Considerations</a>
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.6">Using the Algorithm &quot;none&quot;</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
      * @see io.jsonwebtoken.security.SignatureAlgorithms#NONE
      * @since JJWT_RELEASE_VERSION
      */

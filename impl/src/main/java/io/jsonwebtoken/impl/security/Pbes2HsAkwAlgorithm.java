@@ -32,9 +32,9 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     private static final int DEFAULT_SHA384_ITERATIONS = 210000;
     private static final int DEFAULT_SHA512_ITERATIONS = 120000;
 
-    private static final int MIN_RECOMMENDED_ITERATIONS = 1000; // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2
+    private static final int MIN_RECOMMENDED_ITERATIONS = 1000; // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2
     private static final String MIN_ITERATIONS_MSG_PREFIX =
-            "[JWA RFC 7518, Section 4.8.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.2) " +
+            "[JWA RFC 7518, Section 4.8.1.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2) " +
                     "recommends password-based-encryption iterations be greater than or equal to " +
                     MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
 
@@ -46,7 +46,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
 
     private static byte[] toRfcSaltPrefix(byte[] bytes) {
         // last byte must always be zero as it is a delimiter per
-        // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8.1.1
+        // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1
         // We ensure this by creating a byte array that is one element larger than bytes.length since Java defaults all
         // new byte array indices to 0x00, meaning the last one will be our zero delimiter:
         byte[] output = new byte[bytes.length + 1];
@@ -94,7 +94,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
             DEFAULT_ITERATIONS = DEFAULT_SHA256_ITERATIONS;
         }
 
-        // https://datatracker.ietf.org/doc/html/rfc7518#section-4.8, 2nd paragraph, last sentence:
+        // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8, 2nd paragraph, last sentence:
         // "Their derived-key lengths respectively are 16, 24, and 32 octets." :
         this.DERIVED_KEY_BIT_LENGTH = hashBitLength / 2; // results in 128, 192, or 256
 

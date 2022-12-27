@@ -164,7 +164,7 @@ class JwtsTest {
 
     @Test
     void testContentJwtString() {
-        // Assert exact output per example at https://datatracker.ietf.org/doc/html/rfc7519#section-6.1
+        // Assert exact output per example at https://www.rfc-editor.org/rfc/rfc7519.html#section-6.1
         String encodedBody = 'eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ'
         String payload = new String(Decoders.BASE64URL.decode(encodedBody), StandardCharsets.UTF_8)
         String val = Jwts.builder().setPayload(payload).compact()
@@ -706,7 +706,7 @@ class JwtsTest {
         } catch (InvalidKeyException expected) {
             String msg = "EllipticCurve key has a field size of 48 bytes (384 bits), but ES256 requires a " +
                     "field size of 32 bytes (256 bits) per [RFC 7518, Section 3.4 (validation)]" +
-                    "(https://datatracker.ietf.org/doc/html/rfc7518#section-3.4)."
+                    "(https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)."
             assertEquals msg, expected.getMessage()
         }
     }
