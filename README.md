@@ -2726,7 +2726,7 @@ https://github.com/jwtk/jjwt/blob/51ad94d9ac695edf320ba0f60457eefd9911e3db/tdjar
 
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
-SignatureAlgorithm alg = SignatureAlgorithms.HS256; // or HS384 or HS512
+SecretKeySignatureAlgorithm alg = SignatureAlgorithms.HS256; //or HS384 or HS512
 SecretKey key = alg.keyBuilder().build();
 
 String message = "Hello World!";
@@ -2737,7 +2737,7 @@ String jws = Jwts.builder().setContent(content, "text/plain").signWith(key, alg)
 
 // Parse the compact JWS:
 content = Jwts.parserBuilder().verifyWith(key).build().parseContentJws(jws).getPayload();
-        
+
 assert message.equals(new String(content, StandardCharsets.UTF_8));
 ```
 
@@ -2753,7 +2753,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired RSA signature algorithm:
-SignatureAlgorithm alg = SignatureAlgorithms.RS512; //or RS256, RS384, PS256, PS384, or PS512
+AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.RS512; //or RS256, RS384, PS256, PS384, or PS512
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his RSA private key:
@@ -2765,7 +2765,7 @@ String jws = Jwts.builder().setSubject("Alice")
 String subject = Jwts.parserBuilder()
     .verifyWith(pair.getPublic()) // <-- Bob's RSA public key
     .build().parseClaimsJws(jws).getPayload().getSubject();
-        
+
 assert "Alice".equals(subject);
 ```
 
@@ -2784,7 +2784,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired ECDSA signature algorithm:
-SignatureAlgorithm alg = SignatureAlgorithms.ES512; // or ES256 or ES384
+AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.ES512; // or ES256 or ES384
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his EC private key:
@@ -2796,7 +2796,7 @@ String jws = Jwts.builder().setSubject("Alice")
 String subject = Jwts.parserBuilder()
     .verifyWith(pair.getPublic()) // <-- Bob's EC public key
     .build().parseClaimsJws(jws).getPayload().getSubject();
-        
+
 assert "Alice".equals(subject);
 ```
 
@@ -2823,6 +2823,7 @@ Example:
 
 ```java
 // Create a test key suitable for the desired payload encryption algorithm:
+// (A*GCM algorithms are recommended, but require JDK 8 or later)
 AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A128GCM, A192GCM, A128CBC-HS256, A192CBC-HS384, or A256CBC-HS512
 SecretKey key = enc.keyBuilder().build();
 
@@ -2851,23 +2852,23 @@ decrypt the JWT using her RSA private key:
 
 ```java
 // Create a test KeyPair suitable for the desired RSA key algorithm:
-KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
-KeyPair pair = alg.keyPairBuilder().build();
+KeyPair pair = SignatureAlgorithms.RS512.keyPairBuilder().build();
 
-// Chooose the Encryption Algorithm to encrypt the payload:
+// Choose the key algorithm used encrypt the payload key:
+KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+// Choose the Encryption Algorithm to encrypt the payload:
 AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-String jwe = Jwts.builder()
-    .setAudience("Alice")
-    .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key 
+String jwe = Jwts.builder().setAudience("Alice")
+    .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
     .compact();
 
 // Alice receives and decrypts the compact JWE:
 String audience = Jwts.parserBuilder()
     .decryptWith(pair.getPrivate()) // <-- Alice's RSA private key
     .build().parseClaimsJwe(jwe).getPayload().getAudience();
-        
+
 assert "Alice".equals(audience);
 ```
 
@@ -2891,13 +2892,14 @@ SecretKey key = alg.keyBuilder().build();
 
 // Chooose the Encryption Algorithm used to encrypt the payload:
 AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
-        
+
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me").encryptWith(key, alg, enc).compact();
 
 // Parse the compact JWE:
-String issuer = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jws).getPayload().getIssuer();
-        
+String issuer = Jwts.parserBuilder().decryptWith(key).build()
+    .parseClaimsJwe(jwe).getPayload().getIssuer();
+
 assert "me".equals(issuer);
 ```
 
@@ -2915,15 +2917,15 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 
 ```java
 // Create a test KeyPair suitable for the desired EC key algorithm:
-KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //or ECDH_ES_A192KW, ECDH_ES_128KW, or ECDH_ES
-KeyPair pair = alg.keyPairBuilder().build();
+KeyPair pair = SignatureAlgorithms.ES512.keyPairBuilder().build();
 
-// Chooose the Encryption Algorithm to encrypt the payload:
+// Choose the key algorithm used encrypt the payload key:
+KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //or ECDH_ES_A192KW, ECDH_ES_128KW, or ECDH_ES
+// Choose the Encryption Algorithm to encrypt the payload:
 AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-String jwe = Jwts.builder()
-    .setAudience("Alice")
+String jwe = Jwts.builder().setAudience("Alice")
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
     .compact();
 
@@ -2946,31 +2948,32 @@ expose the longer-lived (and potentially weaker) password.  This approach requir
 algorithms to be paired with an AEAD content encryption algorithm, as shown below.
 
 ```java
-// Use a sample password here. DO NOT use this in a real production application, it is well-known to password crackers
+//DO NOT use this example password in a real app, it is well-known to password crackers
 String pw = "correct horse battery staple";
 Password password = Keys.forPassword(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
 KeyAlgorithm<Password, Password> alg = KeyAlgorithms.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
 
-// Choose the number of PBES2 computational iterations to use to derive the key.  This is optional - if you do not
-// specify a value, JJWT will automatically choose a value based on OWASP PBKDF2 recommendations here:
-// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
-int pbkdf2Iterations = 120000;        
-        
-// Chooose the Encryption Algorithm used to encrypt the payload:
+// Choose the number of PBES2 computational iterations to use to derive the key.  This is optional - if you
+// do not specify a value, JJWT will automatically choose a value based on OWASP PBKDF2 recommendations
+// here: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
+int pbkdf2Iterations = 120000;
+
+// Choose the Encryption Algorithm used to encrypt the payload:
 AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
-        
+
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me")
-     // Optional work factor is specified in the header:
-    .setHeader(Jwts.headerBuilder.setPbes2Count(pbkdf2Iterations).build())
-    .encryptWith(password, alg, enc).compact();
+    // Optional work factor is specified in the header:
+    .setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations).build())
+    .encryptWith(password, alg, enc)
+    .compact();
 
 // Parse the compact JWE:
-String issuer = Jwts.parserBuilder()
-    .decryptWith(password).build().parseClaimsJwe(jws).getPayload().getIssuer();
-        
+String issuer = Jwts.parserBuilder().decryptWith(password)
+    .build().parseClaimsJwe(jwe).getPayload().getIssuer();
+
 assert "me".equals(issuer);
 ```
 
