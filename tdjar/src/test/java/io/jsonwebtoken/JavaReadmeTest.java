@@ -31,7 +31,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsHS() {
         // Create a test key suitable for the desired HMAC-SHA algorithm:
-        SecretKeySignatureAlgorithm alg = SignatureAlgorithms.HS256; //or HS384 or HS512
+        SecretKeySignatureAlgorithm alg = SignatureAlgorithms.HS512; //or HS256 or HS384
         SecretKey key = alg.keyBuilder().build();
 
         String message = "Hello World!";
