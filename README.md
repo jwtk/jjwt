@@ -2840,10 +2840,11 @@ assert message.equals(new String(content, StandardCharsets.UTF_8));
 <a name="example-jwe-rsa"></a>
 ### JWT Encrypted with RSA
 
-This is an example showing how to encrypt and decrypt a JWT using RSA cryptography.  Because RSA cannot encrypt much
-data, RSA is used to encrypt and decrypt a secure-random key, and that generated key in turn is used to actually encrypt
-the payload as described in the [RSA Key Encryption](jwe-alg-rsa) section above.  Because of this, RSA Key Algorithms 
-must be paired with an AEAD Encryption Algorithm, as shown below.
+This is an example showing how to encrypt and decrypt a JWT using RSA cryptography.
+
+Because RSA cannot encrypt much data, RSA is used to encrypt and decrypt a secure-random key, and that generated key 
+in turn is used to actually encrypt the payload as described in the [RSA Key Encryption](jwe-alg-rsa) section above.  
+Because of this, RSA Key Algorithms must be paired with an AEAD Encryption Algorithm, as shown below.
 
 In this example, Bob will encrypt a JWT using Alice's RSA public key to ensure only she may read it.  Alice can then 
 decrypt the JWT using her RSA private key:
@@ -2873,15 +2874,16 @@ assert "Alice".equals(audience);
 <a name="example-jwe-aeskw"></a>
 ### JWT Encrypted with AES Key Wrap
 
-This is an example showing how to encrypt and decrypt a JWT using AES Key Wrap algorithms. These algorithms use 
-AES to encrypt and decrypt a secure-random key, and that generated key in turn is used to actually encrypt
+This is an example showing how to encrypt and decrypt a JWT using AES Key Wrap algorithms.
+
+These algorithms use AES to encrypt and decrypt a secure-random key, and that generated key in turn is used to actually encrypt
 the payload as described in the [AES Key Encryption](jwe-alg-aes) section above. This allows the payload to be 
 encrypted with a random short-lived key, reducing material exposure of the potentially longer-lived symmetric secret 
 key.  This approach requires the AES Key Wrap algorithms to be paired with an AEAD content encryption algorithm, 
 as shown below.
 
 The AES GCM Key Wrap algorithms (`A128GCMKW`, `A192GCMKW` and `A256GCMKW`) are preferred - they are faster and more
-efficient than the `A*KW` variants.
+efficient than the `A*KW` variants, but they do require JDK 8 or later (or JDK 7 + BouncyCastle).
 
 ```java
 // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
@@ -2905,9 +2907,11 @@ assert "me".equals(issuer);
 ### JWT Encrypted with ECDH-ES
 
 This is an example showing how to encrypt and decrypt a JWT using Elliptic Curve Diffie-Hellman Ephmeral Static 
-Key Agreement (ECDH-ES) algorithms.  These algorithms use ECDH-ES to encrypt and decrypt a secure-random key, and that 
+Key Agreement (ECDH-ES) algorithms.
+
+These algorithms use ECDH-ES to encrypt and decrypt a secure-random key, and that 
 generated key in turn is used to actually encrypt the payload as described in the 
-[Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement](jwe-alg-ecdhes) section above. Because of this, ECDH-ES* 
+[Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement](jwe-alg-ecdhes) section above. Because of this, ECDH-ES 
 Key Algorithms must be paired with an AEAD Encryption Algorithm, as shown below.
 
 In this example, Bob will encrypt a JWT using Alice's Elliptic Curve public key to ensure only she may read it.  
@@ -2938,12 +2942,15 @@ assert "Alice".equals(audience);
 <a name="example-jwe-password"></a>
 ### JWT Encrypted with a Password
 
-This is an example showing how to encrypt and decrypt a JWT using Password-based key-derivation algorithms. These 
-algorithms use a password to securely derive a random key, and that derived random key in turn is used to actually 
+This is an example showing how to encrypt and decrypt a JWT using Password-based key-derivation algorithms.
+
+These algorithms use a password to securely derive a random key, and that derived random key in turn is used to actually 
 encrypt the payload as described in the [Password-based Key Encryption](jwe-alg-pbes2) section above. This allows 
 the payload to be encrypted with a random short-lived cryptographically-stronger key, reducing the need to
-expose the longer-lived (and potentially weaker) password.  This approach requires the Password-based Key Wrap 
-algorithms to be paired with an AEAD content encryption algorithm, as shown below.
+expose the longer-lived (and potentially weaker) password.  
+
+This approach requires the Password-based Key Wrap algorithms to be paired with an AEAD content encryption algorithm, 
+as shown below.
 
 ```java
 //DO NOT use this example password in a real app, it is well-known to password crackers
