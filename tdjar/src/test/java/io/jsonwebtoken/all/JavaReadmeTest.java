@@ -1,5 +1,6 @@
-package io.jsonwebtoken;
+package io.jsonwebtoken.all;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
