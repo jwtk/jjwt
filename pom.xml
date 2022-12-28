@@ -266,6 +266,7 @@
                         <historyDir>${user.home}/.clover/${project.groupId}/jjwt</historyDir> -->
                         <excludes>
                             <exclude>io/jsonwebtoken/lang/*</exclude>
+                            <exclude>io/jsonwebtoken/all/JavaReadmeTest.java</exclude>
                         </excludes>
                         <methodPercentage>100.000000%</methodPercentage>
                         <statementPercentage>100.000000%</statementPercentage>
