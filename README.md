@@ -2953,7 +2953,7 @@ This approach requires the Password-based Key Wrap algorithms to be paired with 
 as shown below.
 
 ```java
-//DO NOT use this example password in a real app, it is well-known to password crackers
+//DO NOT use this example password in a real app, it is well-known to password crackers:
 String pw = "correct horse battery staple";
 Password password = Keys.forPassword(pw.toCharArray());
 
