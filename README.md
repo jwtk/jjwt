@@ -2960,11 +2960,13 @@ Password password = Keys.forPassword(pw.toCharArray());
 // Choose the desired PBES2 key derivation algorithm:
 KeyAlgorithm<Password, Password> alg = KeyAlgorithms.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
 
-// Choose the number of PBES2 computational iterations to use to derive the key.  This is 
-// optional - if you do not specify a value, JJWT will automatically choose a value based
-// on OWASP PBKDF2 recommendations here: 
+// Optionally choose the number of PBES2 computational iterations to use to derive the key.
+// This is optional - if you do not specify a value, JJWT will automatically choose a value 
+// based on your chosen PBES2 algorithm and OWASP PBKDF2 recommendations here: 
 // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
-int pbkdf2Iterations = 120000;
+// 
+// If you do specify a value, ensure the iterations are large enough for your desired alg
+//int pbkdf2Iterations = 120000; //for HS512. Needs to be much higher for smaller hash algs.
 
 // Choose the Encryption Algorithm used to encrypt the payload:
 AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
@@ -2972,7 +2974,7 @@ AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me")
     // Optional work factor is specified in the header:
-    .setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations).build())
+    //.setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations).build())
     .encryptWith(password, alg, enc)
     .compact();
 
