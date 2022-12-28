@@ -52,7 +52,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsRSA() {
         // Create a test key suitable for the desired RSA signature algorithm:
-        AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.RS512; //or RS256, RS384, PS256, PS384, or PS512
+        AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.RS512; //or PS512, RS256, etc...
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his RSA private key:
@@ -74,7 +74,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsECDSA() {
         // Create a test key suitable for the desired ECDSA signature algorithm:
-        AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.ES512; // or ES256 or ES384
+        AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.ES512; //or ES256 or ES384
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his EC private key:
@@ -97,7 +97,7 @@ public class JavaReadmeTest {
     public void testExampleJweDir() {
         // Create a test key suitable for the desired payload encryption algorithm:
         // (A*GCM algorithms are recommended, but require JDK 8 or later)
-        AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A128GCM, A192GCM, A128CBC-HS256, A192CBC-HS384, or A256CBC-HS512
+        AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
         SecretKey key = enc.keyBuilder().build();
 
         String message = "Live long and prosper.";
@@ -144,7 +144,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweAESKW() {
         // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-        SecretKeyAlgorithm alg = KeyAlgorithms.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, A192KW, A128KW
+        SecretKeyAlgorithm alg = KeyAlgorithms.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
         SecretKey key = alg.keyBuilder().build();
 
         // Chooose the Encryption Algorithm used to encrypt the payload:
@@ -169,7 +169,7 @@ public class JavaReadmeTest {
         KeyPair pair = SignatureAlgorithms.ES512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //or ECDH_ES_A192KW, ECDH_ES_128KW, or ECDH_ES
+        KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
         // Choose the Encryption Algorithm to encrypt the payload:
         AeadAlgorithm enc = EncryptionAlgorithms.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
@@ -198,9 +198,10 @@ public class JavaReadmeTest {
         // Choose the desired PBES2 key derivation algorithm:
         KeyAlgorithm<Password, Password> alg = KeyAlgorithms.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
 
-        // Choose the number of PBES2 computational iterations to use to derive the key.  This is optional - if you
-        // do not specify a value, JJWT will automatically choose a value based on OWASP PBKDF2 recommendations
-        // here: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
+        // Choose the number of PBES2 computational iterations to use to derive the key.  This is
+        // optional - if you do not specify a value, JJWT will automatically choose a value based
+        // on OWASP PBKDF2 recommendations here:
+        // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
         int pbkdf2Iterations = 120000;
 
         // Choose the Encryption Algorithm used to encrypt the payload:
