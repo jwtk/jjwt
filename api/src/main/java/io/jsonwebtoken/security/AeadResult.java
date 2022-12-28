@@ -16,7 +16,7 @@
 package io.jsonwebtoken.security;
 
 /**
- * The result of authenticated encryption, providing access to the resulting {@link #getContent() ciphertext},
+ * The result of authenticated encryption, providing access to the resulting {@link #getPayload() ciphertext},
  * {@link #getDigest() AAD tag}, and {@link #getInitializationVector() initialization vector}. The AAD tag and
  * initialization vector must be supplied with the ciphertext to decrypt.
  *
@@ -33,5 +33,5 @@ package io.jsonwebtoken.security;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadResult extends Message, DigestSupplier, InitializationVectorSupplier {
+public interface AeadResult extends Message<byte[]>, DigestSupplier, InitializationVectorSupplier {
 }

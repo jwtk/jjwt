@@ -6,10 +6,10 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.CryptoRequest;
 import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecretKeyBuilder;
+import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.SignatureRequest;
 
@@ -58,7 +58,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         return new RandomSecretKeyBuilder(KEY_ALG_NAME, getKeyBitLength());
     }
 
-    byte[] assertKeyBytes(CryptoRequest<SecretKey> request) {
+    byte[] assertKeyBytes(SecureRequest<?, SecretKey> request) {
         SecretKey key = Assert.notNull(request.getKey(), "Request key cannot be null.");
         return validateLength(key, this.keyBitLength * 2, true);
     }
@@ -74,7 +74,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] plaintext = Assert.notEmpty(req.getContent(), "Request content (plaintext) cannot be null or empty.");
+        final byte[] plaintext = Assert.notEmpty(req.getPayload(), "Request content (plaintext) cannot be null or empty.");
         final byte[] aad = getAAD(req); //can be null if request associated data does not exist or is empty
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
@@ -113,7 +113,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         }
 
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());
-        SignatureRequest<SecretKey> request = new DefaultSignatureRequest<>(null, null, toHash, key);
+        SignatureRequest<SecretKey> request = new DefaultSignatureRequest<>(toHash, null, null, key);
         byte[] digest = SIGALG.sign(request);
 
         // https://tools.ietf.org/html/rfc7518#section-5.2.2.1 #5 requires truncating the signature
@@ -122,7 +122,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public Message decrypt(final DecryptAeadRequest req) {
+    public Message<byte[]> decrypt(final DecryptAeadRequest req) {
 
         Assert.notNull(req, "Request cannot be null.");
 
@@ -132,7 +132,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] ciphertext = Assert.notEmpty(req.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
+        final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
         final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);
@@ -154,6 +154,6 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
             }
         });
 
-        return new DefaultMessage(plaintext);
+        return new DefaultMessage<>(plaintext);
     }
 }

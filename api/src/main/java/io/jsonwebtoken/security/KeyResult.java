@@ -22,7 +22,7 @@ import javax.crypto.SecretKey;
  * {@code JWE encrypted key} and {@code JWE Content Encryption Key (CEK)}, concepts defined in
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">JWE Terminology</a>.
  *
- * <p>The result {@link #getContent() content} is the {@code JWE encrypted key}, which will be Base64URL-encoded
+ * <p>The result {@link #getPayload() payload} is the {@code JWE encrypted key}, which will be Base64URL-encoded
  * and embedded in the resulting compact JWE string.</p>
  *
  * <p>The result {@link #getKey() key} is the {@code JWE Content Encryption Key (CEK)} which will be used to encrypt
@@ -30,5 +30,5 @@ import javax.crypto.SecretKey;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyResult extends Message, KeySupplier<SecretKey> {
+public interface KeyResult extends Message<byte[]>, KeySupplier<SecretKey> {
 }

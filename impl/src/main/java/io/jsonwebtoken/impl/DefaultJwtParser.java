@@ -623,7 +623,7 @@ public class DefaultJwtParser implements JwtParser {
             }
 
             DecryptionKeyRequest<Key> request =
-                    new DefaultDecryptionKeyRequest<>(this.provider, null, key, jweHeader, encAlg, cekBytes);
+                    new DefaultDecryptionKeyRequest<>(cekBytes, this.provider, null, jweHeader, encAlg, key);
             final SecretKey cek = keyAlg.getDecryptionKey(request);
             if (cek == null) {
                 String msg = "The '" + keyAlg.getId() + "' JWE key algorithm did not return a decryption key. " +
@@ -633,8 +633,8 @@ public class DefaultJwtParser implements JwtParser {
 
             DecryptAeadRequest decryptRequest =
                     new DefaultAeadResult(this.provider, null, payload, cek, aad, tag, iv);
-            Message result = encAlg.decrypt(decryptRequest);
-            payload = result.getContent();
+            Message<byte[]> result = encAlg.decrypt(decryptRequest);
+            payload = result.getPayload();
 
         } else if (Strings.hasText(base64UrlDigest) && this.signingKeyResolver == null) { //TODO: for 1.0, remove the == null check
             // not using a signing key resolver, so we can verify the signature before reading the body, which is

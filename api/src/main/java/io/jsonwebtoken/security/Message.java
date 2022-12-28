@@ -15,20 +15,22 @@
  */
 package io.jsonwebtoken.security;
 
+import java.security.Key;
+
 /**
- * A message contains {@link #getContent() content} used as input to a cryptographic algorithm, such as
- * signing, encryption or decryption.
+ * A message contains a {@link #getPayload() payload} used as input to or output from a cryptographic algorithm.
  *
+ * @param <T> The type of payload in the message.
  * @since JJWT_RELEASE_VERSION
  */
-public interface Message {
+public interface Message<T> {
 
     /**
-     * Returns the message content to be used as input to a cryptographic algorithm. This is almost always
-     * plaintext used for cryptographic signatures or encryption, or ciphertext for decryption.
+     * Returns the message payload used as input to or output from a cryptographic algorithm. This is almost always
+     * plaintext used for cryptographic signatures or encryption, or ciphertext for decryption, or a {@link Key}
+     * instance for wrapping or unwrapping algorithms.
      *
-     * @return the message content to be used as input to a cryptographic algorithm.
+     * @return the message payload used as input to or output from a cryptographic algorithm.
      */
-    byte[] getContent(); //plaintext or ciphertext
-
+    T getPayload(); //plaintext, ciphertext or Key
 }

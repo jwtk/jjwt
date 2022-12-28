@@ -34,7 +34,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
     public KeyResult getEncryptionKey(final KeyRequest<SecretKey> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
-        final SecretKey kek = assertKey(request);
+        final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);
         final byte[] iv = ensureInitializationVector(request);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
@@ -66,8 +66,8 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
     @Override
     public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        final SecretKey kek = assertKey(request);
-        final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
+        final SecretKey kek = assertKey(request.getKey());
+        final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
         final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final FieldReadable reader = new RequiredFieldReader(header);
         final byte[] tag = reader.get(DefaultJweHeader.TAG);

@@ -13,7 +13,7 @@ public class DefaultAeadResult extends DefaultAeadRequest implements AeadResult,
     private final byte[] TAG;
 
     public DefaultAeadResult(Provider provider, SecureRandom secureRandom, byte[] data, SecretKey key, byte[] aad, byte[] tag, byte[] iv) {
-        super(provider, secureRandom, data, key, aad, iv);
+        super(data, provider, secureRandom, key, aad, iv);
         Assert.notEmpty(iv, "initialization vector cannot be null or empty.");
         this.TAG = Assert.notEmpty(tag, "authentication tag cannot be null or empty.");
     }

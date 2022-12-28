@@ -9,9 +9,9 @@ import java.security.SecureRandom;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultSignatureRequest<K extends Key> extends DefaultCryptoRequest<K> implements SignatureRequest<K> {
+public class DefaultSignatureRequest<K extends Key> extends DefaultSecureRequest<byte[], K> implements SignatureRequest<K> {
 
-    public DefaultSignatureRequest(Provider provider, SecureRandom secureRandom, byte[] data, K key) {
-        super(provider, secureRandom, data, key);
+    public DefaultSignatureRequest(byte[] data, Provider provider, SecureRandom secureRandom, K key) {
+        super(data, provider, secureRandom, key);
     }
 }

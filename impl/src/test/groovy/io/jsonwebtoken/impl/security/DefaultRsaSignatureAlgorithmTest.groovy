@@ -51,7 +51,7 @@ class DefaultRsaSignatureAlgorithmTest {
     @Test
     void testValidateSigningKeyNotPrivate() {
         RSAPublicKey key = createMock(RSAPublicKey)
-        def request = new DefaultSignatureRequest(null, null, new byte[1], key)
+        def request = new DefaultSignatureRequest(new byte[1], null, null, key)
         try {
             SignatureAlgorithms.RS256.sign(request)
         } catch (InvalidKeyException e) {
@@ -65,7 +65,7 @@ class DefaultRsaSignatureAlgorithmTest {
         gen.initialize(1024) //too week for any JWA RSA algorithm
         def pair = gen.generateKeyPair()
 
-        def request = new DefaultSignatureRequest(null, null, new byte[1], pair.getPrivate())
+        def request = new DefaultSignatureRequest(new byte[1], null, null, pair.getPrivate())
         SignatureAlgorithms.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
             try {
                 it.sign(request)

@@ -26,7 +26,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
     @Override
     public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        final SecretKey kek = assertKey(request);
+        final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);
 
         byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
@@ -43,8 +43,8 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
     @Override
     public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        final SecretKey kek = assertKey(request);
-        final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Request content (encrypted key) cannot be null or empty.");
+        final SecretKey kek = assertKey(request.getKey());
+        final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request content (encrypted key) cannot be null or empty.");
 
         return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
             @Override

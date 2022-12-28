@@ -6,9 +6,8 @@ import io.jsonwebtoken.security.KeyResult;
 
 import javax.crypto.SecretKey;
 
-public class DefaultKeyResult implements KeyResult {
+public class DefaultKeyResult extends DefaultMessage<byte[]> implements KeyResult {
 
-    private final byte[] encryptedKey;
     private final SecretKey key;
 
     public DefaultKeyResult(SecretKey key) {
@@ -16,13 +15,13 @@ public class DefaultKeyResult implements KeyResult {
     }
 
     public DefaultKeyResult(SecretKey key, byte[] encryptedKey) {
-        this.encryptedKey = Assert.notNull(encryptedKey, "encryptedKey cannot be null (but can be empty).");
-        this.key = Assert.notNull(key, "Key argument cannot be null.");
+        super(encryptedKey);
+        this.key = Assert.notNull(key, "Content Encryption Key cannot be null.");
     }
 
     @Override
-    public byte[] getContent() {
-        return this.encryptedKey;
+    protected void assertBytePayload(byte[] payload) {
+        Assert.notNull(payload, "encrypted key bytes cannot be null (but may be empty.");
     }
 
     @Override

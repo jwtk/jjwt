@@ -148,7 +148,7 @@ class JwtsTest {
         def h = base64Url('{"alg":"HS256"}')
         def c = base64Url('{"sub":"joe","exp":"-42-"}')
         def payload = ("$h.$c" as String).getBytes(StandardCharsets.UTF_8)
-        def result = SignatureAlgorithms.HS256.sign(new DefaultSignatureRequest<SecretKey>(null, null, payload, key))
+        def result = SignatureAlgorithms.HS256.sign(new DefaultSignatureRequest<SecretKey>(payload, null, null, key))
         def sig = Encoders.BASE64URL.encode(result)
         def compact = "$h.$c.$sig" as String
         try {
@@ -1070,7 +1070,7 @@ class JwtsTest {
             }
 
             @Override
-            Message decrypt(DecryptAeadRequest request) throws SecurityException {
+            Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException {
                 return realAlg.decrypt(request)
             }
 

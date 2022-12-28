@@ -47,7 +47,7 @@ class HmacAesAeadAlgorithmTest {
 
         def plaintext = "Hello World! Nice to meet you!".getBytes("UTF-8")
 
-        def req = new DefaultAeadRequest(null, null, plaintext, key, null)
+        def req = new DefaultAeadRequest(plaintext, null, null, key, null)
         def result = alg.encrypt(req);
 
         def realTag = result.getDigest();
@@ -56,7 +56,7 @@ class HmacAesAeadAlgorithmTest {
         def fakeTag = new byte[realTag.length]
         Randoms.secureRandom().nextBytes(fakeTag)
 
-        def dreq = new DefaultAeadResult(null, null, result.getContent(), key, null, fakeTag, result.getInitializationVector())
+        def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, null, fakeTag, result.getInitializationVector())
         alg.decrypt(dreq)
     }
 }

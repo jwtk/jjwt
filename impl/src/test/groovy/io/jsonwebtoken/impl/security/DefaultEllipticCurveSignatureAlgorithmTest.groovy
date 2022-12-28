@@ -61,7 +61,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     @Test
     void testSignWithPublicKey() {
         ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
-        def request = new DefaultSignatureRequest(null, null, new byte[1], key)
+        def request = new DefaultSignatureRequest(new byte[1], null, null, key)
         try {
             SignatureAlgorithms.ES256.sign(request)
         } catch (InvalidKeyException e) {
@@ -77,7 +77,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPrivateKey priv = new TestECPrivateKey(params: spec)
-            def request = new DefaultSignatureRequest(null, null, new byte[1], priv)
+            def request = new DefaultSignatureRequest(new byte[1], null, null, priv)
             try {
                 it.sign(request)
             } catch (InvalidKeyException expected) {
@@ -94,7 +94,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void testSignWithInvalidKeyFieldLength() {
         def keypair = SignatureAlgorithms.ES256.keyPairBuilder().build()
         def data = "foo".getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultSignatureRequest(null, null, data, keypair.private)
+        def req = new DefaultSignatureRequest(data, null, null, keypair.private)
         try {
             SignatureAlgorithms.ES384.sign(req)
         } catch (InvalidKeyException expected) {
@@ -112,7 +112,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         algs().each {
             def pair = it.keyPairBuilder().build()
             def key = pair.getPrivate()
-            def signRequest = new DefaultSignatureRequest(null, null, data, key)
+            def signRequest = new DefaultSignatureRequest(data, null, null, key)
             byte[] signature = it.sign(signRequest)
             def verifyRequest = new DefaultVerifySignatureRequest(null, null, data, key, signature)
             try {
@@ -266,7 +266,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             assertTrue keypair.getPublic() instanceof ECPublicKey
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
             def data = withoutSignature.getBytes("US-ASCII")
-            def signature = alg.sign(new DefaultSignatureRequest<Key>(null, null, data, keypair.private))
+            def signature = alg.sign(new DefaultSignatureRequest<Key>(data, null, null, keypair.private))
             assertTrue alg.verify(new DefaultVerifySignatureRequest(null, null, data, keypair.public, signature))
         }
     }

@@ -46,11 +46,11 @@ class GcmAesAeadAlgorithmTest {
 
         def alg = EncryptionAlgorithms.A256GCM
 
-        def req = new DefaultAeadRequest(null, null, P, KEY, AAD, IV)
+        def req = new DefaultAeadRequest(P, null, null, KEY, AAD, IV)
 
         def result = alg.encrypt(req)
 
-        byte[] ciphertext = result.getContent()
+        byte[] ciphertext = result.getPayload()
         byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
@@ -60,7 +60,7 @@ class GcmAesAeadAlgorithmTest {
 
         // now test decryption:
         def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, AAD, tag, iv)
-        byte[] decryptionResult = alg.decrypt(dreq).getContent()
+        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
         assertArrayEquals(P, decryptionResult)
     }
 

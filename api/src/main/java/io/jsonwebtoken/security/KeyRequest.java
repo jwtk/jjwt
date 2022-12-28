@@ -17,31 +17,32 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.JweHeader;
 
-import java.security.Key;
-
 /**
  * A request to a {@link KeyAlgorithm} to obtain the key necessary for AEAD encryption or decryption.  The exact
  * {@link AeadAlgorithm} that will be used is accessible via {@link #getEncryptionAlgorithm()}.
  *
- * <p>The key used to perform cryptographic operations, for example a direct shared key, or a
- * JWE &quot;key encryption key&quot; will be accessible via {@link #getKey()}. This is always required and
- * never {@code null}.</p>
- *
- * <p>For an encryption key request, any <em>public</em> information specific to the called {@link KeyAlgorithm}
- * implementation that is required to be transmitted in the JWE (such as an initialization vector,
+ * <p><b>Encryption Requests</b></p>
+ * <p>For an encryption key request, {@link #getPayload()} will return
+ * the encryption key to use.  Additionally, any <em>public</em> information specific to the called
+ * {@link KeyAlgorithm} implementation that is required to be transmitted in the JWE (such as an initialization vector,
  * authentication tag or ephemeral key, etc) may be added to the JWE protected header, accessible via
  * {@link #getHeader()}. Although the JWE header is checked for authenticity and integrity, it itself is
  * <em>not</em> encrypted, so {@link KeyAlgorithm}s should never place any secret or private information in the
  * header.</p>
  *
- * <p>For a decryption request, any public information necessary by the called {@link KeyAlgorithm}
- * (such as an initialization vector, authentication tag, ephemeral key, etc) is expected to be available in
- * the JWE protected header, accessible via {@link #getHeader()}.</p>
+ * <p><b>Decryption Requests</b></p>
+ * <p>For a decryption request, the {@code KeyRequest} instance will be
+ * a {@link DecryptionKeyRequest} instance, {@link #getPayload()} will return the encrypted key ciphertext (a
+ * byte array), and the decryption key will be available via {@link DecryptionKeyRequest#getKey()}.  Additionally,
+ * any public information necessary by the called {@link KeyAlgorithm} (such as an initialization vector,
+ * authentication tag, ephemeral key, etc) is expected to be available in the JWE protected header, accessible
+ * via {@link #getHeader()}.</p>
  *
- * @param <K> the type of key used to perform cryptographic operations during the request.
+ * @param <T> the type of object relevant during key algorithm cryptographic operations.
+ * @see DecryptionKeyRequest
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyRequest<K extends Key> extends Request, KeySupplier<K> {
+public interface KeyRequest<T> extends Request<T> {
 
     /**
      * Returns the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the

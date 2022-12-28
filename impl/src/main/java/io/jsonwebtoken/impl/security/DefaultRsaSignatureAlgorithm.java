@@ -102,7 +102,7 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSignatureAlgorithm<Pri
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initSign(request.getKey());
-                sig.update(request.getContent());
+                sig.update(request.getPayload());
                 return sig.sign();
             }
         });
@@ -121,7 +121,7 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSignatureAlgorithm<Pri
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initVerify(request.getKey());
-                sig.update(request.getContent());
+                sig.update(request.getPayload());
                 return sig.verify(request.getDigest());
             }
         });

@@ -44,7 +44,7 @@ import java.security.Key;
 public interface SignatureAlgorithm<S extends Key, V extends Key> extends Identifiable {
 
     /**
-     * Compute a digital signature or MAC for the request {@link SignatureRequest#getContent() content} using the
+     * Compute a digital signature or MAC for the request {@link SignatureRequest#getPayload() payload} using the
      * request {@link SignatureRequest#getKey() key}, returning the digest result.
      *
      * @param request the signature request representing the plaintext data to be signed or MAC'd and the
@@ -60,7 +60,7 @@ public interface SignatureAlgorithm<S extends Key, V extends Key> extends Identi
      *
      * @param request the request representing the previously-computed digital signature or MAC
      *                {@link VerifySignatureRequest#getDigest() digest output}, original
-     *                {@link VerifySignatureRequest#getContent() content} and
+     *                {@link VerifySignatureRequest#getPayload() payload} and
      *                {@link VerifySignatureRequest#getKey() verification key}.
      * @return {@code true} if the authenticity and integrity of the previously-computed digital signature or MAC can
      * be verified, {@code false} otherwise.

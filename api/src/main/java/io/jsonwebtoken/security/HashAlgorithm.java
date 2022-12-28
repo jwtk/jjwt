@@ -1,8 +1,8 @@
-package io.jsonwebtoken.impl.security;
+package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 
 public interface HashAlgorithm extends Identifiable {
 
-    byte[] hash(ContentRequest request);
+    byte[] hash(Request<byte[]> request);
 }

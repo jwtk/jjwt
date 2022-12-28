@@ -27,7 +27,7 @@ import java.security.Key;
  *
  * <p>Any encrypted key material (what the JWE specification calls the
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">JWE Encrypted Key</a>) will
- * be accessible via {@link #getContent()}. If present, the {@link KeyAlgorithm} will decrypt it to obtain the resulting
+ * be accessible via {@link #getPayload()}. If present, the {@link KeyAlgorithm} will decrypt it to obtain the resulting
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">Content Encryption Key (CEK)</a>.
  * This may be empty however depending on which {@link KeyAlgorithm} was used during JWE encryption.</p>
  *
@@ -38,5 +38,5 @@ import java.security.Key;
  * @param <K> the type of {@link Key} used during the request to obtain the resulting decryption key.
  * @since JJWT_RELEASE_VERSION
  */
-public interface DecryptionKeyRequest<K extends Key> extends KeyRequest<K>, Message {
+public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
 }

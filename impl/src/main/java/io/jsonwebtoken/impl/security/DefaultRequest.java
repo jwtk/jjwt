@@ -5,12 +5,13 @@ import io.jsonwebtoken.security.Request;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultRequest implements Request {
+public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
 
     private final Provider provider;
     private final SecureRandom secureRandom;
 
-    public DefaultRequest(Provider provider, SecureRandom secureRandom) {
+    public DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
+        super(payload);
         this.provider = provider;
         this.secureRandom = secureRandom;
     }

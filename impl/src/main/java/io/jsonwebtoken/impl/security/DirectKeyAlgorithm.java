@@ -24,13 +24,13 @@ public class DirectKeyAlgorithm implements KeyAlgorithm<SecretKey, SecretKey> {
     @Override
     public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        SecretKey key = Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
+        SecretKey key = Assert.notNull(request.getPayload(), "Encryption key cannot be null.");
         return new DefaultKeyResult(key);
     }
 
     @Override
     public SecretKey getDecryptionKey(DecryptionKeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        return Assert.notNull(request.getKey(), "request.getKey() cannot be null.");
+        return Assert.notNull(request.getKey(), "Decryption key cannot be null.");
     }
 }

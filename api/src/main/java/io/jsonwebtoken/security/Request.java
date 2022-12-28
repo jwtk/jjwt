@@ -30,11 +30,12 @@ import java.security.SecureRandom;
  * {@code SecureRandom} for all executions. {@code Request} subtypes provide additional parameters as necessary
  * depending on the type of cryptographic algorithm invoked.</p>
  *
+ * @param <T> the type of payload in the request.
  * @see #getProvider()
  * @see #getSecureRandom()
  * @since JJWT_RELEASE_VERSION
  */
-public interface Request {
+public interface Request<T> extends Message<T> {
 
     /**
      * Returns the JCA provider that should be used for cryptographic operations during the request or

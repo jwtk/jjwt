@@ -24,10 +24,10 @@ class DirectKeyAlgorithmTest {
     void testGetEncryptionKey() {
         def alg = new DirectKeyAlgorithm()
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(null, null, key, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM)
+        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM)
         def result = alg.getEncryptionKey(request)
         assertSame key, result.getKey()
-        assertEquals 0, Arrays.length(result.getContent()) //must not have an encrypted key
+        assertEquals 0, Arrays.length(result.getPayload()) //must not have an encrypted key
     }
 
     @Test(expected = IllegalArgumentException)
@@ -38,9 +38,9 @@ class DirectKeyAlgorithmTest {
     @Test(expected = IllegalArgumentException)
     void testGetEncryptionKeyWithNullRequestKey() {
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(null, null, key, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM) {
+        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader(), EncryptionAlgorithms.A128GCM) {
             @Override
-            Key getKey() {
+            Key getPayload() {
                 return null
             }
         }

@@ -137,7 +137,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
             @Override
             public byte[] apply(Signature sig) throws Exception {
                 sig.initSign(request.getKey());
-                sig.update(request.getContent());
+                sig.update(request.getPayload());
                 byte[] signature = sig.sign();
                 return transcodeDERToConcat(signature, signatureByteLength);
             }
@@ -197,7 +197,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
                     }
 
                     sig.initVerify(key);
-                    sig.update(request.getContent());
+                    sig.update(request.getPayload());
                     return sig.verify(derSignature);
 
                 } catch (Exception e) {

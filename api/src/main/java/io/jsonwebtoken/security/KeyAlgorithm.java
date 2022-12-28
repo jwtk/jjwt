@@ -52,8 +52,8 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      *
      * <p>If the key algorithm uses key encryption or key agreement to produce an encrypted key value that must be
      * included in the JWE, the encrypted key ciphertext will be available via the result's
-     * {@link KeyResult#getContent() result.getContent()} method.  If the key algorithm does not produce encrypted
-     * key ciphertext, {@link KeyResult#getContent() result.getContent()} will be a non-null empty byte array.</p>
+     * {@link KeyResult#getPayload() result.getPayload()} method.  If the key algorithm does not produce encrypted
+     * key ciphertext, {@link KeyResult#getPayload() result.getPayload()} will be a non-null empty byte array.</p>
      *
      * @param request the {@code KeyRequest} containing information necessary to produce a {@code SecretKey} for
      *                {@link AeadAlgorithm AEAD} encryption.
@@ -68,9 +68,9 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      * {@link DecryptionKeyRequest#getEncryptionAlgorithm() AeadAlgorithm}.
      *
      * <p>If the key algorithm used key encryption or key agreement to produce an encrypted key value, the encrypted
-     * key ciphertext will be available via the request's {@link DecryptionKeyRequest#getContent() result.getContent()}
+     * key ciphertext will be available via the request's {@link DecryptionKeyRequest#getPayload() result.getPayload()}
      * method. If the key algorithm did not produce encrypted key ciphertext,
-     * {@link DecryptionKeyRequest#getContent() request.getContent()} will return a non-null empty byte array.</p>
+     * {@link DecryptionKeyRequest#getPayload() request.getPayload()} will return a non-null empty byte array.</p>
      *
      * @param request the {@code DecryptionKeyRequest} containing information necessary to obtain a
      *                {@code SecretKey} for {@link AeadAlgorithm AEAD} decryption.

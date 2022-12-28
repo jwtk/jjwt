@@ -63,7 +63,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
     @Override
     public KeyResult getEncryptionKey(final KeyRequest<PublicKey> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
-        final PublicKey kek = Assert.notNull(request.getKey(), "Request key encryption key cannot be null.");
+        final PublicKey kek = Assert.notNull(request.getPayload(), "RSA PublicKey encryption key cannot be null.");
         validate(kek, true);
         final SecretKey cek = generateKey(request);
 
@@ -85,9 +85,9 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
     @Override
     public SecretKey getDecryptionKey(DecryptionKeyRequest<PrivateKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
-        final PrivateKey kek = Assert.notNull(request.getKey(), "Request key decryption key cannot be null.");
+        final PrivateKey kek = Assert.notNull(request.getKey(), "RSA PrivateKey decryption key cannot be null.");
         validate(kek, false);
-        final byte[] cekBytes = Assert.notEmpty(request.getContent(), "Request content (encrypted key) cannot be null or empty.");
+        final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request content (encrypted key) cannot be null or empty.");
 
         return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
             @Override

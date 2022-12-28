@@ -23,5 +23,5 @@ import java.security.Key;
  * @param <K> they type of key used by the algorithm during the request
  * @since JJWT_RELEASE_VERSION
  */
-public interface CryptoRequest<K extends Key> extends Message, Request, KeySupplier<K> {
+public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier<K> {
 }

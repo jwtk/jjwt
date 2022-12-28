@@ -28,7 +28,7 @@ class EcdhKeyAlgorithmTest {
 
         def header = new DefaultJweHeader()
 
-        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest(null, null, decryptionKey, header, EncryptionAlgorithms.A128GCM, 'test'.getBytes())
+        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, EncryptionAlgorithms.A128GCM, decryptionKey)
 
         try {
             alg.getDecryptionKey(req)
@@ -50,7 +50,7 @@ class EcdhKeyAlgorithmTest {
         def jwk = Jwks.builder().forKey(TestKeys.ES384.pair.public as ECPublicKey).build()
         header.put('epk', jwk)
 
-        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest(null, null, decryptionKey, header, EncryptionAlgorithms.A128GCM, 'test'.getBytes())
+        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, EncryptionAlgorithms.A128GCM, decryptionKey)
 
         try {
             alg.getDecryptionKey(req)

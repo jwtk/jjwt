@@ -29,8 +29,8 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
     public AeadResult encrypt(final AeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
-        final SecretKey key = assertKey(req);
-        final byte[] plaintext = Assert.notEmpty(req.getContent(), "Request content (plaintext) cannot be null or empty.");
+        final SecretKey key = assertKey(req.getKey());
+        final byte[] plaintext = Assert.notEmpty(req.getPayload(), "Request content (plaintext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
@@ -58,11 +58,11 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
     }
 
     @Override
-    public Message decrypt(final DecryptAeadRequest req) throws SecurityException {
+    public Message<byte[]> decrypt(final DecryptAeadRequest req) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
-        final SecretKey key = assertKey(req);
-        final byte[] ciphertext = Assert.notEmpty(req.getContent(), "Decryption request content (ciphertext) cannot be null or empty.");
+        final SecretKey key = assertKey(req.getKey());
+        final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
         final byte[] tag = Assert.notEmpty(req.getDigest(), "Decryption request authentication tag cannot be null or empty.");
         final byte[] iv = assertDecryptionIv(req);
@@ -82,6 +82,6 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
             }
         });
 
-        return new DefaultMessage(plaintext);
+        return new DefaultMessage<>(plaintext);
     }
 }

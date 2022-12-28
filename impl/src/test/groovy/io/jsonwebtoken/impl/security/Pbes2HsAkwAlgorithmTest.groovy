@@ -36,7 +36,7 @@ class Pbes2HsAkwAlgorithmTest {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
             JweHeader header = Jwts.headerBuilder().setPbes2Count(iterations).build() as JweHeader
-            KeyRequest<Password> req = new DefaultKeyRequest<>(null, null, KEY, header, EncryptionAlgorithms.A256GCM)
+            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, header, EncryptionAlgorithms.A256GCM)
             try {
                 alg.getEncryptionKey(req)
                 fail()

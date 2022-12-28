@@ -452,7 +452,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
             Assert.stateNotNull(key, "Signing key cannot be null.");
             Assert.stateNotNull(signFunction, "signFunction cannot be null.");
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
-            SignatureRequest<Key> request = new DefaultSignatureRequest<>(provider, secureRandom, data, key);
+            SignatureRequest<Key> request = new DefaultSignatureRequest<>(data, provider, secureRandom, key);
             byte[] signature = signFunction.apply(request);
             String base64UrlSignature = base64UrlEncoder.encode(signature);
             jwt += DefaultJwtParser.SEPARATOR_CHAR + base64UrlSignature;
@@ -474,12 +474,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         Assert.notEmpty(payload, "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
-        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.provider, this.secureRandom, this.key, header, enc);
+        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, header, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
 
         Assert.stateNotNull(keyRequest, "KeyAlgorithm must return a KeyResult.");
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
-        byte[] encryptedCek = Assert.notNull(keyResult.getContent(), "KeyResult must return an encrypted key byte array, even if empty.");
+        byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
         header.put(AbstractHeader.ALGORITHM.getId(), keyAlg.getId());
         header.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
@@ -488,11 +488,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
-        AeadRequest encRequest = new DefaultAeadRequest(provider, secureRandom, payload, cek, aad);
+        AeadRequest encRequest = new DefaultAeadRequest(payload, provider, secureRandom, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
-        byte[] ciphertext = Assert.notEmpty(encResult.getContent(), "Encryption result must have non-empty ciphertext (result.getData()).");
+        byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");
         byte[] tag = Assert.notEmpty(encResult.getDigest(), "Encryption result must have a non-empty authentication tag.");
 
         String base64UrlEncodedEncryptedCek = base64UrlEncoder.encode(encryptedCek);

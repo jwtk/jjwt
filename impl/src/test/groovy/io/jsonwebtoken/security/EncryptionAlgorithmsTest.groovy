@@ -93,7 +93,7 @@ class EncryptionAlgorithmsTest {
             byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
 
-            byte[] ciphertext = result.getContent()
+            byte[] ciphertext = result.getPayload()
 
             boolean gcm = alg instanceof GcmAesAeadAlgorithm
 
@@ -103,7 +103,7 @@ class EncryptionAlgorithmsTest {
 
             def dreq = new DefaultAeadResult(null, null, ciphertext, key, null, tag, result.getInitializationVector())
 
-            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getContent()
+            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
 
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }
@@ -116,11 +116,11 @@ class EncryptionAlgorithmsTest {
 
             def key = alg.keyBuilder().build()
 
-            def req = new DefaultAeadRequest(null, null, PLAINTEXT_BYTES, key, AAD_BYTES)
+            def req = new DefaultAeadRequest(PLAINTEXT_BYTES, null, null, key, AAD_BYTES)
 
             def result = alg.encrypt(req)
 
-            byte[] ciphertext = result.getContent()
+            byte[] ciphertext = result.getPayload()
 
             boolean gcm = alg instanceof GcmAesAeadAlgorithm
 
@@ -128,8 +128,8 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertext.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadResult(null, null, result.getContent(), key, AAD_BYTES, result.getDigest(), result.getInitializationVector())
-            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getContent()
+            def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, AAD_BYTES, result.getDigest(), result.getInitializationVector())
+            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }
     }

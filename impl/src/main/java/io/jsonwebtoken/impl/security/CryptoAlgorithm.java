@@ -47,7 +47,7 @@ abstract class CryptoAlgorithm implements Identifiable {
         return this.provider;
     }
 
-    SecureRandom ensureSecureRandom(Request request) {
+    SecureRandom ensureSecureRandom(Request<?> request) {
         SecureRandom random = request != null ? request.getSecureRandom() : null;
         return random != null ? random : Randoms.secureRandom();
     }
@@ -56,7 +56,7 @@ abstract class CryptoAlgorithm implements Identifiable {
         return new JcaTemplate(getJcaName(), this.provider).execute(clazz, fn);
     }
 
-    protected Provider getProvider(Request request) {
+    protected Provider getProvider(Request<?> request) {
         Provider provider = request.getProvider();
         if (provider == null) {
             provider = this.provider; // fallback, if any
@@ -64,7 +64,7 @@ abstract class CryptoAlgorithm implements Identifiable {
         return provider;
     }
 
-    protected <I, T> T execute(Request request, Class<I> clazz, CheckedFunction<I, T> fn) {
+    protected <I, T> T execute(Request<?> request, Class<I> clazz, CheckedFunction<I, T> fn) {
         Assert.notNull(request, "request cannot be null.");
         Provider provider = getProvider(request);
         SecureRandom random = ensureSecureRandom(request);

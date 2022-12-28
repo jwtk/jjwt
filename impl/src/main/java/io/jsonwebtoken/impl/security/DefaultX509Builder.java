@@ -21,6 +21,8 @@ import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.security.HashAlgorithm;
+import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.X509Builder;
 import io.jsonwebtoken.security.X509Mutator;
 
@@ -103,7 +105,7 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
 
     private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {
         byte[] encoded = GET_X509_BYTES.apply(cert);
-        ContentRequest request = new DefaultContentRequest(null, null, encoded);
+        Request<byte[]> request = new DefaultRequest<>(encoded, null, null);
         return alg.hash(request);
     }
 

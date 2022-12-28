@@ -12,7 +12,7 @@ public class DefaultVerifySignatureRequest<K extends Key> extends DefaultSignatu
     private final byte[] signature;
 
     public DefaultVerifySignatureRequest(Provider provider, SecureRandom secureRandom, byte[] data, K key, byte[] signature) {
-        super(provider, secureRandom, data, key);
+        super(data, provider, secureRandom, key);
         this.signature = Assert.notEmpty(signature, "Signature byte array cannot be null or empty.");
     }
 

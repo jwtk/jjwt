@@ -86,5 +86,5 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      * @return the decryption result containing the plaintext
      * @throws SecurityException if there is a decryption problem or authenticity assertions fail.
      */
-    Message decrypt(DecryptAeadRequest request) throws SecurityException;
+    Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException;
 }

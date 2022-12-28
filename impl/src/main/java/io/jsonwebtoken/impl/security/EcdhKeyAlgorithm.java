@@ -66,7 +66,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
     }
 
     //visible for testing
-    protected KeyPair generateKeyPair(final Request request, final ECParameterSpec spec) {
+    protected KeyPair generateKeyPair(final Request<?> request, final ECParameterSpec spec) {
         Assert.notNull(spec, "request key params cannot be null.");
         JcaTemplate template = new JcaTemplate(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, getProvider(request), ensureSecureRandom(request));
         return template.generateKeyPair(spec);
@@ -131,10 +131,10 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         Assert.notNull(request, "Request cannot be null.");
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
 
-        PublicKey publicKey = Assert.notNull(request.getKey(), "Request key cannot be null.");
+        PublicKey publicKey = Assert.notNull(request.getPayload(), "Encryption PublicKey cannot be null.");
         ECKey ecPublicKey = Assert.isInstanceOf(ECKey.class, publicKey, KEK_ECKEY_TYPE_MESSAGE);
 
-        ECParameterSpec spec = Assert.notNull(ecPublicKey.getParams(), "Request key params cannot be null.");
+        ECParameterSpec spec = Assert.notNull(ecPublicKey.getParams(), "Encryption PublicKey params cannot be null.");
         // note: we don't need to validate if specified key's point is on a supported curve here
         // because that will automatically be asserted when using Jwks.builder().... below
         KeyPair pair = generateKeyPair(request, spec);
@@ -145,8 +145,8 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         final SecretKey derived = deriveKey(request, publicKey, genPrivKey);
 
-        DefaultKeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(request.getProvider(), request.getSecureRandom(),
-                derived, request.getHeader(), request.getEncryptionAlgorithm());
+        DefaultKeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derived, request.getProvider(), request.getSecureRandom(),
+                request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = WRAP_ALG.getEncryptionKey(wrapReq);
 
         header.put(DefaultJweHeader.EPK.getId(), jwk);
@@ -159,7 +159,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         Assert.notNull(request, "Request cannot be null.");
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        PrivateKey privateKey = Assert.notNull(request.getKey(), "Request key cannot be null.");
+        PrivateKey privateKey = Assert.notNull(request.getKey(), "Decryption PrivateKey cannot be null.");
         ECKey ecPrivateKey = Assert.isInstanceOf(ECKey.class, privateKey, KDK_ECKEY_TYPE_MESSAGE);
 
         FieldReadable reader = new RequiredFieldReader(header);
@@ -174,8 +174,8 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);
 
-        DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getProvider(),
-                request.getSecureRandom(), derived, header, request.getEncryptionAlgorithm(), request.getContent());
+        DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getPayload(), request.getProvider(),
+                request.getSecureRandom(), header, request.getEncryptionAlgorithm(), derived);
 
         return WRAP_ALG.getDecryptionKey(unwrapReq);
     }

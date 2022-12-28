@@ -66,12 +66,12 @@ class AesGcmKeyAlgorithmTest {
         System.arraycopy(jcaResult, ciphertextLength, tag, 0, 16)
         def resultA = new DefaultAeadResult(null, null, ciphertext, kek, null, tag, iv)
 
-        def encRequest = new DefaultAeadRequest(null, null, cek.getEncoded(), kek, null, iv)
+        def encRequest = new DefaultAeadRequest(cek.getEncoded(), null, null, kek, null, iv)
         def encResult = EncryptionAlgorithms.A256GCM.encrypt(encRequest)
 
         assertArrayEquals resultA.digest, encResult.digest
         assertArrayEquals resultA.initializationVector, encResult.initializationVector
-        assertArrayEquals resultA.getContent(), encResult.getContent()
+        assertArrayEquals resultA.getPayload(), encResult.getPayload()
     }
 
     static void assertAlgorithm(int keyLength) {
@@ -91,14 +91,14 @@ class AesGcmKeyAlgorithmTest {
             }
         }
 
-        def ereq = new DefaultKeyRequest(null, null, kek, header, enc)
+        def ereq = new DefaultKeyRequest(kek, null, null, header, enc)
 
         def result = alg.getEncryptionKey(ereq)
 
-        byte[] encryptedKeyBytes = result.getContent()
+        byte[] encryptedKeyBytes = result.getPayload()
         assertFalse "encryptedKey must be populated", Arrays.length(encryptedKeyBytes) == 0
 
-        def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(null, null, kek, header, enc, encryptedKeyBytes))
+        def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, header, enc, kek))
 
         //Assert the decrypted key matches the original cek
         assertEquals cek.algorithm, dcek.algorithm
@@ -125,17 +125,17 @@ class AesGcmKeyAlgorithmTest {
                 return new FixedSecretKeyBuilder(cek)
             }
         }
-        def ereq = new DefaultKeyRequest(null, null, kek, header, enc)
+        def ereq = new DefaultKeyRequest(kek, null, null, header, enc)
         def result = alg.getEncryptionKey(ereq)
 
         header.remove(headerName)
 
         header.put(headerName, value)
 
-        byte[] encryptedKeyBytes = result.getContent()
+        byte[] encryptedKeyBytes = result.getPayload()
 
         try {
-            alg.getDecryptionKey(new DefaultDecryptionKeyRequest(null, null, kek, header, enc, encryptedKeyBytes))
+            alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, header, enc, kek))
             fail()
         } catch (MalformedJwtException iae) {
             assertEquals exmsg, iae.getMessage()

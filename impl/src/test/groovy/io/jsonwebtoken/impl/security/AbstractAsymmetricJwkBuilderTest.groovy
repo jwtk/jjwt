@@ -16,10 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.EcPrivateJwk
-import io.jsonwebtoken.security.EcPublicJwk
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.RsaPublicJwkBuilder
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import java.security.cert.X509Certificate
@@ -67,7 +64,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1Thumbprint() {
-        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
         def x5t = DefaultHashAlgorithm.SHA1.hash(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().setX509CertificateSha1Thumbprint(x5t).build()
@@ -77,7 +74,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1ThumbprintEnabled() {
-        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
         def x5t = DefaultHashAlgorithm.SHA1.hash(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha1Thumbprint(true).build()
@@ -87,7 +84,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha256Thumbprint() {
-        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
         def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateSha256Thumbprint(x5tS256).build()
@@ -97,7 +94,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha256ThumbprintEnabled() {
-        ContentRequest request = new DefaultContentRequest(null, null, TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
         def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()

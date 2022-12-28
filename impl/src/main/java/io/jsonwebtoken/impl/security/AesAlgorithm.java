@@ -9,7 +9,6 @@ import io.jsonwebtoken.security.AssociatedDataSupplier;
 import io.jsonwebtoken.security.InitializationVectorSupplier;
 import io.jsonwebtoken.security.KeyBuilderSupplier;
 import io.jsonwebtoken.security.KeyLengthSupplier;
-import io.jsonwebtoken.security.KeySupplier;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.WeakKeyException;
@@ -32,8 +31,8 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     protected static final int GCM_IV_SIZE = 96; // https://tools.ietf.org/html/rfc7518#section-5.3
     //protected static final int GCM_IV_BYTE_SIZE = GCM_IV_SIZE / Byte.SIZE;
     protected static final String DECRYPT_NO_IV = "This algorithm implementation rejects decryption " +
-        "requests that do not include initialization vectors. AES ciphertext without an IV is weak and " +
-        "susceptible to attack.";
+            "requests that do not include initialization vectors. AES ciphertext without an IV is weak and " +
+            "susceptible to attack.";
 
     protected final int keyBitLength;
     protected final int ivBitLength;
@@ -71,8 +70,8 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         return new DefaultSecretKeyBuilder(KEY_ALG_NAME, getKeyBitLength());
     }
 
-    protected SecretKey assertKey(KeySupplier<? extends SecretKey> request) {
-        SecretKey key = Assert.notNull(request.getKey(), "Request key cannot be null.");
+    protected SecretKey assertKey(SecretKey key) {
+        Assert.notNull(key, "Request key cannot be null.");
         validateLengthIfPossible(key);
         return key;
     }
@@ -83,8 +82,8 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
 
     protected static String lengthMsg(String id, String type, int requiredLengthInBits, long actualLengthInBits) {
         return "The '" + id + "' algorithm requires " + type + " with a length of " +
-            Bytes.bitsMsg(requiredLengthInBits) + ".  The provided key has a length of " +
-            Bytes.bitsMsg(actualLengthInBits) + ".";
+                Bytes.bitsMsg(requiredLengthInBits) + ".  The provided key has a length of " +
+                Bytes.bitsMsg(actualLengthInBits) + ".";
     }
 
     protected byte[] validateLength(SecretKey key, int requiredBitLength, boolean propagate) {
@@ -130,7 +129,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         return assertIvLength(iv);
     }
 
-    protected byte[] ensureInitializationVector(Request request) {
+    protected byte[] ensureInitializationVector(Request<?> request) {
         byte[] iv = null;
         if (request instanceof InitializationVectorSupplier) {
             iv = Arrays.clean(((InitializationVectorSupplier) request).getInitializationVector());

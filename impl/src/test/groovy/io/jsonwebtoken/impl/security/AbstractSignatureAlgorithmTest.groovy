@@ -21,7 +21,7 @@ class AbstractSignatureAlgorithmTest {
         Provider provider = Security.getProvider('BC')
         def pair = SignatureAlgorithms.RS256.keyPairBuilder().build()
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
-        byte[] signature = SignatureAlgorithms.RS256.sign(new DefaultSignatureRequest<>(provider, null, data, pair.getPrivate()))
+        byte[] signature = SignatureAlgorithms.RS256.sign(new DefaultSignatureRequest<>(data, provider, null, pair.getPrivate()))
         assertTrue SignatureAlgorithms.RS256.verify(new DefaultVerifySignatureRequest(provider, null, data, pair.getPublic(), signature))
     }
 
@@ -36,7 +36,7 @@ class AbstractSignatureAlgorithmTest {
             }
         }
         try {
-            alg.sign(new DefaultSignatureRequest(null, null, 'foo'.getBytes(StandardCharsets.UTF_8), pair.getPrivate()))
+            alg.sign(new DefaultSignatureRequest('foo'.getBytes(StandardCharsets.UTF_8), null, null, pair.getPrivate()))
         } catch (SignatureException e) {
             assertTrue e.getMessage().startsWith('Unable to compute test signature with JCA algorithm \'test\' using key {')
             assertTrue e.getMessage().endsWith('}: foo')
@@ -56,7 +56,7 @@ class AbstractSignatureAlgorithmTest {
         }
         def data = 'foo'.getBytes(StandardCharsets.UTF_8)
         try {
-            byte[] signature = alg.sign(new DefaultSignatureRequest(null, null, data, pair.getPrivate()))
+            byte[] signature = alg.sign(new DefaultSignatureRequest(data, null, null, pair.getPrivate()))
             alg.verify(new DefaultVerifySignatureRequest(null, null, data, pair.getPublic(), signature))
         } catch (SignatureException e) {
             assertTrue e.getMessage().startsWith('Unable to verify test signature with JCA algorithm \'test\' using key {')
