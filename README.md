@@ -2958,7 +2958,7 @@ String pw = "correct horse battery staple";
 Password password = Keys.forPassword(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
-KeyAlgorithm<Password, Password> alg = KeyAlgorithms.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
+KeyAlgorithm<Password, Password> alg = KeyAlgorithms.PBES2_HS512_A256KW; //or PBES2_HS384...
 
 // Optionally choose the number of PBES2 computational iterations to use to derive the key.
 // This is optional - if you do not specify a value, JJWT will automatically choose a value 
