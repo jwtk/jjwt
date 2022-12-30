@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.security
 
 import io.jsonwebtoken.impl.lang.Bytes
@@ -70,7 +71,7 @@ class KeysTest {
                     "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                     "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                     "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                    "output size).  Consider using the SignatureAlgorithms.HS256.keyBuilder() method (or " +
+                    "output size).  Consider using the JwsAlgorithms.HS256.keyBuilder() method (or " +
                     "HS384.keyBuilder() or HS512.keyBuilder()) to create a key guaranteed to be secure enough " +
                     "for your preferred HMAC-SHA algorithm.  See " +
                     "https://tools.ietf.org/html/rfc7518#section-3.2 for more information." as String, expected.message
@@ -126,12 +127,12 @@ class KeysTest {
 
     @Test
     void testSecretKeyFor() {
-        for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
-            if (alg instanceof SecretKeySignatureAlgorithm) {
+        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
+            if (alg instanceof MacAlgorithm) {
                 SecretKey key = alg.keyBuilder().build()
                 assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
                 assertEquals alg.jcaName, key.algorithm
-                assertEquals alg, SignatureAlgorithmsBridge.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
+                assertEquals alg, JwsAlgorithmsBridge.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
             }
         }
     }
@@ -161,7 +162,7 @@ class KeysTest {
 
             } else if (alg.isEllipticCurve()) {
 
-                KeyPair pair = Keys.keyPairFor(alg);
+                KeyPair pair = Keys.keyPairFor(alg)
                 assertNotNull pair
 
                 int len = alg.minKeyLength
@@ -204,7 +205,7 @@ class KeysTest {
     @Test
     void testKeyPairFor() {
 
-        for (SignatureAlgorithm alg : SignatureAlgorithms.values()) {
+        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
 
             if (alg instanceof DefaultRsaSignatureAlgorithm) {
 
@@ -251,7 +252,7 @@ class KeysTest {
                 assertEquals alg.orderBitLength, priv.params.order.bitLength()
 
             } else {
-                assertFalse alg instanceof AsymmetricKeySignatureAlgorithm
+                assertFalse alg instanceof SignatureAlgorithm
                 //assert we've accounted for all asymmetric ones above
             }
         }

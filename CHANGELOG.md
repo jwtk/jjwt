@@ -50,7 +50,7 @@ Private keys - as fully encoded JSON objects according to the JWK specification 
 supported.  The new `Jwks` utility class exists to create JWK builders and parsers as desired.  For example:
 
 ```java
-SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build();
+SecretKey key = JwsAlgorithms.HS256.keyBuilder().build();
 SecretJwk jwk = Jwks.builder().forKey(key).build();
 assert key.equals(jwk.toKey());
 
@@ -74,9 +74,10 @@ custom code previously written to extend JJWT to use keys from those KeyStores o
 
 #### Custom Signature Algorithms
 
-The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of a new 
-`io.jsonwebtoken.security.SignatureAlgorithm` interface to allow custom algorithm implementations.  Also, a new 
-`io.jsonwebtoken.security.SignatureAlgorithms` static helper class enumerates all the standard JWA algorithms as 
+The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of new 
+`io.jsonwebtoken.security.SecureDigestAlgorithm`, `io.jsonwebtoken.security.MacAlgorithm`, and 
+`io.jsonwebtoken.security.SignatureAlgorithm` interfaces to allow custom algorithm implementations.  Also, a new 
+`io.jsonwebtoken.security.JwsAlgorithms` static helper class enumerates all the standard JWA algorithms as 
 expected, exactly like the old enum.  This change was made because enums are a static concept by design and cannot 
 support custom values: those who wanted to use custom signature algorithms could not do so until now.  The new 
 interface now allows anyone to plug in and support custom algorithms with JJWT as desired.
@@ -85,11 +86,12 @@ interface now allows anyone to plug in and support custom algorithms with JJWT a
 
 Because the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
 accepted the now-deprecated `io.jsonwebtoken.SignatureAlgorithm` enum, they have also been deprecated in favor of 
-calling new `keyBuilder()` or `keyPairBuilder()` methods on `SignatureAlgorithm` instances directly.  For example:
+calling new `keyBuilder()` or `keyPairBuilder()` methods on `MacAlgorithm` and `SignatureAlgorithm` instances directly.  
+For example:
 
 ```java
-SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build();
-KeyPair pair = SignatureAlgorithms.RS256.keyPairBuilder().build();
+SecretKey key = JwsAlgorithms.HS256.keyBuilder().build();
+KeyPair pair = JwsAlgorithms.RS256.keyPairBuilder().build();
 ```
 
 The builders allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas

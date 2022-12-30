@@ -1,8 +1,7 @@
 package io.jsonwebtoken.impl.security
 
-
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.JwsAlgorithms
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -17,7 +16,9 @@ import static org.junit.Assert.*
 class DefaultRsaSignatureAlgorithmTest {
 
     static Collection<DefaultRsaSignatureAlgorithm> algs() {
-        return SignatureAlgorithms.values().findAll({ it.id.startsWith("RS") || it.id.startsWith("PS") })
+        return JwsAlgorithms.values().findAll({
+            it.id.startsWith("RS") || it.id.startsWith("PS")
+        })
     }
 
     @Test
@@ -51,9 +52,10 @@ class DefaultRsaSignatureAlgorithmTest {
     @Test
     void testValidateSigningKeyNotPrivate() {
         RSAPublicKey key = createMock(RSAPublicKey)
-        def request = new DefaultSignatureRequest(new byte[1], null, null, key)
+        def request = new DefaultSecureRequest(new byte[1], null, null, key)
         try {
-            SignatureAlgorithms.RS256.sign(request)
+            JwsAlgorithms.RS256.digest(request)
+            fail()
         } catch (InvalidKeyException e) {
             assertTrue e.getMessage().startsWith("Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: ")
         }
@@ -65,10 +67,11 @@ class DefaultRsaSignatureAlgorithmTest {
         gen.initialize(1024) //too week for any JWA RSA algorithm
         def pair = gen.generateKeyPair()
 
-        def request = new DefaultSignatureRequest(new byte[1], null, null, pair.getPrivate())
-        SignatureAlgorithms.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
+        def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
+        JwsAlgorithms.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
             try {
-                it.sign(request)
+                it.digest(request)
+                fail()
             } catch (WeakKeyException expected) {
             }
         }

@@ -16,8 +16,10 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Request;
+import io.jsonwebtoken.security.VerifyDigestRequest;
 
 import java.security.MessageDigest;
 
@@ -31,12 +33,22 @@ public final class DefaultHashAlgorithm extends CryptoAlgorithm implements HashA
     }
 
     @Override
-    public byte[] hash(final Request<byte[]> request) {
+    public byte[] digest(final Request<byte[]> request) {
+        Assert.notNull(request, "Request cannot be null.");
+        final byte[] payload = Assert.notNull(request.getPayload(), "Request payload cannot be null.");
         return execute(request, MessageDigest.class, new CheckedFunction<MessageDigest, byte[]>() {
             @Override
             public byte[] apply(MessageDigest md) {
-                return md.digest(request.getPayload());
+                return md.digest(payload);
             }
         });
+    }
+
+    @Override
+    public boolean verify(VerifyDigestRequest request) {
+        Assert.notNull(request, "VerifyDigestRequest cannot be null.");
+        byte[] digest = Assert.notNull(request.getDigest(), "Digest cannot be null.");
+        byte[] computed = digest(request);
+        return MessageDigest.isEqual(computed, digest); // time-constant comparison required, not standard equals
     }
 }

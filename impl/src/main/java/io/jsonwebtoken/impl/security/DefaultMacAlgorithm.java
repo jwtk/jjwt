@@ -6,9 +6,9 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.SecretKeyBuilder;
-import io.jsonwebtoken.security.SecretKeySignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureRequest;
+import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Mac;
@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey, SecretKey> implements SecretKeySignatureAlgorithm {
+public class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey, SecretKey> implements MacAlgorithm {
 
     private final int minKeyBitLength; //in bits
 
@@ -42,11 +42,11 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
         VALID_HS256_JCA_NAMES.addAll(VALID_HS384_JCA_NAMES);
     }
 
-    public MacSignatureAlgorithm(int digestBitLength) {
+    public DefaultMacAlgorithm(int digestBitLength) {
         this("HS" + digestBitLength, "HmacSHA" + digestBitLength, digestBitLength);
     }
 
-    public MacSignatureAlgorithm(String id, String jcaName, int minKeyBitLength) {
+    public DefaultMacAlgorithm(String id, String jcaName, int minKeyBitLength) {
         super(id, jcaName);
         Assert.isTrue(minKeyBitLength > 0, "minKeyLength must be greater than zero.");
         this.minKeyBitLength = minKeyBitLength;
@@ -81,7 +81,7 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
 
         if (!(k instanceof SecretKey)) {
             String msg = "MAC " + keyType(signing) + " keys must be SecretKey instances.  Specified key is of type " +
-                k.getClass().getName();
+                    k.getClass().getName();
             throw new InvalidKeyException(msg);
         }
 
@@ -98,7 +98,7 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
         //assert key's jca name is valid if it's a JWA standard algorithm:
         if (isJwaStandard() && !isJwaStandardJcaName(alg)) {
             throw new InvalidKeyException("The " + keyType + " key's algorithm '" + alg + "' does not equal a valid " +
-                "HmacSHA* algorithm name or PKCS12 OID and cannot be used with " + id + ".");
+                    "HmacSHA* algorithm name or PKCS12 OID and cannot be used with " + id + ".");
         }
 
         byte[] encoded = null;
@@ -118,18 +118,18 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
         // so return early if we can't:
         if (encoded == null) return;
 
-        int size = (int)Bytes.bitLength(encoded);
+        int size = (int) Bytes.bitLength(encoded);
         if (size < this.minKeyBitLength) {
             String msg = "The " + keyType + " key's size is " + size + " bits which " +
-                "is not secure enough for the " + id + " algorithm.";
+                    "is not secure enough for the " + id + " algorithm.";
 
             if (isJwaStandard() && isJwaStandardJcaName(getJcaName())) { //JWA standard algorithm name - reference the spec:
                 msg += " The JWT " +
-                    "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + id + " MUST have a " +
-                    "size >= " + minKeyBitLength + " bits (the key size must be greater than or equal to the hash " +
-                    "output size). Consider using the SignatureAlgorithms." + id + ".keyBuilder() " +
-                    "method to create a key guaranteed to be secure enough for " + id + ".  See " +
-                    "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
+                        "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + id + " MUST have a " +
+                        "size >= " + minKeyBitLength + " bits (the key size must be greater than or equal to the hash " +
+                        "output size). Consider using the JwsAlgorithms." + id + ".keyBuilder() " +
+                        "method to create a key guaranteed to be secure enough for " + id + ".  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
             } else { //custom algorithm - just indicate required key length:
                 msg += " The " + id + " algorithm requires keys to have a size >= " + minKeyBitLength + " bits.";
             }
@@ -139,7 +139,7 @@ public class MacSignatureAlgorithm extends AbstractSignatureAlgorithm<SecretKey,
     }
 
     @Override
-    public byte[] doSign(final SignatureRequest<SecretKey> request) {
+    public byte[] doDigest(final SecureRequest<byte[], SecretKey> request) {
         return execute(request, Mac.class, new CheckedFunction<Mac, byte[]>() {
             @Override
             public byte[] apply(Mac mac) throws Exception {

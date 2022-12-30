@@ -17,9 +17,9 @@ class TestKeys {
     // =======================================================
     // Secret Keys
     // =======================================================
-    static SecretKey HS256 = SignatureAlgorithms.HS256.keyBuilder().build()
-    static SecretKey HS384 = SignatureAlgorithms.HS384.keyBuilder().build()
-    static SecretKey HS512 = SignatureAlgorithms.HS512.keyBuilder().build()
+    static SecretKey HS256 = JwsAlgorithms.HS256.keyBuilder().build()
+    static SecretKey HS384 = JwsAlgorithms.HS384.keyBuilder().build()
+    static SecretKey HS512 = JwsAlgorithms.HS512.keyBuilder().build()
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
@@ -35,17 +35,17 @@ class TestKeys {
     // =======================================================
     // Elliptic Curve Keys & Certificates
     // =======================================================
-    static Bundle ES256 = TestCertificates.readAsymmetricBundle(SignatureAlgorithms.ES256)
-    static Bundle ES384 = TestCertificates.readAsymmetricBundle(SignatureAlgorithms.ES384)
-    static Bundle ES512 = TestCertificates.readAsymmetricBundle(SignatureAlgorithms.ES512)
+    static Bundle ES256 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES256)
+    static Bundle ES384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES384)
+    static Bundle ES512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
     // =======================================================
     // RSA Keys & Certificates
     // =======================================================
-    static Bundle RS256 = TestCertificates.readAsymmetricBundle(SignatureAlgorithms.RS256)
-    static Bundle RS384 = TestCertificates.readAsymmetricBundle(SignatureAlgorithms.RS384)
-    static Bundle RS512 = TestCertificates.readAsymmetricBundle(SignatureAlgorithms.RS512)
+    static Bundle RS256 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS256)
+    static Bundle RS384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS384)
+    static Bundle RS512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS512)
     static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512)
 
     static <T extends KeyBuilderSupplier<SecretKey, SecretKeyBuilder> & Identifiable> SecretKey forAlgorithm(T alg) {
@@ -56,7 +56,7 @@ class TestKeys {
         return TestKeys.metaClass.getAttribute(TestKeys, id) as SecretKey
     }
 
-    static Bundle forAlgorithm(AsymmetricKeySignatureAlgorithm alg) {
+    static Bundle forAlgorithm(SignatureAlgorithm alg) {
         String id = alg.getId()
         if (id.startsWith('PS')) {
             id = 'R' + id.substring(1) //keys for PS* algs are the same as RS algs
@@ -68,6 +68,7 @@ class TestKeys {
         X509Certificate cert
         List<X509Certificate> chain
         KeyPair pair
+
         Bundle(X509Certificate cert, PrivateKey privateKey) {
             this.cert = cert
             this.chain = Collections.of(cert)

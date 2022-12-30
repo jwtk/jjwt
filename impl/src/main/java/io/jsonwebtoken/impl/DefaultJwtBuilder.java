@@ -28,9 +28,9 @@ import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultSignatureRequest;
+import io.jsonwebtoken.impl.security.DefaultSecureRequest;
+import io.jsonwebtoken.impl.security.JwsAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
-import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
@@ -45,16 +45,16 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithms;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.SignatureRequest;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -74,8 +74,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Claims claims;
     protected byte[] content;
 
-    private SignatureAlgorithm<Key, ?> sigAlg = SignatureAlgorithms.NONE;
-    private Function<SignatureRequest<Key>, byte[]> signFunction;
+    private SecureDigestAlgorithm<Key, ?> sigAlg = JwsAlgorithms.NONE;
+    private Function<SecureRequest<byte[], Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
     private Function<AeadRequest, AeadResult> encFunction;
@@ -184,26 +184,26 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder signWith(Key key) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
-        SignatureAlgorithm<Key, ?> alg = SignatureAlgorithmsBridge.forSigningKey(key);
+        SecureDigestAlgorithm<Key, ?> alg = JwsAlgorithmsBridge.forSigningKey(key);
         return signWith(key, alg);
     }
 
     @Override
-    public <K extends Key> JwtBuilder signWith(K key, final SignatureAlgorithm<? super K, ?> alg) throws InvalidKeyException {
+    public <K extends Key> JwtBuilder signWith(K key, final SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
-        if (SignatureAlgorithms.NONE.getId().equalsIgnoreCase(id)) {
-            String msg = "The 'none' SignatureAlgorithm cannot be used to sign JWTs.";
+        if (JwsAlgorithms.NONE.getId().equalsIgnoreCase(id)) {
+            String msg = "The 'none' JWS algorithm cannot be used to sign JWTs.";
             throw new IllegalArgumentException(msg);
         }
         this.key = key;
         //noinspection unchecked
-        this.sigAlg = (SignatureAlgorithm<Key, ?>) alg;
-        this.signFunction = Functions.wrap(new Function<SignatureRequest<Key>, byte[]>() {
+        this.sigAlg = (SecureDigestAlgorithm<Key, ?>) alg;
+        this.signFunction = Functions.wrap(new Function<SecureRequest<byte[], Key>, byte[]>() {
             @Override
-            public byte[] apply(SignatureRequest<Key> request) {
-                return sigAlg.sign(request);
+            public byte[] apply(SecureRequest<byte[], Key> request) {
+                return sigAlg.digest(request);
             }
         }, SignatureException.class, "Unable to compute %s signature.", id);
         return this;
@@ -214,7 +214,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SignatureAlgorithm<Key, ?>) SignatureAlgorithmsBridge.forId(alg.getValue()));
+        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) JwsAlgorithmsBridge.forId(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -452,13 +452,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
             Assert.stateNotNull(key, "Signing key cannot be null.");
             Assert.stateNotNull(signFunction, "signFunction cannot be null.");
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
-            SignatureRequest<Key> request = new DefaultSignatureRequest<>(data, provider, secureRandom, key);
+            SecureRequest<byte[], Key> request = new DefaultSecureRequest<>(data, provider, secureRandom, key);
             byte[] signature = signFunction.apply(request);
             String base64UrlSignature = base64UrlEncoder.encode(signature);
             jwt += DefaultJwtParser.SEPARATOR_CHAR + base64UrlSignature;
         } else {
             // no signature (unprotected JWT), but must terminate w/ a period, see
-            // https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-6.1
+            // https://www.rfc-editor.org/rfc/rfc7519#section-6.1
             jwt += DefaultJwtParser.SEPARATOR_CHAR;
         }
 

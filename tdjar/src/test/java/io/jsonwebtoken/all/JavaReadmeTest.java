@@ -2,15 +2,15 @@ package io.jsonwebtoken.all;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyAlgorithm;
-import io.jsonwebtoken.security.SecretKeySignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithms;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 import org.junit.Test;
 
 import javax.crypto.SecretKey;
@@ -32,7 +32,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsHS() {
         // Create a test key suitable for the desired HMAC-SHA algorithm:
-        SecretKeySignatureAlgorithm alg = SignatureAlgorithms.HS512; //or HS256 or HS384
+        MacAlgorithm alg = JwsAlgorithms.HS512; //or HS256 or HS384
         SecretKey key = alg.keyBuilder().build();
 
         String message = "Hello World!";
@@ -53,7 +53,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsRSA() {
         // Create a test key suitable for the desired RSA signature algorithm:
-        AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.RS512; //or PS512, RS256, etc...
+        SignatureAlgorithm alg = JwsAlgorithms.RS512; //or PS512, RS256, etc...
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his RSA private key:
@@ -75,7 +75,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsECDSA() {
         // Create a test key suitable for the desired ECDSA signature algorithm:
-        AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.ES512; //or ES256 or ES384
+        SignatureAlgorithm alg = JwsAlgorithms.ES512; //or ES256 or ES384
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his EC private key:
@@ -119,7 +119,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweRSA() {
         // Create a test KeyPair suitable for the desired RSA key algorithm:
-        KeyPair pair = SignatureAlgorithms.RS512.keyPairBuilder().build();
+        KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
         KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
@@ -167,7 +167,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweECDHES() {
         // Create a test KeyPair suitable for the desired EC key algorithm:
-        KeyPair pair = SignatureAlgorithms.ES512.keyPairBuilder().build();
+        KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
         KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...

@@ -17,54 +17,37 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 
-import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
- * A cryptographic algorithm that computes and verifies the authenticity of data via
- * <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signatures</a> or
- * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
- * authentication codes</a> as defined by the
- * <a href="https://www.rfc-editor.org/rfc/rfc7515.html">JSON Web Signature (JWS)</a> specification.
+ * A <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature</a> algorithm computes and
+ * verifies digests using asymmetric public/private key cryptography.
  *
- * <p><b>Standard Implementations</b></p>
+ * <p><b>JWA Standard Implementations</b></p>
  *
- * <p>Constant definitions and utility methods for all standard
- * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">JWA (RFC 7518) Signature Algorithms</a> are
- * available via the {@link SignatureAlgorithms} utility class.</p>
+ * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard signature algorithms are
+ * available via the {@link JwsAlgorithms} utility class.</p>
  *
  * <p><b>&quot;alg&quot; identifier</b></p>
  *
  * <p>{@code SignatureAlgorithm} extends {@link Identifiable}: the value returned from
  * {@link Identifiable#getId() getId()} will be used as the JWS &quot;alg&quot; protected header value.</p>
  *
- * @param <S> the type of {@link Key} used to create digital signatures or message authentication codes
- * @param <V> the type of {@link Key} used to verify digital signatures or message authentication codes
+ * <p><b>Key Pair Generation</b></p>
+ *
+ * <p>{@code SignatureAlgorithm} extends {@link KeyPairBuilderSupplier} to enable
+ * {@link KeyPair} generation. Each {@code SignatureAlgorithm} instance will return a
+ * {@link KeyPairBuilder} that ensures any created key pairs will have a sufficient length and algorithm parameters
+ * required by that algorithm.  For example:</p>
+ *
+ * <blockquote><pre>
+ * KeyPair pair = signatureAlgorithm.keyPairBuilder().build();</pre></blockquote>
+ *
+ * <p>The resulting {@code pair} is guaranteed to have the correct algorithm parameters and length/strength necessary
+ * for that exact {@code signatureAlgorithm} instance.</p>
+ *
  * @since JJWT_RELEASE_VERSION
  */
-public interface SignatureAlgorithm<S extends Key, V extends Key> extends Identifiable {
-
-    /**
-     * Compute a digital signature or MAC for the request {@link SignatureRequest#getPayload() payload} using the
-     * request {@link SignatureRequest#getKey() key}, returning the digest result.
-     *
-     * @param request the signature request representing the plaintext data to be signed or MAC'd and the
-     *                {@code key} used during execution.
-     * @return the resulting digital signature or MAC.
-     * @throws SecurityException if there is invalid key input or a problem during digest creation.
-     */
-    byte[] sign(SignatureRequest<S> request) throws SecurityException;
-
-    /**
-     * Verify the authenticity of the previously computed digital signature or MAC
-     * {@link VerifySignatureRequest#getDigest() digest output} represented by the specified  {@code request}.
-     *
-     * @param request the request representing the previously-computed digital signature or MAC
-     *                {@link VerifySignatureRequest#getDigest() digest output}, original
-     *                {@link VerifySignatureRequest#getPayload() payload} and
-     *                {@link VerifySignatureRequest#getKey() verification key}.
-     * @return {@code true} if the authenticity and integrity of the previously-computed digital signature or MAC can
-     * be verified, {@code false} otherwise.
-     * @throws SecurityException if there is invalid key input or a problem that won't allow digest verification.
-     */
-    boolean verify(VerifySignatureRequest<V> request) throws SecurityException;
+public interface SignatureAlgorithm extends SecureDigestAlgorithm<PrivateKey, PublicKey>, KeyPairBuilderSupplier {
 }

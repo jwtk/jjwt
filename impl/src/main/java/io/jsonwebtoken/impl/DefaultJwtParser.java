@@ -48,11 +48,11 @@ import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultVerifySignatureRequest;
+import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge;
+import io.jsonwebtoken.impl.security.JwsAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.KeyAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
-import io.jsonwebtoken.impl.security.SignatureAlgorithmsBridge;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DecodingException;
@@ -67,13 +67,13 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Message;
-import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithms;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.VerifySignatureRequest;
+import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
@@ -120,7 +120,7 @@ public class DefaultJwtParser implements JwtParser {
                     "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an  " +
-            AbstractHeader.ALGORITHM + " header value of '" + SignatureAlgorithms.NONE.getId() +
+            AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() +
             "') are disallowed by default as mandated by " +
             "https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to allow them to be " +
             "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
@@ -148,8 +148,8 @@ public class DefaultJwtParser implements JwtParser {
         return new IdLocator<>(id, msg, reg, backup);
     }
 
-    private static Function<JwsHeader, SignatureAlgorithm<?, ?>> sigFn(Collection<SignatureAlgorithm<?, ?>> extras) {
-        return locFn(AbstractHeader.ALGORITHM.getId(), MISSING_JWS_ALG_MSG, SignatureAlgorithmsBridge.REGISTRY, extras);
+    private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
+        return locFn(AbstractHeader.ALGORITHM.getId(), MISSING_JWS_ALG_MSG, JwsAlgorithmsBridge.REGISTRY, extras);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
@@ -157,7 +157,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
-        return locFn(JweHeader.ALGORITHM, MISSING_JWE_ALG_MSG, KeyAlgorithmsBridge.REGISTRY, extras);
+        return locFn(AbstractHeader.ALGORITHM.getId(), MISSING_JWE_ALG_MSG, KeyAlgorithmsBridge.REGISTRY, extras);
     }
 
     // TODO: make the following fields final for v1.0
@@ -170,7 +170,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final boolean enableUnsecuredJws;
 
-    private final Function<JwsHeader, SignatureAlgorithm<?, ?>> signatureAlgorithmLocator;
+    private final Function<JwsHeader, SecureDigestAlgorithm<?, ?>> signatureAlgorithmLocator;
 
     private final Function<JweHeader, AeadAlgorithm> encryptionAlgorithmLocator;
 
@@ -197,7 +197,7 @@ public class DefaultJwtParser implements JwtParser {
     @Deprecated
     public DefaultJwtParser() {
         this.keyLocator = new ConstantKeyLocator(null, null);
-        this.signatureAlgorithmLocator = sigFn(Collections.<SignatureAlgorithm<?, ?>>emptyList());
+        this.signatureAlgorithmLocator = sigFn(Collections.<SecureDigestAlgorithm<?, ?>>emptyList());
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
         this.compressionCodecLocator = new CompressionCodecLocator(new DefaultCompressionCodecResolver());
@@ -216,7 +216,7 @@ public class DefaultJwtParser implements JwtParser {
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
                      Locator<CompressionCodec> compressionCodecLocator,
-                     Collection<SignatureAlgorithm<?, ?>> extraSigAlgs,
+                     Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs,
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
                      Collection<AeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
@@ -442,9 +442,9 @@ public class DefaultJwtParser implements JwtParser {
 
         Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
 
-        SignatureAlgorithm<?, Key> algorithm;
+        SecureDigestAlgorithm<?, Key> algorithm;
         try {
-            algorithm = (SignatureAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
+            algorithm = (SecureDigestAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
         } catch (UnsupportedJwtException e) {
             //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
             String msg = "Unsupported signature algorithm '" + alg + "'";
@@ -471,9 +471,8 @@ public class DefaultJwtParser implements JwtParser {
         byte[] signature = base64UrlDecode(tokenized.getDigest(), "JWS signature");
 
         try {
-            VerifySignatureRequest<Key> request =
-                    new DefaultVerifySignatureRequest<>(this.provider, null, data, key, signature);
-
+            VerifySecureDigestRequest<Key> request =
+                    new DefaultVerifySecureDigestRequest<>(data, this.provider, null, key, signature);
             if (!algorithm.verify(request)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
                         "asserted and should not be trusted.";
@@ -539,7 +538,7 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         final String base64UrlDigest = tokenized.getDigest();
-        if (SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
+        if (JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
             if (tokenized instanceof TokenizedJwe) {
                 throw new MalformedJwtException(JWE_NONE_MSG);
             }
@@ -670,7 +669,7 @@ public class DefaultJwtParser implements JwtParser {
         if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else { // JWS
-            if (!Strings.hasText(base64UrlDigest) && SignatureAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
+            if (!Strings.hasText(base64UrlDigest) && JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
                 //noinspection rawtypes
                 jwt = new DefaultJwt(header, body);
             } else {

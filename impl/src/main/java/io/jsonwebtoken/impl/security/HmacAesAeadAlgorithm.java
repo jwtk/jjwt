@@ -11,7 +11,6 @@ import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.SignatureRequest;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -27,7 +26,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
     private static final String TRANSFORMATION_STRING = "AES/CBC/PKCS5Padding";
 
-    private final MacSignatureAlgorithm SIGALG;
+    private final DefaultMacAlgorithm SIGALG;
 
     private static int digestLength(int keyLength) {
         return keyLength * 2;
@@ -37,13 +36,13 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         return "A" + keyLength + "CBC-HS" + digestLength(keyLength);
     }
 
-    public HmacAesAeadAlgorithm(String id, MacSignatureAlgorithm sigAlg) {
+    public HmacAesAeadAlgorithm(String id, DefaultMacAlgorithm sigAlg) {
         super(id, TRANSFORMATION_STRING, sigAlg.getKeyBitLength());
         this.SIGALG = sigAlg;
     }
 
     public HmacAesAeadAlgorithm(int keyBitLength) {
-        this(id(keyBitLength), new MacSignatureAlgorithm(id(keyBitLength), "HmacSHA" + digestLength(keyBitLength), keyBitLength));
+        this(id(keyBitLength), new DefaultMacAlgorithm(id(keyBitLength), "HmacSHA" + digestLength(keyBitLength), keyBitLength));
     }
 
     @Override
@@ -113,8 +112,9 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         }
 
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());
-        SignatureRequest<SecretKey> request = new DefaultSignatureRequest<>(toHash, null, null, key);
-        byte[] digest = SIGALG.sign(request);
+        SecureRequest<byte[], SecretKey> request =
+                new DefaultSecureRequest<>(toHash, null, null, key);
+        byte[] digest = SIGALG.digest(request);
 
         // https://tools.ietf.org/html/rfc7518#section-5.2.2.1 #5 requires truncating the signature
         // to be the same length as the macKey/encKey:

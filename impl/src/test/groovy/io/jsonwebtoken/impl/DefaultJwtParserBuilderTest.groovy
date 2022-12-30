@@ -23,7 +23,7 @@ import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.JwsAlgorithms
 import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Test
@@ -107,7 +107,7 @@ class DefaultJwtParserBuilderTest {
         def p = builder.deserializeJsonWith(deserializer)
         assertSame deserializer, p.deserializer
 
-        def alg = SignatureAlgorithms.HS256
+        def alg = JwsAlgorithms.HS256
         def key = alg.keyBuilder().build()
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()

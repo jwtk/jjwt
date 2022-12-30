@@ -1,15 +1,19 @@
+//file:noinspection SpellCheckingInspection
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.JwsAlgorithms
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
-import java.security.*
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.Signature
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECParameterSpec
@@ -23,7 +27,7 @@ import static org.junit.Assert.*
 class DefaultEllipticCurveSignatureAlgorithmTest {
 
     static Collection<DefaultEllipticCurveSignatureAlgorithm> algs() {
-        return SignatureAlgorithms.values().findAll({ it instanceof DefaultEllipticCurveSignatureAlgorithm })
+        return JwsAlgorithms.values().findAll({ it instanceof DefaultEllipticCurveSignatureAlgorithm }) as Collection<DefaultEllipticCurveSignatureAlgorithm>
     }
 
     @Test
@@ -61,9 +65,9 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     @Test
     void testSignWithPublicKey() {
         ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
-        def request = new DefaultSignatureRequest(new byte[1], null, null, key)
+        def request = new DefaultSecureRequest(new byte[1], null, null, key)
         try {
-            SignatureAlgorithms.ES256.sign(request)
+            JwsAlgorithms.ES256.digest(request)
         } catch (InvalidKeyException e) {
             String msg = "Elliptic Curve signing keys must be PrivateKeys (implement ${PrivateKey.class.getName()}). " +
                     "Provided key type: ${key.getClass().getName()}."
@@ -77,9 +81,9 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPrivateKey priv = new TestECPrivateKey(params: spec)
-            def request = new DefaultSignatureRequest(new byte[1], null, null, priv)
+            def request = new DefaultSecureRequest(new byte[1], null, null, priv)
             try {
-                it.sign(request)
+                it.digest(request)
             } catch (InvalidKeyException expected) {
                 String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
@@ -92,11 +96,11 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void testSignWithInvalidKeyFieldLength() {
-        def keypair = SignatureAlgorithms.ES256.keyPairBuilder().build()
+        def keypair = JwsAlgorithms.ES256.keyPairBuilder().build()
         def data = "foo".getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultSignatureRequest(data, null, null, keypair.private)
+        def req = new DefaultSecureRequest(data, null, null, keypair.private)
         try {
-            SignatureAlgorithms.ES384.sign(req)
+            JwsAlgorithms.ES384.digest(req)
         } catch (InvalidKeyException expected) {
             String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
                     "256 bits (32 bytes), but the 'ES384' algorithm requires EC Keys with " +
@@ -112,9 +116,9 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         algs().each {
             def pair = it.keyPairBuilder().build()
             def key = pair.getPrivate()
-            def signRequest = new DefaultSignatureRequest(data, null, null, key)
-            byte[] signature = it.sign(signRequest)
-            def verifyRequest = new DefaultVerifySignatureRequest(null, null, data, key, signature)
+            def signRequest = new DefaultSecureRequest(data, null, null, key)
+            byte[] signature = it.digest(signRequest)
+            def verifyRequest = new DefaultVerifySecureDigestRequest(data, null, null, key, signature)
             try {
                 it.verify(verifyRequest)
             } catch (InvalidKeyException e) {
@@ -131,7 +135,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPublicKey pub = new TestECPublicKey(params: spec)
-            def request = new DefaultVerifySignatureRequest(null, null, new byte[1], pub, new byte[1])
+            def request = new DefaultVerifySecureDigestRequest(new byte[1], null, null, pub, new byte[1])
             try {
                 it.verify(request)
             } catch (InvalidKeyException expected) {
@@ -146,7 +150,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void invalidDERSignatureToJoseFormatTest() {
-        def verify = { signature ->
+        def verify = { byte[] signature ->
             try {
                 DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
                 fail()
@@ -208,7 +212,6 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
             fail()
         } catch (JwtException expected) {
-
         }
     }
 
@@ -240,16 +243,16 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void ecdsaSignatureCompatTest() {
-        def fact = KeyFactory.getInstance("EC");
+        def fact = KeyFactory.getInstance("EC")
         def publicKey = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="
         def pub = fact.generatePublic(new X509EncodedKeySpec(Decoders.BASE64.decode(publicKey)))
-        def alg = SignatureAlgorithms.ES512
-        def verifier = { token ->
+        def alg = JwsAlgorithms.ES512
+        def verifier = { String token ->
             def signatureStart = token.lastIndexOf('.')
             def withoutSignature = token.substring(0, signatureStart)
             def data = withoutSignature.getBytes("US-ASCII")
             def signature = Decoders.BASE64URL.decode(token.substring(signatureStart + 1))
-            assertTrue "Signature do not match that of other implementations", alg.verify(new DefaultVerifySignatureRequest(null, null, data, pub, signature))
+            assertTrue "Signature do not match that of other implementations", alg.verify(new DefaultVerifySecureDigestRequest(data, null, null, pub, signature))
         }
         //Test verification for token created using https://github.com/auth0/node-jsonwebtoken/tree/v7.0.1
         verifier("eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30.Aab4x7HNRzetjgZ88AMGdYV2Ml7kzFbl8Ql2zXvBores7iRqm2nK6810ANpVo5okhHa82MQf2Q_Zn4tFyLDR9z4GAcKFdcAtopxq1h8X58qBWgNOc0Bn40SsgUc8wOX4rFohUCzEtnUREePsvc9EfXjjAH78WD2nq4tn-N94vf14SncQ")
@@ -266,8 +269,8 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             assertTrue keypair.getPublic() instanceof ECPublicKey
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
             def data = withoutSignature.getBytes("US-ASCII")
-            def signature = alg.sign(new DefaultSignatureRequest<Key>(data, null, null, keypair.private))
-            assertTrue alg.verify(new DefaultVerifySignatureRequest(null, null, data, keypair.public, signature))
+            def signature = alg.digest(new DefaultSecureRequest<>(data, null, null, keypair.private))
+            assertTrue alg.verify(new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, signature))
         }
     }
 
@@ -297,7 +300,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
 
         try {
-            signer.sign(bytes)
+            signer.digest(bytes)
             fail();
         } catch (io.jsonwebtoken.security.SignatureException se) {
             assertEquals se.message, 'Invalid Elliptic Curve PrivateKey. ' + msg
@@ -327,7 +330,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
 
         try {
-            signer.sign(bytes)
+            signer.digest(bytes)
             fail();
         } catch (io.jsonwebtoken.security.SignatureException se) {
             assertEquals se.message, 'Unable to convert signature to JOSE format. ' + msg
@@ -357,7 +360,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(bytes)
 
         try {
-            signer.sign(bytes)
+            signer.digest(bytes)
             fail();
         } catch (io.jsonwebtoken.security.SignatureException se) {
             assertEquals se.message, 'Unable to calculate signature using Elliptic Curve PrivateKey. ' + msg
@@ -383,7 +386,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         byte[] data = new byte[32]
         SignatureProvider.DEFAULT_SECURE_RANDOM.nextBytes(data)
 
-        byte[] signature = new EllipticCurveSigner(alg, keypair.getPrivate()).sign(data)
+        byte[] signature = new EllipticCurveSigner(alg, keypair.getPrivate()).digest(data)
 
         try {
             v.isValid(data, signature)
@@ -398,18 +401,18 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
 
     @Test
     void ecdsaSignatureInteropTest() {
-        def fact = KeyFactory.getInstance("EC");
+        def fact = KeyFactory.getInstance("EC")
         def publicKey = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="
         def pub = fact.generatePublic(new X509EncodedKeySpec(Decoders.BASE64.decode(publicKey)))
-        def alg = SignatureAlgorithms.ES512
-        def verifier = { token ->
+        def alg = JwsAlgorithms.ES512
+        def verifier = { String token ->
             def signatureStart = token.lastIndexOf('.')
             def withoutSignature = token.substring(0, signatureStart)
             def signature = token.substring(signatureStart + 1)
 
             def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
             def sigBytes = Decoders.BASE64URL.decode(signature)
-            def request = new DefaultVerifySignatureRequest(null, null, data, pub, sigBytes)
+            def request = new DefaultVerifySecureDigestRequest(data, null, null, pub, sigBytes)
             assert alg.verify(request), "Signature do not match that of other implementations"
         }
         //Test verification for token created using https://github.com/auth0/node-jsonwebtoken/tree/v7.0.1
@@ -418,17 +421,18 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         verifier("eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiJ9.eyJ0ZXN0IjoidGVzdCJ9.AV26tERbSEwcoDGshneZmhokg-tAKUk0uQBoHBohveEd51D5f6EIs6cskkgwtfzs4qAGfx2rYxqQXr7LTXCNquKiAJNkTIKVddbPfped3_TQtmHZTmMNiqmWjiFj7Y9eTPMMRRu26w4gD1a8EQcBF-7UGgeH4L_1CwHJWAXGbtu7uMUn")
     }
 
-    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    @Test
+    // asserts guard for JVM security bug CVE-2022-21449:
     void legacySignatureCompatDefaultTest() {
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = SignatureAlgorithms.ES512
+        def alg = JwsAlgorithms.ES512
         def keypair = alg.keyPairBuilder().build()
-        def signature = Signature.getInstance(alg.jcaName)
+        def signature = Signature.getInstance(alg.jcaName as String)
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         signature.initSign(keypair.private)
         signature.update(data)
         def signed = signature.sign()
-        def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, signed)
+        def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, signed)
         try {
             alg.verify(request)
             fail()
@@ -448,32 +452,34 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             System.setProperty(DefaultEllipticCurveSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME, 'true')
 
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-            def alg = SignatureAlgorithms.ES512
+            def alg = JwsAlgorithms.ES512
             def keypair = alg.keyPairBuilder().build()
-            def signature = Signature.getInstance(alg.jcaName)
+            def signature = Signature.getInstance(alg.jcaName as String)
             def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
             signature.initSign(keypair.private)
             signature.update(data)
             def signed = signature.sign()
-            def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, signed)
+            def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, signed)
             assertTrue alg.verify(request)
         } finally {
             System.clearProperty(DefaultEllipticCurveSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME)
         }
     }
 
-    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    @Test
+    // asserts guard for JVM security bug CVE-2022-21449:
     void testVerifySignatureAllZeros() {
         byte[] forgedSig = new byte[64]
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = SignatureAlgorithms.ES256
+        def alg = JwsAlgorithms.ES256
         def keypair = alg.keyPairBuilder().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
-        def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, forgedSig)
+        def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, forgedSig)
         assertFalse alg.verify(request)
     }
 
-    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    @Test
+    // asserts guard for JVM security bug CVE-2022-21449:
     void testVerifySignatureRZero() {
         byte[] r = new byte[32]
         byte[] s = new byte[32]; Arrays.fill(s, Byte.MAX_VALUE)
@@ -482,38 +488,40 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         System.arraycopy(s, 0, sig, r.length, s.length)
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = SignatureAlgorithms.ES256
+        def alg = JwsAlgorithms.ES256
         def keypair = alg.keyPairBuilder().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
-        def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, sig)
+        def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, sig)
         assertFalse alg.verify(request)
     }
 
-    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    @Test
+    // asserts guard for JVM security bug CVE-2022-21449:
     void testVerifySignatureSZero() {
-        byte[] r = new byte[32]; Arrays.fill(r, Byte.MAX_VALUE);
+        byte[] r = new byte[32]; Arrays.fill(r, Byte.MAX_VALUE)
         byte[] s = new byte[32]
         byte[] sig = new byte[r.length + s.length]
         System.arraycopy(r, 0, sig, 0, r.length)
         System.arraycopy(s, 0, sig, r.length, s.length)
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = SignatureAlgorithms.ES256
+        def alg = JwsAlgorithms.ES256
         def keypair = alg.keyPairBuilder().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
-        def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, sig)
+        def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, sig)
         assertFalse alg.verify(request)
     }
 
-    @Test // asserts guard for JVM security bug CVE-2022-21449:
+    @Test
+    // asserts guard for JVM security bug CVE-2022-21449:
     void ecdsaInvalidSignatureValuesTest() {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
-        def alg = SignatureAlgorithms.ES256
+        def alg = JwsAlgorithms.ES256
         def keypair = alg.keyPairBuilder().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def invalidSignature = Decoders.BASE64URL.decode(invalidEncodedSignature)
-        def request = new DefaultVerifySignatureRequest(null, null, data, keypair.public, invalidSignature)
+        def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, invalidSignature)
         assertFalse("Forged signature must not be considered valid.", alg.verify(request))
     }
 }

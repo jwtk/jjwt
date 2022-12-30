@@ -1,8 +1,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.JwsAlgorithms
 import io.jsonwebtoken.security.SignatureAlgorithm
-import io.jsonwebtoken.security.SignatureAlgorithms
 import org.junit.Test
 
 import java.security.PrivateKey
@@ -26,9 +26,9 @@ class Issue542Test {
     private static String PS512_0_10_7 = 'eyJhbGciOiJQUzUxMiJ9.eyJpc3MiOiJqb2UifQ.r6sisG-FVaMoIJacMSdYZLWFBVoT6bXmf3X3humLZqzoGfsRw3q9-wJ2oIiR4ua2L_mPnJqyPcjFWoXLUzw-URFSyQEAX_S2mWTBn7avCFsmJUh2fMkplG0ynbIHCqReRDl3moQGallbl-SYgArSRI2HbpVt05xsVbk3BmxB8N8buKbBPfUqwZMicRqNpHxoOc-IXaClc7y93gFNfGBMEwXn2nK_ZFXY03pMBL_MHVsJprPmtGfQw0ZZUv29zZbZTkRb6W6bRCi3jIP8sBMnYDqG3_Oyz9sF74IeOoD9sCpgAuRnrSAXhEb3tr1uBwyT__DOI1ZdT8QGFiRRNpUZDm7g4ub7njhXQ6ppkEY6kEKCCoxSq5sAh6EzZQgAfbpKNXy5VIu8s1nR-iJ8GDpeTcpLRhbX8havNzWjc-kSnU95_D5NFoaKfIjofKideVU46lUdCk-m7q8mOoFz8UEK1cXq3t7ay2jLG_sNvv7oZPe2TC4ovQGiQP0Mt446XBuIvyXSvygD3_ACpRSfpAqVoP7Ce98NkV2QCJxYNX1cZ4Zj4HrNoNWMx81TFoyU7RoUhj4tHcgBt_3_jbCO0OCejwswAFhwYRXP3jXeE2QhLaN1QJ7p97ly8WxjkBRac3I2WAeJhOM4CWhtgDmHAER9571MWp-7n4h4bnx9tXXfV7k'
 
     private static Map<SignatureAlgorithm, String> JWS_0_10_7_VALUES = [
-            (SignatureAlgorithms.PS256): PS256_0_10_7,
-            (SignatureAlgorithms.PS384): PS384_0_10_7,
-            (SignatureAlgorithms.PS512): PS512_0_10_7
+            (JwsAlgorithms.PS256): PS256_0_10_7,
+            (JwsAlgorithms.PS384): PS384_0_10_7,
+            (JwsAlgorithms.PS512): PS512_0_10_7
     ]
 
     /**
@@ -37,7 +37,7 @@ class Issue542Test {
     @Test
     void testRsaSsaPssBackwardsCompatibility() {
 
-        def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
+        def algs = [JwsAlgorithms.PS256, JwsAlgorithms.PS384, JwsAlgorithms.PS512]
 
         for (alg in algs) {
             PublicKey key = TestCertificates.readTestPublicKey(alg)
@@ -52,7 +52,7 @@ class Issue542Test {
      * class.  This method implementation was retained only to demonstrate how they were created for future reference.
      */
     static void main(String[] args) {
-        def algs = [SignatureAlgorithms.PS256, SignatureAlgorithms.PS384, SignatureAlgorithms.PS512]
+        def algs = [JwsAlgorithms.PS256, JwsAlgorithms.PS384, JwsAlgorithms.PS512]
         for (alg in algs) {
             PrivateKey privateKey = TestCertificates.readTestPrivateKey(alg)
             String jws = Jwts.builder().setIssuer('joe').signWith(privateKey, alg).compact()

@@ -1,8 +1,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.lang.Classes
-import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm
-import io.jsonwebtoken.security.SignatureAlgorithm
+import io.jsonwebtoken.security.SecureDigestAlgorithm
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -40,7 +39,7 @@ class TestCertificates {
         return new PEMParser(new BufferedReader(new InputStreamReader(is, StandardCharsets.ISO_8859_1)))
     }
 
-    static X509Certificate readTestCertificate(SignatureAlgorithm alg) {
+    static X509Certificate readTestCertificate(SecureDigestAlgorithm alg) {
         PEMParser parser = getParser(alg.getId() + '.crt.pem')
         try {
             X509CertificateHolder holder = parser.readObject() as X509CertificateHolder
@@ -50,11 +49,11 @@ class TestCertificates {
         }
     }
 
-    static PublicKey readTestPublicKey(SignatureAlgorithm alg) {
+    static PublicKey readTestPublicKey(SecureDigestAlgorithm alg) {
         return readTestCertificate(alg).getPublicKey()
     }
 
-    static PrivateKey readTestPrivateKey(SignatureAlgorithm alg) {
+    static PrivateKey readTestPrivateKey(SecureDigestAlgorithm alg) {
         PEMParser parser = getParser(alg.getId() + '.key.pem')
         try {
             PrivateKeyInfo info
@@ -70,7 +69,7 @@ class TestCertificates {
         }
     }
 
-    static TestKeys.Bundle readAsymmetricBundle(AsymmetricKeySignatureAlgorithm alg) {
+    static TestKeys.Bundle readAsymmetricBundle(SecureDigestAlgorithm alg) {
         X509Certificate cert = readTestCertificate(alg)
         PrivateKey priv = readTestPrivateKey(alg)
         return new TestKeys.Bundle(cert, priv)

@@ -642,13 +642,13 @@ code quickly.  Here's an example:
 
 ```java
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureAlgorithms;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
-SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build();
+SecretKey key = JwsAlgorithms.HS256.keyBuilder().build();
 
 String jws = Jwts.builder().setSubject("Joe").signWith(key).compact();
 ```
@@ -1376,7 +1376,7 @@ key algorithms:
 
 <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants in the `io.jsonwebtoken.security.SignatureAlgorithms` utility class.
+These are all represented as constants in the `io.jsonwebtoken.security.JwsAlgorithms` utility class.
 
 <a name="jws-key"></a>
 ### Signature Algorithms Keys
@@ -1457,7 +1457,7 @@ If you want to generate a sufficiently strong `SecretKey` for use with the JWT H
 algorithm's `keyBuilder()` method:
 
 ```java
-SecretKey key = SignatureAlgorithms.HS256.keyBuilder().build(); //or HS384.keyBuilder() or HS512.keyBuilder()
+SecretKey key = JwsAlgorithms.HS256.keyBuilder().build(); //or HS384.keyBuilder() or HS512.keyBuilder()
 ```
 
 Under the hood, JJWT uses the JCA default provider's `KeyGenerator` to create a secure-random key with the correct 
@@ -1467,7 +1467,7 @@ If you want to specify a specific JCA `Provider` or `SecureRandom` to use during
 as builder arguments. For example:
 
 ```java
-SecretKey key = SignatureAlgorithms.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
+SecretKey key = JwsAlgorithms.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
 ```
 
 If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
@@ -1487,7 +1487,7 @@ If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key
 algorithms, use an algorithm's respective `keyPairBuilder()` method:
 
 ```java
-KeyPair keyPair = SignatureAlgorithms.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
+KeyPair keyPair = JwsAlgorithms.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
 ```
 
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
@@ -1596,7 +1596,7 @@ that accepts the `SignatureAlgorithm` as an additional parameter:
 
 ```java
 
-   .signWith(privateKey, SignatureAlgorithms.RS512) // <---
+   .signWith(privateKey, JwsAlgorithms.RS512) // <---
    
    .compact();
 
@@ -2724,7 +2724,7 @@ Example:
 
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
-SecretKeySignatureAlgorithm alg = SignatureAlgorithms.HS512; //or HS256 or HS384
+SecretKeySignatureAlgorithm alg = JwsAlgorithms.HS512; //or HS256 or HS384
 SecretKey key = alg.keyBuilder().build();
 
 String message = "Hello World!";
@@ -2751,7 +2751,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired RSA signature algorithm:
-AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.RS512; //or PS512, RS256, etc...
+AsymmetricKeySignatureAlgorithm alg = JwsAlgorithms.RS512; //or PS512, RS256, etc...
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his RSA private key:
@@ -2782,7 +2782,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired ECDSA signature algorithm:
-AsymmetricKeySignatureAlgorithm alg = SignatureAlgorithms.ES512; //or ES256 or ES384
+AsymmetricKeySignatureAlgorithm alg = JwsAlgorithms.ES512; //or ES256 or ES384
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his EC private key:
@@ -2851,7 +2851,7 @@ decrypt the JWT using her RSA private key:
 
 ```java
 // Create a test KeyPair suitable for the desired RSA key algorithm:
-KeyPair pair = SignatureAlgorithms.RS512.keyPairBuilder().build();
+KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
 
 // Choose the key algorithm used encrypt the payload key:
 KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
@@ -2919,7 +2919,7 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 
 ```java
 // Create a test KeyPair suitable for the desired EC key algorithm:
-KeyPair pair = SignatureAlgorithms.ES512.keyPairBuilder().build();
+KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
 
 // Choose the key algorithm used encrypt the payload key:
 KeyAlgorithm<PublicKey, PrivateKey> alg = KeyAlgorithms.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc.

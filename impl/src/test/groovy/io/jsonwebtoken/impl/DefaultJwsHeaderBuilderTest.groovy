@@ -74,7 +74,7 @@ class DefaultJwsHeaderBuilderTest {
     @Test
     void testSetX509CertificateSha1Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5t = DefaultHashAlgorithm.SHA1.hash(request)
+        def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
         def header = builder.setX509CertificateSha1Thumbprint(x5t).build()
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
@@ -85,7 +85,7 @@ class DefaultJwsHeaderBuilderTest {
     void testSetX509CertificateSha1ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
-        def x5t = DefaultHashAlgorithm.SHA1.hash(request)
+        def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
         def header = builder.setX509CertificateChain(chain).withX509Sha1Thumbprint(true).build()
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
@@ -95,7 +95,7 @@ class DefaultJwsHeaderBuilderTest {
     @Test
     void testSetX509CertificateSha256Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
+        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         def header = builder.setX509CertificateSha256Thumbprint(x5tS256).build()
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
@@ -106,7 +106,7 @@ class DefaultJwsHeaderBuilderTest {
     void testSetX509CertificateSha256ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
+        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         def header = builder.setX509CertificateChain(chain).withX509Sha256Thumbprint(true).build()
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()

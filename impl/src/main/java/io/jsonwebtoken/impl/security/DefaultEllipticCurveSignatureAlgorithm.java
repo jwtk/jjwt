@@ -4,12 +4,12 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.AsymmetricKeySignatureAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
+import io.jsonwebtoken.security.SecureRequest;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.SignatureRequest;
-import io.jsonwebtoken.security.VerifySignatureRequest;
+import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
 import java.math.BigInteger;
 import java.security.Key;
@@ -22,8 +22,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 
 // @since JJWT_RELEASE_VERSION
-public class DefaultEllipticCurveSignatureAlgorithm
-        extends AbstractSignatureAlgorithm<PrivateKey, PublicKey> implements AsymmetricKeySignatureAlgorithm {
+public class DefaultEllipticCurveSignatureAlgorithm extends AbstractSecureDigestAlgorithm<PrivateKey, PublicKey>
+        implements SignatureAlgorithm {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 521.";
     private static final String KEY_TYPE_MSG_PATTERN =
@@ -132,7 +132,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
     }
 
     @Override
-    protected byte[] doSign(final SignatureRequest<PrivateKey> request) {
+    protected byte[] doDigest(final SecureRequest<byte[], PrivateKey> request) {
         return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
@@ -156,7 +156,7 @@ public class DefaultEllipticCurveSignatureAlgorithm
     }
 
     @Override
-    protected boolean doVerify(final VerifySignatureRequest<PublicKey> request) {
+    protected boolean doVerify(final VerifySecureDigestRequest<PublicKey> request) {
 
         final PublicKey key = request.getKey();
 

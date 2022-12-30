@@ -65,7 +65,7 @@ class AbstractAsymmetricJwkBuilderTest {
     @Test
     void testX509CertificateSha1Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5t = DefaultHashAlgorithm.SHA1.hash(request)
+        def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().setX509CertificateSha1Thumbprint(x5t).build()
         assertArrayEquals x5t, jwk.getX509CertificateSha1Thumbprint()
@@ -75,7 +75,7 @@ class AbstractAsymmetricJwkBuilderTest {
     @Test
     void testX509CertificateSha1ThumbprintEnabled() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5t = DefaultHashAlgorithm.SHA1.hash(request)
+        def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha1Thumbprint(true).build()
         assertArrayEquals x5t, jwk.getX509CertificateSha1Thumbprint()
@@ -85,7 +85,7 @@ class AbstractAsymmetricJwkBuilderTest {
     @Test
     void testX509CertificateSha256Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
+        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateSha256Thumbprint(x5tS256).build()
         assertArrayEquals x5tS256, jwk.getX509CertificateSha256Thumbprint()
@@ -95,7 +95,7 @@ class AbstractAsymmetricJwkBuilderTest {
     @Test
     void testX509CertificateSha256ThumbprintEnabled() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.hash(request)
+        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()
         assertArrayEquals x5tS256, jwk.getX509CertificateSha256Thumbprint()

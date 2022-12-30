@@ -37,7 +37,7 @@ import static org.junit.Assert.*
 
 class DefaultJwtBuilderTest {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper()
 
     private DefaultJwtBuilder builder
 
@@ -55,7 +55,7 @@ class DefaultJwtBuilderTest {
 
         io.jsonwebtoken.security.SignatureAlgorithm alg = new io.jsonwebtoken.security.SignatureAlgorithm() {
             @Override
-            byte[] sign(SignatureRequest request) throws SignatureException, KeyException {
+            byte[] digest(SecureRequest request) throws SignatureException, KeyException {
                 assertSame provider, request.getProvider()
                 called[0] = true
                 //simulate a digest:
@@ -65,7 +65,12 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            boolean verify(VerifySignatureRequest request) throws SignatureException, KeyException {
+            boolean verify(VerifySecureDigestRequest request) throws SignatureException, KeyException {
+                throw new IllegalStateException("should not be called during build")
+            }
+
+            @Override
+            KeyPairBuilder keyPairBuilder() {
                 throw new IllegalStateException("should not be called during build")
             }
 
@@ -77,7 +82,7 @@ class DefaultJwtBuilderTest {
 
         replay provider
         def b = new DefaultJwtBuilder().setProvider(provider)
-                .setSubject('me').signWith(SignatureAlgorithms.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(JwsAlgorithms.HS256.keyBuilder().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -93,7 +98,7 @@ class DefaultJwtBuilderTest {
 
         io.jsonwebtoken.security.SignatureAlgorithm alg = new io.jsonwebtoken.security.SignatureAlgorithm() {
             @Override
-            byte[] sign(SignatureRequest request) throws SignatureException, KeyException {
+            byte[] digest(SecureRequest request) throws SignatureException, KeyException {
                 assertSame random, request.getSecureRandom()
                 called[0] = true
                 //simulate a digest:
@@ -103,7 +108,12 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            boolean verify(VerifySignatureRequest request) throws SignatureException, KeyException {
+            boolean verify(VerifySecureDigestRequest request) throws SignatureException, KeyException {
+                throw new IllegalStateException("should not be called during build")
+            }
+
+            @Override
+            KeyPairBuilder keyPairBuilder() {
                 throw new IllegalStateException("should not be called during build")
             }
 
@@ -114,7 +124,7 @@ class DefaultJwtBuilderTest {
         }
 
         def b = new DefaultJwtBuilder().setSecureRandom(random)
-                .setSubject('me').signWith(SignatureAlgorithms.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(JwsAlgorithms.HS256.keyBuilder().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]
@@ -232,7 +242,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactWithoutPayloadOrClaims() {
         def serializer = Services.loadFirst(Serializer.class)
-        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg':'none']))
+        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg': 'none']))
         assertEquals "$header.." as String, new DefaultJwtBuilder().compact()
     }
 
@@ -240,8 +250,8 @@ class DefaultJwtBuilderTest {
     void testNullPayloadString() {
         String payload = null
         def serializer = Services.loadFirst(Serializer.class)
-        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg':'none']))
-        assertEquals "$header.." as String, builder.setPayload((String)payload).compact()
+        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg': 'none']))
+        assertEquals "$header.." as String, builder.setPayload((String) payload).compact()
     }
 
     @Test
@@ -464,10 +474,10 @@ class DefaultJwtBuilderTest {
     void testSignWithNoneAlgorithm() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key, SignatureAlgorithms.NONE)
+            builder.signWith(key, JwsAlgorithms.NONE)
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "The 'none' SignatureAlgorithm cannot be used to sign JWTs."
+            String msg = "The 'none' JWS algorithm cannot be used to sign JWTs."
             assertEquals msg, expected.getMessage()
         }
     }

@@ -21,8 +21,7 @@ import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithms;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import java.security.Key;
 import java.security.Provider;
@@ -57,7 +56,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
-     * @see io.jsonwebtoken.security.SignatureAlgorithms#NONE
+     * @see io.jsonwebtoken.security.JwsAlgorithms#NONE
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder enableUnsecuredJws();
@@ -441,22 +440,23 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     /**
      * Adds the specified signature algorithms to the parser's total set of supported signature algorithms,
      * overwriting any previously-added algorithms with the same
-     * {@link io.jsonwebtoken.security.SignatureAlgorithm#getId() id}s.
+     * {@link Identifiable#getId() id}s.
      *
-     * <p>There may be only one registered {@code SignatureAlgorithm} per algorithm {@code id}, and the {@code sigAlgs}
-     * collection is added in iteration order; if a duplicate id is found when iterating the {@code sigAlgs}
-     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     * <p>There may be only one registered {@code SecureDigestAlgorithm} per algorithm {@code id}, and the
+     * {@code sigAlgs} collection is added in iteration order; if a duplicate id is found when iterating the
+     * {@code sigAlgs} collection, the later element will evict any previously-added algorithm with the same
+     * {@code id}.</p>
      *
-     * <p>Finally, the {@link SignatureAlgorithms#values() JWA standard signature algorithms} are added last,
-     * <em>after</em> those in the {@code sigAlgs} collection, to ensure that JWA standard algorithms cannot be
-     * accidentally replaced.</p>
+     * <p>Finally, the {@link io.jsonwebtoken.security.JwsAlgorithms#values() JWA standard signature algorithms} are
+     * added last, <em>after</em> those in the {@code sigAlgs} collection, to ensure that JWA standard algorithms
+     * cannot be accidentally replaced.</p>
      *
-     * @param sigAlgs collection of signature algorithms to add to the parser's total set of supported signature
+     * @param sigAlgs collection of signing algorithms to add to the parser's total set of supported signature
      *                algorithms.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs);
+    JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> sigAlgs);
 
     /**
      * Adds the specified key management algorithms to the parser's total set of supported key algorithms,
@@ -475,7 +475,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs);
+    JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs);
 
     /**
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to

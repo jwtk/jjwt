@@ -1,6 +1,8 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.SignatureException
+import io.jsonwebtoken.security.VerifySecureDigestRequest
 import org.junit.Before
 import org.junit.Test
 
@@ -18,17 +20,17 @@ class NoneSignatureAlgorithmTest {
 
     @Test
     void testName() {
-        assertEquals "none", alg.getId();
+        assertEquals "none", alg.getId()
     }
 
     @Test(expected = SignatureException)
-    void testSign() {
-        alg.sign(null)
+    void testDigest() {
+        alg.digest((SecureRequest)null)
     }
 
     @Test(expected = SignatureException)
     void testVerify() {
-        alg.verify(null)
+        alg.verify((VerifySecureDigestRequest)null)
     }
 
     @Test
@@ -38,12 +40,12 @@ class NoneSignatureAlgorithmTest {
 
     @Test
     void testEquals() {
-        assertTrue alg.equals(new NoneSignatureAlgorithm())
+        assertTrue alg == new NoneSignatureAlgorithm()
     }
 
     @Test
     void testIdentityEquals() {
-        assertTrue alg.equals(alg)
+        assertTrue alg == alg
     }
 
     @Test

@@ -34,7 +34,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import java.security.Key;
 import java.security.Provider;
@@ -75,7 +75,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgorithms = new LinkedHashSet<>();
 
-    private final Collection<SignatureAlgorithm<?, ?>> extraSignatureAlgorithms = new LinkedHashSet<>();
+    private final Collection<SecureDigestAlgorithm<?, ?>> extraDigestAlgorithms = new LinkedHashSet<>();
 
     private final Collection<CompressionCodec> extraCompressionCodecs = new LinkedHashSet<>();
 
@@ -227,14 +227,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addSignatureAlgorithms(Collection<SignatureAlgorithm<?, ?>> sigAlgs) {
+    public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> sigAlgs) {
         Assert.notEmpty(sigAlgs, "Additional SignatureAlgorithm collection cannot be null or empty.");
-        this.extraSignatureAlgorithms.addAll(sigAlgs);
+        this.extraDigestAlgorithms.addAll(sigAlgs);
         return this;
     }
 
     @Override
-    public JwtParserBuilder addKeyAlgorithms(Collection<KeyAlgorithm<?, ?>> keyAlgs) {
+    public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs) {
         Assert.notEmpty(keyAlgs, "Additional KeyAlgorithm collection cannot be null or empty.");
         this.extraKeyAlgorithms.addAll(keyAlgs);
         return this;
@@ -312,7 +312,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 base64UrlDecoder,
                 new JwtDeserializer<>(deserializer),
                 compressionCodecLocator,
-                extraSignatureAlgorithms,
+                extraDigestAlgorithms,
                 extraKeyAlgorithms,
                 extraEncryptionAlgorithms
         ));

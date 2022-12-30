@@ -10,24 +10,24 @@ import javax.crypto.spec.SecretKeySpec
 
 import static org.junit.Assert.assertEquals
 
-class MacSignatureAlgorithmTest {
+class DefaultMacAlgorithmTest {
 
-    static MacSignatureAlgorithm newAlg() {
-        return new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256)
+    static DefaultMacAlgorithm newAlg() {
+        return new DefaultMacAlgorithm('HS256', 'HmacSHA256', 256)
     }
 
     @Test(expected = SecurityException)
     void testKeyGeneratorNoSuchAlgorithm() {
-        MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'foo', 256);
+        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'foo', 256);
         alg.keyBuilder().build()
     }
 
     @Test
     void testKeyGeneratorKeyLength() {
-        MacSignatureAlgorithm alg = new MacSignatureAlgorithm('HS256', 'HmacSHA256', 256);
+        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'HmacSHA256', 256);
         assertEquals 256, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
 
-        alg = new MacSignatureAlgorithm('A128CBC-HS256', 'HmacSHA256', 128)
+        alg = new DefaultMacAlgorithm('A128CBC-HS256', 'HmacSHA256', 128)
         assertEquals 128, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
     }
 
@@ -67,7 +67,7 @@ class MacSignatureAlgorithmTest {
             String msg = 'The signing key\'s size is 192 bits which is not secure enough for the HS256 algorithm. ' +
                     'The JWT JWA Specification (RFC 7518, Section 3.2) states that keys used with HS256 MUST have a ' +
                     'size >= 256 bits (the key size must be greater than or equal to the hash output size). ' +
-                    'Consider using the SignatureAlgorithms.HS256.keyBuilder() method to create a key guaranteed ' +
+                    'Consider using the JwsAlgorithms.HS256.keyBuilder() method to create a key guaranteed ' +
                     'to be secure enough for HS256.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more ' +
                     'information.'
             assertEquals msg, expected.getMessage()
@@ -78,7 +78,7 @@ class MacSignatureAlgorithmTest {
     void testValidateKeyCustomAlgorithmWeakKey() {
         byte[] bytes = new byte[24]
         Randoms.secureRandom().nextBytes(bytes)
-        MacSignatureAlgorithm alg = new MacSignatureAlgorithm('foo', 'foo', 256);
+        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('foo', 'foo', 256);
         try {
             alg.validateKey(new SecretKeySpec(bytes, 'HmacSHA256'), true)
         } catch (WeakKeyException expected) {

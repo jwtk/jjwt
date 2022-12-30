@@ -8,10 +8,10 @@ import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
-import io.jsonwebtoken.security.SecretKeySignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
@@ -65,7 +65,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         return new DefaultSecretJwk(ctx);
     }
 
-    private static void assertKeyBitLength(byte[] bytes, SecretKeySignatureAlgorithm alg) {
+    private static void assertKeyBitLength(byte[] bytes, MacAlgorithm alg) {
         long bitLen = Bytes.bitLength(bytes);
         long requiredBitLen = alg.getKeyBitLength();
         if (bitLen != requiredBitLen) {
@@ -84,11 +84,11 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
         String id = ctx.getAlgorithm();
         if (Strings.hasText(id)) {
-            SignatureAlgorithm<?, ?> alg = SignatureAlgorithmsBridge.findById(id);
-            if (alg instanceof SecretKeySignatureAlgorithm) {
+            SecureDigestAlgorithm<?, ?> alg = JwsAlgorithmsBridge.findById(id);
+            if (alg instanceof MacAlgorithm) {
                 jcaName = ((CryptoAlgorithm) alg).getJcaName(); // valid for all JJWT alg implementations
                 Assert.hasText(jcaName, "Algorithm jcaName cannot be null or empty.");
-                assertKeyBitLength(bytes, (SecretKeySignatureAlgorithm) alg);
+                assertKeyBitLength(bytes, (MacAlgorithm) alg);
             }
         }
         if (!Strings.hasText(jcaName) &&

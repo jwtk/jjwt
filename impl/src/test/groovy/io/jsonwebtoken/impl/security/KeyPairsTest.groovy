@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.SignatureAlgorithms
+import io.jsonwebtoken.security.JwsAlgorithms
 import org.junit.Test
 
 import java.security.Key
@@ -47,7 +47,7 @@ class KeyPairsTest {
 
     @Test
     void testGetKeyECMismatch() {
-        KeyPair pair = SignatureAlgorithms.RS256.keyPairBuilder().build()
+        KeyPair pair = JwsAlgorithms.RS256.keyPairBuilder().build()
         Class clazz = ECPublicKey
         try {
             KeyPairs.getKey(pair, clazz)
@@ -97,9 +97,9 @@ class KeyPairsTest {
         }
     }
 
-    private void printMap(Map<?,?> m, int indentCount) {
-        for(def entry : m.entrySet()) {
-            indentCount.times {print("\t")}
+    private void printMap(Map<?, ?> m, int indentCount) {
+        for (def entry : m.entrySet()) {
+            indentCount.times { print("\t") }
             print "${entry.key}: "
             if (entry.value instanceof Map) {
                 println()

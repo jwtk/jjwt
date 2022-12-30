@@ -106,7 +106,7 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
     private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {
         byte[] encoded = GET_X509_BYTES.apply(cert);
         Request<byte[]> request = new DefaultRequest<>(encoded, null, null);
-        return alg.hash(request);
+        return alg.digest(request);
     }
 
     public void apply() {

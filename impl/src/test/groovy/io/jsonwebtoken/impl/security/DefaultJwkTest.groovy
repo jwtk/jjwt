@@ -1,21 +1,10 @@
 package io.jsonwebtoken.impl.security
 
-
-import io.jsonwebtoken.security.MalformedKeyException
-import io.jsonwebtoken.security.SignatureAlgorithms
-import org.junit.Test
-
-import javax.crypto.SecretKey
-import java.security.Key
-import java.security.cert.X509Certificate
-
-import static org.junit.Assert.*
-
 class DefaultJwkTest {
 
     /*
 
-    private static final SecretKey TEST_KEY = SignatureAlgorithms.HS512.generateKey();
+    private static final SecretKey TEST_KEY = JwsAlgorithms.HS512.generateKey();
 
     class TestJwk extends AbstractJwk {
         TestJwk(String type = "test", String use = null, Set<String> operations = null, String algorithm = null, String id = null, URI x509url = null, List<X509Certificate> certChain = null, byte[] x509Sha1Thumbprint = null, byte[] x509Sha256Thumbprint = null, Key key = TEST_KEY) {

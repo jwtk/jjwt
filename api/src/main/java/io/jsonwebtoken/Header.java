@@ -118,7 +118,7 @@ public interface Header<T extends Header<T>> extends Map<String, Object>, Header
      *     <li>If the JWT is a Signed JWT (a JWS), the <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">
      *      <code>alg</code></a> (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
      *      JWS.  Consider using
-     *      {@link io.jsonwebtoken.security.SignatureAlgorithms#findById(String) SignatureAlgorithms.findById} to
+     *      {@link io.jsonwebtoken.security.JwsAlgorithms#findById(String) JwsAlgorithms.findById} to
      *      convert this string value to a type-safe SignatureAlgorithm instance.</li>
      *      <li>If the JWT is an Encrypted JWT (a JWE), the
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
