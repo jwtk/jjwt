@@ -196,6 +196,27 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
     String getType();
 
     /**
+     * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the {@code SHA-256} hash algorithm.  This is a convenience method that delegates to
+     * {@link #thumbprint(HashAlgorithm)} with a {@code SHA-256} {@link HashAlgorithm} instance.
+     *
+     * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the {@code SHA-256} hash algorithm.
+     * @see #thumbprint(HashAlgorithm)
+     */
+    JwkThumbprint thumbprint();
+
+    /**
+     * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the specified hash algorithm.
+     *
+     * @param alg the hash algorithm to use to compute the digest of the canonical JWK Thumbprint JSON form of this JWK.
+     * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the specified hash algorithm.
+     */
+    JwkThumbprint thumbprint(HashAlgorithm alg);
+
+    /**
      * Represents the JWK as its corresponding Java {@link Key} instance for use with Java cryptographic
      * APIs.
      *

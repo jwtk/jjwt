@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl
 
-
 import org.junit.Before
 import org.junit.Test
 

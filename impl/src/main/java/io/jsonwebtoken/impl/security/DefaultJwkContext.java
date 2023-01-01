@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.JwtMap;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.security.HashAlgorithm;
 
 import java.net.URI;
 import java.security.Key;
@@ -50,6 +51,8 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     private SecureRandom random;
 
+    private HashAlgorithm idThumbprintAlgorithm;
+
     public DefaultJwkContext() {
         // For the default constructor case, we don't know how it will be used or what values will be populated,
         // so we can't know ahead of time what the sensitive data is.  As such, for security reasons, we assume all
@@ -79,6 +82,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         DefaultJwkContext<?> src = (DefaultJwkContext<?>) other;
         this.provider = other.getProvider();
         this.random = other.getRandom();
+        this.idThumbprintAlgorithm = other.getIdThumbprintAlgorithm();
         this.values.putAll(src.values);
         this.idiomaticValues.putAll(src.idiomaticValues);
         if (removePrivate) {
@@ -142,6 +146,17 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
     public JwkContext<K> setId(String id) {
         put(AbstractJwk.KID, id);
         return this;
+    }
+
+    @Override
+    public JwkContext<K> setIdThumbprintAlgorithm(HashAlgorithm alg) {
+        this.idThumbprintAlgorithm = alg;
+        return this;
+    }
+
+    @Override
+    public HashAlgorithm getIdThumbprintAlgorithm() {
+        return this.idThumbprintAlgorithm;
     }
 
     @Override

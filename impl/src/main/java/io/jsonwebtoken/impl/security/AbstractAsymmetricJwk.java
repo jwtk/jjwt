@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
@@ -21,8 +36,8 @@ public abstract class AbstractAsymmetricJwk<K extends Key> extends AbstractJwk<K
     public static final Field<URI> X5U = Fields.uri("x5u", "X.509 URL");
     static final Set<Field<?>> FIELDS = Collections.concat(AbstractJwk.FIELDS, USE, X5C, X5T, X5T_S256, X5U);
 
-    AbstractAsymmetricJwk(JwkContext<K> ctx) {
-        super(ctx);
+    AbstractAsymmetricJwk(JwkContext<K> ctx, List<Field<?>> thumbprintFields) {
+        super(ctx, thumbprintFields);
     }
 
     @Override

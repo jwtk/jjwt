@@ -37,7 +37,6 @@ import static org.junit.Assert.*
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParserBuilder
 // implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class
 // just fills in any remaining test gaps.
-
 class DefaultJwtParserBuilderTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()

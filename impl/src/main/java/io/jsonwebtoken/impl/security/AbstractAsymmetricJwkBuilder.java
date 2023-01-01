@@ -56,12 +56,12 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
-        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, tthis(), MalformedKeyException.class);
+        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, self(), MalformedKeyException.class);
     }
 
     AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, K key, Set<Field<?>> fields) {
         super(new DefaultJwkContext<>(fields, b.jwkContext, key));
-        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, tthis(), MalformedKeyException.class);
+        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, self(), MalformedKeyException.class);
         this.applyX509KeyUse = b.applyX509KeyUse;
         this.keyUseStrategy = b.keyUseStrategy;
     }
@@ -70,7 +70,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     public T setPublicKeyUse(String use) {
         Assert.hasText(use, "publicKeyUse cannot be null or empty.");
         this.jwkContext.setPublicKeyUse(use);
-        return tthis();
+        return self();
     }
 
     /*
@@ -175,7 +175,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         @Override
         public T setPublicKey(L publicKey) {
             this.jwkContext.setPublicKey(publicKey);
-            return tthis();
+            return self();
         }
     }
 

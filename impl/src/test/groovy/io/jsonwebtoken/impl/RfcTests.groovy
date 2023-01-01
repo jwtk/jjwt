@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright (C) 2022 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.security;
+package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.io.Encoders
 
-import java.security.Key;
+class RfcTests {
 
-public interface FamilyJwkFactory<K extends Key, J extends Jwk<K>> extends JwkFactory<K, J>, Identifiable {
+    static String encode(byte[] b) {
+        return Encoders.BASE64URL.encode(b)
+    }
 
-    boolean supports(JwkContext<?> context);
+    static byte[] decode(String val) {
+        return Decoders.BASE64URL.decode(val)
+    }
+
+    static final String stripws(String s) {
+        return s.replaceAll('[\\s]', '')
+    }
 }

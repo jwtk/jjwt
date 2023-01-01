@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -7,6 +22,7 @@ import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.RsaPrivateJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -98,9 +114,17 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         // The [JWA Spec](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.1)
         // requires public values to be present in private JWKs, so add them:
+
+        // If a JWK fingerprint has been requested to be the JWK id, ensure we copy over the one computed for the
+        // public key per https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        boolean copyId = !Strings.hasText(ctx.getId()) && ctx.getIdThumbprintAlgorithm() != null;
+
         JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, rsaPublicKey);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
+        if (copyId) {
+            ctx.setId(pubJwk.getId());
+        }
 
         put(ctx, DefaultRsaPrivateJwk.PRIVATE_EXPONENT, key.getPrivateExponent());
 

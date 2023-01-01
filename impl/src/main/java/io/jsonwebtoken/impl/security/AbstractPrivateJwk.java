@@ -1,5 +1,21 @@
+/*
+ * Copyright (C) 2021 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.KeyPair;
 import io.jsonwebtoken.security.PrivateJwk;
@@ -7,14 +23,15 @@ import io.jsonwebtoken.security.PublicJwk;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
 
 abstract class AbstractPrivateJwk<K extends PrivateKey, L extends PublicKey, M extends PublicJwk<L>> extends AbstractAsymmetricJwk<K> implements PrivateJwk<K, L, M> {
 
     private final M publicJwk;
     private final KeyPair<L, K> keyPair;
 
-    AbstractPrivateJwk(JwkContext<K> ctx, M pubJwk) {
-        super(ctx);
+    AbstractPrivateJwk(JwkContext<K> ctx, List<Field<?>> thumbprintFields, M pubJwk) {
+        super(ctx, thumbprintFields);
         this.publicJwk = Assert.notNull(pubJwk, "PublicJwk instance cannot be null.");
         L publicKey = Assert.notNull(pubJwk.toKey(), "PublicJwk key instance cannot be null.");
         this.context.setPublicKey(publicKey);

@@ -9,7 +9,9 @@ and Android.
 
 JJWT is a pure Java implementation based exclusively on the [JWT](https://tools.ietf.org/html/rfc7519), 
 [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), 
-[JWK](https://tools.ietf.org/html/rfc7517) and [JWA](https://tools.ietf.org/html/rfc7518) RFC specifications and 
+[JWA](https://tools.ietf.org/html/rfc7518), [JWK](https://tools.ietf.org/html/rfc7517), 
+[JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html), and 
+[JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) RFC specifications and 
 open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 
 The library was created by [Les Hazlewood](https://github.com/lhazlewood)
@@ -101,6 +103,18 @@ enforcement.
     * [JWE Decryption Key](#jwe-read-key)
     * [JWE Decryption Key Locator](#jwe-key-locator)
     * [JWE Decompression](#jwe-read-decompression)
+* [JSON Web Keys (JWKs)](#jwk)
+  * [Create a JWK](#jwk-create)
+  * [Read a JWK](#jwk-read)
+  * [PrivateKey JWKs](#jwk-private)
+    * [Private JWK `PublicKey`](#jwk-private-public)
+    * [Private JWK from `KeyPair`](#jwk-private-keypair)
+    * [Private JWK Public Conversion](#jwk-private-topub)
+  * [JWK Thumbprints](#jwk-thumbprint)
+    * [JWK Thumbprint as Key ID](jwk-thumbprint-kid)
+    * [JWK Thumbprint URI](#jwk-thumbprint-uri)
+  * [JWK Security Considerations](#jwk-security)
+    * [JWK `toString()` Safety](#jwk-tostring)
 * [Compression](#compression)
   * [Custom Compression Codec](#compression-custom)
   * [Custom Compression Codec Locator](#compression-custom-locator)
@@ -133,8 +147,8 @@ enforcement.
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with over 1,000+ tests and enforced 100% test code coverage.  Literally every single
-   method, statement and conditional branch variant in the entire codebase is tested and required to pass on every build.
+ * Stable implementation with over 1,000+ tests and enforced 100% test code coverage.  Every single method, statement 
+   and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
    | Identifier | Signature Algorithm |
@@ -2201,6 +2215,261 @@ If, however, a custom compression algorithm was used to compress the JWE, you wi
 `JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
+
+<a name="jwk"></a>
+## JSON Web Keys (JWKs)
+
+[JSON Web Keys](https://www.rfc-editor.org/rfc/rfc7517.html) (JWKs) are JSON serializations of cryptographic keys, 
+allowing key material to be embedded in JWTs or transmitted between parties in a standard JSON-based text format. They
+are essentially a JSON-based alternative to other text-based key formats, such as the
+[DER, PEM and PKCS12](https://serverfault.com/a/9717) text strings or files commonly used when configuring TLS on web
+servers, for example.
+
+For example, an identity web service may expose its RSA or Elliptic Curve Public Keys to 3rd parties in the JWK format.
+A client may then parse the public key JWKs to verify the service's [JWS](#jws) tokens, as well as send encrypted 
+information to the service using [JWE](#jwe)s.
+
+JWKs can be converted to and from standard Java `Key` types as expected using the same builder/parser patterns we've
+seen for JWTs.
+
+<a name="jwk-create"></a>
+### Create a JWK
+
+You create a JWK as follows:
+
+1. Use the `Jwks.builder()` method to create a `JwkBuilder` instance.
+2. Call the `forKey` method with the Java key you wish to represent as a JWK.
+3. Call builder methods to set any additional key fields or metadata, such as a `kid` (Key ID), X509 Certificates, 
+   etc as desired.
+4. Call the `build()` method to produce the resulting JWK.
+
+For example:
+
+```java
+SecretKey key = getSecretKey(); // or RSA or EC PublicKey or PrivateKey
+SecretJwk = Jwts.builder().forKey(key) // (1) and (2)
+        
+    .setId("mySecretKeyId")            // (3)
+    // ... etc ...    
+    
+    .build();                          // (4)
+```
+
+<a name="jwk-read"></a>
+### Read a JWK
+
+You can read/parse a JWK by building a `JwkParser` and parsing the JWK JSON string with its `parse` method:
+
+```java
+String json = getJwkJsonString();
+Jwk<?> jwk = Jwks.parser()
+    //.setProvider(aJcaProvider)         // optional
+    //.deserializeJsonWith(deserializer) // optional
+    .build()                             // create the parser
+    .parse(json);                        // actually parse the JSON
+
+Key key = jwk.toKey();                   // convert to a Java Key instance
+```
+As shown above you can specify a custom JCA Provider or [JSON deserializer](#json) in the same way as the `JwtBuilder`.
+
+<a name="jwk-private"></a>
+### PrivateKey JWKs
+
+Unlike Java, the JWA specification requires a private JWKs to contain _both_ public key _and_ private key material
+(see [RFC 7518, Section 6.1.1](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.2) and 
+[RFC 7518, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2)).
+
+In this sense, a private JWK (represented as a `PrivateJwk` or a subtype, such as `RsaPrivateJwk`, `EcPrivateJwk`, etc) 
+can be thought of more like a Java `KeyPair` instance.  Consequently, when creating a `PrivateJwk` instance, 
+the `PrivateKey`'s corresponding `PublicKey` is required.
+
+<a name="jwk-private-public"></a>
+#### Private JWK `PublicKey`
+
+If you do not provide a `PublicKey` when creating a `PrivateJwk`, JJWT will automatically perform the necessary 
+computations to derive the `PublicKey` from the `PrivateKey` instance if possible. However, because this can add 
+some computing time, it is typically recommended to provide the `PublicKey` when possible to avoid this extra work.
+
+For example:
+
+```java
+RSAPrivateKey rsaPrivateKey = getRSAPrivateKey(); // or ECPrivateKey
+
+RsaPrivateJwk jwk = Jwks.builder().forKey(rsaPrivateKey)
+
+        //.setPublicKey(rsaPublicKey)  // optional, but recommended to avoid extra computation work
+        
+        .build();
+```
+
+<a name="jwk-private-keypair"></a>
+#### Private JWK from KeyPair
+
+If you have a Java `KeyPair` instance, then you have both the public and private key material necessary to create a
+`PrivateJwk`. For example:
+
+```java
+KeyPair rsaKeyPair = getRSAKeyPair();
+RsaPrivateJwk rsaPrivJwk = Jwks.builder().forRsaKeyPair(rsaKeyPair).build();
+
+KeyPair ecKeyPair = getECKeyPair();
+EcPrivateJwk ecPrivJwk = Jwks.builder().forEcKeyPair(ecKeyPair).build();
+```
+
+An exception will thrown when calling `forRsaKeyPair` if the specified `KeyPair` instance does not contain
+`RSAPublicKey` and `RSAPrivateKey` instances.  Similarly, an exception will be thrown when calling `forEcKeyPair` if
+the `KeyPair` instance does not contain `ECPublicKey` and `ECPrivateKey` instances.
+
+<a name="jwk-private-topub"></a>
+#### Private JWK Public Conversion
+
+Because private JWKs contain public key material, you can always obtain the private JWK's corresponding public JWK and
+Java `PublicKey` or `KeyPair`.  For example:
+
+```java
+
+RsaPrivateJwk privateJwk = Jwks.builder().forKey(rsaPrivateKey).build(); // or ecPrivateKey
+
+// Get the matching public JWK and/or PublicKey:
+RsaPublicJwk pubJwk = privateJwk.toPublicJwk(); // JWK instance
+RSAPublicKey pubKey = pubJwk.toKey();           // Java PublicKey instance
+
+// or, convert to a Java `KeyPair` containing both the `PrivateKey` and `PublicKey` instances:
+KeyPair pair = privateJwk.toKeyPair();
+```
+
+<a name="jwk-thumbprint"></a>
+### JWK Thumbprints
+
+A [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html) is a digest (aka hash) of a canonical JSON 
+representation of a JWK's public properties. 'Canonical' in this case means that only RFC-specified values in any JWK
+are used in an exact order thumbprint calculation.  This ensures that anyone can calculate a JWK's same exact 
+thumbprint, regardless of custom fields or JSON key/value ordering differences in a JWK.
+
+All `Jwk` instances support [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html)s via the
+`thumbprint()` and `thumbprint(HashAlgorithm)` methods:
+
+```java
+HashAlgorithm hashAlg = getAHashAlgorithm();
+
+Jwk<?> jwk = Jwks.builder(). /* ... */ .build();
+
+JwkThumbprint sha256Thumbprint = jwk.thumbprint(); // SHA-256 thumbprint by default
+
+JwkThumbprint anotherThumbprint = jwk.thumbprint(hashAlg); // thumbprint using specified hash algorithm
+```
+
+The resulting `JwkThumbprint` instance provides some useful methods:
+
+* `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the output from the hash algorithm
+* `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
+* `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint
+* `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) specification
+
+<a name="jwk-thumbprint-kid"></a>
+#### JWK Thumbprint as a Key ID
+
+Because a thumbprint is an order-guaranteed unique digest of a JWK, JWK thumbprints are often used as convenient
+unique identifiers for a JWK (e.g. the JWK's `kid` (Key ID) value). These identifiers can be useful when
+[locating keys](#key-locator) for JWS signature verification or JWE decryption, for example.
+
+For example:
+
+```java
+String kid = jwk.thumbprint().toString(); // Thumbprint bytes as a Base64URL-encoded string
+Key key = findKey(kid);
+```
+
+However, because `Jwk` instances are immutable, you can't set the key id after the JWK is created. For example, the
+following is not possible:
+
+```java
+String kid = jwk.thumbprint().toString();
+jwk.setId(kid) // Jwks are immutable - there is no `setId` method
+```
+
+Instead, you may use the `setIdAsThumbprint` methods on the `JwkBuilder` when creating a `Jwk`:
+
+```java
+Jwk<?> jwk = Jwks.builder().forKey(aKey)
+
+    .setIdAsThumbprint() //  <---  (or setIdAsThumbprint(hashAlgorithm) )
+        
+    /* ... etc ... */
+
+    .build();
+```
+
+Calling either `setIdAsThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`.
+
+<a name="jwk-thumbprint-uri"></a>
+#### JWK Thumbprint URI
+
+A JWK's thumbprint's canonical URI as defined by the [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) 
+specification may be obtained by calling the thumbprint's `toURI()` method:
+
+```java
+URI canonicalThumbprintURI = jwk.thumbprint().toURI();
+```
+
+Per the RFC specification, if you call `canonicalThumbprintURI.toString()`, you would see a string that looks like this:
+
+```text
+urn:ietf:params:oauth:jwk-thumbprint:HASH_ALG_ID:BASE64URL_DIGEST
+```
+
+where:
+* `urn:ietf:params:oauth:jwk-thumbprint:` is the URI scheme+prefix
+* `HASH_ALG_ID` is the standard identifier used to compute the thumbprint as defined in the
+  [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml)
+* `BASE64URL_DIGEST` is the Base64URL-encoded thumbprint bytes, equal to `jwkThumbprint.toString()`.
+
+<a name="jwk-security"></a>
+### JWK Security Considerations
+
+Because they contain secret or private key material, `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`,  
+`EcPrivateJwk`, etc) instances should be used with great care and never accidentally transmitted to 3rd parties.
+As such, JJWT's `Jwk` implementations will suppress certain values in `toString()` output for safety as described 
+next.
+
+<a name="jwk-tostring"></a>
+#### JWK `toString()` Safety
+
+Because it would be incredibly easy to accidentally print key material to `System.out.println()` or application 
+logs, all `Jwk` implementations will print redacted values instead of actual secret or private key material.
+
+For example, consider the following Secret JWK JSON example from 
+[RFC 7515, Appendix A.1.1](https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1):
+
+```json
+{
+  "kty": "oct",
+  "k": "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow",
+  "kid": "HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example."
+}
+```
+
+The `k` value (`AyAyM1SysPpby...`) reflects secure key material and should never be accidentially
+exposed.
+
+If you were to parse this JSON as a `Jwk`, calling `toString()` will _NOT_ print this material.  It will 
+instead print the string literal `<redacted>` for any secret or private key data field.  For example:
+
+```java
+String json = getExampleSecretKeyJson();
+Jwk<?> jwk = Jwks.parser().build().parse(json);
+
+System.out.printn(jwk);
+```
+
+This code would print the following string literal to the System console:
+
+```text
+kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.
+```
+
+This is true for all secret or private key values in `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`, 
+`EcPrivateJwk`, etc) instances.
 
 <a name="compression"></a>
 ## Compression

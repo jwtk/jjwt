@@ -48,6 +48,10 @@ class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKe
     );
 
     DefaultRsaPrivateJwk(JwkContext<RSAPrivateKey> ctx, RsaPublicJwk pubJwk) {
-        super(ctx, pubJwk);
+        super(ctx,
+                // only public members are included in Private JWKs per
+                // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+                DefaultRsaPublicJwk.THUMBPRINT_FIELDS,
+                pubJwk);
     }
 }

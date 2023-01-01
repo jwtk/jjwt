@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Nameable;
+import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.X509Mutator;
 
 import java.net.URI;
@@ -34,6 +35,10 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String, Obj
         X509Mutator<JwkContext<K>> {
 
     JwkContext<K> setId(String id);
+
+    JwkContext<K> setIdThumbprintAlgorithm(HashAlgorithm alg);
+
+    HashAlgorithm getIdThumbprintAlgorithm();
 
     String getType();
 

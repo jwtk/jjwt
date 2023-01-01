@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.MalformedKeyException;
@@ -49,63 +50,78 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     public T setProvider(Provider provider) {
         Assert.notNull(provider, "Provider cannot be null.");
         jwkContext.setProvider(provider);
-        return tthis();
+        return self();
     }
 
     @Override
     public T setRandom(SecureRandom random) {
         Assert.notNull(random, "SecureRandom cannot be null.");
         jwkContext.setRandom(random);
-        return tthis();
+        return self();
     }
 
     @Override
     public T put(String name, Object value) {
         jwkContext.put(name, value);
-        return tthis();
+        return self();
     }
 
     @Override
     public T putAll(Map<? extends String, ?> values) {
         jwkContext.putAll(values);
-        return tthis();
+        return self();
     }
 
     @Override
     public T remove(String key) {
         jwkContext.remove(key);
-        return tthis();
+        return self();
     }
 
     @Override
     public T clear() {
         jwkContext.clear();
-        return tthis();
+        return self();
     }
 
     @Override
     public T setAlgorithm(String alg) {
         Assert.hasText(alg, "Algorithm cannot be null or empty.");
         jwkContext.setAlgorithm(alg);
-        return tthis();
+        return self();
     }
 
     @Override
     public T setId(String id) {
         Assert.hasText(id, "Id cannot be null or empty.");
+        jwkContext.setIdThumbprintAlgorithm(null); //clear out any previously set value
         jwkContext.setId(id);
-        return tthis();
+        return self();
+    }
+
+    @Override
+    public T setIdFromThumbprint() {
+        return setIdFromThumbprint(DefaultHashAlgorithm.SHA256);
+    }
+
+    @Override
+    public T setIdFromThumbprint(HashAlgorithm alg) {
+        Assert.notNull(alg, "Thumbprint HashAlgorithm cannot be null.");
+        Assert.notNull(alg.getId(), "Thumbprint HashAlgorithm ID cannot be null.");
+        this.jwkContext.setId(null); // clear out any previous value
+        this.jwkContext.setIdThumbprintAlgorithm(alg);
+        return self();
     }
 
     @Override
     public T setOperations(Set<String> ops) {
         Assert.notEmpty(ops, "Operations cannot be null or empty.");
         jwkContext.setOperations(ops);
-        return tthis();
+        return self();
     }
 
     @SuppressWarnings("unchecked")
-    protected final T tthis() {
+    protected final T self() {
         return (T) this;
     }
 

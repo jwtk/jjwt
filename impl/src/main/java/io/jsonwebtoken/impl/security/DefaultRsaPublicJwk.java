@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.RsaPublicJwk;
 
 import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.Set;
 
 class DefaultRsaPublicJwk extends AbstractPublicJwk<RSAPublicKey> implements RsaPublicJwk {
@@ -15,8 +16,9 @@ class DefaultRsaPublicJwk extends AbstractPublicJwk<RSAPublicKey> implements Rsa
     static final Field<BigInteger> MODULUS = Fields.bigInt("n", "Modulus").build();
     static final Field<BigInteger> PUBLIC_EXPONENT = Fields.bigInt("e", "Public Exponent").build();
     static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, MODULUS, PUBLIC_EXPONENT);
+    static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(PUBLIC_EXPONENT, KTY, MODULUS);
 
     DefaultRsaPublicJwk(JwkContext<RSAPublicKey> ctx) {
-        super(ctx);
+        super(ctx, THUMBPRINT_FIELDS);
     }
 }

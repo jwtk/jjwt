@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 jsonwebtoken.io
+ * Copyright (C) 2018 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,12 +159,12 @@ class JwksTest {
 
     @Test
     void testX509Sha1Thumbprint() {
-        testThumbprint(1)
+        testX509Thumbprint(1)
     }
 
     @Test
     void testX509Sha256Thumbprint() {
-        testThumbprint(256)
+        testX509Thumbprint(256)
     }
 
     @Test
@@ -179,7 +179,7 @@ class JwksTest {
         Jwks.builder().forKey(SKEY).setRandom(null).build()
     }
 
-    static void testThumbprint(int number) {
+    static void testX509Thumbprint(int number) {
         def algs = JwsAlgorithms.values().findAll { it instanceof SignatureAlgorithm }
 
         for (def alg : algs) {
@@ -339,10 +339,10 @@ class JwksTest {
 
     private static class InvalidECPublicKey implements ECPublicKey {
 
-        private final ECPublicKey good;
+        private final ECPublicKey good
 
         InvalidECPublicKey(ECPublicKey good) {
-            this.good = good;
+            this.good = good
         }
 
         @Override
