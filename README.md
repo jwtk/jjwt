@@ -52,11 +52,11 @@ enforcement.
     * [Header Map](#jwt-header-map)
   * [Payload](#jwt-payload)
     * [Arbitrary Content](#jwt-content)
-    * [Claims](#jwt-create-claims)
-      * [Standard Claims](#jwt-create-claims-standard)
-      * [Custom Claims](#jwt-create-claims-custom)
-      * [Claims Instance](#jwt-create-claims-instance)
-      * [Claims Map](#jwt-create-claims-map)
+    * [Claims](#jwt-claims)
+      * [Standard Claims](#jwt-claims-standard)
+      * [Custom Claims](#jwt-claims-custom)
+      * [Claims Instance](#jwt-claims-instance)
+      * [Claims Map](#jwt-claims-map)
   * [Compression](#jwt-compression)
 * [Read a JWT](#jwt-read)
   * [Static Parsing Key](#jwt-read-key)
@@ -137,6 +137,11 @@ enforcement.
   * [JWE Encrypted with AES Key Wrap](#example-jwe-aeskw)
   * [JWE Encrypted with ECDH-ES](#example-jwe-ecdhes)
   * [JWE Encrypted with a Password](#example-jwe-password)
+  * [SecretKey JWK](#example-jwk-secret)
+  * [RSA Public JWK](#example-jwk-rsapub)
+  * [RSA Private JWK](#example-jwk-rsapriv)
+  * [Elliptic Curve Public JWK](#example-jwk-ecpub)
+  * [Elliptic Curve Private JWK](#example-jwk-ecpriv)
 
 <a name="features"></a>
 ## Features
@@ -1860,7 +1865,8 @@ to produce a final symmetric key, and that symmetric key is used to encrypt the 
 <a name="jwe-alg-standard"></a>
 #### JWE Standard Key Management Algorithms
 
-The JWT specification defines 17 standard Key Management Algorithms used to produce the `payload` encryption key:
+The JWT specification defines 17 standard Key Management Algorithms used to produce the JWE 
+Content Encryption Key (CEK):
 
 | Identifier | Key Management Algorithm                                                      |
 | --- |-------------------------------------------------------------------------------|   
@@ -1928,7 +1934,7 @@ Instead, a new secure-random key is generated each time a JWE is created, and th
 encrypt/decrypt the JWT payload.  The secure-random key is itself encrypted with your symmetric secret key
 using the AES Wrap algorithm, and the encrypted key is embedded in the resulting JWE.
 
-This allows the payload to be encrypted with a random short-lived key, reducing material exposure of the potentially 
+This allows the JWE to be encrypted with a random short-lived key, reducing material exposure of the potentially 
 longer-lived symmetric secret key.
 
 Because these particular algorithms use a symmetric secret key, they are best suited when the JWE creator and 
@@ -2327,15 +2333,12 @@ Because private JWKs contain public key material, you can always obtain the priv
 Java `PublicKey` or `KeyPair`.  For example:
 
 ```java
-
 RsaPrivateJwk privateJwk = Jwks.builder().forKey(rsaPrivateKey).build(); // or ecPrivateKey
 
 // Get the matching public JWK and/or PublicKey:
 RsaPublicJwk pubJwk = privateJwk.toPublicJwk(); // JWK instance
 RSAPublicKey pubKey = pubJwk.toKey();           // Java PublicKey instance
-
-// or, convert to a Java `KeyPair` containing both the `PrivateKey` and `PublicKey` instances:
-KeyPair pair = privateJwk.toKeyPair();
+KeyPair pair = privateJwk.toKeyPair();          // java.security.KeyPair
 ```
 
 <a name="jwk-thumbprint"></a>
@@ -2393,14 +2396,13 @@ Instead, you may use the `setIdAsThumbprint` methods on the `JwkBuilder` when cr
 ```java
 Jwk<?> jwk = Jwks.builder().forKey(aKey)
 
-    .setIdAsThumbprint() //  <---  (or setIdAsThumbprint(hashAlgorithm) )
-        
-    /* ... etc ... */
+    .setIdAsThumbprint() // or setIdAsThumbprint(hashAlgorithm)
 
     .build();
 ```
 
-Calling either `setIdAsThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`.
+Calling either `setIdAsThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`
+(which is `Encoders.BASE64URL.encode(thumbprint.toByteArray())`).
 
 <a name="jwk-thumbprint-uri"></a>
 #### JWK Thumbprint URI
@@ -2421,7 +2423,8 @@ urn:ietf:params:oauth:jwk-thumbprint:HASH_ALG_ID:BASE64URL_DIGEST
 where:
 * `urn:ietf:params:oauth:jwk-thumbprint:` is the URI scheme+prefix
 * `HASH_ALG_ID` is the standard identifier used to compute the thumbprint as defined in the
-  [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml)
+  [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml).
+  This is the same as `thumbprint.getHashAlgorithm().getId()`.
 * `BASE64URL_DIGEST` is the Base64URL-encoded thumbprint bytes, equal to `jwkThumbprint.toString()`.
 
 <a name="jwk-security"></a>
@@ -2977,7 +2980,22 @@ Jwts.parserBuilder()
     // ... etc ...
 ```
 
+<a name="examples"></a>
 ## Examples
+
+* [JWS Signed with HMAC](#example-jws-hs)
+* [JWS Signed with RSA](#example-jws-rsa)
+* [JWS Signed with ECDSA](#example-jws-ecdsa)
+* [JWE Encrypted Directly with a SecretKey](#example-jwe-dir)
+* [JWE Encrypted with RSA](#example-jwe-rsa)
+* [JWE Encrypted with AES Key Wrap](#example-jwe-aeskw)
+* [JWE Encrypted with ECDH-ES](#example-jwe-ecdhes)
+* [JWE Encrypted with a Password](#example-jwe-password)
+* [SecretKey JWK](#example-jwk-secret)
+* [RSA Public JWK](#example-jwk-rsapub)
+* [RSA Private JWK](#example-jwk-rsapriv)
+* [Elliptic Curve Public JWK](#example-jwk-ecpub)
+* [Elliptic Curve Private JWK](#example-jwk-ecpriv)
 
 <a name="example-jws-hs"></a>
 ### JWT Signed with HMAC
@@ -3254,9 +3272,117 @@ String issuer = Jwts.parserBuilder().decryptWith(password)
 assert "me".equals(issuer);
 ```
 
-### JWK Examples
+<a name="example-jwk-secret"></a>
+### SecretKey JWK
 
-TBD
+Example creating and parsing a secret JWK:
+
+```java
+SecretKey key = JwsAlgorithms.HS512.keyBuilder().build(); // or HS384 or HS256
+SecretJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+
+assert jwk.getId().equals(jwk.thumbprint().toString());
+assert key.equals(jwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof SecretJwk;
+assert jwk.equals(parsed);
+```
+
+<a name="example-jwk-rsapub"></a>
+### RSA Public JWK
+
+Example creating and parsing an RSA Public JWK:
+
+```java
+RSAPublicKey key = (RSAPublicKey)JwsAlgorithms.RS512.keyPairBuilder().build().getPublic();
+RsaPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+
+assert jwk.getId().equals(jwk.thumbprint().toString());
+assert key.equals(jwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof RsaPublicJwk;
+assert jwk.equals(parsed);
+```
+
+<a name="example-jwk-rsapriv"></a>
+### RSA Private JWK
+
+Example creating and parsing an RSA Private JWK:
+
+```java
+KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
+RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
+RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
+
+RsaPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+RsaPublicJwk pubJwk = privJwk.toPublicJwk();
+
+assert privJwk.getId().equals(privJwk.thumbprint().toString());
+assert pubJwk.getId().equals(pubJwk.thumbprint().toString());
+assert privKey.equals(privJwk.toKey());
+assert pubKey.equals(pubJwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof RsaPrivateJwk;
+assert privJwk.equals(parsed);
+```
+
+<a name="example-jwk-ecpub"></a>
+### Elliptic Curve Public JWK
+
+Example creating and parsing an Elliptic Curve Public JWK:
+
+```java
+ECPublicKey key = (ECPublicKey) JwsAlgorithms.ES512.keyPairBuilder().build().getPublic();
+EcPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+
+assert jwk.getId().equals(jwk.thumbprint().toString());
+assert key.equals(jwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof EcPublicJwk;
+assert jwk.equals(parsed);
+```
+
+<a name="example-jwk-ecpriv"></a>
+### Elliptic Curve Private JWK
+
+Example creating and parsing an Elliptic Curve Private JWK:
+
+```java
+KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
+ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
+ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
+
+EcPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+EcPublicJwk pubJwk = privJwk.toPublicJwk();
+
+assert privJwk.getId().equals(privJwk.thumbprint().toString());
+assert pubJwk.getId().equals(pubJwk.thumbprint().toString());
+assert privKey.equals(privJwk.toKey());
+assert pubKey.equals(pubJwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof EcPrivateJwk;
+assert privJwk.equals(parsed);
+```
 
 ## Learn More
 

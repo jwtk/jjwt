@@ -16,14 +16,22 @@
 package io.jsonwebtoken.all;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.EcPrivateJwk;
+import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.EncryptionAlgorithms;
+import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.RsaPrivateJwk;
+import io.jsonwebtoken.security.RsaPublicJwk;
+import io.jsonwebtoken.security.SecretJwk;
 import io.jsonwebtoken.security.SecretKeyAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import org.junit.Test;
@@ -33,6 +41,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * Test cases to ensure snippets in README.md work/compile as expected with the Java language (not Groovy):
@@ -237,5 +249,102 @@ public class JavaReadmeTest {
                 .build().parseClaimsJwe(jwe).getPayload().getIssuer();
 
         assert "me".equals(issuer);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleSecretJwk() {
+        SecretKey key = JwsAlgorithms.HS512.keyBuilder().build(); // or HS384 or HS256
+        SecretJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+
+        assert jwk.getId().equals(jwk.thumbprint().toString());
+        assert key.equals(jwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof SecretJwk;
+        assert jwk.equals(parsed);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleRsaPublicJwk() {
+        RSAPublicKey key = (RSAPublicKey) JwsAlgorithms.RS512.keyPairBuilder().build().getPublic();
+        RsaPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+
+        assert jwk.getId().equals(jwk.thumbprint().toString());
+        assert key.equals(jwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof RsaPublicJwk;
+        assert jwk.equals(parsed);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleRsaPrivateJwk() {
+        KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
+        RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
+        RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
+
+        RsaPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+        RsaPublicJwk pubJwk = privJwk.toPublicJwk();
+
+        assert privJwk.getId().equals(privJwk.thumbprint().toString());
+        assert pubJwk.getId().equals(pubJwk.thumbprint().toString());
+        assert privKey.equals(privJwk.toKey());
+        assert pubKey.equals(pubJwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof RsaPrivateJwk;
+        assert privJwk.equals(parsed);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleEcPublicJwk() {
+        ECPublicKey key = (ECPublicKey) JwsAlgorithms.ES512.keyPairBuilder().build().getPublic();
+        EcPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+
+        assert jwk.getId().equals(jwk.thumbprint().toString());
+        assert key.equals(jwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof EcPublicJwk;
+        assert jwk.equals(parsed);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleEcPrivateJwk() {
+        KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
+        ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
+        ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
+
+        EcPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+        EcPublicJwk pubJwk = privJwk.toPublicJwk();
+
+        assert privJwk.getId().equals(privJwk.thumbprint().toString());
+        assert pubJwk.getId().equals(pubJwk.thumbprint().toString());
+        assert privKey.equals(privJwk.toKey());
+        assert pubKey.equals(pubJwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof EcPrivateJwk;
+        assert privJwk.equals(parsed);
     }
 }
