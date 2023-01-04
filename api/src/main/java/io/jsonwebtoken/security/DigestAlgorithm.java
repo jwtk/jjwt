@@ -55,6 +55,7 @@ import java.security.PublicKey;
  *
  * @param <R> the type of {@link Request} used when computing a digest.
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
+ * @see JwsAlgorithms
  * @since JJWT_RELEASE_VERSION
  */
 public interface DigestAlgorithm<R extends Request<byte[]>, V extends VerifyDigestRequest> extends Identifiable {
