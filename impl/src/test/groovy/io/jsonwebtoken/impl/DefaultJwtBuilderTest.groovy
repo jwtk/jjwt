@@ -483,6 +483,18 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testSignWithPublicKey() {
+        def key = TestKeys.RS256.pair.public
+        def alg = JwsAlgorithms.RS256
+        try {
+            builder.signWith(key, alg)
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals(DefaultJwtBuilder.PUB_KEY_SIGN_MSG, iae.getMessage())
+        }
+    }
+
+    @Test
     void testCompactSimplestPayload() {
         def enc = EncryptionAlgorithms.A128GCM
         def key = enc.keyBuilder().build()

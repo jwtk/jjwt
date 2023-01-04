@@ -39,6 +39,7 @@ import java.security.Key;
  *
  * @param <E> The type of key to use to obtain the AEAD encryption key
  * @param <D> The type of key to use to obtain the AEAD decryption key
+ * @see KeyAlgorithms
  * @see <a href="https://tools.ietf.org/html/rfc7516#section-2">RFC 7561, Section 2: JWE Key (Management) Algorithms</a>
  * @since JJWT_RELEASE_VERSION
  */

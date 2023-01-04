@@ -61,11 +61,16 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
+
+    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
+            "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " +
+            "digital signatures.";
 
     protected Provider provider;
     protected SecureRandom secureRandom;
@@ -191,6 +196,23 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public <K extends Key> JwtBuilder signWith(K key, final SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
+        if (key instanceof PublicKey) { // it's always wrong to try to create signatures with PublicKeys:
+            throw new IllegalArgumentException(PUB_KEY_SIGN_MSG);
+        }
+        // Implementation note:  Ordinarily Passwords should not be used to create secure digests because they usually
+        // lack the length or entropy necessary for secure cryptographic operations, and are prone to misuse.
+        // However, we DO NOT prevent them as arguments here (like the above PublicKey check) because
+        // it is conceivable that a custom SecureDigestAlgorithm implementation would allow Password instances
+        // so that it might perform its own internal key-derivation logic producing a key that is then used to create a
+        // secure hash.
+        //
+        // Even so, a fallback safety check is that JJWT's only out-of-the-box Password implementation
+        // (io.jsonwebtoken.impl.security.PasswordSpec) explicitly forbids calls to password.getEncoded() in all
+        // scenarios to avoid potential misuse, so a digest algorithm implementation would explicitly need to avoid
+        // this by calling toCharArray() instead.
+        //
+        // TLDR; the digest algorithm implementation has the final say whether a password instance is valid
+
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
         if (JwsAlgorithms.NONE.getId().equalsIgnoreCase(id)) {

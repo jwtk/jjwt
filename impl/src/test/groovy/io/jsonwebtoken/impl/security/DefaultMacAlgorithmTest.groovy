@@ -15,19 +15,83 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.SecurityException
-import io.jsonwebtoken.security.WeakKeyException
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
+import java.nio.charset.StandardCharsets
+import java.security.Key
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
 class DefaultMacAlgorithmTest {
 
+    static final byte[] payload = "Hello World".getBytes(StandardCharsets.UTF_8)
+    static final char[] passwordChars = "correct horse battery staple".toCharArray()
+
+    static <T extends Key> SecureRequest<byte[], T> request(T key) {
+        return new DefaultSecureRequest<byte[], T>(payload, null, null, key)
+    }
+
     static DefaultMacAlgorithm newAlg() {
         return new DefaultMacAlgorithm('HS256', 'HmacSHA256', 256)
+    }
+
+    /**
+     * Asserts a default Password instance can't be used (poor length/entropy)
+     */
+    @Test
+    void testWithPasswordSpec() {
+        def password = Keys.forPassword(passwordChars)
+        try {
+            newAlg().digest(request(password))
+        } catch (InvalidKeyException expected) {
+            String msg = 'The signing key\'s algorithm \'NONE\' does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with HS256.'
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    /**
+     * Asserts a Password instance that fakes a valid HmacSHA* JDK algorithm name can't be used
+     */
+    @Test
+    void testWithPasswordWithValidAlgorithm() {
+        def password = new PasswordSpec("correct horse battery staple".toCharArray()) {
+            @Override
+            String getAlgorithm() {
+                return 'HmacSHA256'
+            }
+        }
+        try {
+            newAlg().digest(request(password))
+        } catch (SignatureException expected) {
+            assertTrue expected.getMessage().startsWith('Unable to compute HS256 signature with JCA algorithm \'HmacSHA256\' using key {<redacted>}')
+        }
+    }
+
+    /**
+     * Asserts a Password instance that fakes a valid HmacSHA* JDK algorithm name, and even has encoded bytes can't be used
+     */
+    @Test
+    void testWithCustomPasswordImplementation() {
+        Password password = new PasswordSpec("correct horse".toCharArray()) {
+            @Override
+            String getAlgorithm() {
+                return 'HmacSHA256'
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return new String(passwordChars).getBytes(StandardCharsets.UTF_8)
+            }
+        }
+
+        try {
+            newAlg().digest(request(password))
+        } catch (SignatureException expected) {
+            assertTrue expected.getMessage().startsWith('Unable to compute HS256 signature with JCA algorithm \'HmacSHA256\' using key {<redacted>}')
+        }
     }
 
     @Test(expected = SecurityException)
