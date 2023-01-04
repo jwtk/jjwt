@@ -2432,7 +2432,8 @@ where:
 
 Because they contain secret or private key material, `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`,  
 `EcPrivateJwk`, etc) instances should be used with great care and never accidentally transmitted to 3rd parties.
-As such, JJWT's `Jwk` implementations will suppress certain values in `toString()` output for safety as described 
+
+Even so, JJWT's `Jwk` implementations will suppress certain values in `toString()` output for safety as described 
 next.
 
 <a name="jwk-tostring"></a>
@@ -2455,7 +2456,7 @@ For example, consider the following Secret JWK JSON example from
 The `k` value (`AyAyM1SysPpby...`) reflects secure key material and should never be accidentially
 exposed.
 
-If you were to parse this JSON as a `Jwk`, calling `toString()` will _NOT_ print this material.  It will 
+If you were to parse this JSON as a `Jwk`, calling `toString()` will _NOT_ print this value.  It will 
 instead print the string literal `<redacted>` for any secret or private key data field.  For example:
 
 ```java
@@ -2468,7 +2469,7 @@ System.out.printn(jwk);
 This code would print the following string literal to the System console:
 
 ```text
-kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.
+{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}
 ```
 
 This is true for all secret or private key values in `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`, 

@@ -476,8 +476,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, header, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
-
-        Assert.stateNotNull(keyRequest, "KeyAlgorithm must return a KeyResult.");
+        Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 

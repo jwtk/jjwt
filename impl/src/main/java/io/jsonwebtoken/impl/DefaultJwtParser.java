@@ -200,7 +200,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signatureAlgorithmLocator = sigFn(Collections.<SecureDigestAlgorithm<?, ?>>emptyList());
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
-        this.compressionCodecLocator = new CompressionCodecLocator(new DefaultCompressionCodecResolver());
+        this.compressionCodecLocator = new DefaultCompressionCodecResolver();
         this.enableUnsecuredJws = false;
     }
 
@@ -597,7 +597,7 @@ public class DefaultJwtParser implements JwtParser {
             final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
 
             base64Url = base64UrlDigest;
-            //guaranteed to be non-empty via the `alg` check (~ line 423) above:
+            //guaranteed to be non-empty via the `alg` + digest check above:
             Assert.hasText(base64Url, "JWE AAD Authentication Tag cannot be null or empty.");
             tag = base64UrlDecode(base64Url, "JWE AAD Authentication Tag");
             if (Arrays.length(tag) == 0) {

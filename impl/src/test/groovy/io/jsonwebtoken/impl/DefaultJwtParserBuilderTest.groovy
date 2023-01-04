@@ -188,6 +188,20 @@ class DefaultJwtParserBuilderTest {
         assertSame deserializer, parser.jwtParser.deserializer.deserializer
     }
 
+    @Test
+    void testVerificationKeyAndSigningKeyResolverBothConfigured() {
+        def key = TestKeys.HS256
+        builder.verifyWith(key).setSigningKeyResolver(new ConstantKeyLocator(key, null))
+        try {
+            builder.build()
+            fail()
+        } catch (IllegalStateException expected) {
+            String msg = "Both 'signingKeyResolver and 'verifyWith/signWith' key cannot be configured. " +
+                    "Choose either, or prefer `keyLocator` when possible."
+            assertEquals(msg, expected.getMessage())
+        }
+    }
+
     static class TestCompressionCodec implements CompressionCodec {
 
         String id

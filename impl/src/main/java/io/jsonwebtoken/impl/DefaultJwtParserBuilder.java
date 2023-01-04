@@ -203,7 +203,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder verifyWith(Key key) {
         this.signatureVerificationKey = Assert.notNull(key, "signature verification key cannot be null.");
-        return setSigningKeyResolver(new ConstantKeyLocator(key, null));
+        return this;
     }
 
     @Override
@@ -278,11 +278,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             this.deserializer = Services.loadFirst(Deserializer.class);
         }
 
+        if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
+            String msg = "Both 'signingKeyResolver and 'verifyWith/signWith' key cannot be configured. " +
+                    "Choose either, or prefer `keyLocator` when possible.";
+            throw new IllegalStateException(msg);
+        }
         if (this.keyLocator != null && this.decryptionKey != null) {
             String msg = "Both 'keyLocator' and 'decryptWith' key cannot be configured. Prefer 'keyLocator' if possible.";
             throw new IllegalStateException(msg);
         }
-
         if (this.keyLocator == null) {
             this.keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }

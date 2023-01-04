@@ -347,4 +347,16 @@ public class JavaReadmeTest {
         assert parsed instanceof EcPrivateJwk;
         assert privJwk.equals(parsed);
     }
+
+    @Test
+    public void testExampleJwkToString() {
+        String json = "{\"kty\":\"oct\"," +
+                "\"k\":\"AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow\"," +
+                "\"kid\":\"HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.\"}";
+
+        Jwk<?> jwk = Jwks.parser().build().parse(json);
+
+        String expected = "{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}";
+        assert expected.equals(jwk.toString());
+    }
 }
