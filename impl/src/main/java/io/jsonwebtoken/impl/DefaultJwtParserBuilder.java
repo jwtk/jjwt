@@ -64,6 +64,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private boolean enableUnsecuredJws = false;
 
+    private boolean enableUnsecuredDecompression = false;
+
     private Locator<? extends Key> keyLocator;
 
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
@@ -95,6 +97,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder enableUnsecuredJws() {
         this.enableUnsecuredJws = true;
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder enableUnsecuredDecompression() {
+        this.enableUnsecuredDecompression = true;
         return this;
     }
 
@@ -291,6 +299,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             this.keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
+        if (!enableUnsecuredJws && enableUnsecuredDecompression) {
+            String msg = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecuredJws' is also " +
+                    "configured. Please read the JavaDoc of both features before enabling either " +
+                    "due to their security implications.";
+            throw new IllegalStateException(msg);
+        }
         if (this.compressionCodecLocator != null && !Collections.isEmpty(extraCompressionCodecs)) {
             String msg = "Both 'addCompressionCodecs' and 'compressionCodecLocator' " +
                     "(or 'compressionCodecResolver') cannot be specified. Choose either.";
@@ -309,6 +323,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 provider,
                 signingKeyResolver,
                 enableUnsecuredJws,
+                enableUnsecuredDecompression,
                 keyLocator,
                 clock,
                 allowedClockSkewMillis,

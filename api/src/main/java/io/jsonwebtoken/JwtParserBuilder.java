@@ -44,8 +44,8 @@ import java.util.Map;
 @SuppressWarnings("JavadocLinkAsPlainText")
 public interface JwtParserBuilder extends Builder<JwtParser> {
 
-    /**
-     * Enables parsing of Unsecured JWSs (JWTs an 'alg' (Algorithm) header value of
+    /**ß
+     * Enables parsing of Unsecured JWSs (JWTs with an 'alg' (Algorithm) header value of
      * 'none'). <b>Be careful when calling this method - one should fully understand
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * before enabling this feature.</b>
@@ -57,9 +57,39 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
      * @see io.jsonwebtoken.security.JwsAlgorithms#NONE
+     * @see #enableUnsecuredDecompression()
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder enableUnsecuredJws();
+
+    /**
+     * If {@link #enableUnsecuredJws() enabledUnsecuredJws} is enabled, calling this method additionally enables
+     * payload decompression of Unsecured JWSs (JWTs with an 'alg' (Algorithm) header value of 'none') that also have
+     * a 'zip' (Compression) header. This behavior is disabled by default because using compression
+     * algorithms with data from unverified (unauthenticated) parties can be susceptible to Denial of Service attacks
+     * and other data integrity problems as described in
+     * <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
+     * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>.
+     *
+     * <p>Because this behavior is only relevant if {@link #enableUnsecuredJws() enabledUnsecuredJws} is specified,
+     * calling this method without also calling {@code enableUnsecuredJws()} will result in a build exception, as the
+     * incongruent state could reflect a misunderstanding of both behaviors which should be remedied by the
+     * application developer.</p>
+     *
+     * <b>As is the case for {@link #enableUnsecuredJws()}, be careful when calling this method - one should fully
+     * understand
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
+     * before enabling this feature.</b>
+     *
+     * @return the builder for method chaining.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
+     * @see <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
+     * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>
+     * @see io.jsonwebtoken.security.JwsAlgorithms#NONE
+     * @see #enableUnsecuredJws()
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtParserBuilder enableUnsecuredDecompression();
 
     /**
      * Sets the JCA Provider to use during cryptographic signature and decryption operations, or {@code null} if the

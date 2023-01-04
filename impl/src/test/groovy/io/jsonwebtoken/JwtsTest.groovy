@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
@@ -686,7 +687,7 @@ class JwtsTest {
         def builder = Jwts.builder().setSubject('foo')
         def pair = TestKeys.ES256.pair
         try {
-            builder.signWith(pair.public, JwsAlgorithms.ES256) //public keys can't be used to create signatures
+            builder.signWith(pair.public, SignatureAlgorithm.ES256) //public keys can't be used to create signatures
         } catch (InvalidKeyException expected) {
             String msg = "ECDSA signing keys must be PrivateKey instances."
             assertEquals msg, expected.getMessage()
@@ -701,7 +702,7 @@ class JwtsTest {
         def builder = Jwts.builder().setSubject('foo')
         def pair = TestKeys.ES384.pair
         try {
-            builder.signWith(pair.private, JwsAlgorithms.ES256)
+            builder.signWith(pair.private, SignatureAlgorithm.ES256)
             //ES384 keys can't be used to create ES256 signatures
         } catch (InvalidKeyException expected) {
             String msg = "EllipticCurve key has a field size of 48 bytes (384 bits), but ES256 requires a " +

@@ -56,7 +56,7 @@ class DefaultMacAlgorithmTest {
      * Asserts a Password instance that fakes a valid HmacSHA* JDK algorithm name can't be used
      */
     @Test
-    void testWithPasswordWithValidAlgorithm() {
+    void testCustomPasswordWithValidAlgorithm() {
         def password = new PasswordSpec("correct horse battery staple".toCharArray()) {
             @Override
             String getAlgorithm() {
@@ -74,7 +74,7 @@ class DefaultMacAlgorithmTest {
      * Asserts a Password instance that fakes a valid HmacSHA* JDK algorithm name, and even has encoded bytes can't be used
      */
     @Test
-    void testWithCustomPasswordImplementation() {
+    void testWithCustomPasswordGetEncodedThrowsException() {
         Password password = new PasswordSpec("correct horse".toCharArray()) {
             @Override
             String getAlgorithm() {
@@ -83,7 +83,7 @@ class DefaultMacAlgorithmTest {
 
             @Override
             byte[] getEncoded() {
-                return new String(passwordChars).getBytes(StandardCharsets.UTF_8)
+                throw new UnsupportedOperationException("Invalid")
             }
         }
 
@@ -96,13 +96,13 @@ class DefaultMacAlgorithmTest {
 
     @Test(expected = SecurityException)
     void testKeyGeneratorNoSuchAlgorithm() {
-        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'foo', 256);
+        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'foo', 256)
         alg.keyBuilder().build()
     }
 
     @Test
     void testKeyGeneratorKeyLength() {
-        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'HmacSHA256', 256);
+        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'HmacSHA256', 256)
         assertEquals 256, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
 
         alg = new DefaultMacAlgorithm('A128CBC-HS256', 'HmacSHA256', 128)
@@ -156,7 +156,7 @@ class DefaultMacAlgorithmTest {
     void testValidateKeyCustomAlgorithmWeakKey() {
         byte[] bytes = new byte[24]
         Randoms.secureRandom().nextBytes(bytes)
-        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('foo', 'foo', 256);
+        DefaultMacAlgorithm alg = new DefaultMacAlgorithm('foo', 'foo', 256)
         try {
             alg.validateKey(new SecretKeySpec(bytes, 'HmacSHA256'), true)
         } catch (WeakKeyException expected) {

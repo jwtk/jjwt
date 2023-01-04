@@ -96,7 +96,7 @@ class DefaultJwtParserBuilderTest {
     }
 
     @Test
-    void testDesrializeJsonWithCustomSerializer() {
+    void testDeserializeJsonWithCustomSerializer() {
         def deserializer = new Deserializer() {
             @Override
             Object deserialize(byte[] bytes) throws DeserializationException {
@@ -170,6 +170,38 @@ class DefaultJwtParserBuilderTest {
     }
 
     @Test
+    void testEnableUnsecuredDecompressionWithoutEnablingUnsecuredJws() {
+        try {
+            builder.enableUnsecuredDecompression().build()
+            fail()
+        } catch (IllegalStateException ise) {
+            String expected = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecuredJws' " + "is also configured. Please read the JavaDoc of both features before enabling either " + "due to their security implications."
+            assertEquals expected, ise.getMessage()
+        }
+    }
+
+    @Test
+    void testDecompressUnprotectedJwtDefault() {
+        def codec = CompressionCodecs.GZIP
+        String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
+        try {
+            builder.enableUnsecuredJws().build().parse(jwt)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String expected = String.format(DefaultJwtParser.UNPROTECTED_DECOMPRESSION_MSG, codec.getId())
+            assertEquals(expected, e.getMessage())
+        }
+    }
+
+    @Test
+    void testDecompressUnprotectedJwtEnabled() {
+        def codec = CompressionCodecs.GZIP
+        String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
+        def jwt = builder.enableUnsecuredJws().enableUnsecuredDecompression().build().parse(jws)
+        assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()
+    }
+
+    @Test
     void testDefaultDeserializer() {
         JwtParser parser = builder.build()
         assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
@@ -196,8 +228,7 @@ class DefaultJwtParserBuilderTest {
             builder.build()
             fail()
         } catch (IllegalStateException expected) {
-            String msg = "Both 'signingKeyResolver and 'verifyWith/signWith' key cannot be configured. " +
-                    "Choose either, or prefer `keyLocator` when possible."
+            String msg = "Both 'signingKeyResolver and 'verifyWith/signWith' key cannot be configured. " + "Choose either, or prefer `keyLocator` when possible."
             assertEquals(msg, expected.getMessage())
         }
     }

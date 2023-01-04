@@ -119,7 +119,7 @@ public class DefaultJwtParser implements JwtParser {
                     "This header parameter is mandatory per the JWE Specification, Section 4.1.2. See " +
                     "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
-    private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an  " +
+    private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an " +
             AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() +
             "') are disallowed by default as mandated by " +
             "https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to allow them to be " +
@@ -134,6 +134,14 @@ public class DefaultJwtParser implements JwtParser {
             "The JWS header references signature algorithm 'none' yet the " +
                     "compact JWS string contains a signature. This is not permitted per " +
                     "https://tools.ietf.org/html/rfc7518#section-3.6.";
+    private static final String UNPROTECTED_DECOMPRESSION_MSG = "The JWT header references " +
+            "compression algorithm '%s', but payload decompression for Unsecured JWSs (those with an " +
+            AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() + "') are " +
+            "disallowed by default to protect against [Denial of Service attacks](" +
+            "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf).  If you " +
+            "wish to enable Unsecure JWS payload decompression, call the JwtParserBuilder." +
+            "enableUnsecuredDecompression() method (but please read the security considerations covered in that " +
+            "method's JavaDoc before doing so).";
 
     private static <H extends Header<H>, R extends Identifiable> Function<H, R> backup(String id, String msg, Collection<R> extras) {
         if (Collections.isEmpty(extras)) {
@@ -170,6 +178,8 @@ public class DefaultJwtParser implements JwtParser {
 
     private final boolean enableUnsecuredJws;
 
+    private final boolean enableUnsecuredDecompression;
+
     private final Function<JwsHeader, SecureDigestAlgorithm<?, ?>> signatureAlgorithmLocator;
 
     private final Function<JweHeader, AeadAlgorithm> encryptionAlgorithmLocator;
@@ -202,13 +212,15 @@ public class DefaultJwtParser implements JwtParser {
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
         this.compressionCodecLocator = new DefaultCompressionCodecResolver();
         this.enableUnsecuredJws = false;
+        this.enableUnsecuredDecompression = false;
     }
 
+    //SigningKeyResolver will be removed for 1.0:
     @SuppressWarnings("deprecation")
-        //SigningKeyResolver will be removed for 1.0
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
                      boolean enableUnsecuredJws,
+                     boolean enableUnsecuredDecompression,
                      Locator<? extends Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
@@ -221,6 +233,7 @@ public class DefaultJwtParser implements JwtParser {
                      Collection<AeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
         this.enableUnsecuredJws = enableUnsecuredJws;
+        this.enableUnsecuredDecompression = enableUnsecuredDecompression;
         this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = clock;
@@ -643,6 +656,10 @@ public class DefaultJwtParser implements JwtParser {
 
         CompressionCodec compressionCodec = compressionCodecLocator.locate(header);
         if (compressionCodec != null) {
+            if (JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg) && !enableUnsecuredDecompression) {
+                String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionCodec.getId());
+                throw new UnsupportedJwtException(msg);
+            }
             payload = compressionCodec.decompress(payload);
         }
 
