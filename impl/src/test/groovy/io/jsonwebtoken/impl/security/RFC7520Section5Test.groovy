@@ -25,6 +25,7 @@ import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
+import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
@@ -423,6 +424,7 @@ class RFC7520Section5Test {
         assert FIGURE_113.equals(utf8(b64Url(FIGURE_114)))
     }
 
+    // https://www.rfc-editor.org/rfc/rfc7520.html#section-5.1
     @Test
     void testSection5_1() {
 
@@ -431,14 +433,20 @@ class RFC7520Section5Test {
 
         def alg = new DefaultRsaKeyAlgorithm(KeyAlgorithmsBridge.RSA1_5_ID, KeyAlgorithmsBridge.RSA1_5_TRANSFORMATION) {
             @Override
-            SecretKey generateKey(KeyRequest<? extends Key> request) {
+            SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_74) // ensure RFC required value
                 return new SecretKeySpec(encoded, "AES")
             }
 
             @Override
-            protected execute(Request request, Class clazz, CheckedFunction fn) {
-                return b64Url(FIGURE_76)
+            protected JcaTemplate jca(Request<?> request) {
+                return new JcaTemplate(getJcaName(), null) {
+                    // overrides parent, Groovy doesn't pick it up due to generics signature:
+                    @SuppressWarnings('unused')
+                    byte[] withCipher(CheckedFunction<Cipher, byte[]> fn) throws SecurityException {
+                        return b64Url(FIGURE_76)
+                    }
+                }
             }
         }
 
@@ -489,14 +497,20 @@ class RFC7520Section5Test {
 
         def alg = new DefaultRsaKeyAlgorithm(KeyAlgorithmsBridge.RSA_OAEP_ID, KeyAlgorithmsBridge.RSA_OAEP_TRANSFORMATION) {
             @Override
-            SecretKey generateKey(KeyRequest<? extends Key> request) {
+            SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_85) // ensure RFC required value
                 return new SecretKeySpec(encoded, "AES")
             }
 
             @Override
-            protected execute(Request request, Class clazz, CheckedFunction fn) {
-                return b64Url(FIGURE_87)
+            protected JcaTemplate jca(Request<?> request) {
+                return new JcaTemplate(getJcaName(), null) {
+                    // overrides parent, Groovy doesn't pick it up due to generics signature:
+                    @SuppressWarnings('unused')
+                    byte[] withCipher(CheckedFunction<Cipher, byte[]> fn) throws SecurityException {
+                        return b64Url(FIGURE_87)
+                    }
+                }
             }
         }
 

@@ -36,7 +36,7 @@ public final class DefaultHashAlgorithm extends CryptoAlgorithm implements HashA
     public byte[] digest(final Request<byte[]> request) {
         Assert.notNull(request, "Request cannot be null.");
         final byte[] payload = Assert.notNull(request.getPayload(), "Request payload cannot be null.");
-        return execute(request, MessageDigest.class, new CheckedFunction<MessageDigest, byte[]>() {
+        return jca(request).withMessageDigest(new CheckedFunction<MessageDigest, byte[]>() {
             @Override
             public byte[] apply(MessageDigest md) {
                 return md.digest(payload);

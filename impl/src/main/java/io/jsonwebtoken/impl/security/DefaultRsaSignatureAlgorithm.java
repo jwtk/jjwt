@@ -110,7 +110,7 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
 
     @Override
     protected byte[] doDigest(final SecureRequest<byte[], PrivateKey> request) {
-        return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
+        return jca(request).withSignature(new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
                 if (algorithmParameterSpec != null) {
@@ -129,7 +129,7 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
         if (key instanceof PrivateKey) { //legacy support only TODO: remove for 1.0
             return super.doVerify(request);
         }
-        return execute(request, Signature.class, new CheckedFunction<Signature, Boolean>() {
+        return jca(request).withSignature(new CheckedFunction<Signature, Boolean>() {
             @Override
             public Boolean apply(Signature sig) throws Exception {
                 if (algorithmParameterSpec != null) {

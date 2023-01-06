@@ -140,7 +140,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     private SecretKey deriveKey(final KeyRequest<?> request, final char[] password, final byte[] salt, final int iterations) {
         try {
             Assert.notEmpty(password, "Key password character array cannot be null or empty.");
-            return execute(request, SecretKeyFactory.class, new CheckedFunction<SecretKeyFactory, SecretKey>() {
+            return jca(request).withSecretKeyFactory(new CheckedFunction<SecretKeyFactory, SecretKey>() {
                 @Override
                 public SecretKey apply(SecretKeyFactory factory) throws Exception {
                     return deriveKey(factory, password, salt, iterations);

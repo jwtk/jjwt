@@ -50,7 +50,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        byte[] taggedCiphertext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] taggedCiphertext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
@@ -86,7 +86,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
         final byte[] taggedCiphertext = Bytes.concat(ciphertext, tag);
 
-        byte[] plaintext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] plaintext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);

@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
@@ -67,8 +66,15 @@ abstract class CryptoAlgorithm implements Identifiable {
         return random != null ? random : Randoms.secureRandom();
     }
 
-    protected <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) {
-        return new JcaTemplate(getJcaName(), this.provider).execute(clazz, fn);
+    protected JcaTemplate jca() {
+        return new JcaTemplate(getJcaName(), getProvider());
+    }
+
+    protected JcaTemplate jca(Request<?> request) {
+        Assert.notNull(request, "request cannot be null.");
+        Provider provider = getProvider(request);
+        SecureRandom random = ensureSecureRandom(request);
+        return new JcaTemplate(getJcaName(), provider, random);
     }
 
     protected Provider getProvider(Request<?> request) {
@@ -79,15 +85,7 @@ abstract class CryptoAlgorithm implements Identifiable {
         return provider;
     }
 
-    protected <I, T> T execute(Request<?> request, Class<I> clazz, CheckedFunction<I, T> fn) {
-        Assert.notNull(request, "request cannot be null.");
-        Provider provider = getProvider(request);
-        SecureRandom random = ensureSecureRandom(request);
-        JcaTemplate template = new JcaTemplate(getJcaName(), provider, random);
-        return template.execute(clazz, fn);
-    }
-
-    public SecretKey generateKey(KeyRequest<?> request) {
+    protected SecretKey generateKey(KeyRequest<?> request) {
         AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         SecretKeyBuilder builder = Assert.notNull(enc.keyBuilder(), "Request encryptionAlgorithm keyBuilder cannot be null.");
         SecretKey key = builder.setProvider(getProvider(request)).setRandom(request.getSecureRandom()).build();

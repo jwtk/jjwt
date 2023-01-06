@@ -148,7 +148,7 @@ public class DefaultEllipticCurveSignatureAlgorithm extends AbstractSecureDigest
 
     @Override
     protected byte[] doDigest(final SecureRequest<byte[], PrivateKey> request) {
-        return execute(request, Signature.class, new CheckedFunction<Signature, byte[]>() {
+        return jca(request).withSignature(new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
                 sig.initSign(request.getKey());
@@ -175,7 +175,7 @@ public class DefaultEllipticCurveSignatureAlgorithm extends AbstractSecureDigest
 
         final PublicKey key = request.getKey();
 
-        return execute(request, Signature.class, new CheckedFunction<Signature, Boolean>() {
+        return jca(request).withSignature(new CheckedFunction<Signature, Boolean>() {
             @Override
             public Boolean apply(Signature sig) {
                 byte[] concatSignature = request.getDigest();

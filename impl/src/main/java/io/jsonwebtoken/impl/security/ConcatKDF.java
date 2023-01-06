@@ -40,11 +40,22 @@ final class ConcatKDF extends CryptoAlgorithm {
     private static final long MAX_HASH_INPUT_BIT_LENGTH = MAX_HASH_INPUT_BYTE_LENGTH * Byte.SIZE;
 
     private final int hashBitLength;
-    private final long MAX_DERIVED_KEY_BIT_LENGTH;
+
+    /**
+     * NIST.SP.800-56Ar2.pdf, Section 5.8.1.1, Input requirement #2 says that the maximum bit length of the
+     * derived key cannot be more than this:
+     * <code><pre>
+     *     hashBitLength * (2^32 - 1)
+     * </pre></code>
+     * However, this number is always greater than Integer.MAX_VALUE * Byte.SIZE, which is the maximum number of
+     * bits that can be represented in a Java byte array.  So our implementation must be limited to that size
+     * regardless of what the spec allows:
+     */
+    private static final long MAX_DERIVED_KEY_BIT_LENGTH = (long) Integer.MAX_VALUE * (long) Byte.SIZE;
 
     ConcatKDF(String jcaName) {
         super("ConcatKDF", jcaName);
-        int hashByteLength = execute(MessageDigest.class, new CheckedFunction<MessageDigest, Integer>() {
+        int hashByteLength = jca().withMessageDigest(new CheckedFunction<MessageDigest, Integer>() {
             @Override
             public Integer apply(MessageDigest instance) {
                 return instance.getDigestLength();
@@ -52,16 +63,6 @@ final class ConcatKDF extends CryptoAlgorithm {
         });
         this.hashBitLength = hashByteLength * Byte.SIZE;
         Assert.state(this.hashBitLength > 0, "MessageDigest length must be a positive value.");
-
-        // NIST.SP.800-56Ar2.pdf, Section 5.8.1.1, Input requirement #2 says that the maximum bit length of the
-        // derived key cannot be more than this:
-        //
-        // hashBitLength * (2^32 - 1)
-        //
-        // However, this number is always greater than Integer.MAX_VALUE * Byte.SIZE, which is the maximum number of
-        // bits that can be represented in a Java byte array.  So our implementation must be limited to that size
-        // regardless of what the spec allows:
-        MAX_DERIVED_KEY_BIT_LENGTH = (long) Integer.MAX_VALUE * (long) Byte.SIZE;
     }
 
     /**
@@ -80,7 +81,7 @@ final class ConcatKDF extends CryptoAlgorithm {
      *                                 generate the derived key.
      */
     public SecretKey deriveKey(final byte[] Z, final long derivedKeyBitLength, final byte[] otherInfo)
-        throws UnsupportedKeyException, SecurityException {
+            throws UnsupportedKeyException, SecurityException {
 
         // sharedSecretKey argument assertions:
         Assert.notEmpty(Z, "Z cannot be null or empty.");
@@ -89,7 +90,7 @@ final class ConcatKDF extends CryptoAlgorithm {
         Assert.isTrue(derivedKeyBitLength > 0, "derivedKeyBitLength must be a positive integer.");
         if (derivedKeyBitLength > MAX_DERIVED_KEY_BIT_LENGTH) {
             String msg = "derivedKeyBitLength may not exceed " + bitsMsg(MAX_DERIVED_KEY_BIT_LENGTH) +
-                ". Specified size: " + bitsMsg(derivedKeyBitLength) + ".";
+                    ". Specified size: " + bitsMsg(derivedKeyBitLength) + ".";
             throw new IllegalArgumentException(msg);
         }
         final long derivedKeyByteLength = derivedKeyBitLength / Byte.SIZE;
@@ -113,7 +114,7 @@ final class ConcatKDF extends CryptoAlgorithm {
         long inputBitLength = bitLength(counter) + bitLength(Z) + bitLength(OtherInfo);
         Assert.state(inputBitLength <= MAX_HASH_INPUT_BIT_LENGTH, "Hash input is too large.");
 
-        byte[] derivedKeyBytes = new JcaTemplate(getJcaName(), null).execute(MessageDigest.class, new CheckedFunction<MessageDigest, byte[]>() {
+        byte[] derivedKeyBytes = jca().withMessageDigest(new CheckedFunction<MessageDigest, byte[]>() {
             @Override
             public byte[] apply(MessageDigest md) throws Exception {
 

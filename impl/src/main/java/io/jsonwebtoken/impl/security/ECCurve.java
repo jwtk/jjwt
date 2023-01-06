@@ -32,7 +32,7 @@ public class ECCurve extends DefaultCurve {
     public ECCurve(String id, String jcaName) {
         super(id, jcaName);
         JcaTemplate template = new JcaTemplate(KEY_PAIR_GENERATOR_JCA_NAME, null);
-        this.spec = template.execute(AlgorithmParameters.class, new CheckedFunction<AlgorithmParameters, ECParameterSpec>() {
+        this.spec = template.withAlgorithmParameters(new CheckedFunction<AlgorithmParameters, ECParameterSpec>() {
             @Override
             public ECParameterSpec apply(AlgorithmParameters params) throws Exception {
                 params.init(new ECGenParameterSpec(getJcaName()));

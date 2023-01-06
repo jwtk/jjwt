@@ -15,24 +15,58 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.DefaultRegistry;
+import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.List;
 
 public class JcaTemplate {
+
+    private static final List<InstanceFactory<?>> FACTORIES = Collections.<InstanceFactory<?>>of(
+            new CipherFactory(),
+            new KeyFactoryFactory(),
+            new SecretKeyFactoryFactory(),
+            new KeyGeneratorFactory(),
+            new KeyPairGeneratorFactory(),
+            new KeyAgreementFactory(),
+            new MessageDigestFactory(),
+            new SignatureFactory(),
+            new MacFactory(),
+            new AlgorithmParametersFactory()
+    );
+
+    private static final Registry<Class<?>, InstanceFactory<?>> REGISTRY = new DefaultRegistry<>(FACTORIES,
+            new Function<InstanceFactory<?>, Class<?>>() {
+                @Override
+                public Class<?> apply(InstanceFactory<?> factory) {
+                    return factory.getInstanceClass();
+                }
+            });
 
     private final String jcaName;
     private final Provider provider;
@@ -48,12 +82,54 @@ public class JcaTemplate {
         this.provider = provider; //may be null, meaning to use the JCA subsystem default provider
     }
 
-    public <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws SecurityException {
-        return execute(new JcaInstanceSupplier<>(clazz, this.jcaName, this.provider), fn);
+    private <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws SecurityException {
+        InstanceFactory<?> factory = REGISTRY.apply(clazz);
+        Assert.notNull(factory, "Unsupported JCA instance class.");
+        return execute(factory, clazz, fn);
+    }
+
+    public <R> R withCipher(CheckedFunction<Cipher, R> fn) throws SecurityException {
+        return execute(Cipher.class, fn);
+    }
+
+    public <R> R withKeyFactory(CheckedFunction<KeyFactory, R> fn) throws SecurityException {
+        return execute(KeyFactory.class, fn);
+    }
+
+    public <R> R withSecretKeyFactory(CheckedFunction<SecretKeyFactory, R> fn) throws SecurityException {
+        return execute(SecretKeyFactory.class, fn);
+    }
+
+    public <R> R withKeyGenerator(CheckedFunction<KeyGenerator, R> fn) throws SecurityException {
+        return execute(KeyGenerator.class, fn);
+    }
+
+    public <R> R withKeyAgreement(CheckedFunction<KeyAgreement, R> fn) throws SecurityException {
+        return execute(KeyAgreement.class, fn);
+    }
+
+    public <R> R withKeyPairGenerator(CheckedFunction<KeyPairGenerator, R> fn) throws SecurityException {
+        return execute(KeyPairGenerator.class, fn);
+    }
+
+    public <R> R withMessageDigest(CheckedFunction<MessageDigest, R> fn) throws SecurityException {
+        return execute(MessageDigest.class, fn);
+    }
+
+    public <R> R withSignature(CheckedFunction<Signature, R> fn) throws SecurityException {
+        return execute(Signature.class, fn);
+    }
+
+    public <R> R withMac(CheckedFunction<Mac, R> fn) throws SecurityException {
+        return execute(Mac.class, fn);
+    }
+
+    public <R> R withAlgorithmParameters(CheckedFunction<AlgorithmParameters, R> fn) throws SecurityException {
+        return execute(AlgorithmParameters.class, fn);
     }
 
     public SecretKey generateSecretKey(final int keyBitLength) {
-        return execute(KeyGenerator.class, new CheckedFunction<KeyGenerator, SecretKey>() {
+        return withKeyGenerator(new CheckedFunction<KeyGenerator, SecretKey>() {
             @Override
             public SecretKey apply(KeyGenerator generator) {
                 generator.init(keyBitLength, secureRandom);
@@ -63,7 +139,7 @@ public class JcaTemplate {
     }
 
     public KeyPair generateKeyPair() {
-        return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
+        return withKeyPairGenerator(new CheckedFunction<KeyPairGenerator, KeyPair>() {
             @Override
             public KeyPair apply(KeyPairGenerator gen) {
                 return gen.generateKeyPair();
@@ -72,7 +148,7 @@ public class JcaTemplate {
     }
 
     public KeyPair generateKeyPair(final int keyBitLength) {
-        return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
+        return withKeyPairGenerator(new CheckedFunction<KeyPairGenerator, KeyPair>() {
             @Override
             public KeyPair apply(KeyPairGenerator generator) {
                 generator.initialize(keyBitLength, secureRandom);
@@ -82,7 +158,7 @@ public class JcaTemplate {
     }
 
     public KeyPair generateKeyPair(final AlgorithmParameterSpec params) {
-        return execute(KeyPairGenerator.class, new CheckedFunction<KeyPairGenerator, KeyPair>() {
+        return withKeyPairGenerator(new CheckedFunction<KeyPairGenerator, KeyPair>() {
             @Override
             public KeyPair apply(KeyPairGenerator generator) throws InvalidAlgorithmParameterException {
                 generator.initialize(params, secureRandom);
@@ -91,75 +167,180 @@ public class JcaTemplate {
         });
     }
 
-    private <T, R> R execute(JcaInstanceSupplier<T> supplier, CheckedFunction<T, R> callback) throws SecurityException {
+    // protected visibility for testing
+    private <T, R> R execute(InstanceFactory<?> factory, Class<T> clazz, CheckedFunction<T, R> callback) throws SecurityException {
         try {
-            T instance = supplier.getInstance();
+            Object object = factory.get(this.jcaName, this.provider);
+            T instance = Assert.isInstanceOf(clazz, object, "Factory instance does not match expected type.");
             return callback.apply(instance);
         } catch (SecurityException se) {
             throw se; //propagate
         } catch (Exception e) {
-            throw new SecurityException(supplier.getName() + " callback execution failed: " + e.getMessage(), e);
+            throw new SecurityException(factory.getId() + " callback execution failed: " + e.getMessage(), e);
         }
     }
 
-    private interface InstanceSupplier<T> {
-        T getInstance() throws Exception;
+    private interface InstanceFactory<T> extends Identifiable {
+
+        Class<T> getInstanceClass();
+
+        T get(String jcaName, Provider provider) throws Exception;
     }
 
-    //visible for testing
-    static class JcaInstanceSupplier<T> implements InstanceSupplier<T> {
-
-        private static final String METHOD_NAME = "getInstance";
-        private static final Class<?>[] PROVIDER_ARGS = new Class[]{String.class, Provider.class};
-        private static final Class<?>[] NAME_ARGS = new Class[]{String.class};
+    private static abstract class JcaInstanceFactory<T> implements InstanceFactory<T> {
 
         private final Class<T> clazz;
-        private final String name;
-        private final String jcaName;
-        private final Provider provider;
 
-        JcaInstanceSupplier(Class<T> clazz, String jcaName, Provider provider) {
-            this.clazz = Assert.notNull(clazz, "Clazz cannot be null.");
-            this.name = clazz.getSimpleName();
-            this.jcaName = jcaName;
-            Assert.hasText(jcaName, "jcaName cannot be null or empty.");
-            this.provider = provider;
-        }
-
-        public String getName() {
-            return name;
+        JcaInstanceFactory(Class<T> clazz) {
+            this.clazz = Assert.notNull(clazz, "Class argument cannot be null.");
         }
 
         @Override
-        public final T getInstance() throws Exception {
+        public Class<T> getInstanceClass() {
+            return this.clazz;
+        }
+
+        @Override
+        public String getId() {
+            return clazz.getSimpleName();
+        }
+
+        @Override
+        public final T get(String jcaName, Provider provider) throws Exception {
+            Assert.hasText(jcaName, "jcaName cannot be null or empty.");
             try {
-                return doGetInstance();
+                return doGet(jcaName, provider);
             } catch (Exception e) {
-                String msg = "Unable to obtain " + this.name + " instance from ";
-                if (this.provider != null) {
-                    msg += "specified Provider {" + this.provider + "} ";
+                String msg = "Unable to obtain " + getId() + " instance from ";
+                if (provider != null) {
+                    msg += "specified Provider '" + provider + "' ";
                 } else {
                     msg += "default JCA Provider ";
                 }
-                msg += "for JCA algorithm '" + this.jcaName + "': " + e.getMessage();
+                msg += "for JCA algorithm '" + jcaName + "': " + e.getMessage();
                 throw wrap(msg, e);
             }
         }
 
+        protected abstract T doGet(String jcaName, Provider provider) throws Exception;
+
         protected Exception wrap(String msg, Exception cause) {
-            if (cause instanceof SecurityException) {
-                return cause;
-            }
             if (Signature.class.isAssignableFrom(clazz) || Mac.class.isAssignableFrom(clazz)) {
                 return new SignatureException(msg, cause);
             }
             return new SecurityException(msg, cause);
         }
+    }
 
-        protected T doGetInstance() {
+    private static class CipherFactory extends JcaInstanceFactory<Cipher> {
+        CipherFactory() {
+            super(Cipher.class);
+        }
+
+        @Override
+        public Cipher doGet(String jcaName, Provider provider) throws NoSuchPaddingException, NoSuchAlgorithmException {
+            return provider != null ? Cipher.getInstance(jcaName, provider) : Cipher.getInstance(jcaName);
+        }
+    }
+
+    private static class KeyFactoryFactory extends JcaInstanceFactory<KeyFactory> {
+        KeyFactoryFactory() {
+            super(KeyFactory.class);
+        }
+
+        @Override
+        public KeyFactory doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? KeyFactory.getInstance(jcaName, provider) : KeyFactory.getInstance(jcaName);
+        }
+    }
+
+    private static class SecretKeyFactoryFactory extends JcaInstanceFactory<SecretKeyFactory> {
+        SecretKeyFactoryFactory() {
+            super(SecretKeyFactory.class);
+        }
+
+        @Override
+        public SecretKeyFactory doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? SecretKeyFactory.getInstance(jcaName, provider) : SecretKeyFactory.getInstance(jcaName);
+        }
+    }
+
+    private static class KeyGeneratorFactory extends JcaInstanceFactory<KeyGenerator> {
+        KeyGeneratorFactory() {
+            super(KeyGenerator.class);
+        }
+
+        @Override
+        public KeyGenerator doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? KeyGenerator.getInstance(jcaName, provider) : KeyGenerator.getInstance(jcaName);
+        }
+    }
+
+    private static class KeyPairGeneratorFactory extends JcaInstanceFactory<KeyPairGenerator> {
+        KeyPairGeneratorFactory() {
+            super(KeyPairGenerator.class);
+        }
+
+        @Override
+        public KeyPairGenerator doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? KeyPairGenerator.getInstance(jcaName, provider) : KeyPairGenerator.getInstance(jcaName);
+        }
+    }
+
+    private static class KeyAgreementFactory extends JcaInstanceFactory<KeyAgreement> {
+        KeyAgreementFactory() {
+            super(KeyAgreement.class);
+        }
+
+        @Override
+        public KeyAgreement doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? KeyAgreement.getInstance(jcaName, provider) : KeyAgreement.getInstance(jcaName);
+        }
+    }
+
+    private static class MessageDigestFactory extends JcaInstanceFactory<MessageDigest> {
+        MessageDigestFactory() {
+            super(MessageDigest.class);
+        }
+
+        @Override
+        public MessageDigest doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? MessageDigest.getInstance(jcaName, provider) : MessageDigest.getInstance(jcaName);
+        }
+    }
+
+    private static class SignatureFactory extends JcaInstanceFactory<Signature> {
+        SignatureFactory() {
+            super(Signature.class);
+        }
+
+        @Override
+        public Signature doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? Signature.getInstance(jcaName, provider) : Signature.getInstance(jcaName);
+        }
+    }
+
+    private static class MacFactory extends JcaInstanceFactory<Mac> {
+        MacFactory() {
+            super(Mac.class);
+        }
+
+        @Override
+        public Mac doGet(String jcaName, Provider provider) throws NoSuchAlgorithmException {
+            return provider != null ? Mac.getInstance(jcaName, provider) : Mac.getInstance(jcaName);
+        }
+    }
+
+    private static class AlgorithmParametersFactory extends JcaInstanceFactory<AlgorithmParameters> {
+        AlgorithmParametersFactory() {
+            super(AlgorithmParameters.class);
+        }
+
+        @Override
+        protected AlgorithmParameters doGet(String jcaName, Provider provider) throws Exception {
             return provider != null ?
-                    Classes.<T>invokeStatic(clazz, METHOD_NAME, PROVIDER_ARGS, jcaName, provider) :
-                    Classes.<T>invokeStatic(clazz, METHOD_NAME, NAME_ARGS, jcaName);
+                    AlgorithmParameters.getInstance(jcaName, provider) :
+                    AlgorithmParameters.getInstance(jcaName);
         }
     }
 }

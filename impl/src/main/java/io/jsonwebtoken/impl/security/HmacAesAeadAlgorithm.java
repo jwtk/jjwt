@@ -93,7 +93,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        final byte[] ciphertext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        final byte[] ciphertext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, ivSpec);
@@ -161,7 +161,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
             throw new SignatureException(msg);
         }
 
-        byte[] plaintext = execute(req, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] plaintext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, decryptionKey, ivSpec);

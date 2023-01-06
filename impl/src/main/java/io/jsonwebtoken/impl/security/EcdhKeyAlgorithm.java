@@ -88,7 +88,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
     }
 
     protected byte[] generateZ(final KeyRequest<?> request, final PublicKey pub, final PrivateKey priv) {
-        return execute(request, KeyAgreement.class, new CheckedFunction<KeyAgreement, byte[]>() {
+        return jca(request).withKeyAgreement(new CheckedFunction<KeyAgreement, byte[]>() {
             @Override
             public byte[] apply(KeyAgreement keyAgreement) throws Exception {
                 keyAgreement.init(priv, ensureSecureRandom(request));

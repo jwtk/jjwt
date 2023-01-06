@@ -155,7 +155,7 @@ public class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey
 
     @Override
     public byte[] doDigest(final SecureRequest<byte[], SecretKey> request) {
-        return execute(request, Mac.class, new CheckedFunction<Mac, byte[]>() {
+        return jca(request).withMac(new CheckedFunction<Mac, byte[]>() {
             @Override
             public byte[] apply(Mac mac) throws Exception {
                 mac.init(request.getKey());

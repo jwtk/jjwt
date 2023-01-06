@@ -54,7 +54,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         final byte[] iv = ensureInitializationVector(request);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        byte[] taggedCiphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] taggedCiphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.WRAP_MODE, kek, ivSpec);
@@ -92,7 +92,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
         final byte[] taggedCiphertext = Bytes.concat(cekBytes, tag);
 
-        return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
+        return jca(request).withCipher(new CheckedFunction<Cipher, SecretKey>() {
             @Override
             public SecretKey apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.UNWRAP_MODE, kek, ivSpec);

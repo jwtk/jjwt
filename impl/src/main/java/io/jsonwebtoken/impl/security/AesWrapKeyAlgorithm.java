@@ -44,7 +44,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
         final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);
 
-        byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] ciphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.WRAP_MODE, kek);
@@ -61,7 +61,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
         final SecretKey kek = assertKey(request.getKey());
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request content (encrypted key) cannot be null or empty.");
 
-        return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
+        return jca(request).withCipher(new CheckedFunction<Cipher, SecretKey>() {
             @Override
             public SecretKey apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.UNWRAP_MODE, kek);

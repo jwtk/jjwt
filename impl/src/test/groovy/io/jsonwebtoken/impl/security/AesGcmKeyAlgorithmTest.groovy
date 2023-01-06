@@ -64,7 +64,7 @@ class AesGcmKeyAlgorithmTest {
         }))
 
         JcaTemplate template = new JcaTemplate(jcaName, provider)
-        byte[] jcaResult = template.execute(Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] jcaResult = template.withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.WRAP_MODE, kek, new GCMParameterSpec(128, iv))
@@ -163,10 +163,6 @@ class AesGcmKeyAlgorithmTest {
 
     static String type(String name) {
         return "JWE header '${name}' value must be a String. Actual type: java.lang.Integer" as String
-    }
-
-    static String base64Url(String name) {
-        return "JWE header '${name}' value is not a valid Base64URL String: Illegal base64url character: '#'"
     }
 
     static String length(String name, int requiredBitLength) {

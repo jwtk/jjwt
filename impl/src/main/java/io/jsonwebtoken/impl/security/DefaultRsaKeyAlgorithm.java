@@ -82,7 +82,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
         validate(kek, true);
         final SecretKey cek = generateKey(request);
 
-        byte[] ciphertext = execute(request, Cipher.class, new CheckedFunction<Cipher, byte[]>() {
+        byte[] ciphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 if (SPEC == null) {
@@ -104,7 +104,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
         validate(kek, false);
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request content (encrypted key) cannot be null or empty.");
 
-        return execute(request, Cipher.class, new CheckedFunction<Cipher, SecretKey>() {
+        return jca(request).withCipher(new CheckedFunction<Cipher, SecretKey>() {
             @Override
             public SecretKey apply(Cipher cipher) throws Exception {
                 if (SPEC == null) {
@@ -113,8 +113,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
                     cipher.init(Cipher.UNWRAP_MODE, kek, SPEC);
                 }
                 Key key = cipher.unwrap(cekBytes, AesAlgorithm.KEY_ALG_NAME, Cipher.SECRET_KEY);
-                Assert.state(key instanceof SecretKey, "Cipher unwrap must return a SecretKey instance.");
-                return (SecretKey) key;
+                return Assert.isInstanceOf(SecretKey.class, key, "Cipher unwrap must return a SecretKey instance.");
             }
         });
     }
