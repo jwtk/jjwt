@@ -1631,7 +1631,7 @@ used for that algorithm when possible according to the JWT specification require
 <a name="jws-create-compression"></a>
 #### JWS Compression
 
-If your JWT claims set is large (contains a lot of data), and you are certain that JJWT will also be the same library 
+If your JWT payload is large (contains a lot of data), and you are certain that JJWT will also be the same library 
 that reads/parses your JWS, you might want to compress the JWS to reduce its size.  
 
 > **Warning**
