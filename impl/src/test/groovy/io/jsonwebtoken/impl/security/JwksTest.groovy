@@ -257,7 +257,7 @@ class JwksTest {
     @Test
     void testAsymmetricJwks() {
 
-        Collection<SignatureAlgorithm> algs = JwsAlgorithms.values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
+        Collection<KeyPairBuilderSupplier> algs = JwsAlgorithms.values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
         for (def alg : algs) {
 
@@ -281,6 +281,39 @@ class JwksTest {
             privJwk = pub instanceof ECKey ?
                     Jwks.builder().forEcKeyPair(pair).setPublicKeyUse("sig").build() :
                     Jwks.builder().forRsaKeyPair(pair).setPublicKeyUse("sig").build()
+            assertEquals priv, privJwk.toKey()
+            privPubJwk = privJwk.toPublicJwk()
+            assertEquals pubJwk, privPubJwk
+            assertEquals pub, pubJwk.toKey()
+            jwkPair = privJwk.toKeyPair()
+            assertEquals pub, jwkPair.getPublic()
+            assertEquals priv, jwkPair.getPrivate()
+        }
+    }
+
+    @Test
+    void testOctetKeyPairs() {
+
+        for (EdwardsCurve curve : EdwardsCurve.VALUES) {
+
+            def pair = curve.keyPairBuilder().build()
+            PublicKey pub = pair.getPublic()
+            PrivateKey priv = pair.getPrivate()
+
+            // test individual keys
+            PublicJwk pubJwk = Jwks.builder().forOctetKey(pub).setPublicKeyUse("sig").build()
+            assertEquals pub, pubJwk.toKey()
+            PrivateJwk privJwk = Jwks.builder().forOctetKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
+            assertEquals priv, privJwk.toKey()
+            PublicJwk privPubJwk = privJwk.toPublicJwk()
+            assertEquals pubJwk, privPubJwk
+            assertEquals pub, pubJwk.toKey()
+            def jwkPair = privJwk.toKeyPair()
+            assertEquals pub, jwkPair.getPublic()
+            assertEquals priv, jwkPair.getPrivate()
+
+            // test pair
+            privJwk = Jwks.builder().forOctetKeyPair(pair).setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk

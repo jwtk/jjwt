@@ -15,7 +15,15 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.UnsupportedKeyException;
+
+import javax.crypto.SecretKey;
+import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
@@ -26,5 +34,38 @@ public final class KeysBridge {
 
     public static Password forPassword(char[] password) {
         return new PasswordSpec(password);
+    }
+
+    public static byte[] findEncoded(Key key) {
+        if (key != null) {
+            try {
+                return key.getEncoded();
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    public static byte[] getEncoded(Key key) {
+        byte[] encoded = findEncoded(key);
+        if (Bytes.isEmpty(encoded)) {
+            String msg = typeName(key) + " encoded bytes cannot be null or empty.";
+            throw new UnsupportedKeyException(msg);
+        }
+        return encoded;
+    }
+
+    public static String typeName(Key key) {
+        Assert.notNull(key, "Key cannot be null.");
+        if (key instanceof Password) {
+            return Password.class.getSimpleName();
+        } else if (key instanceof SecretKey) {
+            return SecretKey.class.getSimpleName();
+        } else if (key instanceof PublicKey) {
+            return PublicKey.class.getSimpleName();
+        } else if (key instanceof PrivateKey) {
+            return PrivateKey.class.getSimpleName();
+        }
+        return key.getClass().getSimpleName();
     }
 }

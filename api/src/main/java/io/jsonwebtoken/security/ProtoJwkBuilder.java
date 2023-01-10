@@ -18,6 +18,7 @@ package io.jsonwebtoken.security;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
@@ -86,6 +87,16 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      * @return the builder coerced as a {@link EcPrivateJwkBuilder}.
      */
     EcPrivateJwkBuilder forKey(ECPrivateKey key);
+
+    SimplePublicJwkBuilder forOctetKey(PublicKey publicKey);
+
+    SimplePrivateJwkBuilder forOctetKey(PrivateKey privateKey);
+
+    SimplePrivateJwkBuilder forOctetKeyPair(KeyPair keyPair);
+
+    SimplePublicJwkBuilder forOctetChain(List<X509Certificate> chain);
+
+    SimplePublicJwkBuilder forOctetChain(X509Certificate... chain);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.

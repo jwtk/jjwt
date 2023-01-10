@@ -58,6 +58,51 @@ public final class Bytes {
                 (bytes[3] & 0xFF);
     }
 
+    public static int indexOf(byte[] source, byte[] target) {
+        return indexOf(source, target, 0);
+    }
+
+    public static int indexOf(byte[] source, byte[] target, int fromIndex) {
+        return indexOf(source, 0, length(source), target, 0, length(target), fromIndex);
+    }
+
+
+    static int indexOf(byte[] source, int srcOffset, int srcLen,
+                       byte[] target, int targetOffset, int targetLen,
+                       int fromIndex) {
+
+        if (fromIndex >= srcLen) {
+            return (targetLen == 0 ? srcLen : -1);
+        }
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        if (targetLen == 0) {
+            return fromIndex;
+        }
+
+        byte first = target[targetOffset];
+        int max = srcOffset + (srcLen - targetLen);
+
+        for (int i = srcOffset + fromIndex; i <= max; i++) { //
+
+            if (source[i] != first) { // continue on to find the first matching byte
+                while (++i <= max && source[i] != first) ;
+            }
+
+            if (i <= max) { // found first byte in target, now try to find the rest:
+                int j = i + 1;
+                int end = j + targetLen - 1;
+                //noinspection StatementWithEmptyBody
+                for (int k = targetOffset + 1; j < end && source[j] == target[k]; j++, k++) ;
+                if (j == end) {
+                    return i - srcOffset; // found entire target byte array
+                }
+            }
+        }
+        return -1;
+    }
+
     public static byte[] concat(byte[]... arrays) {
         int len = 0;
         int numArrays = Arrays.length(arrays);
@@ -76,6 +121,10 @@ public final class Bytes {
             }
         }
         return output;
+    }
+
+    public static boolean isEmpty(byte[] bytes) {
+        return length(bytes) == 0;
     }
 
     public static int length(byte[] bytes) {

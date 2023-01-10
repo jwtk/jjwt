@@ -25,10 +25,13 @@ import io.jsonwebtoken.security.ProtoJwkBuilder;
 import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
 import io.jsonwebtoken.security.RsaPublicJwkBuilder;
 import io.jsonwebtoken.security.SecretJwkBuilder;
+import io.jsonwebtoken.security.SimplePrivateJwkBuilder;
+import io.jsonwebtoken.security.SimplePublicJwkBuilder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
@@ -38,8 +41,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 @SuppressWarnings("unused") //used via reflection by io.jsonwebtoken.security.Jwks
-public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
-    extends AbstractJwkBuilder<K, J, T> implements ProtoJwkBuilder<K, J, T> {
+public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends AbstractJwkBuilder<K, J, T> implements ProtoJwkBuilder<K, J, T> {
 
     public DefaultProtoJwkBuilder() {
         super(new DefaultJwkContext<K>());
@@ -93,6 +95,38 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
     @Override
     public EcPublicJwkBuilder forKey(ECPublicKey key) {
         return new AbstractAsymmetricJwkBuilder.DefaultEcPublicJwkBuilder(this.jwkContext, key);
+    }
+
+    @Override
+    public SimplePublicJwkBuilder forOctetKey(PublicKey key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultOctetPublicJwkBuilder(this.jwkContext, key);
+    }
+
+    @Override
+    public SimplePrivateJwkBuilder forOctetKey(PrivateKey key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder(this.jwkContext, key);
+    }
+
+    @Override
+    public SimplePrivateJwkBuilder forOctetKeyPair(KeyPair pair) {
+        PublicKey pub = KeyPairs.getKey(pair, PublicKey.class);
+        PrivateKey priv = KeyPairs.getKey(pair, PrivateKey.class);
+        return forOctetKey(priv).setPublicKey(pub);
+    }
+
+    @Override
+    public SimplePublicJwkBuilder forOctetChain(X509Certificate... chain) {
+        Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
+        return forOctetChain(Arrays.asList(chain));
+    }
+
+    @Override
+    public SimplePublicJwkBuilder forOctetChain(List<X509Certificate> chain) {
+        Assert.notEmpty(chain, "X509Certificate chain cannot be empty.");
+        X509Certificate cert = chain.get(0);
+        PublicKey key = cert.getPublicKey();
+        Assert.notNull(key, "The first X509Certificate's PublicKey cannot be null.");
+        return forOctetKey(key).setX509CertificateChain(chain);
     }
 
     @Override

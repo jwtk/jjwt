@@ -33,8 +33,10 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
         families.add(new SecretJwkFactory());
         families.add(new AsymmetricJwkFactory(EcPublicJwkFactory.DEFAULT_INSTANCE, new EcPrivateJwkFactory()));
         families.add(new AsymmetricJwkFactory(RsaPublicJwkFactory.DEFAULT_INSTANCE, new RsaPrivateJwkFactory()));
+        families.add(new AsymmetricJwkFactory(OctetPublicJwkFactory.INSTANCE, new OctetPrivateJwkFactory()));
         return families;
     }
+
     private static final Collection<FamilyJwkFactory<Key, ?>> DEFAULT_FACTORIES = createDefaultFactories();
     static final JwkFactory<Key, Jwk<Key>> DEFAULT_INSTANCE = new DispatchingJwkFactory();
 
@@ -86,7 +88,7 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
         }
 
         String msg = "Unable to create JWK for unrecognized " + reason + ": there is " +
-            "no known JWK Factory capable of creating JWKs for this key type.";
+                "no known JWK Factory capable of creating JWKs for this key type.";
         throw new UnsupportedKeyException(msg);
     }
 }

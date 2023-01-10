@@ -48,6 +48,10 @@ class DefaultCurve implements Curve {
         return this.JCA_NAME;
     }
 
+    public Provider getProvider() {
+        return this.PROVIDER;
+    }
+
     @Override
     public int hashCode() {
         return ID.hashCode();
