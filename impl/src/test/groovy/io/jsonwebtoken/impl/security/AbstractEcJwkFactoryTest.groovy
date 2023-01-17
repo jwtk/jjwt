@@ -106,7 +106,7 @@ class AbstractEcJwkFactoryTest {
 
         def ex = new InvalidKeySpecException("invalid")
 
-        def factory = new AbstractEcJwkFactory(ECPrivateKey.class) {
+        def factory = new AbstractEcJwkFactory(ECPrivateKey.class, DefaultEcPrivateJwk.FIELDS) {
             @Override
             protected Jwk createJwkFromKey(JwkContext ctx) {
                 return null

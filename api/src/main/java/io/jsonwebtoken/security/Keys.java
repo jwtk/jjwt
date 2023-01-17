@@ -21,6 +21,8 @@ import io.jsonwebtoken.lang.Classes;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * Utility class for securely generating {@link SecretKey}s and {@link KeyPair}s.
@@ -33,6 +35,8 @@ public final class Keys {
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     @SuppressWarnings("rawtypes")
     private static final Class[] FOR_PASSWORD_ARG_TYPES = new Class[]{char[].class};
+
+    private static final Class[] FOR_KEY_PAIR_ARG_TYPES = new Class[]{PublicKey.class, PrivateKey.class};
 
     //prevent instantiation
     private Keys() {
@@ -243,6 +247,10 @@ public final class Keys {
         }
         SignatureAlgorithm asalg = ((SignatureAlgorithm) salg);
         return asalg.keyPairBuilder().build();
+    }
+
+    public static <A extends PublicKey, B extends PrivateKey> io.jsonwebtoken.security.KeyPair<A, B> keyPairFor(A publicKey, B privateKey) {
+        return Classes.invokeStatic(BRIDGE_CLASS, "keyPairFor", FOR_KEY_PAIR_ARG_TYPES, publicKey, privateKey);
     }
 
     /**

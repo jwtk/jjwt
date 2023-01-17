@@ -156,22 +156,25 @@ enforcement.
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
-   | Identifier | Signature Algorithm |
-   | ------- | --- |
-   | `HS256` | HMAC using SHA-256 |
-   | `HS384` | HMAC using SHA-384 |
-   | `HS512` | HMAC using SHA-512 |
-   | `ES256` | ECDSA using P-256 and SHA-256 |
-   | `ES384` | ECDSA using P-384 and SHA-384 |
-   | `ES512` | ECDSA using P-521 and SHA-512 |
-   | `RS256` | RSASSA-PKCS-v1_5 using SHA-256 |
-   | `RS384` | RSASSA-PKCS-v1_5 using SHA-384 |
-   | `RS512` | RSASSA-PKCS-v1_5 using SHA-512 |
+   | Identifier | Signature Algorithm                                               |
+   |-------------------------------------------------------------------| --- |
+   | `HS256` | HMAC using SHA-256                                                |
+   | `HS384` | HMAC using SHA-384                                                |
+   | `HS512` | HMAC using SHA-512                                                |
+   | `ES256` | ECDSA using P-256 and SHA-256                                     |
+   | `ES384` | ECDSA using P-384 and SHA-384                                     |
+   | `ES512` | ECDSA using P-521 and SHA-512                                     |
+   | `RS256` | RSASSA-PKCS-v1_5 using SHA-256                                    |
+   | `RS384` | RSASSA-PKCS-v1_5 using SHA-384                                    |
+   | `RS512` | RSASSA-PKCS-v1_5 using SHA-512                                    |
    | `PS256` | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
    | `PS384` | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
    | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
+   | `EdDSA` | Edwards-curve Digital Signature Algorithm<sup><b>2</b></sup>      |
 
    <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+   <sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
  
@@ -180,45 +183,53 @@ enforcement.
    | <code>A128CBC&#8209;HS256</code> | [AES_128_CBC_HMAC_SHA_256](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.3) authenticated encryption algorithm |
    | `A192CBC-HS384` | [AES_192_CBC_HMAC_SHA_384](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.4) authenticated encryption algorithm |
    | `A256CBC-HS512` | [AES_256_CBC_HMAC_SHA_512](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.5) authenticated encryption algorithm |
-   | `A128GCM` | AES GCM using 128-bit key<sup><b>2</b></sup>                                                                             |
-   | `A192GCM` | AES GCM using 192-bit key<sup><b>2</b></sup>                                                                             |
-   | `A256GCM` | AES GCM using 256-bit key<sup><b>2</b></sup>                                                                             |
+   | `A128GCM` | AES GCM using 128-bit key<sup><b>3</b></sup>                                                                             |
+   | `A192GCM` | AES GCM using 192-bit key<sup><b>3</b></sup>                                                                             |
+   | `A256GCM` | AES GCM using 256-bit key<sup><b>3</b></sup>                                                                             |
    
-   <sup><b>2</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+   <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * All Key Management Algorithms for obtaining JWE encryption and decryption keys: 
    
-   | Identifier | Key Management Algorithm |
-   | ----- | --- |   
-   | `RSA1_5` | RSAES-PKCS1-v1_5 |
-   | `RSA-OAEP` | RSAES OAEP using default parameters |
-   | `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256 |
-   | `A128KW` | AES Key Wrap with default initial value using 128-bit key |
-   | `A192KW` | AES Key Wrap with default initial value using 192-bit key |
-   | `A256KW` | AES Key Wrap with default initial value using 256-bit key |
-   | `dir` | Direct use of a shared symmetric key as the CEK |
+   | Identifier | Key Management Algorithm                                                      |
+   |-------------------------------------------------------------------------------| --- |   
+   | `RSA1_5` | RSAES-PKCS1-v1_5                                                              |
+   | `RSA-OAEP` | RSAES OAEP using default parameters                                           |
+   | `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256                                |
+   | `A128KW` | AES Key Wrap with default initial value using 128-bit key                     |
+   | `A192KW` | AES Key Wrap with default initial value using 192-bit key                     |
+   | `A256KW` | AES Key Wrap with default initial value using 256-bit key                     |
+   | `dir` | Direct use of a shared symmetric key as the CEK                               |
    | `ECDH-ES` | Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF |
-   | `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW" |
-   | `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW" |
-   | `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW" |
-   | `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>3</b></sup> |
-   | `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>3</b></sup> |
-   | `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>3</b></sup> |
-   | `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>3</b></sup> |
-   | `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>3</b></sup> |
-   | <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>3</b></sup> |
+   | `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW"                        |
+   | `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW"                        |
+   | `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"                        |
+   | `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>4</b></sup>                |
+   | `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>4</b></sup>                |
+   | `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>4</b></sup>                |
+   | `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>4</b></sup>              |
+   | `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>4</b></sup>              |
+   | <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>4</b></sup>              |
       
-   <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+   <sup><b>4</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * Creating, parsing and verifying JSON Web Keys (JWKs) in all standard JWA key formats using native Java `Key` types:
    
-   | JWK Key Format | Java `Key` Type | JJWT `Jwk` Type |
-   |---------------|-----------------| --- |
-   | Symmetric Key  | `SecretKey`    | `SecretJwk`     |
-   | Elliptic Curve Public Key | `ECPublicKey`  | `EcPublicJwk`   |
-   | Elliptic Curve Private Key | `ECPrivateKey` | `EcPrivateJwk`  |
-   | RSA Public Key | `RSAPublicKey` | `RsaPublicJwk`  |
-   | RSA Private Key | `RSAPrivateKey` | `RsaPrivateJwk` |
+   | JWK Key Format                       | Java `Key` Type | JJWT `Jwk` Type   |
+   |-----------------|-------------------|---------------- |
+   | Symmetric Key                        | `SecretKey`     | `SecretJwk`       |
+   | Elliptic Curve Public Key            | `ECPublicKey`   | `EcPublicJwk`     |
+   | Elliptic Curve Private Key           | `ECPrivateKey`  | `EcPrivateJwk`    |
+   | RSA Public Key                       | `RSAPublicKey`  | `RsaPublicJwk`    |
+   | RSA Private Key                      | `RSAPrivateKey` | `RsaPrivateJwk`   |
+   | XDH Private Key   | `XECPublicKey`<sup><b>5</b></sup>  | `OctetPublicJwk`  |
+   | XDH Private Key   | `XECPrivateKey`<sup><b>5</b></sup> | `OctetPrivateJwk` |
+   | EdDSA Public Key  | `EdECPublicKey`<sup><b>6</b></sup> | `OctetPublicJwk`  |
+   | EdDSA Private Key | `EdECPublicKey`<sup><b>6</b></sup> | `OctetPrivateJwk` |
+
+   <sup><b>5</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+   <sup><b>6</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * Convenience enhancements beyond the specification such as
     * Payload compression for any large JWT, not just JWEs
@@ -539,8 +550,10 @@ If you're building a (non-Android) JDK project, you will want to define the foll
     <version>JJWT_RELEASE_VERSION</version>
     <scope>runtime</scope>
 </dependency>
-<!-- Uncomment this next dependency if you are using JDK 10 or earlier and you also want to use 
-     RSASSA-PSS (PS256, PS384, PS512) algorithms.  JDK 11 or later does not require it for those algorithms:
+<!-- Uncomment this next dependency if you are using:
+     - JDK 10 or earlier, and you want to use RSASSA-PSS (PS256, PS384, PS512) signature algorithms.  
+     - JDK 10 or earlier, and you want to use EdECDH (X25519 or X448) Elliptic Curve Diffie-Hellman encryption.
+     - JDK 14 or earlier, and you want to use EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.    
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
@@ -607,8 +620,9 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 <a name="install-android-bc"></a>
 #### Bouncy Castle
 
-If you want to use JWT RSASSA-PSS algorithms (i.e. `PS256`, `PS384`, and `PS512`), or you just want to ensure your 
-Android application is running an updated version of BouncyCastle, you will need to:
+If you want to use JWT RSASSA-PSS algorithms (i.e. `PS256`, `PS384`, and `PS512`), EdECDH (`X25512` or `X448`) 
+Elliptic Curve Diffie-Hellman encryption, EdDSA (`Ed25519` or `Ed448`) signature algorithms, or you just want to 
+ensure your Android application is running an updated version of BouncyCastle, you will need to:
 1. Uncomment the BouncyCastle dependency as commented above in the [dependencies](#install-android-dependencies) section.
 2. Replace the legacy Android custom `BC` provider with the updated one.
 
@@ -1375,7 +1389,7 @@ JWS properly.
 <a name="jws-alg"></a>
 ### Standard Signature Algorithms
 
-The JWT specification identifies 12 standard signature algorithms - 3 secret key algorithms and 9 asymmetric
+The JWT specifications identify 13 standard signature algorithms - 3 secret key algorithms and 10 asymmetric
 key algorithms:
 
 | Identifier | Signature Algorithm |
@@ -1392,8 +1406,11 @@ key algorithms:
 | `PS256` | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
 | `PS384` | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
 | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
+| `EdDSA` | Edwards-Curve Digital Signature Algorithm (EdDSA)<sup><b>2</b></sup> | 
 
 <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+
+<sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
 These are all represented as constants in the `io.jsonwebtoken.security.JwsAlgorithms` utility class.
 
@@ -1461,6 +1478,16 @@ JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all requir
 * `ES384` requires that you use a private key that is exactly 384 bits (48 bytes) long.
 
 * `ES512` requires that you use a private key that is exactly 521 bits (65 or 66 bytes) long (depending on format).
+
+<a name="jws-key-eddsa"></a>
+#### Edwards Curve
+
+The JWT Edwards Curve signature algorithm `EdDSA` supports two sizes of private and public `EdECKey`s (these types
+were introduced in Java 15):
+
+* `Ed25519` algorithm keys must be 256 bits (32 bytes) long and produce signatures 512 bits (64 bytes) long.
+
+* `Ed448` algorithm keys must be 456 bits (57 bytes) long and produce signatures 912 bits (114 bytes) long.
 
 <a name="jws-key-create"></a>
 #### Creating Safe Keys

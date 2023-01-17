@@ -5,7 +5,7 @@ import io.jsonwebtoken.lang.Assert;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-class RequiredTypeConverter<T> implements Converter<T, Object> {
+public class RequiredTypeConverter<T> implements Converter<T, Object> {
 
     private final Class<T> type;
 

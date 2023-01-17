@@ -46,6 +46,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+import static io.jsonwebtoken.security.Jwks.builder;
+
 /**
  * Test cases to ensure snippets in README.md work/compile as expected with the Java language (not Groovy):
  *
@@ -255,7 +257,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleSecretJwk() {
         SecretKey key = JwsAlgorithms.HS512.keyBuilder().build(); // or HS384 or HS256
-        SecretJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+        SecretJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -272,7 +274,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleRsaPublicJwk() {
         RSAPublicKey key = (RSAPublicKey) JwsAlgorithms.RS512.keyPairBuilder().build().getPublic();
-        RsaPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+        RsaPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -292,7 +294,7 @@ public class JavaReadmeTest {
         RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
         RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
-        RsaPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+        RsaPrivateJwk privJwk = builder().forKey(privKey).setIdFromThumbprint().build();
         RsaPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -312,7 +314,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleEcPublicJwk() {
         ECPublicKey key = (ECPublicKey) JwsAlgorithms.ES512.keyPairBuilder().build().getPublic();
-        EcPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+        EcPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -332,7 +334,7 @@ public class JavaReadmeTest {
         ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 
-        EcPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+        EcPrivateJwk privJwk = builder().forKey(privKey).setIdFromThumbprint().build();
         EcPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());

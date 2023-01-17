@@ -23,6 +23,7 @@ import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
 
 import javax.crypto.SecretKey
+import java.security.Key
 
 import static org.junit.Assert.*
 
@@ -31,7 +32,7 @@ class AbstractJwkBuilderTest {
     private static final SecretKey SKEY = TestKeys.A256GCM
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder)Jwks.builder().forKey(SKEY)
+        return (AbstractJwkBuilder) Jwks.builder().forKey(SKEY)
     }
 
     @Test
@@ -123,7 +124,8 @@ class AbstractJwkBuilderTest {
         assertEquals set, jwk.key_ops
     }
 
-    @Test //ensures that even if a raw single value is present it is represented as a Set per the JWA spec (string array)
+    @Test
+    //ensures that even if a raw single value is present it is represented as a Set per the JWA spec (string array)
     void testOperationsByPutSingleValue() {
         def a = UUID.randomUUID().toString()
         def set = [a] as Set<String>
@@ -145,6 +147,9 @@ class AbstractJwkBuilderTest {
         ctx.put('whatevs', 42)
         //noinspection GroovyUnusedAssignment
         JwkFactory factory = new JwkFactory() {
+            JwkContext newContext(JwkContext src, Key key) {
+                return null
+            }
             @Override
             Jwk createJwk(JwkContext jwkContext) {
                 throw new IllegalArgumentException("foo")

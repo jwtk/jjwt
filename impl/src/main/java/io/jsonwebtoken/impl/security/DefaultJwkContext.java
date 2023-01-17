@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.JwtMap;
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.HashAlgorithm;
@@ -42,6 +43,17 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         set.addAll(DefaultSecretJwk.FIELDS); // Private/Secret JWKs has both public and private fields
         set.addAll(DefaultEcPrivateJwk.FIELDS); // Private JWKs have both public and private fields
         set.addAll(DefaultRsaPrivateJwk.FIELDS); // Private JWKs have both public and private fields
+        set.addAll(DefaultOctetPrivateJwk.FIELDS);
+
+        // EC JWKs and Octet JWKs have two fields that are named identically, but have different type requirements.  So
+        // we swap out those fields with placeholders that allow either.  When the JwkContext is converted to its
+        // type-specific context by the ProtoBuilder, the values will be correctly converted to their required types
+        // at that time.  It is also important to retain toString security (via field.setSecret(true)) to ensure
+        // any printing of the builder or its internal context does not print secure data.
+        set.add(Fields.string(DefaultEcPublicJwk.X.getId(), "Elliptic Curve public key X coordinate"));
+        set.add(Fields.builder(String.class).setSecret(true)
+                .setId(DefaultEcPrivateJwk.D.getId()).setName("Elliptic Curve private key").build());
+
         DEFAULT_FIELDS = Collections.immutable(set);
     }
 
@@ -75,7 +87,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         this.key = Assert.notNull(key, "Key cannot be null.");
     }
 
-    private DefaultJwkContext(Set<Field<?>> fields, JwkContext<?> other, boolean removePrivate) {
+    public DefaultJwkContext(Set<Field<?>> fields, JwkContext<?> other, boolean removePrivate) {
         super(Assert.notEmpty(fields, "Fields cannot be null or empty."));
         Assert.notNull(other, "JwkContext cannot be null.");
         Assert.isInstanceOf(DefaultJwkContext.class, other, "JwkContext must be a DefaultJwkContext instance.");
@@ -84,7 +96,18 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         this.random = other.getRandom();
         this.idThumbprintAlgorithm = other.getIdThumbprintAlgorithm();
         this.values.putAll(src.values);
-        this.idiomaticValues.putAll(src.idiomaticValues);
+        // Ensure the source's idiomatic values match the types expected by this object:
+        for (Map.Entry<String, Object> entry : src.idiomaticValues.entrySet()) {
+            String id = entry.getKey();
+            Object value = entry.getValue();
+            Field<?> field = this.FIELDS.get(id);
+            if (field != null && !field.getIdiomaticType().isInstance(value)) {
+                value = this.values.get(field.getId());
+                put(field, value); // perform idiomatic conversion with original/raw src value
+            } else {
+                this.idiomaticValues.put(id, value);
+            }
+        }
         if (removePrivate) {
             for (Field<?> field : src.FIELDS.values()) {
                 if (field.isSecret()) {

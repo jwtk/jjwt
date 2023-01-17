@@ -19,7 +19,7 @@ public class DefaultOctetPrivateJwk<T extends PrivateKey, P extends PublicKey, K
 
     DefaultOctetPrivateJwk(JwkContext<T> ctx, K pubJwk) {
         super(ctx,
-                // only public members are included in Private JWKs per
+                // only public members are included in Private JWK Thumbprints per
                 // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
                 DefaultOctetPublicJwk.THUMBPRINT_FIELDS,
                 pubJwk);

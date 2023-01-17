@@ -41,7 +41,20 @@ class AsymmetricJwkFactory implements FamilyJwkFactory<Key, Jwk<Key>> {
 
     @Override
     public boolean supports(JwkContext<?> ctx) {
-        return this.id.equals(ctx.getType()) || privateFactory.supports(ctx) || publicFactory.supports(ctx);
+        return ctx != null &&
+                (this.id.equals(ctx.getType()) || privateFactory.supports(ctx) || publicFactory.supports(ctx));
+    }
+
+    @Override
+    public boolean supports(Key key) {
+        return key != null && (privateFactory.supports(key) || publicFactory.supports(key));
+    }
+
+    @Override
+    public JwkContext<Key> newContext(JwkContext<?> src, Key key) {
+        return (privateFactory.supports(key) || privateFactory.supports(src)) ?
+                privateFactory.newContext(src, key) :
+                publicFactory.newContext(src, key);
     }
 
     @Override

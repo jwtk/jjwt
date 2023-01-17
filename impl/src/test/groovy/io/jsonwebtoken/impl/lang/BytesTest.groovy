@@ -24,7 +24,12 @@ import static org.junit.Assert.*
 
 class BytesTest {
 
-    final static Random RANDOM = Randoms.secureRandom()
+    static final Random RANDOM = Randoms.secureRandom()
+
+    static final byte[] A = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05] as byte[]
+    static final byte[] B = [0x02, 0x03] as byte[]
+    static final byte[] C = [0x05, 0x06] as byte[]
+    static final byte[] D = [0x06, 0x07] as byte[]
 
     @Test
     void testPrivateCtor() { // for code coverage only
@@ -34,9 +39,9 @@ class BytesTest {
     @Test
     void testIntToBytesToInt() {
         int iterations = 10000
-        for(int i = 0; i < iterations; i++) {
+        for (int i = 0; i < iterations; i++) {
             int a = RANDOM.nextInt()
-            byte[] bytes = Bytes.toBytes(a);
+            byte[] bytes = Bytes.toBytes(a)
             int b = Bytes.toInt(bytes)
             assertEquals a, b
         }
@@ -45,9 +50,9 @@ class BytesTest {
     @Test
     void testLongToBytesToLong() {
         int iterations = 10000
-        for(int i = 0; i < iterations; i++) {
+        for (int i = 0; i < iterations; i++) {
             long a = RANDOM.nextLong()
-            byte[] bytes = Bytes.toBytes(a);
+            byte[] bytes = Bytes.toBytes(a)
             long b = Bytes.toLong(bytes)
             assertEquals a, b
         }
@@ -154,7 +159,7 @@ class BytesTest {
     void testIncrement() {
 
         byte[] counter = Bytes.toBytes(0)
-        for(int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             assertEquals i, Bytes.toInt(counter)
             Bytes.increment(counter)
         }
@@ -174,5 +179,47 @@ class BytesTest {
         byte[] counter = new byte[0]
         Bytes.increment(counter)
         assertTrue MessageDigest.isEqual(new byte[0], counter)
+    }
+
+    @Test
+    void testIndexOfFromIndexOOB() {
+        int i = Bytes.indexOf(A, 0, A.length, B, 0, B.length, A.length)
+        assertEquals(-1, i)
+    }
+
+    @Test
+    void testIndexOfFromIndexOOBWithZeroLengthTarget() {
+        int i = Bytes.indexOf(A, 0, A.length, B, 0, 0, A.length)
+        assertEquals(A.length, i)
+    }
+
+    @Test
+    void testIndexOfFromIndexNegative() {
+        int i = Bytes.indexOf(A, 0, A.length, B, 0, B.length, -1) // should normalize fromIndex to be zero
+        assertEquals(2, i) // B starts at A index 2
+    }
+
+    @Test
+    void testIndexOfEmptyTargetIsZero() {
+        int i = Bytes.indexOf(A, Bytes.EMPTY)
+        assertEquals(0, i)
+    }
+
+    @Test
+    void testIndexOfOOBSrcIndex() {
+        int i = Bytes.indexOf(A, 3, 2, B, 1, A.length, 0)
+        assertEquals(-1, i)
+    }
+
+    @Test
+    void testIndexOfDisjointSrcAndTarget() {
+        int i = Bytes.indexOf(A, D)
+        assertEquals(-1, i)
+    }
+
+    @Test
+    void testIndexOfPartialMatch() {
+        int i = Bytes.indexOf(A, C)
+        assertEquals(-1, i)
     }
 }

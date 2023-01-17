@@ -38,7 +38,7 @@ public final class Jwks {
      *
      * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
      */
-    public static ProtoJwkBuilder<?, ?, ?> builder() {
+    public static ProtoJwkBuilder<?, ?> builder() {
         return Classes.newInstance(BUILDER_CLASSNAME);
     }
 

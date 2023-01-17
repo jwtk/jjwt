@@ -21,7 +21,6 @@ import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
-import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -37,8 +36,7 @@ import java.security.spec.PSSParameterSpec;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultRsaSignatureAlgorithm extends AbstractSecureDigestAlgorithm<PrivateKey, PublicKey>
-        implements SignatureAlgorithm {
+public class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     private static final String PSS_JCA_NAME = "RSASSA-PSS";
     private static final int MIN_KEY_BIT_LENGTH = 2048;
@@ -53,7 +51,7 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
 
     private final AlgorithmParameterSpec algorithmParameterSpec;
 
-    public DefaultRsaSignatureAlgorithm(String name, String jcaName, int preferredKeyBitLength, AlgorithmParameterSpec algParam) {
+    public RsaSignatureAlgorithm(String name, String jcaName, int preferredKeyBitLength, AlgorithmParameterSpec algParam) {
         super(name, jcaName);
         if (preferredKeyBitLength < MIN_KEY_BIT_LENGTH) {
             String msg = "preferredKeyBitLength must be greater than the JWA mandatory minimum key length of " + MIN_KEY_BIT_LENGTH;
@@ -63,11 +61,11 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
         this.algorithmParameterSpec = algParam;
     }
 
-    public DefaultRsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength) {
+    public RsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength) {
         this("RS" + digestBitLength, "SHA" + digestBitLength + "withRSA", preferredKeyBitLength, null);
     }
 
-    public DefaultRsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength, int pssSaltBitLength) {
+    public RsaSignatureAlgorithm(int digestBitLength, int preferredKeyBitLength, int pssSaltBitLength) {
         this("PS" + digestBitLength, PSS_JCA_NAME, preferredKeyBitLength, pssParamFromSaltBitLength(pssSaltBitLength));
         // PSS is not available natively until JDK 11, so try to load BC as a backup provider if possible on <= JDK 10:
         setProvider(Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<Signature>() {
@@ -124,10 +122,10 @@ public class DefaultRsaSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
     }
 
     @Override
-    protected boolean doVerify(final VerifySecureDigestRequest<PublicKey> request) throws Exception {
+    protected boolean doVerify(final VerifySecureDigestRequest<PublicKey> request) {
         final Key key = request.getKey();
         if (key instanceof PrivateKey) { //legacy support only TODO: remove for 1.0
-            return super.doVerify(request);
+            return super.messageDigest(request);
         }
         return jca(request).withSignature(new CheckedFunction<Signature, Boolean>() {
             @Override

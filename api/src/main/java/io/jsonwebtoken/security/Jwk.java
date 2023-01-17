@@ -48,7 +48,7 @@ import java.util.Set;
  * <p><b>Private and Secret Value Safety</b></p>
  *
  * <p>JWKs often represent secret or private key data which should never be exposed publicly, nor mistakenly printed
- * via application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
+ * to application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
  * private or secret field values are 'wrapped' in a {@link io.jsonwebtoken.lang.Supplier Supplier} instance to ensure
  * any attempt to call {@link String#toString() toString()} on the value will print a redacted value instead of an
  * actual private or secret value.</p>

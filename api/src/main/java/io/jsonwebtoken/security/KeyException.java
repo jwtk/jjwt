@@ -38,7 +38,7 @@ public class KeyException extends SecurityException {
      * @param msg   the message explaining why the exception is thrown.
      * @param cause the underlying cause that resulted in this exception being thrown.
      */
-    public KeyException(String msg, Exception cause) {
+    public KeyException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }

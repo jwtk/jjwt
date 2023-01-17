@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
+import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
@@ -33,7 +34,7 @@ class DispatchingJwkFactoryTest {
         new DispatchingJwkFactory().createJwk(null)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = InvalidKeyException)
     void testEmptyJwk() {
         new DispatchingJwkFactory().createJwk(new DefaultJwkContext<Key>())
     }
@@ -43,6 +44,20 @@ class DispatchingJwkFactoryTest {
         def ctx = new DefaultJwkContext()
         ctx.put('kty', 'foo')
         new DispatchingJwkFactory().createJwk(ctx)
+    }
+
+    @Test
+    void testNewContextNoFamily() {
+        def ctx = new DefaultJwkContext()
+        def key = new TestKey(algorithm: 'foo')
+        try {
+            DispatchingJwkFactory.DEFAULT_INSTANCE.newContext(ctx, key)
+            fail()
+        } catch (UnsupportedKeyException uke) {
+            String msg = 'Unable to create JWK for unrecognized key of type io.jsonwebtoken.impl.security.TestKey: ' +
+                    'there is no known JWK Factory capable of creating JWKs for this key type.'
+            assertEquals msg, uke.getMessage()
+        }
     }
 
     @Test
@@ -76,7 +91,7 @@ class DispatchingJwkFactoryTest {
     @Test
     void testEcKeyPairToKey() {
 
-        Map<String,String> m = [
+        Map<String, String> m = [
                 'kty': 'EC',
                 'crv': 'P-256',
                 "x"  : "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",

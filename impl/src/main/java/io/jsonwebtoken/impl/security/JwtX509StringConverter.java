@@ -30,7 +30,7 @@ import java.security.cert.X509Certificate;
 
 public class JwtX509StringConverter implements Converter<X509Certificate, String> {
 
-    static final JwtX509StringConverter INSTANCE = new JwtX509StringConverter();
+    public static final JwtX509StringConverter INSTANCE = new JwtX509StringConverter();
 
     // Returns a Base64 encoded (NOT Base64Url encoded) string of the cert's encoded byte array per
     // https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6

@@ -6,16 +6,17 @@ import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.Key;
+import java.util.Set;
 
 public abstract class OctetJwkFactory<K extends Key, J extends Jwk<K>> extends AbstractFamilyJwkFactory<K, J> {
 
-    OctetJwkFactory(Class<K> keyType) {
-        super(DefaultOctetPublicJwk.TYPE_VALUE, keyType);
+    OctetJwkFactory(Class<K> keyType, Set<Field<?>> fields) {
+        super(DefaultOctetPublicJwk.TYPE_VALUE, keyType, fields);
     }
 
     @Override
-    protected boolean supportsKey(Key key) {
-        return super.supportsKey(key) && EdwardsCurve.isEdwards(key);
+    public boolean supports(Key key) {
+        return super.supports(key) && EdwardsCurve.isEdwards(key);
     }
 
     protected EdwardsCurve getCurve(final FieldReadable reader) throws UnsupportedKeyException {

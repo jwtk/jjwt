@@ -27,10 +27,10 @@ import java.security.spec.RSAPublicKeySpec;
 
 class RsaPublicJwkFactory extends AbstractFamilyJwkFactory<RSAPublicKey, RsaPublicJwk> {
 
-    static final RsaPublicJwkFactory DEFAULT_INSTANCE = new RsaPublicJwkFactory();
+    static final RsaPublicJwkFactory INSTANCE = new RsaPublicJwkFactory();
 
     RsaPublicJwkFactory() {
-        super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPublicKey.class);
+        super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPublicKey.class, DefaultRsaPublicJwk.FIELDS);
     }
 
     @Override

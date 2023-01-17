@@ -11,11 +11,10 @@ import io.jsonwebtoken.security.PublicJwk;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey,
-        PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>>> {
+public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>>> {
 
     public OctetPrivateJwkFactory() {
-        super(PrivateKey.class);
+        super(PrivateKey.class, DefaultOctetPrivateJwk.FIELDS);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey,
         // If a JWK fingerprint has been requested to be the JWK id, ensure we copy over the one computed for the
         // public key per https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
         boolean copyId = !Strings.hasText(ctx.getId()) && ctx.getIdThumbprintAlgorithm() != null;
-        JwkContext<PublicKey> pubCtx = new DefaultJwkContext<>(DefaultOctetPublicJwk.FIELDS, ctx, pub);
+        JwkContext<PublicKey> pubCtx = OctetPublicJwkFactory.INSTANCE.newContext(ctx, pub);
         PublicJwk<PublicKey> pubJwk = OctetPublicJwkFactory.INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk);
         if (copyId) {

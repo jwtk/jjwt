@@ -32,7 +32,7 @@ import java.util.Set;
 
 abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> implements JwkBuilder<K, J, T> {
 
-    protected final JwkContext<K> jwkContext;
+    protected JwkContext<K> jwkContext;
     protected final JwkFactory<K, J> jwkFactory;
 
     @SuppressWarnings("unchecked")
@@ -42,8 +42,17 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     // visible for testing
     protected AbstractJwkBuilder(JwkContext<K> context, JwkFactory<K, J> factory) {
-        this.jwkContext = Assert.notNull(context, "JwkContext cannot be null.");
         this.jwkFactory = Assert.notNull(factory, "JwkFactory cannot be null.");
+        setContext(context);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <A extends Key> JwkContext<A> newContext(A key) {
+        return (JwkContext<A>) this.jwkFactory.newContext(this.jwkContext, (K) key);
+    }
+
+    protected void setContext(JwkContext<K> ctx) {
+        this.jwkContext = Assert.notNull(ctx, "JwkContext cannot be null.");
     }
 
     @Override
@@ -147,8 +156,8 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     static class DefaultSecretJwkBuilder extends AbstractJwkBuilder<SecretKey, SecretJwk, SecretJwkBuilder>
             implements SecretJwkBuilder {
-        public DefaultSecretJwkBuilder(JwkContext<?> ctx, SecretKey key) {
-            super(new DefaultJwkContext<>(DefaultSecretJwk.FIELDS, ctx, key));
+        public DefaultSecretJwkBuilder(JwkContext<SecretKey> ctx) {
+            super(ctx);
         }
     }
 }

@@ -55,7 +55,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
     private static final String PUBKEY_ERR_MSG = "JwkContext publicKey must be an " + RSAPublicKey.class.getName() + " instance.";
 
     RsaPrivateJwkFactory() {
-        super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPrivateKey.class);
+        super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPrivateKey.class, DefaultRsaPrivateJwk.FIELDS);
     }
 
     @Override
@@ -119,8 +119,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         // public key per https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
         boolean copyId = !Strings.hasText(ctx.getId()) && ctx.getIdThumbprintAlgorithm() != null;
 
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, rsaPublicKey);
-        RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
+        JwkContext<RSAPublicKey> pubCtx = RsaPublicJwkFactory.INSTANCE.newContext(ctx, rsaPublicKey);
+        RsaPublicJwk pubJwk = RsaPublicJwkFactory.INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
         if (copyId) {
             ctx.setId(pubJwk.getId());
@@ -163,7 +163,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         //The [JWA Spec, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
         JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx);
-        RsaPublicJwk pubJwk = RsaPublicJwkFactory.DEFAULT_INSTANCE.createJwkFromValues(pubCtx);
+        RsaPublicJwk pubJwk = RsaPublicJwkFactory.INSTANCE.createJwkFromValues(pubCtx);
         RSAPublicKey pubKey = pubJwk.toKey();
         final BigInteger modulus = pubKey.getModulus();
         final BigInteger publicExponent = pubKey.getPublicExponent();

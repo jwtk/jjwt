@@ -22,5 +22,7 @@ import java.security.Key;
 
 public interface FamilyJwkFactory<K extends Key, J extends Jwk<K>> extends JwkFactory<K, J>, Identifiable {
 
+    boolean supports(Key key);
+
     boolean supports(JwkContext<?> context);
 }

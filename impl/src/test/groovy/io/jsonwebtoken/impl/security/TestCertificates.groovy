@@ -15,19 +15,24 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.SecureDigestAlgorithm
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
-import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
 
 import java.nio.charset.StandardCharsets
+import java.security.KeyFactory
 import java.security.PrivateKey
+import java.security.Provider
 import java.security.PublicKey
+import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import java.security.spec.X509EncodedKeySpec
 
 /**
  * For test cases that need to read certificate and/or PEM files.  Encapsulates BouncyCastle API to
@@ -46,42 +51,83 @@ import java.security.cert.X509Certificate
  */
 class TestCertificates {
 
-    private static JcaX509CertificateConverter X509_CERT_CONVERTER = new JcaX509CertificateConverter()
-    private static JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter()
+    private static InputStream getResourceStream(String filename) {
+        String packageName = TestCertificates.class.getPackage().getName()
+        String resourcePath = Strings.replace(packageName, ".", "/") + "/" + filename
+        return Classes.getResourceAsStream(resourcePath)
+    }
 
     private static PEMParser getParser(String filename) {
         InputStream is = Classes.getResourceAsStream('io/jsonwebtoken/impl/security/' + filename)
         return new PEMParser(new BufferedReader(new InputStreamReader(is, StandardCharsets.ISO_8859_1)))
     }
 
+    private static String getKeyFilePrefix(SecureDigestAlgorithm alg) {
+        if (alg instanceof EdSignatureAlgorithm) {
+            return alg.preferredCurve.getId()
+        }
+        return alg.getId()
+    }
+
     static X509Certificate readTestCertificate(SecureDigestAlgorithm alg) {
-        PEMParser parser = getParser(alg.getId() + '.crt.pem')
+        InputStream is = getResourceStream(getKeyFilePrefix(alg) + '.crt.pem')
         try {
-            X509CertificateHolder holder = parser.readObject() as X509CertificateHolder
-            return X509_CERT_CONVERTER.getCertificate(holder)
+            JcaTemplate template = new JcaTemplate("X.509", alg.getProvider())
+            template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
+                @Override
+                X509Certificate apply(CertificateFactory factory) throws Exception {
+                    return (X509Certificate) factory.generateCertificate(is)
+                }
+            })
+        } finally {
+            is.close()
+        }
+    }
+
+    static PublicKey readTestPublicKey(EdwardsCurve crv) {
+        PEMParser parser = getParser(crv.getId() + '.pub.pem')
+        try {
+            SubjectPublicKeyInfo info = parser.readObject() as SubjectPublicKeyInfo
+            def template = new JcaTemplate(crv.getJcaName(), crv.getProvider())
+            return template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
+                @Override
+                PublicKey apply(KeyFactory keyFactory) throws Exception {
+                    return keyFactory.generatePublic(new X509EncodedKeySpec(info.getEncoded()))
+                }
+            })
         } finally {
             parser.close()
         }
     }
 
-    static PublicKey readTestPublicKey(SecureDigestAlgorithm alg) {
-        return readTestCertificate(alg).getPublicKey()
+    static PrivateKey readTestPrivateKey(SecureDigestAlgorithm alg) {
+        return readTestPrivateKey(getKeyFilePrefix(alg), alg.getProvider())
     }
 
-    static PrivateKey readTestPrivateKey(SecureDigestAlgorithm alg) {
-        PEMParser parser = getParser(alg.getId() + '.key.pem')
+    static PrivateKey readTestPrivateKey(String filenamePrefix, Provider provider) {
+        PEMParser parser = getParser(filenamePrefix + '.key.pem')
         try {
             PrivateKeyInfo info
             Object object = parser.readObject()
             if (object instanceof PEMKeyPair) {
-                info = ((PEMKeyPair)object).getPrivateKeyInfo()
+                info = ((PEMKeyPair) object).getPrivateKeyInfo()
             } else {
-                info = (PrivateKeyInfo)object
+                info = (PrivateKeyInfo) object
             }
-            return PEM_KEY_CONVERTER.getPrivateKey(info)
+            def converter = new JcaPEMKeyConverter()
+            if (provider != null) {
+                converter.setProvider(provider)
+            }
+            return converter.getPrivateKey(info)
         } finally {
             parser.close()
         }
+    }
+
+    static TestKeys.Bundle readBundle(EdwardsCurve curve) {
+        PublicKey pub = readTestPublicKey(curve)
+        PrivateKey priv = readTestPrivateKey(curve.getId(), curve.getProvider())
+        return new TestKeys.Bundle(pub, priv)
     }
 
     static TestKeys.Bundle readAsymmetricBundle(SecureDigestAlgorithm alg) {

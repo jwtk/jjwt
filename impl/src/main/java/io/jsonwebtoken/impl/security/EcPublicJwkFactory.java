@@ -33,10 +33,10 @@ import java.util.Map;
 
 class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> {
 
-    static final EcPublicJwkFactory DEFAULT_INSTANCE = new EcPublicJwkFactory();
+    static final EcPublicJwkFactory INSTANCE = new EcPublicJwkFactory();
 
     EcPublicJwkFactory() {
-        super(ECPublicKey.class);
+        super(ECPublicKey.class, DefaultEcPublicJwk.FIELDS);
     }
 
     protected static String keyContainsErrorMessage(String curveId) {

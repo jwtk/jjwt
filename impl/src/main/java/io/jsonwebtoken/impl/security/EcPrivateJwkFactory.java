@@ -35,8 +35,10 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
 
     private static final String ECPUBKEY_ERR_MSG = "JwkContext publicKey must be an " + ECPublicKey.class.getName() + " instance.";
 
+    private static final EcPublicJwkFactory PUB_FACTORY = EcPublicJwkFactory.INSTANCE;
+
     EcPrivateJwkFactory() {
-        super(ECPrivateKey.class);
+        super(ECPrivateKey.class, DefaultEcPrivateJwk.FIELDS);
     }
 
     @Override
@@ -64,8 +66,8 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
         // public key per https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
         boolean copyId = !Strings.hasText(ctx.getId()) && ctx.getIdThumbprintAlgorithm() != null;
 
-        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, ctx, ecPublicKey);
-        EcPublicJwk pubJwk = EcPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
+        JwkContext<ECPublicKey> pubCtx = PUB_FACTORY.newContext(ctx, ecPublicKey);
+        EcPublicJwk pubJwk = PUB_FACTORY.createJwk(pubCtx);
         ctx.putAll(pubJwk); // add public values to private key context
         if (copyId) {
             ctx.setId(pubJwk.getId());
@@ -89,7 +91,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
         // requires them to be present and valid for the private key as well, so we assert that here:
         JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, ctx);
-        EcPublicJwk pubJwk = EcPublicJwkFactory.DEFAULT_INSTANCE.createJwk(pubCtx);
+        EcPublicJwk pubJwk = EcPublicJwkFactory.INSTANCE.createJwk(pubCtx);
 
         ECParameterSpec spec = getCurveByJwaId(curveId);
         final ECPrivateKeySpec privateSpec = new ECPrivateKeySpec(d, spec);

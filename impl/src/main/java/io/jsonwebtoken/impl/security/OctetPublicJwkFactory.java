@@ -12,7 +12,7 @@ public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, PublicJwk<
     static final OctetPublicJwkFactory INSTANCE = new OctetPublicJwkFactory();
 
     OctetPublicJwkFactory() {
-        super(PublicKey.class);
+        super(PublicKey.class, DefaultOctetPublicJwk.FIELDS);
     }
 
     @Override

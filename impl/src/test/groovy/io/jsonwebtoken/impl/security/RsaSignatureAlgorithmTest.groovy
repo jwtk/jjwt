@@ -28,9 +28,9 @@ import java.security.interfaces.RSAPublicKey
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
-class DefaultRsaSignatureAlgorithmTest {
+class RsaSignatureAlgorithmTest {
 
-    static Collection<DefaultRsaSignatureAlgorithm> algs() {
+    static Collection<RsaSignatureAlgorithm> algs() {
         return JwsAlgorithms.values().findAll({
             it.id.startsWith("RS") || it.id.startsWith("PS")
         })
@@ -50,7 +50,7 @@ class DefaultRsaSignatureAlgorithmTest {
 
     @Test(expected = IllegalArgumentException)
     void testWeakPreferredKeyLength() {
-        new DefaultRsaSignatureAlgorithm(256, 1024) //must be >= 2048
+        new RsaSignatureAlgorithm(256, 1024) //must be >= 2048
     }
 
     @Test

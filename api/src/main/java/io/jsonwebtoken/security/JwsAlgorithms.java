@@ -173,4 +173,30 @@ public final class JwsAlgorithms {
      * requires a 521-bit key.
      */
     public static final SignatureAlgorithm ES512 = forId0("ES512");
+
+    /**
+     * {@code EdDSA} signature algorithm as defined by
+     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
+     * requires either {@code Ed25519} or {@code Ed448} Edwards Curve keys.
+     */
+    public static final SignatureAlgorithm EdDSA = forId0("EdDSA");
+
+    /**
+     * {@code EdDSA} signature algorithm using Curve 25519 as defined by
+     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
+     * requires {@code Ed25519} Edwards Curve keys to create signatures.
+     * <p><b>This is a convenience alias for {@link #EdDSA}</b> that defaults key generation to
+     * {@code Ed25519} keys.</p>
+     */
+    public static final SignatureAlgorithm Ed25519 = forId0("Ed25519");
+
+    /**
+     * {@code EdDSA} signature algorithm using Curve 25519 as defined by
+     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
+     * requires {@code Ed448} Edwards Curve keys to create signatures.
+     * <p><b>This is a convenience alias for {@link #EdDSA}</b> that defaults key generation to
+     * {@code Ed448} keys.</p>
+     */
+    public static final SignatureAlgorithm Ed448 = forId0("Ed448");
+
 }

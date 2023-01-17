@@ -39,16 +39,16 @@ import java.security.spec.X509EncodedKeySpec
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
-class DefaultEllipticCurveSignatureAlgorithmTest {
+class EcSignatureAlgorithmTest {
 
-    static Collection<DefaultEllipticCurveSignatureAlgorithm> algs() {
-        return JwsAlgorithms.values().findAll({ it instanceof DefaultEllipticCurveSignatureAlgorithm }) as Collection<DefaultEllipticCurveSignatureAlgorithm>
+    static Collection<EcSignatureAlgorithm> algs() {
+        return JwsAlgorithms.values().findAll({ it instanceof EcSignatureAlgorithm }) as Collection<EcSignatureAlgorithm>
     }
 
     @Test
     void testConstructorWithWeakKeyLength() {
         try {
-            new DefaultEllipticCurveSignatureAlgorithm(128)
+            new EcSignatureAlgorithm(128)
         } catch (IllegalArgumentException iae) {
             String msg = 'orderBitLength must equal 256, 384, or 521.'
             assertEquals msg, iae.getMessage()
@@ -81,10 +81,11 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void testSignWithPublicKey() {
         ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
         def request = new DefaultSecureRequest(new byte[1], null, null, key)
+        def alg = JwsAlgorithms.ES256
         try {
-            JwsAlgorithms.ES256.digest(request)
+            alg.digest(request)
         } catch (InvalidKeyException e) {
-            String msg = "Elliptic Curve signing keys must be PrivateKeys (implement ${PrivateKey.class.getName()}). " +
+            String msg = "${alg.getId()} signing keys must be PrivateKeys (implement ${PrivateKey.class.getName()}). " +
                     "Provided key type: ${key.getClass().getName()}."
             assertEquals msg, e.getMessage()
         }
@@ -137,7 +138,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             try {
                 it.verify(verifyRequest)
             } catch (InvalidKeyException e) {
-                String msg = "Elliptic Curve verification keys must be PublicKeys (implement " +
+                String msg = "${it.getId()} verification keys must be PublicKeys (implement " +
                         "${PublicKey.class.name}). Provided key type: ${key.class.name}."
                 assertEquals msg, e.getMessage()
             }
@@ -167,7 +168,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void invalidDERSignatureToJoseFormatTest() {
         def verify = { byte[] signature ->
             try {
-                DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
+                EcSignatureAlgorithm.transcodeDERToConcat(signature, 132)
                 fail()
             } catch (JwtException e) {
                 assertEquals e.message, 'Invalid ECDSA signature format'
@@ -191,7 +192,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void edgeCaseSignatureToConcatInvalidSignatureTest() {
         try {
             def signature = Decoders.BASE64.decode("MIGBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
+            EcSignatureAlgorithm.transcodeDERToConcat(signature, 132)
             fail()
         } catch (JwtException e) {
             assertEquals e.message, 'Invalid ECDSA signature format'
@@ -202,7 +203,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void edgeCaseSignatureToConcatInvalidSignatureBranchTest() {
         try {
             def signature = Decoders.BASE64.decode("MIGBAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
+            EcSignatureAlgorithm.transcodeDERToConcat(signature, 132)
             fail()
         } catch (JwtException e) {
             assertEquals e.message, 'Invalid ECDSA signature format'
@@ -213,7 +214,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void edgeCaseSignatureToConcatInvalidSignatureBranch2Test() {
         try {
             def signature = Decoders.BASE64.decode("MIGBAj4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
+            EcSignatureAlgorithm.transcodeDERToConcat(signature, 132)
             fail()
         } catch (JwtException e) {
             assertEquals e.message, 'Invalid ECDSA signature format'
@@ -224,7 +225,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     void edgeCaseSignatureToConcatLengthTest() {
         try {
             def signature = Decoders.BASE64.decode("MIEAAGg3OVb/ZeX12cYrhK3c07TsMKo7Kc6SiqW++4CAZWCX72DkZPGTdCv2duqlupsnZL53hiG3rfdOLj8drndCU+KHGrn5EotCATdMSLCXJSMMJoHMM/ZPG+QOHHPlOWnAvpC1v4lJb32WxMFNz1VAIWrl9Aa6RPG1GcjCTScKjvEE")
-            DefaultEllipticCurveSignatureAlgorithm.transcodeDERToConcat(signature, 132)
+            EcSignatureAlgorithm.transcodeDERToConcat(signature, 132)
             fail()
         } catch (JwtException expected) {
         }
@@ -235,7 +236,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         try {
             def signature = new byte[257]
             Randoms.secureRandom().nextBytes(signature)
-            DefaultEllipticCurveSignatureAlgorithm.transcodeConcatToDER(signature)
+            EcSignatureAlgorithm.transcodeConcatToDER(signature)
             fail()
         } catch (JwtException e) {
             assertEquals 'Invalid ECDSA signature format.', e.message
@@ -245,7 +246,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     @Test
     void edgeCaseSignatureLengthTest() {
         def signature = new byte[1]
-        DefaultEllipticCurveSignatureAlgorithm.transcodeConcatToDER(signature)
+        EcSignatureAlgorithm.transcodeConcatToDER(signature)
     }
 
     @Test
@@ -253,7 +254,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
         def signature = new byte[32]
         Randoms.secureRandom().nextBytes(signature)
         signature[0] = 0 as byte
-        DefaultEllipticCurveSignatureAlgorithm.transcodeConcatToDER(signature) //no exception
+        EcSignatureAlgorithm.transcodeConcatToDER(signature) //no exception
     }
 
     @Test
@@ -464,7 +465,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
     @Test
     void legacySignatureCompatWhenEnabledTest() {
         try {
-            System.setProperty(DefaultEllipticCurveSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME, 'true')
+            System.setProperty(EcSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME, 'true')
 
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
             def alg = JwsAlgorithms.ES512
@@ -477,7 +478,7 @@ class DefaultEllipticCurveSignatureAlgorithmTest {
             def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, signed)
             assertTrue alg.verify(request)
         } finally {
-            System.clearProperty(DefaultEllipticCurveSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME)
+            System.clearProperty(EcSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME)
         }
     }
 

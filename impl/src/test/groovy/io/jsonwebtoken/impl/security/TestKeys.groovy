@@ -22,6 +22,7 @@ import io.jsonwebtoken.security.*
 import javax.crypto.SecretKey
 import java.security.KeyPair
 import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.cert.X509Certificate
 
 /**
@@ -54,6 +55,12 @@ class TestKeys {
     static Bundle ES384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES384)
     static Bundle ES512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
+    static Bundle EdDSA = TestCertificates.readAsymmetricBundle(JwsAlgorithms.EdDSA)
+    static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.Ed25519)
+    static Bundle Ed448 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.Ed448)
+    static Bundle X25519 = TestCertificates.readBundle(EdwardsCurve.X25519)
+    static Bundle X448 = TestCertificates.readBundle(EdwardsCurve.X448)
+    static Set<Bundle> EdEC = Collections.setOf(EdDSA, Ed25519, Ed448, X25519, X448)
 
     // =======================================================
     // RSA Keys & Certificates
@@ -76,7 +83,14 @@ class TestKeys {
         if (id.startsWith('PS')) {
             id = 'R' + id.substring(1) //keys for PS* algs are the same as RS algs
         }
+        if (alg instanceof EdSignatureAlgorithm) {
+            id = alg.preferredCurve.getId()
+        }
         return TestKeys.metaClass.getAttribute(TestKeys, id) as Bundle
+    }
+
+    static Bundle forCurve(EdwardsCurve curve) {
+        return TestKeys.metaClass.getAttribute(TestKeys, curve.getId()) as Bundle
     }
 
     static class Bundle {
@@ -88,6 +102,11 @@ class TestKeys {
             this.cert = cert
             this.chain = Collections.of(cert)
             this.pair = new KeyPair(cert.getPublicKey(), privateKey)
+        }
+        Bundle(PublicKey pub, PrivateKey priv) {
+            this.cert = null
+            this.chain = Collections.emptyList()
+            this.pair = new KeyPair(pub, priv)
         }
     }
 }

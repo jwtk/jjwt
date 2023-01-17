@@ -22,7 +22,6 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
-import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
@@ -33,16 +32,12 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.ECKey;
 import java.security.spec.ECGenParameterSpec;
-import java.text.MessageFormat;
 import java.util.Arrays;
 
 // @since JJWT_RELEASE_VERSION
-public class DefaultEllipticCurveSignatureAlgorithm extends AbstractSecureDigestAlgorithm<PrivateKey, PublicKey>
-        implements SignatureAlgorithm {
+public class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 521.";
-    private static final String KEY_TYPE_MSG_PATTERN =
-            "Elliptic Curve {0} keys must be {1}s (implement {2}). Provided key type: {3}.";
 
     private static final String DER_ENCODING_SYS_PROPERTY_NAME =
             "io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported";
@@ -94,7 +89,7 @@ public class DefaultEllipticCurveSignatureAlgorithm extends AbstractSecureDigest
         return orderBitLength == 256 || orderBitLength == 384 || orderBitLength == 521;
     }
 
-    public DefaultEllipticCurveSignatureAlgorithm(int orderBitLength) {
+    public EcSignatureAlgorithm(int orderBitLength) {
         super("ES" + shaSize(orderBitLength), "SHA" + shaSize(orderBitLength) + "withECDSA");
         Assert.isTrue(isSupportedOrderBitLength(orderBitLength), REQD_ORDER_BIT_LENGTH_MSG);
         String curveName = "secp" + orderBitLength + "r1";
@@ -111,21 +106,9 @@ public class DefaultEllipticCurveSignatureAlgorithm extends AbstractSecureDigest
                 .setRandom(Randoms.secureRandom());
     }
 
-    private static void assertKey(Key key, Class<?> type, boolean signing) {
-        if (!type.isInstance(key)) {
-            String msg = MessageFormat.format(KEY_TYPE_MSG_PATTERN,
-                    keyType(signing), type.getSimpleName(), type.getName(), key.getClass().getName());
-            throw new InvalidKeyException(msg);
-        }
-    }
-
     @Override
     protected void validateKey(Key key, boolean signing) {
-
-        // https://github.com/jwtk/jjwt/issues/68:
-        Class<?> requiredType = signing ? PrivateKey.class : PublicKey.class;
-        assertKey(key, requiredType, signing);
-
+        super.validateKey(key, signing);
         // Some PKCS11 providers and HSMs won't expose the ECKey interface, so we have to check to see if we can cast
         // If so, we can provide the additional safety checks:
         if (key instanceof ECKey) {

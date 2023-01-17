@@ -30,7 +30,7 @@ import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
 import java.security.interfaces.ECPublicKey
-import java.security.interfaces.RSAPublicKey
+import java.security.interfaces.RSAKey
 import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 
@@ -52,6 +52,7 @@ class JwksTest {
         def key = name == 'publicKeyUse' || name == 'x509CertificateChain' ? EC_PAIR.public : SKEY
 
         //test non-null value:
+        //noinspection GroovyAssignabilityCheck
         def builder = Jwks.builder().forKey(key)
         builder."set${cap}"(val)
         def jwk = builder.build()
@@ -152,7 +153,7 @@ class JwksTest {
     @Test
     void testX509CertChain() {
         //get a test cert:
-        X509Certificate cert = TestCertificates.readTestCertificate(JwsAlgorithms.RS256)
+        X509Certificate cert = TestKeys.forAlgorithm(JwsAlgorithms.RS256).cert
         def sval = JwtX509StringConverter.INSTANCE.applyTo(cert)
         testProperty('x509CertificateChain', 'x5c', [cert], [sval])
     }
@@ -187,9 +188,14 @@ class JwksTest {
             X509Certificate cert = TestCertificates.readTestCertificate(alg)
             def pubKey = cert.getPublicKey()
 
-            def builder = pubKey instanceof RSAPublicKey ?
-                    Jwks.builder().forRsaChain(cert) :
-                    Jwks.builder().forEcChain(cert)
+            def builder = Jwks.builder()
+            if (pubKey instanceof ECKey) {
+                builder = builder.forEcChain(cert)
+            } else if (pubKey instanceof RSAKey) {
+                builder = builder.forRsaChain(cert)
+            } else {
+                builder = builder.forOctetChain(cert)
+            }
 
             if (number == 1) {
                 builder.withX509Sha1Thumbprint(true)
@@ -268,7 +274,13 @@ class JwksTest {
             // test individual keys
             PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
             assertEquals pub, pubJwk.toKey()
-            PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKeyUse("sig").build()
+
+            def builder = Jwks.builder().forKey(priv).setPublicKeyUse('sig')
+            if (alg instanceof EdSignatureAlgorithm) {
+                // We haven't implemented EdDSA public-key derivation yet, so public key is required
+                builder.setPublicKey(pub)
+            }
+            PrivateJwk privJwk = builder.build()
             assertEquals priv, privJwk.toKey()
             PublicJwk privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
@@ -278,9 +290,14 @@ class JwksTest {
             assertEquals priv, jwkPair.getPrivate()
 
             // test pair
-            privJwk = pub instanceof ECKey ?
-                    Jwks.builder().forEcKeyPair(pair).setPublicKeyUse("sig").build() :
-                    Jwks.builder().forRsaKeyPair(pair).setPublicKeyUse("sig").build()
+            if (pub instanceof ECKey) {
+                builder = Jwks.builder().forEcKeyPair(pair)
+            } else if (pub instanceof RSAKey) {
+                builder = Jwks.builder().forRsaKeyPair(pair)
+            } else {
+                builder = Jwks.builder().forOctetKeyPair(pair)
+            }
+            privJwk = builder.setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
@@ -301,23 +318,69 @@ class JwksTest {
             PrivateKey priv = pair.getPrivate()
 
             // test individual keys
-            PublicJwk pubJwk = Jwks.builder().forOctetKey(pub).setPublicKeyUse("sig").build()
+            PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
+            PublicJwk pubValuesJwk = Jwks.builder().putAll(pubJwk).build() as PublicJwk // ensure value map symmetry
+            assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
-            PrivateJwk privJwk = Jwks.builder().forOctetKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
+            assertEquals pub, pubValuesJwk.toKey()
+
+            PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
+            PrivateJwk privValuesJwk = Jwks.builder().putAll(privJwk).build() as PrivateJwk // ensure value map symmetry
+            assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
+            // we can't assert that priv.equals(privValuesJwk.toKey()) here because BouncyCastle uses PKCS8 V2 encoding
+            // while the JDK uses V1, and BC implementations check that the encodings are equal (instead of their
+            // actual key material).  Since we only care about the key material for JWK representations, and not the
+            // key's PKCS8 encoding, we check that their 'd' values are the same, not that the keys' encoding is:
+            byte[] privMaterial = curve.getKeyMaterial(priv)
+            byte[] jwkKeyMaterial = curve.getKeyMaterial(privValuesJwk.toKey())
+            assertArrayEquals privMaterial, jwkKeyMaterial
+
             PublicJwk privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
+            assertEquals pubValuesJwk, privPubJwk
             assertEquals pub, pubJwk.toKey()
+
             def jwkPair = privJwk.toKeyPair()
             assertEquals pub, jwkPair.getPublic()
             assertEquals priv, jwkPair.getPrivate()
+            jwkPair = privValuesJwk.toKeyPair()
+            assertEquals pub, jwkPair.getPublic()
+            // see comments above about material equality instead of encoding equality
+            privMaterial = curve.getKeyMaterial(priv)
+            jwkKeyMaterial = curve.getKeyMaterial(jwkPair.getPrivate())
+            assertArrayEquals privMaterial, jwkKeyMaterial
+
+            // Test public-to-private builder coercion:
+            privJwk = Jwks.builder().forKey(pub).setPrivateKey(priv).setPublicKeyUse('sig').build()
+            privValuesJwk = Jwks.builder().putAll(privJwk).build() as PrivateJwk // ensure value map symmetry
+            assertEquals privJwk, privValuesJwk
+            assertEquals priv, privJwk.toKey()
+            // see comments above about material equality instead of encoding equality
+            privMaterial = curve.getKeyMaterial(priv)
+            jwkKeyMaterial = curve.getKeyMaterial(jwkPair.getPrivate())
+            assertArrayEquals privMaterial, jwkKeyMaterial
+
+            privPubJwk = privJwk.toPublicJwk()
+            pubValuesJwk = privValuesJwk.toPublicJwk()
+            assertEquals pubJwk, privPubJwk
+            assertEquals pubJwk, pubValuesJwk
+            assertEquals pub, pubJwk.toKey()
+            assertEquals pub, pubValuesJwk.toKey()
 
             // test pair
             privJwk = Jwks.builder().forOctetKeyPair(pair).setPublicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
+            // see comments above about material equality instead of encoding equality
+            privMaterial = curve.getKeyMaterial(priv)
+            jwkKeyMaterial = curve.getKeyMaterial(privValuesJwk.toKey())
+            assertArrayEquals privMaterial, jwkKeyMaterial
+
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
+            assertEquals pubValuesJwk, privPubJwk
             assertEquals pub, pubJwk.toKey()
+
             jwkPair = privJwk.toKeyPair()
             assertEquals pub, jwkPair.getPublic()
             assertEquals priv, jwkPair.getPrivate()
@@ -325,7 +388,21 @@ class JwksTest {
     }
 
     @Test
-    void testInvalidCurvePoint() {
+    void testUnknownCurveId() {
+        def b = Jwks.builder()
+                .put(AbstractJwk.KTY.getId(), DefaultOctetPublicJwk.TYPE_VALUE)
+                .put(DefaultOctetPublicJwk.CRV.getId(), 'foo')
+        try {
+            b.build()
+            fail()
+        } catch (UnsupportedKeyException e) {
+            String msg = "Unrecognized OKP JWK ${DefaultOctetPublicJwk.CRV} value 'foo'" as String
+            assertEquals msg, e.getMessage()
+        }
+    }
+
+    @Test
+    void testInvalidEcCurvePoint() {
         def algs = [JwsAlgorithms.ES256, JwsAlgorithms.ES384, JwsAlgorithms.ES512]
 
         for (SignatureAlgorithm alg : algs) {

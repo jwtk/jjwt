@@ -655,12 +655,28 @@ class JwtsTest {
     }
 
     @Test
+    void testEdDSA() {
+        testEC(JwsAlgorithms.EdDSA)
+    }
+
+    @Test
+    void testEd25519() {
+        testEC(JwsAlgorithms.Ed25519)
+    }
+
+    @Test
+    void testEd448() {
+        testEC(JwsAlgorithms.Ed448)
+    }
+
+    @Test
     void testES256WithPrivateKeyValidation() {
+        def alg = JwsAlgorithms.ES256
         try {
-            testEC(JwsAlgorithms.ES256, true)
+            testEC(alg, true)
             fail("EC private keys cannot be used to validate EC signatures.")
         } catch (UnsupportedJwtException e) {
-            String msg = "Elliptic Curve verification keys must be PublicKeys (implement java.security.PublicKey). " +
+            String msg = "${alg.getId()} verification keys must be PublicKeys (implement java.security.PublicKey). " +
                     "Provided key type: sun.security.ec.ECPrivateKeyImpl."
             assertEquals msg, e.cause.message
         }
@@ -1478,7 +1494,7 @@ class JwtsTest {
             key = privateKey
         }
 
-        def token = Jwts.parserBuilder().setSigningKey(key).build().parse(jwt)
+        def token = Jwts.parserBuilder().verifyWith(key).build().parse(jwt)
 
         assertEquals([alg: alg.getId()], token.header)
         assertEquals(claims, token.payload)
@@ -1493,7 +1509,7 @@ class JwtsTest {
 
         String jwt = Jwts.builder().setClaims(claims).signWith(key, alg).compact()
 
-        def token = Jwts.parserBuilder().setSigningKey(key).build().parse(jwt)
+        def token = Jwts.parserBuilder().verifyWith(key).build().parse(jwt)
 
         assertEquals([alg: alg.getId()], token.header)
         assertEquals(claims, token.payload)
@@ -1514,7 +1530,7 @@ class JwtsTest {
             key = privateKey
         }
 
-        def token = Jwts.parserBuilder().setSigningKey(key).build().parse(jwt)
+        def token = Jwts.parserBuilder().verifyWith(key).build().parse(jwt)
 
         assertEquals([alg: alg.getId()], token.header)
         assertEquals(claims, token.payload)

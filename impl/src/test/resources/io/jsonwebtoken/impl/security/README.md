@@ -32,7 +32,26 @@ The Elliptic Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this direct
     openssl x509 -pubkey -noout -in ES256.crt.pem > ES256.pub.pem
     openssl x509 -pubkey -noout -in ES384.crt.pem > ES384.pub.pem
     openssl x509 -pubkey -noout -in ES512.crt.pem > ES512.pub.pem
+  
+The Edwards Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this directory were created for testing as follows:
+
+    # generate the private keys:
+    openssl genpkey -algorithm Ed25519 -out Ed25519.key.pem
+    openssl genpkey -algorithm X25519 -out X25519.key.pem
+    openssl genpkey -algorithm Ed448 -out Ed448.key.pem
+    openssl genpkey -algorithm X448 -out X448.key.pem
+
+    # obtain the public key from the private key:
+    openssl pkey -pubout -inform pem -outform pem -in X25519.key.pem -out X25519.pub.pem
+    openssl pkey -pubout -inform pem -outform pem -in X448.key.pem -out X448.pub.pem
+    openssl pkey -pubout -inform pem -outform pem -in Ed25519.key.pem -out Ed25519.pub.pem
+    openssl pkey -pubout -inform pem -outform pem -in Ed448.key.pem -out Ed448.pub.pem
     
+    # generate X.509 Certificates containing the public key based on the private key:
+    openssl req -new -x509 -key Ed25519.key.pem -out Ed25519.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+    openssl req -new -x509 -key Ed448.key.pem -out Ed448.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+    # note that there are no self-signed certificates for X25519 and X448 because these algorithms can't be used for signing
+
 The above commands create a (non-password-protected) private key and a self-signed certificate for the associated key
 size, valid for 1000 years.  These files are intended for testing purposes only and shouldn't be used in a production 
 system.
@@ -40,6 +59,6 @@ system.
 All `ES*`, `RS*`, and `PS*` file prefixes are equal to JWA standard `SignatureAlgorithm` IDs.  This allows
 easy file lookup based on the `SignatureAlgorithm` `getId()` value when authoring tests.
 
-Finally, the `RS*` and `PS*` files in this directory are just are symlinks back to `rsa*` files based on the JWT alg 
-names and their respective key sizes.  This is so the `RS*` and `PS*` algorithms can use the same files since there
-is no difference in keys between the two sets of algorithms.
+Finally, the `RS*`, `PS*`, and `EdDSA*` files in this directory are just are symlinks back to source files based on 
+the JWT alg names and their respective key sizes.  This is so the `RS*` and `PS*` algorithms can use the same files 
+since there is no difference in keys between the two sets of algorithms.

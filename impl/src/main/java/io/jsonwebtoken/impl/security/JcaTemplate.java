@@ -42,6 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.cert.CertificateFactory;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.List;
 
@@ -57,7 +58,8 @@ public class JcaTemplate {
             new MessageDigestFactory(),
             new SignatureFactory(),
             new MacFactory(),
-            new AlgorithmParametersFactory()
+            new AlgorithmParametersFactory(),
+            new CertificateFactoryFactory()
     );
 
     private static final Registry<Class<?>, InstanceFactory<?>> REGISTRY = new DefaultRegistry<>(FACTORIES,
@@ -126,6 +128,10 @@ public class JcaTemplate {
 
     public <R> R withAlgorithmParameters(CheckedFunction<AlgorithmParameters, R> fn) throws SecurityException {
         return execute(AlgorithmParameters.class, fn);
+    }
+
+    public <R> R withCertificateFactory(CheckedFunction<CertificateFactory, R> fn) throws SecurityException {
+        return execute(CertificateFactory.class, fn);
     }
 
     public SecretKey generateSecretKey(final int keyBitLength) {
@@ -341,6 +347,19 @@ public class JcaTemplate {
             return provider != null ?
                     AlgorithmParameters.getInstance(jcaName, provider) :
                     AlgorithmParameters.getInstance(jcaName);
+        }
+    }
+
+    private static class CertificateFactoryFactory extends JcaInstanceFactory<CertificateFactory> {
+        CertificateFactoryFactory() {
+            super(CertificateFactory.class);
+        }
+
+        @Override
+        protected CertificateFactory doGet(String jcaName, Provider provider) throws Exception {
+            return provider != null ?
+                    CertificateFactory.getInstance(jcaName, provider) :
+                    CertificateFactory.getInstance(jcaName);
         }
     }
 }

@@ -38,7 +38,7 @@ public class MalformedKeyException extends InvalidKeyException {
      * @param msg   the message explaining why the exception is thrown.
      * @param cause the underlying cause that resulted in this exception being thrown.
      */
-    public MalformedKeyException(String msg, Exception cause) {
+    public MalformedKeyException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }

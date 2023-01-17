@@ -24,6 +24,7 @@ import io.jsonwebtoken.security.KeyException;
 
 import java.security.Key;
 import java.security.KeyFactory;
+import java.util.Set;
 
 abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> implements FamilyJwkFactory<K, J> {
 
@@ -33,10 +34,12 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
 
     private final String ktyValue;
     private final Class<K> keyType;
+    private final Set<Field<?>> fields;
 
-    AbstractFamilyJwkFactory(String ktyValue, Class<K> keyType) {
+    AbstractFamilyJwkFactory(String ktyValue, Class<K> keyType, Set<Field<?>> fields) {
         this.ktyValue = Assert.hasText(ktyValue, "keyType argument cannot be null or empty.");
         this.keyType = Assert.notNull(keyType, "keyType class cannot be null.");
+        this.fields = Assert.notEmpty(fields, "Fields collection cannot be null or empty.");
     }
 
     @Override
@@ -45,16 +48,25 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
     }
 
     @Override
+    public boolean supports(Key key) {
+        return this.keyType.isInstance(key);
+    }
+
+    @Override
+    public JwkContext<K> newContext(JwkContext<?> src, K key) {
+        Assert.notNull(src, "Source JwkContext cannot be null.");
+        return key != null ?
+                new DefaultJwkContext<>(this.fields, src, key) :
+                new DefaultJwkContext<K>(this.fields, src, false);
+    }
+
+    @Override
     public boolean supports(JwkContext<?> ctx) {
-        return supportsKey(ctx.getKey()) || supportsKeyValues(ctx);
+        return supports(ctx.getKey()) || supportsKeyValues(ctx);
     }
 
     protected boolean supportsKeyValues(JwkContext<?> ctx) {
         return this.ktyValue.equals(ctx.getType());
-    }
-
-    protected boolean supportsKey(Key key) {
-        return this.keyType.isInstance(key);
     }
 
     protected K generateKey(final JwkContext<K> ctx, final CheckedFunction<KeyFactory, K> fn) {

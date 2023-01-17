@@ -33,7 +33,7 @@ class DefaultEcPrivateJwk extends AbstractPrivateJwk<ECPrivateKey, ECPublicKey, 
 
     DefaultEcPrivateJwk(JwkContext<ECPrivateKey> ctx, EcPublicJwk pubJwk) {
         super(ctx,
-                // only public members are included in Private JWKs per
+                // only public members are included in Private JWK Thumbprints per
                 // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
                 DefaultEcPublicJwk.THUMBPRINT_FIELDS,
                 pubJwk);

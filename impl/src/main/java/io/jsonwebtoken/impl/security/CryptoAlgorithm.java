@@ -72,9 +72,14 @@ abstract class CryptoAlgorithm implements Identifiable {
 
     protected JcaTemplate jca(Request<?> request) {
         Assert.notNull(request, "request cannot be null.");
+        String jcaName = Assert.hasText(getJcaName(request), "Request jcaName cannot be null or empty.");
         Provider provider = getProvider(request);
         SecureRandom random = ensureSecureRandom(request);
-        return new JcaTemplate(getJcaName(), provider, random);
+        return new JcaTemplate(jcaName, provider, random);
+    }
+
+    protected String getJcaName(Request<?> request) {
+        return getJcaName();
     }
 
     protected Provider getProvider(Request<?> request) {

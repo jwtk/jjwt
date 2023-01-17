@@ -39,7 +39,7 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
     protected abstract void validateKey(Key key, boolean signing);
 
     @Override
-    public byte[] digest(SecureRequest<byte[], S> request) throws SecurityException {
+    public final byte[] digest(SecureRequest<byte[], S> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final S key = Assert.notNull(request.getKey(), "Request key cannot be null.");
         Assert.notEmpty(request.getPayload(), "Request content cannot be null or empty.");
@@ -58,7 +58,7 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
     protected abstract byte[] doDigest(SecureRequest<byte[], S> request) throws Exception;
 
     @Override
-    public boolean verify(VerifySecureDigestRequest<V> request) throws SecurityException {
+    public final boolean verify(VerifySecureDigestRequest<V> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final V key = Assert.notNull(request.getKey(), "Request key cannot be null.");
         Assert.notEmpty(request.getPayload(), "Request content cannot be null or empty.");
@@ -75,10 +75,14 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
         }
     }
 
-    protected boolean doVerify(VerifySecureDigestRequest<V> request) throws Exception {
+    protected boolean messageDigest(VerifySecureDigestRequest<V> request) {
         byte[] providedSignature = request.getDigest();
         Assert.notEmpty(providedSignature, "Request signature byte array cannot be null or empty.");
         @SuppressWarnings({"unchecked", "rawtypes"}) byte[] computedSignature = digest((SecureRequest) request);
         return MessageDigest.isEqual(providedSignature, computedSignature);
+    }
+
+    protected boolean doVerify(VerifySecureDigestRequest<V> request) throws Exception {
+        return messageDigest(request);
     }
 }

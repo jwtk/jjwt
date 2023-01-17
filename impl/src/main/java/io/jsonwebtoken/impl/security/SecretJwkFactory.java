@@ -42,7 +42,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
             "possible to represent the SecretKey instance as a JWK.";
 
     SecretJwkFactory() {
-        super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class);
+        super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class, DefaultSecretJwk.FIELDS);
     }
 
     static byte[] getRequiredEncoded(SecretKey key) {

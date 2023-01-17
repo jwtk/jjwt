@@ -207,7 +207,7 @@ class KeysTest {
 
         for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
 
-            if (alg instanceof DefaultRsaSignatureAlgorithm) {
+            if (alg instanceof RsaSignatureAlgorithm) {
 
                 def pair = alg.keyPairBuilder().build()
                 assertNotNull pair
@@ -220,7 +220,20 @@ class KeysTest {
                 assert priv instanceof RSAPrivateKey
                 assertEquals alg.preferredKeyBitLength, priv.modulus.bitLength()
 
-            } else if (alg instanceof DefaultEllipticCurveSignatureAlgorithm) {
+            } else if (alg instanceof EdSignatureAlgorithm) {
+
+                def pair = alg.keyPairBuilder().build()
+                assertNotNull pair
+
+                PublicKey pub = pair.getPublic()
+                assert pub instanceof PublicKey
+                assertTrue EdwardsCurve.isEdwards(pub)
+
+                PrivateKey priv = pair.getPrivate()
+                assert priv instanceof PrivateKey
+                assertTrue EdwardsCurve.isEdwards(priv)
+
+            } else if (alg instanceof EcSignatureAlgorithm) {
 
                 def pair = alg.keyPairBuilder().build()
                 assertNotNull pair

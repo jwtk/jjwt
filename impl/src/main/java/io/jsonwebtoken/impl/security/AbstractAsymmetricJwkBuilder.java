@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AsymmetricJwk;
 import io.jsonwebtoken.security.AsymmetricJwkBuilder;
@@ -24,6 +23,10 @@ import io.jsonwebtoken.security.EcPrivateJwkBuilder;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.EcPublicJwkBuilder;
 import io.jsonwebtoken.security.MalformedKeyException;
+import io.jsonwebtoken.security.OctetPrivateJwk;
+import io.jsonwebtoken.security.OctetPrivateJwkBuilder;
+import io.jsonwebtoken.security.OctetPublicJwk;
+import io.jsonwebtoken.security.OctetPublicJwkBuilder;
 import io.jsonwebtoken.security.PrivateJwk;
 import io.jsonwebtoken.security.PrivateJwkBuilder;
 import io.jsonwebtoken.security.PublicJwk;
@@ -32,8 +35,6 @@ import io.jsonwebtoken.security.RsaPrivateJwk;
 import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
 import io.jsonwebtoken.security.RsaPublicJwk;
 import io.jsonwebtoken.security.RsaPublicJwkBuilder;
-import io.jsonwebtoken.security.SimplePrivateJwkBuilder;
-import io.jsonwebtoken.security.SimplePublicJwkBuilder;
 
 import java.net.URI;
 import java.security.Key;
@@ -45,7 +46,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
-import java.util.Set;
 
 abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
         T extends AsymmetricJwkBuilder<K, J, T>>
@@ -61,9 +61,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         this.x509Builder = new DefaultX509Builder<>(this.jwkContext, self(), MalformedKeyException.class);
     }
 
-    AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, K key, Set<Field<?>> fields) {
-        super(new DefaultJwkContext<>(fields, b.jwkContext, key));
-        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, self(), MalformedKeyException.class);
+    AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, JwkContext<K> ctx) {
+        this(ctx);
         this.applyX509KeyUse = b.applyX509KeyUse;
         this.keyUseStrategy = b.keyUseStrategy;
     }
@@ -124,17 +123,6 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     @Override
     public J build() {
-//        if (applyX509KeyUse == null) { //if not specified, enable by default if possible:
-//            applyX509KeyUse = firstCert != null && !Strings.hasText(this.jwkContext.getPublicKeyUse());
-//        }
-
-//            if (applyX509KeyUse) {
-//                KeyUsage usage = new KeyUsage(firstCert);
-//                String use = keyUseStrategy.toJwkValue(usage);
-//                if (Strings.hasText(use)) {
-//                    setPublicKeyUse(use);
-//                }
-//            }
         this.x509Builder.apply();
         return super.build();
     }
@@ -153,10 +141,10 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         public P setPrivateKey(L privateKey) {
             Assert.notNull(privateKey, "PrivateKey argument cannot be null.");
             final K publicKey = Assert.notNull(jwkContext.getKey(), "PublicKey cannot be null.");
-            return newPrivateBuilder(privateKey).setPublicKey(publicKey);
+            return newPrivateBuilder(newContext(privateKey)).setPublicKey(publicKey);
         }
 
-        protected abstract P newPrivateBuilder(L privateKey);
+        protected abstract P newPrivateBuilder(JwkContext<L> ctx);
     }
 
     private abstract static class DefaultPrivateJwkBuilder<K extends PrivateKey, L extends PublicKey,
@@ -169,8 +157,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
             super(ctx);
         }
 
-        DefaultPrivateJwkBuilder(DefaultPublicJwkBuilder<L, K, J, M, ?, ?> b, K key, Set<Field<?>> fields) {
-            super(b, key, fields);
+        DefaultPrivateJwkBuilder(DefaultPublicJwkBuilder<L, K, J, M, ?, ?> b, JwkContext<K> ctx) {
+            super(b, ctx);
             this.jwkContext.setPublicKey(b.jwkContext.getKey());
         }
 
@@ -185,80 +173,80 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
             extends DefaultPublicJwkBuilder<RSAPublicKey, RSAPrivateKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder, RsaPublicJwkBuilder>
             implements RsaPublicJwkBuilder {
 
-        DefaultRsaPublicJwkBuilder(JwkContext<?> ctx, RSAPublicKey key) {
-            super(new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx, key));
+        DefaultRsaPublicJwkBuilder(JwkContext<RSAPublicKey> ctx) {
+            super(ctx);
         }
 
         @Override
-        protected RsaPrivateJwkBuilder newPrivateBuilder(RSAPrivateKey key) {
-            return new DefaultRsaPrivateJwkBuilder(this, key);
+        protected RsaPrivateJwkBuilder newPrivateBuilder(JwkContext<RSAPrivateKey> ctx) {
+            return new DefaultRsaPrivateJwkBuilder(this, ctx);
         }
     }
 
     static class DefaultEcPublicJwkBuilder
             extends DefaultPublicJwkBuilder<ECPublicKey, ECPrivateKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder, EcPublicJwkBuilder>
             implements EcPublicJwkBuilder {
-
-        DefaultEcPublicJwkBuilder(JwkContext<?> src, ECPublicKey key) {
-            super(new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, src, key));
+        DefaultEcPublicJwkBuilder(JwkContext<ECPublicKey> src) {
+            super(src);
         }
 
         @Override
-        protected EcPrivateJwkBuilder newPrivateBuilder(ECPrivateKey key) {
-            return new DefaultEcPrivateJwkBuilder(this, key);
+        protected EcPrivateJwkBuilder newPrivateBuilder(JwkContext<ECPrivateKey> ctx) {
+            return new DefaultEcPrivateJwkBuilder(this, ctx);
         }
     }
 
-    static class DefaultOctetPublicJwkBuilder extends DefaultPublicJwkBuilder<PublicKey, PrivateKey,
-            PublicJwk<PublicKey>, PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>>,
-            SimplePrivateJwkBuilder, SimplePublicJwkBuilder> implements SimplePublicJwkBuilder {
-
-        DefaultOctetPublicJwkBuilder(JwkContext<?> src, PublicKey key) {
-            super(new DefaultJwkContext<>(DefaultOctetPublicJwk.FIELDS, src, EdwardsCurve.assertEdwards(key)));
+    static class DefaultOctetPublicJwkBuilder<A extends PublicKey, B extends PrivateKey>
+            extends DefaultPublicJwkBuilder<A, B, OctetPublicJwk<A>, OctetPrivateJwk<A, B>,
+            OctetPrivateJwkBuilder<A, B>, OctetPublicJwkBuilder<A, B>>
+            implements OctetPublicJwkBuilder<A, B> {
+        DefaultOctetPublicJwkBuilder(JwkContext<A> ctx) {
+            super(ctx);
+            EdwardsCurve.assertEdwards(ctx.getKey());
         }
 
         @Override
-        protected SimplePrivateJwkBuilder newPrivateBuilder(PrivateKey key) {
-            return new DefaultOctetPrivateJwkBuilder(this, key);
+        protected OctetPrivateJwkBuilder<A, B> newPrivateBuilder(JwkContext<B> ctx) {
+            return new DefaultOctetPrivateJwkBuilder<>(this, ctx);
         }
     }
 
     static class DefaultRsaPrivateJwkBuilder
             extends DefaultPrivateJwkBuilder<RSAPrivateKey, RSAPublicKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder>
             implements RsaPrivateJwkBuilder {
-
-        DefaultRsaPrivateJwkBuilder(JwkContext<?> src, RSAPrivateKey key) {
-            super(new DefaultJwkContext<>(DefaultRsaPrivateJwk.FIELDS, src, key));
+        DefaultRsaPrivateJwkBuilder(JwkContext<RSAPrivateKey> src) {
+            super(src);
         }
 
-        DefaultRsaPrivateJwkBuilder(DefaultRsaPublicJwkBuilder b, RSAPrivateKey key) {
-            super(b, key, DefaultRsaPrivateJwk.FIELDS);
+        DefaultRsaPrivateJwkBuilder(DefaultRsaPublicJwkBuilder b, JwkContext<RSAPrivateKey> ctx) {
+            super(b, ctx);
         }
     }
 
     static class DefaultEcPrivateJwkBuilder
             extends DefaultPrivateJwkBuilder<ECPrivateKey, ECPublicKey, EcPublicJwk, EcPrivateJwk, EcPrivateJwkBuilder>
             implements EcPrivateJwkBuilder {
-
-        DefaultEcPrivateJwkBuilder(JwkContext<?> src, ECPrivateKey key) {
-            super(new DefaultJwkContext<>(DefaultEcPrivateJwk.FIELDS, src, key));
+        DefaultEcPrivateJwkBuilder(JwkContext<ECPrivateKey> src) {
+            super(src);
         }
 
-        DefaultEcPrivateJwkBuilder(DefaultEcPublicJwkBuilder b, ECPrivateKey key) {
-            super(b, key, DefaultEcPrivateJwk.FIELDS);
+        DefaultEcPrivateJwkBuilder(DefaultEcPublicJwkBuilder b, JwkContext<ECPrivateKey> ctx) {
+            super(b, ctx);
         }
     }
 
-    static class DefaultOctetPrivateJwkBuilder extends DefaultPrivateJwkBuilder<PrivateKey, PublicKey,
-            PublicJwk<PublicKey>, PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>>,
-            SimplePrivateJwkBuilder> implements SimplePrivateJwkBuilder {
-
-        DefaultOctetPrivateJwkBuilder(JwkContext<?> src, PrivateKey key) {
-            super(new DefaultJwkContext<>(DefaultOctetPrivateJwk.FIELDS, src, EdwardsCurve.assertEdwards(key)));
+    static class DefaultOctetPrivateJwkBuilder<A extends PublicKey, B extends PrivateKey>
+            extends DefaultPrivateJwkBuilder<B, A, OctetPublicJwk<A>, OctetPrivateJwk<A, B>,
+            OctetPrivateJwkBuilder<A, B>> implements OctetPrivateJwkBuilder<A, B> {
+        DefaultOctetPrivateJwkBuilder(JwkContext<B> src) {
+            super(src);
+            EdwardsCurve.assertEdwards(src.getKey());
         }
 
-        DefaultOctetPrivateJwkBuilder(DefaultOctetPublicJwkBuilder b, PrivateKey key) {
-            super(b, EdwardsCurve.assertEdwards(key), DefaultOctetPrivateJwk.FIELDS);
+        DefaultOctetPrivateJwkBuilder(DefaultOctetPublicJwkBuilder<A, B> b, JwkContext<B> ctx) {
+            super(b, ctx);
+            EdwardsCurve.assertEdwards(ctx.getKey());
+            EdwardsCurve.assertEdwards(ctx.getPublicKey());
         }
     }
 }

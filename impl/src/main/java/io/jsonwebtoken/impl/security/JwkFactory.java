@@ -21,5 +21,7 @@ import java.security.Key;
 
 public interface JwkFactory<K extends Key, J extends Jwk<K>> {
 
+    JwkContext<K> newContext(JwkContext<?> src,  K key);
+
     J createJwk(JwkContext<K> ctx);
 }

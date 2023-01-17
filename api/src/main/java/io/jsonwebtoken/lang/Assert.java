@@ -417,6 +417,26 @@ public final class Assert {
     }
 
     /**
+     * Asserts that a specified {@code value} is equal to the given {@code requirement}, throwing
+     * an {@link IllegalArgumentException} with the given message if not.
+     *
+     * @param <T>         the type of argument
+     * @param requirement the integer that {@code value} must be greater than
+     * @param value       the value to check
+     * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
+     * @return {@code value} if greater than the specified {@code requirement}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static <T extends Number> T eq(T requirement, T value, String msg) {
+        notNull(requirement, "requirement cannot be null.");
+        notNull(value, "value cannot be null.");
+        if (!requirement.equals(value)) {
+            throw new IllegalArgumentException(msg);
+        }
+        return value;
+    }
+
+    /**
      * Asserts that a specified {@code value} is greater than the given {@code requirement}, throwing
      * an {@link IllegalArgumentException} with the given message if not.
      *

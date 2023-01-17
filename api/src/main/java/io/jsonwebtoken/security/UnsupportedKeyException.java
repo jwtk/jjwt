@@ -37,7 +37,7 @@ public class UnsupportedKeyException extends KeyException {
      * @param msg the message explaining why the exception is thrown.
      * @param cause   the underlying cause that resulted in this exception being thrown.
      */
-    public UnsupportedKeyException(String msg, Exception cause) {
+    public UnsupportedKeyException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }

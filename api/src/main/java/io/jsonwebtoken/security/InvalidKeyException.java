@@ -39,7 +39,7 @@ public class InvalidKeyException extends KeyException {
      * @param cause   the underlying cause that resulted in this exception being thrown.
      * @since JJWT_RELEASE_VERSION
      */
-    public InvalidKeyException(String message, Exception cause) {
+    public InvalidKeyException(String message, Throwable cause) {
         super(message, cause);
     }
 }

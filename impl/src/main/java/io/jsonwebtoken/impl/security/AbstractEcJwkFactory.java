@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Converters;
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -33,6 +34,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Set;
 
 abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> extends AbstractFamilyJwkFactory<K, J> {
 
@@ -198,8 +200,8 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         return new ECPoint(x, y);
     }
 
-    AbstractEcJwkFactory(Class<K> keyType) {
-        super(DefaultEcPublicJwk.TYPE_VALUE, keyType);
+    AbstractEcJwkFactory(Class<K> keyType, Set<Field<?>> fields) {
+        super(DefaultEcPublicJwk.TYPE_VALUE, keyType, fields);
     }
 
     // visible for testing

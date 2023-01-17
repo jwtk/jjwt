@@ -29,4 +29,27 @@ public final class Functions {
     public static <T, R, E extends RuntimeException> Function<T, R> wrap(Function<T, R> fn, Class<E> exClass, String fmt, Object... args) {
         return new PropagatingExceptionFunction<>(new DelegatingCheckedFunction<>(fn), exClass, new FormattedStringSupplier(fmt, args));
     }
+
+    /**
+     * Returns a composed function that first applies this function to
+     * its input, and then applies the {@code after} function to the result.
+     * If evaluation of either function throws an exception, it is relayed to
+     * the caller of the composed function.
+     *
+     * @param <V>   the type of output of the {@code after} function, and of the
+     *              composed function
+     * @param after the function to apply after this function is applied
+     * @return a composed function that first applies this function and then
+     * applies the {@code after} function
+     * @throws NullPointerException if after is null
+     */
+    public static <T, V, R> Function<T, R> andThen(final Function<T, ? extends V> before, final Function<V, R> after) {
+        return new Function<T, R>() {
+            @Override
+            public R apply(T t) {
+                V result = before.apply(t);
+                return after.apply(result);
+            }
+        };
+    }
 }

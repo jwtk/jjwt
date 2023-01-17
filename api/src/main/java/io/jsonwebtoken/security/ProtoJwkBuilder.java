@@ -33,10 +33,9 @@ import java.util.List;
  *
  * @param <K> the type of Java {@link Key} represented by the created {@link Jwk}.
  * @param <J> the type of {@link Jwk} created by the builder
- * @param <T> the type of the builder, for subtype method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends JwkBuilder<K, J, T> {
+public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBuilder<K, J, ProtoJwkBuilder<K, J>> {
 
     /**
      * Ensures the builder will create a {@link SecretJwk} for the specified Java {@link SecretKey}.
@@ -88,15 +87,15 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkB
      */
     EcPrivateJwkBuilder forKey(ECPrivateKey key);
 
-    SimplePublicJwkBuilder forOctetKey(PublicKey publicKey);
+    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forKey(A publicKey);
 
-    SimplePrivateJwkBuilder forOctetKey(PrivateKey privateKey);
+    <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forKey(B privateKey);
 
-    SimplePrivateJwkBuilder forOctetKeyPair(KeyPair keyPair);
+    <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair keyPair);
 
-    SimplePublicJwkBuilder forOctetChain(List<X509Certificate> chain);
+    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetChain(List<X509Certificate> chain);
 
-    SimplePublicJwkBuilder forOctetChain(X509Certificate... chain);
+    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetChain(X509Certificate... chain);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.

@@ -17,16 +17,16 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.EcPrivateJwkBuilder;
 import io.jsonwebtoken.security.EcPublicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.JwkBuilder;
+import io.jsonwebtoken.security.OctetPrivateJwkBuilder;
+import io.jsonwebtoken.security.OctetPublicJwkBuilder;
 import io.jsonwebtoken.security.ProtoJwkBuilder;
 import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
 import io.jsonwebtoken.security.RsaPublicJwkBuilder;
 import io.jsonwebtoken.security.SecretJwkBuilder;
-import io.jsonwebtoken.security.SimplePrivateJwkBuilder;
-import io.jsonwebtoken.security.SimplePublicJwkBuilder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -41,7 +41,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 @SuppressWarnings("unused") //used via reflection by io.jsonwebtoken.security.Jwks
-public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>> extends AbstractJwkBuilder<K, J, T> implements ProtoJwkBuilder<K, J, T> {
+public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
+        extends AbstractJwkBuilder<K, J, ProtoJwkBuilder<K, J>> implements ProtoJwkBuilder<K, J> {
 
     public DefaultProtoJwkBuilder() {
         super(new DefaultJwkContext<K>());
@@ -49,12 +50,37 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
 
     @Override
     public SecretJwkBuilder forKey(SecretKey key) {
-        return new AbstractJwkBuilder.DefaultSecretJwkBuilder(this.jwkContext, key);
+        return new AbstractJwkBuilder.DefaultSecretJwkBuilder(newContext(key));
     }
 
     @Override
     public RsaPublicJwkBuilder forKey(RSAPublicKey key) {
-        return new AbstractAsymmetricJwkBuilder.DefaultRsaPublicJwkBuilder(this.jwkContext, key);
+        return new AbstractAsymmetricJwkBuilder.DefaultRsaPublicJwkBuilder(newContext(key));
+    }
+
+    @Override
+    public RsaPrivateJwkBuilder forKey(RSAPrivateKey key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultRsaPrivateJwkBuilder(newContext(key));
+    }
+
+    @Override
+    public EcPublicJwkBuilder forKey(ECPublicKey key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultEcPublicJwkBuilder(newContext(key));
+    }
+
+    @Override
+    public EcPrivateJwkBuilder forKey(ECPrivateKey key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultEcPrivateJwkBuilder(newContext(key));
+    }
+
+    @Override
+    public <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forKey(A key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultOctetPublicJwkBuilder<>(newContext(key));
+    }
+
+    @Override
+    public <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forKey(B key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder<>(newContext(key));
     }
 
     @Override
@@ -87,51 +113,31 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
         return forKey(pubKey).setX509CertificateChain(chain);
     }
 
+    @SuppressWarnings("unchecked") // ok because of the EdwardsCurve.assertEdwards calls
     @Override
-    public RsaPrivateJwkBuilder forKey(RSAPrivateKey key) {
-        return new AbstractAsymmetricJwkBuilder.DefaultRsaPrivateJwkBuilder(this.jwkContext, key);
-    }
-
-    @Override
-    public EcPublicJwkBuilder forKey(ECPublicKey key) {
-        return new AbstractAsymmetricJwkBuilder.DefaultEcPublicJwkBuilder(this.jwkContext, key);
-    }
-
-    @Override
-    public SimplePublicJwkBuilder forOctetKey(PublicKey key) {
-        return new AbstractAsymmetricJwkBuilder.DefaultOctetPublicJwkBuilder(this.jwkContext, key);
-    }
-
-    @Override
-    public SimplePrivateJwkBuilder forOctetKey(PrivateKey key) {
-        return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder(this.jwkContext, key);
-    }
-
-    @Override
-    public SimplePrivateJwkBuilder forOctetKeyPair(KeyPair pair) {
+    public <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair pair) {
         PublicKey pub = KeyPairs.getKey(pair, PublicKey.class);
         PrivateKey priv = KeyPairs.getKey(pair, PrivateKey.class);
-        return forOctetKey(priv).setPublicKey(pub);
+        EdwardsCurve.assertEdwards(pub);
+        EdwardsCurve.assertEdwards(priv);
+        return (OctetPrivateJwkBuilder<A, B>) forKey(priv).setPublicKey(pub);
     }
 
     @Override
-    public SimplePublicJwkBuilder forOctetChain(X509Certificate... chain) {
+    public <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetChain(X509Certificate... chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
         return forOctetChain(Arrays.asList(chain));
     }
 
+    @SuppressWarnings("unchecked") // ok because of the EdwardsCurve.assertEdwards calls
     @Override
-    public SimplePublicJwkBuilder forOctetChain(List<X509Certificate> chain) {
+    public <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetChain(List<X509Certificate> chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be empty.");
         X509Certificate cert = chain.get(0);
         PublicKey key = cert.getPublicKey();
         Assert.notNull(key, "The first X509Certificate's PublicKey cannot be null.");
-        return forOctetKey(key).setX509CertificateChain(chain);
-    }
-
-    @Override
-    public EcPrivateJwkBuilder forKey(ECPrivateKey key) {
-        return new AbstractAsymmetricJwkBuilder.DefaultEcPrivateJwkBuilder(this.jwkContext, key);
+        EdwardsCurve.assertEdwards(key);
+        return this.<A, B>forKey((A) key).setX509CertificateChain(chain);
     }
 
     @Override
@@ -146,5 +152,16 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>, T extends J
         ECPublicKey pub = KeyPairs.getKey(pair, ECPublicKey.class);
         ECPrivateKey priv = KeyPairs.getKey(pair, ECPrivateKey.class);
         return forKey(priv).setPublicKey(pub);
+    }
+
+    @Override
+    public J build() {
+        if (Strings.hasText(this.jwkContext.get(AbstractJwk.KTY))) {
+            // Ensure we have a context that represents the configured kty value.  Converting the existing context to
+            // the type-specific context will also perform any necessary field value type conversion / error checking
+            // this will also perform any necessary field value type conversions / error checking
+            setContext(this.jwkFactory.newContext(this.jwkContext, this.jwkContext.getKey()));
+        }
+        return super.build();
     }
 }
