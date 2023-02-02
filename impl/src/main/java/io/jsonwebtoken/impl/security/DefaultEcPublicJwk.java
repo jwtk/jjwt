@@ -32,6 +32,8 @@ class DefaultEcPublicJwk extends AbstractPublicJwk<ECPublicKey> implements EcPub
     static final Field<BigInteger> X = Fields.bigInt("x", "X Coordinate").build();
     static final Field<BigInteger> Y = Fields.bigInt("y", "Y Coordinate").build();
     static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, CRV, X, Y);
+
+    // https://www.rfc-editor.org/rfc/rfc7638#section-3.2
     static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(CRV, KTY, X, Y);
 
     DefaultEcPublicJwk(JwkContext<ECPublicKey> ctx) {

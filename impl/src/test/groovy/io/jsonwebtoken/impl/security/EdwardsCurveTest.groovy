@@ -44,10 +44,11 @@ class EdwardsCurveTest {
     @Test
     void testForKeyNonEdwards() {
         def alg = 'foo'
+        def key = new TestKey(algorithm: alg)
         try {
-            EdwardsCurve.forKey(new TestKey(algorithm: alg))
+            EdwardsCurve.forKey(key)
         } catch (UnsupportedKeyException uke) {
-            String msg = "TestKey with algorithm '${alg}' is not a recognized Edwards Curve key."
+            String msg = "${key.getClass().getName()} with algorithm '${alg}' is not a recognized Edwards Curve key."
             assertEquals msg, uke.getMessage()
         }
     }
@@ -140,7 +141,7 @@ class EdwardsCurveTest {
                 it.getKeyMaterial(key)
                 fail()
             } catch (UnsupportedKeyException uke) {
-                String msg = "TestKey encoded bytes cannot be null or empty."
+                String msg = "${key.getClass().getName()} encoded bytes cannot be null or empty."
                 assertEquals msg, uke.getMessage()
             }
         }

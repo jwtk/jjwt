@@ -1,5 +1,7 @@
 package io.jsonwebtoken.impl.lang;
 
+import io.jsonwebtoken.lang.Assert;
+
 public final class Functions {
 
     private Functions() {
@@ -41,14 +43,46 @@ public final class Functions {
      * @param after the function to apply after this function is applied
      * @return a composed function that first applies this function and then
      * applies the {@code after} function
-     * @throws NullPointerException if after is null
+     * @throws IllegalArgumentException if either {@code before} or {@code after} are null.
      */
     public static <T, V, R> Function<T, R> andThen(final Function<T, ? extends V> before, final Function<V, R> after) {
+        Assert.notNull(before, "Before function cannot be null.");
+        Assert.notNull(after, "After function cannot be null.");
         return new Function<T, R>() {
             @Override
             public R apply(T t) {
                 V result = before.apply(t);
                 return after.apply(result);
+            }
+        };
+    }
+
+    /**
+     * Returns a composed function that invokes the specified functions in iteration order, and returns the first
+     * non-null result.  Once a non-null result is discovered, no further functions will be invoked, 'short-circuiting'
+     * any remaining functions. If evaluation of any function throws an exception, it is relayed to the caller of the
+     * composed function.
+     *
+     * @param <R> the type of output of the functions, and of the composed function
+     * @param fns the functions to iterate
+     * @return a composed function that invokes the specified functions in iteration order, returning the first non-null
+     * result.
+     * @throws NullPointerException if after is null
+     */
+    @SafeVarargs
+    public static <T, R> Function<T, R> firstResult(final Function<T, R>... fns) {
+        Assert.notEmpty(fns, "Function list cannot be null or empty.");
+        return new Function<T, R>() {
+            @Override
+            public R apply(T t) {
+                for (Function<T, R> fn : fns) {
+                    Assert.notNull(fn, "Function cannot be null.");
+                    R result = fn.apply(t);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+                return null;
             }
         };
     }

@@ -1,9 +1,9 @@
 package io.jsonwebtoken.impl.lang
 
-
 import io.jsonwebtoken.impl.security.TestKeys
 import org.junit.Test
 
+import java.lang.reflect.InvocationTargetException
 import java.security.Key
 
 import static org.junit.Assert.*
@@ -23,23 +23,34 @@ class OptionalMethodInvokerTest {
     }
 
     @Test
-    void testClassAndMethodExist() {
+    void testClassAndMethodExistWithValidArgument() {
         def key = TestKeys.HS256
         def i = new OptionalMethodInvoker(Key.class.getName(), 'getAlgorithm')
         assertEquals key.getAlgorithm(), i.apply(key)
     }
 
     @Test
-    void testClassAndMethodExistWithInvocationError() {
+    void testClassAndMethodExistWithInvalidTypeArgument() {
         def i = new OptionalMethodInvoker(Key.class.getName(), 'getAlgorithm')
-        //invoke with a non-key instance:
+        assertNull i.apply('Hello') // not a Key instance, should return null
+    }
+
+    @Test
+    void testClassAndMethodExistWithInvocationError() {
+        def key = TestKeys.HS256
+        def ex = new InvocationTargetException()
+        def i = new OptionalMethodInvoker<Key, String>(Key.class.getName(), 'getEncoded') {
+            @Override
+            protected Object invoke(Key aKey) throws InvocationTargetException, IllegalAccessException {
+                throw ex
+            }
+        }
         try {
-            i.apply("Hello")
+            i.apply(key) // getEncoded returns a byte array, not a String, should throw cast error
             fail()
-        } catch (IllegalStateException ex) {
-            assertNotNull(ex.getCause())
-            String msg = OptionalMethodInvoker.ERR_MSG + ex.getCause().getMessage()
-            assertEquals(msg, ex.getMessage())
+        } catch (IllegalStateException ise) {
+            assertEquals OptionalMethodInvoker.ERR_MSG + "null", ise.getMessage()
+            assertSame ex, ise.getCause()
         }
     }
 }

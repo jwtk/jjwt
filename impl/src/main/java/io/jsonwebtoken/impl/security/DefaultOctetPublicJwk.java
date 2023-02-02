@@ -15,6 +15,8 @@ public class DefaultOctetPublicJwk<T extends PublicKey> extends AbstractPublicJw
     static final Field<String> CRV = DefaultEcPublicJwk.CRV;
     static final Field<byte[]> X = Fields.bytes("x", "The public key").build();
     static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, CRV, X);
+
+    // https://www.rfc-editor.org/rfc/rfc8037#section-2 (last paragraph):
     static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(CRV, KTY, X);
 
     DefaultOctetPublicJwk(JwkContext<T> ctx) {

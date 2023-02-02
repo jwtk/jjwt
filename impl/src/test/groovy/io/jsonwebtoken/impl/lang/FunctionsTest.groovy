@@ -107,4 +107,116 @@ class FunctionsTest {
             assertSame cause, expected
         }
     }
+
+    @Test
+    void testFirstResultWithNullArgument() {
+        try {
+            Functions.firstResult(null)
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals 'Function list cannot be null or empty.', iae.getMessage()
+        }
+    }
+
+    @Test
+    void testFirstResultWithEmptyArgument() {
+        Function<String, String>[] functions = [] as Function<String, String>[]
+        try {
+            Functions.firstResult(functions)
+            fail()
+        } catch (IllegalArgumentException iae) {
+            assertEquals 'Function list cannot be null or empty.', iae.getMessage()
+        }
+    }
+
+    @Test
+    void testFirstResultWithSingleNonNullValueFunction() {
+        Function<String, String> fn = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s
+                return s
+            }
+        }
+        assertEquals 'foo', Functions.firstResult(fn).apply('foo')
+    }
+
+    @Test
+    void testFirstResultWithSingleNullValueFunction() {
+        Function<String, String> fn = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s
+                return null
+            }
+        }
+        assertNull Functions.firstResult(fn).apply('foo')
+    }
+
+    @Test
+    void testFirstResultFallback() {
+        def fn1 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s
+                return null
+            }
+        }
+        def fn2 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s // ensure original input is retained, not output from fn1
+                return 'fn2'
+            }
+        }
+        assertEquals 'fn2', Functions.firstResult(fn1, fn2).apply('foo')
+    }
+
+    @Test
+    void testFirstResultAllNull() {
+        def fn1 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s
+                return null
+            }
+        }
+        def fn2 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s // ensure original input is retained, not output from fn1
+                return null
+            }
+        }
+        // everything returned null, so null should be returned:
+        assertNull Functions.firstResult(fn1, fn2).apply('foo')
+    }
+
+    @Test
+    void testFirstResultShortCircuit() {
+        def fn1 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s
+                return null
+            }
+        }
+        def fn2 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                assertEquals 'foo', s // ensure original argument is retained, not output from fn1
+                return 'fn2'
+            }
+        }
+        boolean invoked = false
+        def fn3 = new Function<String, String>() {
+            @Override
+            String apply(String s) {
+                invoked = true // should not be invoked
+                return 'fn3'
+            }
+        }
+        assertEquals 'fn2', Functions.firstResult(fn1, fn2, fn3).apply('foo')
+        assertFalse invoked
+    }
 }

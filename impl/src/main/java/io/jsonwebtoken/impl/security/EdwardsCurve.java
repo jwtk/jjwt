@@ -319,7 +319,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         Assert.notNull(key, "Key cannot be null.");
         EdwardsCurve curve = findByKey(key);
         if (curve == null) {
-            String msg = KeysBridge.typeName(key) + " with algorithm '" + key.getAlgorithm() +
+            String msg = key.getClass().getName() + " with algorithm '" + key.getAlgorithm() +
                     "' is not a recognized Edwards Curve key.";
             throw new UnsupportedKeyException(msg);
         }

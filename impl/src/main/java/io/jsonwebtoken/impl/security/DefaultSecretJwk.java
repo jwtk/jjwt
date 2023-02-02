@@ -29,6 +29,8 @@ class DefaultSecretJwk extends AbstractJwk<SecretKey> implements SecretJwk {
     static final String TYPE_VALUE = "oct";
     static final Field<byte[]> K = Fields.bytes("k", "Key Value").setSecret(true).build();
     static final Set<Field<?>> FIELDS = Collections.concat(AbstractJwk.FIELDS, K);
+
+    // https://www.rfc-editor.org/rfc/rfc7638#section-3.2
     static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(K, KTY);
 
     DefaultSecretJwk(JwkContext<SecretKey> ctx) {

@@ -2,6 +2,7 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Classes;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class OptionalMethodInvoker<T, R> implements Function<T, R> {
@@ -24,16 +25,22 @@ public class OptionalMethodInvoker<T, R> implements Function<T, R> {
         this.METHOD = method;
     }
 
+    // Visible for testing
+    protected Object invoke(T t) throws InvocationTargetException, IllegalAccessException {
+        return METHOD.invoke(t);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public R apply(T t) {
         R result = null;
-        if (CLASS != null && METHOD != null) {
+        if (CLASS != null && METHOD != null && CLASS.isInstance(t)) {
             try {
-                result = (R) METHOD.invoke(t);
-            } catch (Exception e) {
-                String msg = ERR_MSG + e.getMessage();
-                throw new IllegalStateException(msg, e); // should never happen if both CLASS and METHOD were found
+                result = (R) invoke(t);
+            } catch (Throwable throwable) {
+                // should never happen if both CLASS and METHOD were found and 't' is the expected type:
+                String msg = ERR_MSG + throwable.getMessage();
+                throw new IllegalStateException(msg, throwable);
             }
         }
         return result;

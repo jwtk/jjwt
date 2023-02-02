@@ -17,13 +17,10 @@ public class NamedParameterSpecValueFinder implements Function<Key, String> {
 
     private static final Function<Key, String> EDEC_FN = Functions.andThen(EDEC_KEY_GET_PARAMS, GET_NAME);
     private static final Function<Key, String> XEC_FN = Functions.andThen(XEC_KEY_GET_PARAMS, GET_NAME);
+    private static final Function<Key, String> COMPOSED = Functions.firstResult(EDEC_FN, XEC_FN);
 
     @Override
     public String apply(final Key key) {
-        String result = EDEC_FN.apply(key);
-        if (result == null) {
-            result = XEC_FN.apply(key);
-        }
-        return result;
+        return COMPOSED.apply(key);
     }
 }

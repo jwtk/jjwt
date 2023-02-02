@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.JwkThumbprint
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
+import javax.crypto.SecretKey
 import java.nio.charset.StandardCharsets
 
 import static io.jsonwebtoken.impl.security.DefaultHashAlgorithm.SHA1
@@ -40,16 +41,17 @@ class JwkThumbprintsTest {
     }
 
     @Test
-    void testSecretJwk() {
-        def key = TestKeys.HS256
-        def jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build()
-        def json = RfcTests.stripws("""
-        {"k":"${jwk.get('k').get()}","kty":"oct"}
-        """)
-        def s256t = thumbprint(json, SHA256)
-        assertEquals s256t, jwk.thumbprint()
-        assertEquals thumbprint(json, SHA1), jwk.thumbprint(SHA1)
-        assertEquals s256t.toString(), jwk.getId()
+    void testSecretJwks() {
+        TestKeys.SECRET.each { SecretKey key ->
+            def jwk = Jwks.builder().forKey((SecretKey)key).setIdFromThumbprint().build()
+            def json = RfcTests.stripws("""
+            {"k":"${jwk.get('k').get()}","kty":"oct"}
+            """)
+            def s256t = thumbprint(json, SHA256)
+            assertEquals s256t, jwk.thumbprint()
+            assertEquals thumbprint(json, SHA1), jwk.thumbprint(SHA1)
+            assertEquals s256t.toString(), jwk.getId()
+        }
     }
 
     @Test
@@ -67,8 +69,10 @@ class JwkThumbprintsTest {
         assertEquals thumbprint(json, SHA1), pubJwk.thumbprint(SHA1)
         assertEquals s256t.toString(), pubJwk.getId()
 
-        assertEquals thumbprint(json, SHA256), privJwk.thumbprint() // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
-        assertEquals thumbprint(json, SHA1), privJwk.thumbprint(SHA1) // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        assertEquals thumbprint(json, SHA256), privJwk.thumbprint()
+        // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        assertEquals thumbprint(json, SHA1), privJwk.thumbprint(SHA1)
+        // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
         assertEquals s256t.toString(), privJwk.getId()
     }
 
@@ -87,8 +91,32 @@ class JwkThumbprintsTest {
         assertEquals thumbprint(json, SHA1), pubJwk.thumbprint(SHA1)
         assertEquals s256t.toString(), pubJwk.getId()
 
-        assertEquals thumbprint(json, SHA256), privJwk.thumbprint() // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
-        assertEquals thumbprint(json, SHA1), privJwk.thumbprint(SHA1) // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        assertEquals thumbprint(json, SHA256), privJwk.thumbprint()
+        // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        assertEquals thumbprint(json, SHA1), privJwk.thumbprint(SHA1)
+        // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        assertEquals s256t.toString(), privJwk.getId()
+    }
+
+    @Test
+    void testEdECKeyPair() {
+        def pair = TestKeys.Ed25519.pair
+        def privJwk = Jwks.builder().forOctetKeyPair(pair).setIdFromThumbprint().build()
+        def pubJwk = privJwk.toPublicJwk()
+        def json = RfcTests.stripws("""
+        {"crv":"${pubJwk.get('crv')}","kty":"OKP","x":"${pubJwk.get('x')}"}
+        """)
+
+        def s256t = thumbprint(json, SHA256)
+
+        assertEquals s256t, pubJwk.thumbprint()
+        assertEquals thumbprint(json, SHA1), pubJwk.thumbprint(SHA1)
+        assertEquals s256t.toString(), pubJwk.getId()
+
+        assertEquals thumbprint(json, SHA256), privJwk.thumbprint()
+        // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+        assertEquals thumbprint(json, SHA1), privJwk.thumbprint(SHA1)
+        // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
         assertEquals s256t.toString(), privJwk.getId()
     }
 }

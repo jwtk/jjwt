@@ -39,14 +39,25 @@ class TestKeys {
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
+    static Collection<SecretKey> AGCM
     static {
         A128GCM = A128KW = A128GCMKW = EncryptionAlgorithms.A128GCM.keyBuilder().build()
         A192GCM = A192KW = A192GCMKW = EncryptionAlgorithms.A192GCM.keyBuilder().build()
         A256GCM = A256KW = A256GCMKW = EncryptionAlgorithms.A256GCM.keyBuilder().build()
+        AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
+
     static SecretKey A128CBC_HS256 = EncryptionAlgorithms.A128CBC_HS256.keyBuilder().build()
     static SecretKey A192CBC_HS384 = EncryptionAlgorithms.A192CBC_HS384.keyBuilder().build()
     static SecretKey A256CBC_HS512 = EncryptionAlgorithms.A256CBC_HS512.keyBuilder().build()
+    static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
+
+    static Collection<SecretKey> SECRET = new LinkedHashSet<>()
+    static {
+        SECRET.addAll(HS)
+        SECRET.addAll(AGCM)
+        SECRET.addAll(ACBC)
+    }
 
     // =======================================================
     // Elliptic Curve Keys & Certificates
@@ -55,6 +66,7 @@ class TestKeys {
     static Bundle ES384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES384)
     static Bundle ES512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
+
     static Bundle EdDSA = TestCertificates.readAsymmetricBundle(JwsAlgorithms.EdDSA)
     static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.Ed25519)
     static Bundle Ed448 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.Ed448)
@@ -69,6 +81,13 @@ class TestKeys {
     static Bundle RS384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS384)
     static Bundle RS512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS512)
     static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512)
+
+    static Set<Bundle> ASYM = new LinkedHashSet<>()
+    static {
+        ASYM.addAll(EC)
+        ASYM.addAll(EdEC)
+        ASYM.addAll(RSA)
+    }
 
     static <T extends KeyBuilderSupplier<SecretKey, SecretKeyBuilder> & Identifiable> SecretKey forAlgorithm(T alg) {
         String id = alg.getId()
