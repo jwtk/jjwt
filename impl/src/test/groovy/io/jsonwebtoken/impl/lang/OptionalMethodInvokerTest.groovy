@@ -41,7 +41,7 @@ class OptionalMethodInvokerTest {
         def ex = new InvocationTargetException()
         def i = new OptionalMethodInvoker<Key, String>(Key.class.getName(), 'getEncoded') {
             @Override
-            protected Object invoke(Key aKey) throws InvocationTargetException, IllegalAccessException {
+            protected String invoke(Key aKey) throws InvocationTargetException, IllegalAccessException {
                 throw ex
             }
         }
@@ -49,7 +49,7 @@ class OptionalMethodInvokerTest {
             i.apply(key) // getEncoded returns a byte array, not a String, should throw cast error
             fail()
         } catch (IllegalStateException ise) {
-            assertEquals OptionalMethodInvoker.ERR_MSG + "null", ise.getMessage()
+            assertEquals ReflectionFunction.ERR_MSG + "null", ise.getMessage()
             assertSame ex, ise.getCause()
         }
     }

@@ -222,4 +222,11 @@ class BytesTest {
         int i = Bytes.indexOf(A, C)
         assertEquals(-1, i)
     }
+
+    @Test
+    void testIndexOfPartialMatchEndDifferent() {
+        byte[] toTest = [0x00, 0x01, 0x02, 0x03, 0x04, 0x06] // last byte is different in A
+        int i = Bytes.indexOf(A, toTest)
+        assertEquals(-1, i)
+    }
 }

@@ -1,15 +1,21 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.lang.Function
+import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
+
+import java.security.spec.AlgorithmParameterSpec
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.KeySpec
 
 import static org.junit.Assert.*
 
 class EdwardsCurveTest {
 
-    static final def curves = EdwardsCurve.VALUES
+    static final Collection<EdwardsCurve> curves = EdwardsCurve.VALUES
 
     @SuppressWarnings('GroovyResultOfObjectAllocationIgnored')
     @Test
@@ -133,6 +139,32 @@ class EdwardsCurveTest {
         }
     }
 
+    /**
+     * Ensures that if a DER NULL terminates the OID in the encoded key, the null tag is skipped.  This occurs in
+     * some SunCE key encodings.
+     */
+    @Test
+    void testGetKeyMaterialWithOidNullTerminator() {
+        byte[] DER_NULL = [0x05, 0x00] as byte[]
+        curves.each { it ->
+
+            byte[] x = new byte[it.encodedKeyByteLength]
+            Randoms.secureRandom().nextBytes(x)
+
+            byte[] encoded = Bytes.concat(
+                    [0x30, it.encodedKeyByteLength + 10 + DER_NULL.length, 0x30, 0x05] as byte[],
+                    it.DER_OID,
+                    DER_NULL, // this should be skipped when getting key material
+                    [0x03, it.encodedKeyByteLength + 1, 0x00] as byte[],
+                    x
+            )
+
+            def key = new TestKey(encoded: encoded)
+            byte[] material = it.getKeyMaterial(key)
+            assertArrayEquals(x, material)
+        }
+    }
+
     @Test
     void testGetKeyMaterialWithMissingEncodedBytes() {
         def key = new TestKey(algorithm: 'foo')
@@ -241,5 +273,51 @@ class EdwardsCurveTest {
                 assertEquals msg, ike.getMessage()
             }
         }
+    }
+
+    @Test
+    void testParamKeySpecFactoryWithNullSpec() {
+        def fn = EdwardsCurve.paramKeySpecFactory(null, true)
+        assertSame Functions.NULL(), fn
+    }
+
+    @Test
+    void testXecParamKeySpecFactory() {
+        AlgorithmParameterSpec spec = new ECGenParameterSpec('foo') // any impl will do for this test
+        def fn = EdwardsCurve.paramKeySpecFactory(spec, false) as EdwardsCurve.ParameterizedKeySpecFactory
+        assertSame spec, fn.params
+        assertSame EdwardsCurve.XEC_PRIV_KEY_SPEC_CTOR, fn.keySpecFactory
+    }
+
+    @Test
+    void testEdEcParamKeySpecFactory() {
+        AlgorithmParameterSpec spec = new ECGenParameterSpec('foo') // any impl will do for this test
+        def fn = EdwardsCurve.paramKeySpecFactory(spec, true) as EdwardsCurve.ParameterizedKeySpecFactory
+        assertSame spec, fn.params
+        assertSame EdwardsCurve.EDEC_PRIV_KEY_SPEC_CTOR, fn.keySpecFactory
+    }
+
+    @Test
+    void testParamKeySpecFactoryInvocation() {
+        AlgorithmParameterSpec spec = new ECGenParameterSpec('foo') // any impl will do for this test
+        KeySpec keySpec = new PasswordSpec("foo".toCharArray()) // any KeySpec impl will do
+
+        byte[] d = new byte[32]
+        Randoms.secureRandom().nextBytes(d)
+
+        def keySpecFn = new Function<Object, KeySpec>() {
+            @Override
+            KeySpec apply(Object o) {
+                assertTrue o instanceof Object[]
+                Object[] args = (Object[]) o
+                assertSame spec, args[0]
+                assertSame d, args[1]
+                return keySpec // simulate a creation
+            }
+        }
+
+        def fn = new EdwardsCurve.ParameterizedKeySpecFactory(spec, keySpecFn)
+        def result = fn.apply(d)
+        assertSame keySpec, result
     }
 }

@@ -24,6 +24,7 @@ public class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
     public EdSignatureAlgorithm(EdwardsCurve preferredCurve) {
         super(ID, preferredCurve.getJcaName());
         this.preferredCurve = Assert.notNull(preferredCurve, "preferredCurve cannot be null.");
+        Assert.isTrue(preferredCurve.isSignatureCurve(), "EdwardsCurve must be a signature curve, not a key agreement curve.");
         setProvider(preferredCurve.getProvider());
     }
 

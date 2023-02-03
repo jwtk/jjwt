@@ -4,7 +4,19 @@ import io.jsonwebtoken.lang.Assert;
 
 public final class Functions {
 
+    private static final Function<?, ?> NULL = new Function<Object, Object>() {
+        @Override
+        public Object apply(Object o) {
+            return null;
+        }
+    };
+
     private Functions() {
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, R> Function<T, R> NULL() {
+        return (Function<T, R>) NULL;
     }
 
     /**
