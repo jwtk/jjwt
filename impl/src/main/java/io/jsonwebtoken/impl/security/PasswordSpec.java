@@ -68,8 +68,8 @@ public class PasswordSpec implements Password, KeySpec {
     }
 
     public void destroy() {
-        java.util.Arrays.fill(password, '\u0000');
         this.destroyed = true;
+        java.util.Arrays.fill(password, '\u0000');
     }
 
     public boolean isDestroyed() {

@@ -33,7 +33,10 @@ The Elliptic Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this direct
     openssl x509 -pubkey -noout -in ES384.crt.pem > ES384.pub.pem
     openssl x509 -pubkey -noout -in ES512.crt.pem > ES512.pub.pem
   
-The Edwards Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this directory were created for testing as follows:
+The Edwards Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this directory were created for testing as follows
+Note that we don't/can't create self-signed certificates (`*.crt.pem` files) for X25519 and X448 because these 
+algorithms cannot be used for signing (perhaps we could have signed them with another key, but it wasn't necessary
+for our testing):
 
     # generate the private keys:
     openssl genpkey -algorithm Ed25519 -out Ed25519.key.pem
@@ -56,8 +59,9 @@ The above commands create a (non-password-protected) private key and a self-sign
 size, valid for 1000 years.  These files are intended for testing purposes only and shouldn't be used in a production 
 system.
 
-All `ES*`, `RS*`, and `PS*` file prefixes are equal to JWA standard `SignatureAlgorithm` IDs.  This allows
-easy file lookup based on the `SignatureAlgorithm` `getId()` value when authoring tests.
+All `ES*`, `RS*`, `PS*`, `X*` and `Ed*` file prefixes are equal to JWA standard `SignatureAlgorithm` IDs or Edwards
+Curve IDs.  This allows easy file lookup based on the `SignatureAlgorithm` `getId()` or `EdwardsCurve#getId()` value 
+when authoring tests.
 
 Finally, the `RS*`, `PS*`, and `EdDSA*` files in this directory are just are symlinks back to source files based on 
 the JWT alg names and their respective key sizes.  This is so the `RS*` and `PS*` algorithms can use the same files 

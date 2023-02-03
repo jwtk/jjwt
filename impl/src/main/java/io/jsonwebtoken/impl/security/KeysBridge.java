@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.Key;
+import java.security.PublicKey;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
@@ -51,5 +52,18 @@ public final class KeysBridge {
             throw new UnsupportedKeyException(msg);
         }
         return encoded;
+    }
+
+    public static String toString(Key key) {
+        if (key == null) {
+            return "null";
+        }
+        if (key instanceof PublicKey) {
+            return key.toString(); // safe to show internal key state as it's a public key
+        }
+        // else secret or private key, don't show internal key state, just public attributes
+        return "class: " + key.getClass().getName() +
+                ", algorithm: " + key.getAlgorithm() +
+                ", format: " + key.getFormat();
     }
 }

@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecureRequest;
+import io.jsonwebtoken.security.VerifyDigestRequest;
 
 import java.security.Key;
 
@@ -30,15 +31,21 @@ public class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     @Override
     protected String getJcaName(Request<?> request) {
-        SecureRequest<?, ?> req = Assert.isInstanceOf(SecureRequest.class, request,
-                "Only SecureRequests are supported.");
+        SecureRequest<?, ?> req = Assert.isInstanceOf(SecureRequest.class, request, "SecureRequests are required.");
         Key key = req.getKey();
-        EdwardsCurve curve = EdwardsCurve.findByKey(key);
-        if (curve != null) {
-            return curve.getJcaName(); // prefer the key's specific curve algorithm identifier
+
+        // If we're signing, and this instance's algorithm name is the default/generic 'EdDSA', then prefer the
+        // signing key's curve algorithm ID.  This ensures the most specific JCA algorithm is used for signing,
+        // (while generic 'EdDSA' is fine for validation)
+        String jcaName = getJcaName(); //default for JCA interaction
+        boolean signing = !(request instanceof VerifyDigestRequest);
+        if (ID.equals(jcaName) && signing) { // see if we can get a more-specific curve algorithm identifier:
+            EdwardsCurve curve = EdwardsCurve.findByKey(key);
+            if (curve != null) {
+                jcaName = curve.getJcaName(); // prefer the key's specific curve algorithm identifier during signing
+            }
         }
-        //otherwise we'll fall back to the generic 'EdDSA' algorithm name for JCA interaction
-        return super.getJcaName(request);
+        return jcaName;
     }
 
     @Override

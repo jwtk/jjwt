@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets
 import java.security.Key
 
 import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
 
 class DefaultMacAlgorithmTest {
 
@@ -66,7 +65,8 @@ class DefaultMacAlgorithmTest {
         try {
             newAlg().digest(request(password))
         } catch (SignatureException expected) {
-            assertTrue expected.getMessage().startsWith('Unable to compute HS256 signature with JCA algorithm \'HmacSHA256\' using key {<redacted>}')
+            String msg = "Unable to compute HS256 signature with JCA algorithm 'HmacSHA256' using key {${KeysBridge.toString(password)}}: ${expected.getCause().getMessage()}" as String
+            assertEquals msg, expected.getMessage()
         }
     }
 
@@ -90,7 +90,8 @@ class DefaultMacAlgorithmTest {
         try {
             newAlg().digest(request(password))
         } catch (SignatureException expected) {
-            assertTrue expected.getMessage().startsWith('Unable to compute HS256 signature with JCA algorithm \'HmacSHA256\' using key {<redacted>}')
+            String msg = "Unable to compute HS256 signature with JCA algorithm 'HmacSHA256' using key {${KeysBridge.toString(password)}}: ${expected.getCause().getMessage()}" as String
+            assertEquals msg, expected.getMessage()
         }
     }
 

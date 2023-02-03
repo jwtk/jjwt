@@ -50,7 +50,7 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
             throw e; //propagate
         } catch (Exception e) {
             String msg = "Unable to compute " + getId() + " signature with JCA algorithm '" + getJcaName() + "' " +
-                    "using key {" + key + "}: " + e.getMessage();
+                    "using key {" + KeysBridge.toString(key) + "}: " + e.getMessage();
             throw new SignatureException(msg, e);
         }
     }
@@ -70,7 +70,7 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
             throw e; //propagate
         } catch (Exception e) {
             String msg = "Unable to verify " + getId() + " signature with JCA algorithm '" + getJcaName() + "' " +
-                    "using key {" + key + "}: " + e.getMessage();
+                    "using key {" + KeysBridge.toString(key) + "}: " + e.getMessage();
             throw new SignatureException(msg, e);
         }
     }

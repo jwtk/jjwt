@@ -33,7 +33,7 @@ class EdSignatureAlgorithmTest {
         // only one recognized by the spec.  They are effectively just aliases of EdDSA but have the added
         // functionality of generating Ed25519 and Ed448 keys, that's the only difference.
         for (EdSignatureAlgorithm alg : algs) {
-            assertEquals JwsAlgorithms.EdDSA.getId(), alg.getId(); // all aliases of EdDSA per the RFC spec
+            assertEquals JwsAlgorithms.EdDSA.getId(), alg.getId() // all aliases of EdDSA per the RFC spec
         }
     }
 
@@ -99,8 +99,14 @@ class EdSignatureAlgorithmTest {
             testSig(alg, priv, pub)
             fail()
         } catch (SignatureException expected) {
+            // SignatureException message can differ depending on JDK version and if BC is enabled or not:
+            // BC Provider signature.verify() will just return false, but SunEC provider signature.verify() throws an
+            // exception with its own message.  As a result, we should always get a SignatureException, but we need
+            // to check the message for either scenario depending on the JVM version running the tests:
+            String exMsg = expected.getMessage()
             String expectedMsg = 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
-            assertEquals expectedMsg, expected.getMessage()
+            String expectedMsg2 = "Unable to verify EdDSA signature with JCA algorithm 'EdDSA' using key {${pub}}: ${expected.getCause()?.getMessage()}"
+            assertTrue exMsg.equals(expectedMsg) || exMsg.equals(expectedMsg2)
         }
     }
 
