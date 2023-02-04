@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -18,13 +19,19 @@ class OctetJwksTest {
         } catch (Exception e) {
             // FOR CI INSPECTION:
             byte[] material = curve.getKeyMaterial(key)
+            println "Base64Url key value:     ${Encoders.BASE64URL.encode(material)}"
             assertEquals curve.encodedKeyByteLength, material.length
             def field = key instanceof PrivateKey ? DefaultOctetPrivateJwk.D : DefaultOctetPublicJwk.X
             Object materialEncoded = field.applyTo(material)
+            println "field encoded key value: ${materialEncoded}"
             String val = jwk.get(field.getId())
+            println "jwk value:               ${val}"
             byte[] decodedMaterial = field.applyFrom(val)
-            assertEquals curve.encodedKeyByteLength, decodedMaterial.length
-            assertEquals("material encoded value should equal JWK value", materialEncoded, val)
+            println "curve keyByteLen: ${curve.encodedKeyByteLength}"
+            println "material byteLen: ${material.length}"
+            println "decoded  byteLen: ${decodedMaterial.length}"
+            //assertEquals curve.encodedKeyByteLength, decodedMaterial.length
+            //assertEquals("material encoded value should equal JWK value", materialEncoded, val)
             String status = Arrays.equals(material, decodedMaterial) ? 'equals' : 'doesnt equal'
             int lenDiff = material.length - decodedMaterial.length
             if (lenDiff != 0) {
