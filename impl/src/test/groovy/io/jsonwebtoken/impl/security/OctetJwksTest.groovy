@@ -1,7 +1,6 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -25,6 +24,7 @@ class OctetJwksTest {
             String val = jwk.get(field.getId())
             byte[] decodedMaterial = field.applyFrom(val)
             assertEquals curve.encodedKeyByteLength, decodedMaterial.length
+            assertEquals("material encoded value should equal JWK value", materialEncoded, val)
             String status = Arrays.equals(material, decodedMaterial) ? 'equals' : 'doesnt equal'
             int lenDiff = material.length - decodedMaterial.length
             if (lenDiff != 0) {
@@ -39,13 +39,6 @@ class OctetJwksTest {
             e.printStackTrace()
             throw new IllegalStateException(msg, e)
         }
-    }
-
-    @Test
-    void testFoo() {
-        byte[] bytes = Decoders.BASE64URL.decode('AIVW7jd1gnvBg-iGL23siKicJuhD-eCTFObJQLPUmf3S479H3ijV6hoxb53CPQlvLaNc2sbovVqA')
-        println "length: ${bytes.length}"
-        EdwardsCurve.findById("Ed448").toPublicKey(bytes, null)
     }
 
     @Test
