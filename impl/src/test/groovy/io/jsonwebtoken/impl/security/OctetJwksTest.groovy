@@ -4,12 +4,37 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
+import java.security.Key
 import java.security.PrivateKey
 import java.security.PublicKey
 
 import static org.junit.Assert.*
 
 class OctetJwksTest {
+
+    static def buildJwk(EdwardsCurve curve, Key key, Jwk jwk, JwkBuilder builder) {
+        try {
+            return builder.build()
+        } catch (Exception e) {
+            // FOR CI INSPECTION:
+            byte[] material = curve.getKeyMaterial(key)
+            Object materialEncoded = DefaultOctetPublicJwk.X.applyTo(material)
+            String x = jwk.get('x')
+            byte[] decodedMaterial = DefaultOctetPublicJwk.X.applyFrom(x)
+            String status = Arrays.equals(material, decodedMaterial) ? 'equals' : 'doesnt equal'
+            int lenDiff = material.length - decodedMaterial.length
+            if (lenDiff != 0) {
+                if (Bytes.startsWith(material, decodedMaterial)) {
+                    status = 'starts with'
+                } else if (Bytes.endsWith(material, decodedMaterial)) {
+                    status = 'ends with'
+                }
+            }
+            String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK 'x': $x. JWK: $jwk"
+            println msg
+            throw new IllegalStateException(msg, e)
+        }
+    }
 
     @Test
     void testOctetKeyPairs() {
@@ -22,34 +47,13 @@ class OctetJwksTest {
 
             // test individual keys
             PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
-            PublicJwk pubValuesJwk
-            try {
-                pubValuesJwk = Jwks.builder().putAll(pubJwk).build() as PublicJwk // ensure value map symmetry
-            } catch (Exception e) {
-                // FOR CI INSPECTION:
-                byte[] material = curve.getKeyMaterial(pub)
-                Object materialEncoded = DefaultOctetPublicJwk.X.applyTo(material)
-                String x = pubJwk.get('x')
-                byte[] decodedMaterial = DefaultOctetPublicJwk.X.applyFrom(x)
-                String status = 'doesnt match'
-                int lenDiff = material.length - decodedMaterial.length
-                if (lenDiff != 0) {
-                    if (Bytes.startsWith(material, decodedMaterial)) {
-                        status = 'starts with'
-                    } else if (Bytes.endsWith(material, decodedMaterial)) {
-                        status = 'ends with'
-                    }
-                }
-                String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK 'x': $x"
-                println msg
-                throw new IllegalStateException(msg, e)
-            }
+            PublicJwk pubValuesJwk = buildJwk(curve, pub, pubJwk, Jwks.builder().putAll(pubJwk)) as PublicJwk // ensure value map symmetry
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
 
             PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
-            PrivateJwk privValuesJwk = Jwks.builder().putAll(privJwk).build() as PrivateJwk // ensure value map symmetry
+            PrivateJwk privValuesJwk = buildJwk(curve, priv, privJwk, Jwks.builder().putAll(privJwk)) as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
             // we can't assert that priv.equals(privValuesJwk.toKey()) here because BouncyCastle uses PKCS8 V2 encoding
