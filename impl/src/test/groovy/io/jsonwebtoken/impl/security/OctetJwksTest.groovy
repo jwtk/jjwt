@@ -19,9 +19,10 @@ class OctetJwksTest {
             // FOR CI INSPECTION:
             byte[] material = curve.getKeyMaterial(key)
             assertEquals curve.encodedKeyByteLength, material.length
-            Object materialEncoded = DefaultOctetPublicJwk.X.applyTo(material)
-            String x = jwk.get('x')
-            byte[] decodedMaterial = DefaultOctetPublicJwk.X.applyFrom(x)
+            def field = key instanceof PrivateKey ? DefaultOctetPrivateJwk.D : DefaultOctetPublicJwk.X
+            Object materialEncoded = field.applyTo(material)
+            String val = jwk.get(field.getId())
+            byte[] decodedMaterial = field.applyFrom(val)
             assertEquals curve.encodedKeyByteLength, decodedMaterial.length
             String status = Arrays.equals(material, decodedMaterial) ? 'equals' : 'doesnt equal'
             int lenDiff = material.length - decodedMaterial.length
@@ -32,7 +33,7 @@ class OctetJwksTest {
                     status = 'ends with'
                 }
             }
-            String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK 'x': $x. JWK: $jwk"
+            String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK '${field.getId()}': $val. JWK: $jwk"
             println msg
             throw new IllegalStateException(msg, e)
         }
