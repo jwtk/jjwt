@@ -12,9 +12,9 @@ import static org.junit.Assert.*
 
 class OctetJwksTest {
 
-    static def buildJwk(EdwardsCurve curve, Key key, Jwk jwk, JwkBuilder builder) {
+    static def buildJwk(EdwardsCurve curve, Key key, Jwk jwk) {
         try {
-            return builder.build()
+            return Jwks.builder().putAll(jwk).build()
         } catch (Exception e) {
             // FOR CI INSPECTION:
             byte[] material = curve.getKeyMaterial(key)
@@ -50,13 +50,13 @@ class OctetJwksTest {
 
             // test individual keys
             PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
-            PublicJwk pubValuesJwk = buildJwk(curve, pub, pubJwk, Jwks.builder().putAll(pubJwk)) as PublicJwk // ensure value map symmetry
+            PublicJwk pubValuesJwk = buildJwk(curve, pub, pubJwk) as PublicJwk // ensure value map symmetry
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
 
             PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
-            PrivateJwk privValuesJwk = buildJwk(curve, priv, privJwk, Jwks.builder().putAll(privJwk)) as PrivateJwk // ensure value map symmetry
+            PrivateJwk privValuesJwk = buildJwk(curve, priv, privJwk) as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
             // we can't assert that priv.equals(privValuesJwk.toKey()) here because BouncyCastle uses PKCS8 V2 encoding
