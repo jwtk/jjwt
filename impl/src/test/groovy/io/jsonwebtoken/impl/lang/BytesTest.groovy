@@ -229,4 +229,16 @@ class BytesTest {
         int i = Bytes.indexOf(A, toTest)
         assertEquals(-1, i)
     }
+
+    @Test
+    void testStartsWith() {
+        byte[] A = [0x01, 0x02, 0x03]
+        byte[] B = [0x01, 0x03]
+        byte[] C = [0x02, 0x03]
+        assertTrue Bytes.startsWith(A, A, 0)
+        assertFalse Bytes.startsWith(A, B)
+        assertTrue Bytes.endsWith(A, C)
+        assertFalse Bytes.startsWith(A, A, -1)
+        assertFalse Bytes.startsWith(C, A)
+    }
 }

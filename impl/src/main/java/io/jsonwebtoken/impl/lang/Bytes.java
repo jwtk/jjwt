@@ -103,6 +103,29 @@ public final class Bytes {
         return -1;
     }
 
+    public static boolean startsWith(byte[] src, byte[] prefix) {
+        return startsWith(src, prefix, 0);
+    }
+
+    public static boolean startsWith(byte[] src, byte[] prefix, int offset) {
+        int to = offset;
+        int po = 0;
+        int pc = length(prefix);
+        if ((offset < 0) || (offset > length(src) - pc)) {
+            return false;
+        }
+        while (--pc >= 0) {
+            if (src[to++] != prefix[po++]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean endsWith(byte[] src, byte[] suffix) {
+        return startsWith(src, suffix, length(src) - length(suffix));
+    }
+
     public static byte[] concat(byte[]... arrays) {
         int len = 0;
         int numArrays = Arrays.length(arrays);

@@ -1,5 +1,6 @@
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -21,7 +22,28 @@ class OctetJwksTest {
 
             // test individual keys
             PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
-            PublicJwk pubValuesJwk = Jwks.builder().putAll(pubJwk).build() as PublicJwk // ensure value map symmetry
+            PublicJwk pubValuesJwk
+            try {
+                pubValuesJwk = Jwks.builder().putAll(pubJwk).build() as PublicJwk // ensure value map symmetry
+            } catch (Exception e) {
+                // FOR CI INSPECTION:
+                byte[] material = curve.getKeyMaterial(pub)
+                Object materialEncoded = DefaultOctetPublicJwk.X.applyTo(material)
+                String x = pubJwk.get('x')
+                byte[] decodedMaterial = DefaultOctetPublicJwk.X.applyFrom(x)
+                String status = 'doesnt match'
+                int lenDiff = material.length - decodedMaterial.length
+                if (lenDiff != 0) {
+                    if (Bytes.startsWith(material, decodedMaterial)) {
+                        status = 'starts with'
+                    } else if (Bytes.endsWith(material, decodedMaterial)) {
+                        status = 'ends with'
+                    }
+                }
+                String msg = "Material $status decodedMaterial, missing $lenDiff bytes."
+                println msg
+                throw new IllegalStateException(msg, e)
+            }
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
