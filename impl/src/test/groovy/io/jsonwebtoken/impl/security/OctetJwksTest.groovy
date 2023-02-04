@@ -1,6 +1,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -35,8 +36,16 @@ class OctetJwksTest {
             }
             String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK '${field.getId()}': $val. JWK: $jwk"
             println msg
+            e.printStackTrace()
             throw new IllegalStateException(msg, e)
         }
+    }
+
+    @Test
+    void testFoo() {
+        byte[] bytes = Decoders.BASE64URL.decode('AIVW7jd1gnvBg-iGL23siKicJuhD-eCTFObJQLPUmf3S479H3ijV6hoxb53CPQlvLaNc2sbovVqA')
+        println "length: ${bytes.length}"
+        EdwardsCurve.findById("Ed448").toPublicKey(bytes, null)
     }
 
     @Test
