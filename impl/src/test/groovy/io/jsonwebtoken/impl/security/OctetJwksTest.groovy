@@ -52,7 +52,6 @@ class OctetJwksTest {
             String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK '${field.getId()}': $val. JWK: $jwk"
             println msg
             println()
-            println()
             e.printStackTrace()
             fail(msg)
         }
