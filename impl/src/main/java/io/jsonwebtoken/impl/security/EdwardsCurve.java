@@ -235,11 +235,12 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     protected byte[] doGetKeyMaterial(Key key) {
         byte[] encoded = KeysBridge.getEncoded(key);
         int i = Bytes.indexOf(encoded, DER_OID);
+        Assert.gt(i, -1, "Missing or incorrect algorithm OID.");
         i = i + DER_OID.length;
         int keyLen = 0;
         if (encoded[i] == 0x05) { // NULL terminator, next should be zero byte indicator
             int unusedBytes = encoded[++i];
-            Assert.eq(0, unusedBytes, "NULL terminator should indicate zero unused bytes.");
+            Assert.eq(0, unusedBytes, "OID NULL terminator should indicate zero unused bytes.");
             i++;
         }
         if (encoded[i] == 0x03) { // DER bit stream, Public Key
@@ -270,18 +271,18 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         return provider;
     }
 
-    private void assertLength(byte[] raw) {
+    private void assertLength(byte[] raw, boolean isPublic) {
         int len = Bytes.length(raw);
         if (len != this.encodedKeyByteLength) {
-            String msg = "Invalid " + getId() + " encoded key length. Should be " +
-                    Bytes.bytesMsg(this.encodedKeyByteLength) + ", found " +
+            String msg = "Invalid " + getId() + " encoded " + (isPublic ? "PublicKey" : "PrivateKey") +
+                    " length. Should be " + Bytes.bytesMsg(this.encodedKeyByteLength) + ", found " +
                     Bytes.bytesMsg(len) + ".";
             throw new InvalidKeyException(msg);
         }
     }
 
     public PublicKey toPublicKey(byte[] x, Provider provider) {
-        assertLength(x);
+        assertLength(x, true);
         final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_DER_PREFIX, x);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
         JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
@@ -294,7 +295,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     }
 
     public PrivateKey toPrivateKey(byte[] d, Provider provider) {
-        assertLength(d);
+        assertLength(d, false);
         final KeySpec spec = this.PRIVATE_KEY_SPEC_FACTORY.apply(d);
         JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
         return template.withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {

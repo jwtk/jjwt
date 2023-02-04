@@ -117,8 +117,8 @@ class EdwardsCurveTest {
             try {
                 it.toPrivateKey(d, it.getProvider())
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.id} encoded key length. Should be ${Bytes.bitsMsg(it.keyBitLength)}, " +
-                        "found ${Bytes.bytesMsg(d.length)}."
+                String msg = "Invalid ${it.id} encoded PrivateKey length. Should be " +
+                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(d.length)}."
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -132,8 +132,8 @@ class EdwardsCurveTest {
             try {
                 it.toPublicKey(x, it.getProvider())
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.id} encoded key length. Should be ${Bytes.bitsMsg(it.keyBitLength)}, " +
-                        "found ${Bytes.bytesMsg(x.length)}."
+                String msg = "Invalid ${it.id} encoded PublicKey length. Should be " +
+                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(x.length)}."
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -181,10 +181,32 @@ class EdwardsCurveTest {
 
     @Test
     void testGetKeyMaterialInvalidKeyEncoding() {
-        byte[] fake = new byte[30]
-        Randoms.secureRandom().nextBytes(fake)
-        def key = new TestKey(encoded: fake)
+        byte[] encoded = new byte[30]
+        Randoms.secureRandom().nextBytes(encoded)
+        //ensure random generator doesn't put in a byte that would cause other logic checks (0x03, 0x04, 0x05)
+        encoded[0] = 0x20 // anything other than 0x03, 0x04, 0x05
+        def key = new TestKey(encoded: encoded)
         curves.each {
+            try {
+                it.getKeyMaterial(key)
+                fail()
+            } catch (InvalidKeyException ike) {
+                String msg = "Invalid ${it.getId()} DER encoding: Missing or incorrect algorithm OID." as String
+                assertEquals msg, ike.getMessage()
+            }
+        }
+    }
+
+    @Test
+    void testGetKeyMaterialInvalidKeyLength() {
+        byte[] encoded = new byte[30]
+        Randoms.secureRandom().nextBytes(encoded)
+        //ensure random generator doesn't put in a byte that would cause other logic checks (0x03, 0x04, 0x05)
+        encoded[0] = 0x20 // anything other than 0x03, 0x04, 0x05
+        curves.each {
+            // prefix it with the OID to make it look valid:
+            encoded = Bytes.concat(it.DER_OID, encoded)
+            def key = new TestKey(encoded: encoded)
             try {
                 it.getKeyMaterial(key)
                 fail()
