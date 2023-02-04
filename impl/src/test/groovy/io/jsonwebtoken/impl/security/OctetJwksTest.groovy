@@ -18,9 +18,11 @@ class OctetJwksTest {
         } catch (Exception e) {
             // FOR CI INSPECTION:
             byte[] material = curve.getKeyMaterial(key)
+            assertEquals curve.encodedKeyByteLength, material.length
             Object materialEncoded = DefaultOctetPublicJwk.X.applyTo(material)
             String x = jwk.get('x')
             byte[] decodedMaterial = DefaultOctetPublicJwk.X.applyFrom(x)
+            assertEquals curve.encodedKeyByteLength, decodedMaterial.length
             String status = Arrays.equals(material, decodedMaterial) ? 'equals' : 'doesnt equal'
             int lenDiff = material.length - decodedMaterial.length
             if (lenDiff != 0) {
