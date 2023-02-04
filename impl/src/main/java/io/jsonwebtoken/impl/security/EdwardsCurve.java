@@ -286,24 +286,32 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_DER_PREFIX, x);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
         JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
-        return template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
-            @Override
-            public PublicKey apply(KeyFactory keyFactory) throws Exception {
-                return keyFactory.generatePublic(spec);
-            }
-        });
+        try {
+            return template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
+                @Override
+                public PublicKey apply(KeyFactory keyFactory) throws Exception {
+                    return keyFactory.generatePublic(spec);
+                }
+            });
+        } catch (Throwable t) {
+            throw new InvalidKeyException("Unsupported public key value.", t);
+        }
     }
 
     public PrivateKey toPrivateKey(byte[] d, Provider provider) {
         //assertLength(d, false);
         final KeySpec spec = this.PRIVATE_KEY_SPEC_FACTORY.apply(d);
         JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
-        return template.withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {
-            @Override
-            public PrivateKey apply(KeyFactory keyFactory) throws Exception {
-                return keyFactory.generatePrivate(spec);
-            }
-        });
+        try {
+            return template.withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {
+                @Override
+                public PrivateKey apply(KeyFactory keyFactory) throws Exception {
+                    return keyFactory.generatePrivate(spec);
+                }
+            });
+        } catch (Throwable t) {
+            throw new InvalidKeyException("Unsupported private key value.", t);
+        }
     }
 
     /**
