@@ -2,6 +2,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Supplier
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -13,6 +14,13 @@ import static org.junit.Assert.*
 
 class OctetJwksTest {
 
+    static String sval(Object v) {
+        if (v instanceof Supplier) {
+            v = ((Supplier)v).get()
+        }
+        return "" + v
+    }
+
     static def buildJwk(EdwardsCurve curve, Key key, Jwk jwk) {
         try {
             return Jwks.builder().putAll(jwk).build()
@@ -22,9 +30,9 @@ class OctetJwksTest {
             println "Base64Url key value:     ${Encoders.BASE64URL.encode(material)}"
             assertEquals curve.encodedKeyByteLength, material.length
             def field = key instanceof PrivateKey ? DefaultOctetPrivateJwk.D : DefaultOctetPublicJwk.X
-            Object materialEncoded = field.applyTo(material)
+            String materialEncoded = sval(field.applyTo(material))
             println "field encoded key value: ${materialEncoded}"
-            String val = jwk.get(field.getId())
+            String val = sval(jwk.get(field.getId()))
             println "jwk value:               ${val}"
             byte[] decodedMaterial = field.applyFrom(val)
             println "curve keyByteLen: ${curve.encodedKeyByteLength}"
@@ -43,8 +51,10 @@ class OctetJwksTest {
             }
             String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK '${field.getId()}': $val. JWK: $jwk"
             println msg
+            println()
+            println()
             e.printStackTrace()
-            throw new IllegalStateException(msg, e)
+            fail(msg)
         }
     }
 
