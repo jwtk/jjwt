@@ -40,7 +40,7 @@ class OctetJwksTest {
                         status = 'ends with'
                     }
                 }
-                String msg = "Material $status decodedMaterial, missing $lenDiff bytes."
+                String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK 'x': $x"
                 println msg
                 throw new IllegalStateException(msg, e)
             }
