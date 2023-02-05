@@ -102,6 +102,8 @@
         <maven.gpg.version>1.6</maven.gpg.version> <!-- max version allowed for JDK 7 builds -->
         <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
         <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
+        <maven.license.version>3.0</maven.license.version>
+        <maven.build-helper.version>1.12</maven.build-helper.version>
 
         <jdk.version>1.7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
@@ -263,6 +265,24 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${maven.build-helper.version}</version>
+                    <executions>
+                        <execution>
+                            <id>timestamp-property</id>
+                            <goals>
+                                <goal>timestamp-property</goal>
+                            </goals>
+                            <phase>validate</phase>
+                            <configuration>
+                                <name>build.year</name>
+                                <pattern>yyyy</pattern>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
@@ -302,7 +322,7 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>3.0</version>
+                    <version>${maven.license.version}</version>
                     <configuration>
                         <aggregate>true</aggregate>
                         <skipExistingHeaders>true</skipExistingHeaders>
@@ -312,7 +332,7 @@
                         </headerDefinitions>
                         <properties>
                             <organization.name>${project.organization.name}</organization.name>
-                            <year>2019</year>
+                            <build.year>${build.year}</build.year>
                         </properties>
                         <excludes>
                             <exclude>**/*.txt</exclude>
@@ -322,6 +342,13 @@
                             <exclude>.gitattributes</exclude>
                         </excludes>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -544,6 +571,10 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.openclover</groupId>
