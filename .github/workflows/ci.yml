@@ -10,7 +10,7 @@ jobs:
   oracle:
     strategy:
       matrix:
-        java: [ '17', '18' ]
+        java: [ '17' ]
     runs-on: 'ubuntu-latest'
     env:
       MVN_CMD: ./mvnw --no-transfer-progress -B
