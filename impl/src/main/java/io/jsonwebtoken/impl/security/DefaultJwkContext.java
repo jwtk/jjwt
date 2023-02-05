@@ -43,13 +43,15 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         set.addAll(DefaultSecretJwk.FIELDS); // Private/Secret JWKs has both public and private fields
         set.addAll(DefaultEcPrivateJwk.FIELDS); // Private JWKs have both public and private fields
         set.addAll(DefaultRsaPrivateJwk.FIELDS); // Private JWKs have both public and private fields
-        set.addAll(DefaultOctetPrivateJwk.FIELDS);
+        set.addAll(DefaultOctetPrivateJwk.FIELDS); // Private JWKs have both public and private fields
 
         // EC JWKs and Octet JWKs have two fields that are named identically, but have different type requirements.  So
         // we swap out those fields with placeholders that allow either.  When the JwkContext is converted to its
         // type-specific context by the ProtoBuilder, the values will be correctly converted to their required types
         // at that time.  It is also important to retain toString security (via field.setSecret(true)) to ensure
         // any printing of the builder or its internal context does not print secure data.
+        set.remove(DefaultEcPublicJwk.X);
+        set.remove(DefaultEcPrivateJwk.D);
         set.add(Fields.string(DefaultEcPublicJwk.X.getId(), "Elliptic Curve public key X coordinate"));
         set.add(Fields.builder(String.class).setSecret(true)
                 .setId(DefaultEcPrivateJwk.D.getId()).setName("Elliptic Curve private key").build());
@@ -101,7 +103,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
             String id = entry.getKey();
             Object value = entry.getValue();
             Field<?> field = this.FIELDS.get(id);
-            if (field != null && !field.getIdiomaticType().isInstance(value)) {
+            if (field != null && !field.supports(value)) { // src idiomatic value is not what is expected, so convert:
                 value = this.values.get(field.getId());
                 put(field, value); // perform idiomatic conversion with original/raw src value
             } else {

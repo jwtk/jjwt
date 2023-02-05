@@ -58,7 +58,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
         return "Map";
     }
 
-    public static boolean isReduceableToNull(Object v) {
+    public static boolean isReducibleToNull(Object v) {
         return v == null ||
                 (v instanceof String && !Strings.hasText((String) v)) ||
                 (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
@@ -70,21 +70,17 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
         return this.idiomaticValues.get(key);
     }
 
-    @SuppressWarnings("unchecked")
     protected <T> T idiomaticGet(Field<T> field) {
-        return (T) this.idiomaticValues.get(field.getId());
+        Object value = this.idiomaticValues.get(field.getId());
+        return field.cast(value);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T get(Field<T> field) {
         Assert.notNull(field, "Field cannot be null.");
         final String id = Assert.hasText(field.getId(), "Field id cannot be null or empty.");
         Object value = idiomaticValues.get(id);
-        if (value == null) {
-            return null;
-        }
-        return (T) value; // should always be the field type - if not, it's a misuse of the API
+        return field.cast(value);
     }
 
     @Override
@@ -146,7 +142,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
     }
 
     protected Object nullSafePut(String name, Object value) {
-        if (isReduceableToNull(value)) {
+        if (isReducibleToNull(value)) {
             return remove(name);
         } else {
             this.idiomaticValues.put(name, value);
@@ -158,7 +154,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
         final String id = field.getId();
 
-        if (isReduceableToNull(rawValue)) {
+        if (isReducibleToNull(rawValue)) {
             return remove(id);
         }
 
@@ -166,14 +162,14 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
         Object canonicalValue; // as required by the RFC
         try {
             idiomaticValue = field.applyFrom(rawValue);
-            Assert.notNull(idiomaticValue, "Converter's resulting idiomaticValue cannot be null.");
+            Assert.notNull(idiomaticValue, "Field's resulting idiomaticValue cannot be null.");
             canonicalValue = field.applyTo(idiomaticValue);
-            Assert.notNull(canonicalValue, "Converter's resulting canonicalValue cannot be null.");
+            Assert.notNull(canonicalValue, "Field's resulting canonicalValue cannot be null.");
         } catch (Exception e) {
             StringBuilder sb = new StringBuilder(100);
             sb.append("Invalid ").append(getName()).append(" ").append(field).append(" value");
             if (field.isSecret()) {
-                sb.append(" ").append(RedactedSupplier.REDACTED_VALUE);
+                sb.append(": ").append(RedactedSupplier.REDACTED_VALUE);
             } else if (!(rawValue instanceof byte[])) {
                 // don't print raw byte array gibberish.  We can't base64[url] encode it either because that could
                 // make the exception message confusing: the developer would see an encoded string and could think

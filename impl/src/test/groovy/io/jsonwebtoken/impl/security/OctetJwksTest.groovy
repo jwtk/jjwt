@@ -1,12 +1,9 @@
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.lang.Supplier
+import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
-import java.security.Key
 import java.security.PrivateKey
 import java.security.PublicKey
 
@@ -14,47 +11,93 @@ import static org.junit.Assert.*
 
 class OctetJwksTest {
 
-    static String sval(Object v) {
-        if (v instanceof Supplier) {
-            v = ((Supplier)v).get()
-        }
-        return "" + v
+    /**
+     * Test case discovered during CI testing where a randomly-generated X25519 public key with a leading zero byte
+     * was not being decoded correctly.  This test asserts that this value is decoded correctly.
+     */
+    @Test
+    void testX25519PublicJson() {
+        String use = 'sig'
+        String kty = 'OKP'
+        String crv = 'X25519'
+        String x = 'AHwi7xPo5meUAGBDyzLZ9_ZwmmYA_SAMpdRFnsmggnI'
+        byte[] decoded = DefaultOctetPublicJwk.X.applyFrom(x)
+        assertEquals 0x00, decoded[0]
+
+        String json = RfcTests.stripws("""
+        {
+           "use": "$use",
+           "kty": "$kty",
+           "crv": "$crv",
+           "x": "$x"
+        }""")
+        def jwk = Jwks.parser().build().parse(json) as OctetPublicJwk
+        assertEquals use, jwk.getPublicKeyUse()
+        assertEquals kty, jwk.getType()
+        assertEquals crv, jwk.get('crv')
+        assertEquals x, jwk.get('x')
     }
 
-    static def buildJwk(EdwardsCurve curve, Key key, Jwk jwk) {
-        try {
-            return Jwks.builder().putAll(jwk).build()
-        } catch (Exception e) {
-            // FOR CI INSPECTION:
-            byte[] material = curve.getKeyMaterial(key)
-            println "Base64Url key value:     ${Encoders.BASE64URL.encode(material)}"
-            assertEquals curve.encodedKeyByteLength, material.length
-            def field = key instanceof PrivateKey ? DefaultOctetPrivateJwk.D : DefaultOctetPublicJwk.X
-            String materialEncoded = sval(field.applyTo(material))
-            println "field encoded key value: ${materialEncoded}"
-            String val = sval(jwk.get(field.getId()))
-            println "jwk value:               ${val}"
-            byte[] decodedMaterial = field.applyFrom(val)
-            println "curve keyByteLen: ${curve.encodedKeyByteLength}"
-            println "material byteLen: ${material.length}"
-            println "decoded  byteLen: ${decodedMaterial.length}"
-            //assertEquals curve.encodedKeyByteLength, decodedMaterial.length
-            //assertEquals("material encoded value should equal JWK value", materialEncoded, val)
-            String status = Arrays.equals(material, decodedMaterial) ? 'equals' : 'doesnt equal'
-            int lenDiff = material.length - decodedMaterial.length
-            if (lenDiff != 0) {
-                if (Bytes.startsWith(material, decodedMaterial)) {
-                    status = 'starts with'
-                } else if (Bytes.endsWith(material, decodedMaterial)) {
-                    status = 'ends with'
-                }
-            }
-            String msg = "Material $status decodedMaterial, missing $lenDiff bytes. Encoded material: $materialEncoded, JWK '${field.getId()}': $val. JWK: $jwk"
-            println msg
-            println()
-            e.printStackTrace()
-            fail(msg)
-        }
+    /**
+     * Test case discovered during CI testing where a randomly-generated Ed448 public key with a leading zero byte was
+     * not being decoded correctly.  This test asserts that this value is decoded correctly.
+     */
+    @Test
+    void testEd448PublicJson() {
+        String use = 'sig'
+        String kty = 'OKP'
+        String crv = 'Ed448'
+        String x = 'AKxj_Iz2y6IHq5KipsOYZJyUjClO1IbT396KQK15DFryNwowKKBvswQLWytxXHgqGkpG5PUWkuQA'
+        byte[] decoded = DefaultOctetPublicJwk.X.applyFrom(x)
+        assertEquals 0x00, decoded[0]
+
+        String json = RfcTests.stripws("""
+        {
+           "use": "$use",
+           "kty": "$kty",
+           "crv": "$crv",
+           "x": "$x"
+        }""")
+        def jwk = Jwks.parser().build().parse(json) as OctetPublicJwk
+        assertEquals use, jwk.getPublicKeyUse()
+        assertEquals kty, jwk.getType()
+        assertEquals crv, jwk.get('crv')
+        assertEquals x, jwk.get('x')
+    }
+
+    /**
+     * Test case discovered during CI testing where a randomly-generated Ed25519 private key with a leading zero byte
+     * was not being decoded correctly.  This test asserts that this value is decoded correctly.
+     */
+    @Test
+    void testEd25519PrivateJson() {
+        String use = 'sig'
+        String kty = 'OKP'
+        String crv = 'Ed25519'
+        String x = '9NAzPLMakU0R-tLgX7NmzUUg_fUGiDbrGOWqQ0F_s3g'
+        String d = 'AAfgb017BkHlLf_SqVBA_LqPhabpdh43dLXHfD6ggQ0'
+        byte[] decoded = DefaultOctetPrivateJwk.D.applyFrom(d)
+        assertEquals 0x00, decoded[0]
+        String json = RfcTests.stripws("""
+        {
+           "use": "$use",
+           "kty": "$kty",
+           "crv": "$crv",
+           "x": "$x",
+           "d": "$d"
+        }""")
+        def jwk = Jwks.parser().build().parse(json) as OctetPrivateJwk
+        assertEquals use, jwk.getPublicKeyUse()
+        assertEquals kty, jwk.getType()
+        assertEquals crv, jwk.get('crv')
+        assertEquals x, jwk.get('x')
+        assertEquals d, jwk.get('d').get() // Supplier
+        def pubJwk = jwk.toPublicJwk()
+        assertEquals use, pubJwk.getPublicKeyUse()
+        assertEquals kty, pubJwk.getType()
+        assertEquals crv, pubJwk.get('crv')
+        assertEquals x, pubJwk.get('x')
+        assertNull pubJwk.get('d')
     }
 
     @Test
@@ -68,13 +111,13 @@ class OctetJwksTest {
 
             // test individual keys
             PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
-            PublicJwk pubValuesJwk = buildJwk(curve, pub, pubJwk) as PublicJwk // ensure value map symmetry
+            PublicJwk pubValuesJwk = Jwks.builder().putAll(pubJwk).build() as PublicJwk // ensure value map symmetry
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
 
             PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
-            PrivateJwk privValuesJwk = buildJwk(curve, priv, privJwk) as PrivateJwk // ensure value map symmetry
+            PrivateJwk privValuesJwk = Jwks.builder().putAll(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
             // we can't assert that priv.equals(privValuesJwk.toKey()) here because BouncyCastle uses PKCS8 V2 encoding

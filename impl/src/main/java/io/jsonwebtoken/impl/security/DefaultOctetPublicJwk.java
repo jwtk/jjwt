@@ -3,13 +3,13 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.security.PublicJwk;
+import io.jsonwebtoken.security.OctetPublicJwk;
 
 import java.security.PublicKey;
 import java.util.List;
 import java.util.Set;
 
-public class DefaultOctetPublicJwk<T extends PublicKey> extends AbstractPublicJwk<T> implements PublicJwk<T> {
+public class DefaultOctetPublicJwk<T extends PublicKey> extends AbstractPublicJwk<T> implements OctetPublicJwk<T> {
 
     static final String TYPE_VALUE = "OKP";
     static final Field<String> CRV = DefaultEcPublicJwk.CRV;

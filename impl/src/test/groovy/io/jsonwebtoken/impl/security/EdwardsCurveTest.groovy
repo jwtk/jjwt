@@ -117,9 +117,8 @@ class EdwardsCurveTest {
             try {
                 it.toPrivateKey(d, it.getProvider())
             } catch (InvalidKeyException ike) {
-//                String msg = "Invalid ${it.id} encoded PrivateKey length. Should be " +
-//                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(d.length)}."
-                String msg = "Unsupported private key value."
+                String msg = "Invalid ${it.id} encoded PrivateKey length. Should be " +
+                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(d.length)}."
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -133,9 +132,8 @@ class EdwardsCurveTest {
             try {
                 it.toPublicKey(x, it.getProvider())
             } catch (InvalidKeyException ike) {
-//                String msg = "Invalid ${it.id} encoded PublicKey length. Should be " +
-//                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(x.length)}."
-                String msg = "Unsupported public key value."
+                String msg = "Invalid ${it.id} encoded PublicKey length. Should be " +
+                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(x.length)}."
                 assertEquals msg, ike.getMessage()
             }
         }

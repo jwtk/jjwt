@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -25,9 +26,13 @@ public class DefaultFieldBuilder<T> implements FieldBuilder<T> {
     private String id;
     private String name;
     private boolean secret;
-    private Class<T> type;
+    private final Class<T> type;
     private Converter<T, ?> converter;
-    private Boolean list = null; // True == List, False == Set, null == not a collection
+    private Class<? extends Collection<T>> collectionType; // will be null if field doesn't represent a collection (list or set)
+
+    public DefaultFieldBuilder(Class<T> type) {
+        this.type = Assert.notNull(type, "Type cannot be null.");
+    }
 
     @Override
     public FieldBuilder<T> setId(String id) {
@@ -47,25 +52,19 @@ public class DefaultFieldBuilder<T> implements FieldBuilder<T> {
         return this;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "UnnecessaryLocalVariable"})
-    @Override
-    public <C> FieldBuilder<C> setType(Class<C> type) {
-        Class clazz = type;
-        this.type = clazz;
-        return (FieldBuilder<C>) this;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public FieldBuilder<List<T>> list() {
-        this.list = true;
+        Class<?> clazz = List.class;
+        this.collectionType = (Class<? extends Collection<T>>) clazz;
         return (FieldBuilder<List<T>>) this;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public FieldBuilder<Set<T>> set() {
-        this.list = false;
+        Class<?> clazz = Set.class;
+        this.collectionType = (Class<? extends Collection<T>>) clazz;
         return (FieldBuilder<Set<T>>) this;
     }
 
@@ -79,16 +78,16 @@ public class DefaultFieldBuilder<T> implements FieldBuilder<T> {
     @Override
     public Field<T> build() {
         Assert.notNull(this.type, "Type must be set.");
-        Converter converter = this.converter;
-        if (converter == null) {
-            converter = Converters.forType(this.type);
+        Converter conv = this.converter;
+        if (conv == null) {
+            conv = Converters.forType(this.type);
         }
-        if (this.list != null) {
-            converter = this.list ? Converters.forList(converter) : Converters.forSet(converter);
+        if (this.collectionType != null) {
+            conv = List.class.isAssignableFrom(collectionType) ? Converters.forList(conv) : Converters.forSet(conv);
         }
         if (this.secret) {
-            converter = new RedactedValueConverter(converter);
+            conv = new RedactedValueConverter(conv);
         }
-        return new DefaultField<>(this.id, this.name, this.secret, this.type, converter);
+        return new DefaultField<>(this.id, this.name, this.secret, this.type, this.collectionType, conv);
     }
 }

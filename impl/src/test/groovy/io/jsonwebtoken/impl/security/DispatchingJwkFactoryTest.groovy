@@ -103,6 +103,7 @@ class DispatchingJwkFactoryTest {
         ctx.putAll(m)
 
         DispatchingJwkFactory factory = new DispatchingJwkFactory()
+        ctx = factory.newContext(ctx, null)
 
         def jwk = factory.createJwk(ctx) as EcPrivateJwk
         assertTrue jwk instanceof EcPrivateJwk
@@ -117,6 +118,7 @@ class DispatchingJwkFactoryTest {
         m.remove(DefaultEcPrivateJwk.D.getId())
         ctx = new DefaultJwkContext()
         ctx.putAll(m)
+        ctx = factory.newContext(ctx, null)
 
         jwk = factory.createJwk(ctx) as EcPublicJwk
         assertTrue jwk instanceof EcPublicJwk

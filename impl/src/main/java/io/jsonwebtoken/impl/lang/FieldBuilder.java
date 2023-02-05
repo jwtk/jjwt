@@ -16,8 +16,6 @@ public interface FieldBuilder<T> extends Builder<Field<T>> {
 
     FieldBuilder<T> setSecret(boolean secret);
 
-    <C> FieldBuilder<C> setType(Class<C> type);
-
     FieldBuilder<List<T>> list();
 
     FieldBuilder<Set<T>> set();

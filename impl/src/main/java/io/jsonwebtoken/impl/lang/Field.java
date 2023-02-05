@@ -6,7 +6,9 @@ public interface Field<T> extends Identifiable, Converter<T, Object> {
 
     String getName();
 
-    Class<T> getIdiomaticType();
+    boolean supports(Object value);
+
+    T cast(Object value);
 
     boolean isSecret();
 }

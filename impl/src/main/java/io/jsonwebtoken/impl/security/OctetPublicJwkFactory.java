@@ -3,11 +3,11 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.PublicJwk;
+import io.jsonwebtoken.security.OctetPublicJwk;
 
 import java.security.PublicKey;
 
-public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, PublicJwk<PublicKey>> {
+public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, OctetPublicJwk<PublicKey>> {
 
     static final OctetPublicJwkFactory INSTANCE = new OctetPublicJwkFactory();
 
@@ -16,7 +16,7 @@ public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, PublicJwk<
     }
 
     @Override
-    protected PublicJwk<PublicKey> createJwkFromKey(JwkContext<PublicKey> ctx) {
+    protected OctetPublicJwk<PublicKey> createJwkFromKey(JwkContext<PublicKey> ctx) {
         PublicKey key = Assert.notNull(ctx.getKey(), "PublicKey cannot be null.");
         EdwardsCurve crv = EdwardsCurve.forKey(key);
         byte[] x = crv.getKeyMaterial(key);
@@ -28,7 +28,7 @@ public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, PublicJwk<
     }
 
     @Override
-    protected PublicJwk<PublicKey> createJwkFromValues(JwkContext<PublicKey> ctx) {
+    protected OctetPublicJwk<PublicKey> createJwkFromValues(JwkContext<PublicKey> ctx) {
         FieldReadable reader = new RequiredFieldReader(ctx);
         EdwardsCurve curve = getCurve(reader);
         byte[] x = reader.get(DefaultOctetPublicJwk.X);

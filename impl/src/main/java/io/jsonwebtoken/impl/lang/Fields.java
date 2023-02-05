@@ -22,12 +22,12 @@ public final class Fields {
 
     public static Field<List<X509Certificate>> x509Chain(String id, String name) {
         return builder(X509Certificate.class)
-            .setConverter(Converters.X509_CERTIFICATE).list()
-            .setId(id).setName(name).build();
+                .setConverter(Converters.X509_CERTIFICATE).list()
+                .setId(id).setName(name).build();
     }
 
     public static <T> FieldBuilder<T> builder(Class<T> type) {
-        return new DefaultFieldBuilder<>().setType(type);
+        return new DefaultFieldBuilder<>(type);
     }
 
     public static Field<Set<String>> stringSet(String id, String name) {

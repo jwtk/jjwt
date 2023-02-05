@@ -5,13 +5,13 @@ import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.PrivateJwk;
-import io.jsonwebtoken.security.PublicJwk;
+import io.jsonwebtoken.security.OctetPrivateJwk;
+import io.jsonwebtoken.security.OctetPublicJwk;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>>> {
+public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPrivateJwk<PublicKey, PrivateKey>> {
 
     public OctetPrivateJwkFactory() {
         super(PrivateKey.class, DefaultOctetPrivateJwk.FIELDS);
@@ -23,7 +23,7 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, PrivateJ
     }
 
     @Override
-    protected PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>> createJwkFromKey(JwkContext<PrivateKey> ctx) {
+    protected OctetPrivateJwk<PublicKey, PrivateKey> createJwkFromKey(JwkContext<PrivateKey> ctx) {
         PrivateKey key = Assert.notNull(ctx.getKey(), "PrivateKey cannot be null.");
         EdwardsCurve crv = EdwardsCurve.forKey(key);
 
@@ -38,7 +38,7 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, PrivateJ
         // public key per https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
         boolean copyId = !Strings.hasText(ctx.getId()) && ctx.getIdThumbprintAlgorithm() != null;
         JwkContext<PublicKey> pubCtx = OctetPublicJwkFactory.INSTANCE.newContext(ctx, pub);
-        PublicJwk<PublicKey> pubJwk = OctetPublicJwkFactory.INSTANCE.createJwk(pubCtx);
+        OctetPublicJwk<PublicKey> pubJwk = OctetPublicJwkFactory.INSTANCE.createJwk(pubCtx);
         ctx.putAll(pubJwk);
         if (copyId) {
             ctx.setId(pubJwk.getId());
@@ -54,14 +54,14 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, PrivateJ
     }
 
     @Override
-    protected PrivateJwk<PrivateKey, PublicKey, PublicJwk<PublicKey>> createJwkFromValues(JwkContext<PrivateKey> ctx) {
+    protected OctetPrivateJwk<PublicKey, PrivateKey> createJwkFromValues(JwkContext<PrivateKey> ctx) {
         FieldReadable reader = new RequiredFieldReader(ctx);
         EdwardsCurve curve = getCurve(reader);
         //TODO: assert that the curve contains the specified key
 
         // public values are required, so assert them:
         JwkContext<PublicKey> pubCtx = new DefaultJwkContext<>(DefaultOctetPublicJwk.FIELDS, ctx);
-        PublicJwk<PublicKey> pubJwk = OctetPublicJwkFactory.INSTANCE.createJwkFromValues(pubCtx);
+        OctetPublicJwk<PublicKey> pubJwk = OctetPublicJwkFactory.INSTANCE.createJwkFromValues(pubCtx);
 
         byte[] d = reader.get(DefaultOctetPrivateJwk.D);
         PrivateKey key = curve.toPrivateKey(d, ctx.getProvider());

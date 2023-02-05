@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Converters
-import io.jsonwebtoken.impl.lang.RedactedSupplier
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
@@ -125,9 +124,9 @@ class JwksTest {
         def jwk = Jwks.builder().forKey(SKEY).build()
         assertEquals 'oct', jwk.getType()
         assertEquals 'oct', jwk.kty
-        assertNotNull jwk.k
-        assertTrue jwk.k instanceof RedactedSupplier
-        assertTrue MessageDigest.isEqual(SKEY.encoded, Decoders.BASE64URL.decode(jwk.k.get()))
+        String k = jwk.k.get() as String
+        assertNotNull k
+        assertTrue MessageDigest.isEqual(SKEY.encoded, Decoders.BASE64URL.decode(k))
     }
 
     @Test
