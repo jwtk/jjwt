@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * A {@link SecurityBuilder} that produces a JWK.  A JWK is an immutable set of name/value pairs that represent a
  * cryptographic key as defined by
- * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}.
+ * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517: JSON Web Key (JWK)</a>.
  * The {@code JwkBuilder} interface represents common JWK properties that may be specified for any type of JWK.
  * Builder subtypes support additional JWK properties specific to different types of cryptographic keys
  * (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).

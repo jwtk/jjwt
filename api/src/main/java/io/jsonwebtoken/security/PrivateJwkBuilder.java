@@ -19,7 +19,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 /**
- * An {@link AsymmetricJwkBuilder} that creates private JWKs.
+ * An {@link AsymmetricJwkBuilder} that creates {@link PrivateJwk} instances.
  *
  * @param <K> the type of Java {@link PrivateKey} provided by the created private JWK.
  * @param <L> the type of Java {@link PublicKey} paired with the private key.
