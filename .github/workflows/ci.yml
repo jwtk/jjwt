@@ -20,7 +20,6 @@ jobs:
       - name: Set up JDK
         uses: oracle-actions/setup-java@v1
         with:
-          website: jdk.java.net
           release: ${{ matrix.java }}
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
