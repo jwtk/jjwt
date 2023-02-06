@@ -73,6 +73,25 @@ jobs:
           if [ "$JDK_MAJOR_VERSION" == "7" ]; then export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"; fi
           ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
 
+  # ensure all of our files have the correct/updated license header
+  license-check:
+    runs-on: 'ubuntu-latest'
+    env:
+      MVN_CMD: ./mvnw --no-transfer-progress -B
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+          cache: 'maven'
+          check-latest: true
+      - name: License Check
+        # This adds about 1 minute to any build, which is why we don't want to do it on every other build:
+        run: |
+          ${{env.MVN_CMD}} license:check
+
   code-coverage:
     # (commented out for now - see the comments in 'Wait to start' below for why.  Keeping this here as a placeholder
     # as it may be better to use instead of an artificial delay once we no longer need to build on JDK 7):

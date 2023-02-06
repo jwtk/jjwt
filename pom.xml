@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2014 jsonwebtoken.io
+  ~ Copyright (C) 2014-2023 jsonwebtoken.io
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jsonwebtoken</groupId>
@@ -90,7 +91,7 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments />
+        <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
@@ -102,8 +103,7 @@
         <maven.gpg.version>1.6</maven.gpg.version> <!-- max version allowed for JDK 7 builds -->
         <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
         <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
-        <maven.license.version>3.0</maven.license.version>
-        <maven.build-helper.version>1.12</maven.build-helper.version>
+        <maven.license.version>4.2.rc3</maven.license.version>
 
         <jdk.version>1.7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
@@ -112,7 +112,7 @@
         <orgjson.version>20220320</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
-        <maven.javadoc.additionalOptions />
+        <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.70</bouncycastle.version>
@@ -265,24 +265,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${maven.build-helper.version}</version>
-                    <executions>
-                        <execution>
-                            <id>timestamp-property</id>
-                            <goals>
-                                <goal>timestamp-property</goal>
-                            </goals>
-                            <phase>validate</phase>
-                            <configuration>
-                                <name>build.year</name>
-                                <pattern>yyyy</pattern>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
@@ -324,24 +306,48 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${maven.license.version}</version>
                     <configuration>
-                        <aggregate>true</aggregate>
                         <skipExistingHeaders>true</skipExistingHeaders>
-                        <header>${jjwt.root}/src/license/header.txt</header>
-                        <headerDefinitions>
-                            <headerDefinition>${jjwt.root}/src/license/header_format.xml</headerDefinition>
-                        </headerDefinitions>
-                        <properties>
-                            <organization.name>${project.organization.name}</organization.name>
-                            <build.year>${build.year}</build.year>
-                        </properties>
-                        <excludes>
-                            <exclude>**/*.txt</exclude>
-                            <exclude>LICENSE</exclude>
-                            <exclude>**/lombok.config</exclude>
-                            <exclude>**/mvnw</exclude>
-                            <exclude>.gitattributes</exclude>
-                        </excludes>
+                        <mapping>
+                            <toml>SCRIPT_STYLE</toml> <!-- yaml -->
+                            <pem>SCRIPT_STYLE</pem> <!-- any will do -->
+                        </mapping>
+                        <licenseSets>
+                            <licenseSet>
+                                <header>${jjwt.root}/src/license/header.txt</header>
+                                <excludes>
+                                    <exclude>**/license/header.txt</exclude>
+                                    <exclude>**/*.test.orgjson</exclude>
+                                    <exclude>**/*.test.gson</exclude>
+                                    <exclude>**/*.test.override</exclude>
+                                    <exclude>**/*.bnd</exclude>
+                                    <exclude>LICENSE</exclude>
+                                    <exclude>**/mvnw</exclude>
+                                    <exclude>**/lombok.config</exclude>
+                                    <exclude>.gitattributes</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
+                        <!--                        <aggregate>true</aggregate>-->
+                        <!--                        <skipExistingHeaders>true</skipExistingHeaders>-->
+                        <!--                        <header>${jjwt.root}/src/license/header.txt</header>-->
+                        <!--                        <headerDefinitions>-->
+                        <!--                            <headerDefinition>${jjwt.root}/src/license/header_format.xml</headerDefinition>-->
+                        <!--                        </headerDefinitions>-->
+                        <!--                        <excludes>-->
+                        <!--                            <exclude>**/*.txt</exclude>-->
+                        <!--                            <exclude>LICENSE</exclude>-->
+                        <!--                            <exclude>**/lombok.config</exclude>-->
+                        <!--                            <exclude>**/mvnw</exclude>-->
+                        <!--                            <exclude>.gitattributes</exclude>-->
+                        <!--                        </excludes>-->
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.mycila</groupId>
+                            <artifactId>license-maven-plugin-git</artifactId>
+                            <version>${maven.license.version}</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <goals>
@@ -463,7 +469,8 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         </transformers>
                     </configuration>
                     <executions>
@@ -478,6 +485,10 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -571,10 +582,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.openclover</groupId>
