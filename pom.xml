@@ -104,6 +104,7 @@
         <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
         <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
         <maven.license.version>4.2.rc3</maven.license.version>
+        <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
         <jdk.version>1.7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
@@ -306,7 +307,7 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${maven.license.version}</version>
                     <configuration>
-                        <skipExistingHeaders>true</skipExistingHeaders>
+                        <skipExistingHeaders>${maven.license.skipExistingHeaders}</skipExistingHeaders>
                         <mapping>
                             <toml>SCRIPT_STYLE</toml> <!-- yaml -->
                             <pem>SCRIPT_STYLE</pem> <!-- any will do -->
@@ -327,19 +328,6 @@
                                 </excludes>
                             </licenseSet>
                         </licenseSets>
-                        <!--                        <aggregate>true</aggregate>-->
-                        <!--                        <skipExistingHeaders>true</skipExistingHeaders>-->
-                        <!--                        <header>${jjwt.root}/src/license/header.txt</header>-->
-                        <!--                        <headerDefinitions>-->
-                        <!--                            <headerDefinition>${jjwt.root}/src/license/header_format.xml</headerDefinition>-->
-                        <!--                        </headerDefinitions>-->
-                        <!--                        <excludes>-->
-                        <!--                            <exclude>**/*.txt</exclude>-->
-                        <!--                            <exclude>LICENSE</exclude>-->
-                        <!--                            <exclude>**/lombok.config</exclude>-->
-                        <!--                            <exclude>**/mvnw</exclude>-->
-                        <!--                            <exclude>.gitattributes</exclude>-->
-                        <!--                        </excludes>-->
                     </configuration>
                     <dependencies>
                         <dependency>
