@@ -39,7 +39,7 @@ import java.security.interfaces.ECPublicKey;
  * JJWT supports Octet public JWKs in earlier versions when BouncyCastle is enabled in the application classpath.  When
  * using earlier JDK versions, the {@code OctetPublicJwk} instance will need be parameterized with the
  * generic {@code PublicKey} type since the latter key types would not be present.  For example:</p>
- * <pre><code>OctetPublicJwk&LT;PublicKey&gt; octetPublicJwk = getKey();</code></pre>
+ * <pre><code>OctetPublicJwk&lt;PublicKey&gt; octetPublicJwk = getKey();</code></pre>
  *
  * <p><b>OKP-specific Properties</b></p>
  *

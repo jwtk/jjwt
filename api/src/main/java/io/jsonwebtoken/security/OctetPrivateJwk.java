@@ -41,7 +41,7 @@ import java.security.interfaces.ECPrivateKey;
  * using earlier JDK versions, the {@code OctetPrivateJwk} instance will need be parameterized with the
  * generic {@code PrivateKey} type since the latter key types would not be present.  For example:</p>
  * <blockquote><pre>
- * OctetPrivateJwk&LT;PrivateKey&gt; octetPrivateJwk = getKey();</pre></blockquote>
+ * OctetPrivateJwk&lt;PrivateKey&gt; octetPrivateJwk = getKey();</pre></blockquote>
  *
  * <p><b>OKP-specific Properties</b></p>
  *
