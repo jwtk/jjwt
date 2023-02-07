@@ -26,22 +26,20 @@ import java.security.interfaces.ECPublicKey;
  * <p>Unlike the {@link EcPublicJwk} interface, which only supports
  * <a href="https://en.wikipedia.org/wiki/Elliptic_curve">Weierstrass</a>-form {@link ECPublicKey}s,
  * {@code OctetPublicJwk} allows for multiple parameterized {@link PublicKey} types
- * because the JDK supports two different types of Edwards Curve public keys:
+ * because the JDK supports two different types of Edwards Curve public keys:</p>
  * <ul>
  *     <li><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPublicKey.html">java.security.interfaces.XECPublicKey</a>, introduced in JDK 11, and</li>
  *     <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPublicKey.html">java.security.interfaces.EdECPublicKey</a>, introduced in JDK 15.</li>
  * </ul>
- * As such, {@code OctetPublicJwk} is parameterized to support both key types.
- * </p>
+ * <p>As such, {@code OctetPublicJwk} is parameterized to support both key types.</p>
  *
  * <p><b>Earlier JDK Versions</b></p>
  *
  * <p>Even though {@code XECPublicKey} and {@code EdECPublicKey} were introduced in JDK 11 and JDK 15 respectively,
  * JJWT supports Octet public JWKs in earlier versions when BouncyCastle is enabled in the application classpath.  When
  * using earlier JDK versions, the {@code OctetPublicJwk} instance will need be parameterized with the
- * generic {@code PublicKey} type since the latter key types would not be present.  For example:
+ * generic {@code PublicKey} type since the latter key types would not be present.  For example:</p>
  * <pre><code>OctetPublicJwk&LT;PublicKey&gt; octetPublicJwk = getKey();</code></pre>
- * </p>
  *
  * <p><b>OKP-specific Properties</b></p>
  *
