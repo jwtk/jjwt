@@ -22,9 +22,9 @@ import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.impl.lang.IdRegistry;
-import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
@@ -75,7 +75,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         codecs.addAll(extraCodecs);
         codecs.add(CompressionCodecs.DEFLATE); // standard ones are added last so they can't be accidentally replaced
         codecs.add(CompressionCodecs.GZIP);
-        this.codecs = new IdRegistry<>(codecs);
+        this.codecs = new IdRegistry<>("CompressionCodec", codecs);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         if (!Strings.hasText(id)) {
             return null;
         }
-        CompressionCodec codec = codecs.apply(id);
+        CompressionCodec codec = codecs.find(id);
         if (codec == null) {
             String msg = String.format(MISSING_COMPRESSION_MESSAGE, id);
             throw new CompressionException(msg);

@@ -41,15 +41,15 @@ class TestKeys {
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static Collection<SecretKey> AGCM
     static {
-        A128GCM = A128KW = A128GCMKW = EncryptionAlgorithms.A128GCM.keyBuilder().build()
-        A192GCM = A192KW = A192GCMKW = EncryptionAlgorithms.A192GCM.keyBuilder().build()
-        A256GCM = A256KW = A256GCMKW = EncryptionAlgorithms.A256GCM.keyBuilder().build()
+        A128GCM = A128KW = A128GCMKW = Algorithms.enc.A128GCM.keyBuilder().build()
+        A192GCM = A192KW = A192GCMKW = Algorithms.enc.A192GCM.keyBuilder().build()
+        A256GCM = A256KW = A256GCMKW = Algorithms.enc.A256GCM.keyBuilder().build()
         AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
 
-    static SecretKey A128CBC_HS256 = EncryptionAlgorithms.A128CBC_HS256.keyBuilder().build()
-    static SecretKey A192CBC_HS384 = EncryptionAlgorithms.A192CBC_HS384.keyBuilder().build()
-    static SecretKey A256CBC_HS512 = EncryptionAlgorithms.A256CBC_HS512.keyBuilder().build()
+    static SecretKey A128CBC_HS256 = Algorithms.enc.A128CBC_HS256.keyBuilder().build()
+    static SecretKey A192CBC_HS384 = Algorithms.enc.A192CBC_HS384.keyBuilder().build()
+    static SecretKey A256CBC_HS512 = Algorithms.enc.A256CBC_HS512.keyBuilder().build()
     static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
 
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()

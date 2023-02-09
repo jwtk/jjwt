@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.KeyAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -28,11 +28,11 @@ import static org.junit.Assert.assertEquals
 
 class DefaultRsaKeyAlgorithmTest {
 
-    static final algs = [KeyAlgorithms.RSA1_5, KeyAlgorithms.RSA_OAEP, KeyAlgorithms.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
+    static final algs = [Algorithms.key.RSA1_5, Algorithms.key.RSA_OAEP, Algorithms.key.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
 
     @Test
     void testValidateNonRSAKey() {
-        SecretKey key = KeyAlgorithms.A128KW.keyBuilder().build()
+        SecretKey key = Algorithms.key.A128KW.keyBuilder().build()
         for (DefaultRsaKeyAlgorithm alg : algs) {
             // if RSAKey interface isn't exposed (e.g. PKCS11 or HSM), don't error:
             alg.validate(key, true)

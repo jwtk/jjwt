@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.IdRegistry;
-import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import java.security.Key;
@@ -37,7 +37,7 @@ public final class JwsAlgorithmsBridge {
 
     static {
         //noinspection RedundantTypeArguments
-        REGISTRY = new IdRegistry<>(Collections.<SecureDigestAlgorithm<?, ?>>of(
+        REGISTRY = new IdRegistry<>("JWS MAC or SignatureAlgorithm", Collections.<SecureDigestAlgorithm<?, ?>>of(
                 new NoneSignatureAlgorithm(),
                 new DefaultMacAlgorithm(256),
                 new DefaultMacAlgorithm(384),
@@ -60,7 +60,7 @@ public final class JwsAlgorithmsBridge {
     }
 
     public static SecureDigestAlgorithm<?, ?> findById(String id) {
-        return REGISTRY.apply(id);
+        return REGISTRY.find(id);
     }
 
     public static SecureDigestAlgorithm<?, ?> forId(String id) {

@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.JwkThumbprint;
 
@@ -37,8 +38,9 @@ class DefaultJwkThumbprint implements JwkThumbprint {
     DefaultJwkThumbprint(byte[] digest, HashAlgorithm alg) {
         this.digest = Assert.notEmpty(digest, "Thumbprint digest byte array cannot be null or empty.");
         this.alg = Assert.notNull(alg, "Thumbprint HashAlgorithm cannot be null.");
+        String id = Assert.hasText(Strings.clean(alg.getId()), "Thumbprint HashAlgorithm id cannot be null or empty.");
         String base64Url = Encoders.BASE64URL.encode(digest);
-        String s = URI_PREFIX + alg.getId() + ":" + base64Url;
+        String s = URI_PREFIX + id + ":" + base64Url;
         this.uri = URI.create(s);
         this.hashcode = Objects.nullSafeHashCode(this.digest, this.alg);
         this.sval = Encoders.BASE64URL.encode(digest);

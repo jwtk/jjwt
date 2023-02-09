@@ -315,7 +315,7 @@ class EdwardsCurveTest {
     @Test
     void testParamKeySpecFactoryWithNullSpec() {
         def fn = EdwardsCurve.paramKeySpecFactory(null, true)
-        assertSame Functions.NULL(), fn
+        assertSame Functions.forNull(), fn
     }
 
     @Test

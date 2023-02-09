@@ -30,12 +30,12 @@ public class StringRegistry<V> extends DefaultRegistry<String, V> {
 
     private final Map<String, V> CI_VALUES;
 
-    public StringRegistry(Collection<V> values, Function<V, String> keyFn) {
-        this(values, keyFn, Locale.ENGLISH);
+    public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn) {
+        this(name, keyName, values, keyFn, Locale.ENGLISH);
     }
 
-    public StringRegistry(Collection<V> values, Function<V, String> keyFn, final Locale caseInsensitiveLocale) {
-        super(values, keyFn);
+    public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, final Locale caseInsensitiveLocale) {
+        super(name, keyName, values, keyFn);
         this.CI_FN = new CaseInsensitiveFunction(caseInsensitiveLocale);
         Map<String, V> m = new LinkedHashMap<>(values().size());
         for (V value : values) {

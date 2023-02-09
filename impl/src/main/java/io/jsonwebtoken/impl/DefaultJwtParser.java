@@ -41,7 +41,6 @@ import io.jsonwebtoken.UnprotectedHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.ConstantFunction;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.LegacyServices;
@@ -49,9 +48,7 @@ import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
-import io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.JwsAlgorithmsBridge;
-import io.jsonwebtoken.impl.security.KeyAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
@@ -64,6 +61,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -82,6 +80,7 @@ import java.security.Key;
 import java.security.Provider;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -94,78 +93,73 @@ public class DefaultJwtParser implements JwtParser {
     private static final JwtTokenizer jwtTokenizer = new JwtTokenizer();
 
     public static final String INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was: %s.";
-    public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not present in the JWT claims.";
+    public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not " +
+            "present in the JWT claims.";
 
-    public static final String MISSING_JWS_ALG_MSG =
-            "JWS header does not contain a required 'alg' (Algorithm) header parameter.  " +
-                    "This header parameter is mandatory per the JWS Specification, Section 4.1.1. See " +
-                    "https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.1 for more information.";
+    public static final String MISSING_JWS_ALG_MSG = "JWS header does not contain a required 'alg' (Algorithm) " +
+            "header parameter.  This header parameter is mandatory per the JWS Specification, Section 4.1.1. See " +
+            "https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.1 for more information.";
 
-    public static final String MISSING_JWE_ALG_MSG =
-            "JWE header does not contain a required 'alg' (Algorithm) header parameter.  " +
-                    "This header parameter is mandatory per the JWE Specification, Section 4.1.1. See " +
-                    "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1 for more information.";
+    public static final String MISSING_JWE_ALG_MSG = "JWE header does not contain a required 'alg' (Algorithm) " +
+            "header parameter.  This header parameter is mandatory per the JWE Specification, Section 4.1.1. See " +
+            "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1 for more information.";
 
-    public static final String MISSING_JWS_DIGEST_MSG_FMT =
-            "The JWS header references signature algorithm '%s' but the compact JWE string is missing the " +
-                    "required signature.";
+    public static final String MISSING_JWS_DIGEST_MSG_FMT = "The JWS header references signature algorithm '%s' but " +
+            "the compact JWE string is missing the required signature.";
 
-    public static final String MISSING_JWE_DIGEST_MSG_FMT =
-            "The JWE header references key management algorithm '%s' but the compact JWE string is missing the " +
-                    "required AAD authentication tag.";
+    public static final String MISSING_JWE_DIGEST_MSG_FMT = "The JWE header references key management algorithm '%s' " +
+            "but the compact JWE string is missing the " + "required AAD authentication tag.";
 
-    private static final String MISSING_ENC_MSG =
-            "JWE header does not contain a required 'enc' (Encryption Algorithm) header parameter.  " +
-                    "This header parameter is mandatory per the JWE Specification, Section 4.1.2. See " +
-                    "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
+    private static final String MISSING_ENC_MSG = "JWE header does not contain a required " +
+            "'enc' (Encryption Algorithm) header parameter.  " + "This header parameter is mandatory per the JWE " +
+            "Specification, Section 4.1.2. See " +
+            "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an " +
-            AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() +
-            "') are disallowed by default as mandated by " +
-            "https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to allow them to be " +
-            "parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
+            AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() + "') are disallowed by " +
+            "default as mandated by https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to " +
+            "allow them to be parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
             "security considerations covered in that method's JavaDoc before doing so). Header: ";
 
-    private static final String JWE_NONE_MSG =
-            "JWEs do not support key management " + AbstractHeader.ALGORITHM +
-                    " header value 'none' per https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1";
+    private static final String JWE_NONE_MSG = "JWEs do not support key management " + AbstractHeader.ALGORITHM +
+            " header value '" + JwsAlgorithms.NONE.getId() + "' per " +
+            "https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1";
 
-    private static final String JWS_NONE_SIG_MISMATCH_MSG =
-            "The JWS header references signature algorithm 'none' yet the " +
-                    "compact JWS string contains a signature. This is not permitted per " +
-                    "https://tools.ietf.org/html/rfc7518#section-3.6.";
-    private static final String UNPROTECTED_DECOMPRESSION_MSG = "The JWT header references " +
-            "compression algorithm '%s', but payload decompression for Unsecured JWSs (those with an " +
-            AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() + "') are " +
-            "disallowed by default to protect against [Denial of Service attacks](" +
+    private static final String JWS_NONE_SIG_MISMATCH_MSG = "The JWS header references signature algorithm '" +
+            JwsAlgorithms.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
+            "per https://tools.ietf.org/html/rfc7518#section-3.6.";
+    private static final String UNPROTECTED_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
+            "'%s', but payload decompression for Unsecured JWTs (those with an " + AbstractHeader.ALGORITHM +
+            " header value of '" + JwsAlgorithms.NONE.getId() + "') are " + "disallowed by default to protect " +
+            "against [Denial of Service attacks](" +
             "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf).  If you " +
             "wish to enable Unsecure JWS payload decompression, call the JwtParserBuilder." +
             "enableUnsecuredDecompression() method (but please read the security considerations covered in that " +
             "method's JavaDoc before doing so).";
 
-    private static <H extends Header<H>, R extends Identifiable> Function<H, R> backup(String id, String msg, Collection<R> extras) {
-        if (Collections.isEmpty(extras)) {
-            return ConstantFunction.forNull();
-        } else {
-            return new IdLocator<>(id, msg, new IdRegistry<>(extras), ConstantFunction.<H, R>forNull());
-        }
-    }
-
-    private static <H extends Header<H>, R extends Identifiable> Function<H, R> locFn(String id, String msg, Function<String, R> reg, Collection<R> extras) {
-        Function<H, R> backup = backup(id, msg, extras);
-        return new IdLocator<>(id, msg, reg, backup);
+    private static <I extends Identifiable> IdRegistry<I> newRegistry(String name, Collection<I> defaults, Collection<I> extras) {
+        Collection<I> all = new LinkedHashSet<>(Collections.size(extras) + defaults.size());
+        all.addAll(extras);
+        all.addAll(defaults);
+        return new IdRegistry<>(name, all);
     }
 
     private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
-        return locFn(AbstractHeader.ALGORITHM.getId(), MISSING_JWS_ALG_MSG, JwsAlgorithmsBridge.REGISTRY, extras);
+        String name = "JWS MAC or Signature Algorithm";
+        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, JwsAlgorithmsBridge.values(), extras);
+        return new IdLocator<>(AbstractHeader.ALGORITHM, MISSING_JWS_ALG_MSG, registry);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
-        return locFn(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), MISSING_ENC_MSG, EncryptionAlgorithmsBridge.REGISTRY, extras);
+        String name = "JWE Encryption Algorithm";
+        IdRegistry<AeadAlgorithm> registry = newRegistry(name, Algorithms.enc.values(), extras);
+        return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, registry);
     }
 
     private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
-        return locFn(AbstractHeader.ALGORITHM.getId(), MISSING_JWE_ALG_MSG, KeyAlgorithmsBridge.REGISTRY, extras);
+        String name = "JWE Key Management Algorithm";
+        IdRegistry<KeyAlgorithm<?, ?>> registry = newRegistry(name, Algorithms.key.values(), extras);
+        return new IdLocator<>(AbstractHeader.ALGORITHM, MISSING_JWE_ALG_MSG, registry);
     }
 
     // TODO: make the following fields final for v1.0
@@ -549,26 +543,26 @@ public class DefaultJwtParser implements JwtParser {
             String msg = tokenized instanceof TokenizedJwe ? MISSING_JWE_ALG_MSG : MISSING_JWS_ALG_MSG;
             throw new MalformedJwtException(msg);
         }
+        final boolean unsecured = JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg);
 
         final String base64UrlDigest = tokenized.getDigest();
-        if (JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
+        final boolean hasDigest = Strings.hasText(base64UrlDigest);
+        if (unsecured) {
             if (tokenized instanceof TokenizedJwe) {
                 throw new MalformedJwtException(JWE_NONE_MSG);
             }
-            // else it's a JWS:
+            // Unsecured JWTs are disabled by default per the RFC:
             if (!enableUnsecuredJws) {
                 String msg = UNSECURED_DISABLED_MSG_PREFIX + header;
                 throw new UnsupportedJwtException(msg);
             }
-            if (Strings.hasText(base64UrlDigest)) {
+            if (hasDigest) {
                 throw new MalformedJwtException(JWS_NONE_SIG_MISMATCH_MSG);
             }
-        } else { // something other than 'none'.  Must have a digest component:
-            if (!Strings.hasText(base64UrlDigest)) {
-                String fmt = tokenized instanceof TokenizedJwe ? MISSING_JWE_DIGEST_MSG_FMT : MISSING_JWS_DIGEST_MSG_FMT;
-                String msg = String.format(fmt, alg);
-                throw new MalformedJwtException(msg);
-            }
+        } else if (!hasDigest) { // something other than 'none'.  Must have a digest component:
+            String fmt = tokenized instanceof TokenizedJwe ? MISSING_JWE_DIGEST_MSG_FMT : MISSING_JWS_DIGEST_MSG_FMT;
+            String msg = String.format(fmt, alg);
+            throw new MalformedJwtException(msg);
         }
 
         // =============== Body =================
@@ -648,7 +642,7 @@ public class DefaultJwtParser implements JwtParser {
             Message<byte[]> result = encAlg.decrypt(decryptRequest);
             payload = result.getPayload();
 
-        } else if (Strings.hasText(base64UrlDigest) && this.signingKeyResolver == null) { //TODO: for 1.0, remove the == null check
+        } else if (hasDigest && this.signingKeyResolver == null) { //TODO: for 1.0, remove the == null check
             // not using a signing key resolver, so we can verify the signature before reading the body, which is
             // always safer:
             verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
@@ -656,7 +650,7 @@ public class DefaultJwtParser implements JwtParser {
 
         CompressionCodec compressionCodec = compressionCodecLocator.locate(header);
         if (compressionCodec != null) {
-            if (JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg) && !enableUnsecuredDecompression) {
+            if (unsecured && !enableUnsecuredDecompression) {
                 String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionCodec.getId());
                 throw new UnsupportedJwtException(msg);
             }
@@ -685,17 +679,16 @@ public class DefaultJwtParser implements JwtParser {
         Object body = claims != null ? claims : payload;
         if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
-        } else { // JWS
-            if (!Strings.hasText(base64UrlDigest) && JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg)) {
-                //noinspection rawtypes
-                jwt = new DefaultJwt(header, body);
-            } else {
-                jwt = new DefaultJws<>((JwsHeader) header, body, base64UrlDigest);
-            }
+        } else if (hasDigest) {
+            JwsHeader jwsHeader = Assert.isInstanceOf(JwsHeader.class, header, "JwsHeader required.");
+            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest);
+        } else {
+            //noinspection rawtypes
+            jwt = new DefaultJwt(header, body);
         }
 
         // =============== Signature =================
-        if (Strings.hasText(base64UrlDigest) && signingKeyResolver != null) { // TODO: remove for 1.0
+        if (hasDigest && signingKeyResolver != null) { // TODO: remove for 1.0
             // A SigningKeyResolver has been configured, and due to it's API, we have to verify the signature after
             // parsing the body.  This can be a security risk, so it needs to be removed before 1.0
             verifySignature(tokenized, ((JwsHeader) header), alg, this.signingKeyResolver, claims, payload);

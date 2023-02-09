@@ -125,8 +125,8 @@ public interface Header<T extends Header<T>> extends Map<String, Object>, Header
      * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
      * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
      * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.  Consider
-     * using {@link io.jsonwebtoken.security.KeyAlgorithms#findById(String) KeyAlgorithms.findById} to convert this
-     * string value to a type-safe KeyAlgorithm instance.</li>
+     * using {@link io.jsonwebtoken.security.Algorithms#enc Algorithms.key}.{@link io.jsonwebtoken.lang.Registry#find(Object) find(id)}
+     * to convert this string value to a type-safe {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} instance.</li>
      * </ul>
      *
      * @return the {@code alg} header value or {@code null} if not present.  This will always be

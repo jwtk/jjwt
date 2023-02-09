@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.lang;
 
 import java.util.Collection;
 
-public interface Registry<I, T> extends Function<I, T> {
+public interface Registry<K, V> {
 
-    Collection<T> values();
+    Collection<V> values();
+
+    V get(K key) throws IllegalArgumentException;
+
+    V find(K key);
 }

@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyAlgorithms;
 
 /**
  * Mutation (modifications) to a {@link JweHeader} instance.
@@ -47,10 +47,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE producer to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     T setAgreementPartyUInfo(byte[] info);
 
@@ -65,10 +65,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE producer to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     T setAgreementPartyUInfo(String info);
 
@@ -79,10 +79,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE recipient to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     T setAgreementPartyVInfo(byte[] info);
 
@@ -97,10 +97,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE recipient to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     T setAgreementPartyVInfo(String info);
 
@@ -122,9 +122,9 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      *              greater than or equal to 1000 (one thousand).
      * @return the header for method chaining
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">JWE <code>p2c</code> (PBES2 Count) Header Parameter</a>
-     * @see KeyAlgorithms#PBES2_HS256_A128KW
-     * @see KeyAlgorithms#PBES2_HS384_A192KW
-     * @see KeyAlgorithms#PBES2_HS512_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS256_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS384_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS512_A256KW
      * @see <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP PBKDF2 Iteration Recommendations</a>
      */
     T setPbes2Count(int count);
@@ -137,9 +137,9 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
 //     * @param salt the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption.
 //     * @return the header for method chaining
 //     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
-//     * @see KeyAlgorithms#PBES2_HS256_A128KW
-//     * @see KeyAlgorithms#PBES2_HS384_A192KW
-//     * @see KeyAlgorithms#PBES2_HS512_A256KW
+//     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS256_A128KW
+//     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS384_A192KW
+//     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS512_A256KW
 //     */
 //    JweHeader setPbes2Salt(byte[] salt);
 

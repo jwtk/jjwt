@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
 import io.jsonwebtoken.impl.security.DefaultRequest
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.Request
 import org.junit.Before
@@ -169,7 +170,7 @@ class DefaultDynamicHeaderBuilderTest {
     @Test
     void testSetX509CertificateSha256Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
+        def x5tS256 = Algorithms.hash.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         def header = builder.setX509CertificateSha256Thumbprint(x5tS256).build() as JwsHeader
         assertTrue header instanceof JwsHeader

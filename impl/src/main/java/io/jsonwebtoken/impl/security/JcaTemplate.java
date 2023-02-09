@@ -19,9 +19,9 @@ import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.DefaultRegistry;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -62,7 +62,8 @@ public class JcaTemplate {
             new CertificateFactoryFactory()
     );
 
-    private static final Registry<Class<?>, InstanceFactory<?>> REGISTRY = new DefaultRegistry<>(FACTORIES,
+    private static final Registry<Class<?>, InstanceFactory<?>> REGISTRY = new DefaultRegistry<>(
+            "JCA Instance Factory", "instance class", FACTORIES,
             new Function<InstanceFactory<?>, Class<?>>() {
                 @Override
                 public Class<?> apply(InstanceFactory<?> factory) {
@@ -85,7 +86,7 @@ public class JcaTemplate {
     }
 
     private <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws SecurityException {
-        InstanceFactory<?> factory = REGISTRY.apply(clazz);
+        InstanceFactory<?> factory = REGISTRY.find(clazz);
         Assert.notNull(factory, "Unsupported JCA instance class.");
         return execute(factory, clazz, fn);
     }

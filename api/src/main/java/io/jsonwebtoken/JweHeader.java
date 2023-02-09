@@ -16,9 +16,9 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyAlgorithms;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -66,10 +66,11 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @return the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">{@code epk} (Ephemeral
      * Public Key)</a> header value created by the JWE originator for use with key agreement algorithms, or
      * {@code null} if not present.
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms#key
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     EcPublicJwk getEphemeralPublicKey();
 
@@ -80,10 +81,10 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @return any information about the JWE producer for use with key agreement algorithms, or {@code null} if not
      * present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     byte[] getAgreementPartyUInfo();
 
@@ -94,10 +95,10 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @return any information about the JWE recipient for use with key agreement algorithms, or {@code null} if not
      * present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
-     * @see KeyAlgorithms#ECDH_ES
-     * @see KeyAlgorithms#ECDH_ES_A128KW
-     * @see KeyAlgorithms#ECDH_ES_A192KW
-     * @see KeyAlgorithms#ECDH_ES_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#ECDH_ES_A256KW
      */
     byte[] getAgreementPartyVInfo();
 
@@ -113,9 +114,9 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * automatically when producing the encryption key.</p>
      *
      * @return the 96-bit initialization vector generated during key encryption, or {@code null} if not present.
-     * @see KeyAlgorithms#A128GCMKW
-     * @see KeyAlgorithms#A192GCMKW
-     * @see KeyAlgorithms#A256GCMKW
+     * @see Algorithms.StandardKeyAlgorithms#A128GCMKW
+     * @see Algorithms.StandardKeyAlgorithms#A192GCMKW
+     * @see Algorithms.StandardKeyAlgorithms#A256GCMKW
      */
     byte[] getInitializationVector();
 
@@ -130,9 +131,9 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * automatically when producing the encryption key.</p>
      *
      * @return the 128-bit authentication tag resulting from key encryption, or {@code null} if not present.
-     * @see KeyAlgorithms#A128GCMKW
-     * @see KeyAlgorithms#A192GCMKW
-     * @see KeyAlgorithms#A256GCMKW
+     * @see Algorithms.StandardKeyAlgorithms#A128GCMKW
+     * @see Algorithms.StandardKeyAlgorithms#A192GCMKW
+     * @see Algorithms.StandardKeyAlgorithms#A256GCMKW
      */
     byte[] getAuthenticationTag();
 
@@ -143,9 +144,9 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @return the number of PBKDF2 iterations necessary to derive the key used during JWE encryption, or {@code null}
      * if not present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">JWE <code>p2c</code> (PBES2 Count) Header Parameter</a>
-     * @see KeyAlgorithms#PBES2_HS256_A128KW
-     * @see KeyAlgorithms#PBES2_HS384_A192KW
-     * @see KeyAlgorithms#PBES2_HS512_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS256_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS384_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS512_A256KW
      */
     Integer getPbes2Count();
 
@@ -162,9 +163,9 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @return the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption, or
      * {@code null} if not present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
-     * @see KeyAlgorithms#PBES2_HS256_A128KW
-     * @see KeyAlgorithms#PBES2_HS384_A192KW
-     * @see KeyAlgorithms#PBES2_HS512_A256KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS256_A128KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS384_A192KW
+     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS512_A256KW
      */
     byte[] getPbes2Salt();
 }

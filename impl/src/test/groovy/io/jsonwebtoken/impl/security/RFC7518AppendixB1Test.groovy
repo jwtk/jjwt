@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -83,7 +83,7 @@ class RFC7518AppendixB1Test {
     @Test
     void test() {
 
-        def alg = EncryptionAlgorithms.A128CBC_HS256
+        def alg = Algorithms.enc.A128CBC_HS256
         def request = new DefaultAeadRequest(P, null, null, KEY, A, IV)
         def result = alg.encrypt(request);
 

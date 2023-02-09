@@ -356,8 +356,8 @@ public final class Assert {
      * @throws IllegalArgumentException if the object is not an instance of clazz
      * @see Class#isInstance
      */
-    public static void isInstanceOf(Class clazz, Object obj) {
-        isInstanceOf(clazz, obj, "");
+    public static <T> T isInstanceOf(Class<T> clazz, Object obj) {
+        return isInstanceOf(clazz, obj, "");
     }
 
     /**

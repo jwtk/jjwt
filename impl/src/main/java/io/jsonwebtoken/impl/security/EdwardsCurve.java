@@ -218,7 +218,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     // visible for testing
     protected static Function<byte[], KeySpec> paramKeySpecFactory(AlgorithmParameterSpec spec, boolean signatureCurve) {
         if (spec == null) {
-            return Functions.NULL();
+            return Functions.forNull();
         }
         return new ParameterizedKeySpecFactory(spec, signatureCurve ? EDEC_PRIV_KEY_SPEC_CTOR : XEC_PRIV_KEY_SPEC_CTOR);
     }

@@ -44,10 +44,10 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
+import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyAlgorithms;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.Password;
@@ -269,7 +269,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (key instanceof Password) {
             return encryptWith((Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()), enc);
         }
-        return encryptWith(key, KeyAlgorithms.DIRECT, enc);
+        return encryptWith(key, Algorithms.key.DIRECT, enc);
     }
 
     @Override

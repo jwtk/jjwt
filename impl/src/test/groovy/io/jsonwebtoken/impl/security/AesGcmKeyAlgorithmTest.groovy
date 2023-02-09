@@ -22,7 +22,7 @@ import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.impl.lang.CheckedSupplier
 import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Arrays
-import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
@@ -82,7 +82,7 @@ class AesGcmKeyAlgorithmTest {
         def resultA = new DefaultAeadResult(null, null, ciphertext, kek, null, tag, iv)
 
         def encRequest = new DefaultAeadRequest(cek.getEncoded(), null, null, kek, null, iv)
-        def encResult = EncryptionAlgorithms.A256GCM.encrypt(encRequest)
+        def encResult = Algorithms.enc.A256GCM.encrypt(encRequest)
 
         assertArrayEquals resultA.digest, encResult.digest
         assertArrayEquals resultA.initializationVector, encResult.initializationVector
@@ -174,25 +174,4 @@ class AesGcmKeyAlgorithmTest {
         testDecryptionHeader('iv', null, missing('iv', 'Initialization Vector'))
         testDecryptionHeader('tag', null, missing('tag', 'Authentication Tag'))
     }
-
-    /*
-    @Test
-    void testIncorrectTypeHeaders() {
-        testDecryptionHeader('iv', 14, type('iv'))
-        testDecryptionHeader('tag', 14, type('tag'))
-    }
-
-    @Test
-    void testInvalidBase64UrlHeaders() {
-        testDecryptionHeader('iv', 'T#ZW@#', base64Url('iv'))
-        testDecryptionHeader('tag', 'T#ZW@#', base64Url('tag'))
-    }
-
-    @Test
-    void testIncorrectLengths() {
-        def value = Encoders.BASE64URL.encode("hi".getBytes(StandardCharsets.US_ASCII))
-        testDecryptionHeader('iv', value, length('iv', 96))
-        testDecryptionHeader('tag', value, length('tag', 128))
-    }
-     */
 }

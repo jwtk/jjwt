@@ -32,8 +32,9 @@ public class IdRegistry<T extends Identifiable> extends StringRegistry<T> {
     };
 
     @SuppressWarnings("unchecked")
-    public IdRegistry(Collection<T> instances) {
-        super(Assert.notEmpty(instances, "Collection of Identifiable instances may not be null or empty."),
+    public IdRegistry(String name, Collection<T> instances) {
+        super(name, "id",
+                Assert.notEmpty(instances, "Collection of Identifiable instances may not be null or empty."),
                 (Function<T, String>) FN);
     }
 }

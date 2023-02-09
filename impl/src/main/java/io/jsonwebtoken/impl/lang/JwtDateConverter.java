@@ -40,6 +40,9 @@ public class JwtDateConverter implements Converter<Date, Object> {
     }
 
     /**
+     * Returns an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
+     *
+     * @return an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
      * @since 0.10.0
      */
     public static Date toSpecDate(Object value) {
@@ -63,6 +66,12 @@ public class JwtDateConverter implements Converter<Date, Object> {
         return toDate(value);
     }
 
+    /**
+     * Returns a {@link Date} equivalent of the specified object value using heuristics.
+     *
+     * @param v the object value to represent as a Date.
+     * @return a {@link Date} equivalent of the specified object value using heuristics.
+     */
     public static Date toDate(Object v) {
         if (v == null) {
             return null;
@@ -83,6 +92,10 @@ public class JwtDateConverter implements Converter<Date, Object> {
     }
 
     /**
+     * Parses the specified ISO-8601-formatted string and returns the corresponding {@link Date} instance.
+     *
+     * @param value an ISO-8601-formatted string.
+     * @return a {@link Date} instance reflecting the specified ISO-8601-formatted string.
      * @since 0.10.0
      */
     private static Date parseIso8601Date(String value) throws IllegalArgumentException {

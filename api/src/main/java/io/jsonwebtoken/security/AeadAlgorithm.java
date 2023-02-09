@@ -25,7 +25,7 @@ import javax.crypto.SecretKey;
  * Per <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2">JWE RFC 7516, Section 4.1.2</a>, all JWEs
  * <em>MUST</em> use an AEAD algorithm to encrypt or decrypt the JWE payload/content.  Consequently, all
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA &quot;enc&quot; algorithms</a> are AEAD
- * algorithms, and they are accessible as concrete instances via the {@link EncryptionAlgorithms} utility class.
+ * algorithms, and they are accessible as concrete instances via {@link Algorithms#enc}.
  *
  * <p><b>&quot;enc&quot; identifier</b></p>
  *
@@ -56,7 +56,7 @@ import javax.crypto.SecretKey;
  * <p>The resulting {@code key} is guaranteed to have the correct algorithm parameters and strength/length necessary for
  * that exact {@code aeadAlgorithm} instance.</p>
  *
- * @see EncryptionAlgorithms
+ * @see Algorithms#enc
  * @see Identifiable#getId()
  * @see KeyLengthSupplier
  * @see KeyBuilderSupplier

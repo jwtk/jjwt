@@ -18,9 +18,9 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.DefaultRegistry;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.IdRegistry;
-import io.jsonwebtoken.impl.lang.Registry;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 
 import java.security.spec.EllipticCurve;
 import java.util.Collection;
@@ -44,15 +44,17 @@ public final class Curves {
         VALUES.addAll(EdwardsCurve.VALUES);
     }
 
-    private static final Registry<String, Curve> CURVES_BY_ID = new IdRegistry<>(VALUES);
-    private static final Registry<String, Curve> CURVES_BY_JCA_NAME = new DefaultRegistry<>(VALUES, new Function<Curve, String>() {
+    private static final Registry<String, Curve> CURVES_BY_ID = new IdRegistry<>("Elliptic Curve", VALUES);
+    private static final Registry<String, Curve> CURVES_BY_JCA_NAME = new DefaultRegistry<>(
+            "Elliptic Curve", "JCA name", VALUES, new Function<Curve, String>() {
         @Override
         public String apply(Curve curve) {
             return ((DefaultCurve) curve).getJcaName();
         }
     });
 
-    private static final Registry<EllipticCurve, ECCurve> CURVES_BY_JCA_CURVE = new DefaultRegistry<>(EC_CURVES, new Function<ECCurve, EllipticCurve>() {
+    private static final Registry<EllipticCurve, ECCurve> CURVES_BY_JCA_CURVE = new DefaultRegistry<>(
+            "Elliptic Curve", "ECCurve instance", EC_CURVES, new Function<ECCurve, EllipticCurve>() {
         @Override
         public EllipticCurve apply(ECCurve curve) {
             return curve.toParameterSpec().getCurve();
@@ -65,16 +67,16 @@ public final class Curves {
 
     public static Curve findById(String jwaId) {
         Assert.hasText(jwaId, "jwaId cannot be null or empty.");
-        return CURVES_BY_ID.apply(jwaId);
+        return CURVES_BY_ID.find(jwaId);
     }
 
     public static Curve findByJcaName(String jcaName) {
         Assert.hasText(jcaName, "jcaName cannot be null or empty.");
-        return CURVES_BY_JCA_NAME.apply(jcaName);
+        return CURVES_BY_JCA_NAME.find(jcaName);
     }
 
     public static ECCurve findBy(EllipticCurve curve) {
         Assert.notNull(curve, "EllipticCurve argument cannot be null.");
-        return CURVES_BY_JCA_CURVE.apply(curve);
+        return CURVES_BY_JCA_CURVE.find(curve);
     }
 }

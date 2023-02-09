@@ -38,5 +38,11 @@ public interface TokenizedJwt {
      */
     String getDigest();
 
+    /**
+     * Returns a new {@link Header} instance with the specified map state.
+     *
+     * @param m the header state
+     * @return a new header instance.
+     */
     Header<?> createHeader(Map<String, ?> m);
 }

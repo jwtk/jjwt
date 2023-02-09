@@ -23,6 +23,8 @@ import org.junit.Test
 import static org.junit.Assert.*
 
 /**
+ * Tests the {@link Algorithms#enc} implementation.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 class EncryptionAlgorithmsTest {
@@ -48,55 +50,66 @@ class EncryptionAlgorithmsTest {
     private static final String AAD = 'You can get with this, or you can get with that'
     private static final byte[] AAD_BYTES = AAD.getBytes("UTF-8")
 
+    static boolean contains(AeadAlgorithm alg) {
+        return Algorithms.enc.values().contains(alg)
+    }
+
     @Test
-    void testPrivateCtor() { //for code coverage only
-        new EncryptionAlgorithms()
+    void testValues() {
+        assertEquals 6, Algorithms.enc.values().size()
+        assertTrue(contains(Algorithms.enc.A128CBC_HS256) &&
+                contains(Algorithms.enc.A192CBC_HS384) &&
+                contains(Algorithms.enc.A256CBC_HS512) &&
+                contains(Algorithms.enc.A128GCM) &&
+                contains(Algorithms.enc.A192GCM) &&
+                contains(Algorithms.enc.A256GCM)
+        )
     }
 
     @Test
     void testForId() {
-        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
-            assertSame alg, EncryptionAlgorithms.forId(alg.getId())
+        for (AeadAlgorithm alg : Algorithms.enc.values()) {
+            assertSame alg, Algorithms.enc.get(alg.getId())
         }
     }
 
     @Test
     void testForIdCaseInsensitive() {
-        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
-            assertSame alg, EncryptionAlgorithms.forId(alg.getId().toLowerCase())
+        for (AeadAlgorithm alg : Algorithms.enc.values()) {
+            assertSame alg, Algorithms.enc.get(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
     void testForIdWithInvalidId() {
         //unlike the 'find' paradigm, 'for' requires the value to exist
-        EncryptionAlgorithms.forId('invalid')
+        Algorithms.enc.get('invalid')
     }
 
     @Test
     void testFindById() {
-        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
-            assertSame alg, EncryptionAlgorithms.findById(alg.getId())
+        for (AeadAlgorithm alg : Algorithms.enc.values()) {
+            assertSame alg, Algorithms.enc.find(alg.getId())
         }
     }
 
     @Test
     void testFindByIdCaseInsensitive() {
-        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
-            assertSame alg, EncryptionAlgorithms.findById(alg.getId().toLowerCase())
+        for (AeadAlgorithm alg : Algorithms.enc.values()) {
+            assertSame alg, Algorithms.enc.find(alg.getId().toLowerCase())
         }
     }
 
     @Test
     void testFindByIdWithInvalidId() {
         // 'find' paradigm can return null if not found
-        assertNull EncryptionAlgorithms.findById('invalid')
+        assertNull Algorithms.enc.find('invalid')
     }
 
     @Test
     void testWithoutAad() {
 
-        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
+        for (AeadAlgorithm alg : Algorithms.enc.values()) {
 
             def key = alg.keyBuilder().build()
 
@@ -126,7 +139,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithAad() {
 
-        for (AeadAlgorithm alg : EncryptionAlgorithms.values()) {
+        for (AeadAlgorithm alg : Algorithms.enc.values()) {
 
             def key = alg.keyBuilder().build()
 

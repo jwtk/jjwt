@@ -17,16 +17,23 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
+import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DefaultRegistry<K, V> implements Registry<K, V> {
+public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
 
     private final Map<K, V> VALUES;
 
-    public DefaultRegistry(Collection<V> values, Function<V, K> keyFn) {
+    private final String qualifiedKeyName;
+
+    public DefaultRegistry(String name, String keyName, Collection<V> values, Function<V, K> keyFn) {
+        name = Assert.hasText(Strings.clean(name), "name cannot be null or empty.");
+        keyName = Assert.hasText(Strings.clean(keyName), "keyName cannot be null or empty.");
+        this.qualifiedKeyName = name + " " + keyName;
         Assert.notEmpty(values, "Collection of values may not be null or empty.");
         Assert.notNull(keyFn, "Key function cannot be null.");
         Map<K, V> m = new LinkedHashMap<>(values.size());
@@ -39,7 +46,7 @@ public class DefaultRegistry<K, V> implements Registry<K, V> {
 
     @Override
     public V apply(K k) {
-        Assert.notNull(k, "Lookup value cannot be null.");
+        Assert.notNull(k, this.qualifiedKeyName + " cannot be null.");
         return VALUES.get(k);
     }
 
@@ -48,4 +55,18 @@ public class DefaultRegistry<K, V> implements Registry<K, V> {
         return VALUES.values();
     }
 
+    @Override
+    public V get(K key) {
+        V value = find(key);
+        if (value == null) {
+            String msg = "Unrecognized " + this.qualifiedKeyName + ": " + key;
+            throw new IllegalArgumentException(msg);
+        }
+        return value;
+    }
+
+    @Override
+    public V find(K key) {
+        return apply(key);
+    }
 }

@@ -19,7 +19,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.EncryptionAlgorithms;
+import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
@@ -456,7 +456,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * collection is added in iteration order; if a duplicate id is found when iterating the {@code encAlgs}
      * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link EncryptionAlgorithms#values() JWA standard encryption algorithms} are added last,
+     * <p>Finally, the {@link Algorithms#enc JWA standard encryption algorithms} are added last,
      * <em>after</em> those in the {@code encAlgs} collection, to ensure that JWA standard algorithms cannot be
      * accidentally replaced.</p>
      *
@@ -496,7 +496,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * collection is added in iteration order; if a duplicate id is found when iterating the {@code keyAlgs}
      * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link io.jsonwebtoken.security.KeyAlgorithms#values() JWA standard key management algorithms}
+     * <p>Finally, the {@link io.jsonwebtoken.security.Algorithms.StandardKeyAlgorithms#values() JWA standard key management algorithms}
      * are added last, <em>after</em> those in the {@code keyAlgs} collection, to ensure that JWA standard algorithms
      * cannot be accidentally replaced.</p>
      *

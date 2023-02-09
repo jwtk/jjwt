@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.EncryptionAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -27,7 +27,7 @@ class DefaultJweTest {
 
     @Test
     void testToString() {
-        def alg = EncryptionAlgorithms.A128CBC_HS256
+        def alg = Algorithms.enc.A128CBC_HS256
         def key = alg.keyBuilder().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def jwe = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(compact)
@@ -39,7 +39,7 @@ class DefaultJweTest {
 
     @Test
     void testEqualsAndHashCode() {
-        def alg = EncryptionAlgorithms.A128CBC_HS256
+        def alg = Algorithms.enc.A128CBC_HS256
         def key = alg.keyBuilder().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def parser = Jwts.parserBuilder().decryptWith(key).build()

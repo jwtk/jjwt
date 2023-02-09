@@ -17,7 +17,10 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.Algorithms
+import io.jsonwebtoken.security.KeyRequest
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.Password
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -27,16 +30,16 @@ import static org.junit.Assert.fail
 class Pbes2HsAkwAlgorithmTest {
 
     private static Password KEY = Keys.forPassword("12345678".toCharArray())
-    private static List<Pbes2HsAkwAlgorithm> ALGS = [KeyAlgorithms.PBES2_HS256_A128KW,
-                                                     KeyAlgorithms.PBES2_HS384_A192KW,
-                                                     KeyAlgorithms.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
+    private static List<Pbes2HsAkwAlgorithm> ALGS = [Algorithms.key.PBES2_HS256_A128KW,
+                                                     Algorithms.key.PBES2_HS384_A192KW,
+                                                     Algorithms.key.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
 
     @Test
     void testInsufficientIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
             JweHeader header = Jwts.headerBuilder().setPbes2Count(iterations).build() as JweHeader
-            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, header, EncryptionAlgorithms.A256GCM)
+            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, header, Algorithms.enc.A256GCM)
             try {
                 alg.getEncryptionKey(req)
                 fail()
@@ -51,10 +54,10 @@ class Pbes2HsAkwAlgorithmTest {
     @Test
     void test() {
 
-        def alg = KeyAlgorithms.PBES2_HS256_A128KW
+        def alg = Algorithms.key.PBES2_HS256_A128KW
 
         int desiredMillis = 100
-        int iterations = KeyAlgorithms.estimateIterations(alg, desiredMillis)
+        int iterations = Algorithms.key.estimateIterations(alg, desiredMillis)
         println "Estimated iterations: $iterations"
 
         int tries = 30
@@ -64,7 +67,7 @@ class Pbes2HsAkwAlgorithmTest {
         def password = 'hellowor'.toCharArray()
         def header = new DefaultJweHeader().setPbes2Count(iterations)
         def key = Keys.forPassword(password)
-        def req = new DefaultKeyRequest(null, null, key, header, EncryptionAlgorithms.A128GCM)
+        def req = new DefaultKeyRequest(null, null, key, header, Algorithms.enc.A128GCM)
         int sum = 0
         for (int i = 0; i < tries; i++) {
             long start = System.currentTimeMillis()

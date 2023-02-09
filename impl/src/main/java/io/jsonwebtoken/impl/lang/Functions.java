@@ -19,19 +19,11 @@ import io.jsonwebtoken.lang.Assert;
 
 public final class Functions {
 
-    private static final Function<?, ?> NULL = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object o) {
-            return null;
-        }
-    };
-
     private Functions() {
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T, R> Function<T, R> NULL() {
-        return (Function<T, R>) NULL;
+    public static <T, R> Function<T, R> forNull() {
+        return ConstantFunction.forNull();
     }
 
     /**
@@ -60,16 +52,17 @@ public final class Functions {
     }
 
     /**
-     * Returns a composed function that first applies this function to
-     * its input, and then applies the {@code after} function to the result.
-     * If evaluation of either function throws an exception, it is relayed to
+     * Returns a composed function that first applies the {@code before} function to its input, and then applies
+     * the {@code after} function to the result. If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
      *
-     * @param <V>   the type of output of the {@code after} function, and of the
-     *              composed function
-     * @param after the function to apply after this function is applied
-     * @return a composed function that first applies this function and then
-     * applies the {@code after} function
+     * @param <T>    type of input to the {@code before} function and the resulting composed function.
+     * @param <V>    the type of output of the {@code before} function, and of the input to the {@code after} function.
+     * @param <R>    return type of the {@code after} function and the resulting composed function.
+     * @param before the function to invoke first
+     * @param after  the function to invoke second with the output from the first
+     * @return a composed function that first applies the {@code before} function and then
+     * applies the {@code after} function.
      * @throws IllegalArgumentException if either {@code before} or {@code after} are null.
      */
     public static <T, V, R> Function<T, R> andThen(final Function<T, ? extends V> before, final Function<V, R> after) {
@@ -90,6 +83,7 @@ public final class Functions {
      * any remaining functions. If evaluation of any function throws an exception, it is relayed to the caller of the
      * composed function.
      *
+     * @param <T> the type of input of the functions, and of the composed function
      * @param <R> the type of output of the functions, and of the composed function
      * @param fns the functions to iterate
      * @return a composed function that invokes the specified functions in iteration order, returning the first non-null

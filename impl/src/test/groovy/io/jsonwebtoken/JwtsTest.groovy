@@ -965,7 +965,7 @@ class JwtsTest {
             Jwts.parserBuilder().build().parseClaimsJwe(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = "Unrecognized JWE 'enc' header value: foo"
+            String expected = "Unrecognized JWE 'enc' (Encryption Algorithm) header value: foo"
             assertEquals expected, e.getMessage()
         }
     }
@@ -985,7 +985,7 @@ class JwtsTest {
             Jwts.parserBuilder().build().parseClaimsJwe(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = "Unrecognized JWE 'alg' header value: bar"
+            String expected = "Unrecognized JWE 'alg' (Algorithm) header value: bar"
             assertEquals expected, e.getMessage()
         }
     }
@@ -1077,7 +1077,7 @@ class JwtsTest {
      */
     @Test
     void testParseJweWithCustomEncryptionAlgorithm() {
-        def realAlg = EncryptionAlgorithms.A128GCM // any alg will do, we're going to wrap it
+        def realAlg = Algorithms.enc.A128GCM // any alg will do, we're going to wrap it
         def key = realAlg.keyBuilder().build()
         def enc = realAlg.getId() + 'X' // custom id
         def encAlg = new AeadAlgorithm() {
@@ -1304,13 +1304,13 @@ class JwtsTest {
     @Test
     void testSecretKeyJwes() {
 
-        def algs = KeyAlgorithms.values().findAll({ it ->
+        def algs = Algorithms.key.values().findAll({ it ->
             it instanceof DirectKeyAlgorithm || it instanceof SecretKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+            for (AeadAlgorithm enc : Algorithms.enc.values()) {
 
                 SecretKey key = alg instanceof SecretKeyAlgorithm ?
                         ((SecretKeyAlgorithm) alg).keyBuilder().build() :
@@ -1339,7 +1339,7 @@ class JwtsTest {
 
         for (CompressionCodec codec : codecs) {
 
-            for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+            for (AeadAlgorithm enc : Algorithms.enc.values()) {
 
                 SecretKey key = enc.keyBuilder().build()
 
@@ -1363,7 +1363,7 @@ class JwtsTest {
     @Test
     void testPasswordJwes() {
 
-        def algs = KeyAlgorithms.values().findAll({ it ->
+        def algs = Algorithms.key.values().findAll({ it ->
             it instanceof Pbes2HsAkwAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1371,7 +1371,7 @@ class JwtsTest {
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+            for (AeadAlgorithm enc : Algorithms.enc.values()) {
 
                 // encrypt:
                 String jwe = Jwts.builder()
@@ -1397,7 +1397,7 @@ class JwtsTest {
         // encrypt:
         String jwe = Jwts.builder()
                 .claim('foo', 'bar')
-                .encryptWith(key, EncryptionAlgorithms.A256GCM) // should auto choose KeyAlg PBES2_HS512_A256KW
+                .encryptWith(key, Algorithms.enc.A256GCM) // should auto choose KeyAlg PBES2_HS512_A256KW
                 .compact()
 
         //decrypt:
@@ -1406,7 +1406,7 @@ class JwtsTest {
                 .build()
                 .parseClaimsJwe(jwe)
         assertEquals 'bar', jwt.getPayload().get('foo')
-        assertEquals KeyAlgorithms.PBES2_HS512_A256KW, KeyAlgorithms.forId(jwt.getHeader().getAlgorithm())
+        assertEquals Algorithms.key.PBES2_HS512_A256KW, Algorithms.key.get(jwt.getHeader().getAlgorithm())
     }
 
     @Test
@@ -1414,7 +1414,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
-        def algs = KeyAlgorithms.values().findAll({ it ->
+        def algs = Algorithms.key.values().findAll({ it ->
             it instanceof DefaultRsaKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1425,7 +1425,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+                for (AeadAlgorithm enc : Algorithms.enc.values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
@@ -1449,7 +1449,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
-        def algs = KeyAlgorithms.values().findAll({ it ->
+        def algs = Algorithms.key.values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1460,7 +1460,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : EncryptionAlgorithms.values()) {
+                for (AeadAlgorithm enc : Algorithms.enc.values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
