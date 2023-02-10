@@ -45,10 +45,9 @@ public class RedactedSupplier<T> implements Supplier<T> {
             return true;
         }
         if (obj instanceof RedactedSupplier) {
-            return Objects.nullSafeEquals(this.value, ((RedactedSupplier<?>) obj).value);
-        } else {
-            return Objects.nullSafeEquals(this.value, obj);
+            obj = ((RedactedSupplier<?>) obj).value; // get the wrapped value
         }
+        return Objects.nullSafeEquals(this.value, obj);
     }
 
     @Override

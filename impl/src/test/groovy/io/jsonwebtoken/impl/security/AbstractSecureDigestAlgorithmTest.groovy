@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.JwsAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.SignatureException
 import io.jsonwebtoken.security.VerifySecureDigestRequest
@@ -32,15 +32,15 @@ class AbstractSecureDigestAlgorithmTest {
     @Test
     void testSignAndVerifyWithExplicitProvider() {
         Provider provider = Security.getProvider('BC')
-        def pair = JwsAlgorithms.RS256.keyPairBuilder().build()
+        def pair = Algorithms.sig.RS256.keyPairBuilder().build()
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
-        byte[] signature = JwsAlgorithms.RS256.digest(new DefaultSecureRequest<byte[], PrivateKey>(data, provider, null, pair.getPrivate()))
-        assertTrue JwsAlgorithms.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(data, provider, null, pair.getPublic(), signature))
+        byte[] signature = Algorithms.sig.RS256.digest(new DefaultSecureRequest<byte[], PrivateKey>(data, provider, null, pair.getPrivate()))
+        assertTrue Algorithms.sig.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(data, provider, null, pair.getPublic(), signature))
     }
 
     @Test
     void testSignFailsWithAnExternalException() {
-        def pair = JwsAlgorithms.RS256.keyPairBuilder().build()
+        def pair = Algorithms.sig.RS256.keyPairBuilder().build()
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSecureDigestAlgorithm() {
             @Override
@@ -59,7 +59,7 @@ class AbstractSecureDigestAlgorithmTest {
 
     @Test
     void testVerifyFailsWithExternalException() {
-        def pair = JwsAlgorithms.RS256.keyPairBuilder().build()
+        def pair = Algorithms.sig.RS256.keyPairBuilder().build()
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSecureDigestAlgorithm() {
             @Override

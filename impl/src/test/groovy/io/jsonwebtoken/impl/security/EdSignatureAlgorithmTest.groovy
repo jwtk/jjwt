@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
-import io.jsonwebtoken.security.JwsAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.SignatureAlgorithm
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -29,13 +29,13 @@ import static org.junit.Assert.*
 
 class EdSignatureAlgorithmTest {
 
-    static List<EdSignatureAlgorithm> algs = [JwsAlgorithms.EdDSA, JwsAlgorithms.Ed25519, JwsAlgorithms.Ed448] as List<EdSignatureAlgorithm>
+    static List<EdSignatureAlgorithm> algs = [Algorithms.sig.EdDSA, Algorithms.sig.Ed25519, Algorithms.sig.Ed448] as List<EdSignatureAlgorithm>
 
     @Test
     void testJcaName() {
-        assertEquals JwsAlgorithms.EdDSA.getId(), JwsAlgorithms.EdDSA.getJcaName()
-        assertEquals EdwardsCurve.Ed25519.getId(), JwsAlgorithms.Ed25519.getJcaName()
-        assertEquals EdwardsCurve.Ed448.getId(), JwsAlgorithms.Ed448.getJcaName()
+        assertEquals Algorithms.sig.EdDSA.getId(), Algorithms.sig.EdDSA.getJcaName()
+        assertEquals EdwardsCurve.Ed25519.getId(), Algorithms.sig.Ed25519.getJcaName()
+        assertEquals EdwardsCurve.Ed448.getId(), Algorithms.sig.Ed448.getJcaName()
     }
 
     @Test
@@ -48,7 +48,7 @@ class EdSignatureAlgorithmTest {
         // only one recognized by the spec.  They are effectively just aliases of EdDSA but have the added
         // functionality of generating Ed25519 and Ed448 keys, that's the only difference.
         for (EdSignatureAlgorithm alg : algs) {
-            assertEquals JwsAlgorithms.EdDSA.getId(), alg.getId() // all aliases of EdDSA per the RFC spec
+            assertEquals Algorithms.sig.EdDSA.getId(), alg.getId() // all aliases of EdDSA per the RFC spec
         }
     }
 
@@ -59,10 +59,10 @@ class EdSignatureAlgorithmTest {
             assertNotNull pair.public
             assertTrue pair.public instanceof PublicKey
             String alg = pair.public.getAlgorithm()
-            assertTrue JwsAlgorithms.EdDSA.getId().equals(alg) || alg.equals(it.preferredCurve.getId())
+            assertTrue Algorithms.sig.EdDSA.getId().equals(alg) || alg.equals(it.preferredCurve.getId())
 
             alg = pair.private.getAlgorithm()
-            assertTrue JwsAlgorithms.EdDSA.getId().equals(alg) || alg.equals(it.preferredCurve.getId())
+            assertTrue Algorithms.sig.EdDSA.getId().equals(alg) || alg.equals(it.preferredCurve.getId())
         }
     }
 
@@ -81,32 +81,32 @@ class EdSignatureAlgorithmTest {
 
     @Test
     void testEd25519SigVerifyWithEd448() {
-        testIncorrectVerificationKey(JwsAlgorithms.Ed25519, TestKeys.Ed25519.pair.private, TestKeys.Ed448.pair.public)
+        testIncorrectVerificationKey(Algorithms.sig.Ed25519, TestKeys.Ed25519.pair.private, TestKeys.Ed448.pair.public)
     }
 
     @Test
     void testEd25519SigVerifyWithX25519() {
-        testInvalidVerificationKey(JwsAlgorithms.Ed25519, TestKeys.Ed25519.pair.private, TestKeys.X25519.pair.public)
+        testInvalidVerificationKey(Algorithms.sig.Ed25519, TestKeys.Ed25519.pair.private, TestKeys.X25519.pair.public)
     }
 
     @Test
     void testEd25519SigVerifyWithX448() {
-        testInvalidVerificationKey(JwsAlgorithms.Ed25519, TestKeys.Ed25519.pair.private, TestKeys.X448.pair.public)
+        testInvalidVerificationKey(Algorithms.sig.Ed25519, TestKeys.Ed25519.pair.private, TestKeys.X448.pair.public)
     }
 
     @Test
     void testEd448SigVerifyWithEd25519() {
-        testIncorrectVerificationKey(JwsAlgorithms.Ed448, TestKeys.Ed448.pair.private, TestKeys.Ed25519.pair.public)
+        testIncorrectVerificationKey(Algorithms.sig.Ed448, TestKeys.Ed448.pair.private, TestKeys.Ed25519.pair.public)
     }
 
     @Test
     void testEd448SigVerifyWithX25519() {
-        testInvalidVerificationKey(JwsAlgorithms.Ed448, TestKeys.Ed448.pair.private, TestKeys.X25519.pair.public)
+        testInvalidVerificationKey(Algorithms.sig.Ed448, TestKeys.Ed448.pair.private, TestKeys.X25519.pair.public)
     }
 
     @Test
     void testEd448SigVerifyWithX448() {
-        testInvalidVerificationKey(JwsAlgorithms.Ed448, TestKeys.Ed448.pair.private, TestKeys.X448.pair.public)
+        testInvalidVerificationKey(Algorithms.sig.Ed448, TestKeys.Ed448.pair.private, TestKeys.X448.pair.public)
     }
 
     static void testIncorrectVerificationKey(SignatureAlgorithm alg, PrivateKey priv, PublicKey pub) {

@@ -675,7 +675,7 @@ code quickly.  Here's an example:
 
 ```java
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.JwsAlgorithms;
+import io.jsonwebtoken.security.Algorithms.JwsAlgorithms;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 
@@ -1412,7 +1412,7 @@ key algorithms:
 
 <sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants in the `io.jsonwebtoken.security.JwsAlgorithms` utility class.
+These are all represented as constants in the `io.jsonwebtoken.security.Algorithms.JwsAlgorithms` utility class.
 
 <a name="jws-key"></a>
 ### Signature Algorithms Keys

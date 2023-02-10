@@ -36,6 +36,8 @@ import java.util.Set;
  * @see RsaPrivateJwkBuilder
  * @see EcPublicJwkBuilder
  * @see EcPrivateJwkBuilder
+ * @see OctetPublicJwkBuilder
+ * @see OctetPrivateJwkBuilder
  * @since JJWT_RELEASE_VERSION
  */
 public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>

@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.JwsAlgorithms
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -31,7 +31,7 @@ import static org.junit.Assert.*
 class RsaSignatureAlgorithmTest {
 
     static Collection<RsaSignatureAlgorithm> algs() {
-        return JwsAlgorithms.values().findAll({
+        return Algorithms.sig.values().findAll({
             it.id.startsWith("RS") || it.id.startsWith("PS")
         })
     }
@@ -69,7 +69,7 @@ class RsaSignatureAlgorithmTest {
         RSAPublicKey key = createMock(RSAPublicKey)
         def request = new DefaultSecureRequest(new byte[1], null, null, key)
         try {
-            JwsAlgorithms.RS256.digest(request)
+            Algorithms.sig.RS256.digest(request)
             fail()
         } catch (InvalidKeyException e) {
             assertTrue e.getMessage().startsWith("Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: ")
@@ -83,7 +83,7 @@ class RsaSignatureAlgorithmTest {
         def pair = gen.generateKeyPair()
 
         def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
-        JwsAlgorithms.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
+        Algorithms.sig.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
             try {
                 it.digest(request)
                 fail()

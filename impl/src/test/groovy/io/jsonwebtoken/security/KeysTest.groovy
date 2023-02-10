@@ -16,6 +16,7 @@
 //file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.security
 
+import io.jsonwebtoken.impl.DefaultJwtBuilder
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.*
 import org.junit.Test
@@ -127,12 +128,12 @@ class KeysTest {
 
     @Test
     void testSecretKeyFor() {
-        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
+        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
             if (alg instanceof MacAlgorithm) {
                 SecretKey key = alg.keyBuilder().build()
                 assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
                 assertEquals alg.jcaName, key.algorithm
-                assertEquals alg, JwsAlgorithmsBridge.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
+                assertEquals alg, DefaultJwtBuilder.forSigningKey(key) // https://github.com/jwtk/jjwt/issues/381
             }
         }
     }
@@ -205,7 +206,7 @@ class KeysTest {
     @Test
     void testKeyPairFor() {
 
-        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
+        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
 
             if (alg instanceof RsaSignatureAlgorithm) {
 

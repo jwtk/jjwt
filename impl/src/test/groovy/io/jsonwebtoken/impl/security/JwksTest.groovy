@@ -37,8 +37,8 @@ import static org.junit.Assert.*
 
 class JwksTest {
 
-    private static final SecretKey SKEY = JwsAlgorithms.HS256.keyBuilder().build()
-    private static final java.security.KeyPair EC_PAIR = JwsAlgorithms.ES256.keyPairBuilder().build()
+    private static final SecretKey SKEY = Algorithms.sig.HS256.keyBuilder().build()
+    private static final java.security.KeyPair EC_PAIR = Algorithms.sig.ES256.keyPairBuilder().build()
 
     private static String srandom() {
         byte[] random = new byte[16]
@@ -152,7 +152,7 @@ class JwksTest {
     @Test
     void testX509CertChain() {
         //get a test cert:
-        X509Certificate cert = TestKeys.forAlgorithm(JwsAlgorithms.RS256).cert
+        X509Certificate cert = TestKeys.forAlgorithm(Algorithms.sig.RS256).cert
         def sval = JwtX509StringConverter.INSTANCE.applyTo(cert)
         testProperty('x509CertificateChain', 'x5c', [cert], [sval])
     }
@@ -180,7 +180,7 @@ class JwksTest {
     }
 
     static void testX509Thumbprint(int number) {
-        def algs = JwsAlgorithms.values().findAll { it instanceof SignatureAlgorithm }
+        def algs = Algorithms.sig.values().findAll { it instanceof SignatureAlgorithm }
 
         for (def alg : algs) {
             //get test cert:
@@ -212,7 +212,7 @@ class JwksTest {
 
     @Test
     void testSecretJwks() {
-        Collection<MacAlgorithm> algs = JwsAlgorithms.values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
+        Collection<MacAlgorithm> algs = Algorithms.sig.values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
         for (def alg : algs) {
             SecretKey secretKey = alg.keyBuilder().build()
             def jwk = Jwks.builder().forKey(secretKey).setId('id').build()
@@ -262,7 +262,7 @@ class JwksTest {
     @Test
     void testAsymmetricJwks() {
 
-        Collection<KeyPairBuilderSupplier> algs = JwsAlgorithms.values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
+        Collection<KeyPairBuilderSupplier> algs = Algorithms.sig.values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
         for (def alg : algs) {
 
@@ -309,7 +309,7 @@ class JwksTest {
 
     @Test
     void testInvalidEcCurvePoint() {
-        def algs = [JwsAlgorithms.ES256, JwsAlgorithms.ES384, JwsAlgorithms.ES512]
+        def algs = [Algorithms.sig.ES256, Algorithms.sig.ES384, Algorithms.sig.ES512]
 
         for (SignatureAlgorithm alg : algs) {
 

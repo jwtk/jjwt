@@ -60,7 +60,7 @@ import java.security.PublicKey;
  * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic Algorithms for Digital Signatures and
  * MACs</a> that may be represented in a JWS {@code alg}orithm header
- * are available via the {@link JwsAlgorithms} utility class.</p>
+ * are available via the {@link Algorithms.JwsAlgorithms} utility class.</p>
  *
  * <p><b>JWS &quot;alg&quot; identifier</b></p>
  *
@@ -70,7 +70,7 @@ import java.security.PublicKey;
  *
  * @param <R> the type of {@link Request} used when computing a digest.
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
- * @see JwsAlgorithms
+ * @see Algorithms.JwsAlgorithms
  * @since JJWT_RELEASE_VERSION
  */
 public interface DigestAlgorithm<R extends Request<byte[]>, V extends VerifyDigestRequest> extends Identifiable {

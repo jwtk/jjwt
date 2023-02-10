@@ -25,7 +25,6 @@ class PrivateConstructorsTest {
     @Test
     void testPrivateCtors() { // for code coverage only
         new Classes()
-        new JwsAlgorithmsBridge()
         new KeysBridge()
         new Conditions()
         new Functions()

@@ -27,7 +27,7 @@ import java.security.PublicKey;
  * <p><b>JWA Standard Implementations</b></p>
  *
  * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard signature algorithms are
- * available via the {@link JwsAlgorithms} utility class.</p>
+ * available via the {@link Algorithms.JwsAlgorithms} utility class.</p>
  *
  * <p><b>&quot;alg&quot; identifier</b></p>
  *

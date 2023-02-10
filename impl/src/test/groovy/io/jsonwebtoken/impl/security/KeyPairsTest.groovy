@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.JwsAlgorithms
+import io.jsonwebtoken.security.Algorithms
 import org.junit.Test
 
 import java.security.Key
@@ -62,7 +62,7 @@ class KeyPairsTest {
 
     @Test
     void testGetKeyECMismatch() {
-        KeyPair pair = JwsAlgorithms.RS256.keyPairBuilder().build()
+        KeyPair pair = Algorithms.sig.RS256.keyPairBuilder().build()
         Class clazz = ECPublicKey
         try {
             KeyPairs.getKey(pair, clazz)

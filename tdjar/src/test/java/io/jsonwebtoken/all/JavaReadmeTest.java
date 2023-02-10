@@ -23,7 +23,6 @@ import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.MacAlgorithm;
@@ -60,7 +59,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsHS() {
         // Create a test key suitable for the desired HMAC-SHA algorithm:
-        MacAlgorithm alg = JwsAlgorithms.HS512; //or HS256 or HS384
+        MacAlgorithm alg = Algorithms.sig.HS512; //or HS256 or HS384
         SecretKey key = alg.keyBuilder().build();
 
         String message = "Hello World!";
@@ -81,7 +80,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsRSA() {
         // Create a test key suitable for the desired RSA signature algorithm:
-        SignatureAlgorithm alg = JwsAlgorithms.RS512; //or PS512, RS256, etc...
+        SignatureAlgorithm alg = Algorithms.sig.RS512; //or PS512, RS256, etc...
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his RSA private key:
@@ -103,7 +102,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsECDSA() {
         // Create a test key suitable for the desired ECDSA signature algorithm:
-        SignatureAlgorithm alg = JwsAlgorithms.ES512; //or ES256 or ES384
+        SignatureAlgorithm alg = Algorithms.sig.ES512; //or ES256 or ES384
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his EC private key:
@@ -147,7 +146,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweRSA() {
         // Create a test KeyPair suitable for the desired RSA key algorithm:
-        KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
+        KeyPair pair = Algorithms.sig.RS512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
         KeyAlgorithm<PublicKey, PrivateKey> alg = Algorithms.key.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
@@ -195,7 +194,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweECDHES() {
         // Create a test KeyPair suitable for the desired EC key algorithm:
-        KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
+        KeyPair pair = Algorithms.sig.ES512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
         KeyAlgorithm<PublicKey, PrivateKey> alg = Algorithms.key.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
@@ -255,7 +254,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleSecretJwk() {
-        SecretKey key = JwsAlgorithms.HS512.keyBuilder().build(); // or HS384 or HS256
+        SecretKey key = Algorithms.sig.HS512.keyBuilder().build(); // or HS384 or HS256
         SecretJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -272,7 +271,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleRsaPublicJwk() {
-        RSAPublicKey key = (RSAPublicKey) JwsAlgorithms.RS512.keyPairBuilder().build().getPublic();
+        RSAPublicKey key = (RSAPublicKey) Algorithms.sig.RS512.keyPairBuilder().build().getPublic();
         RsaPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -289,7 +288,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleRsaPrivateJwk() {
-        KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
+        KeyPair pair = Algorithms.sig.RS512.keyPairBuilder().build();
         RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
         RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
@@ -312,7 +311,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEcPublicJwk() {
-        ECPublicKey key = (ECPublicKey) JwsAlgorithms.ES512.keyPairBuilder().build().getPublic();
+        ECPublicKey key = (ECPublicKey) Algorithms.sig.ES512.keyPairBuilder().build().getPublic();
         EcPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -329,7 +328,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEcPrivateJwk() {
-        KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
+        KeyPair pair = Algorithms.sig.ES512.keyPairBuilder().build();
         ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 

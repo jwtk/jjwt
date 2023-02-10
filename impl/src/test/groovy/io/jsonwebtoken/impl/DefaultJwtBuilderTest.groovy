@@ -82,7 +82,7 @@ class DefaultJwtBuilderTest {
 
         replay provider
         def b = new DefaultJwtBuilder().setProvider(provider)
-                .setSubject('me').signWith(JwsAlgorithms.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(Algorithms.sig.HS256.keyBuilder().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -124,7 +124,7 @@ class DefaultJwtBuilderTest {
         }
 
         def b = new DefaultJwtBuilder().setSecureRandom(random)
-                .setSubject('me').signWith(JwsAlgorithms.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(Algorithms.sig.HS256.keyBuilder().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]
@@ -474,7 +474,7 @@ class DefaultJwtBuilderTest {
     void testSignWithNoneAlgorithm() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key, JwsAlgorithms.NONE)
+            builder.signWith(key, Algorithms.sig.NONE)
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "The 'none' JWS algorithm cannot be used to sign JWTs."
@@ -485,7 +485,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testSignWithPublicKey() {
         def key = TestKeys.RS256.pair.public
-        def alg = JwsAlgorithms.RS256
+        def alg = Algorithms.sig.RS256
         try {
             builder.signWith(key, alg)
             fail()

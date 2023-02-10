@@ -77,7 +77,7 @@ custom code previously written to extend JJWT to use keys from those KeyStores o
 The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of new 
 `io.jsonwebtoken.security.SecureDigestAlgorithm`, `io.jsonwebtoken.security.MacAlgorithm`, and 
 `io.jsonwebtoken.security.SignatureAlgorithm` interfaces to allow custom algorithm implementations.  Also, a new 
-`io.jsonwebtoken.security.JwsAlgorithms` static helper class enumerates all the standard JWA algorithms as 
+`io.jsonwebtoken.security.Algorithms.JwsAlgorithms` static helper class enumerates all the standard JWA algorithms as 
 expected, exactly like the old enum.  This change was made because enums are a static concept by design and cannot 
 support custom values: those who wanted to use custom signature algorithms could not do so until now.  The new 
 interface now allows anyone to plug in and support custom algorithms with JJWT as desired.

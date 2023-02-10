@@ -17,27 +17,12 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
-import java.security.Key;
-import java.util.Collection;
+public final class JwsAlgorithmsBridge extends DelegatingRegistry<SecureDigestAlgorithm<?, ?>> {
 
-public final class JwsAlgorithmsBridge {
-
-    //prevent instantiation
-    private JwsAlgorithmsBridge() {
-    }
-
-    //For parser implementation - do not expose outside the impl module
-    public static final Registry<String, SecureDigestAlgorithm<?, ?>> REGISTRY;
-
-    private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);
-    private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
-
-    static {
-        //noinspection RedundantTypeArguments
-        REGISTRY = new IdRegistry<>("JWS MAC or SignatureAlgorithm", Collections.<SecureDigestAlgorithm<?, ?>>of(
+    public JwsAlgorithmsBridge() {
+        super(new IdRegistry<>("JWS MAC or SignatureAlgorithm", Collections.of(
                 new NoneSignatureAlgorithm(),
                 new DefaultMacAlgorithm(256),
                 new DefaultMacAlgorithm(384),
@@ -52,37 +37,29 @@ public final class JwsAlgorithmsBridge {
                 new EcSignatureAlgorithm(384),
                 new EcSignatureAlgorithm(521),
                 new EdSignatureAlgorithm()
-        ));
+        )));
     }
 
-    public static Collection<SecureDigestAlgorithm<?, ?>> values() {
-        return REGISTRY.values();
-    }
+    private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);
+    private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
 
-    public static SecureDigestAlgorithm<?, ?> findById(String id) {
-        return REGISTRY.find(id);
-    }
-
-    public static SecureDigestAlgorithm<?, ?> forId(String id) {
-        SecureDigestAlgorithm<?, ?> instance = findById(id);
-        if (instance == null) { // try convenience aliases for EdDSA:
-            if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(id)) {
-                return Ed448;
-            } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(id)) {
-                return Ed25519;
-            }
+    @Override
+    public SecureDigestAlgorithm<?, ?> find(String id) {
+        if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(id)) {
+            return Ed448;
+        } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(id)) {
+            return Ed25519;
         }
-        if (instance == null) {
-            String msg = "Unrecognized JWA SignatureAlgorithm identifier: " + id;
-            throw new IllegalArgumentException(msg);
-        }
-        return instance;
+        return super.find(id);
     }
 
-    @SuppressWarnings("unchecked") // TODO: remove for 1.0
-    public static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
-        @SuppressWarnings("deprecation")
-        io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return (SecureDigestAlgorithm<K, ?>) forId(alg.getValue());
+    @Override
+    public SecureDigestAlgorithm<?, ?> get(String id) throws IllegalArgumentException {
+        if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(id)) {
+            return Ed448;
+        } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(id)) {
+            return Ed25519;
+        }
+        return super.get(id);
     }
 }

@@ -17,7 +17,10 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.lang.Collections
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.Algorithms
+import io.jsonwebtoken.security.KeyBuilderSupplier
+import io.jsonwebtoken.security.SecretKeyBuilder
+import io.jsonwebtoken.security.SignatureAlgorithm
 
 import javax.crypto.SecretKey
 import java.security.KeyPair
@@ -33,9 +36,9 @@ class TestKeys {
     // =======================================================
     // Secret Keys
     // =======================================================
-    static SecretKey HS256 = JwsAlgorithms.HS256.keyBuilder().build()
-    static SecretKey HS384 = JwsAlgorithms.HS384.keyBuilder().build()
-    static SecretKey HS512 = JwsAlgorithms.HS512.keyBuilder().build()
+    static SecretKey HS256 = Algorithms.sig.HS256.keyBuilder().build()
+    static SecretKey HS384 = Algorithms.sig.HS384.keyBuilder().build()
+    static SecretKey HS512 = Algorithms.sig.HS512.keyBuilder().build()
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
@@ -62,14 +65,14 @@ class TestKeys {
     // =======================================================
     // Elliptic Curve Keys & Certificates
     // =======================================================
-    static Bundle ES256 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES256)
-    static Bundle ES384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES384)
-    static Bundle ES512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.ES512)
+    static Bundle ES256 = TestCertificates.readAsymmetricBundle(Algorithms.sig.ES256)
+    static Bundle ES384 = TestCertificates.readAsymmetricBundle(Algorithms.sig.ES384)
+    static Bundle ES512 = TestCertificates.readAsymmetricBundle(Algorithms.sig.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
-    static Bundle EdDSA = TestCertificates.readAsymmetricBundle(JwsAlgorithms.EdDSA)
-    static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.Ed25519)
-    static Bundle Ed448 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.Ed448)
+    static Bundle EdDSA = TestCertificates.readAsymmetricBundle(Algorithms.sig.EdDSA)
+    static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(Algorithms.sig.Ed25519)
+    static Bundle Ed448 = TestCertificates.readAsymmetricBundle(Algorithms.sig.Ed448)
     static Bundle X25519 = TestCertificates.readBundle(EdwardsCurve.X25519)
     static Bundle X448 = TestCertificates.readBundle(EdwardsCurve.X448)
     static Set<Bundle> EdEC = Collections.setOf(EdDSA, Ed25519, Ed448, X25519, X448)
@@ -77,9 +80,9 @@ class TestKeys {
     // =======================================================
     // RSA Keys & Certificates
     // =======================================================
-    static Bundle RS256 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS256)
-    static Bundle RS384 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS384)
-    static Bundle RS512 = TestCertificates.readAsymmetricBundle(JwsAlgorithms.RS512)
+    static Bundle RS256 = TestCertificates.readAsymmetricBundle(Algorithms.sig.RS256)
+    static Bundle RS384 = TestCertificates.readAsymmetricBundle(Algorithms.sig.RS384)
+    static Bundle RS512 = TestCertificates.readAsymmetricBundle(Algorithms.sig.RS512)
     static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512)
 
     static Set<Bundle> ASYM = new LinkedHashSet<>()

@@ -198,7 +198,7 @@ class RFC7520Section4Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
-        def alg = JwsAlgorithms.RS256
+        def alg = Algorithms.sig.RS256
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // serializer here to check the constructed data, and then, after guaranteeing the same data, return
@@ -236,7 +236,7 @@ class RFC7520Section4Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
-        def alg = JwsAlgorithms.PS384
+        def alg = Algorithms.sig.PS384
         String kid = 'bilbo.baggins@hobbiton.example'
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
@@ -283,7 +283,7 @@ class RFC7520Section4Test {
         EcPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_2) as EcPrivateJwk
         ECPrivateKey key = jwk.toKey()
 
-        def alg = JwsAlgorithms.ES512
+        def alg = Algorithms.sig.ES512
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // serializer here to check the constructed data, and then, after guaranteeing the same data, return
@@ -328,7 +328,7 @@ class RFC7520Section4Test {
         SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
-        def alg = JwsAlgorithms.HS256
+        def alg = Algorithms.sig.HS256
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // serializer here to check the constructed data, and then, after guaranteeing the same data, return
@@ -366,7 +366,7 @@ class RFC7520Section4Test {
         SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
-        def alg = JwsAlgorithms.HS256
+        def alg = Algorithms.sig.HS256
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // serializer here to check the constructed data, and then, after guaranteeing the same data, return

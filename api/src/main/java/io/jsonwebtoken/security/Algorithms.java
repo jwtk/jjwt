@@ -22,10 +22,30 @@ import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 
 import javax.crypto.SecretKey;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Collection;
 
+/**
+ * Standard JSON Web Token algorithm implementations organized by algorithm type.  Each organized collection of
+ * algorithms is available via a static field to allow for easy code-completion in IDEs, showing available
+ * algorithm instances, for example, when typing:
+ *
+ * <blockquote><pre>
+ *     Algorithms.// press code-completion hotkeys to suggest available algorithm registry fields
+ *     Algorithms.sig.// press hotkeys to suggest individual signature or MAC algorithms or utility methods
+ *     Algorithms.enc.// press hotkeys to suggest individual encryption algorithms or utility methods
+ *     Algorithms.key.// press hotkeys to suggest individual key algorithms or utility methods
+ *     Algorithms.hash.// press hotkeys to suggest individual hash algorithms or utility methods
+ * </pre></blockquote>
+ *
+ * @see Algorithms#enc
+ * @see Algorithms#hash
+ * @see Algorithms#key
+ * @see Algorithms#sig
+ * @since JJWT_RELEASE_VERSION
+ */
 public final class Algorithms {
 
     /**
@@ -36,34 +56,34 @@ public final class Algorithms {
     }
 
     /**
-     * Registry of all standard JWE Key Management Algorithms defined in
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">JWA (RFC 7518) Key Management Algorithms</a>
-     * and formalized in <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">
-     * JSON Web Signature and Encryption Algorithms Registry</a>.  The variable is named &quot;{@code alg}&quot; for two
-     * reasons:
-     * <ul>
-     *     <li>The variable name equals the name of the JWE header that contains the key management algorithm
-     *     {@link KeyAlgorithm#getId() identifier} values, self-documenting its purpose in referenced code.</li>
-     *     <li>It is short and simpler to reference {@code Jwe.alg.A256GCMKW} in application
-     *     code instead of the more verbose static class variable alternative of, say,
-     *     {@code StandardKeyAlgorithms.A256GCMKW}. For example:
-     * <blockquote><pre>Jwts.builder()...
-     *   .encryptWith(secretKey, Jwe.alg.A256GCMKW, Jwe.enc.A256GCM)
-     *   //.encryptWith(secretKey, StandardKeyAlgorithms.A256GCMKW, StandardEncryptionAlgorithms...
-     *   .build();</pre></blockquote>
-     *     </li>
-     * </ul>
+     * Registry of various (<em>but not all</em>)
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
+     * Algorithms</a> commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
+     * <a href="https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier">JWK Thumbprint URIs</a>.  For
+     * example:
+     * <blockquote><pre>
+     * Jwks.{@link  JwkBuilder builder}()
+     *     // ... etc ...
+     *     .{@link JwkBuilder#setIdFromThumbprint(HashAlgorithm) setIdFromThumbprint}(Algorithms.hash.{@link StandardHashAlgorithms#SHA256 SHA256}) // &lt;---
+     *     .build()</pre></blockquote>
+     * <p>or</p>
+     * <blockquote><pre>
+     * HashAlgorithm hashAlg = Algorithms.hash.{@link StandardHashAlgorithms#SHA256 SHA256};
+     * {@link JwkThumbprint} thumbprint = aJwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(hashAlg);
+     * String <a href="https://www.rfc-editor.org/rfc/rfc9278#section-3">rfcMandatoryPrefix</a> = "urn:ietf:params:oauth:jwk-thumbprint:" + hashAlg.getId();
+     * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
+     * </pre></blockquote>
      *
      * @see HashAlgorithm
      * @see HashAlgorithm#getId()
+     * @see StandardHashAlgorithms
+     * @see Registry
      */
     public static final StandardHashAlgorithms hash = new StandardHashAlgorithms();
 
     /**
-     * Registry of all standard JWE Encryption Algorithms defined in
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA (RFC 7518) Encryption Algorithms</a> and
-     * formalized in the
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">
+     * Registry of all <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">standard JWE Encryption
+     * Algorithms</a> codified in the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">
      * JSON Web Signature and Encryption Algorithms Registry</a>.  The variable is named &quot;{@code enc}&quot; for two
      * reasons:
      * <ul>
@@ -109,17 +129,37 @@ public final class Algorithms {
     public static final StandardKeyAlgorithms key = new StandardKeyAlgorithms();
 
     /**
-     * Constant definitions and utility methods for JWT-standard hash algorithms as specified by
-     * <a href="https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier">RFC 9278 (JWK Thumbprint URI),
-     * Section 4</a>. Per that RFC, each hash algorithm corresponds to a uniquely-identified algorithm defined in the
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Named
-     * Information Hash Algorithm Registry</a>.
+     * Registry of all standard <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWS Digital
+     * Signature and MAC Algorithms</a> codified in the
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">JSON Web Signature and Encryption Algorithms
+     * Registry</a>.
      *
-     * @see HashAlgorithm
+     * @see JwsAlgorithms
+     */
+    public static final JwsAlgorithms sig = new JwsAlgorithms();
+
+    /**
+     * Registry of various (<em>but not all</em>)
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
+     * Algorithms</a> commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
+     * <a href="https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier">JWK Thumbprint URIs</a>.  For
+     * example:
+     * <blockquote><pre>
+     * Jwks.{@link  JwkBuilder builder}()
+     *     // ... etc ...
+     *     .{@link JwkBuilder#setIdFromThumbprint(HashAlgorithm) setIdFromThumbprint}(Algorithms.hash.{@link StandardHashAlgorithms#SHA256 SHA256}) // &lt;---
+     *     .build()</pre></blockquote>
+     * <p>or</p>
+     * <blockquote><pre>
+     * HashAlgorithm hashAlg = Algorithms.hash.{@link StandardHashAlgorithms#SHA256 SHA256};
+     * {@link JwkThumbprint} thumbprint = aJwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(hashAlg);
+     * String <a href="https://www.rfc-editor.org/rfc/rfc9278#section-3">rfcMandatoryPrefix</a> = "urn:ietf:params:oauth:jwk-thumbprint:" + hashAlg.getId();
+     * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
+     * </pre></blockquote>
+     *
      * @see #values()
      * @see #find(String)
      * @see #get(String)
-     * @since JJWT_RELEASE_VERSION
      */
     public static final class StandardHashAlgorithms implements Registry<String, HashAlgorithm> {
 
@@ -978,4 +1018,206 @@ public final class Algorithms {
         public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = doGet("ECDH-ES+A256KW");
     }
 
+    /**
+     * Constant definitions and utility methods for standard JWS
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic Algorithms for Digital
+     * Signatures and MACs</a>.
+     */
+    public static final class JwsAlgorithms implements Registry<String, SecureDigestAlgorithm<?, ?>> {
+
+        private static final Registry<String, SecureDigestAlgorithm<?, ?>> IMPL =
+                Classes.newInstance("io.jsonwebtoken.impl.security.JwsAlgorithmsBridge");
+
+        /**
+         * Prevent external instantiation.
+         */
+        private JwsAlgorithms() {
+        }
+
+        /**
+         * Returns all standard JWS
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>
+         * as an unmodifiable collection.
+         *
+         * @return all standard JWS
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>
+         * as an unmodifiable collection.
+         */
+        public Collection<SecureDigestAlgorithm<?, ?>> values() {
+            return IMPL.values();
+        }
+
+        /**
+         * Returns the {@link SignatureAlgorithm} or {@link MacAlgorithm} instance with the specified
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">{@code alg} algorithm identifier</a> or
+         * {@code null} if an algorithm for the specified {@code id} cannot be found.  If a JWA-standard
+         * instance must be resolved, consider using the {@link #get(String)} method instead.
+         *
+         * @param id a JWA-standard identifier defined in
+         *           <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWA RFC 7518, Section 3.1</a>
+         *           in the <code>&quot;alg&quot; Param Value</code> column.
+         * @return the {@code SecureDigestAlgorithm} instance with the specified JWA-standard identifier, or
+         * {@code null} if no algorithm with that identifier exists.
+         * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">RFC 7518, Section 3.1</a>
+         * @see #get(String)
+         */
+        public SecureDigestAlgorithm<?, ?> find(String id) {
+            return IMPL.find(id);
+        }
+
+        /**
+         * Returns the {@link SignatureAlgorithm} or {@link MacAlgorithm} instance with the specified
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">{@code alg} algorithm identifier</a> or
+         * throws an {@link IllegalArgumentException} if there is no JWA-standard algorithm for the specified
+         * {@code id}.  If a JWA-standard instance result is not mandatory, consider using the {@link #find(String)}
+         * method instead.
+         *
+         * @param id a JWA-standard identifier defined in
+         *           <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWA RFC 7518, Section 3.1</a>
+         *           in the <code>&quot;alg&quot; Param Value</code> column.
+         * @return the associated {@code SecureDigestAlgorithm} instance.
+         * @throws IllegalArgumentException if there is no JWA-standard algorithm for the specified identifier.
+         * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">RFC 7518, Section 3.1</a>
+         * @see #find(String)
+         */
+        public SecureDigestAlgorithm<?, ?> get(String id) throws IllegalArgumentException {
+            return IMPL.get(id);
+        }
+
+        // do not change this visibility.  Raw type method signature not be publicly exposed
+        @SuppressWarnings("unchecked")
+        private <T> T doGet(String id) {
+            Assert.hasText(id, "id cannot be null or empty.");
+            return (T) get(id);
+        }
+
+        /**
+         * The &quot;none&quot; signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">RFC 7518, Section 3.6</a>.  This algorithm
+         * is used only when creating unsecured (not integrity protected) JWSs and is not usable in any other scenario.
+         * Any attempt to call its methods will result in an exception being thrown.
+         */
+        public final SecureDigestAlgorithm<Key, Key> NONE = doGet("none");
+
+        /**
+         * {@code HMAC using SHA-256} message authentication algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
+         * requires a 256-bit (32 byte) key.
+         */
+        public final MacAlgorithm HS256 = doGet("HS256");
+
+        /**
+         * {@code HMAC using SHA-384} message authentication algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
+         * requires a 384-bit (48 byte) key.
+         */
+        public final MacAlgorithm HS384 = doGet("HS384");
+
+        /**
+         * {@code HMAC using SHA-512} message authentication algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
+         * requires a 512-bit (64 byte) key.
+         */
+        public final MacAlgorithm HS512 = doGet("HS512");
+
+        /**
+         * {@code RSASSA-PKCS1-v1_5 using SHA-256} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
+         * requires a 2048-bit key.
+         */
+        public final SignatureAlgorithm RS256 = doGet("RS256");
+
+        /**
+         * {@code RSASSA-PKCS1-v1_5 using SHA-384} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
+         * requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
+         */
+        public final SignatureAlgorithm RS384 = doGet("RS384");
+
+        /**
+         * {@code RSASSA-PKCS1-v1_5 using SHA-512} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
+         * requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
+         */
+        public final SignatureAlgorithm RS512 = doGet("RS512");
+
+        /**
+         * {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
+         * This algorithm requires a 2048-bit key.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         */
+        public final SignatureAlgorithm PS256 = doGet("PS256");
+
+        /**
+         * {@code RSASSA-PSS using SHA-384 and MGF1 with SHA-384} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
+         * This algorithm requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         */
+        public final SignatureAlgorithm PS384 = doGet("PS384");
+
+        /**
+         * {@code RSASSA-PSS using SHA-512 and MGF1 with SHA-512} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5">RFC 7518, Section 3.5</a><b><sup>1</sup></b>.
+         * This algorithm requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         */
+        public final SignatureAlgorithm PS512 = doGet("PS512");
+
+        /**
+         * {@code ECDSA using P-256 and SHA-256} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
+         * requires a 256-bit key.
+         */
+        public final SignatureAlgorithm ES256 = doGet("ES256");
+
+        /**
+         * {@code ECDSA using P-384 and SHA-384} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
+         * requires a 384-bit key.
+         */
+        public final SignatureAlgorithm ES384 = doGet("ES384");
+
+        /**
+         * {@code ECDSA using P-521 and SHA-512} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
+         * requires a 521-bit key.
+         */
+        public final SignatureAlgorithm ES512 = doGet("ES512");
+
+        /**
+         * {@code EdDSA} signature algorithm as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
+         * requires either {@code Ed25519} or {@code Ed448} Edwards Curve keys.
+         */
+        public final SignatureAlgorithm EdDSA = doGet("EdDSA");
+
+        /**
+         * {@code EdDSA} signature algorithm using Curve 25519 as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
+         * requires {@code Ed25519} Edwards Curve keys to create signatures.
+         * <p><b>This is a convenience alias for {@link #EdDSA}</b> that defaults key generation to
+         * {@code Ed25519} keys.</p>
+         */
+        public final SignatureAlgorithm Ed25519 = doGet("Ed25519");
+
+        /**
+         * {@code EdDSA} signature algorithm using Curve 25519 as defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
+         * requires {@code Ed448} Edwards Curve keys to create signatures.
+         * <p><b>This is a convenience alias for {@link #EdDSA}</b> that defaults key generation to
+         * {@code Ed448} keys.</p>
+         */
+        public final SignatureAlgorithm Ed448 = doGet("Ed448");
+    }
 }

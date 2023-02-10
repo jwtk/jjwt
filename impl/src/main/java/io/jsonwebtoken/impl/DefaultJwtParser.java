@@ -48,7 +48,6 @@ import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
-import io.jsonwebtoken.impl.security.JwsAlgorithmsBridge;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
@@ -65,7 +64,6 @@ import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Message;
@@ -116,21 +114,21 @@ public class DefaultJwtParser implements JwtParser {
             "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an " +
-            AbstractHeader.ALGORITHM + " header value of '" + JwsAlgorithms.NONE.getId() + "') are disallowed by " +
+            AbstractHeader.ALGORITHM + " header value of '" + Algorithms.sig.NONE.getId() + "') are disallowed by " +
             "default as mandated by https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to " +
             "allow them to be parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
             "security considerations covered in that method's JavaDoc before doing so). Header: ";
 
     private static final String JWE_NONE_MSG = "JWEs do not support key management " + AbstractHeader.ALGORITHM +
-            " header value '" + JwsAlgorithms.NONE.getId() + "' per " +
+            " header value '" + Algorithms.sig.NONE.getId() + "' per " +
             "https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1";
 
     private static final String JWS_NONE_SIG_MISMATCH_MSG = "The JWS header references signature algorithm '" +
-            JwsAlgorithms.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
+            Algorithms.sig.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
             "per https://tools.ietf.org/html/rfc7518#section-3.6.";
     private static final String UNPROTECTED_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
             "'%s', but payload decompression for Unsecured JWTs (those with an " + AbstractHeader.ALGORITHM +
-            " header value of '" + JwsAlgorithms.NONE.getId() + "') are " + "disallowed by default to protect " +
+            " header value of '" + Algorithms.sig.NONE.getId() + "') are " + "disallowed by default to protect " +
             "against [Denial of Service attacks](" +
             "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf).  If you " +
             "wish to enable Unsecure JWS payload decompression, call the JwtParserBuilder." +
@@ -146,7 +144,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
         String name = "JWS MAC or Signature Algorithm";
-        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, JwsAlgorithmsBridge.values(), extras);
+        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, Algorithms.sig.values(), extras);
         return new IdLocator<>(AbstractHeader.ALGORITHM, MISSING_JWS_ALG_MSG, registry);
     }
 
@@ -543,7 +541,7 @@ public class DefaultJwtParser implements JwtParser {
             String msg = tokenized instanceof TokenizedJwe ? MISSING_JWE_ALG_MSG : MISSING_JWS_ALG_MSG;
             throw new MalformedJwtException(msg);
         }
-        final boolean unsecured = JwsAlgorithms.NONE.getId().equalsIgnoreCase(alg);
+        final boolean unsecured = Algorithms.sig.NONE.getId().equalsIgnoreCase(alg);
 
         final String base64UrlDigest = tokenized.getDigest();
         final boolean hasDigest = Strings.hasText(base64UrlDigest);

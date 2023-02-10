@@ -17,53 +17,74 @@ package io.jsonwebtoken.security
 
 import org.junit.Test
 
-import static org.junit.Assert.assertNull
-import static org.junit.Assert.assertSame
+import static org.junit.Assert.*
 
 class JwsAlgorithmsTest {
 
     @Test
     void testPrivateCtor() { // for code coverage only
-        new JwsAlgorithms()
+        new Algorithms.JwsAlgorithms()
     }
 
     @Test
-    void testForId() {
-        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
-            assertSame alg, JwsAlgorithms.forId(alg.getId())
+    void testGet() {
+        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
+            assertSame alg, Algorithms.sig.get(alg.getId())
         }
     }
 
     @Test
-    void testForIdCaseInsensitive() {
-        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
-            assertSame alg, JwsAlgorithms.forId(alg.getId().toLowerCase())
+    void testGetCaseInsensitive() {
+        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
+            assertSame alg, Algorithms.sig.get(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
-    void testForIdWithInvalidId() {
+    void testGetWithInvalidId() {
         //unlike the 'find' paradigm, 'for' requires the value to exist
-        JwsAlgorithms.forId('invalid')
+        Algorithms.sig.get('invalid')
     }
 
     @Test
     void testFindById() {
-        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
-            assertSame alg, JwsAlgorithms.findById(alg.getId())
+        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
+            assertSame alg, Algorithms.sig.find(alg.getId())
         }
     }
 
     @Test
     void testFindByIdCaseInsensitive() {
-        for (SecureDigestAlgorithm alg : JwsAlgorithms.values()) {
-            assertSame alg, JwsAlgorithms.findById(alg.getId().toLowerCase())
+        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
+            assertSame alg, Algorithms.sig.find(alg.getId().toLowerCase())
         }
     }
 
     @Test
     void testFindByIdWithInvalidId() {
         // 'find' paradigm can return null if not found
-        assertNull JwsAlgorithms.findById('invalid')
+        assertNull Algorithms.sig.find('invalid')
+    }
+
+    @Test
+    void testFindEd448() {
+        assertNotNull Algorithms.sig.find('Ed448')
+    }
+
+    @Test
+    void testFindEd448CaseInsensitive() {
+        assertNotNull Algorithms.sig.find('ED448')
+        assertNotNull Algorithms.sig.find('ed448')
+    }
+
+    @Test
+    void testFindEd25519() {
+        assertNotNull Algorithms.sig.find('Ed25519')
+    }
+
+    @Test
+    void testFindEd25519CaseInsensitive() {
+        assertNotNull Algorithms.sig.find('ED25519')
+        assertNotNull Algorithms.sig.find('ed25519')
     }
 }

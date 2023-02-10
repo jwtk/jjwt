@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
@@ -99,7 +100,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
         String id = ctx.getAlgorithm();
         if (Strings.hasText(id)) {
-            SecureDigestAlgorithm<?, ?> alg = JwsAlgorithmsBridge.findById(id);
+            SecureDigestAlgorithm<?, ?> alg = Algorithms.sig.find(id);
             if (alg instanceof MacAlgorithm) {
                 jcaName = ((CryptoAlgorithm) alg).getJcaName(); // valid for all JJWT alg implementations
                 Assert.hasText(jcaName, "Algorithm jcaName cannot be null or empty.");

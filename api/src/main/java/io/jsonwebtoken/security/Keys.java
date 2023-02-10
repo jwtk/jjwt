@@ -80,9 +80,9 @@ public final class Keys {
      * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:</p>
      *
      * <pre><code>
-     * {@link JwsAlgorithms#HS256}.keyBuilder().build();
-     * {@link JwsAlgorithms#HS384}.keyBuilder().build();
-     * {@link JwsAlgorithms#HS512}.keyBuilder().build();
+     * {@link Algorithms.JwsAlgorithms#HS256}.keyBuilder().build();
+     * {@link Algorithms.JwsAlgorithms#HS384}.keyBuilder().build();
+     * {@link Algorithms.JwsAlgorithms#HS512}.keyBuilder().build();
      * </code></pre>
      *
      * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
@@ -129,7 +129,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = JwsAlgorithms.forId(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Algorithms.sig.get(alg.name());
         if (!(salg instanceof MacAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -143,13 +143,12 @@ public final class Keys {
      * <p>As of JJWT JJWT_RELEASE_VERSION, asymmetric key algorithm instances can generate KeyPairs of suitable strength
      * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
      *
-     * <pre><code>
-     * {@link JwsAlgorithms#RS256}.keyPairBuilder().build();
-     * {@link JwsAlgorithms#RS384}.keyPairBuilder().build();
-     * {@link JwsAlgorithms#RS256}.keyPairBuilder().build();
+     * <blockquote><pre>
+     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#RS256 RS256}.keyPairBuilder().build();
+     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#RS384 RS384}.keyPairBuilder().build();
+     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#RS512 RS512}.keyPairBuilder().build();
      * ... etc ...
-     * {@link JwsAlgorithms#ES512}.keyPairBuilder().build();
-     * </code></pre>
+     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
@@ -235,7 +234,7 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = JwsAlgorithms.forId(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Algorithms.sig.get(alg.name());
         if (!(salg instanceof SignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);

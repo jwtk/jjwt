@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.JwsAlgorithms
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
@@ -83,7 +83,7 @@ class AbstractEcJwkFactoryTest {
 
     @Test
     void testAddSamePointDoublesIt() {
-        def pair = JwsAlgorithms.ES256.keyPairBuilder().build()
+        def pair = Algorithms.sig.ES256.keyPairBuilder().build()
         def pub = pair.getPublic() as ECPublicKey
 
         def spec = pub.getParams()
@@ -98,7 +98,7 @@ class AbstractEcJwkFactoryTest {
     @Test
     void testDerivePublicFails() {
 
-        def pair = JwsAlgorithms.ES256.keyPairBuilder().build()
+        def pair = Algorithms.sig.ES256.keyPairBuilder().build()
         def priv = pair.getPrivate() as ECPrivateKey
 
         final def context = new DefaultJwkContext(DefaultEcPrivateJwk.FIELDS)
