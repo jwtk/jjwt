@@ -80,9 +80,9 @@ public final class Keys {
      * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:</p>
      *
      * <pre><code>
-     * {@link Algorithms.JwsAlgorithms#HS256}.keyBuilder().build();
-     * {@link Algorithms.JwsAlgorithms#HS384}.keyBuilder().build();
-     * {@link Algorithms.JwsAlgorithms#HS512}.keyBuilder().build();
+     * {@link JwsAlgorithms#HS256}.keyBuilder().build();
+     * {@link JwsAlgorithms#HS384}.keyBuilder().build();
+     * {@link JwsAlgorithms#HS512}.keyBuilder().build();
      * </code></pre>
      *
      * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
@@ -144,11 +144,11 @@ public final class Keys {
      * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
      *
      * <blockquote><pre>
-     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#RS256 RS256}.keyPairBuilder().build();
-     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#RS384 RS384}.keyPairBuilder().build();
-     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#RS512 RS512}.keyPairBuilder().build();
+     * Algorithms.sig.{@link JwsAlgorithms#RS256 RS256}.keyPairBuilder().build();
+     * Algorithms.sig.{@link JwsAlgorithms#RS384 RS384}.keyPairBuilder().build();
+     * Algorithms.sig.{@link JwsAlgorithms#RS512 RS512}.keyPairBuilder().build();
      * ... etc ...
-     * Algorithms.sig.{@link Algorithms.JwsAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
+     * Algorithms.sig.{@link JwsAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if

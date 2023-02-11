@@ -22,11 +22,6 @@ import static org.junit.Assert.*
 class JwsAlgorithmsTest {
 
     @Test
-    void testPrivateCtor() { // for code coverage only
-        new Algorithms.JwsAlgorithms()
-    }
-
-    @Test
     void testGet() {
         for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
             assertSame alg, Algorithms.sig.get(alg.getId())

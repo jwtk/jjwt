@@ -23,10 +23,12 @@ import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.StandardKeyAlgorithms;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
@@ -474,55 +476,55 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA256")</code><sup>1</sup></td>
      * <td>256 &lt;= size &lt;= 383 <sup>2</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#HS256 HS256}</td>
+     * <td>{@link JwsAlgorithms#HS256 HS256}</td>
      * </tr>
      * <tr>
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA384")</code><sup>1</sup></td>
      * <td>384 &lt;= size &lt;= 511</td>
-     * <td>{@link Algorithms.JwsAlgorithms#HS384 HS384}</td>
+     * <td>{@link JwsAlgorithms#HS384 HS384}</td>
      * </tr>
      * <tr>
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA512")</code><sup>1</sup></td>
      * <td>512 &lt;= size</td>
-     * <td>{@link Algorithms.JwsAlgorithms#HS512 HS512}</td>
+     * <td>{@link JwsAlgorithms#HS512 HS512}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>256 &lt;= size &lt;= 383 <sup>3</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#ES256 ES256}</td>
+     * <td>{@link JwsAlgorithms#ES256 ES256}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>384 &lt;= size &lt;= 520 <sup>4</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#ES384 ES384}</td>
+     * <td>{@link JwsAlgorithms#ES384 ES384}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td><b>521</b> &lt;= size <sup>4</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#ES512 ES512}</td>
+     * <td>{@link JwsAlgorithms#ES512 ES512}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>2048 &lt;= size &lt;= 3071 <sup>5,6</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#RS256 RS256}</td>
+     * <td>{@link JwsAlgorithms#RS256 RS256}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>3072 &lt;= size &lt;= 4095 <sup>6</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#RS384 RS384}</td>
+     * <td>{@link JwsAlgorithms#RS384 RS384}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>4096 &lt;= size <sup>5</sup></td>
-     * <td>{@link Algorithms.JwsAlgorithms#RS512 RS512}</td>
+     * <td>{@link JwsAlgorithms#RS512 RS512}</td>
      * </tr>
      * </tbody>
      * </table>
@@ -548,16 +550,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@code RSAKey}s with key lengths less than 2048 bits will be rejected with a
      * {@link WeakKeyException}.</li>
      * <li>Technically any RSA key of length &gt;= 2048 bits may be used with the
-     * {@link Algorithms.JwsAlgorithms#RS256 RS256}, {@link Algorithms.JwsAlgorithms#RS384 RS384}, and
-     * {@link Algorithms.JwsAlgorithms#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
+     * {@link JwsAlgorithms#RS256 RS256}, {@link JwsAlgorithms#RS384 RS384}, and
+     * {@link JwsAlgorithms#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
      * length to parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>
      * </ol>
      *
-     * <p>This implementation does not use the {@link Algorithms.JwsAlgorithms#PS256 PS256},
-     * {@link Algorithms.JwsAlgorithms#PS384 PS384}, or {@link Algorithms.JwsAlgorithms#PS512 PS512} RSA variants for any
-     * specified {@link RSAKey} because the the {@link Algorithms.JwsAlgorithms#RS256 RS256},
-     * {@link Algorithms.JwsAlgorithms#RS384 RS384}, and {@link Algorithms.JwsAlgorithms#RS512 RS512} algorithms are
+     * <p>This implementation does not use the {@link JwsAlgorithms#PS256 PS256},
+     * {@link JwsAlgorithms#PS384 PS384}, or {@link JwsAlgorithms#PS512 PS512} RSA variants for any
+     * specified {@link RSAKey} because the the {@link JwsAlgorithms#RS256 RS256},
+     * {@link JwsAlgorithms#RS384 RS384}, and {@link JwsAlgorithms#RS512 RS512} algorithms are
      * available in the JDK by default while the {@code PS}* variants require either JDK 11 or an additional JCA
      * Provider (like BouncyCastle).  If you wish to use a {@code PS}* variant with your key, use the
      * {@link #signWith(Key, SecureDigestAlgorithm)} method instead.</p>
@@ -570,6 +572,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification as
      *                             described above in <em>recommended signature algorithms</em>.
+     * @see Algorithms#sig
      * @see #signWith(Key, SecureDigestAlgorithm)
      * @since 0.10.0
      */
@@ -669,9 +672,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p><b>Deprecation Notice</b></p>
      *
      * <p><b>This has been deprecated since JJWT_RELEASE_VERSION.  Use
-     * {@link #signWith(Key, SecureDigestAlgorithm)} instead.</b>.  Standard JWA algorithms
-     * are represented as instances of this new interface in the {@link Algorithms.JwsAlgorithms}
-     * enum class.</p>
+     * {@link #signWith(Key, SecureDigestAlgorithm)} instead</b>.  Standard JWA algorithms
+     * are represented as instances of this new interface in the {@link Algorithms#sig}
+     * algorithm registry.</p>
      *
      * <p>Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.</p>
      *
@@ -694,7 +697,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
      *
-     * <p>The {@link Algorithms.JwsAlgorithms} utility class makes available all standard signature
+     * <p>The {@link Algorithms#sig} registry makes available all standard signature
      * algorithms defined in the JWA specification.</p>
      *
      * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
@@ -708,7 +711,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
      *                             the specified algorithm.
      * @see #signWith(Key)
-     * @see Algorithms.JwsAlgorithms
+     * @see Algorithms#sig
      * @since JJWT_RELEASE_VERSION
      */
     <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
@@ -724,12 +727,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <ul>
      *     <li>If the provided {@code key} is a {@link Password Password} instance,
      *     the {@code KeyAlgorithm} used will be one of the three JWA-standard password-based key algorithms
-     *      ({@link Algorithms.StandardKeyAlgorithms#PBES2_HS256_A128KW PBES2_HS256_A128KW},
-     *      {@link Algorithms.StandardKeyAlgorithms#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
-     *      {@link Algorithms.StandardKeyAlgorithms#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
+     *      ({@link StandardKeyAlgorithms#PBES2_HS256_A128KW PBES2_HS256_A128KW},
+     *      {@link StandardKeyAlgorithms#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
+     *      {@link StandardKeyAlgorithms#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
      *      {@link AeadAlgorithm#getKeyBitLength() key length} requirement.</li>
      *     <li>If the {@code key} is otherwise a standard {@code SecretKey}, the {@code KeyAlgorithm} will be
-     *     {@link Algorithms.StandardKeyAlgorithms#DIRECT}, indicating that {@code key} should be used directly with the
+     *     {@link StandardKeyAlgorithms#DIRECT}, indicating that {@code key} should be used directly with the
      *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
      *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
      *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's

@@ -20,8 +20,10 @@ import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.Algorithms;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.StandardKeyAlgorithms;
 
 import java.security.Key;
 import java.security.Provider;
@@ -44,7 +46,7 @@ import java.util.Map;
 @SuppressWarnings("JavadocLinkAsPlainText")
 public interface JwtParserBuilder extends Builder<JwtParser> {
 
-    /**ß
+    /**
      * Enables parsing of Unsecured JWSs (JWTs with an 'alg' (Algorithm) header value of
      * 'none'). <b>Be careful when calling this method - one should fully understand
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
@@ -56,7 +58,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
-     * @see Algorithms.JwsAlgorithms#NONE
+     * @see JwsAlgorithms#NONE
      * @see #enableUnsecuredDecompression()
      * @since JJWT_RELEASE_VERSION
      */
@@ -85,7 +87,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
      * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>
-     * @see Algorithms.JwsAlgorithms#NONE
+     * @see JwsAlgorithms#NONE
      * @see #enableUnsecuredJws()
      * @since JJWT_RELEASE_VERSION
      */
@@ -477,7 +479,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * {@code sigAlgs} collection, the later element will evict any previously-added algorithm with the same
      * {@code id}.</p>
      *
-     * <p>Finally, the {@link Algorithms.JwsAlgorithms#values() JWA standard signature algorithms} are
+     * <p>Finally, the {@link Algorithms#sig JWA standard signature and MAC algorithms} are
      * added last, <em>after</em> those in the {@code sigAlgs} collection, to ensure that JWA standard algorithms
      * cannot be accidentally replaced.</p>
      *
@@ -496,7 +498,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * collection is added in iteration order; if a duplicate id is found when iterating the {@code keyAlgs}
      * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link io.jsonwebtoken.security.Algorithms.StandardKeyAlgorithms#values() JWA standard key management algorithms}
+     * <p>Finally, the {@link StandardKeyAlgorithms#values() JWA standard key management algorithms}
      * are added last, <em>after</em> those in the {@code keyAlgs} collection, to ensure that JWA standard algorithms
      * cannot be accidentally replaced.</p>
      *

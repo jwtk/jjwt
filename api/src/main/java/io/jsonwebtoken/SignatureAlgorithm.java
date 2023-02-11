@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.WeakKeyException;
@@ -35,7 +35,7 @@ import java.util.List;
  * <a href="https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-31">JSON Web Algorithms</a> specification.
  *
  * @since 0.1
- * @deprecated since JJWT_RELEASE_VERSION; use {@link Algorithms.JwsAlgorithms} instead.
+ * @deprecated since JJWT_RELEASE_VERSION; use {@link JwsAlgorithms} instead.
  */
 @Deprecated
 public enum SignatureAlgorithm {
