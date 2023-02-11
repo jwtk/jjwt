@@ -351,8 +351,10 @@ public final class Assert {
      * Assert that the provided object is an instance of the provided class.
      * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
      *
+     * @param <T> the type of instance expected
      * @param clazz the required class
      * @param obj   the object to check
+     * @return the expected instance of type {@code T}
      * @throws IllegalArgumentException if the object is not an instance of clazz
      * @see Class#isInstance
      */

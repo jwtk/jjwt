@@ -19,7 +19,7 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class JwsAlgorithmsTest {
+class StandardSecureDigestAlgorithmsTest {
 
     @Test
     void testGet() {

@@ -20,10 +20,10 @@ import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.Algorithms;
-import io.jsonwebtoken.security.JwsAlgorithms;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.StandardKeyAlgorithms;
+import io.jsonwebtoken.security.StandardSecureDigestAlgorithms;
 
 import java.security.Key;
 import java.security.Provider;
@@ -58,7 +58,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
-     * @see JwsAlgorithms#NONE
+     * @see StandardSecureDigestAlgorithms#NONE
      * @see #enableUnsecuredDecompression()
      * @since JJWT_RELEASE_VERSION
      */
@@ -87,7 +87,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
      * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>
-     * @see JwsAlgorithms#NONE
+     * @see StandardSecureDigestAlgorithms#NONE
      * @see #enableUnsecuredJws()
      * @since JJWT_RELEASE_VERSION
      */

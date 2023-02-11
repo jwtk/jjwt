@@ -24,7 +24,7 @@ import io.jsonwebtoken.lang.Registry;
  *
  * <blockquote><pre>
  *     Algorithms.// press code-completion hotkeys to suggest available algorithm registry fields
- *     Algorithms.sig.// press hotkeys to suggest individual signature or MAC algorithms or utility methods
+ *     Algorithms.sig.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
  *     Algorithms.enc.// press hotkeys to suggest individual encryption algorithms or utility methods
  *     Algorithms.key.// press hotkeys to suggest individual key algorithms or utility methods
  *     Algorithms.hash.// press hotkeys to suggest individual hash algorithms or utility methods
@@ -76,7 +76,7 @@ public final class Algorithms {
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>. In
      * addition to being available via registry {@link StandardEncryptionAlgorithms#get(String) get} and
      * {@link StandardEncryptionAlgorithms#find(String) find} lookup methods, each algorithm is also available as a
-     * ({@code public final}) constant for direct type-safe reference in application code.  For example:</p>
+     * ({@code public final}) constant for direct type-safe reference in application code.  For example:
      * <blockquote><pre>
      * Jwts.builder()
      *     // ... etc ...
@@ -122,8 +122,11 @@ public final class Algorithms {
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">JSON Web Signature and Encryption Algorithms
      * Registry</a>.
      *
-     * @see JwsAlgorithms
+     * @see StandardSecureDigestAlgorithms
+     * @see SecureDigestAlgorithm
+     * @see MacAlgorithm
+     * @see SignatureAlgorithm
      */
-    public static final JwsAlgorithms sig = JwsAlgorithms.get();
+    public static final StandardSecureDigestAlgorithms sig = StandardSecureDigestAlgorithms.get();
 
 }

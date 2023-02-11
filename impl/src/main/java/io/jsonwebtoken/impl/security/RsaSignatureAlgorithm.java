@@ -54,7 +54,8 @@ public class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     public RsaSignatureAlgorithm(String name, String jcaName, int preferredKeyBitLength, AlgorithmParameterSpec algParam) {
         super(name, jcaName);
         if (preferredKeyBitLength < MIN_KEY_BIT_LENGTH) {
-            String msg = "preferredKeyBitLength must be greater than the JWA mandatory minimum key length of " + MIN_KEY_BIT_LENGTH;
+            String msg = "preferredKeyBitLength must be greater than the JWA mandatory minimum key length of " +
+                    MIN_KEY_BIT_LENGTH;
             throw new IllegalArgumentException(msg);
         }
         this.preferredKeyBitLength = preferredKeyBitLength;
@@ -88,7 +89,8 @@ public class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
         // https://github.com/jwtk/jjwt/issues/68
         if (signing && !(key instanceof PrivateKey)) {
-            String msg = "Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: " + key.getClass().getName();
+            String msg = "Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: " +
+                    key.getClass().getName();
             throw new InvalidKeyException(msg);
         }
 
@@ -100,7 +102,12 @@ public class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
             if (size < MIN_KEY_BIT_LENGTH) {
                 String id = getId();
                 String section = id.startsWith("PS") ? "3.5" : "3.3";
-                String msg = "The " + keyType(signing) + " key's size is " + size + " bits which is not secure " + "enough for the " + id + " algorithm.  The JWT JWA Specification (RFC 7518, Section " + section + ") states that RSA keys MUST have a size >= " + MIN_KEY_BIT_LENGTH + " bits.  Consider using the JwsAlgorithms." + id + ".generateKeyPair() " + "method to create a key pair guaranteed to be secure enough for " + id + ".  See " + "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
+                String msg = "The " + keyType(signing) + " key's size is " + size + " bits which is not secure " +
+                        "enough for the " + id + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
+                        section + ") states that RSA keys MUST have a size >= " + MIN_KEY_BIT_LENGTH + " bits.  " +
+                        "Consider using the JwsAlgorithms." + id + ".generateKeyPair() " + "method to create a " +
+                        "key pair guaranteed to be secure enough for " + id + ".  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
                 throw new WeakKeyException(msg);
             }
         }

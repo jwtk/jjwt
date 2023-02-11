@@ -67,7 +67,7 @@ public final class Keys {
                 "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                 "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                 "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                "output size).  Consider using the JwsAlgorithms.HS256.keyBuilder() method (or HS384.keyBuilder() " +
+                "output size).  Consider using the StandardSecureDigestAlgorithms.HS256.keyBuilder() method (or HS384.keyBuilder() " +
                 "or HS512.keyBuilder()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
                 "algorithm.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
         throw new WeakKeyException(msg);
@@ -80,9 +80,9 @@ public final class Keys {
      * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:</p>
      *
      * <pre><code>
-     * {@link JwsAlgorithms#HS256}.keyBuilder().build();
-     * {@link JwsAlgorithms#HS384}.keyBuilder().build();
-     * {@link JwsAlgorithms#HS512}.keyBuilder().build();
+     * {@link StandardSecureDigestAlgorithms#HS256}.keyBuilder().build();
+     * {@link StandardSecureDigestAlgorithms#HS384}.keyBuilder().build();
+     * {@link StandardSecureDigestAlgorithms#HS512}.keyBuilder().build();
      * </code></pre>
      *
      * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
@@ -144,11 +144,11 @@ public final class Keys {
      * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
      *
      * <blockquote><pre>
-     * Algorithms.sig.{@link JwsAlgorithms#RS256 RS256}.keyPairBuilder().build();
-     * Algorithms.sig.{@link JwsAlgorithms#RS384 RS384}.keyPairBuilder().build();
-     * Algorithms.sig.{@link JwsAlgorithms#RS512 RS512}.keyPairBuilder().build();
+     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#RS256 RS256}.keyPairBuilder().build();
+     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#RS384 RS384}.keyPairBuilder().build();
+     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#RS512 RS512}.keyPairBuilder().build();
      * ... etc ...
-     * Algorithms.sig.{@link JwsAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
+     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if

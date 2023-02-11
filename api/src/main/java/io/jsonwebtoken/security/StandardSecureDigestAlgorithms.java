@@ -27,14 +27,14 @@ import java.util.Collection;
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic Algorithms for Digital
  * Signatures and MACs</a>.
  */
-public final class JwsAlgorithms implements Registry<String, SecureDigestAlgorithm<?, ?>> {
+public final class StandardSecureDigestAlgorithms implements Registry<String, SecureDigestAlgorithm<?, ?>> {
 
     private static final Registry<String, SecureDigestAlgorithm<?, ?>> IMPL =
             Classes.newInstance("io.jsonwebtoken.impl.security.JwsAlgorithmsBridge");
 
-    private static final JwsAlgorithms INSTANCE = new JwsAlgorithms();
+    private static final StandardSecureDigestAlgorithms INSTANCE = new StandardSecureDigestAlgorithms();
 
-    static JwsAlgorithms get() {
+    static StandardSecureDigestAlgorithms get() {
         return INSTANCE;
     }
 
@@ -170,7 +170,7 @@ public final class JwsAlgorithms implements Registry<String, SecureDigestAlgorit
     /**
      * Prevent external instantiation.
      */
-    private JwsAlgorithms() {
+    private StandardSecureDigestAlgorithms() {
     }
 
     // do not change this visibility.  Raw type method signature not be publicly exposed

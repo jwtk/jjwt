@@ -29,12 +29,16 @@ public interface TokenizedJwt {
     String getProtected();
 
     /**
-     * Payload for JWS, Ciphertext for JWE
+     * Returns the Payload for a JWS or Ciphertext for a JWE.
+     *
+     * @return the Payload for a JWS or Ciphertext for a JWE.
      */
     String getBody();
 
     /**
-     * Signature for JWS, AAD Tag for JWE.
+     * Returns the Signature for JWS or AAD Tag for JWE.
+     *
+     * @return the Signature for JWS or AAD Tag for JWE.
      */
     String getDigest();
 

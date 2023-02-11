@@ -42,6 +42,7 @@ public class JwtDateConverter implements Converter<Date, Object> {
     /**
      * Returns an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
      *
+     * @param value object to convert to a {@code Date} using heuristics.
      * @return an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
      * @since 0.10.0
      */
