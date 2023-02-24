@@ -119,6 +119,7 @@
         <maven.compiler.version>3.8.1</maven.compiler.version> <!-- max version allowed for JDK 7 builds -->
         <maven.javadoc.version>3.1.1</maven.javadoc.version> <!-- max version allowed for JDK 7 builds -->
         <maven.source.version>3.2.1</maven.source.version>
+        <maven.resources.version>3.1.0</maven.resources.version>
         <maven.gpg.version>1.6</maven.gpg.version> <!-- max version allowed for JDK 7 builds -->
         <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
         <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
@@ -356,6 +357,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
