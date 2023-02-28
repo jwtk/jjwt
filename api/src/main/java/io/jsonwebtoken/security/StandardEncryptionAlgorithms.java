@@ -21,7 +21,7 @@ import io.jsonwebtoken.lang.Registry;
 import java.util.Collection;
 
 /**
- * {@link Registry} implementation containing all
+ * {@link Registry} singleton containing all standard
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>
  * codified in the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">
  * JSON Web Signature and Encryption Algorithms Registry</a>. In addition to convenience
@@ -30,12 +30,12 @@ import java.util.Collection;
  * <blockquote><pre>
  * Jwts.builder()
  *     // ... etc ...
- *     .encryptWith(secretKey, <b>Algorithms.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
- *     .build();
- * </pre></blockquote>
+ *     .encryptWith(secretKey, <b>Jwts.ENC.A256GCM</b>) // or A128GCM, A192GCM, etc...
+ *     .build();</pre></blockquote>
  * <p>Direct type-safe references as shown above are often better than calling {@link #get(String)} or
  * {@link #find(String)} which can be susceptible to misspelled or otherwise invalid string values.</p>
  *
+ * @see #get()
  * @see AeadAlgorithm
  * @see #values()
  * @see #find(String)
@@ -45,11 +45,16 @@ import java.util.Collection;
 public final class StandardEncryptionAlgorithms implements Registry<String, AeadAlgorithm> {
 
     private static final Registry<String, AeadAlgorithm> DELEGATE =
-            Classes.newInstance("io.jsonwebtoken.impl.security.EncryptionAlgorithmsBridge");
+            Classes.newInstance("io.jsonwebtoken.impl.security.StandardEncryptionAlgorithmsBridge");
 
     private static final StandardEncryptionAlgorithms INSTANCE = new StandardEncryptionAlgorithms();
 
-    static StandardEncryptionAlgorithms get() {
+    /**
+     * Returns this registry (a static singleton).
+     *
+     * @return this registry (a static singleton).
+     */
+    public static StandardEncryptionAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 

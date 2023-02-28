@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.lang.Collections
-import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.KeyBuilderSupplier
 import io.jsonwebtoken.security.SecretKeyBuilder
 import io.jsonwebtoken.security.SignatureAlgorithm
@@ -36,23 +36,23 @@ class TestKeys {
     // =======================================================
     // Secret Keys
     // =======================================================
-    static SecretKey HS256 = Algorithms.sig.HS256.keyBuilder().build()
-    static SecretKey HS384 = Algorithms.sig.HS384.keyBuilder().build()
-    static SecretKey HS512 = Algorithms.sig.HS512.keyBuilder().build()
+    static SecretKey HS256 = Jwts.SIG.HS256.keyBuilder().build()
+    static SecretKey HS384 = Jwts.SIG.HS384.keyBuilder().build()
+    static SecretKey HS512 = Jwts.SIG.HS512.keyBuilder().build()
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static Collection<SecretKey> AGCM
     static {
-        A128GCM = A128KW = A128GCMKW = Algorithms.enc.A128GCM.keyBuilder().build()
-        A192GCM = A192KW = A192GCMKW = Algorithms.enc.A192GCM.keyBuilder().build()
-        A256GCM = A256KW = A256GCMKW = Algorithms.enc.A256GCM.keyBuilder().build()
+        A128GCM = A128KW = A128GCMKW = Jwts.ENC.A128GCM.keyBuilder().build()
+        A192GCM = A192KW = A192GCMKW = Jwts.ENC.A192GCM.keyBuilder().build()
+        A256GCM = A256KW = A256GCMKW = Jwts.ENC.A256GCM.keyBuilder().build()
         AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
 
-    static SecretKey A128CBC_HS256 = Algorithms.enc.A128CBC_HS256.keyBuilder().build()
-    static SecretKey A192CBC_HS384 = Algorithms.enc.A192CBC_HS384.keyBuilder().build()
-    static SecretKey A256CBC_HS512 = Algorithms.enc.A256CBC_HS512.keyBuilder().build()
+    static SecretKey A128CBC_HS256 = Jwts.ENC.A128CBC_HS256.keyBuilder().build()
+    static SecretKey A192CBC_HS384 = Jwts.ENC.A192CBC_HS384.keyBuilder().build()
+    static SecretKey A256CBC_HS512 = Jwts.ENC.A256CBC_HS512.keyBuilder().build()
     static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
 
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()
@@ -65,14 +65,14 @@ class TestKeys {
     // =======================================================
     // Elliptic Curve Keys & Certificates
     // =======================================================
-    static Bundle ES256 = TestCertificates.readAsymmetricBundle(Algorithms.sig.ES256)
-    static Bundle ES384 = TestCertificates.readAsymmetricBundle(Algorithms.sig.ES384)
-    static Bundle ES512 = TestCertificates.readAsymmetricBundle(Algorithms.sig.ES512)
+    static Bundle ES256 = TestCertificates.readAsymmetricBundle(Jwts.SIG.ES256)
+    static Bundle ES384 = TestCertificates.readAsymmetricBundle(Jwts.SIG.ES384)
+    static Bundle ES512 = TestCertificates.readAsymmetricBundle(Jwts.SIG.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
-    static Bundle EdDSA = TestCertificates.readAsymmetricBundle(Algorithms.sig.EdDSA)
-    static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(Algorithms.sig.Ed25519)
-    static Bundle Ed448 = TestCertificates.readAsymmetricBundle(Algorithms.sig.Ed448)
+    static Bundle EdDSA = TestCertificates.readAsymmetricBundle(Jwts.SIG.EdDSA)
+    static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(Jwts.SIG.Ed25519)
+    static Bundle Ed448 = TestCertificates.readAsymmetricBundle(Jwts.SIG.Ed448)
     static Bundle X25519 = TestCertificates.readBundle(EdwardsCurve.X25519)
     static Bundle X448 = TestCertificates.readBundle(EdwardsCurve.X448)
     static Set<Bundle> EdEC = Collections.setOf(EdDSA, Ed25519, Ed448, X25519, X448)
@@ -80,9 +80,9 @@ class TestKeys {
     // =======================================================
     // RSA Keys & Certificates
     // =======================================================
-    static Bundle RS256 = TestCertificates.readAsymmetricBundle(Algorithms.sig.RS256)
-    static Bundle RS384 = TestCertificates.readAsymmetricBundle(Algorithms.sig.RS384)
-    static Bundle RS512 = TestCertificates.readAsymmetricBundle(Algorithms.sig.RS512)
+    static Bundle RS256 = TestCertificates.readAsymmetricBundle(Jwts.SIG.RS256)
+    static Bundle RS384 = TestCertificates.readAsymmetricBundle(Jwts.SIG.RS384)
+    static Bundle RS512 = TestCertificates.readAsymmetricBundle(Jwts.SIG.RS512)
     static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512)
 
     static Set<Bundle> ASYM = new LinkedHashSet<>()

@@ -29,7 +29,7 @@ import java.security.spec.MGF1ParameterSpec;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public final class KeyAlgorithmsBridge extends DelegatingRegistry<KeyAlgorithm<?, ?>> {
+public final class StandardKeyAlgorithmsBridge extends DelegatingRegistry<KeyAlgorithm<?, ?>> {
 
     private static final String RSA1_5_ID = "RSA1_5";
     private static final String RSA1_5_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
@@ -40,7 +40,7 @@ public final class KeyAlgorithmsBridge extends DelegatingRegistry<KeyAlgorithm<?
     private static final AlgorithmParameterSpec RSA_OAEP_256_SPEC =
             new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
 
-    public KeyAlgorithmsBridge() {
+    public StandardKeyAlgorithmsBridge() {
         super(new IdRegistry<>("JWE Key Management Algorithm", Collections.<KeyAlgorithm<?, ?>>of(
                 new DirectKeyAlgorithm(),
                 new AesWrapKeyAlgorithm(128),
@@ -130,7 +130,7 @@ public final class KeyAlgorithmsBridge extends DelegatingRegistry<KeyAlgorithm<?
         final int PASSWORD_LENGTH = 8;
 
         final JweHeader HEADER = new DefaultJweHeader();
-        final AeadAlgorithm ENC_ALG = Algorithms.enc.A128GCM; // not used, needed to satisfy API
+        final AeadAlgorithm ENC_ALG = Jwts.ENC.A128GCM; // not used, needed to satisfy API
 
         if (alg instanceof Pbes2HsAkwAlgorithm) {
             // Strip away all things that cause time during computation except for the actual hashing algorithm:

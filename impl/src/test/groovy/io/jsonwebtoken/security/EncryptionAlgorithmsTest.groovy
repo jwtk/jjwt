@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
@@ -23,7 +24,7 @@ import org.junit.Test
 import static org.junit.Assert.*
 
 /**
- * Tests the {@link Algorithms#enc} implementation.
+ * Tests the {@link Jwts#ENC} implementation.
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -51,65 +52,65 @@ class EncryptionAlgorithmsTest {
     private static final byte[] AAD_BYTES = AAD.getBytes("UTF-8")
 
     static boolean contains(AeadAlgorithm alg) {
-        return Algorithms.enc.values().contains(alg)
+        return Jwts.ENC.values().contains(alg)
     }
 
     @Test
     void testValues() {
-        assertEquals 6, Algorithms.enc.values().size()
-        assertTrue(contains(Algorithms.enc.A128CBC_HS256) &&
-                contains(Algorithms.enc.A192CBC_HS384) &&
-                contains(Algorithms.enc.A256CBC_HS512) &&
-                contains(Algorithms.enc.A128GCM) &&
-                contains(Algorithms.enc.A192GCM) &&
-                contains(Algorithms.enc.A256GCM)
+        assertEquals 6, Jwts.ENC.values().size()
+        assertTrue(contains(Jwts.ENC.A128CBC_HS256) &&
+                contains(Jwts.ENC.A192CBC_HS384) &&
+                contains(Jwts.ENC.A256CBC_HS512) &&
+                contains(Jwts.ENC.A128GCM) &&
+                contains(Jwts.ENC.A192GCM) &&
+                contains(Jwts.ENC.A256GCM)
         )
     }
 
     @Test
     void testForId() {
-        for (AeadAlgorithm alg : Algorithms.enc.values()) {
-            assertSame alg, Algorithms.enc.get(alg.getId())
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
+            assertSame alg, Jwts.ENC.get(alg.getId())
         }
     }
 
     @Test
     void testForIdCaseInsensitive() {
-        for (AeadAlgorithm alg : Algorithms.enc.values()) {
-            assertSame alg, Algorithms.enc.get(alg.getId().toLowerCase())
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
+            assertSame alg, Jwts.ENC.get(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
     void testForIdWithInvalidId() {
         //unlike the 'find' paradigm, 'for' requires the value to exist
-        Algorithms.enc.get('invalid')
+        Jwts.ENC.get('invalid')
     }
 
     @Test
     void testFindById() {
-        for (AeadAlgorithm alg : Algorithms.enc.values()) {
-            assertSame alg, Algorithms.enc.find(alg.getId())
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
+            assertSame alg, Jwts.ENC.find(alg.getId())
         }
     }
 
     @Test
     void testFindByIdCaseInsensitive() {
-        for (AeadAlgorithm alg : Algorithms.enc.values()) {
-            assertSame alg, Algorithms.enc.find(alg.getId().toLowerCase())
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
+            assertSame alg, Jwts.ENC.find(alg.getId().toLowerCase())
         }
     }
 
     @Test
     void testFindByIdWithInvalidId() {
         // 'find' paradigm can return null if not found
-        assertNull Algorithms.enc.find('invalid')
+        assertNull Jwts.ENC.find('invalid')
     }
 
     @Test
     void testWithoutAad() {
 
-        for (AeadAlgorithm alg : Algorithms.enc.values()) {
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
 
             def key = alg.keyBuilder().build()
 
@@ -139,7 +140,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testWithAad() {
 
-        for (AeadAlgorithm alg : Algorithms.enc.values()) {
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
 
             def key = alg.keyBuilder().build()
 

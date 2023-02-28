@@ -157,20 +157,20 @@ enforcement.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
    | Identifier | Signature Algorithm                                               |
-   |-------------------------------------------------------------------| --- |
-   | `HS256` | HMAC using SHA-256                                                |
-   | `HS384` | HMAC using SHA-384                                                |
-   | `HS512` | HMAC using SHA-512                                                |
-   | `ES256` | ECDSA using P-256 and SHA-256                                     |
-   | `ES384` | ECDSA using P-384 and SHA-384                                     |
-   | `ES512` | ECDSA using P-521 and SHA-512                                     |
-   | `RS256` | RSASSA-PKCS-v1_5 using SHA-256                                    |
-   | `RS384` | RSASSA-PKCS-v1_5 using SHA-384                                    |
-   | `RS512` | RSASSA-PKCS-v1_5 using SHA-512                                    |
-   | `PS256` | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
-   | `PS384` | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
-   | `PS512` | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
-   | `EdDSA` | Edwards-curve Digital Signature Algorithm<sup><b>2</b></sup>      |
+   |------------|-------------------------------------------------------------------|
+   | `HS256`    | HMAC using SHA-256                                                |
+   | `HS384`    | HMAC using SHA-384                                                |
+   | `HS512`    | HMAC using SHA-512                                                |
+   | `ES256`    | ECDSA using P-256 and SHA-256                                     |
+   | `ES384`    | ECDSA using P-384 and SHA-384                                     |
+   | `ES512`    | ECDSA using P-521 and SHA-512                                     |
+   | `RS256`    | RSASSA-PKCS-v1_5 using SHA-256                                    |
+   | `RS384`    | RSASSA-PKCS-v1_5 using SHA-384                                    |
+   | `RS512`    | RSASSA-PKCS-v1_5 using SHA-512                                    |
+   | `PS256`    | RSASSA-PSS using SHA-256 and MGF1 with SHA-256<sup><b>1</b></sup> |
+   | `PS384`    | RSASSA-PSS using SHA-384 and MGF1 with SHA-384<sup><b>1</b></sup> |
+   | `PS512`    | RSASSA-PSS using SHA-512 and MGF1 with SHA-512<sup><b>1</b></sup> |
+   | `EdDSA`    | Edwards-curve Digital Signature Algorithm<sup><b>2</b></sup>      |
 
    <sup><b>1</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
@@ -178,54 +178,54 @@ enforcement.
 
  * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
  
-   | Identifier | Encryption Algorithm                                                                                                     |
-   |--------------------------------------------------------------------------------------------------------------------------| --- |
+   | Identifier                       | Encryption Algorithm                                                                                                     |
+   |----------------------------------|--------------------------------------------------------------------------------------------------------------------------|
    | <code>A128CBC&#8209;HS256</code> | [AES_128_CBC_HMAC_SHA_256](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.3) authenticated encryption algorithm |
-   | `A192CBC-HS384` | [AES_192_CBC_HMAC_SHA_384](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.4) authenticated encryption algorithm |
-   | `A256CBC-HS512` | [AES_256_CBC_HMAC_SHA_512](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.5) authenticated encryption algorithm |
-   | `A128GCM` | AES GCM using 128-bit key<sup><b>3</b></sup>                                                                             |
-   | `A192GCM` | AES GCM using 192-bit key<sup><b>3</b></sup>                                                                             |
-   | `A256GCM` | AES GCM using 256-bit key<sup><b>3</b></sup>                                                                             |
+   | `A192CBC-HS384`                  | [AES_192_CBC_HMAC_SHA_384](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.4) authenticated encryption algorithm |
+   | `A256CBC-HS512`                  | [AES_256_CBC_HMAC_SHA_512](https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.5) authenticated encryption algorithm |
+   | `A128GCM`                        | AES GCM using 128-bit key<sup><b>3</b></sup>                                                                             |
+   | `A192GCM`                        | AES GCM using 192-bit key<sup><b>3</b></sup>                                                                             |
+   | `A256GCM`                        | AES GCM using 256-bit key<sup><b>3</b></sup>                                                                             |
    
    <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * All Key Management Algorithms for obtaining JWE encryption and decryption keys: 
    
-   | Identifier | Key Management Algorithm                                                      |
-   |-------------------------------------------------------------------------------| --- |   
-   | `RSA1_5` | RSAES-PKCS1-v1_5                                                              |
-   | `RSA-OAEP` | RSAES OAEP using default parameters                                           |
-   | `RSA-OAEP-256` | RSAES OAEP using SHA-256 and MGF1 with SHA-256                                |
-   | `A128KW` | AES Key Wrap with default initial value using 128-bit key                     |
-   | `A192KW` | AES Key Wrap with default initial value using 192-bit key                     |
-   | `A256KW` | AES Key Wrap with default initial value using 256-bit key                     |
-   | `dir` | Direct use of a shared symmetric key as the CEK                               |
-   | `ECDH-ES` | Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF |
-   | `ECDH-ES+A128KW` | ECDH-ES using Concat KDF and CEK wrapped with "A128KW"                        |
-   | `ECDH-ES+A192KW` | ECDH-ES using Concat KDF and CEK wrapped with "A192KW"                        |
-   | `ECDH-ES+A256KW` | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"                        |
-   | `A128GCMKW` | Key wrapping with AES GCM using 128-bit key<sup><b>4</b></sup>                |
-   | `A192GCMKW` | Key wrapping with AES GCM using 192-bit key<sup><b>4</b></sup>                |
-   | `A256GCMKW` | Key wrapping with AES GCM using 256-bit key<sup><b>4</b></sup>                |
+   | Identifier           | Key Management Algorithm                                                      |
+   |----------------------|-------------------------------------------------------------------------------|   
+   | `RSA1_5`             | RSAES-PKCS1-v1_5                                                              |
+   | `RSA-OAEP`           | RSAES OAEP using default parameters                                           |
+   | `RSA-OAEP-256`       | RSAES OAEP using SHA-256 and MGF1 with SHA-256                                |
+   | `A128KW`             | AES Key Wrap with default initial value using 128-bit key                     |
+   | `A192KW`             | AES Key Wrap with default initial value using 192-bit key                     |
+   | `A256KW`             | AES Key Wrap with default initial value using 256-bit key                     |
+   | `dir`                | Direct use of a shared symmetric key as the CEK                               |
+   | `ECDH-ES`            | Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF |
+   | `ECDH-ES+A128KW`     | ECDH-ES using Concat KDF and CEK wrapped with "A128KW"                        |
+   | `ECDH-ES+A192KW`     | ECDH-ES using Concat KDF and CEK wrapped with "A192KW"                        |
+   | `ECDH-ES+A256KW`     | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"                        |
+   | `A128GCMKW`          | Key wrapping with AES GCM using 128-bit key<sup><b>4</b></sup>                |
+   | `A192GCMKW`          | Key wrapping with AES GCM using 192-bit key<sup><b>4</b></sup>                |
+   | `A256GCMKW`          | Key wrapping with AES GCM using 256-bit key<sup><b>4</b></sup>                |
    | `PBES2-HS256+A128KW` | PBES2 with HMAC SHA-256 and "A128KW" wrapping<sup><b>4</b></sup>              |
    | `PBES2-HS384+A192KW` | PBES2 with HMAC SHA-384 and "A192KW" wrapping<sup><b>4</b></sup>              |
-   | <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>4</b></sup>              |
+   | <code>PBES2&#8209;HS512&plus;A256KW</code> | PBES2 with HMAC SHA-512 and "A256KW" wrapping<sup><b>4</b></sup> |
       
    <sup><b>4</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
  * Creating, parsing and verifying JSON Web Keys (JWKs) in all standard JWA key formats using native Java `Key` types:
    
-   | JWK Key Format                       | Java `Key` Type | JJWT `Jwk` Type   |
-   |-----------------|-------------------|---------------- |
-   | Symmetric Key                        | `SecretKey`     | `SecretJwk`       |
-   | Elliptic Curve Public Key            | `ECPublicKey`   | `EcPublicJwk`     |
-   | Elliptic Curve Private Key           | `ECPrivateKey`  | `EcPrivateJwk`    |
-   | RSA Public Key                       | `RSAPublicKey`  | `RsaPublicJwk`    |
-   | RSA Private Key                      | `RSAPrivateKey` | `RsaPrivateJwk`   |
-   | XDH Private Key   | `XECPublicKey`<sup><b>5</b></sup>  | `OctetPublicJwk`  |
-   | XDH Private Key   | `XECPrivateKey`<sup><b>5</b></sup> | `OctetPrivateJwk` |
-   | EdDSA Public Key  | `EdECPublicKey`<sup><b>6</b></sup> | `OctetPublicJwk`  |
-   | EdDSA Private Key | `EdECPublicKey`<sup><b>6</b></sup> | `OctetPrivateJwk` |
+   | JWK Key Format             | Java `Key` Type                    | JJWT `Jwk` Type   |
+   |----------------------------|------------------------------------|-------------------|
+   | Symmetric Key              | `SecretKey`                        | `SecretJwk`       |
+   | Elliptic Curve Public Key  | `ECPublicKey`                      | `EcPublicJwk`     |
+   | Elliptic Curve Private Key | `ECPrivateKey`                     | `EcPrivateJwk`    |
+   | RSA Public Key             | `RSAPublicKey`                     | `RsaPublicJwk`    |
+   | RSA Private Key            | `RSAPrivateKey`                    | `RsaPrivateJwk`   |
+   | XDH Private Key            | `XECPublicKey`<sup><b>5</b></sup>  | `OctetPublicJwk`  |
+   | XDH Private Key            | `XECPrivateKey`<sup><b>5</b></sup> | `OctetPrivateJwk` |
+   | EdDSA Public Key           | `EdECPublicKey`<sup><b>6</b></sup> | `OctetPublicJwk`  |
+   | EdDSA Private Key          | `EdECPublicKey`<sup><b>6</b></sup> | `OctetPrivateJwk` |
 
    <sup><b>5</b>. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
@@ -675,13 +675,12 @@ code quickly.  Here's an example:
 
 ```java
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Algorithms.JwsAlgorithms;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
-SecretKey key = JwsAlgorithms.HS256.keyBuilder().build();
+SecretKey key = Jwts.SIG.HS256.keyBuilder().build();
 
 String jws = Jwts.builder().setSubject("Joe").signWith(key).compact();
 ```
@@ -1412,7 +1411,7 @@ key algorithms:
 
 <sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants in the `io.jsonwebtoken.security.Algorithms.JwsAlgorithms` utility class.
+These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry singleton.
 
 <a name="jws-key"></a>
 ### Signature Algorithms Keys
@@ -1503,7 +1502,7 @@ If you want to generate a sufficiently strong `SecretKey` for use with the JWT H
 algorithm's `keyBuilder()` method:
 
 ```java
-SecretKey key = JwsAlgorithms.HS256.keyBuilder().build(); //or HS384.keyBuilder() or HS512.keyBuilder()
+SecretKey key = Jwts.SIG.HS256.keyBuilder().build(); //or HS384.keyBuilder() or HS512.keyBuilder()
 ```
 
 Under the hood, JJWT uses the JCA default provider's `KeyGenerator` to create a secure-random key with the correct 
@@ -1513,7 +1512,7 @@ If you want to specify a specific JCA `Provider` or `SecureRandom` to use during
 as builder arguments. For example:
 
 ```java
-SecretKey key = JwsAlgorithms.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
+SecretKey key = Jwts.SIG.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
 ```
 
 If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
@@ -1533,7 +1532,7 @@ If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key
 algorithms, use an algorithm's respective `keyPairBuilder()` method:
 
 ```java
-KeyPair keyPair = JwsAlgorithms.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
+KeyPair keyPair = Jwts.SIG.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
 ```
 
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
@@ -1642,7 +1641,7 @@ that accepts the `SignatureAlgorithm` as an additional parameter:
 
 ```java
 
-   .signWith(privateKey, JwsAlgorithms.RS512) // <---
+   .signWith(privateKey, Jwts.SIG.RS512) // <---
    
    .compact();
 
@@ -1808,7 +1807,7 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 
 <sup><b>1. </b>Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants via the `io.jsonwebtoken.security.Algorithms.enc` static field as 
+These are all represented as constants in the `io.jsonwebtoken.Jwts.ENC` registry singleton as 
 implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
 
 As shown in the table above, each algorithm requires a key of sufficient length.  The JWT specification
@@ -1917,7 +1916,7 @@ Content Encryption Key (CEK):
 
 <sup><b>3</b>. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants via the `io.jsonwebtoken.security.Algorithms.key` static field as
+These are all represented as constants in the `io.jsonwebtoken.Jwts.KEY` registry singleton as
 implementations of the `io.jsonwebtoken.security.KeyAlgorithm` interface.
 
 But 17 algorithms are a lot to choose from.  When would you use them?  The sections below describe when you might
@@ -3039,7 +3038,7 @@ Example:
 
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
-SecretKeySignatureAlgorithm alg = JwsAlgorithms.HS512; //or HS256 or HS384
+MacAlgorithm alg = Jwts.SIG.HS512; //or HS256 or HS384
 SecretKey key = alg.keyBuilder().build();
 
 String message = "Hello World!";
@@ -3066,7 +3065,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired RSA signature algorithm:
-AsymmetricKeySignatureAlgorithm alg = JwsAlgorithms.RS512; //or PS512, RS256, etc...
+AsymmetricKeySignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his RSA private key:
@@ -3097,7 +3096,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired ECDSA signature algorithm:
-AsymmetricKeySignatureAlgorithm alg = JwsAlgorithms.ES512; //or ES256 or ES384
+AsymmetricKeySignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his EC private key:
@@ -3136,8 +3135,8 @@ Example:
 
 ```java
 // Create a test key suitable for the desired payload encryption algorithm:
-// (A*GCM algorithms are recommended, but require JDK 8 or later)
-AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
+// (A*GCM algorithms are recommended, but require JDK >= 8 or BouncyCastle)
+AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
 SecretKey key = enc.keyBuilder().build();
 
 String message = "Live long and prosper.";
@@ -3166,12 +3165,12 @@ decrypt the JWT using her RSA private key:
 
 ```java
 // Create a test KeyPair suitable for the desired RSA key algorithm:
-KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.RS512.keyPairBuilder().build();
 
 // Choose the key algorithm used encrypt the payload key:
-KeyAlgorithm<PublicKey, PrivateKey> alg = Algorithms.key.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
 // Choose the Encryption Algorithm to encrypt the payload:
-AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
 String jwe = Jwts.builder().setAudience("Alice")
@@ -3202,11 +3201,11 @@ efficient than the `A*KW` variants, but they do require JDK 8 or later (or JDK 7
 
 ```java
 // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-SecretKeyAlgorithm alg = Algorithms.key.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
+SecretKeyAlgorithm alg = Jwts.KEY.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
 SecretKey key = alg.keyBuilder().build();
 
 // Chooose the Encryption Algorithm used to encrypt the payload:
-AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me").encryptWith(key, alg, enc).compact();
@@ -3234,12 +3233,12 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 
 ```java
 // Create a test KeyPair suitable for the desired EC key algorithm:
-KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.ES512.keyPairBuilder().build();
 
 // Choose the key algorithm used encrypt the payload key:
-KeyAlgorithm<PublicKey, PrivateKey> alg = Algorithms.key.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc.
+KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc.
 // Choose the Encryption Algorithm to encrypt the payload:
-AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's EC public key so only she may read it:
 String jwe = Jwts.builder().setAudience("Alice")
@@ -3273,7 +3272,7 @@ String pw = "correct horse battery staple";
 Password password = Keys.forPassword(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
-KeyAlgorithm<Password, Password> alg = Algorithms.key.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
+KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
 
 // Optionally choose the number of PBES2 computational iterations to use to derive the key.
 // This is optional - if you do not specify a value, JJWT will automatically choose a value 
@@ -3284,7 +3283,7 @@ KeyAlgorithm<Password, Password> alg = Algorithms.key.PBES2_HS512_A256KW; //or P
 //int pbkdf2Iterations = 120000; //for HS512. Needs to be much higher for smaller hash algs.
 
 // Choose the Encryption Algorithm used to encrypt the payload:
-AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me")
@@ -3306,7 +3305,7 @@ assert "me".equals(issuer);
 Example creating and parsing a secret JWK:
 
 ```java
-SecretKey key = JwsAlgorithms.HS512.keyBuilder().build(); // or HS384 or HS256
+SecretKey key = Jwts.SIG.HS512.keyBuilder().build(); // or HS384 or HS256
 SecretJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -3326,7 +3325,7 @@ assert jwk.equals(parsed);
 Example creating and parsing an RSA Public JWK:
 
 ```java
-RSAPublicKey key = (RSAPublicKey)JwsAlgorithms.RS512.keyPairBuilder().build().getPublic();
+RSAPublicKey key = (RSAPublicKey)Jwts.SIG.RS512.keyPairBuilder().build().getPublic();
 RsaPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -3346,7 +3345,7 @@ assert jwk.equals(parsed);
 Example creating and parsing an RSA Private JWK:
 
 ```java
-KeyPair pair = JwsAlgorithms.RS512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.RS512.keyPairBuilder().build();
 RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
 RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
@@ -3372,7 +3371,7 @@ assert privJwk.equals(parsed);
 Example creating and parsing an Elliptic Curve Public JWK:
 
 ```java
-ECPublicKey key = (ECPublicKey) JwsAlgorithms.ES512.keyPairBuilder().build().getPublic();
+ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPairBuilder().build().getPublic();
 EcPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -3392,7 +3391,7 @@ assert jwk.equals(parsed);
 Example creating and parsing an Elliptic Curve Private JWK:
 
 ```java
-KeyPair pair = JwsAlgorithms.ES512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.ES512.keyPairBuilder().build();
 ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
 ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 

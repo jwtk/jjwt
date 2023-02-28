@@ -79,6 +79,4 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      * @throws IllegalArgumentException if the {@code use} value is {@code null} or empty.
      */
     T setPublicKeyUse(String use) throws IllegalArgumentException;
-
-    //T withX509KeyUse(boolean enable);
 }

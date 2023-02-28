@@ -20,9 +20,9 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardSecureDigestAlgorithms
-public final class JwsAlgorithmsBridge extends DelegatingRegistry<SecureDigestAlgorithm<?, ?>> {
+public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegistry<SecureDigestAlgorithm<?, ?>> {
 
-    public JwsAlgorithmsBridge() {
+    public StandardSecureDigestAlgorithmsBridge() {
         super(new IdRegistry<>("JWS Digital Signature or MAC", Collections.of(
                 new NoneSignatureAlgorithm(),
                 new DefaultMacAlgorithm(256),

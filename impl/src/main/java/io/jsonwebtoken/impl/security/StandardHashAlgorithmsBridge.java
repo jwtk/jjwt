@@ -25,9 +25,9 @@ import io.jsonwebtoken.security.HashAlgorithm;
  *
  * @since JJWT_RELEASE_VERSION
  */
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Algorithms.StandardHashAlgorithms
-public class HashAlgorithmsBridge extends DelegatingRegistry<HashAlgorithm> {
-    public HashAlgorithmsBridge() {
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardHashAlgorithms
+public class StandardHashAlgorithmsBridge extends DelegatingRegistry<HashAlgorithm> {
+    public StandardHashAlgorithmsBridge() {
         super(new IdRegistry<>("IANA Hash Algorithm", Collections.of(
                 DefaultHashAlgorithm.SHA256
         )));

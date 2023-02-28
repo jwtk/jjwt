@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
-import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
@@ -43,7 +43,7 @@ class EcdhKeyAlgorithmTest {
 
         def header = new DefaultJweHeader()
 
-        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Algorithms.enc.A128GCM, decryptionKey)
+        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwts.ENC.A128GCM, decryptionKey)
 
         try {
             alg.getDecryptionKey(req)
@@ -65,7 +65,7 @@ class EcdhKeyAlgorithmTest {
         def jwk = Jwks.builder().forKey(TestKeys.ES384.pair.public as ECPublicKey).build()
         header.put('epk', jwk)
 
-        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Algorithms.enc.A128GCM, decryptionKey)
+        DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwts.ENC.A128GCM, decryptionKey)
 
         try {
             alg.getDecryptionKey(req)

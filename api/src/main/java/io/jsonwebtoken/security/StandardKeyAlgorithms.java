@@ -37,11 +37,11 @@ import java.util.Collection;
 public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorithm<?, ?>> {
 
     private static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY =
-            Classes.newInstance("io.jsonwebtoken.impl.security.KeyAlgorithmsBridge");
+            Classes.newInstance("io.jsonwebtoken.impl.security.StandardKeyAlgorithmsBridge");
 
     private static final StandardKeyAlgorithms INSTANCE = new StandardKeyAlgorithms();
 
-    static StandardKeyAlgorithms get() {
+    public static StandardKeyAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 

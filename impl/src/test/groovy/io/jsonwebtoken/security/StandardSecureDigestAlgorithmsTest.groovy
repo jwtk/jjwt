@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.security
 
+import io.jsonwebtoken.Jwts
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -23,63 +24,63 @@ class StandardSecureDigestAlgorithmsTest {
 
     @Test
     void testGet() {
-        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
-            assertSame alg, Algorithms.sig.get(alg.getId())
+        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+            assertSame alg, Jwts.SIG.get(alg.getId())
         }
     }
 
     @Test
     void testGetCaseInsensitive() {
-        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
-            assertSame alg, Algorithms.sig.get(alg.getId().toLowerCase())
+        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+            assertSame alg, Jwts.SIG.get(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
     void testGetWithInvalidId() {
         //unlike the 'find' paradigm, 'for' requires the value to exist
-        Algorithms.sig.get('invalid')
+        Jwts.SIG.get('invalid')
     }
 
     @Test
     void testFindById() {
-        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
-            assertSame alg, Algorithms.sig.find(alg.getId())
+        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+            assertSame alg, Jwts.SIG.find(alg.getId())
         }
     }
 
     @Test
     void testFindByIdCaseInsensitive() {
-        for (SecureDigestAlgorithm alg : Algorithms.sig.values()) {
-            assertSame alg, Algorithms.sig.find(alg.getId().toLowerCase())
+        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+            assertSame alg, Jwts.SIG.find(alg.getId().toLowerCase())
         }
     }
 
     @Test
     void testFindByIdWithInvalidId() {
         // 'find' paradigm can return null if not found
-        assertNull Algorithms.sig.find('invalid')
+        assertNull Jwts.SIG.find('invalid')
     }
 
     @Test
     void testFindEd448() {
-        assertNotNull Algorithms.sig.find('Ed448')
+        assertNotNull Jwts.SIG.find('Ed448')
     }
 
     @Test
     void testFindEd448CaseInsensitive() {
-        assertNotNull Algorithms.sig.find('ED448')
-        assertNotNull Algorithms.sig.find('ed448')
+        assertNotNull Jwts.SIG.find('ED448')
+        assertNotNull Jwts.SIG.find('ed448')
     }
 
     @Test
     void testFindEd25519() {
-        assertNotNull Algorithms.sig.find('Ed25519')
+        assertNotNull Jwts.SIG.find('Ed25519')
     }
 
     @Test
     void testFindEd25519CaseInsensitive() {
-        assertNotNull Algorithms.sig.find('ED25519')
-        assertNotNull Algorithms.sig.find('ed25519')
+        assertNotNull Jwts.SIG.find('ED25519')
+        assertNotNull Jwts.SIG.find('ed25519')
     }
 }

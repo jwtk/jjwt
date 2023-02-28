@@ -82,7 +82,7 @@ class DefaultJwtBuilderTest {
 
         replay provider
         def b = new DefaultJwtBuilder().setProvider(provider)
-                .setSubject('me').signWith(Algorithms.sig.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -124,7 +124,7 @@ class DefaultJwtBuilderTest {
         }
 
         def b = new DefaultJwtBuilder().setSecureRandom(random)
-                .setSubject('me').signWith(Algorithms.sig.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]
@@ -474,7 +474,7 @@ class DefaultJwtBuilderTest {
     void testSignWithNoneAlgorithm() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key, Algorithms.sig.NONE)
+            builder.signWith(key, Jwts.SIG.NONE)
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "The 'none' JWS algorithm cannot be used to sign JWTs."
@@ -485,7 +485,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testSignWithPublicKey() {
         def key = TestKeys.RS256.pair.public
-        def alg = Algorithms.sig.RS256
+        def alg = Jwts.SIG.RS256
         try {
             builder.signWith(key, alg)
             fail()
@@ -496,7 +496,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactSimplestPayload() {
-        def enc = Algorithms.enc.A128GCM
+        def enc = Jwts.ENC.A128GCM
         def key = enc.keyBuilder().build()
         def jwe = builder.setPayload("me").encryptWith(key, enc).compact()
         def jwt = Jwts.parserBuilder().decryptWith(key).build().parseContentJwe(jwe)
@@ -505,7 +505,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactSimplestClaims() {
-        def enc = Algorithms.enc.A128GCM
+        def enc = Jwts.ENC.A128GCM
         def key = enc.keyBuilder().build()
         def jwe = builder.setSubject('joe').encryptWith(key, enc).compact()
         def jwt = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jwe)
@@ -516,7 +516,7 @@ class DefaultJwtBuilderTest {
     void testSignWithAndEncryptWith() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key).encryptWith(key, Algorithms.enc.A128GCM).compact()
+            builder.signWith(key).encryptWith(key, Jwts.ENC.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
             String msg = "Both 'signWith' and 'encryptWith' cannot be specified - choose either."
@@ -528,7 +528,7 @@ class DefaultJwtBuilderTest {
     void testEmptyPayloadAndClaimsJwe() {
         def key = TestKeys.HS256
         try {
-            builder.encryptWith(key, Algorithms.enc.A128GCM).compact()
+            builder.encryptWith(key, Jwts.ENC.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
             String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'."

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 
@@ -129,7 +130,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Algorithms.sig.get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get(alg.name());
         if (!(salg instanceof MacAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -144,11 +145,11 @@ public final class Keys {
      * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
      *
      * <blockquote><pre>
-     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#RS256 RS256}.keyPairBuilder().build();
-     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#RS384 RS384}.keyPairBuilder().build();
-     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#RS512 RS512}.keyPairBuilder().build();
+     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#RS256 RS256}.keyPairBuilder().build();
+     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#RS384 RS384}.keyPairBuilder().build();
+     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#RS512 RS512}.keyPairBuilder().build();
      * ... etc ...
-     * Algorithms.sig.{@link StandardSecureDigestAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
+     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
@@ -234,7 +235,7 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Algorithms.sig.get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get(alg.name());
         if (!(salg instanceof SignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);

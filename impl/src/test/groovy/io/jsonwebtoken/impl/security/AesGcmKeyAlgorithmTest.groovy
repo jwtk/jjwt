@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.lang.Bytes
@@ -22,7 +23,6 @@ import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.impl.lang.CheckedSupplier
 import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Arrays
-import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
@@ -82,7 +82,7 @@ class AesGcmKeyAlgorithmTest {
         def resultA = new DefaultAeadResult(null, null, ciphertext, kek, null, tag, iv)
 
         def encRequest = new DefaultAeadRequest(cek.getEncoded(), null, null, kek, null, iv)
-        def encResult = Algorithms.enc.A256GCM.encrypt(encRequest)
+        def encResult = Jwts.ENC.A256GCM.encrypt(encRequest)
 
         assertArrayEquals resultA.digest, encResult.digest
         assertArrayEquals resultA.initializationVector, encResult.initializationVector

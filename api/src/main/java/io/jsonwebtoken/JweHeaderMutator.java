@@ -137,9 +137,9 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
 //     * @param salt the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption.
 //     * @return the header for method chaining
 //     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
-//     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS256_A128KW
-//     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS384_A192KW
-//     * @see Algorithms.StandardKeyAlgorithms#PBES2_HS512_A256KW
+//     * @see Jwts.KEY#PBES2_HS256_A128KW
+//     * @see Jwts.KEY#PBES2_HS384_A192KW
+//     * @see Jwts.KEY#PBES2_HS512_A256KW
 //     */
 //    JweHeader setPbes2Salt(byte[] salt);
 

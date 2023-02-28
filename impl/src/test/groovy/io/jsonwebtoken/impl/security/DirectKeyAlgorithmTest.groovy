@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.lang.Arrays
-import io.jsonwebtoken.security.Algorithms
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import org.junit.Test
 
@@ -39,7 +39,7 @@ class DirectKeyAlgorithmTest {
     void testGetEncryptionKey() {
         def alg = new DirectKeyAlgorithm()
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader(), Algorithms.enc.A128GCM)
+        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader(), Jwts.ENC.A128GCM)
         def result = alg.getEncryptionKey(request)
         assertSame key, result.getKey()
         assertEquals 0, Arrays.length(result.getPayload()) //must not have an encrypted key
@@ -53,7 +53,7 @@ class DirectKeyAlgorithmTest {
     @Test(expected = IllegalArgumentException)
     void testGetEncryptionKeyWithNullRequestKey() {
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader(), Algorithms.enc.A128GCM) {
+        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader(), Jwts.ENC.A128GCM) {
             @Override
             Key getPayload() {
                 return null
@@ -66,7 +66,7 @@ class DirectKeyAlgorithmTest {
     void testGetDecryptionKey() {
         def alg = new DirectKeyAlgorithm()
         DecryptionKeyRequest req = createMock(DecryptionKeyRequest)
-        def key = Algorithms.enc.A128GCM.keyBuilder().build()
+        def key = Jwts.ENC.A128GCM.keyBuilder().build()
         expect(req.getKey()).andReturn(key)
         replay(req)
         def result = alg.getDecryptionKey(req)

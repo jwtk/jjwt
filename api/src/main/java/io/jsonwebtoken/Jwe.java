@@ -15,9 +15,6 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.security.Algorithms;
-import io.jsonwebtoken.security.StandardEncryptionAlgorithms;
-
 /**
  * An encrypted JWT, called a &quot;JWE&quot;, per the
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html">JWE (RFC 7516) Specification</a>.
@@ -26,8 +23,6 @@ import io.jsonwebtoken.security.StandardEncryptionAlgorithms;
  * @since JJWT_RELEASE_VERSION
  */
 public interface Jwe<B> extends Jwt<JweHeader, B> {
-
-    StandardEncryptionAlgorithms enc = Algorithms.enc;
 
     /**
      * Returns the Initialization Vector used during JWE encryption and decryption.

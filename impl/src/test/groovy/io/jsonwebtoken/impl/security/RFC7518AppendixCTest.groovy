@@ -114,7 +114,7 @@ class RFC7518AppendixCTest {
         String jwe = Jwts.builder()
                 .setHeader(Jwts.headerBuilder().setAgreementPartyUInfo("Alice").setAgreementPartyVInfo("Bob"))
                 .claim("Hello", "World")
-                .encryptWith(bobJwk.toPublicJwk().toKey(), alg, Algorithms.enc.A128GCM)
+                .encryptWith(bobJwk.toPublicJwk().toKey(), alg, Jwts.ENC.A128GCM)
                 .compact()
 
         // Ensure the protected header produced by JJWT is identical to the one in the RFC:

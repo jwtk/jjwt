@@ -18,7 +18,6 @@ package io.jsonwebtoken.all;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.Jwk;
@@ -59,7 +58,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsHS() {
         // Create a test key suitable for the desired HMAC-SHA algorithm:
-        MacAlgorithm alg = Algorithms.sig.HS512; //or HS256 or HS384
+        MacAlgorithm alg = Jwts.SIG.HS512; //or HS384 or HS256
         SecretKey key = alg.keyBuilder().build();
 
         String message = "Hello World!";
@@ -80,7 +79,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsRSA() {
         // Create a test key suitable for the desired RSA signature algorithm:
-        SignatureAlgorithm alg = Algorithms.sig.RS512; //or PS512, RS256, etc...
+        SignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his RSA private key:
@@ -102,7 +101,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsECDSA() {
         // Create a test key suitable for the desired ECDSA signature algorithm:
-        SignatureAlgorithm alg = Algorithms.sig.ES512; //or ES256 or ES384
+        SignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
         KeyPair pair = alg.keyPairBuilder().build();
 
         // Bob creates the compact JWS with his EC private key:
@@ -125,7 +124,7 @@ public class JavaReadmeTest {
     public void testExampleJweDir() {
         // Create a test key suitable for the desired payload encryption algorithm:
         // (A*GCM algorithms are recommended, but require JDK 8 or later)
-        AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
         SecretKey key = enc.keyBuilder().build();
 
         String message = "Live long and prosper.";
@@ -146,12 +145,12 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweRSA() {
         // Create a test KeyPair suitable for the desired RSA key algorithm:
-        KeyPair pair = Algorithms.sig.RS512.keyPairBuilder().build();
+        KeyPair pair = Jwts.SIG.RS512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Algorithms.key.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
         // Choose the Encryption Algorithm to encrypt the payload:
-        AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
         String jwe = Jwts.builder().setAudience("Alice")
@@ -172,11 +171,11 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweAESKW() {
         // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-        SecretKeyAlgorithm alg = Algorithms.key.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
+        SecretKeyAlgorithm alg = Jwts.KEY.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
         SecretKey key = alg.keyBuilder().build();
 
         // Chooose the Encryption Algorithm used to encrypt the payload:
-        AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
         String jwe = Jwts.builder().setIssuer("me").encryptWith(key, alg, enc).compact();
@@ -194,12 +193,12 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweECDHES() {
         // Create a test KeyPair suitable for the desired EC key algorithm:
-        KeyPair pair = Algorithms.sig.ES512.keyPairBuilder().build();
+        KeyPair pair = Jwts.SIG.ES512.keyPairBuilder().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Algorithms.key.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
         // Choose the Encryption Algorithm to encrypt the payload:
-        AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's EC public key so only she may read it:
         String jwe = Jwts.builder().setAudience("Alice")
@@ -224,7 +223,7 @@ public class JavaReadmeTest {
         Password password = Keys.forPassword(pw.toCharArray());
 
         // Choose the desired PBES2 key derivation algorithm:
-        KeyAlgorithm<Password, Password> alg = Algorithms.key.PBES2_HS512_A256KW; //or PBES2_HS384...
+        KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384...
 
         // Optionally choose the number of PBES2 computational iterations to use to derive the key.
         // This is optional - if you do not specify a value, JJWT will automatically choose a value
@@ -235,7 +234,7 @@ public class JavaReadmeTest {
         //int pbkdf2Iterations = 120000; //for HS512. Needs to be much higher for smaller hash algs.
 
         // Choose the Encryption Algorithm used to encrypt the payload:
-        AeadAlgorithm enc = Algorithms.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
         String jwe = Jwts.builder().setIssuer("me")
@@ -254,7 +253,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleSecretJwk() {
-        SecretKey key = Algorithms.sig.HS512.keyBuilder().build(); // or HS384 or HS256
+        SecretKey key = Jwts.SIG.HS512.keyBuilder().build(); // or HS384 or HS256
         SecretJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -271,7 +270,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleRsaPublicJwk() {
-        RSAPublicKey key = (RSAPublicKey) Algorithms.sig.RS512.keyPairBuilder().build().getPublic();
+        RSAPublicKey key = (RSAPublicKey) Jwts.SIG.RS512.keyPairBuilder().build().getPublic();
         RsaPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -288,7 +287,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleRsaPrivateJwk() {
-        KeyPair pair = Algorithms.sig.RS512.keyPairBuilder().build();
+        KeyPair pair = Jwts.SIG.RS512.keyPairBuilder().build();
         RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
         RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
@@ -311,7 +310,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEcPublicJwk() {
-        ECPublicKey key = (ECPublicKey) Algorithms.sig.ES512.keyPairBuilder().build().getPublic();
+        ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPairBuilder().build().getPublic();
         EcPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -328,7 +327,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEcPrivateJwk() {
-        KeyPair pair = Algorithms.sig.ES512.keyPairBuilder().build();
+        KeyPair pair = Jwts.SIG.ES512.keyPairBuilder().build();
         ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 

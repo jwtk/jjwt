@@ -16,7 +16,6 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.StandardKeyAlgorithms;
@@ -67,7 +66,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @return the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">{@code epk} (Ephemeral
      * Public Key)</a> header value created by the JWE originator for use with key agreement algorithms, or
      * {@code null} if not present.
-     * @see Algorithms#key
+     * @see Jwts#KEY
      * @see StandardKeyAlgorithms#ECDH_ES
      * @see StandardKeyAlgorithms#ECDH_ES_A128KW
      * @see StandardKeyAlgorithms#ECDH_ES_A192KW

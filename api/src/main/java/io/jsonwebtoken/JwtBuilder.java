@@ -21,7 +21,6 @@ import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -572,7 +571,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification as
      *                             described above in <em>recommended signature algorithms</em>.
-     * @see Algorithms#sig
+     * @see Jwts#SIG
      * @see #signWith(Key, SecureDigestAlgorithm)
      * @since 0.10.0
      */
@@ -673,7 +672,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p><b>This has been deprecated since JJWT_RELEASE_VERSION.  Use
      * {@link #signWith(Key, SecureDigestAlgorithm)} instead</b>.  Standard JWA algorithms
-     * are represented as instances of this new interface in the {@link Algorithms#sig}
+     * are represented as instances of this new interface in the {@link Jwts#SIG}
      * algorithm registry.</p>
      *
      * <p>Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.</p>
@@ -697,7 +696,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
      *
-     * <p>The {@link Algorithms#sig} registry makes available all standard signature
+     * <p>The {@link Jwts#SIG} registry makes available all standard signature
      * algorithms defined in the JWA specification.</p>
      *
      * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
@@ -711,7 +710,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
      *                             the specified algorithm.
      * @see #signWith(Key)
-     * @see Algorithms#sig
+     * @see Jwts#SIG
      * @since JJWT_RELEASE_VERSION
      */
     <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
@@ -741,9 +740,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param key the symmetric encryption key to use with the {@code enc} algorithm.
      * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE, usually one of the JWA-standard
-     *            algorithms accessible via {@link Algorithms#enc}.
+     *            algorithms accessible via {@link Jwts#ENC}.
      * @return the JWE builder for method chaining.
-     * @see Algorithms#enc
+     * @see Jwts#ENC
      */
     JwtBuilder encryptWith(SecretKey key, AeadAlgorithm enc);
 
@@ -764,7 +763,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * </ol>
      *
      * <p>Most application developers will reference one of the JWA
-     * {@link Algorithms#key standard key algorithms} and {@link Algorithms#enc standard encryption algorithms}
+     * {@link Jwts#KEY standard key algorithms} and {@link Jwts#ENC standard encryption algorithms}
      * when invoking this method, but custom implementations are also supported.</p>
      *
      * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
@@ -773,8 +772,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *               {@code enc} algorithm
      * @param enc    the {@link AeadAlgorithm} algorithm used to encrypt the JWE
      * @return the JWE builder for method chaining.
-     * @see Algorithms#enc
-     * @see Algorithms#key
+     * @see Jwts#ENC
+     * @see Jwts#KEY
      */
     <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);
 

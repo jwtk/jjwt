@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Algorithms
+import io.jsonwebtoken.Jwts
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -58,7 +58,7 @@ class GcmAesAeadAlgorithmTest {
     @Test
     void testEncryptionAndDecryption() {
 
-        def alg = Algorithms.enc.A256GCM
+        def alg = Jwts.ENC.A256GCM
 
         def req = new DefaultAeadRequest(P, null, null, KEY, AAD, IV)
 

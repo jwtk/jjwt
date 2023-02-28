@@ -30,11 +30,11 @@ import java.util.Collection;
  * <blockquote><pre>
  * Jwks.{@link  JwkBuilder builder}()
  *     // ... etc ...
- *     .{@link JwkBuilder#setIdFromThumbprint(HashAlgorithm) setIdFromThumbprint}(Algorithms.hash.{@link StandardHashAlgorithms#SHA256 SHA256}) // &lt;---
+ *     .{@link JwkBuilder#setIdFromThumbprint(HashAlgorithm) setIdFromThumbprint}(Jwks.HASH.{@link StandardHashAlgorithms#SHA256 SHA256}) // &lt;---
  *     .build()</pre></blockquote>
  * <p>or</p>
  * <blockquote><pre>
- * HashAlgorithm hashAlg = Algorithms.hash.{@link StandardHashAlgorithms#SHA256 SHA256};
+ * HashAlgorithm hashAlg = Jwks.HASH.{@link StandardHashAlgorithms#SHA256 SHA256};
  * {@link JwkThumbprint} thumbprint = aJwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(hashAlg);
  * String <a href="https://www.rfc-editor.org/rfc/rfc9278#section-3">rfcMandatoryPrefix</a> = "urn:ietf:params:oauth:jwk-thumbprint:" + hashAlg.getId();
  * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
@@ -48,11 +48,16 @@ import java.util.Collection;
 public final class StandardHashAlgorithms implements Registry<String, HashAlgorithm> {
 
     private static final Registry<String, HashAlgorithm> DELEGATE =
-            Classes.newInstance("io.jsonwebtoken.impl.security.HashAlgorithmsBridge");
+            Classes.newInstance("io.jsonwebtoken.impl.security.StandardHashAlgorithmsBridge");
 
     private static final StandardHashAlgorithms INSTANCE = new StandardHashAlgorithms();
 
-    static StandardHashAlgorithms get() {
+    /**
+     * Returns this registry (a static singleton).
+     *
+     * @return this registry (a static singleton).
+     */
+    public static StandardHashAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 

@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.AeadRequest
 import io.jsonwebtoken.security.AeadResult
-import io.jsonwebtoken.security.Algorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -58,6 +58,7 @@ class RFC7518AppendixB3Test {
              0x69, 0x70, 0x6c, 0x65, 0x20, 0x6f, 0x66, 0x20, 0x41, 0x75, 0x67, 0x75, 0x73, 0x74, 0x65, 0x20,
              0x4b, 0x65, 0x72, 0x63, 0x6b, 0x68, 0x6f, 0x66, 0x66, 0x73] as byte[]
 
+    @SuppressWarnings('unused')
     final byte[] AL = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x50] as byte[]
 
     final byte[] E =
@@ -71,6 +72,7 @@ class RFC7518AppendixB3Test {
              0x31, 0xe6, 0xe0, 0x2c, 0xc8, 0x37, 0xf0, 0x53, 0xd2, 0x1f, 0x37, 0xff, 0x4f, 0x51, 0x95, 0x0b,
              0xbe, 0x26, 0x38, 0xd0, 0x9d, 0xd7, 0xa4, 0x93, 0x09, 0x30, 0x80, 0x6d, 0x07, 0x03, 0xb1, 0xf6] as byte[]
 
+    @SuppressWarnings('unused')
     final byte[] M =
             [0x4d, 0xd3, 0xb4, 0xc0, 0x88, 0xa7, 0xf4, 0x5c, 0x21, 0x68, 0x39, 0x64, 0x5b, 0x20, 0x12, 0xbf,
              0x2e, 0x62, 0x69, 0xa8, 0xc5, 0x6a, 0x81, 0x6d, 0xbc, 0x1b, 0x26, 0x77, 0x61, 0x95, 0x5b, 0xc5,
@@ -84,21 +86,21 @@ class RFC7518AppendixB3Test {
     @Test
     void test() {
 
-        def alg = Algorithms.enc.A256CBC_HS512
+        def alg = Jwts.ENC.A256CBC_HS512
         AeadRequest req = new DefaultAeadRequest(P, null, null, KEY, A, IV)
         AeadResult result = alg.encrypt(req)
 
         byte[] resultCiphertext = result.getPayload()
-        byte[] resultTag = result.getDigest();
-        byte[] resultIv = result.getInitializationVector();
+        byte[] resultTag = result.getDigest()
+        byte[] resultIv = result.getInitializationVector()
 
         assertArrayEquals E, resultCiphertext
         assertArrayEquals T, resultTag
         assertArrayEquals IV, resultIv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv);
+        def dreq = new DefaultAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv)
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-        assertArrayEquals(P, decryptionResult);
+        assertArrayEquals(P, decryptionResult)
     }
 }

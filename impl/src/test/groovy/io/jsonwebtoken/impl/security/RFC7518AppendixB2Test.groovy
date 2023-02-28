@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.AeadRequest
 import io.jsonwebtoken.security.AeadResult
-import io.jsonwebtoken.security.Algorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -84,7 +84,7 @@ class RFC7518AppendixB2Test {
     @Test
     void test() {
 
-        def alg = Algorithms.enc.A192CBC_HS384
+        def alg = Jwts.ENC.A192CBC_HS384
         AeadRequest req = new DefaultAeadRequest(P, null, null, KEY, A, IV)
         AeadResult result = alg.encrypt(req)
 

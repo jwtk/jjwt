@@ -30,11 +30,11 @@ import java.util.Collection;
 public final class StandardSecureDigestAlgorithms implements Registry<String, SecureDigestAlgorithm<?, ?>> {
 
     private static final Registry<String, SecureDigestAlgorithm<?, ?>> IMPL =
-            Classes.newInstance("io.jsonwebtoken.impl.security.JwsAlgorithmsBridge");
+            Classes.newInstance("io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithmsBridge");
 
     private static final StandardSecureDigestAlgorithms INSTANCE = new StandardSecureDigestAlgorithms();
 
-    static StandardSecureDigestAlgorithms get() {
+    public static StandardSecureDigestAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 

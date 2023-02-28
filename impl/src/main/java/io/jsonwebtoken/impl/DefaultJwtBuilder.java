@@ -21,6 +21,7 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
 import io.jsonwebtoken.impl.lang.Function;
@@ -43,7 +44,6 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.Algorithms;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
@@ -77,7 +77,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Claims claims;
     protected byte[] content;
 
-    private SecureDigestAlgorithm<Key, ?> sigAlg = Algorithms.sig.NONE;
+    private SecureDigestAlgorithm<Key, ?> sigAlg = Jwts.SIG.NONE;
     private Function<SecureRequest<byte[], Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
@@ -188,7 +188,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
         @SuppressWarnings("deprecation")
         io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return (SecureDigestAlgorithm<K, ?>) Algorithms.sig.get(alg.getValue());
+        return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get(alg.getValue());
     }
 
     @Override
@@ -220,7 +220,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
-        if (Algorithms.sig.NONE.getId().equalsIgnoreCase(id)) {
+        if (Jwts.SIG.NONE.getId().equalsIgnoreCase(id)) {
             String msg = "The 'none' JWS algorithm cannot be used to sign JWTs.";
             throw new IllegalArgumentException(msg);
         }
@@ -241,7 +241,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Algorithms.sig.get(alg.getValue()));
+        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.get(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -274,7 +274,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (key instanceof Password) {
             return encryptWith((Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()), enc);
         }
-        return encryptWith(key, Algorithms.key.DIRECT, enc);
+        return encryptWith(key, Jwts.KEY.DIRECT, enc);
     }
 
     @Override

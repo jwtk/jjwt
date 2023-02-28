@@ -150,7 +150,7 @@ class JwtsTest {
         def c = base64Url('{"sub":"joe","exp":"-42-"}')
         def payload = ("$h.$c" as String).getBytes(StandardCharsets.UTF_8)
         def request = new DefaultSecureRequest<byte[], SecretKey>(payload, null, null, key)
-        def result = Algorithms.sig.HS256.digest(request)
+        def result = Jwts.SIG.HS256.digest(request)
         def sig = Encoders.BASE64URL.encode(result)
         def compact = "$h.$c.$sig" as String
         try {
@@ -303,7 +303,7 @@ class JwtsTest {
 
     @Test
     void testParseWithMissingRequiredSignature() {
-        Key key = Algorithms.sig.HS256.keyBuilder().build()
+        Key key = Jwts.SIG.HS256.keyBuilder().build()
         String compact = Jwts.builder().setSubject('foo').signWith(key).compact()
         int i = compact.lastIndexOf('.')
         String missingSig = compact.substring(0, i + 1)
@@ -440,7 +440,7 @@ class JwtsTest {
     @Test
     void testUncompressedJwt() {
 
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -462,7 +462,7 @@ class JwtsTest {
     @Test
     void testCompressedJwtWithDeflate() {
 
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -484,7 +484,7 @@ class JwtsTest {
     @Test
     void testCompressedJwtWithGZIP() {
 
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -506,7 +506,7 @@ class JwtsTest {
     @Test
     void testCompressedWithCustomResolver() {
 
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -545,7 +545,7 @@ class JwtsTest {
     @Test(expected = CompressionException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String id = UUID.randomUUID().toString()
@@ -564,7 +564,7 @@ class JwtsTest {
     @Test
     void testCompressStringPayloadWithDeflate() {
 
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String payload = "this is my test for a payload"
@@ -581,97 +581,97 @@ class JwtsTest {
 
     @Test
     void testHS256() {
-        testHmac(Algorithms.sig.HS256)
+        testHmac(Jwts.SIG.HS256)
     }
 
     @Test
     void testHS384() {
-        testHmac(Algorithms.sig.HS384)
+        testHmac(Jwts.SIG.HS384)
     }
 
     @Test
     void testHS512() {
-        testHmac(Algorithms.sig.HS512)
+        testHmac(Jwts.SIG.HS512)
     }
 
     @Test
     void testRS256() {
-        testRsa(Algorithms.sig.RS256)
+        testRsa(Jwts.SIG.RS256)
     }
 
     @Test
     void testRS384() {
-        testRsa(Algorithms.sig.RS384)
+        testRsa(Jwts.SIG.RS384)
     }
 
     @Test
     void testRS512() {
-        testRsa(Algorithms.sig.RS512)
+        testRsa(Jwts.SIG.RS512)
     }
 
     @Test
     void testPS256() {
-        testRsa(Algorithms.sig.PS256)
+        testRsa(Jwts.SIG.PS256)
     }
 
     @Test
     void testPS384() {
-        testRsa(Algorithms.sig.PS384)
+        testRsa(Jwts.SIG.PS384)
     }
 
     @Test
     void testPS512() {
-        testRsa(Algorithms.sig.PS512)
+        testRsa(Jwts.SIG.PS512)
     }
 
     @Test
     void testRSA256WithPrivateKeyValidation() {
-        testRsa(Algorithms.sig.RS256, true)
+        testRsa(Jwts.SIG.RS256, true)
     }
 
     @Test
     void testRSA384WithPrivateKeyValidation() {
-        testRsa(Algorithms.sig.RS384, true)
+        testRsa(Jwts.SIG.RS384, true)
     }
 
     @Test
     void testRSA512WithPrivateKeyValidation() {
-        testRsa(Algorithms.sig.RS512, true)
+        testRsa(Jwts.SIG.RS512, true)
     }
 
     @Test
     void testES256() {
-        testEC(Algorithms.sig.ES256)
+        testEC(Jwts.SIG.ES256)
     }
 
     @Test
     void testES384() {
-        testEC(Algorithms.sig.ES384)
+        testEC(Jwts.SIG.ES384)
     }
 
     @Test
     void testES512() {
-        testEC(Algorithms.sig.ES512)
+        testEC(Jwts.SIG.ES512)
     }
 
     @Test
     void testEdDSA() {
-        testEC(Algorithms.sig.EdDSA)
+        testEC(Jwts.SIG.EdDSA)
     }
 
     @Test
     void testEd25519() {
-        testEC(Algorithms.sig.Ed25519)
+        testEC(Jwts.SIG.Ed25519)
     }
 
     @Test
     void testEd448() {
-        testEC(Algorithms.sig.Ed448)
+        testEC(Jwts.SIG.Ed448)
     }
 
     @Test
     void testES256WithPrivateKeyValidation() {
-        def alg = Algorithms.sig.ES256
+        def alg = Jwts.SIG.ES256
         try {
             testEC(alg, true)
             fail("EC private keys cannot be used to validate EC signatures.")
@@ -685,9 +685,9 @@ class JwtsTest {
     @Test(expected = WeakKeyException)
     void testParseClaimsJwsWithWeakHmacKey() {
 
-        def alg = Algorithms.sig.HS384
+        def alg = Jwts.SIG.HS384
         def key = alg.keyBuilder().build()
-        def weakKey = Algorithms.sig.HS256.keyBuilder().build()
+        def weakKey = Jwts.SIG.HS256.keyBuilder().build()
 
         String jws = Jwts.builder().setSubject("Foo").signWith(key, alg).compact()
 
@@ -757,7 +757,7 @@ class JwtsTest {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
         String jws = withoutSignature + '.' + invalidEncodedSignature
-        def keypair = Algorithms.sig.ES256.keyPairBuilder().build()
+        def keypair = Jwts.SIG.ES256.keyPairBuilder().build()
         Jwts.parserBuilder().setSigningKey(keypair.public).build().parseClaimsJws(jws)
     }
 
@@ -766,7 +766,7 @@ class JwtsTest {
     void testParseClaimsJwsWithUnsignedJwt() {
 
         //create random signing key for testing:
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         String notSigned = Jwts.builder().setSubject("Foo").compact()
@@ -1033,7 +1033,7 @@ class JwtsTest {
      */
     @Test
     void testParseJwsWithCustomSignatureAlgorithm() {
-        def realAlg = Algorithms.sig.HS256 // any alg will do, we're going to wrap it
+        def realAlg = Jwts.SIG.HS256 // any alg will do, we're going to wrap it
         def key = TestKeys.HS256
         def id = realAlg.getId() + 'X' // custom id
         def alg = new MacAlgorithm() {
@@ -1077,7 +1077,7 @@ class JwtsTest {
      */
     @Test
     void testParseJweWithCustomEncryptionAlgorithm() {
-        def realAlg = Algorithms.enc.A128GCM // any alg will do, we're going to wrap it
+        def realAlg = Jwts.ENC.A128GCM // any alg will do, we're going to wrap it
         def key = realAlg.keyBuilder().build()
         def enc = realAlg.getId() + 'X' // custom id
         def encAlg = new AeadAlgorithm() {
@@ -1177,7 +1177,7 @@ class JwtsTest {
     void testForgedTokenWithSwappedHeaderUsingNoneAlgorithm() {
 
         //create random signing key for testing:
-        def alg = Algorithms.sig.HS256
+        def alg = Jwts.SIG.HS256
         SecretKey key = alg.keyBuilder().build()
 
         //this is a 'real', valid JWT:
@@ -1304,13 +1304,13 @@ class JwtsTest {
     @Test
     void testSecretKeyJwes() {
 
-        def algs = Algorithms.key.values().findAll({ it ->
+        def algs = Jwts.KEY.values().findAll({ it ->
             it instanceof DirectKeyAlgorithm || it instanceof SecretKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : Algorithms.enc.values()) {
+            for (AeadAlgorithm enc : Jwts.ENC.values()) {
 
                 SecretKey key = alg instanceof SecretKeyAlgorithm ?
                         ((SecretKeyAlgorithm) alg).keyBuilder().build() :
@@ -1339,7 +1339,7 @@ class JwtsTest {
 
         for (CompressionCodec codec : codecs) {
 
-            for (AeadAlgorithm enc : Algorithms.enc.values()) {
+            for (AeadAlgorithm enc : Jwts.ENC.values()) {
 
                 SecretKey key = enc.keyBuilder().build()
 
@@ -1363,7 +1363,7 @@ class JwtsTest {
     @Test
     void testPasswordJwes() {
 
-        def algs = Algorithms.key.values().findAll({ it ->
+        def algs = Jwts.KEY.values().findAll({ it ->
             it instanceof Pbes2HsAkwAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1371,7 +1371,7 @@ class JwtsTest {
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : Algorithms.enc.values()) {
+            for (AeadAlgorithm enc : Jwts.ENC.values()) {
 
                 // encrypt:
                 String jwe = Jwts.builder()
@@ -1397,7 +1397,7 @@ class JwtsTest {
         // encrypt:
         String jwe = Jwts.builder()
                 .claim('foo', 'bar')
-                .encryptWith(key, Algorithms.enc.A256GCM) // should auto choose KeyAlg PBES2_HS512_A256KW
+                .encryptWith(key, Jwts.ENC.A256GCM) // should auto choose KeyAlg PBES2_HS512_A256KW
                 .compact()
 
         //decrypt:
@@ -1406,7 +1406,7 @@ class JwtsTest {
                 .build()
                 .parseClaimsJwe(jwe)
         assertEquals 'bar', jwt.getPayload().get('foo')
-        assertEquals Algorithms.key.PBES2_HS512_A256KW, Algorithms.key.get(jwt.getHeader().getAlgorithm())
+        assertEquals Jwts.KEY.PBES2_HS512_A256KW, Jwts.KEY.get(jwt.getHeader().getAlgorithm())
     }
 
     @Test
@@ -1414,7 +1414,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
-        def algs = Algorithms.key.values().findAll({ it ->
+        def algs = Jwts.KEY.values().findAll({ it ->
             it instanceof DefaultRsaKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1425,7 +1425,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : Algorithms.enc.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
@@ -1449,7 +1449,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
-        def algs = Algorithms.key.values().findAll({ it ->
+        def algs = Jwts.KEY.values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1460,7 +1460,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : Algorithms.enc.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()

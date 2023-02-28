@@ -105,7 +105,7 @@ public class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
                 String msg = "The " + keyType(signing) + " key's size is " + size + " bits which is not secure " +
                         "enough for the " + id + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
                         section + ") states that RSA keys MUST have a size >= " + MIN_KEY_BIT_LENGTH + " bits.  " +
-                        "Consider using the JwsAlgorithms." + id + ".generateKeyPair() " + "method to create a " +
+                        "Consider using the Jwts.SIG." + id + ".generateKeyPair() " + "method to create a " +
                         "key pair guaranteed to be secure enough for " + id + ".  See " +
                         "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
                 throw new WeakKeyException(msg);
