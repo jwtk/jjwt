@@ -164,14 +164,14 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
 
 * Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
   was thrown. If there was a problem when serializing the JWT claims, an `IllegalArgumentException` was
-  thrown.  This has been changed up to ensure consistency: any serialization problem with either headers or claims
+  thrown.  This has been changed up to ensure consistency: any serialization error with either headers or claims
   will now throw a `io.jsonwebtoken.io.SerializationException`.
 
 
 * Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
   [RFC 7518, Section 3.6](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6). If you require parsing of
   unsecured JWTs, you must call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
-  implications of doing so as mentioned in that method's JavaDoc before doing so.
+  implications mentioned in that method's JavaDoc before doing so.
 
 
 * `io.jsonwebtoken.gson.io.GsonSerializer` now requires `Gson` instances that have a registered
@@ -181,6 +181,8 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
     .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)    
     .disableHtmlEscaping().create();
   ```
+  This is to ensure JWKs have `toString()` and application log safety (do not print secure material), but still 
+  serialize to JSON correctly.
 
 * `io.jsonwebtoken.InvalidClaimException` and it's two subclasses (`IncorrectClaimException` and `MissingClaimException`)
   were previously mutable, allowing the corresponding claim name and claim value to be set on the exception after
