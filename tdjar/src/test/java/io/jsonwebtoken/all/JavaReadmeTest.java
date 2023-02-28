@@ -239,7 +239,7 @@ public class JavaReadmeTest {
         // Create the compact JWE:
         String jwe = Jwts.builder().setIssuer("me")
                 // Optional work factor is specified in the header:
-                //.setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations).build())
+                //.setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations))
                 .encryptWith(password, alg, enc)
                 .compact();
 

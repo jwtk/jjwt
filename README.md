@@ -1192,7 +1192,6 @@ The JWT specifications' preferred approach is to set a `kid` (Key ID) header val
 for example:
 
 ```java
-
 Key key = getSigningKey(); // or getEncryptionKey() for JWE
 
 String keyId = getKeyId(key); //any mechanism you have to associate a key with an ID is fine
@@ -1285,7 +1284,7 @@ otherwise you may not trust the token.  You can do that by using one of the vari
 
 ```java
 try {
-    Jwts.parserBuilder().requireSubject("jsmith")/* ... etc ... */.build().parse(s);
+    Jwts.parserBuilder().requireSubject("jsmith")/* etc... */.build().parse(s);
 } catch (InvalidClaimException ice) {
     // the sub field was missing or did not have a 'jsmith' value
 }
@@ -1296,7 +1295,7 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 
 ```java
 try {
-    Jwts.parserBuilder().requireSubject("jsmith")/* ... etc ... */.build().parse(s);
+    Jwts.parserBuilder().requireSubject("jsmith")/* etc... */.build().parse(s);
 } catch(MissingClaimException mce) {
     // the parsed JWT did not have the sub field
 } catch(IncorrectClaimException ice) {
@@ -1308,7 +1307,7 @@ You can also require custom fields by using the `require(fieldName, requiredFiel
 
 ```java
 try {
-    Jwts.parserBuilder().require("myfield", "myRequiredValue")/* ... etc ... */.build().parse(s);
+    Jwts.parserBuilder().require("myfield", "myRequiredValue")/* etc... */.build().parse(s);
 } catch(InvalidClaimException ice) {
     // the 'myfield' field was missing or did not have a 'myRequiredValue' value
 }
@@ -1778,7 +1777,7 @@ assume that if a message can be decrypted, then the message would be authentic a
 decrypt it, it must not have been tampered with, right? Because if it was changed, decryption would surely fail, right?
 
 Unfortunately, this is not actually guaranteed in all cryptographic ciphers. There are certain attack vectors where 
-it is possible to change an encrypted payload (called 'ciphertext'), and still have the message recipient be able to 
+it is possible to change an encrypted payload (called 'ciphertext'), and the message recipient is still able to 
 successfully decrypt the (modified) payload.  In these cases, the ciphertext integrity was not maintained - a 
 malicious 3rd party could intercept a message and change the payload content, even if they don't understand what is 
 inside the payload, and the message recipient could never know.
@@ -1805,7 +1804,7 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 | `A192GCM`                        | 192 | AES GCM using 192-bit key<sup><b>1</b></sup> |
 | `A256GCM`                        | 256 | AES GCM using 256-bit key<sup><b>1</b></sup> |
 
-<sup><b>1. </b>Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
+<sup><b>1. </b>Requires Java 8+ or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.ENC` registry singleton as 
 implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
@@ -1850,7 +1849,6 @@ key that will be used to directly encrypt the JWT `payload`.
 That is, JWT encryption can be thought of as a two-step process, shown in the following pseudocode:
 
 ```groovy
-
 Key algorithmKey = getKeyManagementAlgorithmKey(); // PublicKey, SecretKey, or Password
 
 SecretKey contentEncryptionKey = keyManagementAlgorithm.produceEncryptionKey(algorithmKey); // 1
@@ -2318,8 +2316,8 @@ the `PrivateKey`'s corresponding `PublicKey` is required.
 <a name="jwk-private-public"></a>
 #### Private JWK `PublicKey`
 
-If you do not provide a `PublicKey` when creating a `PrivateJwk`, JJWT will automatically perform the necessary 
-computations to derive the `PublicKey` from the `PrivateKey` instance if possible. However, because this can add 
+If you do not provide a `PublicKey` when creating a `PrivateJwk`, JJWT will automatically derive the `PublicKey` from 
+the `PrivateKey` instance if possible. However, because this can add 
 some computing time, it is typically recommended to provide the `PublicKey` when possible to avoid this extra work.
 
 For example:
@@ -2364,7 +2362,7 @@ RsaPrivateJwk privateJwk = Jwks.builder().forKey(rsaPrivateKey).build(); // or e
 // Get the matching public JWK and/or PublicKey:
 RsaPublicJwk pubJwk = privateJwk.toPublicJwk(); // JWK instance
 RSAPublicKey pubKey = pubJwk.toKey();           // Java PublicKey instance
-KeyPair pair = privateJwk.toKeyPair();          // java.security.KeyPair
+KeyPair pair = privateJwk.toKeyPair();          // io.jsonwebtoken.security.KeyPair
 ```
 
 <a name="jwk-thumbprint"></a>
@@ -3038,7 +3036,7 @@ Example:
 
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
-MacAlgorithm alg = Jwts.SIG.HS512; //or HS256 or HS384
+MacAlgorithm alg = Jwts.SIG.HS512; //or HS384 or HS256
 SecretKey key = alg.keyBuilder().build();
 
 String message = "Hello World!";
@@ -3065,7 +3063,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired RSA signature algorithm:
-AsymmetricKeySignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
+SignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his RSA private key:
@@ -3096,7 +3094,7 @@ public key:
 
 ```java
 // Create a test key suitable for the desired ECDSA signature algorithm:
-AsymmetricKeySignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
+SignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
 KeyPair pair = alg.keyPairBuilder().build();
 
 // Bob creates the compact JWS with his EC private key:
@@ -3288,7 +3286,7 @@ AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc.
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me")
     // Optional work factor is specified in the header:
-    //.setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations).build())
+    //.setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations))
     .encryptWith(password, alg, enc)
     .compact();
 
