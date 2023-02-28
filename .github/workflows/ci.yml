@@ -80,6 +80,8 @@ jobs:
       MVN_CMD: ./mvnw --no-transfer-progress -B
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid license plugin history warnings (plus it needs full history)
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
