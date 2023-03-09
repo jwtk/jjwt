@@ -116,7 +116,7 @@ class RsaPrivateJwkFactoryTest {
             BigInteger getModulus() {
                 return BigInteger.ZERO
             }
-        }
+        } as RSAPrivateKey
 
         try {
             Jwks.builder().forKey(key).build()
@@ -130,12 +130,11 @@ class RsaPrivateJwkFactoryTest {
     @Test
     void testMultiPrimePrivateKey() {
         def pair = TestKeys.RS256.pair
-        RSAPrivateCrtKey priv = pair.private
-        RSAPublicKey pub = pair.public
+        RSAPrivateCrtKey priv = pair.private as RSAPrivateCrtKey
 
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
         def info2 = new RSAOtherPrimeInfo(BigInteger.TEN, BigInteger.TEN, BigInteger.TEN)
-        def infos = [ info1, info2 ]
+        def infos = [info1, info2]
 
         //build up test key:
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, infos)
@@ -149,19 +148,19 @@ class RsaPrivateJwkFactoryTest {
         Map one = oth.get(0) as Map
         assertEquals one.r, RSAOtherPrimeInfoConverter.PRIME_FACTOR.applyTo(info1.prime)
         assertEquals one.d, RSAOtherPrimeInfoConverter.FACTOR_CRT_EXPONENT.applyTo(info1.crtCoefficient)
-        assertEquals one.t, RSAOtherPrimeInfoConverter.FACTOR_CRT_COEFFICIENT .applyTo(info1.crtCoefficient)
+        assertEquals one.t, RSAOtherPrimeInfoConverter.FACTOR_CRT_COEFFICIENT.applyTo(info1.crtCoefficient)
 
         Map two = oth.get(1) as Map
         assertEquals two.r, RSAOtherPrimeInfoConverter.PRIME_FACTOR.applyTo(info2.prime)
         assertEquals two.d, RSAOtherPrimeInfoConverter.FACTOR_CRT_EXPONENT.applyTo(info2.crtCoefficient)
-        assertEquals two.t, RSAOtherPrimeInfoConverter.FACTOR_CRT_COEFFICIENT .applyTo(info2.crtCoefficient)
+        assertEquals two.t, RSAOtherPrimeInfoConverter.FACTOR_CRT_COEFFICIENT.applyTo(info2.crtCoefficient)
     }
 
     @Test
     void testMultiPrimePrivateKeyWithoutExtraInfo() {
         def pair = TestKeys.RS256.pair
-        RSAPrivateCrtKey priv = pair.private
-        RSAPublicKey pub = pair.public
+        RSAPrivateCrtKey priv = pair.private as RSAPrivateCrtKey
+        RSAPublicKey pub = pair.public as RSAPublicKey
 
         RsaPrivateJwk jwk = Jwks.builder().forKey(priv).setPublicKey(pub).build()
         // an RSAMultiPrimePrivateCrtKey without OtherInfo elements is treated the same as a normal RSAPrivateCrtKey,
@@ -174,12 +173,13 @@ class RsaPrivateJwkFactoryTest {
     }
 
     @Test
-    void testNonCrtPrivateKey() { //tests a standard RSAPrivateKey (not a RSAPrivateCrtKey or RSAMultiPrimePrivateCrtKey):
+    void testNonCrtPrivateKey() {
+        //tests a standard RSAPrivateKey (not a RSAPrivateCrtKey or RSAMultiPrimePrivateCrtKey):
         def pair = TestKeys.RS256.pair
-        RSAPrivateCrtKey privCrtKey = pair.private
-        RSAPublicKey pub = pair.public
+        RSAPrivateCrtKey privCrtKey = pair.private as RSAPrivateCrtKey
+        RSAPublicKey pub = pair.public as RSAPublicKey
 
-        def priv = new TestRSAPrivateKey(pair.private)
+        def priv = new TestRSAPrivateKey(privCrtKey)
 
         RsaPrivateJwk jwk = Jwks.builder().forKey(priv).setPublicKey(pub).build()
         assertEquals 4, jwk.size() // kty, public exponent, modulus, private exponent
@@ -192,8 +192,8 @@ class RsaPrivateJwkFactoryTest {
     @Test
     void testCreateJwkFromMinimalValues() { // no optional private values
         def pair = TestKeys.RS256.pair
-        RSAPublicKey pub = pair.public
-        RSAPrivateKey priv = new TestRSAPrivateKey(pair.private)
+        RSAPublicKey pub = pair.public as RSAPublicKey
+        RSAPrivateKey priv = new TestRSAPrivateKey(pair.private as RSAPrivateKey)
         def jwk = Jwks.builder().forKey(priv).setPublicKey(pub).build()
         //minimal values: kty, modulus, public exponent, private exponent = 4 fields:
         assertEquals 4, jwk.size()
@@ -209,12 +209,12 @@ class RsaPrivateJwkFactoryTest {
     @Test
     void testCreateJwkFromMultiPrimeValues() {
         def pair = TestKeys.RS256.pair
-        RSAPrivateCrtKey priv = pair.private
-        RSAPublicKey pub = pair.public
+        RSAPrivateCrtKey priv = pair.private as RSAPrivateCrtKey
+        RSAPublicKey pub = pair.public as RSAPublicKey
 
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
         def info2 = new RSAOtherPrimeInfo(BigInteger.TEN, BigInteger.TEN, BigInteger.TEN)
-        def infos = [ info1, info2 ]
+        def infos = [info1, info2]
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, infos)
 
         final RsaPrivateJwk jwk = Jwks.builder().forKey(key).setPublicKey(pub).build()
@@ -225,7 +225,7 @@ class RsaPrivateJwkFactoryTest {
             @Override
             protected RSAPrivateKey generateFromSpec(JwkContext<RSAPrivateKey> ctx, KeySpec keySpec) {
                 assertTrue keySpec instanceof RSAMultiPrimePrivateCrtKeySpec
-                RSAMultiPrimePrivateCrtKeySpec spec = (RSAMultiPrimePrivateCrtKeySpec)keySpec
+                RSAMultiPrimePrivateCrtKeySpec spec = (RSAMultiPrimePrivateCrtKeySpec) keySpec
                 assertEquals key.modulus, spec.modulus
                 assertEquals key.publicExponent, spec.publicExponent
                 assertEquals key.privateExponent, spec.privateExponent
@@ -235,7 +235,7 @@ class RsaPrivateJwkFactoryTest {
                 assertEquals key.primeExponentQ, spec.primeExponentQ
                 assertEquals key.crtCoefficient, spec.crtCoefficient
 
-                for(int i = 0; i < infos.size(); i++) {
+                for (int i = 0; i < infos.size(); i++) {
                     RSAOtherPrimeInfo orig = infos.get(i)
                     RSAOtherPrimeInfo copy = spec.otherPrimeInfo[i]
                     assertEquals orig.prime, copy.prime

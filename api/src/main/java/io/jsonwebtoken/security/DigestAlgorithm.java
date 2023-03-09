@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Registry;
 
 import javax.crypto.SecretKey;
 import java.security.PrivateKey;
@@ -25,51 +26,52 @@ import java.security.PublicKey;
  * A {@code DigestAlgorithm} is a
  * <a href="https://en.wikipedia.org/wiki/Cryptographic_hash_function">Cryptographic Hash Function</a>
  * that computes and verifies cryptographic digests.  There are three types of {@code DigestAlgorithm}s represented
- * by subtypes:
+ * by subtypes, and RFC-standard implementations are available as constants in {@link Registry} singletons:
  *
  * <table>
  *     <caption>Types of {@code DigestAlgorithm}s</caption>
  *     <thead>
  *         <tr>
- *             <th>Algorithm Type</th>
  *             <th>Subtype</th>
+ *             <th>Standard Implementation Registry</th>
  *             <th>Security Model</th>
  *         </tr>
  *     </thead>
  *     <tbody>
  *         <tr>
- *             <td>Hash</td>
  *             <td>{@link HashAlgorithm}</td>
+ *             <td>{@link StandardHashAlgorithms}</td>
  *             <td>Unsecured (unkeyed), does not require a key to compute or verify digests.</td>
  *         </tr>
  *         <tr>
- *             <td>Message Authentication Code (MAC)</td>
  *             <td>{@link MacAlgorithm}</td>
- *             <td>Requires a {@link SecretKey} to both compute and verify digests.</td>
+ *             <td>{@link StandardSecureDigestAlgorithms}</td>
+ *             <td>Requires a {@link SecretKey} to both compute and verify digests (aka
+ *                 &quot;Message Authentication Codes&quot;).</td>
  *         </tr>
  *         <tr>
- *             <td>Digital Signature</td>
  *             <td>{@link SignatureAlgorithm}</td>
- *             <td>Requires a {@link PrivateKey} to compute and {@link PublicKey} to verify digests.</td>
+ *             <td>{@link StandardSecureDigestAlgorithms}</td>
+ *             <td>Requires a {@link PrivateKey} to compute and {@link PublicKey} to verify digests
+ *                 (aka &quot;Digital Signatures&quot;).</td>
  *         </tr>
  *     </tbody>
  * </table>
  *
- * <p><b>JWA Standard Implementations</b></p>
- *
- * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard
- * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic Algorithms for Digital Signatures and
- * MACs</a> that may be represented in a JWS {@code alg}orithm header
- * are available via the {@link StandardSecureDigestAlgorithms} utility class.</p>
- *
- * <p><b>JWS &quot;alg&quot; identifier</b></p>
+ * <p><b>Standard Identifier</b></p>
  *
  * <p>{@code DigestAlgorithm} extends {@link Identifiable}: the value returned from
- * {@link Identifiable#getId() getId()} will be used as the JWT standard identifier where required, for example as a
- * JWS &quot;alg&quot; protected header value.</p>
+ * {@link Identifiable#getId() getId()} will be used as the JWT standard identifier where required.</p>
+ *
+ * <p>For example,
+ * when a {@link MacAlgorithm} or {@link SignatureAlgorithm} is used to secure a JWS, the value returned from
+ * {@code algorithm.getId()} will be used as the JWS <code>&quot;alg&quot;</code> protected header value.  Or when a
+ * {@link HashAlgorithm} is used to compute a {@link JwkThumbprint}, it's {@code algorithm.getId()} value will be
+ * used within the thumbprint's {@link JwkThumbprint#toURI() URI} per JWT RFC requirements.</p>
  *
  * @param <R> the type of {@link Request} used when computing a digest.
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
+ * @see StandardHashAlgorithms
  * @see StandardSecureDigestAlgorithms
  * @since JJWT_RELEASE_VERSION
  */

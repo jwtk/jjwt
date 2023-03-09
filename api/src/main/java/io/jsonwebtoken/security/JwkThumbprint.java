@@ -48,7 +48,7 @@ public interface JwkThumbprint {
     URI toURI();
 
     /**
-     * Returns the {@link #toByteArray()} as a Base64URL-encoded string.
+     * Returns the {@link #toByteArray()} value as a Base64URL-encoded string.
      */
     String toString();
 }

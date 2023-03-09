@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
@@ -23,9 +24,21 @@ import java.security.Key;
 import java.util.Collection;
 
 /**
- * Constant definitions and utility methods for standard JWS
+ * Registry of all standard JWS
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic Algorithms for Digital
- * Signatures and MACs</a>.
+ * Signatures and MACs</a>. These are most commonly accessed via the {@link io.jsonwebtoken.Jwts#SIG} convenience
+ * alias when creating a JWS.  For example:
+ * <blockquote><pre>
+ * {@link Jwts#builder()}.
+ *     // ... etc ...
+ *     .{@link io.jsonwebtoken.JwtBuilder#signWith(Key, SecureDigestAlgorithm) signWith}(aKey, {@link Jwts#SIG}.HS256) // &lt;--
+ *     .build()</pre></blockquote>
+ *
+ * @see #get()
+ * @see #get(String)
+ * @see #find(String)
+ * @see #values()
+ * @since JJWT_RELEASE_VERSION
  */
 public final class StandardSecureDigestAlgorithms implements Registry<String, SecureDigestAlgorithm<?, ?>> {
 

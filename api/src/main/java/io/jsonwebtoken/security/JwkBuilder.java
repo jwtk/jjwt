@@ -79,14 +79,13 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      */
     T setId(String kid) throws IllegalArgumentException;
 
-
     /**
      * Sets the JWK's {@link #setId(String) kid} value to be the Base64URL-encoding of its {@code SHA-256}
      * {@link Jwk#thumbprint(HashAlgorithm) thumbprint}.  That is, the constructed JWK's {@code kid} value will equal
-     * {@code jwk}.{@link Jwk#thumbprint(HashAlgorithm) thumbprint(SHA256)}{@link JwkThumbprint#toString() .toString()}.
+     * <code>jwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}({@link Jwks#HASH}.{@link StandardHashAlgorithms#SHA256 SHA256}).{@link JwkThumbprint#toString() toString()}</code>.
      *
-     * <p>This is a convenience method that delegates to {@link #setIdFromThumbprint(HashAlgorithm)} with a
-     * {@code SHA-256} {@link HashAlgorithm} instance.
+     * <p>This is a convenience method that delegates to {@link #setIdFromThumbprint(HashAlgorithm)} using
+     * {@link Jwks#HASH}{@code .}{@link StandardHashAlgorithms#SHA256 SHA256}.</p>
      *
      * @return the builder for method chaining.
      */
@@ -96,10 +95,11 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * Sets the JWK's {@link #setId(String) kid} value to be the Base64URL-encoding of its
      * {@link Jwk#thumbprint(HashAlgorithm) thumbprint} using the specified {@link HashAlgorithm}.  That is, the
      * constructed JWK's {@code kid} value will equal
-     * {@code jwk}.{@link Jwk#thumbprint(HashAlgorithm) thumbprint(hashAlgorithm)}{@link JwkThumbprint#toString() .toString()}.
+     * <code>{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(alg).{@link JwkThumbprint#toString() toString()}.
      *
      * @param alg the hash algorithm to use to compute the thumbprint.
      * @return the builder for method chaining.
+     * @see StandardHashAlgorithms
      */
     T setIdFromThumbprint(HashAlgorithm alg);
 

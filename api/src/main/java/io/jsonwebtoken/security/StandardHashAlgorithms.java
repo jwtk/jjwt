@@ -40,6 +40,7 @@ import java.util.Collection;
  * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
  * </pre></blockquote>
  *
+ * @see #get()
  * @see #values()
  * @see #find(String)
  * @see #get(String)

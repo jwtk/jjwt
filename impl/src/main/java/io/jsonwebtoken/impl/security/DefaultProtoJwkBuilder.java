@@ -23,10 +23,13 @@ import io.jsonwebtoken.security.EcPublicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.OctetPrivateJwkBuilder;
 import io.jsonwebtoken.security.OctetPublicJwkBuilder;
+import io.jsonwebtoken.security.PrivateJwkBuilder;
 import io.jsonwebtoken.security.ProtoJwkBuilder;
+import io.jsonwebtoken.security.PublicJwkBuilder;
 import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
 import io.jsonwebtoken.security.RsaPublicJwkBuilder;
 import io.jsonwebtoken.security.SecretJwkBuilder;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -73,13 +76,52 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
         return new AbstractAsymmetricJwkBuilder.DefaultEcPrivateJwkBuilder(newContext(key));
     }
 
+    private static UnsupportedKeyException unsupportedKey(Key key, Exception e) {
+        String msg = "There is no builder that supports specified key of type " +
+                key.getClass().getName() + " with algorithm '" + key.getAlgorithm() + "'.";
+        return new UnsupportedKeyException(msg, e);
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
-    public <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forKey(A key) {
+    public <A extends PublicKey, B extends PrivateKey> PublicJwkBuilder<A, B, ?, ?, ?, ?> forKey(A key) {
+        if (key instanceof RSAPublicKey) {
+            return (PublicJwkBuilder<A, B, ?, ?, ?, ?>) forKey((RSAPublicKey) key);
+        } else if (key instanceof ECPublicKey) {
+            return (PublicJwkBuilder<A, B, ?, ?, ?, ?>) forKey((ECPublicKey) key);
+        } else {
+            try {
+                return forOctetKey(key);
+            } catch (UnsupportedKeyException | IllegalArgumentException e) {
+                throw unsupportedKey(key, e);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <A extends PublicKey, B extends PrivateKey> PrivateJwkBuilder<B, A, ?, ?, ?> forKey(B key) {
+        Assert.notNull(key, "Key cannot be null.");
+        if (key instanceof RSAPrivateKey) {
+            return (PrivateJwkBuilder<B, A, ?, ?, ?>) forKey((RSAPrivateKey) key);
+        } else if (key instanceof ECPrivateKey) {
+            return (PrivateJwkBuilder<B, A, ?, ?, ?>) forKey((ECPrivateKey) key);
+        } else {
+            try {
+                return forOctetKey(key);
+            } catch (UnsupportedKeyException | IllegalArgumentException e) {
+                throw unsupportedKey(key, e);
+            }
+        }
+    }
+
+    @Override
+    public <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetKey(A key) {
         return new AbstractAsymmetricJwkBuilder.DefaultOctetPublicJwkBuilder<>(newContext(key));
     }
 
     @Override
-    public <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forKey(B key) {
+    public <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKey(B key) {
         return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder<>(newContext(key));
     }
 
@@ -120,7 +162,7 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
         PrivateKey priv = KeyPairs.getKey(pair, PrivateKey.class);
         EdwardsCurve.assertEdwards(pub);
         EdwardsCurve.assertEdwards(priv);
-        return (OctetPrivateJwkBuilder<A, B>) forKey(priv).setPublicKey(pub);
+        return (OctetPrivateJwkBuilder<A, B>) forOctetKey(priv).setPublicKey(pub);
     }
 
     @Override
@@ -137,7 +179,7 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
         PublicKey key = cert.getPublicKey();
         Assert.notNull(key, "The first X509Certificate's PublicKey cannot be null.");
         EdwardsCurve.assertEdwards(key);
-        return this.<A, B>forKey((A) key).setX509CertificateChain(chain);
+        return this.<A, B>forOctetKey((A) key).setX509CertificateChain(chain);
     }
 
     @Override

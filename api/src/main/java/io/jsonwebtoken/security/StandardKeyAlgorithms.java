@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
@@ -26,12 +27,22 @@ import java.security.PublicKey;
 import java.util.Collection;
 
 /**
- * Constant definitions and utility methods for all
- * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">JWA (RFC 7518) Key Management Algorithms</a>.
+ * {@link Registry} singleton containing all standard JWE
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a>. These are most
+ * commonly accessed via the {@link io.jsonwebtoken.Jwts#KEY} convenience alias when creating a JWE.  For example:
+ * <blockquote><pre>
+ * {@link Jwts#builder()}.
+ *     // ... etc ...
+ *     .encryptWith(rsaPublicKey, <b>{@link Jwts#KEY}.RSA_OAEP</b>, Jwts.ENC.A256GCM) // &lt;--
+ *     .build()</pre></blockquote>
+ * <p>Direct type-safe references as shown above are often better than calling {@link #get(String)} or
+ * {@link #find(String)} which can be susceptible to misspelled or otherwise invalid string values.</p>
  *
- * @see #values()
- * @see #find(String)
+ * @see #get()
  * @see #get(String)
+ * @see #find(String)
+ * @see #values()
+ * @see KeyAlgorithm
  * @since JJWT_RELEASE_VERSION
  */
 public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorithm<?, ?>> {

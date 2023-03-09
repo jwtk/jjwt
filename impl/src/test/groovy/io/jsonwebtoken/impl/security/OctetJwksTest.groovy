@@ -125,13 +125,13 @@ class OctetJwksTest {
             PrivateKey priv = pair.getPrivate()
 
             // test individual keys
-            PublicJwk pubJwk = Jwks.builder().forKey(pub).setPublicKeyUse("sig").build()
+            PublicJwk pubJwk = Jwks.builder().forOctetKey(pub).setPublicKeyUse("sig").build()
             PublicJwk pubValuesJwk = Jwks.builder().putAll(pubJwk).build() as PublicJwk // ensure value map symmetry
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
 
-            PrivateJwk privJwk = Jwks.builder().forKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
+            PrivateJwk privJwk = Jwks.builder().forOctetKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
             PrivateJwk privValuesJwk = Jwks.builder().putAll(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
@@ -159,7 +159,7 @@ class OctetJwksTest {
             assertArrayEquals privMaterial, jwkKeyMaterial
 
             // Test public-to-private builder coercion:
-            privJwk = Jwks.builder().forKey(pub).setPrivateKey(priv).setPublicKeyUse('sig').build()
+            privJwk = Jwks.builder().forOctetKey(pub).setPrivateKey(priv).setPublicKeyUse('sig').build()
             privValuesJwk = Jwks.builder().putAll(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
@@ -217,7 +217,7 @@ class OctetJwksTest {
         def priv = TestKeys.X448.pair.private
         def mismatchedPub = TestKeys.X25519.pair.public
         try {
-            Jwks.builder().forKey(priv).setPublicKey(mismatchedPub).build()
+            Jwks.builder().forOctetKey(priv).setPublicKey(mismatchedPub).build()
             fail()
         } catch (InvalidKeyException ike) {
             String msg = "Specified Edwards Curve PublicKey does not match the PrivateKey curve."

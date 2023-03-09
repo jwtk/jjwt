@@ -25,6 +25,13 @@ import java.security.Key;
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
  * authentication code</a> algorithms.
  *
+ * <p><b>Standard Identifier</p>
+ *
+ * <p>{@code SecureDigestAlgorithm} extends {@link Identifiable}: when a {@code SecureDigestAlgorithm} is used to
+ * compute the digital signature or MAC of a JWS, the value returned from
+ * {@link Identifiable#getId() secureDigestAlgorithm.getId()} will be set as the JWS
+ * <code>&quot;alg&quot;</code> protected header value.</p>
+ *
  * <p><b>Standard Implementations</b></p>
  *
  * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard

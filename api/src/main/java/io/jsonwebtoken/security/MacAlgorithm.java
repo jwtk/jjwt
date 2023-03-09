@@ -15,11 +15,19 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.Identifiable;
+
 import javax.crypto.SecretKey;
 
 /**
  * A {@link SecureDigestAlgorithm} that uses symmetric {@link SecretKey}s to both compute and verify digests as
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message authentication codes</a> (MACs).
+ *
+ * <p><b>Standard Identifier</p>
+ *
+ * <p>{@code MacAlgorithm} extends {@link Identifiable}: when a {@code MacAlgorithm} is used to compute the MAC of a
+ * JWS, the value returned from {@link Identifiable#getId() macAlgorithm.getId()} will be set as the JWS
+ * <code>&quot;alg&quot;</code> protected header value.</p>
  *
  * <p><b>Key Strength</b></p>
  *
@@ -42,8 +50,14 @@ import javax.crypto.SecretKey;
  * SecretKey key = macAlgorithm.keyBuilder().build();</pre></blockquote>
  *
  * <p>The resulting {@code key} is guaranteed to have the correct algorithm parameters and strength/length necessary for
- * that exact {@code macAlgorithm} instance.</p>
+ * that exact {@code MacAlgorithm} instance.</p>
  *
+ * <p><b>JWA Standard Implementations</b></p>
+ *
+ * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard MAC algorithms are
+ * available via the {@link StandardSecureDigestAlgorithms} registry singleton.</p>
+ *
+ * @see StandardSecureDigestAlgorithms
  * @since JJWT_RELEASE_VERSION
  */
 public interface MacAlgorithm extends SecureDigestAlgorithm<SecretKey, SecretKey>,

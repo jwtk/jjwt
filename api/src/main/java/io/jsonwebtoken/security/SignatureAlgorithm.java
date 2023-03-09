@@ -24,15 +24,11 @@ import java.security.PublicKey;
  * A <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature</a> algorithm computes and
  * verifies digests using asymmetric public/private key cryptography.
  *
- * <p><b>JWA Standard Implementations</b></p>
+ * <p><b>Standard Identifier</p>
  *
- * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard signature algorithms are
- * available via the {@link StandardSecureDigestAlgorithms} utility class.</p>
- *
- * <p><b>&quot;alg&quot; identifier</b></p>
- *
- * <p>{@code SignatureAlgorithm} extends {@link Identifiable}: the value returned from
- * {@link Identifiable#getId() getId()} will be used as the JWS &quot;alg&quot; protected header value.</p>
+ * <p>{@code SignatureAlgorithm} extends {@link Identifiable}: when a {@code SignatureAlgorithm} is used to compute
+ * a JWS digital signature, the value returned from {@link Identifiable#getId() signatureAlgorithm.getId()} will be
+ * set as the JWS <code>&quot;alg&quot;</code> protected header value.</p>
  *
  * <p><b>Key Pair Generation</b></p>
  *
@@ -47,6 +43,12 @@ import java.security.PublicKey;
  * <p>The resulting {@code pair} is guaranteed to have the correct algorithm parameters and length/strength necessary
  * for that exact {@code signatureAlgorithm} instance.</p>
  *
+ * <p><b>JWA Standard Implementations</b></p>
+ *
+ * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard signature algorithms are
+ * available via the {@link StandardSecureDigestAlgorithms} registry singleton.</p>
+ *
+ * @see StandardSecureDigestAlgorithms
  * @since JJWT_RELEASE_VERSION
  */
 public interface SignatureAlgorithm extends SecureDigestAlgorithm<PrivateKey, PublicKey>, KeyPairBuilderSupplier {

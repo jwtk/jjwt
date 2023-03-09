@@ -15,31 +15,32 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 
 import java.util.Collection;
 
 /**
- * {@link Registry} singleton containing all standard
- * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA (RFC 7518) Encryption Algorithms</a>
+ * {@link Registry} singleton containing all standard JWE
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">Encryption Algorithms</a>
  * codified in the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">
- * JSON Web Signature and Encryption Algorithms Registry</a>. In addition to convenience
- * {@link #get(String)} and {@link #find(String)} lookup methods, each algorithm is also available as a
- * ({@code public final}) constant for direct type-safe reference in application code.  For example:
+ * JSON Web Signature and Encryption Algorithms Registry</a>. These are most commonly accessed via the
+ * {@link io.jsonwebtoken.Jwts#ENC} convenience alias when creating a JWE.  For example:
  * <blockquote><pre>
- * Jwts.builder()
+ * {@link Jwts#builder()}.
  *     // ... etc ...
- *     .encryptWith(secretKey, <b>Jwts.ENC.A256GCM</b>) // or A128GCM, A192GCM, etc...
- *     .build();</pre></blockquote>
+ *     .encryptWith(secretKey, <b>{@link Jwts#ENC}.A256GCM</b>) // or A128GCM, A192GCM, etc...
+ *     .build()</pre></blockquote>
  * <p>Direct type-safe references as shown above are often better than calling {@link #get(String)} or
  * {@link #find(String)} which can be susceptible to misspelled or otherwise invalid string values.</p>
  *
  * @see #get()
- * @see AeadAlgorithm
- * @see #values()
- * @see #find(String)
  * @see #get(String)
+ * @see #find(String)
+ * @see #values()
+ * @see AeadAlgorithm
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public final class StandardEncryptionAlgorithms implements Registry<String, AeadAlgorithm> {
