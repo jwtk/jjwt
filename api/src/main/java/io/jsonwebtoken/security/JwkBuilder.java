@@ -95,7 +95,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * Sets the JWK's {@link #setId(String) kid} value to be the Base64URL-encoding of its
      * {@link Jwk#thumbprint(HashAlgorithm) thumbprint} using the specified {@link HashAlgorithm}.  That is, the
      * constructed JWK's {@code kid} value will equal
-     * <code>{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(alg).{@link JwkThumbprint#toString() toString()}.
+     * <code>{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(alg).{@link JwkThumbprint#toString() toString()}.</code>
      *
      * @param alg the hash algorithm to use to compute the thumbprint.
      * @return the builder for method chaining.

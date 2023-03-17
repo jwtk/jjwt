@@ -23,7 +23,7 @@ import javax.crypto.SecretKey;
  * A {@link SecureDigestAlgorithm} that uses symmetric {@link SecretKey}s to both compute and verify digests as
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message authentication codes</a> (MACs).
  *
- * <p><b>Standard Identifier</p>
+ * <p><b>Standard Identifier</b></p>
  *
  * <p>{@code MacAlgorithm} extends {@link Identifiable}: when a {@code MacAlgorithm} is used to compute the MAC of a
  * JWS, the value returned from {@link Identifiable#getId() macAlgorithm.getId()} will be set as the JWS

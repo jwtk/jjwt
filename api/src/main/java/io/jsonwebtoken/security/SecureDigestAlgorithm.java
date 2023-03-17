@@ -25,7 +25,7 @@ import java.security.Key;
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
  * authentication code</a> algorithms.
  *
- * <p><b>Standard Identifier</p>
+ * <p><b>Standard Identifier</b></p>
  *
  * <p>{@code SecureDigestAlgorithm} extends {@link Identifiable}: when a {@code SecureDigestAlgorithm} is used to
  * compute the digital signature or MAC of a JWS, the value returned from

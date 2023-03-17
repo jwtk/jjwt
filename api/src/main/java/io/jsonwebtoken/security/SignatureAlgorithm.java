@@ -24,7 +24,7 @@ import java.security.PublicKey;
  * A <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature</a> algorithm computes and
  * verifies digests using asymmetric public/private key cryptography.
  *
- * <p><b>Standard Identifier</p>
+ * <p><b>Standard Identifier</b></p>
  *
  * <p>{@code SignatureAlgorithm} extends {@link Identifiable}: when a {@code SignatureAlgorithm} is used to compute
  * a JWS digital signature, the value returned from {@link Identifiable#getId() signatureAlgorithm.getId()} will be

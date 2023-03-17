@@ -207,7 +207,7 @@ class JwksTest {
 
             //ensure base64url encoding/decoding of the thumbprint works:
             def jwkFromValues = Jwks.builder().putAll(jwkFromKey).build() as PublicJwk
-            assertArrayEquals thumbprint, jwkFromValues."getX509CertificateSha${number}Thumbprint"()
+            assertArrayEquals thumbprint, jwkFromValues."getX509CertificateSha${number}Thumbprint"() as byte[]
         }
     }
 
@@ -297,7 +297,7 @@ class JwksTest {
             } else {
                 builder = Jwks.builder().forOctetKeyPair(pair)
             }
-            privJwk = builder.setPublicKeyUse("sig").build()
+            privJwk = builder.setPublicKeyUse("sig").build() as PrivateJwk
             assertEquals priv, privJwk.toKey()
             privPubJwk = privJwk.toPublicJwk()
             assertEquals pubJwk, privPubJwk
@@ -351,6 +351,67 @@ class JwksTest {
                     assertEquals(expected, ike.getMessage())
                 }
             }
+        }
+    }
+
+    @Test
+    void testPublicJwkBuilderWithRSAPublicKey() {
+        def key = TestKeys.RS256.pair.public
+        // must cast to PublicKey to avoid Groovy's dynamic type dispatch to the forKey(RSAPublicKey) method:
+        def jwk = Jwks.builder().forKey((PublicKey) key).build()
+        assertNotNull jwk
+        assertTrue jwk instanceof RsaPublicJwk
+    }
+
+    @Test
+    void testPublicJwkBuilderWithECPublicKey() {
+        def key = TestKeys.ES256.pair.public
+        // must cast to PublicKey to avoid Groovy's dynamic type dispatch to the forKey(ECPublicKey) method:
+        def jwk = Jwks.builder().forKey((PublicKey) key).build()
+        assertNotNull jwk
+        assertTrue jwk instanceof EcPublicJwk
+    }
+
+    @Test
+    void testPublicJwkBuilderWithUnsupportedKey() {
+        def key = new TestPublicKey()
+        // must cast to PublicKey to avoid Groovy's dynamic type dispatch to the forKey(ECPublicKey) method:
+        try {
+            Jwks.builder().forKey((PublicKey) key)
+        } catch (UnsupportedKeyException expected) {
+            String msg = 'There is no builder that supports specified key of type io.jsonwebtoken.impl.security.TestPublicKey with algorithm \'null\'.'
+            assertEquals(msg, expected.getMessage())
+            assertNotNull expected.getCause() // ensure we always retain a cause
+        }
+    }
+
+    @Test
+    void testPrivateJwkBuilderWithRSAPrivateKey() {
+        def key = TestKeys.RS256.pair.private
+        // must cast to PrivateKey to avoid Groovy's dynamic type dispatch to the forKey(RSAPrivateKey) method:
+        def jwk = Jwks.builder().forKey((PrivateKey) key).build()
+        assertNotNull jwk
+        assertTrue jwk instanceof RsaPrivateJwk
+    }
+
+    @Test
+    void testPrivateJwkBuilderWithECPrivateKey() {
+        def key = TestKeys.ES256.pair.private
+        // must cast to PrivateKey to avoid Groovy's dynamic type dispatch to the forKey(ECPrivateKey) method:
+        def jwk = Jwks.builder().forKey((PrivateKey) key).build()
+        assertNotNull jwk
+        assertTrue jwk instanceof EcPrivateJwk
+    }
+
+    @Test
+    void testPrivateJwkBuilderWithUnsupportedKey() {
+        def key = new TestPrivateKey()
+        try {
+            Jwks.builder().forKey((PrivateKey) key)
+        } catch (UnsupportedKeyException expected) {
+            String msg = 'There is no builder that supports specified key of type io.jsonwebtoken.impl.security.TestPrivateKey with algorithm \'null\'.'
+            assertEquals(msg, expected.getMessage())
+            assertNotNull expected.getCause() // ensure we always retain a cause
         }
     }
 

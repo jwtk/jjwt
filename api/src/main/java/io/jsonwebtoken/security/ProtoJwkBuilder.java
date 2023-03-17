@@ -234,6 +234,8 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * {@link KeyPair#getPrivate() private key} <em>MUST</em> be an Edwards-curve private key as defined by
      * {@link #forOctetKey(PrivateKey)}.
      *
+     * @param <A> the type of Edwards-curve {@link PublicKey} contained in the key pair.
+     * @param <B> the type of the Edwards-curve {@link PrivateKey} contained in the key pair.
      * @param keyPair the Edwards-curve {@link KeyPair} to represent as an {@link OctetPrivateJwk}.
      * @return the builder coerced as an {@link OctetPrivateJwkBuilder} for continued method chaining.
      * @throws IllegalArgumentException if the {@code keyPair} does not contain Edwards-curve public and private key
@@ -247,6 +249,9 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
      * {@link #forOctetKey(PublicKey)}.
      *
+     * @param <A> the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
+     * @param <B> the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
+     *            an {@link OctetPrivateJwk} if desired.
      * @param chain the {@link X509Certificate} chain to inspect to find the Edwards-curve {@code PublicKey} to
      *              represent as an {@link OctetPublicJwk}.
      * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
@@ -259,6 +264,9 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
      * {@link #forOctetKey(PublicKey)}.
      *
+     * @param <A> the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
+     * @param <B> the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
+     *            an {@link OctetPrivateJwk} if desired.
      * @param chain the {@link X509Certificate} chain to inspect to find the Edwards-curve {@code PublicKey} to
      *              represent as an {@link OctetPublicJwk}.
      * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
