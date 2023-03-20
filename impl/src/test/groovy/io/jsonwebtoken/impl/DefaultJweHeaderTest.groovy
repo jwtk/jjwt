@@ -19,11 +19,13 @@ import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.RsaPublicJwk
 import org.junit.Before
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.security.PublicKey
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
@@ -66,7 +68,7 @@ class DefaultJweHeaderTest {
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=oct, k=<redacted>}. " +
-                    "Value must be an EC Public JWK, not a Secret JWK."
+                    "Value must be a Public JWK, not a Secret JWK."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -81,7 +83,7 @@ class DefaultJweHeaderTest {
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=EC, crv=P-256, " +
                     "x=xNKMMIsawShLG4LYxpNP0gqdgK_K69UXCLt3AE3zp-Q, y=_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk, " +
-                    "d=<redacted>}. Value must be an EC Public JWK, not an EC Private JWK."
+                    "d=<redacted>}. Value must be a Public JWK, not an EC Private JWK."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -90,18 +92,10 @@ class DefaultJweHeaderTest {
     void testEpkWithRsaPublicJwk() {
         def jwk = Jwks.builder().forKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
-        try {
-            header.put('epk', values)
-            fail()
-        } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=RSA, " +
-                    "n=zkH0MwxQ2cUFWsvOPVFqI_dk2EFTjQolCy97mI5_wYCbaOoZ9Rm7c675mAeemRtNzgNVEz7m298ENqNGqPk2Nv3pBJ_" +
-                    "XCaybBlp61CLez7dQ2h5jUFEJ6FJcjeKHS-MwXr56t2ISdfLNMYtVIxjvXQcYx5VmS4mIqTxj5gVGtQVi0GXdH6SvpdKV" +
-                    "0fjE9KOhjsdBfKQzZfcQlusHg8pThwvjpMwCZnkxCS0RKa9y4-5-7MkC33-8-neZUzS7b6NdFxh6T_pMXpkf8d81fzVo4" +
-                    "ZBMloweW0_l8MOdVxeX7M_7XSC1ank5i3IEZcotLmJYMwEo7rMpZVLevEQ118Eo8Q, " +
-                    "e=AQAB}. Value must be an EC Public JWK, not an RSA Public JWK."
-            assertEquals msg, expected.getMessage()
-        }
+        header.put('epk', values)
+        def epk = header.getEphemeralPublicKey()
+        assertTrue epk instanceof RsaPublicJwk
+        assertEquals(jwk, epk)
     }
 
     @Test
@@ -137,6 +131,17 @@ class DefaultJweHeaderTest {
         header.put('epk', jwk)
         assertEquals jwk, header.get('epk')
         assertEquals jwk, header.getEphemeralPublicKey()
+    }
+
+    @Test
+    void testEpkWithEdPublicJwk() {
+        def keys = TestKeys.EdEC.collect({it -> it.pair.public as PublicKey})
+        for(PublicKey key : keys) {
+            def jwk = Jwks.builder().forKey((PublicKey)key as PublicKey).build()
+            header.put('epk', jwk)
+            assertEquals jwk, header.get('epk')
+            assertEquals jwk, header.getEphemeralPublicKey()
+        }
     }
 
     @Test

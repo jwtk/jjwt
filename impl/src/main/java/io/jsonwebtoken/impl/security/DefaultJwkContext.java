@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static io.jsonwebtoken.lang.Strings.nespace;
+
 public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkContext<K> {
 
     private static final Set<Field<?>> DEFAULT_FIELDS;
@@ -128,20 +130,11 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         StringBuilder sb = value != null ? new StringBuilder(value) : new StringBuilder();
         K key = getKey();
         if (key instanceof PublicKey) {
-            if (sb.length() != 0) {
-                sb.append(' ');
-            }
-            sb.append("Public");
+            nespace(sb).append("Public");
         } else if (key instanceof PrivateKey) {
-            if (sb.length() != 0) {
-                sb.append(' ');
-            }
-            sb.append("Private");
+            nespace(sb).append("Private");
         }
-        if (sb.length() != 0) {
-            sb.append(' ');
-        }
-        sb.append("JWK");
+        nespace(sb).append("JWK");
         return sb.toString();
     }
 

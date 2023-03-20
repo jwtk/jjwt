@@ -137,7 +137,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
      */
     private final byte[] PRIVATE_KEY_DER_PREFIX;
 
-    private final AlgorithmParameterSpec NAMED_PARAMETER_SPEC; // null <= JDK 10
+    private final AlgorithmParameterSpec NAMED_PARAMETER_SPEC; // null on <= JDK 10
 
     private final Function<byte[], KeySpec> PRIVATE_KEY_SPEC_FACTORY;
 
@@ -148,7 +148,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     EdwardsCurve(final String id, int oidTerminalNode) {
         super(id, id, // JWT ID and JCA name happen to be identical
-                // fall back to BouncyCastle if >= JDK 11 (for XDH curves) or 15 (for EdDSA curves) if necessary:
+                // fall back to BouncyCastle if < JDK 11 (for XDH curves) or < JDK 15 (for EdDSA curves) if necessary:
                 Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<KeyPairGenerator>() {
                     @Override
                     public KeyPairGenerator get() throws Exception {
@@ -362,7 +362,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
             }
         }
 
-        //TODO: assert key exists on curve
+        //TODO: check if key exists on discovered curve via equation
 
         return curve;
     }
@@ -386,6 +386,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
                     "' is not a recognized Edwards Curve key.";
             throw new UnsupportedKeyException(msg);
         }
+        //TODO: assert key exists on discovered curve via equation
         return curve;
     }
 

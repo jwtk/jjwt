@@ -1270,5 +1270,30 @@ public final class Strings {
         return arrayToDelimitedString(arr, ",");
     }
 
+    /**
+     * Appends a space character (<code>' '</code>) if the argument is not empty, otherwise does nothing.  This method
+     * can be thought of as &quot;non-empty space&quot;.  Using this method allows reduction of this:
+     * <blockquote><pre>
+     * if (sb.length != 0) {
+     *     sb.append(' ');
+     * }
+     * sb.append(nextWord);</pre></blockquote>
+     * <p>To this:</p>
+     * <blockquote><pre>
+     * nespace(sb).append(nextWord);</pre></blockquote>
+     * @param sb the string builder to append a space to if non-empty
+     * @return the string builder argument for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static StringBuilder nespace(StringBuilder sb) {
+        if (sb == null) {
+            return null;
+        }
+        if (sb.length() != 0) {
+            sb.append(' ');
+        }
+        return sb;
+    }
+
 }
 

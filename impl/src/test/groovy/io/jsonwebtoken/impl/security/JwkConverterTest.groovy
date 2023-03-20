@@ -23,50 +23,64 @@ import static org.junit.Assert.fail
 
 class JwkConverterTest {
 
+    static String typeString(def target) {
+        return JwkConverter.typeString(target)
+    }
+
     @Test
     void testJwkClassTypeString() {
-        assertEquals 'JWK', JwkConverter.typeString(Jwk.class)
+        assertEquals 'JWK', typeString(Jwk.class)
     }
 
     @Test
     void testSecretJwkClassTypeString() {
-        assertEquals 'Secret JWK', JwkConverter.typeString(SecretJwk.class)
+        assertEquals 'Secret JWK', typeString(SecretJwk.class)
     }
 
     @Test
     void testSecretJwkTypeString() {
         def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
-        assertEquals 'Secret JWK', JwkConverter.typeString(jwk)
+        assertEquals 'Secret JWK', typeString(jwk)
     }
 
     @Test
     void testPublicJwkClassTypeString() {
-        assertEquals 'Public JWK', JwkConverter.typeString(PublicJwk.class)
+        assertEquals 'Public JWK', typeString(PublicJwk.class)
     }
 
     @Test
     void testEcPublicJwkClassTypeString() {
-        assertEquals 'EC Public JWK', JwkConverter.typeString(EcPublicJwk.class)
+        assertEquals 'EC Public JWK', typeString(EcPublicJwk.class)
+    }
+
+    @Test
+    void testEdPublicJwkClassTypeString() {
+        assertEquals 'Edwards Curve Public JWK', typeString(OctetPublicJwk.class)
     }
 
     @Test
     void testRsaPublicJwkClassTypeString() {
-        assertEquals 'RSA Public JWK', JwkConverter.typeString(RsaPublicJwk.class)
+        assertEquals 'RSA Public JWK', typeString(RsaPublicJwk.class)
     }
 
     @Test
     void testPrivateJwkClassTypeString() {
-        assertEquals 'Private JWK', JwkConverter.typeString(PrivateJwk.class)
+        assertEquals 'Private JWK', typeString(PrivateJwk.class)
     }
 
     @Test
     void testEcPrivateJwkClassTypeString() {
-        assertEquals 'EC Private JWK', JwkConverter.typeString(EcPrivateJwk.class)
+        assertEquals 'EC Private JWK', typeString(EcPrivateJwk.class)
+    }
+
+    @Test
+    void testEdPrivateJwkClassTypeString() {
+        assertEquals 'Edwards Curve Private JWK', typeString(OctetPrivateJwk.class)
     }
 
     @Test
     void testRsaPrivateJwkClassTypeString() {
-        assertEquals 'RSA Private JWK', JwkConverter.typeString(RsaPrivateJwk.class)
+        assertEquals 'RSA Private JWK', typeString(RsaPrivateJwk.class)
     }
 
     @Test
@@ -82,4 +96,16 @@ class JwkConverterTest {
         }
     }
 
+    @Test
+    void testRsaPrivateJwk() {
+        JwkConverter<RsaPublicJwk> converter = new JwkConverter<>(RsaPublicJwk.class)
+        def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        try {
+            converter.applyFrom(jwk)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = "Value must be an RSA Public JWK, not a Secret JWK."
+            assertEquals msg, expected.getMessage()
+        }
+    }
 }

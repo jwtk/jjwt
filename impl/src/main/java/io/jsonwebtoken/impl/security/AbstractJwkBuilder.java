@@ -57,14 +57,12 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T setProvider(Provider provider) {
-        Assert.notNull(provider, "Provider cannot be null.");
         jwkContext.setProvider(provider);
         return self();
     }
 
     @Override
     public T setRandom(SecureRandom random) {
-        Assert.notNull(random, "SecureRandom cannot be null.");
         jwkContext.setRandom(random);
         return self();
     }

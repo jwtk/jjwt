@@ -20,7 +20,7 @@ package io.jsonwebtoken.security;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public class UnsupportedKeyException extends KeyException {
+public class UnsupportedKeyException extends InvalidKeyException {
 
     /**
      * Creates a new instance with the specified explanation message.
@@ -34,8 +34,8 @@ public class UnsupportedKeyException extends KeyException {
     /**
      * Creates a new instance with the specified explanation message and underlying cause.
      *
-     * @param msg the message explaining why the exception is thrown.
-     * @param cause   the underlying cause that resulted in this exception being thrown.
+     * @param msg   the message explaining why the exception is thrown.
+     * @param cause the underlying cause that resulted in this exception being thrown.
      */
     public UnsupportedKeyException(String msg, Throwable cause) {
         super(msg, cause);

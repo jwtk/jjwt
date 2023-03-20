@@ -16,8 +16,8 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.StandardKeyAlgorithms;
 
 import javax.crypto.SecretKey;
@@ -72,7 +72,7 @@ public interface JweHeader extends ProtectedHeader<JweHeader>, JweHeaderMutator<
      * @see StandardKeyAlgorithms#ECDH_ES_A192KW
      * @see StandardKeyAlgorithms#ECDH_ES_A256KW
      */
-    EcPublicJwk getEphemeralPublicKey();
+    PublicJwk<?> getEphemeralPublicKey();
 
     /**
      * Returns any information about the JWE producer for use with key agreement algorithms, or {@code null} if not

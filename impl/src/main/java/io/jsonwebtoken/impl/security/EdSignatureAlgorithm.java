@@ -16,10 +16,10 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecureRequest;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifyDigestRequest;
 
 import java.security.Key;
@@ -75,7 +75,7 @@ public class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
         if (curve != null && !curve.isSignatureCurve()) {
             String msg = curve.getId() + " keys may not be used with " + getId() + " digital signatures per " +
                     "https://www.rfc-editor.org/rfc/rfc8037#section-3.2";
-            throw new InvalidKeyException(msg);
+            throw new UnsupportedKeyException(msg);
         }
     }
 }

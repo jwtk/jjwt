@@ -24,7 +24,7 @@ import io.jsonwebtoken.impl.lang.RequiredBitLengthConverter;
 import io.jsonwebtoken.impl.security.JwkConverter;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.EcPublicJwk;
+import io.jsonwebtoken.security.PublicJwk;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -39,9 +39,10 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
 
-    public static final Field<EcPublicJwk> EPK = Fields.builder(EcPublicJwk.class)
+    @SuppressWarnings("unchecked")
+    public static final Field<PublicJwk<?>> EPK = Fields.builder((Class<PublicJwk<?>>) (Class<?>) PublicJwk.class)
             .setId("epk").setName("Ephemeral Public Key")
-            .setConverter(JwkConverter.EC_PUBLIC_JWK).build();
+            .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();
     static final Field<byte[]> APV = Fields.bytes("apv", "Agreement PartyVInfo").build();
 
@@ -79,14 +80,8 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
         return idiomaticGet(ENCRYPTION_ALGORITHM);
     }
 
-//    @Override
-//    public JweHeader setEncryptionAlgorithm(String enc) {
-//        put(ENCRYPTION_ALGORITHM, enc);
-//        return this;
-//    }
-
     @Override
-    public EcPublicJwk getEphemeralPublicKey() {
+    public PublicJwk<?> getEphemeralPublicKey() {
         return idiomaticGet(EPK);
     }
 
@@ -137,12 +132,6 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     public byte[] getPbes2Salt() {
         return idiomaticGet(P2S);
     }
-
-//    @Override
-//    public JweHeader setPbes2Salt(byte[] salt) {
-//        put(P2S, salt);
-//        return this;
-//    }
 
     @Override
     public Integer getPbes2Count() {

@@ -30,10 +30,6 @@ public final class Curves {
     public static final Curve P_256 = new ECCurve("P-256", "secp256r1"); // JDK standard
     public static final Curve P_384 = new ECCurve("P-384", "secp384r1"); // JDK standard
     public static final Curve P_521 = new ECCurve("P-521", "secp521r1"); // JDK standard
-    public static final EdwardsCurve X25519 = EdwardsCurve.X25519;
-    public static final EdwardsCurve X448 = EdwardsCurve.X448;
-    public static final EdwardsCurve Ed25519 = EdwardsCurve.Ed25519;
-    public static final EdwardsCurve Ed448 = EdwardsCurve.Ed448;
 
     private static final Collection<ECCurve> EC_CURVES = Collections.setOf((ECCurve) P_256, (ECCurve) P_384, (ECCurve) P_521);
 

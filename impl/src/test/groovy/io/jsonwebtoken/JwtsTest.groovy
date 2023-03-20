@@ -1479,6 +1479,101 @@ class JwtsTest {
         }
     }
 
+    @Test
+    void testEdwardsCurveJwes() { // ensures encryption works with Edwards Curve keys (X25519 and X448)
+
+        def pairs = [TestKeys.X25519.pair, TestKeys.X448.pair]
+
+        def algs = Jwts.KEY.values().findAll({ it ->
+            it.getId().startsWith("ECDH-ES")
+        })
+
+        for (KeyPair pair : pairs) {
+
+            def pubKey = pair.getPublic()
+            def privKey = pair.getPrivate()
+
+            for (KeyAlgorithm alg : algs) {
+                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                    String jwe = encrypt(pubKey, alg, enc)
+                    def jwt = decrypt(jwe, privKey)
+                    assertEquals 'bar', jwt.getPayload().get('foo')
+                }
+            }
+        }
+    }
+
+    /**
+     * Asserts that Edwards Curve signing keys cannot be used for encryption (key agreement) per
+     * https://www.rfc-editor.org/rfc/rfc8037#section-3.1
+     */
+    @Test
+    void testEdwardsCurveEncryptionWithSigningKeys() {
+        def pairs = [TestKeys.Ed25519.pair, TestKeys.Ed448.pair] // signing keys, can't be used
+
+        def algs = Jwts.KEY.values().findAll({ it ->
+            it.getId().startsWith("ECDH-ES")
+        })
+
+        for (KeyPair pair : pairs) {
+            def pubKey = pair.getPublic()
+            for (KeyAlgorithm alg : algs) {
+                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                    try {
+                        encrypt(pubKey, alg, enc)
+                        fail()
+                    } catch (UnsupportedKeyException expected) {
+                        String msg = pubKey.getAlgorithm() + " keys may not be used with ECDH-ES key " +
+                                "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1"
+                        assertEquals msg, expected.getMessage()
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Asserts that Edwards Curve signing keys cannot be used for decryption (key agreement) per
+     * https://www.rfc-editor.org/rfc/rfc8037#section-3.1
+     */
+    @Test
+    void testEdwardsCurveDecryptionWithSigningKeys() {
+
+        def pairs = [ // private keys are invalid signing keys to test decryption:
+                new KeyPair(TestKeys.X25519.pair.public, TestKeys.Ed25519.pair.private),
+                new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
+        ]
+
+        def algs = Jwts.KEY.values().findAll({ it ->
+            it.getId().startsWith("ECDH-ES")
+        })
+
+        for(KeyPair pair : pairs) {
+            for (KeyAlgorithm alg : algs) {
+                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                    String jwe = encrypt(pair.getPublic(), alg, enc)
+                    PrivateKey key = pair.getPrivate()
+                    try {
+                        decrypt(jwe, key) // invalid signing key
+                        fail()
+                    } catch (UnsupportedKeyException expected) {
+                        String msg = key.getAlgorithm() + " keys may not be used with ECDH-ES key " +
+                                "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1"
+                        assertEquals msg, expected.getMessage()
+                    }
+                }
+            }
+        }
+    }
+
+    static String encrypt(PublicKey key, KeyAlgorithm alg, AeadAlgorithm enc) {
+        return Jwts.builder().claim('foo', 'bar').encryptWith(key, alg, enc).compact()
+    }
+
+    static Jwe<Claims> decrypt(String jwe, PrivateKey key) {
+        return Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jwe)
+    }
+
     static void testRsa(io.jsonwebtoken.security.SignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
 
         KeyPair kp = TestKeys.forAlgorithm(alg).pair

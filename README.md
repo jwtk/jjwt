@@ -554,6 +554,7 @@ If you're building a (non-Android) JDK project, you will want to define the foll
      - JDK 10 or earlier, and you want to use RSASSA-PSS (PS256, PS384, PS512) signature algorithms.  
      - JDK 10 or earlier, and you want to use EdECDH (X25519 or X448) Elliptic Curve Diffie-Hellman encryption.
      - JDK 14 or earlier, and you want to use EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.    
+     It is unnecessary for these algorithms on JDK 15 or later.
 <dependency>
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk15on</artifactId>
@@ -570,9 +571,16 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 ```groovy
 dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION',
-    //'org.bouncycastle:bcprov-jdk15on:1.70',
-    'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION' // or 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION' for gson
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION' // or 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION' for gson
+    /* 
+      Uncomment this next dependency if you are using:
+       - JDK 10 or earlier, and you want to use RSASSA-PSS (PS256, PS384, PS512) signature algorithms.
+       - JDK 10 or earlier, and you want to use EdECDH (X25519 or X448) Elliptic Curve Diffie-Hellman encryption.
+       - JDK 14 or earlier, and you want to use EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.
+      It is unnecessary for these algorithms on JDK 15 or later.
+    */
+    // runtimeOnly 'org.bouncycastle:bcprov-jdk15on:1.70'
 }
 ```
 
@@ -594,8 +602,13 @@ dependencies {
     runtimeOnly('io.jsonwebtoken:jjwt-orgjson:JJWT_RELEASE_VERSION') {
         exclude(group: 'org.json', module: 'json') //provided by Android natively
     }
-    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms
-    // AND also enable the BouncyCastle provider as shown below
+    /* 
+      Uncomment this next dependency if you want to use:
+       - RSASSA-PSS (PS256, PS384, PS512) signature algorithms.
+       - EdECDH (X25519 or X448) Elliptic Curve Diffie-Hellman encryption.
+       - EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.
+      ** AND ALSO ensure you enable the BouncyCastle provider as shown below **
+    */
     //implementation('org.bouncycastle:bcprov-jdk15on:1.70')
 }
 ```
@@ -1531,7 +1544,7 @@ If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key
 algorithms, use an algorithm's respective `keyPairBuilder()` method:
 
 ```java
-KeyPair keyPair = Jwts.SIG.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512
+KeyPair keyPair = Jwts.SIG.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, etc...
 ```
 
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
@@ -1540,9 +1553,12 @@ public key (`keyPair.getPublic()`) to parse/verify a JWS.
 > **Note**
 > 
 > **The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider
-> (like BouncyCastle) in the runtime classpath.**  If you are using JDK 10 or earlier and you want to use them, see
-> the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are natively
-> supported by the JDK.
+> (like BouncyCastle) in the runtime classpath.**  
+> **The `EdDSA`, `Ed25519` and `Ed448` algorithms require JDK 15 or a compatible JCA Provider 
+> (like BouncyCastle) in the runtime classpath.** 
+> If you want to use either set of algorithms, and you are on an earlier JDK that does not support them, 
+> see the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are 
+> natively supported by the JDK.
 
 <a name="jws-create"></a>
 ### Creating a JWS
@@ -2377,7 +2393,7 @@ All `Jwk` instances support [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7
 `thumbprint()` and `thumbprint(HashAlgorithm)` methods:
 
 ```java
-HashAlgorithm hashAlg = getAHashAlgorithm();
+HashAlgorithm hashAlg = Jwks.HASH.SHA256; // or SHA384, SHA512, etc.
 
 Jwk<?> jwk = Jwks.builder(). /* ... */ .build();
 
@@ -2388,7 +2404,7 @@ JwkThumbprint anotherThumbprint = jwk.thumbprint(hashAlg); // thumbprint using s
 
 The resulting `JwkThumbprint` instance provides some useful methods:
 
-* `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the output from the hash algorithm
+* `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the raw output from the hash algorithm
 * `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
 * `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint
 * `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) specification
@@ -2405,6 +2421,7 @@ For example:
 ```java
 String kid = jwk.thumbprint().toString(); // Thumbprint bytes as a Base64URL-encoded string
 Key key = findKey(kid);
+assert jwk.toKey().equals(key);
 ```
 
 However, because `Jwk` instances are immutable, you can't set the key id after the JWK is created. For example, the
@@ -2496,7 +2513,7 @@ This code would print the following string literal to the System console:
 {kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}
 ```
 
-This is true for all secret or private key values in `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`, 
+This is true for all secret or private key members in `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`, 
 `EcPrivateJwk`, etc) instances.
 
 <a name="compression"></a>
@@ -3105,6 +3122,50 @@ String jws = Jwts.builder().setSubject("Alice")
 // Alice receives and verifies the compact JWS came from Bob:
 String subject = Jwts.parserBuilder()
     .verifyWith(pair.getPublic()) // <-- Bob's EC public key
+    .build().parseClaimsJws(jws).getPayload().getSubject();
+
+assert "Alice".equals(subject);
+```
+
+<a name="example-jws-eddsa"></a>
+### JWT Signed with EdDSA
+
+This is an example showing how to digitally sign and verify a JWT using the 
+[Edwards Curve Digital Signature Algorithm](https://www.rfc-editor.org/rfc/rfc8032) using
+`Ed25519` or `Ed448` keys.
+
+> **Note**
+>
+> **The `Ed25519` and `Ed448` algorithms require JDK 15 or a compatible JCA Provider
+> (like BouncyCastle) in the runtime classpath.**
+>
+> If you are using JDK 14 or earlier and you want to use them, see
+> the [Installation](#Installation) section to see how to enable BouncyCastle.
+
+The `EdDSA` signature algorithm is defined for JWS in [RFC 8037, Section 3.1](https://www.rfc-editor.org/rfc/rfc8037#section-3.1)
+using keys for two Edwards curves:
+
+* `Ed25519`: `EdDSA` using curve `Ed25519`. `Ed25519` algorithm keys must be 256 bits (32 bytes) long and produce 
+             signatures 512 bits (64 bytes) long.
+* `Ed448`: `EdDSA` using curve `Ed448`. `Ed448` algorithm keys must be 456 bits (57 bytes) long and produce signatures 
+           912 bits (114 bytes) long.
+
+In this example, Bob will sign a JWT using his Edwards Curve private key, and Alice can verify it came from Bob 
+using Bob's Edwards Curve public key:
+
+```java
+// Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
+SignatureAlgorithm alg = Jwts.SIG.Ed25519; //or Ed448
+KeyPair pair = alg.keyPairBuilder().build();
+
+// Bob creates the compact JWS with his Edwards Curve private key:
+String jws = Jwts.builder().setSubject("Alice")
+    .signWith(pair.getPrivate(), alg) // <-- Bob's Edwards Curve private key
+    .compact();
+
+// Alice receives and verifies the compact JWS came from Bob:
+String subject = Jwts.parserBuilder()
+    .verifyWith(pair.getPublic()) // <-- Bob's Edwards Curve public key
     .build().parseClaimsJws(jws).getPayload().getSubject();
 
 assert "Alice".equals(subject);

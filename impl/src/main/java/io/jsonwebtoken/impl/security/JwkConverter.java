@@ -23,6 +23,8 @@ import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.OctetPrivateJwk;
+import io.jsonwebtoken.security.OctetPublicJwk;
 import io.jsonwebtoken.security.PrivateJwk;
 import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.RsaPrivateJwk;
@@ -31,12 +33,12 @@ import io.jsonwebtoken.security.SecretJwk;
 
 import java.util.Map;
 
+import static io.jsonwebtoken.lang.Strings.nespace;
+
 public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object> {
 
     @SuppressWarnings("unchecked")
     public static final JwkConverter<PublicJwk<?>> PUBLIC_JWK = new JwkConverter<>((Class<PublicJwk<?>>) (Class<?>) PublicJwk.class);
-
-    public static final JwkConverter<EcPublicJwk> EC_PUBLIC_JWK = new JwkConverter<>(EcPublicJwk.class);
 
     private final Class<T> desiredType;
 
@@ -51,7 +53,7 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
 
     private static String articleFor(String s) {
         switch (s.charAt(0)) {
-            case 'E': // for Elliptic Curve
+            case 'E': // for Elliptic/Edwards Curve
             case 'R': // for RSA
                 return "an";
             default:
@@ -72,26 +74,19 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
             sb.append("RSA");
         } else if (EcPublicJwk.class.isAssignableFrom(clazz) || EcPrivateJwk.class.isAssignableFrom(clazz)) {
             sb.append("EC");
+        } else if (OctetPublicJwk.class.isAssignableFrom(clazz) || OctetPrivateJwk.class.isAssignableFrom(clazz)) {
+            sb.append("Edwards Curve");
         }
         return typeString(sb, clazz);
     }
 
     private static String typeString(StringBuilder sb, Class<?> clazz) {
         if (PublicJwk.class.isAssignableFrom(clazz)) {
-            if (sb.length() != 0) {
-                sb.append(' ');
-            }
-            sb.append("Public");
+            nespace(sb).append("Public");
         } else if (PrivateJwk.class.isAssignableFrom(clazz)) {
-            if (sb.length() != 0) {
-                sb.append(' ');
-            }
-            sb.append("Private");
+            nespace(sb).append("Private");
         }
-        if (sb.length() != 0) {
-            sb.append(' ');
-        }
-        sb.append("JWK");
+        nespace(sb).append("JWK");
         return sb.toString();
     }
 

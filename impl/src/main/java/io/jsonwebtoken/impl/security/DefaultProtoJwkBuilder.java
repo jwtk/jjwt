@@ -109,7 +109,7 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
         } else {
             try {
                 return forOctetKey(key);
-            } catch (UnsupportedKeyException | IllegalArgumentException e) {
+            } catch (Exception e) {
                 throw unsupportedKey(key, e);
             }
         }

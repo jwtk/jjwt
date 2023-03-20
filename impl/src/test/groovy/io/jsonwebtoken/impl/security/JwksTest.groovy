@@ -175,9 +175,9 @@ class JwksTest {
         assertSame random, jwk.@context.getRandom()
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test
     void testNullRandom() {
-        Jwks.builder().forKey(SKEY).setRandom(null).build()
+        assertNotNull Jwks.builder().forKey(SKEY).setRandom(null).build()
     }
 
     static void testX509Thumbprint(int number) {
