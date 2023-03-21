@@ -1523,7 +1523,8 @@ class JwtsTest {
                         encrypt(pubKey, alg, enc)
                         fail()
                     } catch (UnsupportedKeyException expected) {
-                        String msg = pubKey.getAlgorithm() + " keys may not be used with ECDH-ES key " +
+                        String id = EdwardsCurve.forKey(pubKey).getId()
+                        String msg = id + " keys may not be used with ECDH-ES key " +
                                 "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1"
                         assertEquals msg, expected.getMessage()
                     }
@@ -1557,7 +1558,8 @@ class JwtsTest {
                         decrypt(jwe, key) // invalid signing key
                         fail()
                     } catch (UnsupportedKeyException expected) {
-                        String msg = key.getAlgorithm() + " keys may not be used with ECDH-ES key " +
+                        String id = EdwardsCurve.forKey(key).getId()
+                        String msg = id + " keys may not be used with ECDH-ES key " +
                                 "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1"
                         assertEquals msg, expected.getMessage()
                     }
