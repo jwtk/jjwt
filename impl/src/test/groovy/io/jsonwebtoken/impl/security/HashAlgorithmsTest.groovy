@@ -19,6 +19,8 @@ import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
+import java.nio.charset.StandardCharsets
+
 import static org.junit.Assert.*
 
 class HashAlgorithmsTest {
@@ -29,7 +31,7 @@ class HashAlgorithmsTest {
 
     @Test
     void testValues() {
-        assertEquals 1, Jwks.HASH.values().size()
+        assertEquals 6, Jwks.HASH.values().size()
         assertTrue(contains(Jwks.HASH.SHA256)) // add more later
     }
 
@@ -71,5 +73,49 @@ class HashAlgorithmsTest {
     void testFindByIdWithInvalidId() {
         // 'find' paradigm can return null if not found
         assertNull Jwks.HASH.find('invalid')
+    }
+
+    static DefaultRequest<byte[]> request(String msg) {
+        byte[] data = msg.getBytes(StandardCharsets.UTF_8)
+        return new DefaultRequest<byte[]>(data, null, null)
+    }
+
+    static void testSha(HashAlgorithm alg) {
+        String id = alg.getId()
+        int c = ('-' as char) as int
+        def digestLength = id.substring(id.lastIndexOf(c) + 1) as int
+        assertTrue alg.getJcaName().endsWith('' + digestLength)
+        def digest = alg.digest(request("hello"))
+        assertEquals digestLength, (digest.length * Byte.SIZE)
+    }
+
+    @Test
+    void testSha256() {
+        testSha(Jwks.HASH.SHA256)
+    }
+
+    @Test
+    void testSha384() {
+        testSha(Jwks.HASH.SHA384)
+    }
+
+    @Test
+    void testSha512() {
+        testSha(Jwks.HASH.SHA512)
+    }
+
+    @Test
+    void testSha3_256() {
+        testSha(Jwks.HASH.SHA3_256)
+    }
+
+    @Test
+    void testSha3_384() {
+        testSha(Jwks.HASH.SHA3_384)
+    }
+
+    @Test
+    void testSha3_512() {
+        testSha(Jwks.HASH.SHA3_512)
     }
 }

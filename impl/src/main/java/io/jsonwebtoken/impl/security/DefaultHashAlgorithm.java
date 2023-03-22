@@ -22,14 +22,20 @@ import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.VerifyDigestRequest;
 
 import java.security.MessageDigest;
+import java.security.Provider;
+import java.util.Locale;
 
 public final class DefaultHashAlgorithm extends CryptoAlgorithm implements HashAlgorithm {
 
-    public static final HashAlgorithm SHA1 = new DefaultHashAlgorithm("sha-1", "SHA-1");
-    public static final HashAlgorithm SHA256 = new DefaultHashAlgorithm("sha-256", "SHA-256");
+    public static final HashAlgorithm SHA1 = new DefaultHashAlgorithm("sha-1");
 
-    DefaultHashAlgorithm(String id, String jcaName) {
+    DefaultHashAlgorithm(String id) {
+        super(id, id.toUpperCase(Locale.ENGLISH));
+    }
+
+    DefaultHashAlgorithm(String id, String jcaName, Provider provider) {
         super(id, jcaName);
+        setProvider(provider);
     }
 
     @Override

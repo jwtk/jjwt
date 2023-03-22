@@ -45,6 +45,7 @@ import java.util.Collection;
  * @see #find(String)
  * @see #get(String)
  * @see HashAlgorithm
+ * @since JJWT_RELEASE_VERSION
  */
 public final class StandardHashAlgorithms implements Registry<String, HashAlgorithm> {
 
@@ -65,11 +66,56 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
     /**
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
      * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
-     * value of {@code sha-256}.  Per the IANA registry, this algorithm is defined by
-     * <a href="https://www.rfc-editor.org/rfc/rfc6920.html">RFC 6920</a> and is the same as the
-     * native Java JCA {@code SHA-256} {@code MessageDigest} algorithm.
+     * value of {@code sha-256}. It is a {@code HashAlgorithm} alias for the native
+     * Java JCA {@code SHA-256} {@code MessageDigest} algorithm.
      */
     public final HashAlgorithm SHA256 = get("sha-256");
+
+    /**
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
+     * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
+     * value of {@code sha-384}. It is a {@code HashAlgorithm} alias for the native
+     * Java JCA {@code SHA-384} {@code MessageDigest} algorithm.
+     */
+    public final HashAlgorithm SHA384 = get("sha-384");
+
+    /**
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
+     * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
+     * value of {@code sha-512}. It is a {@code HashAlgorithm} alias for the native
+     * Java JCA {@code SHA-512} {@code MessageDigest} algorithm.
+     */
+    public final HashAlgorithm SHA512 = get("sha-512");
+
+    /**
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
+     * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
+     * value of {@code sha3-256}. It is a {@code HashAlgorithm} alias for the native
+     * Java JCA {@code SHA3-256} {@code MessageDigest} algorithm.
+     * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</b></p>
+     */
+    public final HashAlgorithm SHA3_256 = get("sha3-256");
+
+    /**
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
+     * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
+     * value of {@code sha3-384}. It is a {@code HashAlgorithm} alias for the native
+     * Java JCA {@code SHA3-384} {@code MessageDigest} algorithm.
+     * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</b></p>
+     */
+    public final HashAlgorithm SHA3_384 = get("sha3-384");
+
+    /**
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
+     * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
+     * value of {@code sha3-512}. It is a {@code HashAlgorithm} alias for the native
+     * Java JCA {@code SHA3-512} {@code MessageDigest} algorithm.
+     * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</b></p>
+     */
+    public final HashAlgorithm SHA3_512 = get("sha3-512");
 
     /**
      * Prevent external instantiation.

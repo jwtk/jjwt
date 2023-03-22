@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.HashAlgorithm
+import io.jsonwebtoken.security.StandardHashAlgorithms
 import org.junit.Before
 import org.junit.Test
 
@@ -28,7 +29,7 @@ import static org.junit.Assert.*
 class DefaultJwkThumbprintTest {
 
     private static String content = "Hello World"
-    private static HashAlgorithm alg = DefaultHashAlgorithm.SHA256
+    private static HashAlgorithm alg = StandardHashAlgorithms.get().SHA256
     private static byte[] digest = alg.digest(new DefaultRequest<byte[]>(content.getBytes(StandardCharsets.UTF_8), null, null))
     private static String expectedToString = Encoders.BASE64URL.encode(digest)
     private static String expectedUriString = DefaultJwkThumbprint.URI_PREFIX + alg.getId() + ":" + expectedToString
@@ -74,7 +75,7 @@ class DefaultJwkThumbprintTest {
     @Test
     void testNotEquals() {
         // invalid data type:
-        assertNotEquals new DefaultJwkThumbprint(digest, DefaultHashAlgorithm.SHA256), new Object()
+        assertNotEquals new DefaultJwkThumbprint(digest, alg), new Object()
 
         // same digest, different alg:
         assertFalse thumbprint == new DefaultJwkThumbprint(digest, DefaultHashAlgorithm.SHA1)

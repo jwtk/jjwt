@@ -19,16 +19,18 @@ import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.JwkThumbprint
 import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.StandardHashAlgorithms
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import java.nio.charset.StandardCharsets
 
 import static io.jsonwebtoken.impl.security.DefaultHashAlgorithm.SHA1
-import static io.jsonwebtoken.impl.security.DefaultHashAlgorithm.SHA256
 import static org.junit.Assert.assertEquals
 
 class JwkThumbprintsTest {
+
+    static final HashAlgorithm SHA256 = StandardHashAlgorithms.get().SHA256;
 
     static byte[] digest(String json, HashAlgorithm alg) {
         def utf8Bytes = json.getBytes(StandardCharsets.UTF_8)
@@ -43,7 +45,7 @@ class JwkThumbprintsTest {
     @Test
     void testSecretJwks() {
         TestKeys.SECRET.each { SecretKey key ->
-            def jwk = Jwks.builder().forKey((SecretKey)key).setIdFromThumbprint().build()
+            def jwk = Jwks.builder().forKey((SecretKey) key).setIdFromThumbprint().build()
             def json = RfcTests.stripws("""
             {"k":"${jwk.get('k').get()}","kty":"oct"}
             """)

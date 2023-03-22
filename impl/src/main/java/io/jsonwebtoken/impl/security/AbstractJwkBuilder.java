@@ -19,6 +19,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
+import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
 import io.jsonwebtoken.security.SecretJwkBuilder;
@@ -108,7 +109,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T setIdFromThumbprint() {
-        return setIdFromThumbprint(DefaultHashAlgorithm.SHA256);
+        return setIdFromThumbprint(Jwks.HASH.SHA256);
     }
 
     @Override

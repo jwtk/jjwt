@@ -21,6 +21,7 @@ import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.Request
+import io.jsonwebtoken.security.StandardHashAlgorithms
 import org.junit.Before
 import org.junit.Test
 
@@ -95,7 +96,7 @@ class DefaultJwsHeaderBuilderTest {
     @Test
     void testSetX509CertificateSha256Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
+        def x5tS256 = StandardHashAlgorithms.get().SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         def header = builder.setX509CertificateSha256Thumbprint(x5tS256).build()
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
@@ -106,7 +107,7 @@ class DefaultJwsHeaderBuilderTest {
     void testSetX509CertificateSha256ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
-        def x5tS256 = DefaultHashAlgorithm.SHA256.digest(request)
+        def x5tS256 = StandardHashAlgorithms.get().SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         def header = builder.setX509CertificateChain(chain).withX509Sha256Thumbprint(true).build()
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()

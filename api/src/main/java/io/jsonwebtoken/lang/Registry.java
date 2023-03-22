@@ -17,11 +17,39 @@ package io.jsonwebtoken.lang;
 
 import java.util.Collection;
 
+/**
+ * An immutable read-only repository of key-value pairs.
+ *
+ * @param <K> key type
+ * @param <V> value type
+ * @since JJWT_RELEASE_VERSION
+ */
 public interface Registry<K, V> {
 
+    /**
+     * Returns all registry values as a read-only collection.
+     *
+     * @return all registry values as a read-only collection.
+     */
     Collection<V> values();
 
+    /**
+     * Returns the value assigned the specified key or throws an {@code IllegalArgumentException} if there is no
+     * associated value.  If a value is not required, consider using the {@link #find(Object)} method instead.
+     *
+     * @param key the registry key assigned to the required value
+     * @return the value assigned the specified key
+     * @throws IllegalArgumentException if there is no value assigned the specified key
+     * @see #find(Object)
+     */
     V get(K key) throws IllegalArgumentException;
 
+    /**
+     * Returns the value assigned the specified key or {@code null} if there is no associated value.
+     *
+     * @param key the registry key assigned to the required value
+     * @return the value assigned the specified key or {@code null} if there is no associated value.
+     * @see #get(Object)
+     */
     V find(K key);
 }

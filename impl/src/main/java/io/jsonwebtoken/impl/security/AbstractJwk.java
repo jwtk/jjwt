@@ -28,6 +28,7 @@ import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkThumbprint;
+import io.jsonwebtoken.security.Jwks;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -100,7 +101,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
 
     @Override
     public JwkThumbprint thumbprint() {
-        return thumbprint(DefaultHashAlgorithm.SHA256);
+        return thumbprint(Jwks.HASH.SHA256);
     }
 
     @Override
