@@ -159,24 +159,28 @@ public final class StandardSecureDigestAlgorithms implements Registry<String, Se
      * {@code EdDSA} signature algorithm as defined by
      * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
      * requires either {@code Ed25519} or {@code Ed448} Edwards Curve keys.
+     * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</b></p>
      */
     public final SignatureAlgorithm EdDSA = doGet("EdDSA");
 
     /**
-     * {@code EdDSA} signature algorithm using Curve 25519 as defined by
+     * {@code EdDSA} signature algorithm using Curve {@code Ed25519} as defined by
      * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
-     * requires {@code Ed25519} Edwards Curve keys to create signatures.
-     * <p><b>This is a convenience alias for {@link #EdDSA}</b> that defaults key generation to
-     * {@code Ed25519} keys.</p>
+     * requires {@code Ed25519} Edwards Curve keys to create signatures.  <b>This is a convenience alias for
+     * {@link #EdDSA}</b> that defaults key generation to {@code Ed25519} keys.</p>
+     * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</b></p>
      */
     public final SignatureAlgorithm Ed25519 = doGet("Ed25519");
 
     /**
-     * {@code EdDSA} signature algorithm using Curve 25519 as defined by
+     * {@code EdDSA} signature algorithm using Curve {@code Ed448} as defined by
      * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
-     * requires {@code Ed448} Edwards Curve keys to create signatures.
-     * <p><b>This is a convenience alias for {@link #EdDSA}</b> that defaults key generation to
-     * {@code Ed448} keys.</p>
+     * requires {@code Ed448} Edwards Curve keys to create signatures. <b>This is a convenience alias for
+     * {@link #EdDSA}</b> that defaults key generation to {@code Ed448} keys.
+     * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+     * classpath.</b></p>
      */
     public final SignatureAlgorithm Ed448 = doGet("Ed448");
 

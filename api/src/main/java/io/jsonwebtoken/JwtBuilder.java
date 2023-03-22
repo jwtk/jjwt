@@ -566,7 +566,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * length to parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>
      * <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a>s
-     * require JDK >= 15 or BouncyCastle in the runtime classpath.</li>
+     * require JDK &gt;= 15 or BouncyCastle in the runtime classpath.</li>
      * </ol>
      *
      * <p>This implementation does not use the {@link StandardSecureDigestAlgorithms#PS256 PS256},
