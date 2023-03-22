@@ -52,6 +52,11 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
 
     private static final StandardKeyAlgorithms INSTANCE = new StandardKeyAlgorithms();
 
+    /**
+     * Returns this registry (a static singleton).
+     *
+     * @return this registry (a static singleton).
+     */
     public static StandardKeyAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }

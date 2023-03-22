@@ -47,6 +47,11 @@ public final class StandardSecureDigestAlgorithms implements Registry<String, Se
 
     private static final StandardSecureDigestAlgorithms INSTANCE = new StandardSecureDigestAlgorithms();
 
+    /**
+     * Returns this registry (a static singleton).
+     *
+     * @return this registry (a static singleton).
+     */
     public static StandardSecureDigestAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
@@ -168,7 +173,7 @@ public final class StandardSecureDigestAlgorithms implements Registry<String, Se
      * {@code EdDSA} signature algorithm using Curve {@code Ed25519} as defined by
      * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
      * requires {@code Ed25519} Edwards Curve keys to create signatures.  <b>This is a convenience alias for
-     * {@link #EdDSA}</b> that defaults key generation to {@code Ed25519} keys.</p>
+     * {@link #EdDSA}</b> that defaults key generation to {@code Ed25519} keys.
      * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
      * classpath.</b></p>
      */
