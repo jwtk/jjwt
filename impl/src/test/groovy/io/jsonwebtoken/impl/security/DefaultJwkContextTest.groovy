@@ -49,6 +49,22 @@ class DefaultJwkContextTest {
     }
 
     @Test
+    void testGetNameWithEdwardsPublicKey() {
+        def ctx = new DefaultJwkContext()
+        ctx.setKey(TestKeys.X448.pair.public)
+        ctx.setType(DefaultOctetPublicJwk.TYPE_VALUE)
+        assertEquals 'Octet Public JWK', ctx.getName()
+    }
+
+    @Test
+    void testGetNameWithEdwardsPrivateKey() {
+        def ctx = new DefaultJwkContext()
+        ctx.setKey(TestKeys.X448.pair.private)
+        ctx.setType(DefaultOctetPublicJwk.TYPE_VALUE)
+        assertEquals 'Octet Private JWK', ctx.getName()
+    }
+
+    @Test
     void testGStringPrintsRedactedValues() {
         // DO NOT REMOVE THIS METHOD: IT IS CRITICAL TO ENSURE GROOVY STRINGS DO NOT LEAK SECRET/PRIVATE KEY MATERIAL
         def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)

@@ -2432,17 +2432,17 @@ String kid = jwk.thumbprint().toString();
 jwk.setId(kid) // Jwks are immutable - there is no `setId` method
 ```
 
-Instead, you may use the `setIdAsThumbprint` methods on the `JwkBuilder` when creating a `Jwk`:
+Instead, you may use the `setIdFromThumbprint` methods on the `JwkBuilder` when creating a `Jwk`:
 
 ```java
 Jwk<?> jwk = Jwks.builder().forKey(aKey)
 
-    .setIdAsThumbprint() // or setIdAsThumbprint(hashAlgorithm)
+    .setIdFromThumbprint() // or setIdFromThumbprint(hashAlgorithm)
 
     .build();
 ```
 
-Calling either `setIdAsThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`
+Calling either `setIdFromThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`
 (which is `Encoders.BASE64URL.encode(thumbprint.toByteArray())`).
 
 <a name="jwk-thumbprint-uri"></a>

@@ -126,6 +126,8 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         String value = get(AbstractJwk.KTY);
         if (DefaultSecretJwk.TYPE_VALUE.equals(value)) {
             value = "Secret";
+        } else if (DefaultOctetPublicJwk.TYPE_VALUE.equals(value)) {
+            value = "Octet";
         }
         StringBuilder sb = value != null ? new StringBuilder(value) : new StringBuilder();
         K key = getKey();

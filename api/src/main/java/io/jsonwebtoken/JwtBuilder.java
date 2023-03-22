@@ -525,6 +525,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <td>4096 &lt;= size <sup>5</sup></td>
      * <td>{@link StandardSecureDigestAlgorithms#RS512 RS512}</td>
      * </tr>
+     * <tr>
+     *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
+     *     <td><code>instanceof {@link PrivateKey}</code></td>
+     *     <td>256</td>
+     *     <td>{@link StandardSecureDigestAlgorithms#Ed25519 Ed25519}</td>
+     * </tr>
+     * <tr>
+     *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
+     *     <td><code>instanceof {@link PrivateKey}</code></td>
+     *     <td>456</td>
+     *     <td>{@link StandardSecureDigestAlgorithms#Ed448 Ed448}</td>
+     * </tr>
      * </tbody>
      * </table>
      * <p>Notes:</p>
@@ -553,6 +565,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link StandardSecureDigestAlgorithms#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
      * length to parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>
+     * <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a>s
+     * require JDK >= 15 or BouncyCastle in the runtime classpath.</li>
      * </ol>
      *
      * <p>This implementation does not use the {@link StandardSecureDigestAlgorithms#PS256 PS256},
@@ -564,13 +578,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link #signWith(Key, SecureDigestAlgorithm)} method instead.</p>
      *
      * <p>Finally, this method will throw an {@link InvalidKeyException} for any key that does not match the
-     * heuristics and requirements documented above, since that inevitably means the Key is either insufficient or
-     * explicitly disallowed by the JWT specification.</p>
+     * heuristics and requirements documented above, since that inevitably means the Key is either insufficient,
+     * unsupported, or explicitly disallowed by the JWT specification.</p>
      *
      * @param key the key to use for signing
      * @return the builder instance for method chaining.
-     * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification as
-     *                             described above in <em>recommended signature algorithms</em>.
+     * @throws InvalidKeyException if the Key is insufficient, unsupported, or explicitly disallowed by the JWT
+     *                             specification as described above in <em>recommended signature algorithms</em>.
      * @see Jwts#SIG
      * @see #signWith(Key, SecureDigestAlgorithm)
      * @since 0.10.0
@@ -751,7 +765,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@code keyAlg} when invoked with the given {@code key}, producing a JWE.
      *
      * <p>This behavior can be illustrated by the following pseudocode, a rough example of what happens during
-     *    {@link #compact() compact}ion:</p>
+     * {@link #compact() compact}ion:</p>
      * <blockquote><pre>
      *     SecretKey encryptionKey = keyAlg.getEncryptionKey(key);           // (1)
      *     byte[] jweCiphertext = enc.encrypt(payloadBytes, encryptionKey);  // (2)</pre></blockquote>
