@@ -55,7 +55,7 @@ public final class Jwks {
      *     .build()</pre></blockquote>
      * <p>or</p>
      * <blockquote><pre>
-     * HashAlgorithm hashAlg = Jwts.HASH.{@link StandardHashAlgorithms#SHA256 SHA256};
+     * HashAlgorithm hashAlg = Jwks.HASH.{@link StandardHashAlgorithms#SHA256 SHA256};
      * {@link JwkThumbprint} thumbprint = aJwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(hashAlg);
      * String <a href="https://www.rfc-editor.org/rfc/rfc9278#section-3">rfcMandatoryPrefix</a> = "urn:ietf:params:oauth:jwk-thumbprint:" + hashAlg.getId();
      * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
