@@ -15,10 +15,17 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.jackson.io.JacksonDeserializer
+
+import java.nio.charset.StandardCharsets
 
 class RfcTests {
+
+    static final Deserializer<Map<String, ?>> JSON_DESERIALIZER = new JacksonDeserializer<>()
 
     static String encode(byte[] b) {
         return Encoders.BASE64URL.encode(b)
@@ -30,5 +37,20 @@ class RfcTests {
 
     static final String stripws(String s) {
         return s.replaceAll('[\\s]', '')
+    }
+
+    static final Map<String, ?> jsonToMap(String json) {
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8)
+        return JSON_DESERIALIZER.deserialize(bytes)
+    }
+
+    /**
+     * Returns a random string useful as a test value NOT to be used as a cryptographic key.
+     * @return a random string useful as a test value NOT to be used as a cryptographic key.
+     */
+    private static String srandom() {
+        byte[] random = new byte[16]
+        Randoms.secureRandom().nextBytes(random)
+        return Encoders.BASE64URL.encode(random)
     }
 }

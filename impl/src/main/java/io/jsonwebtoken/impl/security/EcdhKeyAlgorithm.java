@@ -91,11 +91,16 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         this.WRAP_ALG = Assert.notNull(wrapAlg, "Wrap algorithm cannot be null.");
     }
 
-    //visible for testing
+    //visible for testing, for non-Edwards elliptic curves
     protected KeyPair generateKeyPair(final Request<?> request, final ECParameterSpec spec) {
         Assert.notNull(spec, "request key params cannot be null.");
         JcaTemplate template = new JcaTemplate(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, getProvider(request), ensureSecureRandom(request));
         return template.generateKeyPair(spec);
+    }
+
+    //visible for testing, for Edwards elliptic curves
+    protected KeyPair generateKeyPair(SecureRandom random, EdwardsCurve curve, Provider provider) {
+        return curve.keyPairBuilder().setProvider(provider).setRandom(random).build();
     }
 
     protected byte[] generateZ(final KeyRequest<?> request, final PublicKey pub, final PrivateKey priv) {
@@ -205,7 +210,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
                 request = new DefaultKeyRequest<>(request.getPayload(), provider, random,
                         request.getHeader(), request.getEncryptionAlgorithm());
             }
-            pair = curve.keyPairBuilder().setProvider(provider).setRandom(random).build();
+            pair = generateKeyPair(random, curve, provider);
             jwkBuilder.setProvider(provider);
         }
 
