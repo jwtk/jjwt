@@ -48,7 +48,7 @@ class RfcTests {
      * Returns a random string useful as a test value NOT to be used as a cryptographic key.
      * @return a random string useful as a test value NOT to be used as a cryptographic key.
      */
-    private static String srandom() {
+    static String srandom() {
         byte[] random = new byte[16]
         Randoms.secureRandom().nextBytes(random)
         return Encoders.BASE64URL.encode(random)
