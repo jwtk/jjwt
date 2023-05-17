@@ -10,6 +10,7 @@ and Android.
 JJWT is a pure Java implementation based exclusively on the [JWT](https://tools.ietf.org/html/rfc7519), 
 [JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), 
 [JWA](https://tools.ietf.org/html/rfc7518), [JWK](https://tools.ietf.org/html/rfc7517), 
+[Octet JWK](https://www.rfc-editor.org/rfc/rfc8037),
 [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html), and 
 [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) RFC specifications and 
 open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
