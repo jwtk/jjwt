@@ -3037,6 +3037,7 @@ Jwts.parserBuilder()
 * [JWS Signed with HMAC](#example-jws-hs)
 * [JWS Signed with RSA](#example-jws-rsa)
 * [JWS Signed with ECDSA](#example-jws-ecdsa)
+* [JWS Signed with EdDSA](#example-jws-eddsa)
 * [JWE Encrypted Directly with a SecretKey](#example-jwe-dir)
 * [JWE Encrypted with RSA](#example-jwe-rsa)
 * [JWE Encrypted with AES Key Wrap](#example-jwe-aeskw)
@@ -3047,6 +3048,8 @@ Jwts.parserBuilder()
 * [RSA Private JWK](#example-jwk-rsapriv)
 * [Elliptic Curve Public JWK](#example-jwk-ecpub)
 * [Elliptic Curve Private JWK](#example-jwk-ecpriv)
+* [Edwards Elliptic Curve Public JWK](#example-jwk-edpub)
+* [Edwards Elliptic Curve Private JWK](#example-jwk-edpriv)
 
 <a name="example-jws-hs"></a>
 ### JWT Signed with HMAC
@@ -3476,6 +3479,56 @@ String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
 Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
 
 assert parsed instanceof EcPrivateJwk;
+assert privJwk.equals(parsed);
+```
+
+<a name="example-jwk-edpub"></a>
+### Edwards Elliptic Curve Public JWK
+
+Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, X448) Public JWK
+(the JWT [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037) specification calls these `Octet` keys, hence the 
+`OctetPublicJwk` interface names):
+
+```java
+PublicKey key = Jwts.SIG.Ed25519.keyPairBuilder().build().getPublic();
+OctetPublicJwk<PublicKey> jwk = builder().forOctetKey(key).setIdFromThumbprint().build();
+
+assert jwk.getId().equals(jwk.thumbprint().toString());
+assert key.equals(jwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof OctetPublicJwk;
+assert jwk.equals(parsed);
+```
+
+<a name="example-jwk-edpriv"></a>
+### Edwards Elliptic Curve Private JWK
+
+Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, X448) Private JWK
+(the JWT [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037) specification calls these `Octet` keys, hence the
+`OctetPrivateJwk` and `OctetPublicJwk` interface names):
+
+```java
+KeyPair pair = Jwts.SIG.Ed448.keyPairBuilder().build();
+PublicKey pubKey = pair.getPublic();
+PrivateKey privKey = pair.getPrivate();
+
+OctetPrivateJwk<PublicKey, PrivateKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
+OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
+
+assert privJwk.getId().equals(privJwk.thumbprint().toString());
+assert pubJwk.getId().equals(pubJwk.thumbprint().toString());
+assert privKey.equals(privJwk.toKey());
+assert pubKey.equals(pubJwk.toKey());
+
+byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
+String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+assert parsed instanceof OctetPrivateJwk;
 assert privJwk.equals(parsed);
 ```
 

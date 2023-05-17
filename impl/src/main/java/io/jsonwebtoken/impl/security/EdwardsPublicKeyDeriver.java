@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.KeyPair;
@@ -51,8 +52,8 @@ final class EdwardsPublicKeyDeriver implements Function<PrivateKey, PublicKey> {
         // instead of a random one, and the corresponding public key will be computed for us automatically.
         SecureRandom random = new ConstantRandom(pkBytes);
         KeyPair pair = curve.keyPairBuilder().setRandom(random).build();
-
-        return pair.getPublic();
+        Assert.stateNotNull(pair, "Edwards curve generated keypair cannot be null.");
+        return Assert.stateNotNull(pair.getPublic(), "Edwards curve KeyPair must have a PublicKey");
     }
 
     private static final class ConstantRandom extends SecureRandom {

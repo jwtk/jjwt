@@ -43,10 +43,13 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPri
         EdwardsCurve crv = EdwardsCurve.forKey(key);
 
         PublicKey pub = ctx.getPublicKey();
-        Assert.notNull(pub, "Private OKP instances require the PublicKey to be provided.");
-        if (!crv.equals(EdwardsCurve.forKey(pub))) {
-            String msg = "Specified Edwards Curve PublicKey does not match the PrivateKey curve.";
-            throw new InvalidKeyException(msg);
+        if (pub != null) {
+            if (!crv.equals(EdwardsCurve.forKey(pub))) {
+                String msg = "Specified Edwards Curve PublicKey does not match the specified PrivateKey's curve.";
+                throw new InvalidKeyException(msg);
+            }
+        } else { // not supplied - try to generate it:
+            pub = EdwardsCurve.derivePublic(key);
         }
 
         // If a JWK fingerprint has been requested to be the JWK id, ensure we copy over the one computed for the

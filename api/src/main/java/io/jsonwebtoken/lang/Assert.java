@@ -498,10 +498,11 @@ public final class Assert {
      * @throws IllegalStateException with the specified {@code msg} if {@code value} is null.
      * @since JJWT_RELEASE_VERSION
      */
-    public static void stateNotNull(Object value, String msg) throws IllegalStateException {
+    public static <T> T stateNotNull(T value, String msg) throws IllegalStateException {
         if (value == null) {
             throw new IllegalStateException(msg);
         }
+        return value;
     }
 
 }

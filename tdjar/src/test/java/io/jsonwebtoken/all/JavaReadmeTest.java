@@ -25,6 +25,8 @@ import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.MacAlgorithm;
+import io.jsonwebtoken.security.OctetPrivateJwk;
+import io.jsonwebtoken.security.OctetPublicJwk;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.RsaPrivateJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
@@ -344,6 +346,46 @@ public class JavaReadmeTest {
         Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
 
         assert parsed instanceof EcPrivateJwk;
+        assert privJwk.equals(parsed);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleEdEcPublicJwk() {
+        PublicKey key = Jwts.SIG.Ed25519.keyPairBuilder().build().getPublic();
+        OctetPublicJwk<PublicKey> jwk = builder().forOctetKey(key).setIdFromThumbprint().build();
+
+        assert jwk.getId().equals(jwk.thumbprint().toString());
+        assert key.equals(jwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof OctetPublicJwk;
+        assert jwk.equals(parsed);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void testExampleEdEcPrivateJwk() {
+        KeyPair pair = Jwts.SIG.Ed448.keyPairBuilder().build();
+        PublicKey pubKey = pair.getPublic();
+        PrivateKey privKey = pair.getPrivate();
+
+        OctetPrivateJwk<PublicKey, PrivateKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
+        OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
+
+        assert privJwk.getId().equals(privJwk.thumbprint().toString());
+        assert pubJwk.getId().equals(pubJwk.thumbprint().toString());
+        assert privKey.equals(privJwk.toKey());
+        assert pubKey.equals(pubJwk.toKey());
+
+        byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
+        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+
+        assert parsed instanceof OctetPrivateJwk;
         assert privJwk.equals(parsed);
     }
 

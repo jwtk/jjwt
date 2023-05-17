@@ -220,7 +220,7 @@ class OctetJwksTest {
             Jwks.builder().forOctetKey(priv).setPublicKey(mismatchedPub).build()
             fail()
         } catch (InvalidKeyException ike) {
-            String msg = "Specified Edwards Curve PublicKey does not match the PrivateKey curve."
+            String msg = "Specified Edwards Curve PublicKey does not match the specified PrivateKey's curve."
             assertEquals msg, ike.getMessage()
         }
     }
