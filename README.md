@@ -142,6 +142,8 @@ enforcement.
   * [RSA Private JWK](#example-jwk-rsapriv)
   * [Elliptic Curve Public JWK](#example-jwk-ecpub)
   * [Elliptic Curve Private JWK](#example-jwk-ecpriv)
+  * [Edwards Elliptic Curve Public JWK](#example-jwk-edpub)
+  * [Edwards Elliptic Curve Private JWK](#example-jwk-edpriv)
 
 <a name="features"></a>
 ## Features
