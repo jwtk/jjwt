@@ -44,7 +44,8 @@ public interface Password extends SecretKey, Destroyable {
      * <p><b>Usage</b></p>
      *
      * <p>Because a new clone is returned from this method each time it is invoked, it is expected that callers will
-     * clear the resulting clone from memory as soon as possible to reduce password exposure.  For example:
+     * clear the resulting clone from memory as soon as possible to reduce probability of password exposure.  For
+     * example:</p>
      *
      * <pre><code>
      * char[] clonedPassword = aPassword.toCharArray();
