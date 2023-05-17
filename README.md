@@ -2360,11 +2360,19 @@ RsaPrivateJwk rsaPrivJwk = Jwks.builder().forRsaKeyPair(rsaKeyPair).build();
 
 KeyPair ecKeyPair = getECKeyPair();
 EcPrivateJwk ecPrivJwk = Jwks.builder().forEcKeyPair(ecKeyPair).build();
+
+KeyPair edEcKeyPair = getEdECKeyPair();
+OctetPrivateJwk edEcPrivJwk = Jwks.builder().forOctetKeyPair(edEcKeyPair).build();
 ```
 
-An exception will thrown when calling `forRsaKeyPair` if the specified `KeyPair` instance does not contain
-`RSAPublicKey` and `RSAPrivateKey` instances.  Similarly, an exception will be thrown when calling `forEcKeyPair` if
-the `KeyPair` instance does not contain `ECPublicKey` and `ECPrivateKey` instances.
+Note that:
+* An exception will thrown when calling `forRsaKeyPair` if the specified `KeyPair` instance does not contain
+`RSAPublicKey` and `RSAPrivateKey` instances.  
+* Similarly, an exception will be thrown when calling `forEcKeyPair` if
+the `KeyPair` instance does not contain `ECPublicKey` and `ECPrivateKey` instances.  
+* Finally, an exception will be 
+thrown when calling `forOctetKeyPair` if the `KeyPair` instance does not contain X25519, X448, Ed25519, or Ed448 keys
+(introduced in JDK 11 and 15 or when using BouncyCastle).
 
 <a name="jwk-private-topub"></a>
 #### Private JWK Public Conversion
@@ -2373,12 +2381,13 @@ Because private JWKs contain public key material, you can always obtain the priv
 Java `PublicKey` or `KeyPair`.  For example:
 
 ```java
-RsaPrivateJwk privateJwk = Jwks.builder().forKey(rsaPrivateKey).build(); // or ecPrivateKey
+RsaPrivateJwk privateJwk = Jwks.builder().forKey(rsaPrivateKey).build(); // or ecPrivateKey or edEcPrivateKey
 
 // Get the matching public JWK and/or PublicKey:
-RsaPublicJwk pubJwk = privateJwk.toPublicJwk(); // JWK instance
-RSAPublicKey pubKey = pubJwk.toKey();           // Java PublicKey instance
-KeyPair pair = privateJwk.toKeyPair();          // io.jsonwebtoken.security.KeyPair
+RsaPublicJwk pubJwk = privateJwk.toPublicJwk();       // JWK instance
+RSAPublicKey pubKey = pubJwk.toKey();                 // Java PublicKey instance
+KeyPair pair = privateJwk.toKeyPair();                // io.jsonwebtoken.security.KeyPair retains key types
+java.security.KeyPair jdkPair = pair.toJavaKeyPair(); // does not retain pub/private key types
 ```
 
 <a name="jwk-thumbprint"></a>

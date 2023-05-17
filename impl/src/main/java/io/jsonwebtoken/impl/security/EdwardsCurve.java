@@ -28,6 +28,7 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.KeyLengthSupplier;
+import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.Key;
@@ -100,6 +101,8 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     final byte[] DER_OID;
 
     private final int keyBitLength;
+
+    private final int KEY_PAIR_GENERATOR_BIT_LENGTH;
 
     private final int encodedKeyByteLength;
 
@@ -213,6 +216,29 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         Function<byte[], KeySpec> pkcs8KeySpecFn = new Pkcs8KeySpecFactory(this.PRIVATE_KEY_DER_PREFIX);
         // prefer the JDK KeySpec classes first, and fall back to PKCS8 encoding if unavailable:
         this.PRIVATE_KEY_SPEC_FACTORY = Functions.firstResult(paramKeySpecFn, pkcs8KeySpecFn);
+
+        // The Sun CE KeyPairGenerator implementation that we'll use to derive PublicKeys with is problematic here:
+        //
+        // [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748) is clear that X25519 keys are 32 bytes (256 bits) and
+        // X448 keys are 56 bytes (448 bits); see the test vectors in
+        // [RFC 7748, Section 5.2](https://www.rfc-editor.org/rfc/rfc7748#section-5.2).
+        //
+        // Additionally [RFC 8032, Section 1](https://www.rfc-editor.org/rfc/rfc8032#section-1) is clear that
+        // Ed25519 keys are 32 bytes (256 bits) and Ed448 keys are 57 bytes (456 bits).
+        //
+        // HOWEVER:
+        //
+        // The JDK KeyPairGenerator#initialize(keysize, random) method that we use below ONLY accepts
+        // values of '255' and '448', which clearly are `keysize`s that do not match the RFC mandatory lengths.
+        // The Sun CE implementation:
+        //     https://github.com/AdoptOpenJDK/openjdk-jdk15/blob/4a588d89f01a650d90432cc14697a5a2ae2c97d3/src/jdk.crypto.ec/share/classes/sun/security/ec/ed/EdDSAParameters.java#L252-L297
+        //
+        // (see the two `int bits = 255` and `int bits = 448` lines).
+        //
+        // It is strange that the JDK implementation does not match the RFC-specified key length values.
+        // As such, we 'normalize' our curve's (RFC-correct) key bit length to values that the Sun CE
+        // (and also BouncyCastle) will recognize:
+        this.KEY_PAIR_GENERATOR_BIT_LENGTH = this.keyBitLength >= 448 ? 448 : 255;
     }
 
     // visible for testing
@@ -330,12 +356,29 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         return this.signatureCurve;
     }
 
+    @Override
+    public KeyPairBuilder keyPairBuilder() {
+        return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH).setProvider(getProvider());
+    }
+
     public static boolean isEdwards(Key key) {
         if (key == null) {
             return false;
         }
         String alg = Strings.clean(key.getAlgorithm());
         return "EdDSA".equals(alg) || "XDH".equals(alg) || findByKey(key) != null;
+    }
+
+    /**
+     * Computes the PublicKey associated with the specified Edwards-curve PrivateKey.
+     *
+     * @param pk the Edwards-curve {@code PrivateKey} to inspect.
+     * @return the PublicKey associated with the specified Edwards-curve PrivateKey.
+     * @throws KeyException if the PrivateKey is not an Edwards-curve key or unable to access the PrivateKey's
+     *                      material.
+     */
+    public static PublicKey derivePublic(PrivateKey pk) throws KeyException {
+        return EdwardsPublicKeyDeriver.INSTANCE.apply(pk);
     }
 
     public static EdwardsCurve findById(String id) {
