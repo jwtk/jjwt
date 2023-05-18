@@ -121,7 +121,7 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
     }
 
     @Override
-    public <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKey(B key) {
+    public <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> forOctetKey(A key) {
         return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder<>(newContext(key));
     }
 
@@ -157,7 +157,7 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
 
     @SuppressWarnings("unchecked") // ok because of the EdwardsCurve.assertEdwards calls
     @Override
-    public <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair pair) {
+    public <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair pair) {
         PublicKey pub = KeyPairs.getKey(pair, PublicKey.class);
         PrivateKey priv = KeyPairs.getKey(pair, PrivateKey.class);
         EdwardsCurve.assertEdwards(pub);

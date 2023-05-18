@@ -56,6 +56,7 @@ import java.security.interfaces.ECPublicKey;
  * jwk.get(&quot;x&quot;);
  * // ... etc ...</pre></blockquote>
  *
+ * @param <K> The type of Edwards-curve {@link PublicKey} represented by this JWK (e.g. XECPublicKey, EdECPublicKey, etc).
  * @since JJWT_RELEASE_VERSION
  */
 public interface OctetPublicJwk<K extends PublicKey> extends PublicJwk<K> {

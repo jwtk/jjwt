@@ -373,7 +373,7 @@ public class JavaReadmeTest {
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 
-        OctetPrivateJwk<PublicKey, PrivateKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
+        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
         OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());

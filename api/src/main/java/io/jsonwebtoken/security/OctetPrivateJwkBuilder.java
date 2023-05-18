@@ -21,10 +21,10 @@ import java.security.PublicKey;
 /**
  * A {@link PrivateJwkBuilder} that creates {@link OctetPrivateJwk} instances.
  *
- * @param <A> The type of {@link PublicKey} available from the constructed {@link OctetPrivateJwk}'s associated {@link PrivateJwk#toPublicJwk() public JWK} properties.
- * @param <B> The type of {@link PrivateKey} represented by the constructed {@link OctetPrivateJwk} instance.
+ * @param <K> The type of {@link PrivateKey} represented by the constructed {@link OctetPrivateJwk} instance.
+ * @param <L> The type of {@link PublicKey} available from the constructed {@link OctetPrivateJwk}'s associated {@link PrivateJwk#toPublicJwk() public JWK} properties.
  * @since JJWT_RELEASE_VERSION
  */
-public interface OctetPrivateJwkBuilder<A extends PublicKey, B extends PrivateKey> extends
-        PrivateJwkBuilder<B, A, OctetPublicJwk<A>, OctetPrivateJwk<A, B>, OctetPrivateJwkBuilder<A, B>> {
+public interface OctetPrivateJwkBuilder<K extends PrivateKey, L extends PublicKey> extends
+        PrivateJwkBuilder<K, L, OctetPublicJwk<L>, OctetPrivateJwk<K, L>, OctetPrivateJwkBuilder<K, L>> {
 }

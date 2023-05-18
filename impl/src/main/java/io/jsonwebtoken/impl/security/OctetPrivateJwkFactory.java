@@ -26,7 +26,7 @@ import io.jsonwebtoken.security.OctetPublicJwk;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPrivateJwk<PublicKey, PrivateKey>> {
+public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPrivateJwk<PrivateKey, PublicKey>> {
 
     public OctetPrivateJwkFactory() {
         super(PrivateKey.class, DefaultOctetPrivateJwk.FIELDS);
@@ -38,7 +38,7 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPri
     }
 
     @Override
-    protected OctetPrivateJwk<PublicKey, PrivateKey> createJwkFromKey(JwkContext<PrivateKey> ctx) {
+    protected OctetPrivateJwk<PrivateKey, PublicKey> createJwkFromKey(JwkContext<PrivateKey> ctx) {
         PrivateKey key = Assert.notNull(ctx.getKey(), "PrivateKey cannot be null.");
         EdwardsCurve crv = EdwardsCurve.forKey(key);
 
@@ -72,7 +72,7 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPri
     }
 
     @Override
-    protected OctetPrivateJwk<PublicKey, PrivateKey> createJwkFromValues(JwkContext<PrivateKey> ctx) {
+    protected OctetPrivateJwk<PrivateKey, PublicKey> createJwkFromValues(JwkContext<PrivateKey> ctx) {
         FieldReadable reader = new RequiredFieldReader(ctx);
         EdwardsCurve curve = getCurve(reader);
         //TODO: assert that the curve contains the specified key

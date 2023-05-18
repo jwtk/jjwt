@@ -59,7 +59,10 @@ import java.security.interfaces.ECPrivateKey;
  * jwk.get(&quot;d&quot;);
  * // ... etc ...</pre></blockquote>
  *
+ * @param <K> The type of Edwards-curve {@link PrivateKey} represented by this JWK (e.g. XECPrivateKey, EdECPrivateKey, etc).
+ * @param <L> The type of Edwards-curve {@link PublicKey} represented by the JWK's corresponding
+ *            {@link #toPublicJwk() public JWK}, for example XECPublicKey, EdECPublicKey, etc.
  * @since JJWT_RELEASE_VERSION
  */
-public interface OctetPrivateJwk<A extends PublicKey, B extends PrivateKey> extends PrivateJwk<B, A, OctetPublicJwk<A>> {
+public interface OctetPrivateJwk<K extends PrivateKey, L extends PublicKey> extends PrivateJwk<K, L, OctetPublicJwk<L>> {
 }

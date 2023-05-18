@@ -25,7 +25,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Set;
 
-public class DefaultOctetPrivateJwk<T extends PrivateKey, P extends PublicKey> extends AbstractPrivateJwk<T, P, OctetPublicJwk<P>> implements OctetPrivateJwk<P, T> {
+public class DefaultOctetPrivateJwk<T extends PrivateKey, P extends PublicKey> extends AbstractPrivateJwk<T, P, OctetPublicJwk<P>> implements OctetPrivateJwk<T, P> {
 
     static final Field<byte[]> D = Fields.bytes("d", "The private key").setSecret(true).build();
 

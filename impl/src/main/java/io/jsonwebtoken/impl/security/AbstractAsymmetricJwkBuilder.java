@@ -197,8 +197,8 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     static class DefaultOctetPublicJwkBuilder<A extends PublicKey, B extends PrivateKey>
-            extends DefaultPublicJwkBuilder<A, B, OctetPublicJwk<A>, OctetPrivateJwk<A, B>,
-            OctetPrivateJwkBuilder<A, B>, OctetPublicJwkBuilder<A, B>>
+            extends DefaultPublicJwkBuilder<A, B, OctetPublicJwk<A>, OctetPrivateJwk<B, A>,
+            OctetPrivateJwkBuilder<B, A>, OctetPublicJwkBuilder<A, B>>
             implements OctetPublicJwkBuilder<A, B> {
         DefaultOctetPublicJwkBuilder(JwkContext<A> ctx) {
             super(ctx);
@@ -206,7 +206,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         }
 
         @Override
-        protected OctetPrivateJwkBuilder<A, B> newPrivateBuilder(JwkContext<B> ctx) {
+        protected OctetPrivateJwkBuilder<B, A> newPrivateBuilder(JwkContext<B> ctx) {
             return new DefaultOctetPrivateJwkBuilder<>(this, ctx);
         }
     }
@@ -235,15 +235,15 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         }
     }
 
-    static class DefaultOctetPrivateJwkBuilder<A extends PublicKey, B extends PrivateKey>
-            extends DefaultPrivateJwkBuilder<B, A, OctetPublicJwk<A>, OctetPrivateJwk<A, B>,
+    static class DefaultOctetPrivateJwkBuilder<A extends PrivateKey, B extends PublicKey>
+            extends DefaultPrivateJwkBuilder<A, B, OctetPublicJwk<B>, OctetPrivateJwk<A, B>,
             OctetPrivateJwkBuilder<A, B>> implements OctetPrivateJwkBuilder<A, B> {
-        DefaultOctetPrivateJwkBuilder(JwkContext<B> src) {
+        DefaultOctetPrivateJwkBuilder(JwkContext<A> src) {
             super(src);
             EdwardsCurve.assertEdwards(src.getKey());
         }
 
-        DefaultOctetPrivateJwkBuilder(DefaultOctetPublicJwkBuilder<A, B> b, JwkContext<B> ctx) {
+        DefaultOctetPrivateJwkBuilder(DefaultOctetPublicJwkBuilder<B, A> b, JwkContext<A> ctx) {
             super(b, ctx);
             EdwardsCurve.assertEdwards(ctx.getKey());
             EdwardsCurve.assertEdwards(ctx.getPublicKey());

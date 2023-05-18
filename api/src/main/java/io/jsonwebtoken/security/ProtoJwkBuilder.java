@@ -216,16 +216,16 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *     ... etc ...
      *     .build();</pre></blockquote>
      *
-     * @param <A> the type of Edwards-curve {@link PublicKey} paired with the {@code key} argument to produce the
+     * @param <A> the type of the Edwards-curve {@link PrivateKey} argument.
+     * @param <B> the type of Edwards-curve {@link PublicKey} paired with the {@code key} argument to produce the
      *            {@link OctetPrivateJwk}.
-     * @param <B> the type of the Edwards-curve {@link PrivateKey} argument.
      * @param key the Edwards-curve {@link PrivateKey} to represent as an {@link OctetPrivateJwk}.
      * @return the builder coerced as an {@link OctetPrivateJwkBuilder} for continued method chaining.
      * @throws UnsupportedKeyException if the specified key is not a supported Edwards-curve key.
      * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPrivateKey.html">java.security.interfaces.XECPrivateKey</a>
      * @see <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPrivateKey.html">java.security.interfaces.EdECPrivateKey</a>
      */
-    <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKey(B key);
+    <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> forOctetKey(A key);
 
     /**
      * Ensures the builder will create an {@link OctetPrivateJwk} for the specified Java Edwards-curve
@@ -241,7 +241,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @throws IllegalArgumentException if the {@code keyPair} does not contain Edwards-curve public and private key
      *                                  instances.
      */
-    <A extends PublicKey, B extends PrivateKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair keyPair);
+    <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair keyPair);
 
     /**
      * Ensures the builder will create an {@link OctetPublicJwk} for the specified Java {@link X509Certificate} chain.
