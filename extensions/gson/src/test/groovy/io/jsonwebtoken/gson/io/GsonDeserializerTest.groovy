@@ -21,6 +21,9 @@ import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
+import java.text.DecimalFormat
+import java.text.NumberFormat
+
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 import static org.hamcrest.CoreMatchers.instanceOf

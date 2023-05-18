@@ -24,12 +24,17 @@ import io.jsonwebtoken.CompressionException
 class YagCompressionCodec implements CompressionCodec {
 
     @Override
-    String getAlgorithmName() {
-        return new GzipCompressionCodec().getAlgorithmName();
+    String getId() {
+        return GzipCompressionCodec.GZIP
     }
 
     @Override
-    byte[] compress(byte[] payload) throws CompressionException {
+    String getAlgorithmName() {
+        return GzipCompressionCodec.GZIP
+    }
+
+    @Override
+    byte[] compress(byte[] content) throws CompressionException {
         return new byte[0]
     }
 

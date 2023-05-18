@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.*
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
@@ -26,16 +27,18 @@ import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.SecretKey
+import java.nio.charset.StandardCharsets
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParser
 // implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class
 // just fills in any remaining test gaps.
 
 class DefaultJwtParserTest {
+
+    // all whitespace chars as defined by Character.isWhitespace:
+    static final String WHITESPACE_STR = ' \u0020 \u2028 \u2029 \t \n \u000B \f \r \u001C \u001D \u001E \u001F '
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -45,7 +48,7 @@ class DefaultJwtParserTest {
     }
 
     @Test
-    void testBase64UrlEncodeWithCustomDecoder() {
+    void testBase64UrlDecodeWithCustomDecoder() {
         def decoder = new Decoder() {
             @Override
             Object decode(Object o) throws DecodingException {
@@ -54,6 +57,11 @@ class DefaultJwtParserTest {
         }
         def b = new DefaultJwtParser().base64UrlDecodeWith(decoder)
         assertSame decoder, b.base64UrlDecoder
+    }
+
+    @Test(expected = MalformedJwtException)
+    void testBase64UrlDecodeWithInvalidInput() {
+        new DefaultJwtParser().base64UrlDecode('20:SLDKJF;3993;----', 'test')
     }
 
     @Test(expected = IllegalArgumentException)
@@ -77,7 +85,7 @@ class DefaultJwtParserTest {
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
 
-        assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getBody().get('foo')
+        assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test(expected = MalformedJwtException)
@@ -149,5 +157,56 @@ class DefaultJwtParserTest {
         } catch (IllegalArgumentException expected) {
             assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
         }
+    }
+
+    @Test
+    void testIsLikelyJsonWithEmptyString() {
+        assertFalse DefaultJwtParser.isLikelyJson(''.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithEmptyBytes() {
+        assertFalse DefaultJwtParser.isLikelyJson(Bytes.EMPTY)
+    }
+
+    @Test
+    void testIsLikelyJsonWithWhitespaceString() {
+        assertFalse DefaultJwtParser.isLikelyJson(WHITESPACE_STR.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithOnlyOpeningBracket() {
+        assertFalse DefaultJwtParser.isLikelyJson(' {... '.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithOnlyClosingBracket() {
+        assertFalse DefaultJwtParser.isLikelyJson(' } '.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonMinimalJsonObject() {
+        assertTrue DefaultJwtParser.isLikelyJson("{}".getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithLeadingAndTrailingWhitespace() {
+        // all whitespace chars as defined by Character.isWhitespace:
+        String claimsJson = WHITESPACE_STR + '{"sub":"joe"}' + WHITESPACE_STR
+        assertTrue DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithLeadingTextBeforeJsonObject() {
+        // all whitespace chars as defined by Character.isWhitespace:
+        String claimsJson = ' x {"sub":"joe"}'
+        assertFalse DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithTrailingTextAfterJsonObject() {
+        // all whitespace chars as defined by Character.isWhitespace:
+        String claimsJson = '{"sub":"joe"} x'
+        assertFalse DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
     }
 }

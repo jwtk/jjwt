@@ -66,14 +66,6 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <configuration>
-                    <newVersion>
-                        <file>
-                            <!-- compare the previous version with the new 'deprecated' package -->
-                            <path>${project.build.directory}/${project.artifactId}-${project.version}-deprecated.${project.packaging}</path>
-                        </file>
-                    </newVersion>
-                </configuration>
             </plugin>
         </plugins>
     </build>

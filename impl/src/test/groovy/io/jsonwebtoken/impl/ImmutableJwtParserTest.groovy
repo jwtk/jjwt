@@ -15,23 +15,16 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.Clock
-import io.jsonwebtoken.CompressionCodecResolver
-import io.jsonwebtoken.JwtHandler
-import io.jsonwebtoken.JwtParser
-import io.jsonwebtoken.SigningKeyResolver
+import io.jsonwebtoken.*
 import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.Deserializer
 import org.junit.Test
 
 import java.security.Key
 
-import static org.easymock.EasyMock.expect
-import static org.easymock.EasyMock.mock
-import static org.easymock.EasyMock.replay
-import static org.easymock.EasyMock.verify
-import static org.hamcrest.MatcherAssert.assertThat
+import static org.easymock.EasyMock.*
 import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.MatcherAssert.assertThat
 
 /**
  * TODO: These mutable methods will be removed pre 1.0, and ImmutableJwtParser will be replaced with the default

@@ -2,8 +2,215 @@
 
 ### JJWT_RELEASE_VERSION
 
-* Adds a simplified "starter" jar that automatically pulls in `jjwt-api`, `jjwt-impl` and `jjwt-jackson`, useful when 
-  upgrading from the older `io.jsonwebtoken:jjwt:*` to the project's current flexible module structure.
+This is a big release! JJWT now fully supports Encrypted JSON Web Tokens (JWE) and JSON Web Keys (JWK)!  See the 
+sections below enumerating all new features as well as important notes on breaking changes or backwards-incompatible 
+changes made in preparation for the upcoming 1.0 release.
+
+#### Simplified Starter Jar
+
+Those upgrading to new modular JJWT versions from old single-jar versions will transparently obtain everything 
+they need in their Maven, Gradle or Android projects.
+
+JJWT's early releases had one and only one .jar: `jjwt.jar`.  Later releases moved to a modular design with 'api' and
+'impl' jars including 'plugin' jars for Jackson, GSON, org.json, etc.  Some users upgrading from the earlier single 
+jar to JJWT's later versions have been frustrated by being forced to learn how to configure the more modular .jars.
+
+This release re-introduces the `jjwt.jar` artifact again, but this time it is simply an empty .jar with Maven 
+metadata that will automatically transitively download the following into a project, retaining the old single-jar 
+behavior:
+* `jjwt-api.jar`
+* `jjwt-impl.jar`
+* `jjwt-jackson.jar`
+
+Naturally, developers are still encouraged to configure the modular .jars as described in JJWT's documentation for 
+greater control and to enable their preferred JSON parser, but this stop-gap should help those unaware when upgrading.
+
+#### JSON Web Encryption (JWE) Support!
+
+This has been a long-awaited feature for JJWT, years in the making, and it is quite extensive - so many encryption 
+algorithms and key management algorithms are defined by the JWA specification, and new API concepts had to be 
+introduced for all of them, as well as extensive testing with RFC-defined test vectors.  The wait is over!  
+All JWA-defined encryption algorithms and key management algorithms are fully implemented and supported and 
+available immediately.  For example:
+
+```java
+AeadAlgorithm enc = Jwts.ENC.A256GCM;
+SecretKey key = enc.keyBuilder().build();
+String compact = Jwts.builder().setSubject("Joe").encryptWith(key, enc).compact();
+
+Jwe<Claims> jwe = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(compact);
+```
+
+Many other RSA and Elliptic Curve examples are in the full README documentation. 
+
+#### JSON Web Key (JWK) Support!
+
+Representing cryptographic keys - SecretKeys, RSA Public and Private Keys, Elliptic Curve Public and 
+Private keys - as fully encoded JSON objects according to the JWK specification - is now fully implemented and
+supported.  The new `Jwks` utility class exists to create JWK builders and parsers as desired.  For example:
+
+```java
+SecretKey key = Jwts.SIG.HS256.keyBuilder().build();
+SecretJwk jwk = Jwks.builder().forKey(key).build();
+assert key.equals(jwk.toKey());
+
+// or if receiving a JWK string:
+Jwk<?> parsedJwk = Jwks.parser().build().parse(jwkString);
+assert jwk.equals(parsedJwk);
+assert key.equals(parsedJwk.toKey());
+```
+
+Many JJWT users won't need to use JWKs explicitly, but some JWA Key Management Algorithms (and lots of RFC test 
+vectors) utilize JWKs when transmitting JWEs.  As this was required by JWE, it is now implemented in full for 
+JWE use as well as general-purpose JWK support.
+
+#### Better PKCS11 and Hardware Security Module (HSM) support
+
+Previous versions of JJWT enforced that Private Keys implemented the `RSAKey` and `ECKey` interfaces to enforce key 
+length requirements.  With this release, JJWT will still perform those checks when those data types are available, 
+but if not, as is common with keys from PKCS11 and HSM KeyStores, JJWT will still allow those Keys to be used, 
+expecting the underlying Security Provider to enforce any key requirements. This should reduce or eliminate any 
+custom code previously written to extend JJWT to use keys from those KeyStores or Providers.
+
+#### Custom Signature Algorithms
+
+The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of new 
+`io.jsonwebtoken.security.SecureDigestAlgorithm`, `io.jsonwebtoken.security.MacAlgorithm`, and 
+`io.jsonwebtoken.security.SignatureAlgorithm` interfaces to allow custom algorithm implementations.  The new
+`SIG` constant in the `Jwts` helper class is a registry of all standard JWS algorithms as expected, exactly like the 
+old enum.  This change was made because enums are a static concept by design and cannot 
+support custom values: those who wanted to use custom signature algorithms could not do so until now.  The new 
+interface now allows anyone to plug in and support custom algorithms with JJWT as desired.
+
+#### KeyBuilder and KeyPairBuilder
+
+Because the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
+accepted the now-deprecated `io.jsonwebtoken.SignatureAlgorithm` enum, they have also been deprecated in favor of 
+calling new `keyBuilder()` or `keyPairBuilder()` methods on `MacAlgorithm` and `SignatureAlgorithm` instances directly.  
+For example:
+
+```java
+SecretKey key = Jwts.SIG.HS256.keyBuilder().build();
+KeyPair pair = Jwts.SIG.RS256.keyPairBuilder().build();
+```
+
+The builders allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas
+the old enum-based static utility methods did not.
+
+#### Preparation for 1.0
+
+Now that the JWE and JWK specifications are implemented, only a few things remain for JJWT to be considered at 
+version 1.0.  We have been waiting to apply the 1.0 release version number until the entire set of JWT specifications 
+are fully supported and we drop JDK 7 support (to allow users to use JDK 8 APIs).  To that end, we have had to 
+deprecate some concepts, or in some rare cases, completely break backwards compatibility to ensure the transition to 
+1.0 (and JDK 8 APIs) are possible.  Any backwards-incompatible changes are listed in the next section below.
+
+#### Backwards Compatibility Breaking Changes, Warnings and Deprecations
+
+* `io.jsonwebtoken.Jwts`'s `header(Map)`, `jwsHeader()` and `jwsHeader(Map)` methods have been deprecated in favor
+  of the new `header()` builder-based method to support method chaining and dynamic Header type creation.
+
+
+* `io.jsonwebtoken.Jwt`'s `getBody()` method has been deprecated in favor of a new `getPayload()` method to
+  reflect correct JWT specification nomenclature/taxonomy.
+
+
+* `io.jsonwebtoken.CompressionCodec` now inherits a new `io.jsonwebtoken.Identifiable` interface and its `getId()`
+  method is preferred over the now-deprecated `getAlgorithmName()` method.  This is to guarantee API congruence with
+  all other JWT-identifiable algorithm names that can be set as a header value.
+
+
+* `io.jsonwebtoken.Header` has been changed to accept a type-parameter for sub-type method return values, i.e.
+  `io.jsonwebtoken.Header<T extends Header>` and a new `io.jsonwebtoken.UnprotectedHeader` interface has been
+  introduced to represent the concrete type of header without integrity protection.  This new `UnprotectedHeader` is
+  to be used where the previous generic `Header` (non-`JweHeader` and non-`JwsHeader`) interface was used.
+
+
+* Accordingly, the `Jwts.header()` and `Jwts.header(Map<String,?>)` now return instances of `UnprotectedHeader` instead
+  of just `Header`.
+
+
+#### Breaking Changes
+
+* **JWTs that do not contain JSON Claims now have a payload type of `byte[]` instead of `String`** (that is, 
+  `Jwt<byte[]>` instead of `Jwt<String>`).  This is because JWTs, especially when used with the 
+  `cty` (Content Type) header, are capable of handling _any_ type of payload, not just Strings. The previous JJWT 
+  releases didn't account for this, and now the API accurately reflects the JWT RFC specification payload 
+  capabilities. Additionally, the name of `plaintext` has been changed to `content` in method names and JavaDoc to 
+  reflect this taxonomy. This change has impacted the following JJWT APIs:
+
+  * The `JwtBuilder`'s `setPayload(String)` method has been deprecated in favor of two new methods:
+  
+    * `setContent(byte[])`, and 
+    * `setContent(byte[], String contentType)`
+    
+    These new methods allow any kind of content
+    within a JWT, not just Strings. The existing `setPayload(String)` method implementation has been changed to 
+    delegate to this new `setContent(byte[])` method with the argument's UTF-8 bytes, for example 
+    `setContent(payloadString.getBytes(StandardCharsets.UTF_8))`.
+
+  * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
+    `Jws<String> parsePlaintextJws(String plaintextJws)` methods have been changed to
+    `Jwt<UnprotectedHeader, byte[]> parseContentJwt(String plaintextJwt)` and
+    `Jws<byte[]> parseContentJws(String plaintextJws)` respectively.
+
+  * `JwtHandler`'s `onPlaintextJwt(String)` and `onPlaintextJws(String)` methods have been changed to
+    `onContentJwt(byte[])` and `onContentJws(byte[])` respectively.
+
+  * `io.jsonwebtoken.JwtHandlerAdapter` has been changed to reflect the above-mentioned name and `String`-to-`byte[]` 
+    argument changes, as well adding the `abstract` modifier.  This class was never intended
+    to be instantiated directly, and is provided for subclassing only.  The missing modifier has been added to ensure
+    the class is used as it had always been intended.
+
+  * `io.jsonwebtoken.SigningKeyResolver`'s `resolveSigningKey(JwsHeader, String)` method has been changed to
+    `resolveSigningKey(JwsHeader, byte[])`.
+
+* `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been renamed to `legacyParser()` to
+  allow an updated `parser()` method to return a `JwtParserBuilder` instead of a direct `JwtParser` instance.  
+  This `legacyParser()` method will be removed entirely for the 1.0 release - please change your code to use the 
+  updated `parser()` method that returns a builder as soon as possible.
+
+* `io.jsonwebtoken.Jwts`'s `header()` method has been renamed to `unprotectedHeader()` to allow a newer/updated 
+  `header()` method to return a `DynamicHeaderBuilder` instead of a direct `Header` instance.  This new method / 
+  return value is the recommended approach for building headers, as it will dynamically create an `UnprotectedHeader`, 
+  `JwsHeader` or `JweHeader` automatically based on builder state.
+
+* `io.jsonwebtoken.Jwts`'s `headerBuilder()` method has been renamed to `header()` and returns a 
+  `DynamicHeaderBuilder` instead of a direct `Header` instance.  This builder method is the recommended approach 
+  for building headers in the future, as it will dynamically create an `UnprotectedHeader`, `JwsHeader` or `JweHeader` 
+  automatically based on builder state.
+
+* `io.jsonwebtoken.Jwts`'s `header()` method now returns a `DynamicHeaderBuilder` instead of a 
+  direct `Header` instance.  This new method / return value is the recommended approach for building headers
+  in the future, as it will dynamically create an `UnprotectedHeader`, `JwsHeader` or `JweHeader` automatically
+  based on builder state.
+
+* Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
+  was thrown. If there was a problem when serializing the JWT claims, an `IllegalArgumentException` was
+  thrown.  This has been changed up to ensure consistency: any serialization error with either headers or claims
+  will now throw a `io.jsonwebtoken.io.SerializationException`.
+
+
+* Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
+  [RFC 7518, Section 3.6](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6). If you require parsing of
+  unsecured JWTs, you must call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
+  implications mentioned in that method's JavaDoc before doing so.
+
+
+* `io.jsonwebtoken.gson.io.GsonSerializer` now requires `Gson` instances that have a registered
+  `GsonSupplierSerializer` type adapter, for example:
+  ```java
+  new GsonBuilder()
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)    
+    .disableHtmlEscaping().create();
+  ```
+  This is to ensure JWKs have `toString()` and application log safety (do not print secure material), but still 
+  serialize to JSON correctly.
+
+* `io.jsonwebtoken.InvalidClaimException` and it's two subclasses (`IncorrectClaimException` and `MissingClaimException`)
+  were previously mutable, allowing the corresponding claim name and claim value to be set on the exception after
+  creation.  These should have always been immutable without those setters (just getters), and this was a previous
+  implementation oversight.  This release has ensured they are immutable without the setters.
 
 ### 0.11.5
 

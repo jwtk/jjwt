@@ -18,6 +18,7 @@ package io.jsonwebtoken
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
+import java.nio.charset.StandardCharsets
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
@@ -34,7 +35,7 @@ class SigningKeyResolverAdapterTest {
     @Test(expected=UnsupportedJwtException) //should throw since called but not overridden
     void testDefaultResolveSigningKeyBytesFromStringPayload() {
         def header = createMock(JwsHeader)
-        new SigningKeyResolverAdapter().resolveSigningKeyBytes(header, "hi")
+        new SigningKeyResolverAdapter().resolveSigningKeyBytes(header, "hi".getBytes(StandardCharsets.UTF_8))
     }
 
     @Test
@@ -82,8 +83,9 @@ class SigningKeyResolverAdapterTest {
 
         JwsHeader header = createMock(JwsHeader)
 
-        byte[] bytes = new byte[32]
-        new Random().nextBytes(bytes)
+        byte[] keyBytes = new byte[32]
+        new Random().nextBytes(keyBytes)
+        byte[] payloadBytes = 'hi'.getBytes(StandardCharsets.UTF_8)
 
         expect(header.getAlgorithm()).andReturn("HS256")
 
@@ -91,20 +93,20 @@ class SigningKeyResolverAdapterTest {
 
         def adapter = new SigningKeyResolverAdapter() {
             @Override
-            byte[] resolveSigningKeyBytes(JwsHeader h, String s) {
+            byte[] resolveSigningKeyBytes(JwsHeader h, byte[] payload) {
                 assertSame header, h
-                assertEquals 'hi', s
-                return bytes
+                assertArrayEquals payloadBytes, payload
+                return keyBytes
             }
         }
 
-        def key = adapter.resolveSigningKey(header, 'hi')
+        def key = adapter.resolveSigningKey(header, payloadBytes)
 
         verify header
 
         assertTrue key instanceof SecretKeySpec
         assertEquals 'HmacSHA256', key.algorithm
-        assertTrue Arrays.equals(bytes, key.encoded)
+        assertTrue Arrays.equals(keyBytes, key.encoded)
     }
 
     @Test(expected=IllegalArgumentException)
@@ -112,6 +114,6 @@ class SigningKeyResolverAdapterTest {
         JwsHeader header = createMock(JwsHeader)
         expect(header.getAlgorithm()).andReturn("RS256")
         replay header
-        new SigningKeyResolverAdapter().resolveSigningKey(header, 'hi')
+        new SigningKeyResolverAdapter().resolveSigningKey(header, 'hi'.getBytes(StandardCharsets.UTF_8))
     }
 }
