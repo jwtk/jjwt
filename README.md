@@ -159,7 +159,7 @@ enforcement.
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
-   | Identifier | Signature Algorithm                                               |
+   | Identifier | Signature Algorithm                               |
    |------------|-------------------------------------------------------------------|
    | `HS256`    | HMAC using SHA-256                                                |
    | `HS384`    | HMAC using SHA-384                                                |
@@ -3519,7 +3519,7 @@ KeyPair pair = Jwts.SIG.Ed448.keyPairBuilder().build();
 PublicKey pubKey = pair.getPublic();
 PrivateKey privKey = pair.getPrivate();
 
-OctetPrivateJwk<PublicKey, PrivateKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
+OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
 OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());
