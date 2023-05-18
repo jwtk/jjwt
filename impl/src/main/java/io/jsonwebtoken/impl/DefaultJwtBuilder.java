@@ -144,14 +144,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setHeader(Header<?> header) {
-        this.header = header;
-        return this;
+        return setHeader(Jwts.header().putAll(header));
     }
 
     @Override
     public JwtBuilder setHeader(Map<String, ?> header) {
-        this.header = new DefaultUnprotectedHeader(header);
-        return this;
+        return setHeader(Jwts.header().putAll(header));
     }
 
     @Override

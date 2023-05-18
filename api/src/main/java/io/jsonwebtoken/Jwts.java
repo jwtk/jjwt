@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.StandardEncryptionAlgorithms;
@@ -96,36 +97,58 @@ public final class Jwts {
      */
     public static final StandardKeyAlgorithms KEY = StandardKeyAlgorithms.get();
 
+    /**
+     * Private constructor, prevent instantiation.
+     */
     private Jwts() {
     }
 
     /**
-     * Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
+     * <p><b>Deprecation Notice</b>: Renamed from {@code header} to {@code unprotectedHeader} since
+     * JJWT_RELEASE_VERSION and deprecated in favor of {@link #header()} as
+     * the updated builder-based method supports method chaining and is capable of automatically constructing
+     * {@link UnprotectedHeader}, {@link JwsHeader}, and {@link JweHeader} automatically based on builder state.</p>
+     *
+     * <p><b>Previous Documentation</b></p>
+     * <p>Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
      * JWTs.  Because {@code Header} extends {@link Map} and map mutation methods cannot support method chaining,
-     * consider using the more flexible {@link #headerBuilder()} method instead, which does support method
-     * chaining and other builder conveniences not available on the {@link UnprotectedHeader} interface.
+     * consider using the more flexible {@link #header()} method instead, which does support method
+     * chaining and other builder conveniences not available on the {@link UnprotectedHeader} interface.</p>
      *
      * @return a new {@link UnprotectedHeader} instance suitable for <em>unprotected</em> (not digitally signed or
      * encrypted) JWTs.
-     * @see #headerBuilder()
+     * @see #header()
+     * @since JJWT_RELEASE_VERSION
+     * @deprecated since JJWT_RELEASE_VERSION.  This method was created to rename the previous {@code header}
+     * method, but header construction should now use {@link #header()}. This method will be removed in a future
+     * release before 1.0.
      */
-    public static UnprotectedHeader header() {
+    @Deprecated
+    public static UnprotectedHeader unprotectedHeader() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultUnprotectedHeader");
     }
 
     /**
-     * Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
+     * <p><b>Deprecation Notice</b>: deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as
+     * the newer method supports method chaining and is capable of automatically constructing
+     * {@link UnprotectedHeader}, {@link JwsHeader}, and {@link JweHeader} automatically based on builder state.</p>
+     *
+     * <p><b>Previous Documentation</b></p>
+     * <p>Creates a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
      * JWTs, populated with the specified name/value pairs. Because {@code Header} extends {@link Map} and map
-     * mutation methods cannot support method chaining, consider using the more flexible {@link #headerBuilder()}
+     * mutation methods cannot support method chaining, consider using the more flexible {@link #header()}
      * method instead, which does support method chaining and other builder conveniences not available on the
-     * {@link UnprotectedHeader} interface.
+     * {@link UnprotectedHeader} interface.</p>
      *
      * @param header map of name/value pairs used to create an unprotected (not digitally signed or encrypted) JWT
      *               {@code Header} instance.
      * @return a new {@link UnprotectedHeader} instance suitable for unprotected (not digitally signed or encrypted)
      * JWTs.
-     * @see #headerBuilder()
+     * @see #header()
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as the builder supports
+     * method chaining and is more flexible and powerful. This method will be removed in a future release before 1.0.
      */
+    @Deprecated
     public static UnprotectedHeader header(Map<String, Object> header) {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultUnprotectedHeader", MAP_ARG, header);
     }
@@ -138,37 +161,55 @@ public final class Jwts {
      * which builder properties are set.
      * @since JJWT_RELEASE_VERSION
      */
-    public static DynamicHeaderBuilder headerBuilder() {
+    public static DynamicHeaderBuilder header() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultDynamicHeaderBuilder");
     }
 
     /**
-     * Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's). Because {@code Header}
+     * <p><b>Deprecation Notice</b>: deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as
+     * the newer method supports method chaining and is capable of automatically constructing
+     * {@link UnprotectedHeader}, {@link JwsHeader}, and {@link JweHeader} automatically based on builder state.</p>
+     *
+     * <p><b>Previous Documentation</b></p>
+     * <p>Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's). Because {@code Header}
      * extends {@link Map} and map mutation methods cannot support method chaining, consider using the
-     * more flexible {@link #headerBuilder()} method instead, which does support method chaining, as well as other
-     * convenience builder methods not available via the {@link JwsHeader} interface.
+     * more flexible {@link #header()} method instead, which does support method chaining, as well as other
+     * convenience builder methods not available via the {@link JwsHeader} interface.</p>
      *
      * @return a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's).
-     * @see #headerBuilder()
+     * @see #header()
      * @see JwtBuilder#setHeader(Header)
+     * @see JwtBuilder#setHeader(Builder) 
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as the builder supports
+     * method chaining and is more flexible and powerful. This method will be removed in a future release before 1.0.
      */
+    @Deprecated
     public static JwsHeader jwsHeader() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwsHeader");
     }
 
     /**
-     * Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
+     * <p><b>Deprecation Notice</b>: deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as
+     * the newer method supports method chaining and is capable of automatically constructing
+     * {@link UnprotectedHeader}, {@link JwsHeader}, and {@link JweHeader} automatically based on builder state.</p>
+     *
+     * <p><b>Previous Documentation</b></p>
+     * <p>Returns a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
      * specified name/value pairs.  Because {@code Header} extends {@link Map} and map mutation methods cannot
-     * support method chaining, consider using the more flexible {@link #headerBuilder()} method instead,
+     * support method chaining, consider using the more flexible {@link #header()} method instead,
      * which does support method chaining and other builder conveniences not available on the
-     * {@link JwsHeader} interface directly.
+     * {@link JwsHeader} interface directly.</p>
      *
      * @param header map of name/value pairs used to create a new {@link JwsHeader} instance.
      * @return a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's), populated with the
      * specified name/value pairs.
-     * @see #headerBuilder()
+     * @see #header()
      * @see JwtBuilder#setHeader(Header)
+     * @see JwtBuilder#setHeader(Builder)
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as the builder supports
+     * method chaining and is more flexible and powerful. This method will be removed in a future release before 1.0.
      */
+    @Deprecated
     public static JwsHeader jwsHeader(Map<String, Object> header) {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwsHeader", MAP_ARG, header);
     }

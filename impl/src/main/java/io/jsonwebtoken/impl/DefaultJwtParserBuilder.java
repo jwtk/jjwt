@@ -221,14 +221,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addCompressionCodecs(Collection<CompressionCodec> codecs) {
+    public JwtParserBuilder addCompressionCodecs(Collection<? extends CompressionCodec> codecs) {
         Assert.notEmpty(codecs, "Additional CompressionCodec collection cannot be null or empty.");
         this.extraCompressionCodecs.addAll(codecs);
         return this;
     }
 
     @Override
-    public JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs) {
+    public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> encAlgs) {
         Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
         this.extraEncryptionAlgorithms.addAll(encAlgs);
         return this;

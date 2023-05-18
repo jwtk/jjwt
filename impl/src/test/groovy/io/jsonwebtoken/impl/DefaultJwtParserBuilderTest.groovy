@@ -146,7 +146,7 @@ class DefaultJwtParserBuilderTest {
     void testAddCompressionCodecs() {
         def codec = new TestCompressionCodec(id: 'test')
         def parser = builder.addCompressionCodecs([codec] as Set<CompressionCodec>).build()
-        def header = Jwts.header().setCompressionAlgorithm(codec.getId())
+        def header = Jwts.unprotectedHeader().setCompressionAlgorithm(codec.getId())
         assertSame codec, parser.jwtParser.compressionCodecLocator.locate(header)
     }
 

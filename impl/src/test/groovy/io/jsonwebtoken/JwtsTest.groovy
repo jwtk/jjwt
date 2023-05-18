@@ -83,7 +83,7 @@ class JwtsTest {
 
     @Test
     void testHeaderWithNoArgs() {
-        def header = Jwts.header()
+        def header = Jwts.unprotectedHeader()
         assertTrue header instanceof DefaultUnprotectedHeader
     }
 

@@ -447,7 +447,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addCompressionCodecs(Collection<CompressionCodec> codecs);
+    JwtParserBuilder addCompressionCodecs(Collection<? extends CompressionCodec> codecs);
 
     /**
      * Adds the specified AEAD encryption algorithms to the parser's total set of supported encryption algorithms,
@@ -466,7 +466,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addEncryptionAlgorithms(Collection<AeadAlgorithm> encAlgs);
+    JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> encAlgs);
 
     /**
      * Adds the specified signature algorithms to the parser's total set of supported signature algorithms,

@@ -324,7 +324,7 @@ class RFC7517AppendixCTest {
 
         String compact = Jwts.builder()
                 .setPayload(RFC_JWK_JSON)
-                .setHeader(Jwts.headerBuilder().setContentType('jwk+json').setPbes2Count(RFC_P2C))
+                .setHeader(Jwts.header().setContentType('jwk+json').setPbes2Count(RFC_P2C))
                 .encryptWith(key, alg, enc)
                 .serializeToJsonWith(serializer) //ensure header created as expected with an assertion serializer
                 .compact()

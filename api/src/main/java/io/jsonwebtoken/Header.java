@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * <h2>Creation</h2>
  *
- * <p>It is easiest to create a {@code Header} instance by using {@link Jwts#headerBuilder()}.</p>
+ * <p>It is easiest to create a {@code Header} instance by using {@link Jwts#header()}.</p>
  *
  * @since 0.1
  */

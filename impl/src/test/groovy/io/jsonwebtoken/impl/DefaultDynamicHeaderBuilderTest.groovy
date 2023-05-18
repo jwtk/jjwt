@@ -40,7 +40,7 @@ class DefaultDynamicHeaderBuilderTest {
 
     @Before
     void setUp() {
-        builder = Jwts.headerBuilder() as DefaultDynamicHeaderBuilder
+        builder = Jwts.header() as DefaultDynamicHeaderBuilder
     }
 
     @Test

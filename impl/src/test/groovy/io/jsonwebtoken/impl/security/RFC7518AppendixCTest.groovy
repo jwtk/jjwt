@@ -112,7 +112,7 @@ class RFC7518AppendixCTest {
         }
 
         String jwe = Jwts.builder()
-                .setHeader(Jwts.headerBuilder().setAgreementPartyUInfo("Alice").setAgreementPartyVInfo("Bob"))
+                .setHeader(Jwts.header().setAgreementPartyUInfo("Alice").setAgreementPartyVInfo("Bob"))
                 .claim("Hello", "World")
                 .encryptWith(bobJwk.toPublicJwk().toKey(), alg, Jwts.ENC.A128GCM)
                 .compact()
