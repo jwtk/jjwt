@@ -124,6 +124,20 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
     }
 
     /**
+     * Returns the number (quantity) of
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
+     * Algorithms</a> stored in this registry.
+     *
+     * @return the number (quantity) of
+     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
+     * Algorithms</a> stored in this registry.
+     */
+    @Override
+    public int size() {
+        return DELEGATE.size();
+    }
+
+    /**
      * Returns common
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
      * Algorithms</a> as an unmodifiable collection.

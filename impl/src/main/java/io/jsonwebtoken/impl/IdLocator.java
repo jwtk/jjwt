@@ -25,7 +25,7 @@ import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
-public class IdLocator<H extends Header<H>, R> implements Function<H, R> {
+public class IdLocator<H extends Header, R> implements Function<H, R> {
 
     private final Field<String> headerField;
     private final String requiredMsg;
@@ -40,7 +40,7 @@ public class IdLocator<H extends Header<H>, R> implements Function<H, R> {
         this.requiredMsg = requiredMsg;
     }
 
-    private static String type(Header<?> header) {
+    private static String type(Header header) {
         if (header instanceof JweHeader) {
             return "JWE";
         } else if (header instanceof JwsHeader) {

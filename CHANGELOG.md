@@ -165,6 +165,15 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
   * `io.jsonwebtoken.SigningKeyResolver`'s `resolveSigningKey(JwsHeader, String)` method has been changed to
     `resolveSigningKey(JwsHeader, byte[])`.
 
+
+* `io.jsonwebtoken.Claims` and `io.jsonwebtoken.Header` instances are now immutable to enhance security and thread
+  safety.  Creation and mutation are supported with newly introduced `ClaimsBuilder` and `HeaderBuilder` concepts.
+
+
+* Consequently, `io.jsonwebtoken.Jwts`'s `claims()` method has been changed to return a `ClaimsBuilder` instead of
+  a `Claims` instance.
+
+
 * `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been renamed to `legacyParser()` to
   allow an updated `parser()` method to return a `JwtParserBuilder` instead of a direct `JwtParser` instance.  
   This `legacyParser()` method will be removed entirely for the 1.0 release - please change your code to use the 

@@ -41,7 +41,7 @@ class DefaultTokenizedJwe extends DefaultTokenizedJwt implements TokenizedJwe {
     }
 
     @Override
-    public Header<?> createHeader(Map<String, ?> m) {
+    public Header createHeader(Map<String, ?> m) {
         return new DefaultJweHeader(m);
     }
 }

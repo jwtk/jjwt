@@ -16,25 +16,37 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.HeaderBuilder;
+import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
 
 import java.util.Map;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public abstract class AbstractHeaderBuilder<H extends Header<H>, T extends HeaderBuilder<H, T>>
-        implements HeaderBuilder<H, T> {
+public abstract class AbstractHeaderBuilder<H extends Header, M extends AbstractHeader<M>, T extends HeaderBuilder<H, T>>
+        implements HeaderBuilder<H, T>, FieldReadable {
 
-    protected final H header;
+    protected final M header;
 
     protected AbstractHeaderBuilder() {
         this.header = newHeader();
         onNewHeader(this.header);
     }
 
-    protected abstract H newHeader();
+    protected abstract M newHeader();
 
-    protected void onNewHeader(H header) {
+    protected void onNewHeader(M header) {
+    }
+
+    @Override
+    public <F> F get(Field<F> field) {
+        return this.header.get(field);
+    }
+
+    protected M getHeader() {
+        return this.header;
     }
 
     @SuppressWarnings("unchecked")
@@ -68,7 +80,9 @@ public abstract class AbstractHeaderBuilder<H extends Header<H>, T extends Heade
 
     @Override
     public H build() {
-        return this.header;
+        M newHeader = newHeader();
+        newHeader.putAll(this.header);
+        return (H)newHeader;
     }
 
     @Override

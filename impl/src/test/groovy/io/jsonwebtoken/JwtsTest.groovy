@@ -109,7 +109,7 @@ class JwtsTest {
 
     @Test
     void testClaims() {
-        Claims claims = Jwts.claims()
+        Claims claims = Jwts.claims().build()
         assertNotNull claims
     }
 

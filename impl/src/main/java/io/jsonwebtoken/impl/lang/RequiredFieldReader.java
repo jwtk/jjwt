@@ -27,7 +27,7 @@ public class RequiredFieldReader implements FieldReadable {
 
     private final FieldReadable src;
 
-    public RequiredFieldReader(Header<?> header) {
+    public RequiredFieldReader(Header header) {
         this(Assert.isInstanceOf(FieldReadable.class, header, "Header implementations must implement FieldReadable."));
     }
 

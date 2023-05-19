@@ -37,6 +37,32 @@ class JwtMapTest {
         jwtMap = new JwtMap(FIELDS)
     }
 
+    void unsupported(Closure<?> c) {
+        try {
+            c()
+            fail("Should have thrown")
+        } catch (UnsupportedOperationException expected) {
+            String msg = "${jwtMap.getName()} instance is immutable and may not be modified."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testImmutable() {
+        Map m = jwtMap;
+        m.put('foo', 'bar') // allowed
+        jwtMap.setMutable(false)
+
+        unsupported { m.put('whatever', 'value') }
+        unsupported { m.putAll([a: 'b']) }
+        unsupported { m.remove('foo') }
+        unsupported { m.clear() }
+
+        jwtMap.setMutable(true)
+        m.clear() // no exception
+        assertEquals 0, m.size()
+    }
+
     @Test
     void testContainsKey() {
         jwtMap.put('foo', 'bar')

@@ -30,7 +30,7 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
 
     private final String qualifiedKeyName;
 
-    public DefaultRegistry(String name, String keyName, Collection<V> values, Function<V, K> keyFn) {
+    public DefaultRegistry(String name, String keyName, Collection<? extends V> values, Function<V, K> keyFn) {
         name = Assert.hasText(Strings.clean(name), "name cannot be null or empty.");
         keyName = Assert.hasText(Strings.clean(keyName), "keyName cannot be null or empty.");
         this.qualifiedKeyName = name + " " + keyName;
@@ -48,6 +48,11 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
     public V apply(K k) {
         Assert.notNull(k, this.qualifiedKeyName + " cannot be null.");
         return VALUES.get(k);
+    }
+
+    @Override
+    public int size() {
+        return VALUES.size();
     }
 
     @Override

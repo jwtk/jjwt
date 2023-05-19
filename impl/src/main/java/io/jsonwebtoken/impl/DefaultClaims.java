@@ -16,18 +16,18 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsMutator;
 import io.jsonwebtoken.RequiredTypeException;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.JwtDateConverter;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
-public class DefaultClaims extends JwtMap implements Claims {
+public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<DefaultClaims> {
 
     private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
             "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
@@ -45,7 +45,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     static final Field<Date> ISSUED_AT = Fields.rfcDate(Claims.ISSUED_AT, "Issued At");
     static final Field<String> JTI = Fields.string(Claims.ID, "JWT ID");
 
-    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(
+    static final Registry<String, Field<?>> FIELDS = Fields.registry(
             ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI
     );
 
@@ -68,7 +68,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setIssuer(String iss) {
+    public DefaultClaims setIssuer(String iss) {
         put(ISSUER, iss);
         return this;
     }
@@ -79,7 +79,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setSubject(String sub) {
+    public DefaultClaims setSubject(String sub) {
         put(SUBJECT, sub);
         return this;
     }
@@ -90,7 +90,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setAudience(String aud) {
+    public DefaultClaims setAudience(String aud) {
         put(AUDIENCE, aud);
         return this;
     }
@@ -101,7 +101,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setExpiration(Date exp) {
+    public DefaultClaims setExpiration(Date exp) {
         put(EXPIRATION, exp);
         return this;
     }
@@ -112,7 +112,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setNotBefore(Date nbf) {
+    public DefaultClaims setNotBefore(Date nbf) {
         put(NOT_BEFORE, nbf);
         return this;
     }
@@ -123,7 +123,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setIssuedAt(Date iat) {
+    public DefaultClaims setIssuedAt(Date iat) {
         put(ISSUED_AT, iat);
         return this;
     }
@@ -134,7 +134,7 @@ public class DefaultClaims extends JwtMap implements Claims {
     }
 
     @Override
-    public Claims setId(String jti) {
+    public DefaultClaims setId(String jti) {
         put(JTI, jti);
         return this;
     }

@@ -184,7 +184,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private Claims expectedClaims = new DefaultClaims();
+    private DefaultClaims expectedClaims = new DefaultClaims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
@@ -216,7 +216,7 @@ public class DefaultJwtParser implements JwtParser {
                      Locator<? extends Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
-                     Claims expectedClaims,
+                     DefaultClaims expectedClaims,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
                      Locator<CompressionCodec> compressionCodecLocator,
@@ -366,7 +366,7 @@ public class DefaultJwtParser implements JwtParser {
         }
     }
 
-    private static boolean hasContentType(Header<?> header) {
+    private static boolean hasContentType(Header header) {
         return header != null && Strings.hasText(header.getContentType());
     }
 
@@ -522,7 +522,7 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Header =================
         final byte[] headerBytes = base64UrlDecode(base64UrlHeader, "protected header");
         Map<String, ?> m = readValue(headerBytes, "protected header");
-        Header<?> header;
+        Header header;
         try {
             header = tokenized.createHeader(m);
         } catch (Exception e) {
@@ -757,7 +757,7 @@ public class DefaultJwtParser implements JwtParser {
         return o;
     }
 
-    private void validateExpectedClaims(Header<?> header, Claims claims) {
+    private void validateExpectedClaims(Header header, Claims claims) {
 
         for (String expectedClaimName : expectedClaims.keySet()) {
 

@@ -17,13 +17,13 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.lang.Registry;
 
 import java.util.Map;
-import java.util.Set;
 
-public class DefaultJwsHeader extends AbstractProtectedHeader<JwsHeader> implements JwsHeader {
+public class DefaultJwsHeader extends AbstractProtectedHeader<DefaultJwsHeader> implements JwsHeader {
 
-    static final Set<Field<?>> FIELDS = AbstractProtectedHeader.FIELDS; //same
+    static final Registry<String, Field<?>> FIELDS = AbstractProtectedHeader.FIELDS; //same
 
     public DefaultJwsHeader() {
         super(FIELDS);

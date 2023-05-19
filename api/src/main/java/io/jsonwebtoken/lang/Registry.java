@@ -27,6 +27,13 @@ import java.util.Collection;
 public interface Registry<K, V> {
 
     /**
+     * Returns the number of elements in the registry.
+     *
+     * @return the number of elements in the registry.
+     */
+    int size();
+
+    /**
      * Returns all registry values as a read-only collection.
      *
      * @return all registry values as a read-only collection.

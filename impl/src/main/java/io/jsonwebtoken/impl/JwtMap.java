@@ -17,11 +17,13 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.FieldReadable;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
 import java.lang.reflect.Array;
@@ -32,25 +34,40 @@ import java.util.Set;
 
 public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
-    protected final Map<String, Field<?>> FIELDS;
+    protected final Registry<String, ? extends Field<?>> FIELDS;
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
     protected final Map<String, Object> idiomaticValues; // the values map with any RFC values converted to Java type-safe values where possible
 
+    private transient boolean mutable = true;
+
     public JwtMap(Set<Field<?>> fieldSet) {
-        Assert.notEmpty(fieldSet, "Fields cannot be null or empty.");
-        Map<String, Field<?>> fields = new LinkedHashMap<>();
-        for (Field<?> field : fieldSet) {
-            fields.put(field.getId(), field);
-        }
-        this.FIELDS = java.util.Collections.unmodifiableMap(fields);
+        this(new IdRegistry<>("Field", fieldSet, true));
+    }
+
+    public JwtMap(Registry<String, ? extends Field<?>> fields) {
+        Assert.notNull(fields, "Field registry cannot be null.");
+        Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
+        this.FIELDS = fields;
         this.values = new LinkedHashMap<>();
         this.idiomaticValues = new LinkedHashMap<>();
     }
 
-    public JwtMap(Set<Field<?>> fieldSet, Map<String, ?> values) {
-        this(fieldSet);
+    public JwtMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
+        this(fields);
         Assert.notNull(values, "Map argument cannot be null.");
         putAll(values);
+    }
+
+    public JwtMap setMutable(boolean mutable) {
+        this.mutable = mutable;
+        return this;
+    }
+
+    private void assertMutable() {
+        if (!mutable) {
+            String msg = getName() + " instance is immutable and may not be modified.";
+            throw new UnsupportedOperationException(msg);
+        }
     }
 
     @Override
@@ -122,6 +139,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
     @Override
     public Object put(String name, Object value) {
+        assertMutable();
         name = Assert.notNull(Strings.clean(name), "Member name cannot be null or empty.");
         if (value instanceof String) {
             value = Strings.clean((String) value);
@@ -141,7 +159,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
         }
     }
 
-    protected Object nullSafePut(String name, Object value) {
+    private Object nullSafePut(String name, Object value) {
         if (isReducibleToNull(value)) {
             return remove(name);
         } else {
@@ -150,7 +168,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
         }
     }
 
-    protected <T> Object apply(Field<T> field, Object rawValue) {
+    private <T> Object apply(Field<T> field, Object rawValue) {
 
         final String id = field.getId();
 
@@ -187,6 +205,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
     @Override
     public Object remove(Object key) {
+        assertMutable();
         this.idiomaticValues.remove(key);
         return this.values.remove(key);
     }
@@ -204,6 +223,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
     @Override
     public void clear() {
+        assertMutable();
         this.values.clear();
         this.idiomaticValues.clear();
     }

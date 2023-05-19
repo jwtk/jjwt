@@ -35,5 +35,5 @@ public interface DynamicHeaderBuilder extends
         MapMutator<String, Object, DynamicHeaderBuilder>,
         X509Builder<DynamicHeaderBuilder>,
         JweHeaderMutator<DynamicHeaderBuilder>,
-        Builder<Header<?>> {
+        Builder<Header> {
 }

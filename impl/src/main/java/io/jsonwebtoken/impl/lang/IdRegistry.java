@@ -23,7 +23,7 @@ import java.util.Collection;
 
 public class IdRegistry<T extends Identifiable> extends StringRegistry<T> {
 
-    private static final Function<Identifiable, String> FN = new Function<Identifiable, String>() {
+    public static final Function<Identifiable, String> FN = new Function<Identifiable, String>() {
         @Override
         public String apply(Identifiable identifiable) {
             Assert.notNull(identifiable, "Identifiable argument cannot be null.");
@@ -32,9 +32,18 @@ public class IdRegistry<T extends Identifiable> extends StringRegistry<T> {
     };
 
     @SuppressWarnings("unchecked")
+    public static <T extends Identifiable> Function<T, String> fn() {
+        return (Function<T, String>) FN;
+    }
+
     public IdRegistry(String name, Collection<T> instances) {
+        this(name, instances, true);
+    }
+
+    public IdRegistry(String name, Collection<T> instances, boolean caseSensitive) {
         super(name, "id",
                 Assert.notEmpty(instances, "Collection of Identifiable instances may not be null or empty."),
-                (Function<T, String>) FN);
+                IdRegistry.<T>fn(),
+                caseSensitive);
     }
 }

@@ -44,10 +44,10 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
      * or does not exist.
      */
     @Override
-    public final T locate(Header<?> header) {
+    public final T locate(Header header) {
         Assert.notNull(header, "Header cannot be null.");
-        if (header instanceof ProtectedHeader<?>) {
-            ProtectedHeader<?> protectedHeader = (ProtectedHeader<?>) header;
+        if (header instanceof ProtectedHeader) {
+            ProtectedHeader protectedHeader = (ProtectedHeader) header;
             return locate(protectedHeader);
         } else {
             Assert.isInstanceOf(UnprotectedHeader.class, header, "Unrecognized Header type.");
@@ -65,7 +65,7 @@ public abstract class LocatorAdapter<T> implements Locator<T> {
      * @return an object referenced in the specified {@link ProtectedHeader}, or {@code null} if the referenced
      * object cannot be found or does not exist.
      */
-    protected T locate(ProtectedHeader<?> header) {
+    protected T locate(ProtectedHeader header) {
         if (header instanceof JwsHeader) {
             return locate((JwsHeader) header);
         } else {

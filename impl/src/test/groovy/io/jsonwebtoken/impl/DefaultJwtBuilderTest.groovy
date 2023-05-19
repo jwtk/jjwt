@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -171,7 +172,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testSetClaims() {
         def b = new DefaultJwtBuilder()
-        def c = Jwts.claims()
+        Claims c = Jwts.claims().build()
         b.setClaims(c)
         assertNotNull b.claims
         assertSame b.claims, c
@@ -216,7 +217,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testExistingClaimsAndSetClaim() {
         def b = new DefaultJwtBuilder()
-        def c = Jwts.claims()
+        Claims c = Jwts.claims().build()
         b.setClaims(c)
         b.claim('foo', 'bar')
         assertSame b.claims, c

@@ -21,5 +21,5 @@ package io.jsonwebtoken;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface UnprotectedHeader extends Header<UnprotectedHeader> {
+public interface UnprotectedHeader extends Header {
 }

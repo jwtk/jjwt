@@ -29,7 +29,7 @@ public class ExpiredJwtException extends ClaimJwtException {
      * @param claims  jwt claims (body)
      * @param message the message explaining why the exception is thrown.
      */
-    public ExpiredJwtException(Header<?> header, Claims claims, String message) {
+    public ExpiredJwtException(Header header, Claims claims, String message) {
         super(header, claims, message);
     }
 
@@ -42,7 +42,7 @@ public class ExpiredJwtException extends ClaimJwtException {
      * @param claims  jwt claims (body)
      * @since 0.5
      */
-    public ExpiredJwtException(Header<?> header, Claims claims, String message, Throwable cause) {
+    public ExpiredJwtException(Header header, Claims claims, String message, Throwable cause) {
         super(header, claims, message, cause);
     }
 }

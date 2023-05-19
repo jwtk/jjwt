@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.ProtectedHeader;
+import io.jsonwebtoken.ProtectedHeaderBuilder;
 import io.jsonwebtoken.impl.security.DefaultX509Builder;
 import io.jsonwebtoken.security.PublicJwk;
 
@@ -27,14 +28,13 @@ import java.util.Set;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public abstract class AbstractProtectedHeaderBuilder<H extends ProtectedHeader<H>,
-        T extends ProtectedHeaderBuilder<H, T>>
+public abstract class AbstractProtectedHeaderBuilder<H extends ProtectedHeader, M extends AbstractProtectedHeader<M>, T extends AbstractProtectedHeaderBuilder<H, T>>
         extends AbstractHeaderBuilder<H, T> implements ProtectedHeaderBuilder<H, T> {
 
     private DefaultX509Builder<T> x509Builder;
 
     @Override
-    protected void onNewHeader(H header) {
+    protected void onNewHeader(M header) {
         this.x509Builder = new DefaultX509Builder<>(header, tthis(), IllegalStateException.class);
     }
 

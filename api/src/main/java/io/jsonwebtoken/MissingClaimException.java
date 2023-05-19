@@ -32,7 +32,7 @@ public class MissingClaimException extends InvalidClaimException {
      * @param claimValue the value of the claim that could not be validated
      * @param message    the message explaining why the exception is thrown.
      */
-    public MissingClaimException(Header<?> header, Claims claims, String claimName, Object claimValue, String message) {
+    public MissingClaimException(Header header, Claims claims, String claimName, Object claimValue, String message) {
         super(header, claims, claimName, claimValue, message);
     }
 
@@ -47,7 +47,7 @@ public class MissingClaimException extends InvalidClaimException {
      * @param message    the message explaining why the exception is thrown.
      * @param cause      the underlying cause that resulted in this exception being thrown.
      */
-    public MissingClaimException(Header<?> header, Claims claims, String claimName, Object claimValue, String message, Throwable cause) {
+    public MissingClaimException(Header header, Claims claims, String claimName, Object claimValue, String message, Throwable cause) {
         super(header, claims, claimName, claimValue, message, cause);
     }
 }

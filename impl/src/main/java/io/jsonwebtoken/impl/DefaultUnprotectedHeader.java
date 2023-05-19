@@ -19,7 +19,7 @@ import io.jsonwebtoken.UnprotectedHeader;
 
 import java.util.Map;
 
-public class DefaultUnprotectedHeader extends AbstractHeader<UnprotectedHeader> implements UnprotectedHeader {
+public class DefaultUnprotectedHeader extends AbstractHeader<DefaultUnprotectedHeader> implements UnprotectedHeader {
 
     public DefaultUnprotectedHeader() {
         super(AbstractHeader.FIELDS);

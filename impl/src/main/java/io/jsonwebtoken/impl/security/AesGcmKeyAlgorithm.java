@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -83,8 +82,9 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request.getKey());
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
-        final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        final FieldReadable reader = new RequiredFieldReader(header);
+        final Object header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
+        FieldReadable frHeader = Assert.isInstanceOf(FieldReadable.class, header, "Header must implement FieldReadable.");
+        final FieldReadable reader = new RequiredFieldReader(frHeader);
         final byte[] tag = reader.get(DefaultJweHeader.TAG);
         final byte[] iv = reader.get(DefaultJweHeader.IV);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);

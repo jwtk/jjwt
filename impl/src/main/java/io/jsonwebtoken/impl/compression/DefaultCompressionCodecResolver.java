@@ -79,7 +79,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
     }
 
     @Override
-    public CompressionCodec locate(Header<?> header) {
+    public CompressionCodec locate(Header header) {
         Assert.notNull(header, "Header cannot be null.");
         String id = header.getCompressionAlgorithm();
         if (!Strings.hasText(id)) {
@@ -94,7 +94,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
     }
 
     @Override
-    public CompressionCodec resolveCompressionCodec(Header<?> header) {
+    public CompressionCodec resolveCompressionCodec(Header header) {
         return locate(header);
     }
 }

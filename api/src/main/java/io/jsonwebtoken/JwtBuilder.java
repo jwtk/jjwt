@@ -76,7 +76,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param header the header to set (and potentially replace any existing header).
      * @return the builder for method chaining.
      */
-    JwtBuilder setHeader(Header<?> header); //replaces any existing header with the specified header.
+    JwtBuilder setHeader(Header header); //replaces any existing header with the specified header.
 
     /**
      * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
@@ -95,7 +95,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the JwtBuilder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setHeader(Builder<? extends Header<?>> builder);
+    JwtBuilder setHeader(Builder<? extends Header> builder);
 
     /**
      * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl;
-
-import io.jsonwebtoken.UnprotectedHeader;
+package io.jsonwebtoken;
 
 // TODO: move this concept to the API when Java 8 is supported so we can have UnprotectedHeader.builder() --> returns UnprotectedHeaderBuilder
 

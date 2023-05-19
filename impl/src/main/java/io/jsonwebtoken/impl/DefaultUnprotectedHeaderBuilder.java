@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.UnprotectedHeader;
+import io.jsonwebtoken.UnprotectedHeaderBuilder;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -24,7 +25,7 @@ public class DefaultUnprotectedHeaderBuilder extends AbstractHeaderBuilder<Unpro
         implements UnprotectedHeaderBuilder {
 
     @Override
-    protected UnprotectedHeader newHeader() {
+    protected DefaultUnprotectedHeader newHeader() {
         return new DefaultUnprotectedHeader();
     }
 }

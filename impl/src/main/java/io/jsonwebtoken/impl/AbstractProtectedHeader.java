@@ -21,8 +21,9 @@ import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
 import io.jsonwebtoken.impl.security.AbstractJwk;
 import io.jsonwebtoken.impl.security.JwkConverter;
-import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.PublicJwk;
+import io.jsonwebtoken.security.X509Mutator;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
@@ -34,10 +35,9 @@ import java.util.Set;
  * Header implementation satisfying shared JWS and JWE header parameter requirements.  Header parameters specific to
  * either JWE or JWS will be defined in respective subclasses.
  *
- * @param <T> specific header type to return from mutation/setter methods for method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public abstract class AbstractProtectedHeader<T extends ProtectedHeader<T>> extends AbstractHeader<T> implements ProtectedHeader<T> {
+public abstract class AbstractProtectedHeader<T extends AbstractProtectedHeader<T>> extends AbstractHeader<T> implements ProtectedHeader, X509Mutator<T> {
 
     static final Field<URI> JKU = Fields.uri("jku", "JWK Set URL");
 
@@ -47,15 +47,16 @@ public abstract class AbstractProtectedHeader<T extends ProtectedHeader<T>> exte
             .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
 
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractHeader.FIELDS, CRIT, JKU, JWK, AbstractJwk.KID,
-            AbstractAsymmetricJwk.X5U, AbstractAsymmetricJwk.X5C, AbstractAsymmetricJwk.X5T, AbstractAsymmetricJwk.X5T_S256);
+    static final Registry<String, Field<?>> FIELDS = Fields.registry(AbstractHeader.FIELDS,
+            CRIT, JKU, JWK, AbstractJwk.KID, AbstractAsymmetricJwk.X5U, AbstractAsymmetricJwk.X5C,
+            AbstractAsymmetricJwk.X5T, AbstractAsymmetricJwk.X5T_S256);
 
-    protected AbstractProtectedHeader(Set<Field<?>> fieldSet) {
-        super(fieldSet);
+    protected AbstractProtectedHeader(Registry<String, Field<?>> fields) {
+        super(fields);
     }
 
-    protected AbstractProtectedHeader(Set<Field<?>> fieldSet, Map<String, ?> values) {
-        super(fieldSet, values);
+    protected AbstractProtectedHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
+        super(fields, values);
     }
 
     public String getKeyId() {

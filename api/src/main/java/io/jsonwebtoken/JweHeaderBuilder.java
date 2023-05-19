@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl;
+package io.jsonwebtoken;
 
-import io.jsonwebtoken.JwsHeaderBuilder;
+// TODO: move this concept to the API when Java 8 is supported so we can have JweHeader.builder() --> returns JweHeaderBuilder
 
 /**
+ * A builder to create {@link JweHeader} instances.
+ *
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJwsHeaderBuilder extends AbstractProtectedHeaderBuilder<DefaultJwsHeader, DefaultJwsHeaderBuilder>
-        implements JwsHeaderBuilder {
-
-    @Override
-    protected DefaultJwsHeader newHeader() {
-        return new DefaultJwsHeader();
-    }
+public interface JweHeaderBuilder extends
+        ProtectedHeaderBuilder<JweHeader, JweHeaderBuilder>, JweHeaderMutator<JweHeaderBuilder> {
 }

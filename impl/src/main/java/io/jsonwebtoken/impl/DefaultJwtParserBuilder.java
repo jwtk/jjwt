@@ -15,12 +15,13 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
@@ -85,7 +86,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private final Claims expectedClaims = new DefaultClaims();
+    private final ClaimsBuilder expectedClaims = Jwts.claims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
@@ -319,6 +320,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         Assert.stateNotNull(this.keyLocator, "Key locator should never be null.");
         Assert.stateNotNull(this.compressionCodecLocator, "CompressionCodec Locator should never be null.");
 
+        final DefaultClaims expClaims = (DefaultClaims)this.expectedClaims.build();
+
         return new ImmutableJwtParser(new DefaultJwtParser(
                 provider,
                 signingKeyResolver,
@@ -327,7 +330,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 keyLocator,
                 clock,
                 allowedClockSkewMillis,
-                expectedClaims,
+                expClaims,
                 base64UrlDecoder,
                 new JwtDeserializer<>(deserializer),
                 compressionCodecLocator,

@@ -666,6 +666,18 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
     }
 
     /**
+     * Returns the number (quantity) of all JWA-standard
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a>.
+     *
+     * @return the number (quantity) of all JWA-standard
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a>.
+     */
+    @Override
+    public int size() {
+        return REGISTRY.size();
+    }
+
+    /**
      * Returns all JWA-standard
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a> as an
      * unmodifiable collection.

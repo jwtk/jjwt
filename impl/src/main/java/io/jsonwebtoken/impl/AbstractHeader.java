@@ -16,15 +16,15 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.HeaderMutator;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
-import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Map;
-import java.util.Set;
 
-public abstract class AbstractHeader<T extends Header<T>> extends JwtMap implements Header<T> {
+public abstract class AbstractHeader<T extends AbstractHeader<T>> extends JwtMap implements Header, HeaderMutator<T> {
 
     static final Field<String> TYPE = Fields.string(Header.TYPE, "Type");
     static final Field<String> CONTENT_TYPE = Fields.string(Header.CONTENT_TYPE, "Content Type");
@@ -34,14 +34,14 @@ public abstract class AbstractHeader<T extends Header<T>> extends JwtMap impleme
     @Deprecated // TODO: remove for 1.0.0:
     static final Field<String> DEPRECATED_COMPRESSION_ALGORITHM = Fields.string(Header.DEPRECATED_COMPRESSION_ALGORITHM, "Deprecated Compression Algorithm");
 
-    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
+    static final Registry<String, Field<?>> FIELDS = Fields.registry(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
 
-    protected AbstractHeader(Set<Field<?>> fieldSet) {
-        super(fieldSet);
+    protected AbstractHeader(Registry<String, Field<?>> fields) {
+        super(fields);
     }
 
-    protected AbstractHeader(Set<Field<?>> fieldSet, Map<String, ?> values) {
-        super(fieldSet, values);
+    protected AbstractHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
+        super(fields, values);
     }
 
     @Override

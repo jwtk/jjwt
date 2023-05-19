@@ -203,6 +203,18 @@ public final class StandardSecureDigestAlgorithms implements Registry<String, Se
     }
 
     /**
+     * Returns the number (quantity) of all standard JWS
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>.
+     *
+     * @return the number (quantity) of all standard JWS
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>.
+     */
+    @Override
+    public int size() {
+        return IMPL.size();
+    }
+
+    /**
      * Returns all standard JWS
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>
      * as an unmodifiable collection.

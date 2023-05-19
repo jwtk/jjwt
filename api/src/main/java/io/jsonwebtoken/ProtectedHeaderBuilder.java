@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl;
+package io.jsonwebtoken;
 
-import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JweHeaderMutator;
+import io.jsonwebtoken.security.X509Builder;
 
-// TODO: move this concept to the API when Java 8 is supported so we can have JweHeader.builder() --> returns JweHeaderBuilder
+// TODO: move this concept to the API when Java 8 is supported. Do we even need it?
+public interface ProtectedHeaderBuilder<H extends ProtectedHeader, T extends ProtectedHeaderBuilder<H,T>>
+        extends HeaderBuilder<H,T>, ProtectedHeaderMutator<T>, X509Builder<T> {
 
-/**
- * A builder to create {@link JweHeader} instances.
- *
- * @since JJWT_RELEASE_VERSION
- */
-public interface JweHeaderBuilder extends
-        ProtectedHeaderBuilder<JweHeader, JweHeaderBuilder>, JweHeaderMutator<JweHeaderBuilder> {
 }

@@ -179,7 +179,7 @@ public final class Jwts {
      * @return a new {@link JwsHeader} instance suitable for digitally signed JWTs (aka 'JWS's).
      * @see #header()
      * @see JwtBuilder#setHeader(Header)
-     * @see JwtBuilder#setHeader(Builder) 
+     * @see JwtBuilder#setHeader(Builder)
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #header()} as the builder supports
      * method chaining and is more flexible and powerful. This method will be removed in a future release before 1.0.
      */
@@ -215,20 +215,29 @@ public final class Jwts {
     }
 
     /**
-     * Returns a new {@link Claims} instance to be used as a JWT body.
+     * Returns a new {@link Claims} builder instance to be used to populate JWT claims, which in aggregate will be
+     * the JWT payload.
      *
-     * @return a new {@link Claims} instance to be used as a JWT body.
+     * @return a new {@link Claims} builder instance to be used to populate JWT claims, which in aggregate will be
+     * the JWT payload.
      */
-    public static Claims claims() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultClaims");
+    public static ClaimsBuilder claims() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder");
     }
 
     /**
-     * Returns a new {@link Claims} instance populated with the specified name/value pairs.
+     * <p><b>Deprecated since JJWT_RELEASE_VERSION in favor of
+     * {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}</b>.
+     * This method will be removed before 1.0.</p>
+     *
+     * <p>Returns a new {@link Claims} instance populated with the specified name/value pairs.</p>
      *
      * @param claims the name/value pairs to populate the new Claims instance.
      * @return a new {@link Claims} instance populated with the specified name/value pairs.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}.
+     * This method will be removed before 1.0.
      */
+    @Deprecated
     public static Claims claims(Map<String, Object> claims) {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultClaims", MAP_ARG, claims);
     }

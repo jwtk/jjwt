@@ -40,7 +40,6 @@ import java.util.Collection;
  * @see #find(String)
  * @see #values()
  * @see AeadAlgorithm
- *
  * @since JJWT_RELEASE_VERSION
  */
 public final class StandardEncryptionAlgorithms implements Registry<String, AeadAlgorithm> {
@@ -117,6 +116,16 @@ public final class StandardEncryptionAlgorithms implements Registry<String, Aead
      * Prevent external instantiation.
      */
     private StandardEncryptionAlgorithms() {
+    }
+
+    /**
+     * Returns the number (quantity) of all JWE-standard AEAD encryption algorithms.
+     *
+     * @return the number (quantity) of all JWE-standard AEAD encryption algorithms.
+     */
+    @Override
+    public int size() {
+        return DELEGATE.size();
     }
 
     /**

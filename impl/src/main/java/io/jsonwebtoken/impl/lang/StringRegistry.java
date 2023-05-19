@@ -26,21 +26,21 @@ import java.util.Map;
 
 public class StringRegistry<V> extends DefaultRegistry<String, V> {
 
-    private final Function<String, String> CI_FN;
+    private final Function<String, String> CASE_FN;
 
     private final Map<String, V> CI_VALUES;
 
-    public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn) {
-        this(name, keyName, values, keyFn, Locale.ENGLISH);
+    public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, boolean caseSensitive) {
+        this(name, keyName, values, keyFn, caseSensitive ? Functions.<String>identity() : CaseInsensitiveFunction.ENGLISH);
     }
 
-    public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, final Locale caseInsensitiveLocale) {
+    public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, Function<String, String> caseFn) {
         super(name, keyName, values, keyFn);
-        this.CI_FN = new CaseInsensitiveFunction(caseInsensitiveLocale);
+        this.CASE_FN = Assert.notNull(caseFn, "Case function cannot be null.");
         Map<String, V> m = new LinkedHashMap<>(values().size());
         for (V value : values) {
             String key = keyFn.apply(value);
-            key = this.CI_FN.apply(key);
+            key = this.CASE_FN.apply(key);
             m.put(key, value);
         }
         this.CI_VALUES = Collections.immutable(m);
@@ -51,13 +51,16 @@ public class StringRegistry<V> extends DefaultRegistry<String, V> {
         Assert.hasText(id, "id argument cannot be null or empty.");
         V instance = super.apply(id); //try standard ID lookup first.  This will satisfy 99% of invocations
         if (instance == null) { // fall back to case-insensitive ID lookup:
-            id = CI_FN.apply(id);
+            id = CASE_FN.apply(id);
             instance = CI_VALUES.get(id);
         }
         return instance;
     }
 
     private static final class CaseInsensitiveFunction implements Function<String, String> {
+
+        private static final CaseInsensitiveFunction ENGLISH = new CaseInsensitiveFunction(Locale.ENGLISH);
+
         private final Locale LOCALE;
 
         private CaseInsensitiveFunction(Locale locale) {

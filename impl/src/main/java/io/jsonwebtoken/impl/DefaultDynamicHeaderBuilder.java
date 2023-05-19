@@ -29,11 +29,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Implementor's note: this implementation implements {@link JweHeader} to allow reading of properties from current
+ * builder state and to allow the builder to act as a header in certain contexts (such as during KeyAlgorithm
+ * requests), but this notion that a builder 'isA' header is not to be exposed to the public API.
+ *
  * @since JJWT_RELEASE_VERSION
  */
 public class DefaultDynamicHeaderBuilder implements DynamicHeaderBuilder {
 
-    private Header<?> header;
+    private AbstractHeader<?> header;
 
     private DefaultX509Builder<DynamicHeaderBuilder> x509Builder;
 
@@ -42,10 +46,10 @@ public class DefaultDynamicHeaderBuilder implements DynamicHeaderBuilder {
         this.x509Builder = null;
     }
 
-    private ProtectedHeader<?> ensureProtected() {
-        ProtectedHeader<?> ph;
-        if (this.header instanceof ProtectedHeader<?>) {
-            ph = (ProtectedHeader<?>) this.header;
+    private AbstractProtectedHeader<?> ensureProtected() {
+        AbstractProtectedHeader<?> ph;
+        if (this.header instanceof AbstractProtectedHeader) {
+            ph = (AbstractProtectedHeader<?>) this.header;
         } else {
             this.header = ph = new DefaultJwsHeader(this.header);
             this.x509Builder = new DefaultX509Builder<DynamicHeaderBuilder>(ph, this, IllegalStateException.class);
@@ -53,10 +57,10 @@ public class DefaultDynamicHeaderBuilder implements DynamicHeaderBuilder {
         return ph;
     }
 
-    private JweHeader ensureJwe() {
-        JweHeader h;
-        if (this.header instanceof JweHeader) {
-            h = (JweHeader) this.header;
+    private DefaultJweHeader ensureJwe() {
+        DefaultJweHeader h;
+        if (this.header instanceof DefaultJweHeader) {
+            h = (DefaultJweHeader) this.header;
         } else {
             this.header = h = new DefaultJweHeader(this.header);
             this.x509Builder = new DefaultX509Builder<DynamicHeaderBuilder>(h, this, IllegalStateException.class);
@@ -203,10 +207,17 @@ public class DefaultDynamicHeaderBuilder implements DynamicHeaderBuilder {
     }
 
     @Override
-    public Header<?> build() {
+    public Header build() {
         if (this.x509Builder != null) {
             this.x509Builder.apply();
         }
-        return this.header;
+        //ensure future changes to builder state do not change the constructed header:
+        if (this.header instanceof JweHeader) {
+            return new DefaultJweHeader(this.header);
+        } else if (this.header instanceof ProtectedHeader) {
+            return new DefaultJwsHeader(this.header);
+        } else {
+            return new DefaultUnprotectedHeader(this.header);
+        }
     }
 }

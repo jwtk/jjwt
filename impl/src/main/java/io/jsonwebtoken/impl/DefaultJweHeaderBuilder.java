@@ -15,16 +15,16 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JweHeaderBuilder;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJweHeaderBuilder extends AbstractProtectedHeaderBuilder<JweHeader, JweHeaderBuilder>
-        implements JweHeaderBuilder {
+public class DefaultJweHeaderBuilder extends AbstractProtectedHeaderBuilder<DefaultJweHeader, JweHeaderBuilder>
+   implements JweHeaderBuilder {
 
     @Override
-    protected JweHeader newHeader() {
+    protected DefaultJweHeader newHeader() {
         return new DefaultJweHeader();
     }
 
