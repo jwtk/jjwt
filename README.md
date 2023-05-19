@@ -3068,8 +3068,9 @@ Example:
 
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
-MacAlgorithm alg = Jwts.SIG.HS512; //or HS384 or HS256
-SecretKey key = alg.keyBuilder().build();
+SignatureAlgorithm alg = SignatureAlgorithm.HS512; //or HS384 or HS256
+String plaintextSecret = "A random string that is at least 64 bytes long. This is used to sign the JWT tokens. This string should be kept secret."
+SecretKey key = Keys.hmacShaKeyFor(plaintextSecret.getBytes(StandardCharsets.UTF_8));
 
 String message = "Hello World!";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
@@ -3095,8 +3096,8 @@ public key:
 
 ```java
 // Create a test key suitable for the desired RSA signature algorithm:
-SignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
-KeyPair pair = alg.keyPairBuilder().build();
+SignatureAlgorithm alg = SignatureAlgorithm.RS512; //or PS512, RS256, etc...
+KeyPair pair = Keys.keyPairFor(alg);
 
 // Bob creates the compact JWS with his RSA private key:
 String jws = Jwts.builder().setSubject("Alice")
@@ -3126,8 +3127,8 @@ public key:
 
 ```java
 // Create a test key suitable for the desired ECDSA signature algorithm:
-SignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
-KeyPair pair = alg.keyPairBuilder().build();
+SignatureAlgorithm alg = SignatureAlgorithm.ES512; //or ES256 or ES384
+KeyPair pair = Keys.keyPairFor(alg);
 
 // Bob creates the compact JWS with his EC private key:
 String jws = Jwts.builder().setSubject("Alice")
