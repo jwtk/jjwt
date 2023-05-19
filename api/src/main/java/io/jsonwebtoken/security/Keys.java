@@ -205,19 +205,19 @@ public final class Keys {
      * <th><a href="https://tools.ietf.org/html/rfc5480#section-2.1.1.1">ASN1 OID Curve Name</a></th>
      * </tr>
      * <tr>
-     * <td>EC256</td>
+     * <td>ES256</td>
      * <td>256 bits</td>
      * <td>{@code P-256}</td>
      * <td>{@code secp256r1}</td>
      * </tr>
      * <tr>
-     * <td>EC384</td>
+     * <td>ES384</td>
      * <td>384 bits</td>
      * <td>{@code P-384}</td>
      * <td>{@code secp384r1}</td>
      * </tr>
      * <tr>
-     * <td>EC512</td>
+     * <td>ES512</td>
      * <td><b>521</b> bits</td>
      * <td>{@code P-521}</td>
      * <td>{@code secp521r1}</td>
