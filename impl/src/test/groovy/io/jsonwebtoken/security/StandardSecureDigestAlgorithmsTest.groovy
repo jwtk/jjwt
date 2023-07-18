@@ -18,49 +18,14 @@ package io.jsonwebtoken.security
 import io.jsonwebtoken.Jwts
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertNotNull
 
+/**
+ * The {@link StandardAlgorithmsTest} class contains the majority of test cases relevant for the
+ * {@link StandardSecureDigestAlgorithms} implementation.  This test class exists for additional checks/assertions
+ * for the convenience Ed2448 and Ed25519 aliases.
+ */
 class StandardSecureDigestAlgorithmsTest {
-
-    @Test
-    void testGet() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
-            assertSame alg, Jwts.SIG.get(alg.getId())
-        }
-    }
-
-    @Test
-    void testGetCaseInsensitive() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
-            assertSame alg, Jwts.SIG.get(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testGetWithInvalidId() {
-        //unlike the 'find' paradigm, 'for' requires the value to exist
-        Jwts.SIG.get('invalid')
-    }
-
-    @Test
-    void testFindById() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
-            assertSame alg, Jwts.SIG.find(alg.getId())
-        }
-    }
-
-    @Test
-    void testFindByIdCaseInsensitive() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
-            assertSame alg, Jwts.SIG.find(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        assertNull Jwts.SIG.find('invalid')
-    }
 
     @Test
     void testFindEd448() {
