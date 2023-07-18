@@ -27,13 +27,13 @@ import java.security.Key;
  * A component that is able to read
  * <a href="https://www.rfc-editor.org/rfc/rfc7516#section-4">JWE JOSE header</a> values. This is most naturally
  * supported by a {@link JweHeader} instance (which implements this interface), but is also supported by
- * a {@link JweHeaderBuilder}, which also implements this interface to support the ability to read the builder's values.
+ * a {@link JwtHeaderBuilder}, which also implements this interface to support the ability to read the builder's values.
  *
  * @see JweHeader
- * @see JweHeaderBuilder
+ * @see JwtHeaderBuilder
  * @since JJWT_RELEASE_VERSION
  */
-public interface JweHeaderAccessor {
+public interface JweHeaderAccessor extends ProtectedHeaderAccessor {
 
     /**
      * Returns the JWE <a href="https://tools.ietf.org/html/rfc7516#section-4.1.2">{@code enc} (Encryption

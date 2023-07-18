@@ -37,6 +37,39 @@ class BytesTest {
     }
 
     @Test
+    void testRandom() {
+        byte[] random = Bytes.random(12)
+        assertEquals 12, random.length
+    }
+
+    @Test
+    void testRandomBits() {
+        int count = 16
+        byte[] random = Bytes.randomBits(count * Byte.SIZE)
+        assertEquals count, random.length
+    }
+
+    @Test
+    void testRandomBitsZeroLength() {
+        try {
+            Bytes.randomBits(0)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            assertEquals 'numBytes argument must be >= 0', expected.getMessage()
+        }
+    }
+
+    @Test
+    void testRandomBitsNegativeLength() {
+        try {
+            Bytes.randomBits(-1)
+            fail()
+        } catch (IllegalArgumentException expected) {
+            assertEquals 'numBytes argument must be >= 0', expected.getMessage()
+        }
+    }
+
+    @Test
     void testIntToBytesToInt() {
         int iterations = 10000
         for (int i = 0; i < iterations; i++) {

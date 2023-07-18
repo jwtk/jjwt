@@ -133,49 +133,40 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetHeader() {
-        def h = Jwts.unprotectedHeader()
-        def b = new DefaultJwtBuilder()
-        b.setHeader(h)
-        assertEquals h, b.header
+        def h = Jwts.header().put('foo', 'bar').build()
+        builder.setHeader(h)
+        assertEquals h, builder.header().build()
     }
 
     @Test
     void testSetHeaderFromMap() {
         def m = [foo: 'bar']
-        def b = new DefaultJwtBuilder()
-        b.setHeader(m)
-        assertNotNull b.header
-        assertEquals b.header.size(), 1
-        assertEquals b.header.foo, 'bar'
+        builder.setHeader(m)
+        assertEquals builder.header().size(), 1
+        assertEquals builder.header().build().foo, 'bar'
     }
 
     @Test
     void testSetHeaderParams() {
         def m = [a: 'b', c: 'd']
-        def b = new DefaultJwtBuilder()
-        b.setHeaderParams(m)
-        assertNotNull b.header
-        assertEquals b.header.size(), 2
-        assertEquals b.header.a, 'b'
-        assertEquals b.header.c, 'd'
+        builder.setHeaderParams(m)
+        assertEquals builder.header().size(), 2
+        assertEquals builder.header().build().a, 'b'
+        assertEquals builder.header().build().c, 'd'
     }
 
     @Test
     void testSetHeaderParam() {
-        def b = new DefaultJwtBuilder()
-        b.setHeaderParam('foo', 'bar')
-        assertNotNull b.header
-        assertEquals b.header.size(), 1
-        assertEquals b.header.foo, 'bar'
+        builder.setHeaderParam('foo', 'bar')
+        assertEquals builder.header().size(), 1
+        assertEquals builder.header().build().foo, 'bar'
     }
 
     @Test
     void testSetClaims() {
-        def b = new DefaultJwtBuilder()
-        Claims c = Jwts.claims().build()
-        b.setClaims(c)
-        assertNotNull b.claims
-        assertSame b.claims, c
+        Claims c = Jwts.claims().put('foo', 'bar').build()
+        builder.setClaims(c)
+        assertEquals c, builder.claims
     }
 
     @Test
@@ -211,19 +202,17 @@ class DefaultJwtBuilderTest {
     void testClaimEmptyString() {
         String value = ' '
         builder.claim('foo', value)
-        assertNull builder.claims // shouldn't auto-create claims instance
+        assertTrue builder.claims.isEmpty() // shouldn't populate claims instance
     }
 
     @Test
     void testExistingClaimsAndSetClaim() {
-        def b = new DefaultJwtBuilder()
-        Claims c = Jwts.claims().build()
-        b.setClaims(c)
-        b.claim('foo', 'bar')
-        assertSame b.claims, c
-        assertEquals b.claims.size(), 1
+        Claims c = Jwts.claims().put('foo', 'bar').build()
+        builder.setClaims(c)
+        assertEquals c, builder.claims
+        assertEquals builder.claims.size(), 1
         assertEquals c.size(), 1
-        assertEquals b.claims.foo, 'bar'
+        assertEquals builder.claims.foo, 'bar'
         assertEquals c.foo, 'bar'
     }
 
@@ -268,7 +257,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactWithJwsHeader() {
         def b = new DefaultJwtBuilder()
-        b.setHeader(Jwts.header().setKeyId('a'))
+        b.header().setKeyId('a')
         b.setPayload('foo')
         def alg = SignatureAlgorithm.HS256
         def key = Keys.secretKeyFor(alg)
@@ -321,7 +310,7 @@ class DefaultJwtBuilderTest {
     void testSignWithKeyOnly() {
 
         def b = new DefaultJwtBuilder()
-        b.setHeader(Jwts.header().setKeyId('a'))
+        b.header().setKeyId('a')
         b.setPayload('foo')
 
         def key = KeyGenerator.getInstance('HmacSHA256').generateKey()
@@ -360,72 +349,63 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetHeaderParamsWithNullMap() {
-        def b = new DefaultJwtBuilder()
-        b.setHeaderParams(null)
-        assertNull b.header
+        builder.setHeaderParams(null)
+        assertTrue builder.header().isEmpty()
     }
 
     @Test
     void testSetHeaderParamsWithEmptyMap() {
-        def b = new DefaultJwtBuilder()
-        b.setHeaderParams([:])
-        assertNull b.header
+        builder.setHeaderParams([:])
+        assertTrue builder.header().isEmpty()
     }
 
     @Test
     void testSetIssuerWithNull() {
         def b = new DefaultJwtBuilder()
         b.setIssuer(null)
-        assertNull b.claims
+        assertTrue b.claims.isEmpty()
     }
 
     @Test
     void testSetSubjectWithNull() {
-        def b = new DefaultJwtBuilder()
-        b.setSubject(null)
-        assertNull b.claims
+        builder.setSubject(null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test
     void testSetAudienceWithNull() {
-        def b = new DefaultJwtBuilder()
-        b.setAudience(null)
-        assertNull b.claims
+        builder.setAudience(null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test
     void testSetIdWithNull() {
-        def b = new DefaultJwtBuilder()
-        b.setId(null)
-        assertNull b.claims
+        builder.setId(null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test
     void testClaimNullValue() {
-        def b = new DefaultJwtBuilder()
-        b.claim('foo', null)
-        assertNull b.claims
+        builder.claim('foo', null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test
     void testSetNullExpirationWithNullClaims() {
-        def b = new DefaultJwtBuilder()
-        b.setExpiration(null)
-        assertNull b.claims
+        builder.setExpiration(null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test
     void testSetNullNotBeforeWithNullClaims() {
-        def b = new DefaultJwtBuilder()
-        b.setNotBefore(null)
-        assertNull b.claims
+        builder.setNotBefore(null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test
     void testSetNullIssuedAtWithNullClaims() {
-        def b = new DefaultJwtBuilder()
-        b.setIssuedAt(null)
-        assertNull b.claims
+        builder.setIssuedAt(null)
+        assertTrue builder.claims.isEmpty()
     }
 
     @Test(expected = IllegalArgumentException)

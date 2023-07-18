@@ -24,17 +24,17 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class JwtMapTest {
+class FieldMapTest {
 
     private static final Field<String> DUMMY = Fields.string('' + Randoms.secureRandom().nextInt(), "RANDOM")
     private static final Field<String> SECRET = Fields.secretBigInt('foo', 'foo')
     private static final Set<Field<?>> FIELDS = Collections.setOf(DUMMY)
-    JwtMap jwtMap
+    FieldMap jwtMap
 
     @Before
     void setup() {
         // dummy field to satisfy constructor:
-        jwtMap = new JwtMap(FIELDS)
+        jwtMap = new FieldMap(FIELDS)
     }
 
     void unsupported(Closure<?> c) {
@@ -49,7 +49,7 @@ class JwtMapTest {
 
     @Test
     void testImmutable() {
-        Map m = jwtMap;
+        Map m = jwtMap
         m.put('foo', 'bar') // allowed
         jwtMap.setMutable(false)
 
@@ -122,10 +122,10 @@ class JwtMapTest {
 
     @Test
     void testEquals() throws Exception {
-        def m1 = new JwtMap(FIELDS);
+        def m1 = new FieldMap(FIELDS);
         m1.put("a", "a");
 
-        def m2 = new JwtMap(FIELDS);
+        def m2 = new FieldMap(FIELDS);
         m2.put("a", "a");
 
         assertEquals(m1, m2);
@@ -145,13 +145,13 @@ class JwtMapTest {
 
     @Test
     void testGetName() {
-        def map = new JwtMap(FIELDS)
+        def map = new FieldMap(FIELDS)
         assertEquals 'Map', map.getName()
     }
 
     @Test
     void testSetSecretFieldWithInvalidTypeValue() {
-        def map = new JwtMap(Collections.setOf(SECRET))
+        def map = new FieldMap(Collections.setOf(SECRET))
         def invalidValue = URI.create('https://whatever.com')
         try {
             map.put('foo', invalidValue)
@@ -163,5 +163,10 @@ class JwtMapTest {
                     'java.net.URI.'
             assertEquals msg, expected.getMessage()
         }
+    }
+
+    @Test(expected = IllegalStateException)
+    void testIteratorRemoveWithoutIteration() {
+        jwtMap.iterator().remove()
     }
 }

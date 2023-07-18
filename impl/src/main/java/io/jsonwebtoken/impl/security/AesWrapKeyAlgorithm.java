@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.JweHeaderAccessor;
+import io.jsonwebtoken.JweHeaderMutator;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
@@ -39,7 +41,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
+    public <H extends JweHeaderAccessor & JweHeaderMutator<H>> KeyResult getEncryptionKey(final KeyRequest<SecretKey, H> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);

@@ -15,28 +15,25 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.JwtMap;
+import io.jsonwebtoken.impl.AbstractX509Context;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.HashAlgorithm;
 
-import java.net.URI;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static io.jsonwebtoken.lang.Strings.nespace;
 
-public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkContext<K> {
+public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkContext<K>> implements JwkContext<K> {
 
     private static final Set<Field<?>> DEFAULT_FIELDS;
 
@@ -104,7 +101,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
         for (Map.Entry<String, Object> entry : src.idiomaticValues.entrySet()) {
             String id = entry.getKey();
             Object value = entry.getValue();
-            Field<?> field = this.FIELDS.get(id);
+            Field<?> field = this.FIELDS.find(id);
             if (field != null && !field.supports(value)) { // src idiomatic value is not what is expected, so convert:
                 value = this.values.get(field.getId());
                 put(field, value); // perform idiomatic conversion with original/raw src value
@@ -148,7 +145,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public String getAlgorithm() {
-        return idiomaticGet(AbstractJwk.ALG);
+        return get(AbstractJwk.ALG);
     }
 
     @Override
@@ -159,7 +156,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public String getId() {
-        return idiomaticGet(AbstractJwk.KID);
+        return get(AbstractJwk.KID);
     }
 
     @Override
@@ -181,7 +178,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public Set<String> getOperations() {
-        return idiomaticGet(AbstractJwk.KEY_OPS);
+        return get(AbstractJwk.KEY_OPS);
     }
 
     @Override
@@ -192,7 +189,7 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public String getType() {
-        return idiomaticGet(AbstractJwk.KTY);
+        return get(AbstractJwk.KTY);
     }
 
     @Override
@@ -203,56 +200,12 @@ public class DefaultJwkContext<K extends Key> extends JwtMap implements JwkConte
 
     @Override
     public String getPublicKeyUse() {
-        return idiomaticGet(AbstractAsymmetricJwk.USE);
+        return get(AbstractAsymmetricJwk.USE);
     }
 
     @Override
     public JwkContext<K> setPublicKeyUse(String use) {
         put(AbstractAsymmetricJwk.USE, use);
-        return this;
-    }
-
-    @Override
-    public List<X509Certificate> getX509CertificateChain() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5C);
-    }
-
-    @Override
-    public JwkContext<K> setX509CertificateChain(List<X509Certificate> x5c) {
-        put(AbstractAsymmetricJwk.X5C, x5c);
-        return this;
-    }
-
-    @Override
-    public byte[] getX509CertificateSha1Thumbprint() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5T);
-    }
-
-    @Override
-    public JwkContext<K> setX509CertificateSha1Thumbprint(byte[] x5t) {
-        put(AbstractAsymmetricJwk.X5T, x5t);
-        return this;
-    }
-
-    @Override
-    public byte[] getX509CertificateSha256Thumbprint() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5T_S256);
-    }
-
-    @Override
-    public JwkContext<K> setX509CertificateSha256Thumbprint(byte[] x5ts256) {
-        put(AbstractAsymmetricJwk.X5T_S256, x5ts256);
-        return this;
-    }
-
-    @Override
-    public URI getX509Url() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5U);
-    }
-
-    @Override
-    public JwkContext<K> setX509Url(URI url) {
-        put(AbstractAsymmetricJwk.X5U, url);
         return this;
     }
 

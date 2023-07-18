@@ -77,7 +77,7 @@ class EncryptionAlgorithmsTest {
     @Test
     void testForIdCaseInsensitive() {
         for (AeadAlgorithm alg : Jwts.ENC.values()) {
-            assertSame alg, Jwts.ENC.get(alg.getId().toLowerCase())
+            assertSame alg, Jwts.ENC.find(alg.getId().toLowerCase())
         }
     }
 

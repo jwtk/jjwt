@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.JweHeaderAccessor;
+import io.jsonwebtoken.JweHeaderMutator;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -37,7 +39,7 @@ public class DirectKeyAlgorithm implements KeyAlgorithm<SecretKey, SecretKey> {
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
+    public <H extends JweHeaderAccessor & JweHeaderMutator<H>> KeyResult getEncryptionKey(final KeyRequest<SecretKey, H> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         SecretKey key = Assert.notNull(request.getPayload(), "Encryption key cannot be null.");
         return new DefaultKeyResult(key);

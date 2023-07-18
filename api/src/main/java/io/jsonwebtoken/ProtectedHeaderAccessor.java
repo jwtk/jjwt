@@ -25,13 +25,13 @@ import java.util.Set;
  * A component that is able to read a JWT header that is integrity protected, either by JWS digital signature or
  * JWE AEAD encryption. This is most naturally
  * supported by a {@link ProtectedHeader} instance (which implements this interface), but is also supported by
- * a {@link ProtectedHeaderBuilder}, which also implements this interface to support the ability to read the
+ * a {@link JwtHeaderBuilder}, which also implements this interface to support the ability to read the
  * builder's values.
  * <p>Additionally, because all protected headers support X509 parameters, this interface also extends
  * {@link X509Accessor}.</p>
  *
  * @see ProtectedHeader
- * @see ProtectedHeaderBuilder
+ * @see JwtHeaderBuilder
  * @see X509Accessor
  * @since JJWT_RELEASE_VERSION
  */

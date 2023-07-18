@@ -15,59 +15,60 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.Header
-import org.junit.Before
+
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNull
 
-class AbstractHeaderTest {
+class DefaultHeaderTest {
     
-    private AbstractHeader header
-    
-    @Before
-    void setUp() {
-        header = new AbstractHeader(AbstractHeader.FIELDS){}
+    private DefaultHeader header
+
+    private static DefaultHeader h(Map<String, ?> m) {
+        return new DefaultHeader(m)
     }
-
+    
     @Test
     void testType() {
-        header.setType('foo')
-        assertEquals header.getType(), 'foo'
+        header = h([typ: 'foo'])
+        assertEquals 'foo', header.getType()
+        assertEquals 'foo', header.get('typ')
     }
 
     @Test
     void testContentType() {
-        header.setContentType('bar')
+        header = h([cty: 'bar'])
         assertEquals 'bar', header.getContentType()
         assertEquals 'bar', header.get('cty')
     }
 
     @Test
     void testAlgorithm() {
-        header.setAlgorithm('foo')
+        header = h([alg: 'foo'])
         assertEquals 'foo', header.getAlgorithm()
-
-        header = new AbstractHeader(AbstractHeader.FIELDS, [alg: 'bar']){}
-        assertEquals 'bar', header.getAlgorithm()
+        assertEquals 'foo', header.get('alg')
     }
 
     @Test
     void testSetCompressionAlgorithm() {
-        header.setCompressionAlgorithm("DEF")
+        header = h([zip: 'DEF'])
         assertEquals "DEF", header.getCompressionAlgorithm()
+        assertEquals 'DEF', header.get('zip')
     }
 
     @SuppressWarnings('GrDeprecatedAPIUsage')
     @Test
     void testBackwardsCompatibleCompressionHeader() {
-        header.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
+        header = h([calg: 'DEF'])
         assertEquals "DEF", header.getCompressionAlgorithm()
+        assertEquals 'DEF', header.get('calg')
+        assertNull header.get('zip')
     }
 
     @Test
     void testGetName() {
-        def header = new AbstractHeader(AbstractHeader.FIELDS){}
+        def header = new DefaultHeader([:])
         assertEquals 'JWT header', header.getName()
     }
 }

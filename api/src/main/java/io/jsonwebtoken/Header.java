@@ -35,9 +35,18 @@ import java.util.Map;
  *
  * <p>It is easiest to create a {@code Header} instance by using a {@link Jwts#header() Jwts.header()} builder.</p>
  *
+ * <p><b>Security</b></p>
+ *
+ * <p>The {@code Header} interface itself makes no implications of integrity protection via either digital signatures or
+ * encryption. Instead, {@link JwsHeader} and {@link JweHeader} represent this information for respective
+ * {@link Jws} and {@link Jwe} instances.</p>
+ *
+ * @see ProtectedHeader
+ * @see JwsHeader
+ * @see JweHeader
  * @since 0.1
  */
-public interface Header extends HeaderAccessor, Map<String, Object> {
+public interface Header extends Map<String, Object>, HeaderAccessor {
 
     /**
      * JWT {@code Type} (typ) value: <code>"JWT"</code>
@@ -75,7 +84,6 @@ public interface Header extends HeaderAccessor, Map<String, Object> {
      *
      * @deprecated use {@link #COMPRESSION_ALGORITHM} instead.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 }

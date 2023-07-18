@@ -529,7 +529,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since 0.2
      */
-    Jwt<UnprotectedHeader, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException,
+    Jwt<Header, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException,
             SignatureException, SecurityException, IllegalArgumentException;
 
     /**
@@ -559,7 +559,7 @@ public interface JwtParser {
      * @see #parse(String)
      * @since 0.2
      */
-    Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException,
+    Jwt<Header, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException,
             MalformedJwtException, SignatureException, SecurityException, IllegalArgumentException;
 
     /**

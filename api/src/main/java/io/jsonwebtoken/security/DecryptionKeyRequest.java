@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.JweHeader;
+
 import java.security.Key;
 
 /**
@@ -38,5 +40,5 @@ import java.security.Key;
  * @param <K> the type of {@link Key} used during the request to obtain the resulting decryption key.
  * @since JJWT_RELEASE_VERSION
  */
-public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
+public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[], JweHeader> {
 }

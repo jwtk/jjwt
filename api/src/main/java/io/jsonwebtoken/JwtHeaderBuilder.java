@@ -16,24 +16,23 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.Builder;
-import io.jsonwebtoken.lang.MapMutator;
+import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.security.X509Builder;
 
 /**
  * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
  * <ul>
- *     <li>If only standard {@link Header} properties have been set (that is, no
- *     {@link JwsHeader} or {@link JweHeader} properties have been set), an {@link UnprotectedHeader} will be created.</li>
- *     <li>If any {@link ProtectedHeader} properties have been set (but no {@link JweHeader} properties), a
- *         {@link JwsHeader} will be created.</li>
- *     <li>If any {@link JweHeader} properties have been set, a {@link JweHeader} will be created.</li>
+ *     <li>If a {@link #getEncryptionAlgorithm() encryptionAlgorithm} is present (a JWE-only property), a
+ *     {@link JweHeader} will be created, otherwise:</li>
+ *     <li>If an {@link #getAlgorithm() algorithm} other than {@code NONE} is specified, a {@link JwsHeader}
+ *     will be created, otherwise:</li>
+ *     <li>A standard {@link Header} will be created by default.</li>
  * </ul>
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface DynamicHeaderBuilder extends
-        MapMutator<String, Object, DynamicHeaderBuilder>,
-        X509Builder<DynamicHeaderBuilder>,
-        JweHeaderMutator<DynamicHeaderBuilder>,
-        Builder<Header> {
+public interface JwtHeaderBuilder extends
+        X509Builder<JwtHeaderBuilder>,
+        JweHeaderAccessor, JweHeaderMutator<JwtHeaderBuilder>,
+        Builder<Header>, Conjunctor<JwtBuilder> {
 }

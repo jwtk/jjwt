@@ -18,11 +18,12 @@ package io.jsonwebtoken.impl.compression
 import io.jsonwebtoken.CompressionCodec
 import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.CompressionException
+import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
-import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import io.jsonwebtoken.impl.io.FakeServiceDescriptorClassLoader
 import io.jsonwebtoken.impl.lang.Services
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 import static org.hamcrest.CoreMatchers.*
@@ -30,21 +31,24 @@ import static org.hamcrest.MatcherAssert.assertThat
 
 class DefaultCompressionCodecResolverTest {
 
+    private DefaultCompressionCodecResolver resolver
+
+    @Before
+    void setUp() {
+        this.resolver = new DefaultCompressionCodecResolver()
+    }
+
     @Test
     void resolveHeaderTest() {
-        assertThat new DefaultCompressionCodecResolver().resolveCompressionCodec(
-                new DefaultUnprotectedHeader()), nullValue()
-        assertThat new DefaultCompressionCodecResolver().resolveCompressionCodec(
-                new DefaultUnprotectedHeader().setCompressionAlgorithm("def")), is(CompressionCodecs.DEFLATE)
-        assertThat new DefaultCompressionCodecResolver().resolveCompressionCodec(
-                new DefaultUnprotectedHeader().setCompressionAlgorithm("gzip")), is(CompressionCodecs.GZIP)
+        assertThat resolver.resolveCompressionCodec(new DefaultHeader([:])), nullValue()
+        assertThat resolver.resolveCompressionCodec(new DefaultHeader([zip: 'def'])), is(CompressionCodecs.DEFLATE)
+        assertThat resolver.resolveCompressionCodec(new DefaultHeader([zip: 'gzip'])), is(CompressionCodecs.GZIP)
     }
 
     @Test
     void invalidCompressionNameTest() {
         try {
-            new DefaultCompressionCodecResolver().resolveCompressionCodec(
-                    new DefaultUnprotectedHeader().setCompressionAlgorithm("expected-missing"))
+            resolver.resolveCompressionCodec(new DefaultHeader([zip: 'expected-missing']))
             Assert.fail("Expected CompressionException to be thrown")
         } catch (CompressionException e) {
             assertThat e.message, is(String.format(DefaultCompressionCodecResolver.MISSING_COMPRESSION_MESSAGE, "expected-missing"))
@@ -60,7 +64,7 @@ class DefaultCompressionCodecResolverTest {
 
             def header = new DefaultJwsHeader(['zip': 'gzip'])
             // now we know the class is loadable, make sure we ALWAYS return the GZIP impl
-            assertThat new DefaultCompressionCodecResolver().locate(header), instanceOf(GzipCompressionCodec)
+            assertThat resolver.locate(header), instanceOf(GzipCompressionCodec)
         }
     }
 }

@@ -17,48 +17,53 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.MapAccessor;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
 import java.lang.reflect.Array;
+import java.util.AbstractSet;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
+public class FieldMap implements Map<String, Object>, MapAccessor<String, Object>, FieldReadable, Nameable {
 
     protected final Registry<String, ? extends Field<?>> FIELDS;
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
     protected final Map<String, Object> idiomaticValues; // the values map with any RFC values converted to Java type-safe values where possible
 
-    private transient boolean mutable = true;
+    private transient boolean mutable;
 
-    public JwtMap(Set<Field<?>> fieldSet) {
-        this(new IdRegistry<>("Field", fieldSet, true));
+    public FieldMap(Set<Field<?>> fieldSet) {
+        this(Fields.registry(fieldSet));
     }
 
-    public JwtMap(Registry<String, ? extends Field<?>> fields) {
+    public FieldMap(Registry<String, ? extends Field<?>> fields) {
         Assert.notNull(fields, "Field registry cannot be null.");
         Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
         this.FIELDS = fields;
         this.values = new LinkedHashMap<>();
         this.idiomaticValues = new LinkedHashMap<>();
+        this.mutable = true;
     }
 
-    public JwtMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
+    public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
         this(fields);
         Assert.notNull(values, "Map argument cannot be null.");
         putAll(values);
+        this.mutable = false;
     }
 
-    public JwtMap setMutable(boolean mutable) {
+    public FieldMap setMutable(boolean mutable) {
         this.mutable = mutable;
         return this;
     }
@@ -81,15 +86,6 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
                 (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
                 (v instanceof Map && Collections.isEmpty((Map<?, ?>) v)) ||
                 (v.getClass().isArray() && Array.getLength(v) == 0);
-    }
-
-    protected Object idiomaticGet(String key) {
-        return this.idiomaticValues.get(key);
-    }
-
-    protected <T> T idiomaticGet(Field<T> field) {
-        Object value = this.idiomaticValues.get(field.getId());
-        return field.cast(value);
     }
 
     @Override
@@ -151,7 +147,7 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
     // as an idiomatic type-safe Java value in addition to the canonical RFC/encoded value.
     private Object idiomaticPut(String name, Object value) {
         Assert.stateNotNull(name, "Name cannot be null."); // asserted by caller
-        Field<?> field = FIELDS.get(name);
+        Field<?> field = FIELDS.find(name);
         if (field != null) { //Setting a JWA-standard property - let's ensure we can represent it idiomatically:
             return apply(field, value);
         } else { //non-standard/custom property:
@@ -230,17 +226,17 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
 
     @Override
     public Set<String> keySet() {
-        return values.keySet();
+        return new KeySet();
     }
 
     @Override
     public Collection<Object> values() {
-        return values.values();
+        return new ValueSet();
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        return values.entrySet();
+        return new EntrySet();
     }
 
     @Override
@@ -258,4 +254,86 @@ public class JwtMap implements Map<String, Object>, FieldReadable, Nameable {
     public boolean equals(Object obj) {
         return values.equals(obj);
     }
+
+    private abstract class FieldMapSet<T> extends AbstractSet<T> {
+
+        @Override
+        public int size() {
+            return FieldMap.this.size();
+        }
+    }
+
+    private class KeySet extends FieldMapSet<String> {
+        @Override
+        public Iterator<String> iterator() {
+            return new KeyIterator();
+        }
+    }
+
+    private class ValueSet extends FieldMapSet<Object> {
+        @Override
+        public Iterator<Object> iterator() {
+            return new ValueIterator();
+        }
+    }
+
+    private class EntrySet extends FieldMapSet<Map.Entry<String, Object>> {
+        @Override
+        public Iterator<Entry<String, Object>> iterator() {
+            return new EntryIterator();
+        }
+    }
+
+    private abstract class FieldMapIterator<T> implements Iterator<T> {
+
+        final Iterator<Map.Entry<String, Object>> i;
+
+        transient Map.Entry<String, Object> current;
+
+        FieldMapIterator() {
+            this.i = FieldMap.this.values.entrySet().iterator();
+            this.current = null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return i.hasNext();
+        }
+
+        protected Map.Entry<String, Object> nextEntry() {
+            current = i.next();
+            return current;
+        }
+
+        @Override
+        public void remove() {
+            if (current == null) {
+                throw new IllegalStateException();
+            }
+            String key = current.getKey();
+            FieldMap.this.remove(key);
+        }
+    }
+
+    private class ValueIterator extends FieldMapIterator<Object> {
+        @Override
+        public Object next() {
+            return nextEntry().getValue();
+        }
+    }
+
+    private class KeyIterator extends FieldMapIterator<String> {
+        @Override
+        public String next() {
+            return nextEntry().getKey();
+        }
+    }
+
+    private class EntryIterator extends FieldMapIterator<Map.Entry<String, Object>> {
+        @Override
+        public Entry<String, Object> next() {
+            return nextEntry();
+        }
+    }
+
 }

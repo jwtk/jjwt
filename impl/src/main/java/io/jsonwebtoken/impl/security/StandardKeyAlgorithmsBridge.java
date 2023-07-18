@@ -59,7 +59,7 @@ public final class StandardKeyAlgorithmsBridge extends DelegatingRegistry<KeyAlg
                 new DefaultRsaKeyAlgorithm(RSA1_5_ID, RSA1_5_TRANSFORMATION),
                 new DefaultRsaKeyAlgorithm(RSA_OAEP_ID, RSA_OAEP_TRANSFORMATION),
                 new DefaultRsaKeyAlgorithm(RSA_OAEP_256_ID, RSA_OAEP_256_TRANSFORMATION, RSA_OAEP_256_SPEC)
-        )));
+        ), false));
     }
 
     /*

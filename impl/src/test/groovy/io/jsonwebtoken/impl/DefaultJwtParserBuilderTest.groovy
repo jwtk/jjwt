@@ -134,7 +134,7 @@ class DefaultJwtParserBuilderTest {
     void testCompressionCodecLocator() {
         Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
             @Override
-            CompressionCodec locate(Header<? extends Header> header) {
+            CompressionCodec locate(Header header) {
                 return null
             }
         }
@@ -146,7 +146,7 @@ class DefaultJwtParserBuilderTest {
     void testAddCompressionCodecs() {
         def codec = new TestCompressionCodec(id: 'test')
         def parser = builder.addCompressionCodecs([codec] as Set<CompressionCodec>).build()
-        def header = Jwts.unprotectedHeader().setCompressionAlgorithm(codec.getId())
+        def header = Jwts.header().setCompressionAlgorithm(codec.getId()).build()
         assertSame codec, parser.jwtParser.compressionCodecLocator.locate(header)
     }
 
@@ -155,7 +155,7 @@ class DefaultJwtParserBuilderTest {
         def codec = new TestCompressionCodec(id: 'test')
         Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
             @Override
-            CompressionCodec locate(Header<? extends Header> header) {
+            CompressionCodec locate(Header header) {
                 return null
             }
         }

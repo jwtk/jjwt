@@ -23,12 +23,42 @@ import io.jsonwebtoken.lang.Collections;
 import java.util.Date;
 import java.util.Map;
 
-public class DefaultClaimsBuilder implements ClaimsBuilder {
+@SuppressWarnings("unused") // used via reflection via Jwts.claims()
+public final class DefaultClaimsBuilder implements ClaimsBuilder {
 
     final DefaultClaims claims;
 
     public DefaultClaimsBuilder() {
         this.claims = new DefaultClaims();
+    }
+
+    @Override
+    public ClaimsBuilder put(String name, Object value) {
+        Assert.hasText(name, "Claim property name cannot be null or empty.");
+        this.claims.put(name, value);
+        return this;
+    }
+
+    @Override
+    public ClaimsBuilder remove(String key) {
+        this.claims.remove(key);
+        return this;
+    }
+
+    @Override
+    public ClaimsBuilder putAll(Map<? extends String, ?> m) {
+        if (!Collections.isEmpty(m)) {
+            for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
+                put(entry.getKey(), entry.getValue());
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public ClaimsBuilder clear() {
+        this.claims.clear();
+        return this;
     }
 
     @Override
@@ -77,34 +107,5 @@ public class DefaultClaimsBuilder implements ClaimsBuilder {
     public Claims build() {
         // ensure a new instance is returned so that the builder may be re-used:
         return new DefaultClaims(claims);
-    }
-
-    @Override
-    public ClaimsBuilder put(String name, Object value) {
-        Assert.hasText(name, "Claim property name cannot be null or empty.");
-        this.claims.put(name, value);
-        return this;
-    }
-
-    @Override
-    public ClaimsBuilder remove(String key) {
-        this.claims.remove(key);
-        return this;
-    }
-
-    @Override
-    public ClaimsBuilder putAll(Map<? extends String, ?> m) {
-        if (!Collections.isEmpty(m)) {
-            for(Map.Entry<? extends String, ?> entry : m.entrySet()) {
-                put(entry.getKey(), entry.getValue());
-            }
-        }
-        return this;
-    }
-
-    @Override
-    public ClaimsBuilder clear() {
-        this.claims.clear();
-        return this;
     }
 }

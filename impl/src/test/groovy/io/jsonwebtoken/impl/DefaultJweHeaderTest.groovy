@@ -18,9 +18,9 @@ package io.jsonwebtoken.impl
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPublicJwk
-import org.junit.Before
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
@@ -40,23 +40,19 @@ class DefaultJweHeaderTest {
 
     private DefaultJweHeader header
 
-    @Before
-    void setUp() {
-        header = new DefaultJweHeader()
+    private static DefaultJweHeader h(Map<String, ?> m) {
+        return new DefaultJweHeader(m)
     }
 
     @Test
     void testEncryptionAlgorithm() {
-        header.put('enc', 'foo')
-        assertEquals 'foo', header.getEncryptionAlgorithm()
-
-        header = new DefaultJweHeader([enc: 'bar'])
-        assertEquals 'bar', header.getEncryptionAlgorithm()
+        assertEquals 'foo', h([enc: 'foo']).getEncryptionAlgorithm()
+        assertEquals 'bar', h([enc: 'bar']).getEncryptionAlgorithm()
     }
 
     @Test
     void testGetName() {
-        assertEquals 'JWE header', header.getName()
+        assertEquals 'JWE header', new DefaultJweHeader([:]).getName()
     }
 
     @Test
@@ -64,7 +60,7 @@ class DefaultJweHeaderTest {
         def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
         try {
-            header.put('epk', values)
+            h([epk: values])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=oct, k=<redacted>}. " +
@@ -78,7 +74,7 @@ class DefaultJweHeaderTest {
         def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.private as ECPrivateKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
         try {
-            header.put('epk', values)
+            h([epk: values])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=EC, crv=P-256, " +
@@ -92,8 +88,7 @@ class DefaultJweHeaderTest {
     void testEpkWithRsaPublicJwk() {
         def jwk = Jwks.builder().forKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
-        header.put('epk', values)
-        def epk = header.getEphemeralPublicKey()
+        def epk = h([epk: values]).getEphemeralPublicKey()
         assertTrue epk instanceof RsaPublicJwk
         assertEquals(jwk, epk)
     }
@@ -102,8 +97,7 @@ class DefaultJweHeaderTest {
     void testEpkWithEcPublicJwkValues() {
         def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
-        header.put('epk', values)
-        assertEquals jwk, header.get('epk')
+        assertEquals jwk, h([epk: values]).get('epk')
     }
 
     @Test
@@ -113,7 +107,7 @@ class DefaultJweHeaderTest {
         // We have a public JWK for a point on the curve, now swap out the x coordinate for something invalid:
         values.put('x', 'Kg')
         try {
-            header.put('epk', values)
+            h([epk: values])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=EC, crv=P-256, x=Kg, " +
@@ -128,7 +122,7 @@ class DefaultJweHeaderTest {
     @Test
     void testEpkWithEcPublicJwk() {
         def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
-        header.put('epk', jwk)
+        header = h([epk: jwk])
         assertEquals jwk, header.get('epk')
         assertEquals jwk, header.getEphemeralPublicKey()
     }
@@ -138,7 +132,7 @@ class DefaultJweHeaderTest {
         def keys = TestKeys.EdEC.collect({it -> it.pair.public as PublicKey})
         for(PublicKey key : keys) {
             def jwk = Jwks.builder().forKey((PublicKey)key as PublicKey).build()
-            header.put('epk', jwk)
+            header = h([epk: jwk])
             assertEquals jwk, header.get('epk')
             assertEquals jwk, header.getEphemeralPublicKey()
         }
@@ -148,59 +142,52 @@ class DefaultJweHeaderTest {
     void testAgreementPartyUInfo() {
         String val = "Party UInfo"
         byte[] info = val.getBytes(StandardCharsets.UTF_8)
-        header.setAgreementPartyUInfo(info)
-        assertArrayEquals info, header.getAgreementPartyUInfo()
+        assertArrayEquals info, h([apu: info]).getAgreementPartyUInfo()
     }
 
     @Test
     void testAgreementPartyUInfoString() {
         String val = "Party UInfo"
         byte[] info = val.getBytes(StandardCharsets.UTF_8)
-        header.setAgreementPartyUInfo(val)
-        assertArrayEquals info, header.getAgreementPartyUInfo()
+        assertArrayEquals info, h([apu: info]).getAgreementPartyUInfo()
     }
 
     @Test
     void testEmptyAgreementPartyUInfo() {
         byte[] info = new byte[0]
-        header.setAgreementPartyUInfo(info)
-        assertNull header.getAgreementPartyUInfo()
+        assertNull h([apu: info]).getAgreementPartyUInfo()
     }
 
     @Test
     void testEmptyAgreementPartyUInfoString() {
-        String s = '  '
-        header.setAgreementPartyUInfo(s)
-        assertNull header.getAgreementPartyUInfo()
+        def val = '    '
+        assertNull h([apu: val]).getAgreementPartyUInfo()
     }
 
     @Test
     void testAgreementPartyVInfo() {
         String val = "Party VInfo"
-        byte[] info = val.getBytes(StandardCharsets.UTF_8)
-        header.setAgreementPartyVInfo(info)
-        assertArrayEquals info, header.getAgreementPartyVInfo()
+        byte[] info = Strings.utf8(val)
+        assertArrayEquals info, h([apv: info]).getAgreementPartyVInfo()
     }
 
     @Test
     void testAgreementPartyVInfoString() {
         String val = "Party VInfo"
-        byte[] info = val.getBytes(StandardCharsets.UTF_8)
-        header.setAgreementPartyVInfo(val)
-        assertArrayEquals info, header.getAgreementPartyVInfo()
+        byte[] info = Strings.utf8(val)
+        assertArrayEquals info, h(apv: info).getAgreementPartyVInfo()
     }
 
     @Test
     void testEmptyAgreementPartyVInfo() {
         byte[] info = new byte[0]
-        header.setAgreementPartyVInfo(info)
-        assertNull header.getAgreementPartyVInfo()
+        assertNull h([apv: info]).getAgreementPartyVInfo()
     }
 
     @Test
     void testEmptyAgreementPartyVInfoString() {
         String s = '  '
-        header.setAgreementPartyVInfo(s)
+        header = h([apv: s])
         assertNull header.getAgreementPartyVInfo()
     }
 
@@ -208,7 +195,7 @@ class DefaultJweHeaderTest {
     void testIv() {
         byte[] bytes = new byte[12]
         Randoms.secureRandom().nextBytes(bytes)
-        header.put('iv', bytes)
+        header = h([iv: bytes])
         assertEquals Encoders.BASE64URL.encode(bytes), header.get('iv')
         assertTrue MessageDigest.isEqual(bytes, header.getInitializationVector())
     }
@@ -218,7 +205,7 @@ class DefaultJweHeaderTest {
         byte[] bytes = new byte[7]
         Randoms.secureRandom().nextBytes(bytes)
         try {
-            header.put('iv', bytes)
+            h([iv: bytes])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'iv' (Initialization Vector) value. " +
@@ -231,7 +218,7 @@ class DefaultJweHeaderTest {
     void testTag() {
         byte[] bytes = new byte[16]
         Randoms.secureRandom().nextBytes(bytes)
-        header.put('tag', bytes)
+        header = h([tag: bytes])
         assertEquals Encoders.BASE64URL.encode(bytes), header.get('tag')
         assertTrue MessageDigest.isEqual(bytes, header.getAuthenticationTag())
     }
@@ -241,7 +228,7 @@ class DefaultJweHeaderTest {
         byte[] bytes = new byte[15]
         Randoms.secureRandom().nextBytes(bytes)
         try {
-            header.put('tag', bytes)
+            h([tag: bytes])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'tag' (Authentication Tag) value. " +
@@ -252,38 +239,38 @@ class DefaultJweHeaderTest {
 
     @Test
     void testP2cByte() {
-        header.put('p2c', Byte.MAX_VALUE)
+        header = h([p2c: Byte.MAX_VALUE])
         assertEquals 127, header.getPbes2Count()
     }
 
     @Test
     void testP2cShort() {
-        header.put('p2c', Short.MAX_VALUE)
+        header = h([p2c: Short.MAX_VALUE])
         assertEquals 32767, header.getPbes2Count()
     }
 
     @Test
     void testP2cInt() {
-        header.put('p2c', Integer.MAX_VALUE)
+        header = h([p2c: Integer.MAX_VALUE])
         assertEquals 0x7fffffff as Integer, header.getPbes2Count()
     }
 
     @Test
     void testP2cAtomicInteger() {
-        header.put('p2c', new AtomicInteger(Integer.MAX_VALUE))
+        header = h([p2c: new AtomicInteger(Integer.MAX_VALUE)])
         assertEquals 0x7fffffff as Integer, header.getPbes2Count()
     }
 
     @Test
     void testP2cString() {
-        header.put('p2c', "100")
+        header = h([p2c: '100'])
         assertEquals 100, header.getPbes2Count()
     }
 
     @Test
     void testP2cZero() {
         try {
-            header.put('p2c', 0)
+            h([p2c: 0])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: 0. Value must be a positive integer."
@@ -294,7 +281,7 @@ class DefaultJweHeaderTest {
     @Test
     void testP2cNegative() {
         try {
-            header.put('p2c', -1)
+            h([p2c: -1])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: -1. Value must be a positive integer."
@@ -305,7 +292,7 @@ class DefaultJweHeaderTest {
     @Test
     void testP2cTooLarge() {
         try {
-            header.put('p2c', Long.MAX_VALUE)
+            h([p2c: Long.MAX_VALUE])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: 9223372036854775807. " +
@@ -318,7 +305,7 @@ class DefaultJweHeaderTest {
     void testP2cDecimal() {
         double d = 42.2348423d
         try {
-            header.put('p2c', d)
+            h([p2c: d])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'p2c' (PBES2 Count) value: $d. " +
@@ -331,7 +318,7 @@ class DefaultJweHeaderTest {
     void testPbe2SaltBytes() {
         byte[] salt = new byte[32]
         Randoms.secureRandom().nextBytes(salt)
-        header.put('p2s', salt)
+        header = h([p2s: salt])
         assertEquals Encoders.BASE64URL.encode(salt), header.get('p2s')
         assertArrayEquals salt, header.getPbes2Salt()
     }
@@ -341,7 +328,7 @@ class DefaultJweHeaderTest {
         byte[] salt = new byte[32]
         Randoms.secureRandom().nextBytes(salt)
         String val = Encoders.BASE64URL.encode(salt)
-        header.put('p2s', val)
+        header = h([p2s: val])
         //ensure that even though a Base64Url string was set, we get back a byte[]:
         assertArrayEquals salt, header.getPbes2Salt()
     }
@@ -352,7 +339,7 @@ class DefaultJweHeaderTest {
         Randoms.secureRandom().nextBytes(salt)
         String val = Encoders.BASE64URL.encode(salt)
         try {
-            header.put('p2s', val)
+            h([p2s: val])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'p2s' (PBES2 Salt Input) value: $val. " +

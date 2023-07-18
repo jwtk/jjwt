@@ -30,6 +30,11 @@ abstract class DelegatingRegistry<T> implements Registry<String, T> {
     }
 
     @Override
+    public int size() {
+        return REGISTRY.size();
+    }
+
+    @Override
     public Collection<T> values() {
         return REGISTRY.values();
     }

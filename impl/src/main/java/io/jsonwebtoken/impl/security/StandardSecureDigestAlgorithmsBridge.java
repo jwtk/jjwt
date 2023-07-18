@@ -38,7 +38,7 @@ public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegist
                 new EcSignatureAlgorithm(384),
                 new EcSignatureAlgorithm(521),
                 new EdSignatureAlgorithm()
-        )));
+        ), false));
     }
 
     private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);

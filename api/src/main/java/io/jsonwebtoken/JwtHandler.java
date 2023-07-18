@@ -26,7 +26,7 @@ public interface JwtHandler<T> {
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * an Unprotected content JWT.  An Unprotected content JWT has a byte array payload that is not
+     * an unprotected content JWT.  An unprotected content JWT has a byte array payload that is not
      * cryptographically signed or encrypted.  If the JWT creator set the (optional)
      * {@link Header#getContentType() contentType} header value, the application may inspect that value to determine
      * how to convert the byte array to the final content type as desired.
@@ -34,7 +34,7 @@ public interface JwtHandler<T> {
      * @param jwt the parsed Unprotected content JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
      */
-    T onContentJwt(Jwt<UnprotectedHeader, byte[]> jwt);
+    T onContentJwt(Jwt<Header, byte[]> jwt);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
@@ -43,7 +43,7 @@ public interface JwtHandler<T> {
      * @param jwt the parsed claims JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
      */
-    T onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt);
+    T onClaimsJwt(Jwt<Header, Claims> jwt);
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is

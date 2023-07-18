@@ -27,7 +27,7 @@ import io.jsonwebtoken.lang.Registry;
 import java.util.Date;
 import java.util.Map;
 
-public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<DefaultClaims> {
+public class DefaultClaims extends FieldMap implements Claims, ClaimsMutator<DefaultClaims> {
 
     private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
             "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
@@ -45,9 +45,8 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
     static final Field<Date> ISSUED_AT = Fields.rfcDate(Claims.ISSUED_AT, "Issued At");
     static final Field<String> JTI = Fields.string(Claims.ID, "JWT ID");
 
-    static final Registry<String, Field<?>> FIELDS = Fields.registry(
-            ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI
-    );
+    static final Registry<String, Field<?>> FIELDS =
+            Fields.registry(ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI);
 
     public DefaultClaims() {
         super(FIELDS);
@@ -64,7 +63,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public String getIssuer() {
-        return idiomaticGet(ISSUER);
+        return get(ISSUER);
     }
 
     @Override
@@ -75,7 +74,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public String getSubject() {
-        return idiomaticGet(SUBJECT);
+        return get(SUBJECT);
     }
 
     @Override
@@ -86,7 +85,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public String getAudience() {
-        return idiomaticGet(AUDIENCE);
+        return get(AUDIENCE);
     }
 
     @Override
@@ -97,7 +96,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public Date getExpiration() {
-        return idiomaticGet(EXPIRATION);
+        return get(EXPIRATION);
     }
 
     @Override
@@ -108,7 +107,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public Date getNotBefore() {
-        return idiomaticGet(NOT_BEFORE);
+        return get(NOT_BEFORE);
     }
 
     @Override
@@ -119,7 +118,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public Date getIssuedAt() {
-        return idiomaticGet(ISSUED_AT);
+        return get(ISSUED_AT);
     }
 
     @Override
@@ -130,7 +129,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
 
     @Override
     public String getId() {
-        return idiomaticGet(JTI);
+        return get(JTI);
     }
 
     @Override
@@ -143,7 +142,7 @@ public class DefaultClaims extends JwtMap implements Claims, ClaimsMutator<Defau
     public <T> T get(String claimName, Class<T> requiredType) {
         Assert.notNull(requiredType, "requiredType argument cannot be null.");
 
-        Object value = idiomaticGet(claimName);
+        Object value = this.idiomaticValues.get(claimName);
         if (requiredType.isInstance(value)) {
             return requiredType.cast(value);
         }

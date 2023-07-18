@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.HeaderMutator;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Registry;
@@ -24,7 +23,7 @@ import io.jsonwebtoken.lang.Strings;
 
 import java.util.Map;
 
-public abstract class AbstractHeader<T extends AbstractHeader<T>> extends JwtMap implements Header, HeaderMutator<T> {
+public class DefaultHeader extends FieldMap implements Header {
 
     static final Field<String> TYPE = Fields.string(Header.TYPE, "Type");
     static final Field<String> CONTENT_TYPE = Fields.string(Header.CONTENT_TYPE, "Content Type");
@@ -36,11 +35,11 @@ public abstract class AbstractHeader<T extends AbstractHeader<T>> extends JwtMap
 
     static final Registry<String, Field<?>> FIELDS = Fields.registry(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
 
-    protected AbstractHeader(Registry<String, Field<?>> fields) {
-        super(fields);
+    public DefaultHeader(Map<String, ?> values) {
+        super(FIELDS, values);
     }
 
-    protected AbstractHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
+    protected DefaultHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
         super(fields, values);
     }
 
@@ -49,56 +48,27 @@ public abstract class AbstractHeader<T extends AbstractHeader<T>> extends JwtMap
         return "JWT header";
     }
 
-    @SuppressWarnings("unchecked")
-    protected T tthis() {
-        return (T) this;
-    }
-
     @Override
     public String getType() {
-        return idiomaticGet(TYPE);
-    }
-
-    @Override
-    public T setType(String typ) {
-        put(TYPE, typ);
-        return tthis();
+        return get(TYPE);
     }
 
     @Override
     public String getContentType() {
-        return idiomaticGet(CONTENT_TYPE);
-    }
-
-    @Override
-    public T setContentType(String cty) {
-        put(CONTENT_TYPE, cty);
-        return tthis();
+        return get(CONTENT_TYPE);
     }
 
     @Override
     public String getAlgorithm() {
-        return idiomaticGet(ALGORITHM);
-    }
-
-    @Override
-    public T setAlgorithm(String alg) {
-        put(ALGORITHM, alg);
-        return tthis();
+        return get(ALGORITHM);
     }
 
     @Override
     public String getCompressionAlgorithm() {
-        String s = idiomaticGet(COMPRESSION_ALGORITHM);
+        String s = get(COMPRESSION_ALGORITHM);
         if (!Strings.hasText(s)) {
-            s = idiomaticGet(DEPRECATED_COMPRESSION_ALGORITHM);
+            s = get(DEPRECATED_COMPRESSION_ALGORITHM);
         }
         return s;
-    }
-
-    @Override
-    public T setCompressionAlgorithm(String compressionAlgorithm) {
-        put(COMPRESSION_ALGORITHM, compressionAlgorithm);
-        return tthis();
     }
 }

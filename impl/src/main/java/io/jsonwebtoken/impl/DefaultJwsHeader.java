@@ -21,13 +21,9 @@ import io.jsonwebtoken.lang.Registry;
 
 import java.util.Map;
 
-public class DefaultJwsHeader extends AbstractProtectedHeader<DefaultJwsHeader> implements JwsHeader {
+public class DefaultJwsHeader extends DefaultProtectedHeader implements JwsHeader {
 
-    static final Registry<String, Field<?>> FIELDS = AbstractProtectedHeader.FIELDS; //same
-
-    public DefaultJwsHeader() {
-        super(FIELDS);
-    }
+    static final Registry<String, Field<?>> FIELDS = DefaultProtectedHeader.FIELDS; //same
 
     public DefaultJwsHeader(Map<String, ?> map) {
         super(FIELDS, map);

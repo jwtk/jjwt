@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
-
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.lang.Field
@@ -34,7 +34,7 @@ class IdLocatorTest {
     void missingRequiredHeaderValueTest() {
         def msg = 'foo is required'
         def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultUnprotectedHeader()
+        def header = Jwts.header().build()
         try {
             loc.apply(header)
             fail()
@@ -46,7 +46,7 @@ class IdLocatorTest {
     @Test
     void unlocatableJwtHeaderInstanceTest() {
         def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultUnprotectedHeader([foo: 'foo'])
+        def header = Jwts.header().put('foo', 'foo').build()
         try {
             loc.apply(header)
         } catch (UnsupportedJwtException expected) {
@@ -58,7 +58,7 @@ class IdLocatorTest {
     @Test
     void unlocatableJwsHeaderInstanceTest() {
         def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultJwsHeader([foo: 'foo'])
+        def header = Jwts.header().setAlgorithm('HS256').put('foo', 'foo').build()
         try {
             loc.apply(header)
         } catch (UnsupportedJwtException expected) {

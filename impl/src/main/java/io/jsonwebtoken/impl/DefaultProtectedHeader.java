@@ -15,15 +15,18 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.ProtectedHeader;
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
 import io.jsonwebtoken.impl.security.AbstractJwk;
 import io.jsonwebtoken.impl.security.JwkConverter;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
-import io.jsonwebtoken.security.X509Mutator;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
@@ -37,7 +40,7 @@ import java.util.Set;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public abstract class AbstractProtectedHeader<T extends AbstractProtectedHeader<T>> extends AbstractHeader<T> implements ProtectedHeader, X509Mutator<T> {
+public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHeader {
 
     static final Field<URI> JKU = Fields.uri("jku", "JWK Set URL");
 
@@ -47,87 +50,73 @@ public abstract class AbstractProtectedHeader<T extends AbstractProtectedHeader<
             .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
 
-    static final Registry<String, Field<?>> FIELDS = Fields.registry(AbstractHeader.FIELDS,
-            CRIT, JKU, JWK, AbstractJwk.KID, AbstractAsymmetricJwk.X5U, AbstractAsymmetricJwk.X5C,
-            AbstractAsymmetricJwk.X5T, AbstractAsymmetricJwk.X5T_S256);
+    static final Field<String> KID = AbstractJwk.KID;
 
-    protected AbstractProtectedHeader(Registry<String, Field<?>> fields) {
-        super(fields);
+    static final Field<URI> X5U = AbstractAsymmetricJwk.X5U;
+
+    static final Field<List<X509Certificate>> X5C = AbstractAsymmetricJwk.X5C;
+
+    static final Field<byte[]> X5T = AbstractAsymmetricJwk.X5T;
+
+    static final Field<byte[]> X5T_S256 = AbstractAsymmetricJwk.X5T_S256;
+
+    static final Registry<String, Field<?>> FIELDS =
+            Fields.registry(DefaultHeader.FIELDS, CRIT, JKU, JWK, KID, X5U, X5C, X5T, X5T_S256);
+
+    static boolean isCandidate(FieldMap fields) {
+        String id = fields.get(DefaultHeader.ALGORITHM);
+        return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.find(id))) ||
+                fields.get(JKU) != null ||
+                fields.get(JWK) != null ||
+                !Collections.isEmpty(fields.get(CRIT)) ||
+                Strings.hasText(fields.get(KID)) ||
+                fields.get(X5U) != null ||
+                !Collections.isEmpty(fields.get(X5C)) ||
+                !Bytes.isEmpty(fields.get(X5T)) ||
+                !Bytes.isEmpty(fields.get(X5T_S256));
     }
 
-    protected AbstractProtectedHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
+    protected DefaultProtectedHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
         super(fields, values);
     }
 
+    @Override
     public String getKeyId() {
-        return idiomaticGet(AbstractJwk.KID);
+        return get(KID);
     }
 
-    public T setKeyId(String kid) {
-        put(AbstractJwk.KID, kid);
-        return tthis();
-    }
-
+    @Override
     public URI getJwkSetUrl() {
-        return idiomaticGet(JKU);
+        return get(JKU);
     }
 
-    public T setJwkSetUrl(URI uri) {
-        put(JKU, uri);
-        return tthis();
-    }
-
+    @Override
     public PublicJwk<?> getJwk() {
-        return idiomaticGet(JWK);
+        return get(JWK);
     }
 
-    public T setJwk(PublicJwk<?> jwk) {
-        put(JWK, jwk);
-        return tthis();
-    }
-
+    @Override
     public URI getX509Url() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5U);
+        return get(AbstractAsymmetricJwk.X5U);
     }
 
-    public T setX509Url(URI uri) {
-        put(AbstractAsymmetricJwk.X5U, uri);
-        return tthis();
-    }
-
+    @Override
     public List<X509Certificate> getX509CertificateChain() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5C);
+        return get(X5C);
     }
 
-    public T setX509CertificateChain(List<X509Certificate> chain) {
-        put(AbstractAsymmetricJwk.X5C, chain);
-        return tthis();
-    }
-
+    @Override
     public byte[] getX509CertificateSha1Thumbprint() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5T);
+        return get(X5T);
     }
 
-    public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        put(AbstractAsymmetricJwk.X5T, thumbprint);
-        return tthis();
-    }
-
+    @Override
     public byte[] getX509CertificateSha256Thumbprint() {
-        return idiomaticGet(AbstractAsymmetricJwk.X5T_S256);
+        return get(X5T_S256);
     }
 
-    public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        put(AbstractAsymmetricJwk.X5T_S256, thumbprint);
-        return tthis();
-    }
-
+    @Override
     public Set<String> getCritical() {
-        return idiomaticGet(CRIT);
-    }
-
-    public T setCritical(Set<String> crit) {
-        put(CRIT, crit);
-        return tthis();
+        return get(CRIT);
     }
 }

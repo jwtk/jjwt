@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.FieldMap;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
@@ -25,16 +26,15 @@ import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.StandardHashAlgorithms;
 import io.jsonwebtoken.security.X509Builder;
-import io.jsonwebtoken.security.X509Mutator;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-//Consolidates logic between AbstractProtectedHeaderBuilder and AbstractAsymmetricJwkBuilder
+//Consolidates logic between DefaultJwtHeaderBuilder and AbstractAsymmetricJwkBuilder
 public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder<B> {
 
-    private final X509Mutator<?> mutator;
+    private final FieldMap fieldMap;
 
     private final B builder;
 
@@ -44,10 +44,6 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
      * Boolean object indicates 3 states: 1) not configured 2) configured as true, 3) configured as false
      */
     protected Boolean computeX509Sha256Thumbprint = null;
-
-    protected List<X509Certificate> chain;
-
-    protected byte[] sha256Thumbprint;
 
     private static Function<X509Certificate, byte[]> createGetBytesFunction(Class<? extends RuntimeException> clazz) {
         return Functions.wrapFmt(new CheckedFunction<X509Certificate, byte[]>() {
@@ -60,8 +56,8 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
 
     private final Function<X509Certificate, byte[]> GET_X509_BYTES;
 
-    public DefaultX509Builder(X509Mutator<?> mutator, B builder, Class<? extends RuntimeException> getBytesFailedException) {
-        this.mutator = Assert.notNull(mutator, "X509Mutator cannot be null.");
+    public DefaultX509Builder(FieldMap fieldMap, B builder, Class<? extends RuntimeException> getBytesFailedException) {
+        this.fieldMap = Assert.notNull(fieldMap, "FieldMap cannot be null.");
         this.builder = Assert.notNull(builder, "X509Builder cannot be null.");
         this.GET_X509_BYTES = createGetBytesFunction(getBytesFailedException);
     }
@@ -80,27 +76,25 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
 
     @Override
     public B setX509Url(URI uri) {
-        this.mutator.setX509Url(uri);
+        this.fieldMap.put(AbstractAsymmetricJwk.X5U.getId(), uri);
         return builder;
     }
 
     @Override
     public B setX509CertificateChain(List<X509Certificate> chain) {
-        this.mutator.setX509CertificateChain(chain);
-        this.chain = chain;
+        this.fieldMap.put(AbstractAsymmetricJwk.X5C.getId(), chain);
         return builder;
     }
 
     @Override
     public B setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        this.mutator.setX509CertificateSha1Thumbprint(thumbprint);
+        this.fieldMap.put(AbstractAsymmetricJwk.X5T.getId(), thumbprint);
         return builder;
     }
 
     @Override
     public B setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        this.mutator.setX509CertificateSha256Thumbprint(thumbprint);
-        this.sha256Thumbprint = thumbprint;
+        this.fieldMap.put(AbstractAsymmetricJwk.X5T_S256.getId(), thumbprint);
         return this.builder;
     }
 
@@ -111,15 +105,17 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
     }
 
     public void apply() {
+        List<X509Certificate> chain = this.fieldMap.get(AbstractAsymmetricJwk.X5C);
         X509Certificate firstCert = null;
-        if (!Collections.isEmpty(this.chain)) {
-            firstCert = this.chain.get(0);
+        if (!Collections.isEmpty(chain)) {
+            firstCert = chain.get(0);
         }
 
-        if (computeX509Sha256Thumbprint == null) { //if not specified, enable by default if possible:
-            computeX509Sha256Thumbprint = firstCert != null &&
-                    Objects.isEmpty(this.sha256Thumbprint) // no need to compute if already set
-                    && !computeX509Sha1Thumbprint; // no need if at least one thumbprint will be set
+        Boolean computeX509Sha256 = this.computeX509Sha256Thumbprint;
+        if (computeX509Sha256 == null) { //if not specified, enable by default if possible:
+            computeX509Sha256 = firstCert != null &&
+                    !computeX509Sha1Thumbprint && // no need if at least one thumbprint will be set
+                    Objects.isEmpty(this.fieldMap.get(AbstractAsymmetricJwk.X5T_S256)); // no need if already set
         }
 
         if (firstCert != null) {
@@ -127,7 +123,7 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
                 byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA1);
                 setX509CertificateSha1Thumbprint(thumbprint);
             }
-            if (computeX509Sha256Thumbprint) {
+            if (computeX509Sha256) {
                 byte[] thumbprint = computeThumbprint(firstCert, StandardHashAlgorithms.get().SHA256);
                 setX509CertificateSha256Thumbprint(thumbprint);
             }

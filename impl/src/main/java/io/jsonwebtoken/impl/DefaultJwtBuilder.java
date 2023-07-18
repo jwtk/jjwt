@@ -16,11 +16,10 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.DynamicHeaderBuilder;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtHeaderBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
@@ -37,7 +36,6 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -65,15 +63,14 @@ import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
-            "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " +
-            "digital signatures.";
+    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " + "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " + "digital signatures.";
 
     protected Provider provider;
     protected SecureRandom secureRandom;
 
-    private DynamicHeaderBuilder headerBuilder = Jwts.header();
-    private ClaimsBuilder claimsBuilder = Jwts.claims();
+    private final JwtHeaderBuilder headerBuilder = new DefaultJwtHeaderBuilder(this);
+
+    private final DefaultClaims claims = new DefaultClaims();
 
     protected byte[] content;
 
@@ -84,7 +81,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Function<AeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key, ?> keyAlg;
-    private Function<KeyRequest<Key>, KeyResult> keyAlgFunction;
+    private Function<KeyRequest<Key, JwtHeaderBuilder>, KeyResult> keyAlgFunction;
 
     private Key key;
 
@@ -94,6 +91,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     protected Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
     protected CompressionCodec compressionCodec;
+
+    @Override
+    public JwtHeaderBuilder header() {
+        return this.headerBuilder;
+    }
 
     @Override
     public JwtBuilder setProvider(Provider provider) {
@@ -143,21 +145,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setHeader(Header header) {
-        return setHeader(Jwts.header().putAll(header));
-    }
-
-    @Override
-    public JwtBuilder setHeader(Map<String, ?> header) {
-        return setHeader(Jwts.header().putAll(header));
-    }
-
-    @Override
-    public JwtBuilder setHeader(Builder<? extends Header> builder) {
-        Assert.notNull(builder, "Builder cannot be null.");
-        Header header = builder.build();
-        Assert.notNull(header, "Builder cannot produce a null Header instance.");
-        this.headerBuilder = Jwts.header().putAll(header);
+    public JwtBuilder setHeader(Map<String, ?> map) {
+        this.headerBuilder.clear();
+        this.headerBuilder.putAll(map);
         return this;
     }
 
@@ -175,8 +165,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @SuppressWarnings("unchecked") // TODO: remove for 1.0
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
-        @SuppressWarnings("deprecation")
-        io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
+        @SuppressWarnings("deprecation") io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
         return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get(alg.getValue());
     }
 
@@ -284,9 +273,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final String algId = Assert.hasText(keyAlg.getId(), "KeyAlgorithm id cannot be null or empty.");
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
         final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
-        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
+        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key, JwtHeaderBuilder>, KeyResult>() {
             @Override
-            public KeyResult apply(KeyRequest<Key> request) {
+            public KeyResult apply(KeyRequest<Key, JwtHeaderBuilder> request) {
                 return alg.getEncryptionKey(request);
             }
         }, SecurityException.class, cekMsg, algId);
@@ -331,61 +320,62 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder setClaims(Map<String, ?> claims) {
         Assert.notNull(claims, "Claims map cannot be null.");
-        this.claimsBuilder = Jwts.claims().putAll(claims);
+        this.claims.clear();
+        this.claims.putAll(claims);
         return this;
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        this.claimsBuilder.putAll(claims);
+        this.claims.putAll(claims);
         return this;
     }
 
     @Override
     public JwtBuilder setIssuer(String iss) {
-        this.claimsBuilder.setIssuer(iss);
+        this.claims.setIssuer(iss);
         return this;
     }
 
     @Override
     public JwtBuilder setSubject(String sub) {
-        this.claimsBuilder.setSubject(sub);
+        this.claims.setSubject(sub);
         return this;
     }
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        this.claimsBuilder.setAudience(aud);
+        this.claims.setAudience(aud);
         return this;
     }
 
     @Override
     public JwtBuilder setExpiration(Date exp) {
-        this.claimsBuilder.setExpiration(exp);
+        this.claims.setExpiration(exp);
         return this;
     }
 
     @Override
     public JwtBuilder setNotBefore(Date nbf) {
-        this.claimsBuilder.setNotBefore(nbf);
+        this.claims.setNotBefore(nbf);
         return this;
     }
 
     @Override
     public JwtBuilder setIssuedAt(Date iat) {
-        this.claimsBuilder.setIssuedAt(iat);
+        this.claims.setIssuedAt(iat);
         return this;
     }
 
     @Override
     public JwtBuilder setId(String jti) {
-        this.claimsBuilder.setId(jti);
+        this.claims.setId(jti);
         return this;
     }
 
     @Override
     public JwtBuilder claim(String name, Object value) {
-        this.claimsBuilder.put(name, value);
+        this.claims.put(name, value);
         return this;
     }
 
@@ -398,8 +388,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
             String msg = "Both 'signWith' and 'encryptWith' cannot be specified - choose either.";
             throw new IllegalStateException(msg);
         }
-
-        final Claims claims = this.claimsBuilder.build();
 
         if (Objects.isEmpty(content) && Collections.isEmpty(claims)) {
             if (jwe) { // JWE payload can never be empty:
@@ -478,7 +466,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         Assert.notEmpty(payload, "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
-        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, this.headerBuilder, enc);
+        KeyRequest<Key, JwtHeaderBuilder> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, this.headerBuilder, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
@@ -486,9 +474,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         this.headerBuilder.setAlgorithm(keyAlg.getId());
         this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
-
-//        header.put(AbstractHeader.ALGORITHM.getId(), keyAlg.getId());
-//        header.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
         final Header header = this.headerBuilder.build();
 
@@ -508,10 +493,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
         String base64UrlEncodedCiphertext = base64UrlEncoder.encode(ciphertext);
         String base64UrlEncodedTag = base64UrlEncoder.encode(tag);
 
-        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedTag;
+        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
     }
 }

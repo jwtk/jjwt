@@ -24,7 +24,7 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyRequest<byte[]> implements DecryptionKeyRequest<K> {
+public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyRequest<byte[], JweHeader> implements DecryptionKeyRequest<K> {
 
     private final K decryptionKey;
 

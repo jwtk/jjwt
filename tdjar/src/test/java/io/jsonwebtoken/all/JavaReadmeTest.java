@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken.all;
 
-import io.jsonwebtoken.DynamicHeaderBuilder;
-import io.jsonwebtoken.HeaderBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -401,18 +399,5 @@ public class JavaReadmeTest {
 
         String expected = "{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}";
         assert expected.equals(jwk.toString());
-    }
-
-    private HeaderBuilder<?, ?> headerBuilder () {
-        throw new UnsupportedOperationException("testing");
-    }
-
-    @Test
-    public void testHeaderBuilder() {
-        HeaderBuilder<?, ?> builder = headerBuilder();
-        DynamicHeaderBuilder b = Jwts.header();
-
-        builder.setAlgorithm("foo");
-
     }
 }

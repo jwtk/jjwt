@@ -75,7 +75,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         codecs.addAll(extraCodecs);
         codecs.add(CompressionCodecs.DEFLATE); // standard ones are added last so they can't be accidentally replaced
         codecs.add(CompressionCodecs.GZIP);
-        this.codecs = new IdRegistry<>("CompressionCodec", codecs);
+        this.codecs = new IdRegistry<>("CompressionCodec", codecs, false);
     }
 
     @Override

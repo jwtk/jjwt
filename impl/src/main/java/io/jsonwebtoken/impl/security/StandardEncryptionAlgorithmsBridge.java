@@ -28,6 +28,6 @@ public final class StandardEncryptionAlgorithmsBridge extends DelegatingRegistry
                 new HmacAesAeadAlgorithm(256),
                 new GcmAesAeadAlgorithm(128),
                 new GcmAesAeadAlgorithm(192),
-                new GcmAesAeadAlgorithm(256))));
+                new GcmAesAeadAlgorithm(256)), false));
     }
 }

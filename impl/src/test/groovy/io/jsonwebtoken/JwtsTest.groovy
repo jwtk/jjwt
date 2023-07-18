@@ -83,28 +83,16 @@ class JwtsTest {
 
     @Test
     void testHeaderWithNoArgs() {
-        def header = Jwts.unprotectedHeader()
-        assertTrue header instanceof DefaultUnprotectedHeader
+        def header = Jwts.header().build()
+        assertTrue header instanceof DefaultHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header([alg: "HS256"])
-        assertTrue header instanceof DefaultUnprotectedHeader
-        assertEquals 'HS256', header.alg
-    }
-
-    @Test
-    void testJwsHeaderWithNoArgs() {
-        def header = Jwts.jwsHeader()
-        assertTrue header instanceof DefaultJwsHeader
-    }
-
-    @Test
-    void testJwsHeaderWithMapArg() {
-        def header = Jwts.jwsHeader([alg: "HS256"])
+        def header = Jwts.header().putAll([alg: "HS256"]).build()
         assertTrue header instanceof DefaultJwsHeader
         assertEquals 'HS256', header.getAlgorithm()
+        assertEquals 'HS256', header.alg
     }
 
     @Test
@@ -319,7 +307,7 @@ class JwtsTest {
     @Test
     void testWithInvalidCompressionAlgorithm() {
         try {
-            Jwts.builder().setHeaderParam(AbstractHeader.COMPRESSION_ALGORITHM.getId(), "CUSTOM").setId("andId").compact()
+            Jwts.builder().setHeaderParam(DefaultHeader.COMPRESSION_ALGORITHM.getId(), "CUSTOM").setId("andId").compact()
         } catch (CompressionException e) {
             assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
         }

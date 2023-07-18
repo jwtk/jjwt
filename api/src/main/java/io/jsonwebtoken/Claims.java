@@ -34,13 +34,9 @@ import java.util.Map;
  * {@code Map} interface is implemented specifically for the convenience of working with existing Map-based utilities
  * and APIs.</p>
  *
- * <p><b>Creation</b></p>
- *
- * <p>It is easiest to create a {@code Claims} instance by using a {@link Jwts#claims() Jwts.claims()} builder.</p>
- *
  * @since 0.1
  */
-public interface Claims extends ClaimsAccessor, Map<String, Object> {
+public interface Claims extends Map<String, Object>, ClaimsAccessor {
 
     /** JWT {@code Issuer} claims parameter name: <code>"iss"</code> */
     String ISSUER = "iss";

@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
-import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
 import io.jsonwebtoken.impl.compression.GzipCompressionCodec
@@ -32,7 +32,6 @@ import org.junit.Test
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -82,28 +81,16 @@ class DeprecatedJwtsTest {
 
     @Test
     void testHeaderWithNoArgs() {
-        def header = Jwts.unprotectedHeader()
-        assertTrue header instanceof DefaultUnprotectedHeader
+        def header = Jwts.header().build()
+        assertTrue header instanceof DefaultHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header([alg: "HS256"])
-        assertTrue header instanceof DefaultUnprotectedHeader
-        assertEquals header.alg, 'HS256'
-    }
-
-    @Test
-    void testJwsHeaderWithNoArgs() {
-        def header = Jwts.jwsHeader()
+        def header = Jwts.header().putAll([alg: "HS256"]).build()
         assertTrue header instanceof DefaultJwsHeader
-    }
-
-    @Test
-    void testJwsHeaderWithMapArg() {
-        def header = Jwts.jwsHeader([alg: "HS256"])
-        assertTrue header instanceof DefaultJwsHeader
-        assertEquals header.getAlgorithm(), 'HS256'
+        assertEquals 'HS256', header.getAlgorithm()
+        assertEquals 'HS256', header.alg
     }
 
     @Test
@@ -460,7 +447,7 @@ class DeprecatedJwtsTest {
 
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
-        assertEquals "this is my test for a payload", new String(parsed, StandardCharsets.UTF_8)
+        assertEquals "this is my test for a payload", Strings.utf8(parsed)
     }
 
     @Test

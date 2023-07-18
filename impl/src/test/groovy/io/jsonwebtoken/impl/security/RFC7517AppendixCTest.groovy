@@ -27,7 +27,6 @@ import org.junit.Test
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
-import java.security.Key
 
 import static org.junit.Assert.*
 
@@ -296,7 +295,7 @@ class RFC7517AppendixCTest {
         }
         def alg = new Pbes2HsAkwAlgorithm(128) {
             @Override
-            protected byte[] generateInputSalt(KeyRequest<? extends Key> request) {
+            protected byte[] generateInputSalt(KeyRequest<?, ?> request) {
                 return RFC_P2S
             }
         }
@@ -324,7 +323,7 @@ class RFC7517AppendixCTest {
 
         String compact = Jwts.builder()
                 .setPayload(RFC_JWK_JSON)
-                .setHeader(Jwts.header().setContentType('jwk+json').setPbes2Count(RFC_P2C))
+                .header().setContentType('jwk+json').setPbes2Count(RFC_P2C).and()
                 .encryptWith(key, alg, enc)
                 .serializeToJsonWith(serializer) //ensure header created as expected with an assertion serializer
                 .compact()

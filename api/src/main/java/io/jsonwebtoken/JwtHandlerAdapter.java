@@ -31,12 +31,12 @@ package io.jsonwebtoken;
 public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
     @Override
-    public T onContentJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
+    public T onContentJwt(Jwt<Header, byte[]> jwt) {
         throw new UnsupportedJwtException("Unprotected content JWTs are not supported.");
     }
 
     @Override
-    public T onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt) {
+    public T onClaimsJwt(Jwt<Header, Claims> jwt) {
         throw new UnsupportedJwtException("Unprotected Claims JWTs are not supported.");
     }
 

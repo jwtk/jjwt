@@ -34,7 +34,7 @@ class LocatingKeyResolverTest {
     void testResolveSigningKeyClaims() {
         def key = TestKeys.HS256
         def locator = new ConstantKeyLocator(key, null)
-        def header = new DefaultJwsHeader()
+        def header = new DefaultJwsHeader([:])
         def claims = new DefaultClaims()
         assertSame key, new LocatingKeyResolver(locator).resolveSigningKey(header, claims)
     }
@@ -43,7 +43,7 @@ class LocatingKeyResolverTest {
     void testResolveSigningKeyPayload() {
         def key = TestKeys.HS256
         def locator = new ConstantKeyLocator(key, null)
-        def header = new DefaultJwsHeader()
+        def header = new DefaultJwsHeader([:])
         def payload = 'hello world'.getBytes(StandardCharsets.UTF_8)
         assertSame key, new LocatingKeyResolver(locator).resolveSigningKey(header, payload)
     }

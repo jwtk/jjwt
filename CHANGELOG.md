@@ -102,14 +102,10 @@ the old enum-based static utility methods did not.
 Now that the JWE and JWK specifications are implemented, only a few things remain for JJWT to be considered at 
 version 1.0.  We have been waiting to apply the 1.0 release version number until the entire set of JWT specifications 
 are fully supported and we drop JDK 7 support (to allow users to use JDK 8 APIs).  To that end, we have had to 
-deprecate some concepts, or in some rare cases, completely break backwards compatibility to ensure the transition to 
+deprecate some concepts, or in some cases, completely break backwards compatibility to ensure the transition to 
 1.0 (and JDK 8 APIs) are possible.  Any backwards-incompatible changes are listed in the next section below.
 
 #### Backwards Compatibility Breaking Changes, Warnings and Deprecations
-
-* `io.jsonwebtoken.Jwts`'s `header(Map)`, `jwsHeader()` and `jwsHeader(Map)` methods have been deprecated in favor
-  of the new `header()` builder-based method to support method chaining and dynamic Header type creation.
-
 
 * `io.jsonwebtoken.Jwt`'s `getBody()` method has been deprecated in favor of a new `getPayload()` method to
   reflect correct JWT specification nomenclature/taxonomy.
@@ -120,17 +116,15 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
   all other JWT-identifiable algorithm names that can be set as a header value.
 
 
-* `io.jsonwebtoken.Header` has been changed to accept a type-parameter for sub-type method return values, i.e.
-  `io.jsonwebtoken.Header<T extends Header>` and a new `io.jsonwebtoken.UnprotectedHeader` interface has been
-  introduced to represent the concrete type of header without integrity protection.  This new `UnprotectedHeader` is
-  to be used where the previous generic `Header` (non-`JweHeader` and non-`JwsHeader`) interface was used.
-
-
 * Accordingly, the `Jwts.header()` and `Jwts.header(Map<String,?>)` now return instances of `UnprotectedHeader` instead
   of just `Header`.
 
 
 #### Breaking Changes
+
+* `io.jsonwebtoken.Jwts`'s `header(Map)`, `jwsHeader()` and `jwsHeader(Map)` methods have been removed in favor
+  of the new `header()` builder-based method to support method chaining and dynamic Header type creation.
+
 
 * **JWTs that do not contain JSON Claims now have a payload type of `byte[]` instead of `String`** (that is, 
   `Jwt<byte[]>` instead of `Jwt<String>`).  This is because JWTs, especially when used with the 
@@ -151,7 +145,7 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
 
   * The `JwtParser`'s `Jwt<Header, String> parsePlaintextJwt(String plaintextJwt)` and
     `Jws<String> parsePlaintextJws(String plaintextJws)` methods have been changed to
-    `Jwt<UnprotectedHeader, byte[]> parseContentJwt(String plaintextJwt)` and
+    `Jwt<Header, byte[]> parseContentJwt(String plaintextJwt)` and
     `Jws<byte[]> parseContentJws(String plaintextJws)` respectively.
 
   * `JwtHandler`'s `onPlaintextJwt(String)` and `onPlaintextJws(String)` methods have been changed to
@@ -179,20 +173,24 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
   This `legacyParser()` method will be removed entirely for the 1.0 release - please change your code to use the 
   updated `parser()` method that returns a builder as soon as possible.
 
+
 * `io.jsonwebtoken.Jwts`'s `header()` method has been renamed to `unprotectedHeader()` to allow a newer/updated 
   `header()` method to return a `DynamicHeaderBuilder` instead of a direct `Header` instance.  This new method / 
   return value is the recommended approach for building headers, as it will dynamically create an `UnprotectedHeader`, 
   `JwsHeader` or `JweHeader` automatically based on builder state.
+
 
 * `io.jsonwebtoken.Jwts`'s `headerBuilder()` method has been renamed to `header()` and returns a 
   `DynamicHeaderBuilder` instead of a direct `Header` instance.  This builder method is the recommended approach 
   for building headers in the future, as it will dynamically create an `UnprotectedHeader`, `JwsHeader` or `JweHeader` 
   automatically based on builder state.
 
+
 * `io.jsonwebtoken.Jwts`'s `header()` method now returns a `DynamicHeaderBuilder` instead of a 
   direct `Header` instance.  This new method / return value is the recommended approach for building headers
   in the future, as it will dynamically create an `UnprotectedHeader`, `JwsHeader` or `JweHeader` automatically
   based on builder state.
+
 
 * Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
   was thrown. If there was a problem when serializing the JWT claims, an `IllegalArgumentException` was
@@ -215,6 +213,7 @@ deprecate some concepts, or in some rare cases, completely break backwards compa
   ```
   This is to ensure JWKs have `toString()` and application log safety (do not print secure material), but still 
   serialize to JSON correctly.
+
 
 * `io.jsonwebtoken.InvalidClaimException` and it's two subclasses (`IncorrectClaimException` and `MissingClaimException`)
   were previously mutable, allowing the corresponding claim name and claim value to be set on the exception after

@@ -19,7 +19,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
-import io.jsonwebtoken.lang.Builder;
+import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -70,32 +70,37 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setSecureRandom(SecureRandom secureRandom);
 
     /**
-     * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
-     * header and only want to append to it, use the {@link #setHeaderParams(java.util.Map)} method instead.
+     * Returns the {@link JwtHeaderBuilder} to use to modify the constructed JWT's header name/value pairs as desired.
+     * When finished, callers may return to JWT construction via the {@link Conjunctor#and() and()} method. For example:
      *
-     * @param header the header to set (and potentially replace any existing header).
-     * @return the builder for method chaining.
-     */
-    JwtBuilder setHeader(Header header); //replaces any existing header with the specified header.
-
-    /**
-     * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
-     * header and only want to append to it, use the {@link #setHeaderParams(java.util.Map)} method instead.
+     * <blockquote><pre>
+     * String jwt = Jwts.builder()
      *
-     * @param header the header to set (and potentially replace any existing header).
-     * @return the builder for method chaining.
-     */
-    JwtBuilder setHeader(Map<String, ?> header);
-
-    /**
-     * Sets (and replaces) any existing header with the header resulting from the specified builder's
-     * {@link Builder#build()} result.
+     *     <b>.header()
+     *         .setKeyId("keyId")
+     *         .putAll(myHeaderMap)
+     *         // ... etc ...
+     *         .{@link Conjunctor#and() and()}</b> //return back to the JwtBuilder
      *
-     * @param builder the builder to use to obtain the header
-     * @return the JwtBuilder for method chaining.
+     *     .setSubject("Joe") // resume JwtBuilder calls
+     *     // ... etc ...
+     *     .compact();</pre></blockquote>
+     *
+     * @return the {@link JwtHeaderBuilder} to use for header construction.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setHeader(Builder<? extends Header> builder);
+    JwtHeaderBuilder header();
+
+    /**
+     * Sets (and replaces) any existing header with the specified name/value pairs.  If you do not want to replace the
+     * existing header and only want to append to it, call
+     * {@link #header()}{@code .}{@link io.jsonwebtoken.lang.MapMutator#putAll(Map) putAll(map)}
+     * instead.
+     *
+     * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
+     * @return the builder for method chaining.
+     */
+    JwtBuilder setHeader(Map<String, ?> map);
 
     /**
      * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method
@@ -162,7 +167,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
-     * {@link Header#setContentType(String) contentType} header value to a compact {@code cty} media type
+     * {@link Header#getContentType() contentType} header value to a compact {@code cty} media type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.
      *
@@ -173,7 +178,15 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">JWT specification recommendations</a>.</p>
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
-     * method - instead call {@link #setContent(byte[])} and {@link Header#setContentType(String)} independently.</p>
+     * method - instead call {@link #setContent(byte[])} and set the header's
+     * {@link Header#getContentType() contentType} independently.  For example:</p>
+     *
+     * <blockquote><pre>
+     * Jwts.builder()
+     *     .setHeader(Jwts.header().setContentType("application/whatever"))
+     *     .setContent(byteArray)
+     *     ...
+     *     .build();</pre></blockquote>
      *
      * <p>If you want the JWT payload to be JSON claims, use the {@link #setClaims(Claims)} or
      * {@link #setClaims(java.util.Map)} methods instead.</p>
@@ -229,7 +242,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setIssuer(String) issuer} field with the specified value.  This allows you to write
+     * the Claims {@link Claims#getIssuer() issuer} field with the specified value.  This allows you to write
      * code like this:</p>
      *
      * <pre>
@@ -238,7 +251,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setIssuer("Joe");
+     * Claims claims = Jwts.claims().setIssuer("Joe").build();
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
@@ -256,18 +269,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setSubject(String) subject} field with the specified value.  This allows you to write
+     * the Claims {@link Claims#getSubject() subject} field with the specified value.  This allows you to write
      * code like this:</p>
      *
-     * <pre>
-     * String jwt = Jwts.builder().setSubject("Me").compact();
-     * </pre>
+     * <blockquote><pre>
+     * String jwt = Jwts.builder().setSubject("Me").compact();</pre></blockquote>
      *
      * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setSubject("Me");
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
+     * <blockquote><pre>
+     * Claims claims = Jwts.claims().setSubject("Me").build();
+     * String jwt = Jwts.builder().setClaims(claims).compact();</pre></blockquote>
      * <p>if desired.</p>
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.

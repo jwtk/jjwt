@@ -20,11 +20,9 @@ import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
-import org.hamcrest.CoreMatchers
 import org.junit.Test
 
 import javax.crypto.SecretKey

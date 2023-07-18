@@ -23,24 +23,20 @@ import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.SecretJwk
-import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.*
 
 class AbstractProtectedHeaderTest {
 
-    private AbstractProtectedHeader header
-
-    @Before
-    void setUp() {
-        header = new AbstractProtectedHeader(AbstractProtectedHeader.FIELDS) {}
+    private static DefaultProtectedHeader h(Map<String, ?> m) {
+        return new DefaultProtectedHeader(DefaultProtectedHeader.FIELDS, m)
     }
 
     @Test
     void testKeyId() {
         def kid = 'foo'
-        header.setKeyId(kid)
+        def header = h([kid: kid])
         assertEquals kid, header.get('kid')
         assertEquals kid, header.getKeyId()
     }
@@ -48,7 +44,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testKeyIdNonString() {
         try {
-            header.put('kid', 42)
+            h([kid: 42])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWT header 'kid' (Key ID) value: 42. Unsupported value type. " +
@@ -58,34 +54,26 @@ class AbstractProtectedHeaderTest {
     }
 
     @Test
-    void testSetJku() {
+    void testJku() {
         URI uri = URI.create('https://github.com')
-        header.setJwkSetUrl(uri)
+        def header = h([jku: uri])
         assertEquals uri.toString(), header.get('jku')
         assertEquals uri, header.getJwkSetUrl()
     }
 
     @Test
-    void testPutJkuUri() {
-        URI uri = URI.create('https://google.com')
-        header.put('jku', uri)
-        assertEquals uri.toString(), header.get('jku')
-        assertEquals uri, header.getJwkSetUrl()
-    }
-
-    @Test
-    void testPutJkuString() {
+    void testJkuString() {
         String url = 'https://google.com'
         URI uri = URI.create(url)
-        header.put('jku', url)
+        def header = h([jku: url])
         assertEquals url, header.get('jku')
         assertEquals uri, header.getJwkSetUrl()
     }
 
     @Test
-    void testPutJkuNonString() {
+    void testJkuNonString() {
         try {
-            header.put('jku', 42)
+            h([jku: 42])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWT header 'jku' (JWK Set URL) value: 42. Values must be either String or " +
@@ -95,21 +83,21 @@ class AbstractProtectedHeaderTest {
     }
 
     @Test
-    void testJwkWithNull() {
-        header.put('jwk', null)
+    void testJwkNull() {
+        def header = h([jwk: null])
         assertNull header.getJwk()
     }
 
     @Test
     void testJwkWithEmptyMap() {
-        header.put('jwk', [:])
+        def header = h([jwk: [:]])
         assertNull header.getJwk()
     }
 
     @Test
     void testJwkWithoutMap() {
         try {
-            header.put('jwk', 42)
+            h([jwk: 42])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: 42. " +
@@ -122,7 +110,7 @@ class AbstractProtectedHeaderTest {
     void testJwkWithJwk() {
         EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
-        header.setJwk(pubJwk)
+        def header = h([jwk: pubJwk])
         assertEquals pubJwk, header.getJwk()
     }
 
@@ -131,7 +119,7 @@ class AbstractProtectedHeaderTest {
         EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         Map<String, ?> m = new LinkedHashMap<>(pubJwk)
-        header.put('jwk', m)
+        def header = h([jwk: m])
         assertEquals pubJwk, header.getJwk()
     }
 
@@ -139,7 +127,7 @@ class AbstractProtectedHeaderTest {
     void testJwkWithBadMapKeys() {
         def m = [42: "hello"]
         try {
-            header.put('jwk', m)
+            h([jwk: m])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {42=hello}. JWK map keys must be Strings. " +
@@ -152,7 +140,7 @@ class AbstractProtectedHeaderTest {
     void testJwkWithSecretJwk() {
         SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
         try {
-            header.put('jwk', jwk)
+            h([jwk: jwk])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {kty=oct, k=<redacted>}. " +
@@ -165,7 +153,7 @@ class AbstractProtectedHeaderTest {
     void testJwkWithPrivateJwk() {
         EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
         try {
-            header.put('jwk', jwk)
+            h([jwk: jwk])
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {kty=EC, crv=P-256, " +
@@ -178,7 +166,8 @@ class AbstractProtectedHeaderTest {
     @Test
     void testX509Url() {
         URI uri = URI.create('https://google.com')
-        header.setX509Url(uri)
+        def header = h([x5u: uri])
+        assertEquals uri.toString(), header.get('x5u')
         assertEquals uri, header.getX509Url()
     }
 
@@ -186,7 +175,7 @@ class AbstractProtectedHeaderTest {
     void testX509UrlString() { //test canonical/idiomatic conversion
         String url = 'https://google.com'
         URI uri = URI.create(url)
-        header.put('x5u', url)
+        def header = h([x5u: url])
         assertEquals url, header.get('x5u')
         assertEquals uri, header.getX509Url()
     }
@@ -195,7 +184,7 @@ class AbstractProtectedHeaderTest {
     void testX509CertChain() {
         def bundle = TestKeys.RS256
         List<String> encodedCerts = Collections.of(Encoders.BASE64.encode(bundle.cert.getEncoded()))
-        header.setX509CertificateChain(bundle.chain)
+        def header = h([x5c: bundle.chain])
         assertEquals bundle.chain, header.getX509CertificateChain()
         assertEquals encodedCerts, header.get('x5c')
     }
@@ -205,7 +194,7 @@ class AbstractProtectedHeaderTest {
         byte[] thumbprint = new byte[16] // simulate
         Randoms.secureRandom().nextBytes(thumbprint)
         String encoded = Encoders.BASE64URL.encode(thumbprint)
-        header.setX509CertificateSha1Thumbprint(thumbprint)
+        def header = h([x5t: thumbprint])
         assertArrayEquals thumbprint, header.getX509CertificateSha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
@@ -215,7 +204,7 @@ class AbstractProtectedHeaderTest {
         byte[] thumbprint = new byte[32] // simulate
         Randoms.secureRandom().nextBytes(thumbprint)
         String encoded = Encoders.BASE64URL.encode(thumbprint)
-        header.setX509CertificateSha256Thumbprint(thumbprint)
+        def header = h(['x5t#S256': thumbprint])
         assertArrayEquals thumbprint, header.getX509CertificateSha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
@@ -223,25 +212,25 @@ class AbstractProtectedHeaderTest {
     @Test
     void testCritical() {
         Set<String> crits = Collections.setOf('foo', 'bar')
-        header.setCritical(crits)
+        def header = h([crit: crits])
         assertEquals crits, header.getCritical()
     }
 
     @Test
     void testCritNull() {
-        header.put('crit', null)
+        def header = h([crit: null])
         assertNull header.getCritical()
     }
 
     @Test
     void testCritEmpty() {
-        header.put('crit', [])
+        def header = h([crit: []])
         assertNull header.getCritical()
     }
 
     @Test
     void testCritSingleValue() {
-        header.put('crit', 'foo')
+        def header = h([crit: 'foo'])
         assertEquals(["foo"] as Set, header.get('crit'))
         assertEquals(["foo"] as Set, header.getCritical())
     }
@@ -249,7 +238,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testCritArray() {
         String[] crit = ["exp"] as String[]
-        header.put('crit', crit)
+        def header = h([crit: crit])
         assertEquals(["exp"] as Set, header.get('crit'))
         assertEquals(["exp"] as Set, header.getCritical())
     }
@@ -257,7 +246,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testCritList() {
         List<String> crit = ["exp"] as List<String>
-        header.put('crit', crit)
+        def header = h([crit: crit])
         assertEquals(["exp"] as Set, header.get('crit'))
         assertEquals(["exp"] as Set, header.getCritical())
     }

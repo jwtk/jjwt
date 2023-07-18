@@ -16,7 +16,7 @@
 package io.jsonwebtoken;
 
 /**
- * A <a href="https://tools.ietf.org/html/rfc7516">JWE</a> header.
+ * A <a href="https://www.rfc-editor.org/rfc/rfc7516.html">JWE</a> header.
  *
  * @since JJWT_RELEASE_VERSION
  */

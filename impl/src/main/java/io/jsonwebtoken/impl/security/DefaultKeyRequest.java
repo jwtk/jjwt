@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.JweHeaderBuilder;
+import io.jsonwebtoken.JweHeaderAccessor;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
@@ -23,19 +23,19 @@ import io.jsonwebtoken.security.KeyRequest;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyRequest<T> {
+public class DefaultKeyRequest<T, H extends JweHeaderAccessor> extends DefaultRequest<T> implements KeyRequest<T, H> {
 
-    private final JweHeaderBuilder header;
+    private final H header;
     private final AeadAlgorithm encryptionAlgorithm;
 
-    public DefaultKeyRequest(T payload, Provider provider, SecureRandom secureRandom, JweHeaderBuilder header, AeadAlgorithm encryptionAlgorithm) {
+    public DefaultKeyRequest(T payload, Provider provider, SecureRandom secureRandom, H header, AeadAlgorithm encryptionAlgorithm) {
         super(payload, provider, secureRandom);
-        this.header = Assert.notNull(header, "JweHeaderBuilder cannot be null.");
+        this.header = Assert.notNull(header, "JweHeader/Builder cannot be null.");
         this.encryptionAlgorithm = Assert.notNull(encryptionAlgorithm, "AeadAlgorithm argument cannot be null.");
     }
 
     @Override
-    public JweHeaderBuilder getHeader() {
+    public H getHeader() {
         return this.header;
     }
 
