@@ -16,7 +16,6 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.Builder;
-import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.security.X509Builder;
 
 /**
@@ -31,8 +30,6 @@ import io.jsonwebtoken.security.X509Builder;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwtHeaderBuilder extends
-        X509Builder<JwtHeaderBuilder>,
-        JweHeaderAccessor, JweHeaderMutator<JwtHeaderBuilder>,
-        Builder<Header>, Conjunctor<JwtBuilder> {
+public interface JwtHeaderBuilder extends X509Builder<JwtHeaderBuilder>, MutableJweHeader<JwtHeaderBuilder>,
+        Builder<Header> {
 }

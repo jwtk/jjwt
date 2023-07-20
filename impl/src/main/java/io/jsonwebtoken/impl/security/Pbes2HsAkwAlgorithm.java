@@ -16,8 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JweHeaderAccessor;
-import io.jsonwebtoken.JweHeaderMutator;
+import io.jsonwebtoken.MutableJweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -165,7 +164,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public <H extends JweHeaderAccessor & JweHeaderMutator<H>> KeyResult getEncryptionKey(final KeyRequest<Password, H> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<Password, MutableJweHeader<?>> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
         final Password key = Assert.notNull(request.getPayload(), "Encryption Password cannot be null.");
@@ -181,8 +180,9 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
-        DefaultKeyRequest<SecretKey, H> wrapReq = new DefaultKeyRequest<>(derivedKek, request.getProvider(),
-                request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
+        KeyRequest<SecretKey, MutableJweHeader<?>> wrapReq =
+                new DefaultKeyRequest<SecretKey, MutableJweHeader<?>>(derivedKek, request.getProvider(),
+                        request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 
         request.getHeader().put(DefaultJweHeader.P2S.getId(), inputSalt); //retain for recipients

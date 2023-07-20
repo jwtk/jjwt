@@ -16,8 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JweHeaderAccessor;
-import io.jsonwebtoken.JweHeaderMutator;
+import io.jsonwebtoken.MutableJweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -178,9 +177,9 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
     }
 
     @Override
-    public <H extends JweHeaderAccessor & JweHeaderMutator<H>> KeyResult getEncryptionKey(KeyRequest<PublicKey, H> request) throws SecurityException {
+    public KeyResult getEncryptionKey(KeyRequest<PublicKey, MutableJweHeader<?>> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
-        H header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
+        MutableJweHeader<?> header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         PublicKey publicKey = Assert.notNull(request.getPayload(), "Encryption PublicKey cannot be null.");
 
         KeyPair pair; // generated (ephemeral) key pair
@@ -202,7 +201,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
             Provider curveProvider = curve.getProvider(); // only non-null if not natively supported by the JVM
             if (provider == null && curveProvider != null) { // ensure that BC can be used if necessary:
                 provider = curveProvider;
-                request = new DefaultKeyRequest<>(request.getPayload(), provider, random,
+                request = new DefaultKeyRequest<PublicKey, MutableJweHeader<?>>(request.getPayload(), provider, random,
                         request.getHeader(), request.getEncryptionAlgorithm());
             }
             pair = generateKeyPair(random, curve, provider);
@@ -216,8 +215,9 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         final SecretKey derived = deriveKey(request, publicKey, pair.getPrivate());
 
-        DefaultKeyRequest<SecretKey, H> wrapReq = new DefaultKeyRequest<>(derived, request.getProvider(),
-                request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
+        KeyRequest<SecretKey, MutableJweHeader<?>> wrapReq =
+                new DefaultKeyRequest<SecretKey, MutableJweHeader<?>>(derived, request.getProvider(),
+                        request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = WRAP_ALG.getEncryptionKey(wrapReq);
 
         header.put(DefaultJweHeader.EPK.getId(), jwk);

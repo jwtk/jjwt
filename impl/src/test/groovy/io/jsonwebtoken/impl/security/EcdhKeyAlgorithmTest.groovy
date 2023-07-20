@@ -19,6 +19,7 @@ import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
+import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.InvalidKeyException
@@ -117,7 +118,7 @@ class EcdhKeyAlgorithmTest {
     void testEncryptionWithInvalidPublicKey() {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.RS256.pair.public as PublicKey // not an elliptic curve key, must fail
-        def header = new DefaultJweHeader([:])
+        def header = new DefaultMutableJweHeader()
         def request = new DefaultKeyRequest(encKey, null, null, header, Jwts.ENC.A128GCM)
         try {
             alg.getEncryptionKey(request)

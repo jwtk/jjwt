@@ -27,10 +27,10 @@ import java.util.Date;
  * @see ClaimsBuilder
  * @since JJWT_RELEASE_VERSION
  */
-public interface ClaimsAccessor {
+public interface ClaimsAccessor extends Identifiable {
 
     /**
-     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
      * <code>iss</code></a> (issuer) value or {@code null} if not present.
      *
      * @return the JWT {@code iss} value or {@code null} if not present.
@@ -38,7 +38,7 @@ public interface ClaimsAccessor {
     String getIssuer();
 
     /**
-     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.2">
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2">
      * <code>sub</code></a> (subject) value or {@code null} if not present.
      *
      * @return the JWT {@code sub} value or {@code null} if not present.
@@ -46,7 +46,7 @@ public interface ClaimsAccessor {
     String getSubject();
 
     /**
-     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
      * <code>aud</code></a> (audience) value or {@code null} if not present.
      *
      * @return the JWT {@code aud} value or {@code null} if not present.
@@ -54,7 +54,7 @@ public interface ClaimsAccessor {
     String getAudience();
 
     /**
-     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
      * <code>exp</code></a> (expiration) timestamp or {@code null} if not present.
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
@@ -64,7 +64,7 @@ public interface ClaimsAccessor {
     Date getExpiration();
 
     /**
-     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
      * <code>nbf</code></a> (not before) timestamp or {@code null} if not present.
      *
      * <p>A JWT obtained before this timestamp should not be used.</p>
@@ -74,7 +74,7 @@ public interface ClaimsAccessor {
     Date getNotBefore();
 
     /**
-     * Returns the JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
      * <code>iat</code></a> (issued at) timestamp or {@code null} if not present.
      *
      * <p>If present, this value is the timestamp when the JWT was created.</p>
@@ -84,7 +84,7 @@ public interface ClaimsAccessor {
     Date getIssuedAt();
 
     /**
-     * Returns the JWTs <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">
+     * Returns the JWTs <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
      * <code>jti</code></a> (JWT ID) value or {@code null} if not present.
      *
      * <p>This value is a CaSe-SenSiTiVe unique identifier for the JWT. If available, this value is expected to be
@@ -94,6 +94,7 @@ public interface ClaimsAccessor {
      *
      * @return the JWT {@code jti} value or {@code null} if not present.
      */
+    @Override // just for JavaDoc specific to the JWT spec
     String getId();
 
     /**

@@ -32,11 +32,9 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 //Consolidates logic between DefaultJwtHeaderBuilder and AbstractAsymmetricJwkBuilder
-public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder<B> {
+public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
 
     private final FieldMap fieldMap;
-
-    private final B builder;
 
     protected boolean computeX509Sha1Thumbprint;
 
@@ -56,46 +54,45 @@ public class DefaultX509Builder<B extends X509Builder<B>> implements X509Builder
 
     private final Function<X509Certificate, byte[]> GET_X509_BYTES;
 
-    public DefaultX509Builder(FieldMap fieldMap, B builder, Class<? extends RuntimeException> getBytesFailedException) {
+    public X509BuilderSupport(FieldMap fieldMap, Class<? extends RuntimeException> getBytesFailedException) {
         this.fieldMap = Assert.notNull(fieldMap, "FieldMap cannot be null.");
-        this.builder = Assert.notNull(builder, "X509Builder cannot be null.");
         this.GET_X509_BYTES = createGetBytesFunction(getBytesFailedException);
     }
 
     @Override
-    public B withX509Sha1Thumbprint(boolean enable) {
+    public X509BuilderSupport withX509Sha1Thumbprint(boolean enable) {
         this.computeX509Sha1Thumbprint = enable;
-        return builder;
+        return this;
     }
 
     @Override
-    public B withX509Sha256Thumbprint(boolean enable) {
+    public X509BuilderSupport withX509Sha256Thumbprint(boolean enable) {
         this.computeX509Sha256Thumbprint = enable;
-        return builder;
+        return this;
     }
 
     @Override
-    public B setX509Url(URI uri) {
+    public X509BuilderSupport setX509Url(URI uri) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5U.getId(), uri);
-        return builder;
+        return this;
     }
 
     @Override
-    public B setX509CertificateChain(List<X509Certificate> chain) {
+    public X509BuilderSupport setX509CertificateChain(List<X509Certificate> chain) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5C.getId(), chain);
-        return builder;
+        return this;
     }
 
     @Override
-    public B setX509CertificateSha1Thumbprint(byte[] thumbprint) {
+    public X509BuilderSupport setX509CertificateSha1Thumbprint(byte[] thumbprint) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5T.getId(), thumbprint);
-        return builder;
+        return this;
     }
 
     @Override
-    public B setX509CertificateSha256Thumbprint(byte[] thumbprint) {
+    public X509BuilderSupport setX509CertificateSha256Thumbprint(byte[] thumbprint) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5T_S256.getId(), thumbprint);
-        return this.builder;
+        return this;
     }
 
     private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {

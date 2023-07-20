@@ -111,7 +111,7 @@ public final class Jwts {
      * @since JJWT_RELEASE_VERSION
      */
     public static JwtHeaderBuilder header() {
-        return builder().header();
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder");
     }
 
     /**

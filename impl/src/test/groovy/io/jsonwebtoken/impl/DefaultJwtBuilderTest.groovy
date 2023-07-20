@@ -135,7 +135,7 @@ class DefaultJwtBuilderTest {
     void testSetHeader() {
         def h = Jwts.header().put('foo', 'bar').build()
         builder.setHeader(h)
-        assertEquals h, builder.header().build()
+        assertEquals h, builder.buildHeader()
     }
 
     @Test
@@ -143,7 +143,7 @@ class DefaultJwtBuilderTest {
         def m = [foo: 'bar']
         builder.setHeader(m)
         assertEquals builder.header().size(), 1
-        assertEquals builder.header().build().foo, 'bar'
+        assertEquals builder.buildHeader().foo, 'bar'
     }
 
     @Test
@@ -151,15 +151,15 @@ class DefaultJwtBuilderTest {
         def m = [a: 'b', c: 'd']
         builder.setHeaderParams(m)
         assertEquals builder.header().size(), 2
-        assertEquals builder.header().build().a, 'b'
-        assertEquals builder.header().build().c, 'd'
+        assertEquals builder.buildHeader().a, 'b'
+        assertEquals builder.buildHeader().c, 'd'
     }
 
     @Test
     void testSetHeaderParam() {
         builder.setHeaderParam('foo', 'bar')
         assertEquals builder.header().size(), 1
-        assertEquals builder.header().build().foo, 'bar'
+        assertEquals builder.buildHeader().foo, 'bar'
     }
 
     @Test

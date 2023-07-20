@@ -55,12 +55,12 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     protected Boolean applyX509KeyUse = null;
     private KeyUseStrategy keyUseStrategy = DefaultKeyUseStrategy.INSTANCE;
 
-    private final DefaultX509Builder<T> x509Builder;
+    private final X509BuilderSupport x509;
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
         FieldMap map = Assert.isInstanceOf(FieldMap.class, this.jwkContext);
-        this.x509Builder = new DefaultX509Builder<>(map, self(), MalformedKeyException.class);
+        this.x509 = new X509BuilderSupport(map, MalformedKeyException.class);
     }
 
     AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, JwkContext<K> ctx) {
@@ -86,13 +86,15 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     @Override
     public T setX509CertificateChain(List<X509Certificate> chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
-        return this.x509Builder.setX509CertificateChain(chain);
+        this.x509.setX509CertificateChain(chain);
+        return self();
     }
 
     @Override
     public T setX509Url(URI uri) {
         Assert.notNull(uri, "X509Url cannot be null.");
-        return this.x509Builder.setX509Url(uri);
+        this.x509.setX509Url(uri);
+        return self();
     }
 
     /*
@@ -105,27 +107,31 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     @Override
     public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        return this.x509Builder.setX509CertificateSha1Thumbprint(thumbprint);
+        this.x509.setX509CertificateSha1Thumbprint(thumbprint);
+        return self();
     }
 
     @Override
     public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        return this.x509Builder.setX509CertificateSha256Thumbprint(thumbprint);
+        this.x509.setX509CertificateSha256Thumbprint(thumbprint);
+        return self();
     }
 
     @Override
     public T withX509Sha1Thumbprint(boolean enable) {
-        return this.x509Builder.withX509Sha1Thumbprint(enable);
+        this.x509.withX509Sha1Thumbprint(enable);
+        return self();
     }
 
     @Override
     public T withX509Sha256Thumbprint(boolean enable) {
-        return this.x509Builder.withX509Sha256Thumbprint(enable);
+        this.x509.withX509Sha256Thumbprint(enable);
+        return self();
     }
 
     @Override
     public J build() {
-        this.x509Builder.apply();
+        this.x509.apply();
         return super.build();
     }
 

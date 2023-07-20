@@ -16,9 +16,8 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.JweHeaderAccessor;
-import io.jsonwebtoken.JweHeaderMutator;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MutableJweHeader;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -65,7 +64,7 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      * {@link KeyRequest#getEncryptionAlgorithm() AeadAlgorithm}, along with any optional encrypted key ciphertext.
      * @throws SecurityException if there is a problem obtaining or encrypting the AEAD {@code SecretKey}.
      */
-    <H extends JweHeaderAccessor & JweHeaderMutator<H>> KeyResult getEncryptionKey(KeyRequest<E, H> request) throws SecurityException;
+    KeyResult getEncryptionKey(KeyRequest<E, MutableJweHeader<?>> request) throws SecurityException;
 
     /**
      * Return the {@link SecretKey} that should be used to decrypt a JWE via the request's specified

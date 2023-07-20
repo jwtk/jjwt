@@ -19,7 +19,6 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
-import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -29,6 +28,7 @@ import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.StandardKeyAlgorithms;
 import io.jsonwebtoken.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.security.WeakKeyException;
+import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -70,8 +70,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setSecureRandom(SecureRandom secureRandom);
 
     /**
-     * Returns the {@link JwtHeaderBuilder} to use to modify the constructed JWT's header name/value pairs as desired.
-     * When finished, callers may return to JWT construction via the {@link Conjunctor#and() and()} method. For example:
+     * Returns the {@link JwtBuilder.Header} to use to modify the constructed JWT's header name/value pairs as desired.
+     * When finished, callers may return to JWT construction via the {@link JwtBuilder.Header#and() and()} method.
+     * For example:
      *
      * <blockquote><pre>
      * String jwt = Jwts.builder()
@@ -80,7 +81,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *         .setKeyId("keyId")
      *         .putAll(myHeaderMap)
      *         // ... etc ...
-     *         .{@link Conjunctor#and() and()}</b> //return back to the JwtBuilder
+     *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
      *
      *     .setSubject("Joe") // resume JwtBuilder calls
      *     // ... etc ...
@@ -89,7 +90,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the {@link JwtHeaderBuilder} to use for header construction.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtHeaderBuilder header();
+    JwtBuilder.Header header();
 
     /**
      * Sets (and replaces) any existing header with the specified name/value pairs.  If you do not want to replace the
@@ -294,7 +295,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setAudience(String) audience} field with the specified value.  This allows you to write
+     * the Claims {@link Claims#getAudience() audience} field with the specified value.  This allows you to write
      * code like this:</p>
      *
      * <pre>
@@ -323,7 +324,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setExpiration(java.util.Date) expiration} field with the specified value.  This allows
+     * the Claims {@link Claims#getExpiration() expiration} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -352,7 +353,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setNotBefore(java.util.Date) notBefore} field with the specified value.  This allows
+     * the Claims {@link Claims#getNotBefore() notBefore} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -381,7 +382,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>The value is the timestamp when the JWT was created.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setIssuedAt(java.util.Date) issuedAt} field with the specified value.  This allows
+     * the Claims {@link Claims#getIssuedAt() issuedAt} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -412,7 +413,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setId(String) id} field with the specified value.  This allows
+     * the Claims {@link Claims#getId() id} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -861,4 +862,21 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return A compact URL-safe JWT string.
      */
     String compact();
+
+    /**
+     * Editable header for use with a {@link JwtBuilder} that supports method chaining for any/all
+     * standard JWT, JWS and JWE header parameters.  Once header parameters are configured, the associated
+     * {@link JwtBuilder} may be obtained with the {@link #and() and()} method for continued configuration.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Header extends MutableJweHeader<Header>, X509Builder<Header> {
+
+        /**
+         * Returns the associated JwtBuilder for continued configuration.
+         *
+         * @return the associated JwtBuilder for continued configuration.
+         */
+        JwtBuilder and();
+    }
 }

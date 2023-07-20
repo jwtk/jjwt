@@ -26,20 +26,6 @@ import io.jsonwebtoken.security.StandardKeyAlgorithms;
  */
 public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends ProtectedHeaderMutator<T> {
 
-//    /**
-//     * Sets the JWE <a href="https://tools.ietf.org/html/rfc7516#section-4.1.2">{@code enc} (Encryption
-//     * Algorithm)</a> header value.  A {@code null} value will remove the property from the JSON map.
-//     *
-//     * <p>This should almost never be set by JJWT users directly - JJWT will always set this value to the value
-//     * returned by {@link AeadAlgorithm#getId()} when performing encryption, overwriting any potential previous
-//     * value.</p>
-//     *
-//     * @param enc the encryption algorithm identifier obtained from {@link AeadAlgorithm#getId()}.
-//     * @return this header for method chaining
-//     */
-//    @SuppressWarnings("UnusedReturnValue")
-//    JweHeader setEncryptionAlgorithm(String enc);
-
     /**
      * Sets any information about the JWE producer for use with key agreement algorithms. A {@code null} or empty value
      * removes the property from the JSON map.
@@ -128,19 +114,4 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @see <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP PBKDF2 Iteration Recommendations</a>
      */
     T setPbes2Count(int count);
-
-//    /**
-//     * Sets the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption. This should
-//     * almost never be used by JJWT users directly - it should instead be automatically generated and set within a
-//     * PBKDF2-based {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} implementation.
-//     *
-//     * @param salt the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption.
-//     * @return the header for method chaining
-//     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
-//     * @see Jwts.KEY#PBES2_HS256_A128KW
-//     * @see Jwts.KEY#PBES2_HS384_A192KW
-//     * @see Jwts.KEY#PBES2_HS512_A256KW
-//     */
-//    JweHeader setPbes2Salt(byte[] salt);
-
 }

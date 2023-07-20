@@ -42,7 +42,7 @@ class DefaultJwtHeaderBuilderTest {
     @Before
     void setUp() {
         header = null
-        builder = Jwts.builder().header() as DefaultJwtHeaderBuilder
+        builder = Jwts.header() as DefaultJwtHeaderBuilder
     }
 
     @SuppressWarnings('GroovyAssignabilityCheck')
