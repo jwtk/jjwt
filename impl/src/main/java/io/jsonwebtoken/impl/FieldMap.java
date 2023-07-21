@@ -41,35 +41,43 @@ public class FieldMap implements Map<String, Object>, MapAccessor<String, Object
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
     protected final Map<String, Object> idiomaticValues; // the values map with any RFC values converted to Java type-safe values where possible
 
-    private transient boolean mutable;
+    private final boolean initialized;
 
-    public FieldMap(Set<Field<?>> fieldSet) {
-        this(Fields.registry(fieldSet));
-    }
+    private final boolean mutable;
 
-    public FieldMap(Registry<String, ? extends Field<?>> fields) {
+    private FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values, boolean mutable) {
         Assert.notNull(fields, "Field registry cannot be null.");
         Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
         this.FIELDS = fields;
         this.values = new LinkedHashMap<>();
         this.idiomaticValues = new LinkedHashMap<>();
-        this.mutable = true;
-    }
-
-    public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
-        this(fields);
-        Assert.notNull(values, "Map argument cannot be null.");
-        putAll(values);
-        this.mutable = false;
-    }
-
-    public FieldMap setMutable(boolean mutable) {
+        if (!Collections.isEmpty(values)) {
+            putAll(values);
+        }
         this.mutable = mutable;
-        return this;
+        this.initialized = true;
+    }
+
+    public FieldMap(Set<Field<?>> fields) {
+        this(Fields.registry(fields));
+    }
+
+    public FieldMap(Registry<String, ? extends Field<?>> fields) {
+        this(fields, null, true);
+    }
+
+    /**
+     * Copy constructor producing an immutable instance.
+     *
+     * @param fields registry fields
+     * @param values field values
+     */
+    public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
+        this(fields, Assert.notNull(values, "Map argument cannot be null."), false);
     }
 
     private void assertMutable() {
-        if (!mutable) {
+        if (initialized && !mutable) {
             String msg = getName() + " instance is immutable and may not be modified.";
             throw new UnsupportedOperationException(msg);
         }
@@ -122,6 +130,17 @@ public class FieldMap implements Map<String, Object>, MapAccessor<String, Object
     }
 
     /**
+     * Returns an immutable view of this FieldMap.  Child implementations are free to override this to
+     * return a mutable instance if necessary.
+     *
+     * @return an immutable view of this FieldMap.
+     */
+    @Override
+    public Map<String, Object> toMap() {
+        return mutable ? this : Collections.immutable(this);
+    }
+
+    /**
      * Convenience method to put a value for a canonical field.
      *
      * @param field the field representing the property name to set
@@ -147,7 +166,7 @@ public class FieldMap implements Map<String, Object>, MapAccessor<String, Object
     // as an idiomatic type-safe Java value in addition to the canonical RFC/encoded value.
     private Object idiomaticPut(String name, Object value) {
         Assert.stateNotNull(name, "Name cannot be null."); // asserted by caller
-        Field<?> field = FIELDS.find(name);
+        Field<?> field = FIELDS.get(name);
         if (field != null) { //Setting a JWA-standard property - let's ensure we can represent it idiomatically:
             return apply(field, value);
         } else { //non-standard/custom property:

@@ -40,12 +40,12 @@ abstract class DelegatingRegistry<T> implements Registry<String, T> {
     }
 
     @Override
-    public T get(String id) throws IllegalArgumentException {
-        return REGISTRY.get(id);
+    public T forKey(String id) throws IllegalArgumentException {
+        return REGISTRY.forKey(id);
     }
 
     @Override
-    public T find(String id) {
-        return REGISTRY.find(id);
+    public T get(Object id) {
+        return REGISTRY.get(id);
     }
 }

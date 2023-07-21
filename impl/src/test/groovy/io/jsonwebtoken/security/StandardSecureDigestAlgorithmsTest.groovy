@@ -19,6 +19,7 @@ import io.jsonwebtoken.Jwts
 import org.junit.Test
 
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
 
 /**
  * The {@link StandardAlgorithmsTest} class contains the majority of test cases relevant for the
@@ -27,25 +28,30 @@ import static org.junit.Assert.assertNotNull
  */
 class StandardSecureDigestAlgorithmsTest {
 
+    @Test(expected = ClassCastException)
+    void testGetWithoutString() {
+        assertNull Jwts.SIG.get(1)
+    }
+
     @Test
     void testFindEd448() {
-        assertNotNull Jwts.SIG.find('Ed448')
+        assertNotNull Jwts.SIG.get('Ed448')
     }
 
     @Test
     void testFindEd448CaseInsensitive() {
-        assertNotNull Jwts.SIG.find('ED448')
-        assertNotNull Jwts.SIG.find('ed448')
+        assertNotNull Jwts.SIG.get('ED448')
+        assertNotNull Jwts.SIG.get('ed448')
     }
 
     @Test
     void testFindEd25519() {
-        assertNotNull Jwts.SIG.find('Ed25519')
+        assertNotNull Jwts.SIG.get('Ed25519')
     }
 
     @Test
     void testFindEd25519CaseInsensitive() {
-        assertNotNull Jwts.SIG.find('ED25519')
-        assertNotNull Jwts.SIG.find('ed25519')
+        assertNotNull Jwts.SIG.get('ED25519')
+        assertNotNull Jwts.SIG.get('ed25519')
     }
 }

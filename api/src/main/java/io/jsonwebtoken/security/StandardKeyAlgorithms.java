@@ -35,12 +35,12 @@ import java.util.Collection;
  *     // ... etc ...
  *     .encryptWith(rsaPublicKey, <b>{@link Jwts#KEY}.RSA_OAEP</b>, Jwts.ENC.A256GCM) // &lt;--
  *     .build()</pre></blockquote>
- * <p>Direct type-safe references as shown above are often better than calling {@link #get(String)} or
- * {@link #find(String)} which can be susceptible to misspelled or otherwise invalid string values.</p>
+ * <p>Direct type-safe references as shown above are often better than calling {@link #forKey(String)} or
+ * {@link Registry#get(Object)} which can be susceptible to misspelled or otherwise invalid string values.</p>
  *
  * @see #get()
- * @see #get(String)
- * @see #find(String)
+ * @see #forKey(String)
+ * @see Registry#get(Object)
  * @see #values()
  * @see KeyAlgorithm
  * @since JJWT_RELEASE_VERSION
@@ -57,7 +57,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *
      * @return this registry (a static singleton).
      */
-    public static StandardKeyAlgorithms get() { // named `get` to mimic java.util.function.Supplier
+    public static StandardKeyAlgorithms get() { // named `forKey` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 
@@ -662,7 +662,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
     @SuppressWarnings("unchecked")
     private <T> T doGet(String id) {
         Assert.hasText(id, "id cannot be null or empty.");
-        return (T) get(id);
+        return (T) forKey(id);
     }
 
     /**
@@ -694,31 +694,31 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      * Returns the JWE Key Management Algorithm with the specified
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">{@code alg} key algorithm identifier</a> or
      * {@code null} if an algorithm for the specified {@code id} cannot be found.  If a JWA-standard
-     * instance must be resolved, consider using the {@link #get(String)} method instead.
+     * instance must be resolved, consider using the {@link #forKey(String)} method instead.
      *
      * @param id a JWA standard {@code alg} key algorithm identifier
      * @return the associated KeyAlgorithm instance or {@code null} otherwise.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">RFC 7518, Section 4.1</a>
-     * @see #get(String)
+     * @see #forKey(String)
      */
-    public KeyAlgorithm<?, ?> find(String id) {
-        return REGISTRY.find(id);
+    public KeyAlgorithm<?, ?> get(Object id) {
+        return REGISTRY.get(id);
     }
 
     /**
      * Returns the JWE Key Management Algorithm with the specified
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">{@code alg} key algorithm identifier</a> or
      * throws an {@link IllegalArgumentException} if there is no JWE-standard algorithm for the specified
-     * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link #find(String)}
+     * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link Registry#get(Object)}
      * method instead.
      *
      * @param id a JWA standard {@code alg} key algorithm identifier
      * @return the associated {@code KeyAlgorithm} instance.
      * @throws IllegalArgumentException if there is no JWA-standard algorithm for the specified identifier.
-     * @see #find(String)
+     * @see Registry#get(Object)
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">RFC 7518, Section 4.1</a>
      */
-    public KeyAlgorithm<?, ?> get(String id) throws IllegalArgumentException {
-        return REGISTRY.get(id);
+    public KeyAlgorithm<?, ?> forKey(String id) throws IllegalArgumentException {
+        return REGISTRY.forKey(id);
     }
 }

@@ -19,10 +19,19 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Encoders
 import org.junit.Test
 
-import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertEquals
+import static org.junit.Assert.*
 
 class DefaultJwkContextTest {
+
+    @Test
+    void testToMap() {
+        def m = ['foo': 'bar', 'baz': 'bat']
+        def ctx = new DefaultJwkContext()
+        ctx.putAll(m)
+        assertEquals m, ctx
+        assertEquals m, ctx.toMap()
+        assertSame ctx, ctx.toMap()
+    }
 
     @Test
     void testX509Url() {

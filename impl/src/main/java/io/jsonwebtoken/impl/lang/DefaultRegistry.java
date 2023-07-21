@@ -46,8 +46,7 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
 
     @Override
     public V apply(K k) {
-        Assert.notNull(k, this.qualifiedKeyName + " cannot be null.");
-        return VALUES.get(k);
+        return get(k);
     }
 
     @Override
@@ -61,8 +60,8 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
     }
 
     @Override
-    public V get(K key) {
-        V value = find(key);
+    public V forKey(K key) {
+        V value = get(key);
         if (value == null) {
             String msg = "Unrecognized " + this.qualifiedKeyName + ": " + key;
             throw new IllegalArgumentException(msg);
@@ -70,8 +69,10 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
         return value;
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
-    public V find(K key) {
-        return apply(key);
+    public V get(Object key) {
+        Assert.notNull(key, this.qualifiedKeyName + " cannot be null.");
+        return VALUES.get(key);
     }
 }

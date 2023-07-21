@@ -80,14 +80,14 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     <b>.header()
      *         .setKeyId("keyId")
      *         .putAll(myHeaderMap)
-     *         // ... etc ...
+     *         // ... other header params ...
      *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
      *
      *     .setSubject("Joe") // resume JwtBuilder calls
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
-     * @return the {@link JwtHeaderBuilder} to use for header construction.
+     * @return the {@link JwtBuilder.Header} to use for header construction.
      * @since JJWT_RELEASE_VERSION
      */
     JwtBuilder.Header header();

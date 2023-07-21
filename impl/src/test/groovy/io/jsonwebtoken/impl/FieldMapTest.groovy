@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.lang.Field
 import io.jsonwebtoken.impl.lang.Fields
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.lang.Collections
+import io.jsonwebtoken.lang.Registry
 import org.junit.Before
 import org.junit.Test
 
@@ -27,8 +28,9 @@ import static org.junit.Assert.*
 class FieldMapTest {
 
     private static final Field<String> DUMMY = Fields.string('' + Randoms.secureRandom().nextInt(), "RANDOM")
-    private static final Field<String> SECRET = Fields.secretBigInt('foo', 'foo')
-    private static final Set<Field<?>> FIELDS = Collections.setOf(DUMMY)
+    private static final Field<BigInteger> SECRET = Fields.secretBigInt('foo', 'foo')
+    private static final Set<Field<?>> FIELD_SET = Collections.setOf(DUMMY)
+    private static final Registry<String, Field<?>> FIELDS = Fields.registry(FIELD_SET)
     FieldMap jwtMap
 
     @Before
@@ -49,18 +51,17 @@ class FieldMapTest {
 
     @Test
     void testImmutable() {
-        Map m = jwtMap
-        m.put('foo', 'bar') // allowed
-        jwtMap.setMutable(false)
+        Map mutable = jwtMap
+        mutable.put('foo', 'bar')
+        Map immutable = new FieldMap(FIELDS, mutable) // make immutable
 
-        unsupported { m.put('whatever', 'value') }
-        unsupported { m.putAll([a: 'b']) }
-        unsupported { m.remove('foo') }
-        unsupported { m.clear() }
+        unsupported { immutable.put('whatever', 'value') }
+        unsupported { immutable.putAll([a: 'b']) }
+        unsupported { immutable.remove('foo') }
+        unsupported { immutable.clear() }
 
-        jwtMap.setMutable(true)
-        m.clear() // no exception
-        assertEquals 0, m.size()
+        mutable.clear() // no exception
+        assertEquals 0, mutable.size()
     }
 
     @Test
@@ -120,27 +121,52 @@ class FieldMapTest {
         assertTrue jwtMap.values().containsAll(s) && s.containsAll(jwtMap.values())
     }
 
+    @SuppressWarnings('GroovyUnusedCatchParameter')
+    @Test
+    void testToMap() {
+        def m = [foo: 'bar']
+        jwtMap.putAll(m)
+        Map returned = jwtMap.toMap()
+        assertEquals 'bar', returned.foo
+        //assert returned Map is mutable:
+        returned.clear()
+        assertEquals 0, jwtMap.size()
+        assertEquals 0, returned.size()
+
+        // now test immutable:
+        jwtMap = new FieldMap(FIELDS, m)
+        unsupported { jwtMap.clear() }
+        //assert returned Map view reflects changes and is still immutable
+        returned = jwtMap.toMap()
+        assertEquals 'bar', returned.foo
+        try { // assert new return value is immutable:
+            returned.clear()
+            fail()
+        } catch(UnsupportedOperationException expected) {
+        }
+    }
+
     @Test
     void testEquals() throws Exception {
-        def m1 = new FieldMap(FIELDS);
-        m1.put("a", "a");
+        def m1 = new FieldMap(FIELDS)
+        m1.put("a", "a")
 
-        def m2 = new FieldMap(FIELDS);
-        m2.put("a", "a");
+        def m2 = new FieldMap(FIELDS)
+        m2.put("a", "a")
 
-        assertEquals(m1, m2);
+        assertEquals(m1, m2)
     }
 
     @Test
     void testHashcode() throws Exception {
-        def hashCodeEmpty = jwtMap.hashCode();
+        def hashCodeEmpty = jwtMap.hashCode()
 
-        jwtMap.put("a", "b");
-        def hashCodeNonEmpty = jwtMap.hashCode();
-        assertTrue(hashCodeEmpty != hashCodeNonEmpty);
+        jwtMap.put("a", "b")
+        def hashCodeNonEmpty = jwtMap.hashCode()
+        assertTrue(hashCodeEmpty != hashCodeNonEmpty)
 
-        def identityHash = System.identityHashCode(jwtMap);
-        assertTrue(hashCodeNonEmpty != identityHash);
+        def identityHash = System.identityHashCode(jwtMap)
+        assertTrue(hashCodeNonEmpty != identityHash)
     }
 
     @Test
@@ -151,7 +177,7 @@ class FieldMapTest {
 
     @Test
     void testSetSecretFieldWithInvalidTypeValue() {
-        def map = new FieldMap(Collections.setOf(SECRET))
+        def map = new FieldMap(Fields.registry(SECRET))
         def invalidValue = URI.create('https://whatever.com')
         try {
             map.put('foo', invalidValue)

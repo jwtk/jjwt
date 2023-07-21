@@ -38,6 +38,33 @@ class StandardAlgorithmsTest {
     }
 
     @Test
+    void testForKey() {
+        eachRegAlg { reg, alg ->
+            assertSame alg, reg.forKey(alg.getId())
+        }
+    }
+
+    @Test
+    void testForKeyCaseInsensitive() {
+        eachRegAlg { reg, alg ->
+            assertSame alg, reg.forKey(alg.getId().toLowerCase())
+        }
+    }
+
+    @Test
+    void testForKeyWithInvalidId() {
+        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        registries.each {reg ->
+            //noinspection GroovyUnusedCatchParameter
+            try {
+                reg.forKey('invalid')
+                fail()
+            } catch (IllegalArgumentException expected) {
+            }
+        }
+    }
+
+    @Test
     void testGet() {
         eachRegAlg { reg, alg ->
             assertSame alg, reg.get(alg.getId())
@@ -53,36 +80,9 @@ class StandardAlgorithmsTest {
 
     @Test
     void testGetWithInvalidId() {
-        //unlike the 'find' paradigm, 'get' requires the value to exist
+        // 'get' paradigm can return null if not found
         registries.each {reg ->
-            //noinspection GroovyUnusedCatchParameter
-            try {
-                reg.get('invalid')
-                fail()
-            } catch (IllegalArgumentException expected) {
-            }
-        }
-    }
-
-    @Test
-    void testFindById() {
-        eachRegAlg { reg, alg ->
-            assertSame alg, reg.find(alg.getId())
-        }
-    }
-
-    @Test
-    void testFindByIdCaseInsensitive() {
-        eachRegAlg { reg, alg ->
-            assertSame alg, reg.find(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        registries.each {reg ->
-            assertNull reg.find('invalid')
+            assertNull reg.get('invalid')
         }
     }
 

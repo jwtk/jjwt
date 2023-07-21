@@ -43,4 +43,12 @@ public interface MapAccessor<K, V> {
     Collection<V> values();
 
     Set<Map.Entry<K, V>> entrySet();
+
+    /**
+     * Returns a view of the associated Map, which may or may not be mutable.  This is useful for use with existing
+     * Map-based APIs, especially if the underlying implementation does not implement the Map interface itself.
+     *
+     * @return a view of the associated Map, which may or may not be mutable.
+     */
+    Map<K, V> toMap();
 }

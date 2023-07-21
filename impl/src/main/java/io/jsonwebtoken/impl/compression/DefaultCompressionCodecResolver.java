@@ -85,7 +85,7 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         if (!Strings.hasText(id)) {
             return null;
         }
-        CompressionCodec codec = codecs.find(id);
+        CompressionCodec codec = codecs.get(id);
         if (codec == null) {
             String msg = String.format(MISSING_COMPRESSION_MESSAGE, id);
             throw new CompressionException(msg);

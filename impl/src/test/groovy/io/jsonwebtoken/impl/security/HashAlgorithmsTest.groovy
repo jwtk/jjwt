@@ -36,43 +36,43 @@ class HashAlgorithmsTest {
     }
 
     @Test
-    void testForId() {
+    void testForKey() {
+        for (HashAlgorithm alg : Jwks.HASH.values()) {
+            assertSame alg, Jwks.HASH.forKey(alg.getId())
+        }
+    }
+
+    @Test
+    void testForKeyCaseInsensitive() {
+        for (HashAlgorithm alg : Jwks.HASH.values()) {
+            assertSame alg, Jwks.HASH.forKey(alg.getId().toLowerCase())
+        }
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testForKeyWithInvalidId() {
+        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        Jwks.HASH.forKey('invalid')
+    }
+
+    @Test
+    void testGet() {
         for (HashAlgorithm alg : Jwks.HASH.values()) {
             assertSame alg, Jwks.HASH.get(alg.getId())
         }
     }
 
     @Test
-    void testForIdCaseInsensitive() {
+    void testGetCaseInsensitive() {
         for (HashAlgorithm alg : Jwks.HASH.values()) {
             assertSame alg, Jwks.HASH.get(alg.getId().toLowerCase())
         }
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testForIdWithInvalidId() {
-        //unlike the 'find' paradigm, 'get' requires the value to exist
-        Jwks.HASH.get('invalid')
-    }
-
     @Test
-    void testFindById() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.find(alg.getId())
-        }
-    }
-
-    @Test
-    void testFindByIdCaseInsensitive() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.find(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        assertNull Jwks.HASH.find('invalid')
+    void testGetWithInvalidId() {
+        // 'get' paradigm can return null if not found
+        assertNull Jwks.HASH.get('invalid')
     }
 
     static DefaultRequest<byte[]> request(String msg) {

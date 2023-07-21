@@ -101,7 +101,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
         for (Map.Entry<String, Object> entry : src.idiomaticValues.entrySet()) {
             String id = entry.getKey();
             Object value = entry.getValue();
-            Field<?> field = this.FIELDS.find(id);
+            Field<?> field = this.FIELDS.get(id);
             if (field != null && !field.supports(value)) { // src idiomatic value is not what is expected, so convert:
                 value = this.values.get(field.getId());
                 put(field, value); // perform idiomatic conversion with original/raw src value

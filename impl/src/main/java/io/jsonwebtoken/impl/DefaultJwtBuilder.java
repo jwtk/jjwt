@@ -165,7 +165,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @SuppressWarnings("unchecked") // TODO: remove for 1.0
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
         @SuppressWarnings("deprecation") io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get(alg.getValue());
+        return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.forKey(alg.getValue());
     }
 
     @Override
@@ -218,7 +218,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.get(alg.getValue()));
+        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.forKey(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0

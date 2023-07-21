@@ -57,53 +57,42 @@ class KeyAlgorithmsTest {
     }
 
     @Test
-    void testForId() {
+    void testForKey() {
+        for (KeyAlgorithm alg : Jwts.KEY.values()) {
+            assertSame alg, Jwts.KEY.forKey(alg.getId())
+        }
+    }
+
+    @Test
+    void testForKeyCaseInsensitive() {
+        for (KeyAlgorithm alg : Jwts.KEY.values()) {
+            assertSame alg, Jwts.KEY.forKey(alg.getId().toLowerCase())
+        }
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testForKeyWithInvalidId() {
+        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        Jwts.KEY.forKey('invalid')
+    }
+
+    @Test
+    void testGet() {
         for (KeyAlgorithm alg : Jwts.KEY.values()) {
             assertSame alg, Jwts.KEY.get(alg.getId())
         }
     }
 
     @Test
-    void testForIdCaseInsensitive() {
+    void testGetCaseInsensitive() {
         for (KeyAlgorithm alg : Jwts.KEY.values()) {
             assertSame alg, Jwts.KEY.get(alg.getId().toLowerCase())
         }
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testForIdWithInvalidId() {
-        //unlike the 'find' paradigm, 'get' requires the value to exist
-        Jwts.KEY.get('invalid')
-    }
-
     @Test
-    void testFindById() {
-        for (KeyAlgorithm alg : Jwts.KEY.values()) {
-            assertSame alg, Jwts.KEY.find(alg.getId())
-        }
+    void testGetWithInvalidId() {
+        // 'get' paradigm can return null if not found
+        assertNull Jwts.KEY.get('invalid')
     }
-
-    @Test
-    void testFindByIdCaseInsensitive() {
-        for (KeyAlgorithm alg : Jwts.KEY.values()) {
-            assertSame alg, Jwts.KEY.find(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        assertNull Jwts.KEY.find('invalid')
-    }
-
-    /*
-    @Test
-    @Ignore // temporarily until we decide if this API will remain
-    void testEstimateIterations() {
-        // keep it super short so we don't hammer the test server or slow down the build too much:
-        long desiredMillis = 50
-        int result = Jwts.KEY.estimateIterations(Jwts.KEY.PBES2_HS256_A128KW, desiredMillis)
-        assertTrue result > Pbes2HsAkwAlgorithm.MIN_RECOMMENDED_ITERATIONS
-    }
-     */
 }

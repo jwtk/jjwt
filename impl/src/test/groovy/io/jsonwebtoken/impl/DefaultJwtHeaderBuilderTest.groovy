@@ -235,6 +235,16 @@ class DefaultJwtHeaderBuilderTest {
         assertTrue header.isEmpty()
     }
 
+    @Test
+    void testToMap() {
+        def m = ['foo': 'bar', 'baz': 'bat']
+        builder.putAll(m)
+        assertEquals m, builder.toMap()
+        assertEquals m.size(), builder.toMap().size()
+        builder.clear()
+        assertEquals 0, builder.toMap().size()
+    }
+
     // ====================== Generic Header Methods =======================
 
     @Test

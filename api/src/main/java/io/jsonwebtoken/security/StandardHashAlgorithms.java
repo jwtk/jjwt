@@ -42,8 +42,8 @@ import java.util.Collection;
  *
  * @see #get()
  * @see #values()
- * @see #find(String)
- * @see #get(String)
+ * @see Registry#get(Object)
+ * @see #forKey(String)
  * @see HashAlgorithm
  * @since JJWT_RELEASE_VERSION
  */
@@ -59,7 +59,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      *
      * @return this registry (a static singleton).
      */
-    public static StandardHashAlgorithms get() { // named `get` to mimic java.util.function.Supplier
+    public static StandardHashAlgorithms get() { // named `forKey` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 
@@ -69,7 +69,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * value of {@code sha-256}. It is a {@code HashAlgorithm} alias for the native
      * Java JCA {@code SHA-256} {@code MessageDigest} algorithm.
      */
-    public final HashAlgorithm SHA256 = get("sha-256");
+    public final HashAlgorithm SHA256 = forKey("sha-256");
 
     /**
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -77,7 +77,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * value of {@code sha-384}. It is a {@code HashAlgorithm} alias for the native
      * Java JCA {@code SHA-384} {@code MessageDigest} algorithm.
      */
-    public final HashAlgorithm SHA384 = get("sha-384");
+    public final HashAlgorithm SHA384 = forKey("sha-384");
 
     /**
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -85,7 +85,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * value of {@code sha-512}. It is a {@code HashAlgorithm} alias for the native
      * Java JCA {@code SHA-512} {@code MessageDigest} algorithm.
      */
-    public final HashAlgorithm SHA512 = get("sha-512");
+    public final HashAlgorithm SHA512 = forKey("sha-512");
 
     /**
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -95,7 +95,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
      * classpath.</b></p>
      */
-    public final HashAlgorithm SHA3_256 = get("sha3-256");
+    public final HashAlgorithm SHA3_256 = forKey("sha3-256");
 
     /**
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -105,7 +105,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
      * classpath.</b></p>
      */
-    public final HashAlgorithm SHA3_384 = get("sha3-384");
+    public final HashAlgorithm SHA3_384 = forKey("sha3-384");
 
     /**
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -115,7 +115,7 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
      * classpath.</b></p>
      */
-    public final HashAlgorithm SHA3_512 = get("sha3-512");
+    public final HashAlgorithm SHA3_512 = forKey("sha3-512");
 
     /**
      * Prevent external instantiation.
@@ -157,18 +157,18 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * column within the
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named Information
      * Hash Algorithm Registry</a> table. If a supported instance result is not mandatory, consider using the
-     * {@link #find(String)} method instead.
+     * {@link Registry#get(Object)} method instead.
      *
      * @param id an IANA {@code Hash Name String} hash algorithm identifier.
      * @return the associated {@code HashAlgorithm} instance.
      * @throws IllegalArgumentException if there is no supported algorithm for the specified identifier.
-     * @see #find(String)
+     * @see Registry#get(Object)
      * @see <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named
      * Information Hash Algorithm Registry</a>
      */
     @Override
-    public HashAlgorithm get(String id) {
-        return DELEGATE.get(id);
+    public HashAlgorithm forKey(String id) {
+        return DELEGATE.forKey(id);
     }
 
     /**
@@ -177,16 +177,16 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * values in the <b>{@code Hash Name String}</b> column within the
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named Information
      * Hash Algorithm Registry</a> table.  If a standard instance must be resolved, consider using the
-     * {@link #get(String)} method instead.
+     * {@link #forKey(String)} method instead.
      *
      * @param id an IANA {@code Hash Name String} hash algorithm identifier
      * @return the associated {@code HashAlgorithm} instance if found or {@code null} otherwise.
      * @see <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named Information
      * Hash Algorithm Registry</a>
-     * @see #get(String)
+     * @see #forKey(String)
      */
     @Override
-    public HashAlgorithm find(String id) {
-        return DELEGATE.find(id);
+    public HashAlgorithm get(Object id) {
+        return DELEGATE.get(id);
     }
 }

@@ -68,43 +68,36 @@ class EncryptionAlgorithmsTest {
     }
 
     @Test
-    void testForId() {
+    void testForKey() {
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
+            assertSame alg, Jwts.ENC.forKey(alg.getId())
+        }
+    }
+
+    @Test
+    void testGetCaseInsensitive() {
+        for (AeadAlgorithm alg : Jwts.ENC.values()) {
+            assertSame alg, Jwts.ENC.get(alg.getId().toLowerCase())
+        }
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testForIdWithInvalidId() {
+        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        Jwts.ENC.forKey('invalid')
+    }
+
+    @Test
+    void testGet() {
         for (AeadAlgorithm alg : Jwts.ENC.values()) {
             assertSame alg, Jwts.ENC.get(alg.getId())
         }
     }
 
     @Test
-    void testForIdCaseInsensitive() {
-        for (AeadAlgorithm alg : Jwts.ENC.values()) {
-            assertSame alg, Jwts.ENC.find(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testForIdWithInvalidId() {
-        //unlike the 'find' paradigm, 'for' requires the value to exist
-        Jwts.ENC.get('invalid')
-    }
-
-    @Test
-    void testFindById() {
-        for (AeadAlgorithm alg : Jwts.ENC.values()) {
-            assertSame alg, Jwts.ENC.find(alg.getId())
-        }
-    }
-
-    @Test
-    void testFindByIdCaseInsensitive() {
-        for (AeadAlgorithm alg : Jwts.ENC.values()) {
-            assertSame alg, Jwts.ENC.find(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        assertNull Jwts.ENC.find('invalid')
+    void testGetWithInvalidId() {
+        // 'get' paradigm can return null if not found
+        assertNull Jwts.ENC.get('invalid')
     }
 
     @Test

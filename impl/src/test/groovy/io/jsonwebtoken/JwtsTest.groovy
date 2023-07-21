@@ -1394,7 +1394,7 @@ class JwtsTest {
                 .build()
                 .parseClaimsJwe(jwe)
         assertEquals 'bar', jwt.getPayload().get('foo')
-        assertEquals Jwts.KEY.PBES2_HS512_A256KW, Jwts.KEY.get(jwt.getHeader().getAlgorithm())
+        assertEquals Jwts.KEY.PBES2_HS512_A256KW, Jwts.KEY.forKey(jwt.getHeader().getAlgorithm())
     }
 
     @Test

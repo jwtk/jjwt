@@ -45,22 +45,23 @@ public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegist
     private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
 
     @Override
-    public SecureDigestAlgorithm<?, ?> find(String id) {
-        if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(id)) {
+    public SecureDigestAlgorithm<?, ?> get(Object id) {
+        String key = (String) id; // could throw ClassCastException, which is allowed per Map 'get' contract
+        if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(key)) {
             return Ed448;
-        } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(id)) {
+        } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(key)) {
             return Ed25519;
         }
-        return super.find(id);
+        return super.get(key);
     }
 
     @Override
-    public SecureDigestAlgorithm<?, ?> get(String id) throws IllegalArgumentException {
+    public SecureDigestAlgorithm<?, ?> forKey(String id) throws IllegalArgumentException {
         if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(id)) {
             return Ed448;
         } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(id)) {
             return Ed25519;
         }
-        return super.get(id);
+        return super.forKey(id);
     }
 }

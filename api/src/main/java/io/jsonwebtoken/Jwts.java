@@ -49,7 +49,7 @@ public final class Jwts {
      * Algorithms for Content Encryption</a> defined in the
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">
      * JSON Web Signature and Encryption Algorithms Registry</a>. In addition to its
-     * {@link Registry#get(Object) get} and {@link Registry#find(Object) find} lookup methods, each standard algorithm
+     * {@link Registry#forKey(Object) forKey} and {@link Registry#get(Object) get} lookup methods, each standard algorithm
      * is also available as a ({@code public final}) constant for direct type-safe reference in application code.
      * For example:
      * <blockquote><pre>
@@ -67,7 +67,7 @@ public final class Jwts {
      * Algorithms for Digital Signatures and MACs</a> defined in the
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">JSON Web Signature and Encryption Algorithms
      * Registry</a>. In addition to its
-     * {@link Registry#get(Object) get} and {@link Registry#find(Object) find} lookup methods, each standard algorithm
+     * {@link Registry#forKey(Object) forKey} and {@link Registry#get(Object) get} lookup methods, each standard algorithm
      * is also available as a ({@code public final}) constant for direct type-safe reference in application code.
      * For example:
      * <blockquote><pre>
@@ -83,7 +83,7 @@ public final class Jwts {
     /**
      * All JWA (RFC 7518) standard <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Cryptographic
      * Algorithms for Key Management</a>. In addition to its
-     * convenience {@link Registry#get(Object) get} and {@link Registry#find(Object) find} lookup methods, each
+     * convenience {@link Registry#forKey(Object) forKey} and {@link Registry#get(Object) get} lookup methods, each
      * standard algorithm is also available as a ({@code public final}) constant for direct type-safe reference in
      * application code. For example:
      * <blockquote><pre>

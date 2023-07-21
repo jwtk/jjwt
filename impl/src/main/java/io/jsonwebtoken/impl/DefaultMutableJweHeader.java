@@ -135,6 +135,11 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
         return self();
     }
 
+    @Override
+    public Map<String, Object> toMap() {
+        return this.params.toMap();
+    }
+
     // =============================================================
     // JWT Header methods
     // =============================================================

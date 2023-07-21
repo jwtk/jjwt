@@ -47,9 +47,10 @@ public class StringRegistry<V> extends DefaultRegistry<String, V> {
     }
 
     @Override
-    public V apply(String id) {
+    public V get(Object key) {
+        String id = (String) key; // could throw ClassCastException as allowed per Map 'get' contract
         Assert.hasText(id, "id argument cannot be null or empty.");
-        V instance = super.apply(id); //try standard ID lookup first.  This will satisfy 99% of invocations
+        V instance = super.get(id); //try standard ID lookup first.  This will satisfy 99% of invocations
         if (instance == null) { // fall back to case-insensitive ID lookup:
             id = CASE_FN.apply(id);
             instance = CI_VALUES.get(id);
