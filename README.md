@@ -1426,7 +1426,7 @@ key algorithms:
 
 <sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry singleton.
+These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` convenience class.
 
 <a name="jws-key"></a>
 ### Signature Algorithms Keys

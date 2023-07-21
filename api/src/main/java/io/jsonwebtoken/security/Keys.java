@@ -130,7 +130,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get().get(alg.name());
         if (!(salg instanceof MacAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -235,7 +235,7 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get().get(alg.name());
         if (!(salg instanceof SignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);

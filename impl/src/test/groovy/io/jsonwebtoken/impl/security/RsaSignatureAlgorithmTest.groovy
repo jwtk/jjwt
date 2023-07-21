@@ -31,7 +31,7 @@ import static org.junit.Assert.*
 class RsaSignatureAlgorithmTest {
 
     static Collection<RsaSignatureAlgorithm> algs() {
-        return Jwts.SIG.values().findAll({
+        return Jwts.SIG.get().values().findAll({
             it.id.startsWith("RS") || it.id.startsWith("PS")
         }) as Collection<RsaSignatureAlgorithm>
     }
@@ -83,7 +83,7 @@ class RsaSignatureAlgorithmTest {
         def pair = gen.generateKeyPair()
 
         def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
-        Jwts.SIG.values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
+        Jwts.SIG.get().values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
             try {
                 it.digest(request)
                 fail()

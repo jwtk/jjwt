@@ -65,7 +65,7 @@ public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHe
 
     static boolean isCandidate(FieldMap fields) {
         String id = fields.get(DefaultHeader.ALGORITHM);
-        return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.get(id))) ||
+        return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.get().get(id))) ||
                 fields.get(JKU) != null ||
                 fields.get(JWK) != null ||
                 !Collections.isEmpty(fields.get(CRIT)) ||

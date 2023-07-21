@@ -129,7 +129,7 @@ class KeysTest {
 
     @Test
     void testSecretKeyFor() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
             if (alg instanceof MacAlgorithm) {
                 SecretKey key = alg.keyBuilder().build()
                 assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
@@ -207,7 +207,7 @@ class KeysTest {
     @Test
     void testKeyPairFor() {
 
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
 
             if (alg instanceof RsaSignatureAlgorithm) {
 

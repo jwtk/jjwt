@@ -28,30 +28,32 @@ import static org.junit.Assert.assertNull
  */
 class StandardSecureDigestAlgorithmsTest {
 
+    private static final def registry = Jwts.SIG.get()
+
     @Test(expected = ClassCastException)
     void testGetWithoutString() {
-        assertNull Jwts.SIG.get(1)
+        assertNull registry.get(1)
     }
 
     @Test
     void testFindEd448() {
-        assertNotNull Jwts.SIG.get('Ed448')
+        assertNotNull registry.get('Ed448')
     }
 
     @Test
     void testFindEd448CaseInsensitive() {
-        assertNotNull Jwts.SIG.get('ED448')
-        assertNotNull Jwts.SIG.get('ed448')
+        assertNotNull registry.get('ED448')
+        assertNotNull registry.get('ed448')
     }
 
     @Test
     void testFindEd25519() {
-        assertNotNull Jwts.SIG.get('Ed25519')
+        assertNotNull registry.get('Ed25519')
     }
 
     @Test
     void testFindEd25519CaseInsensitive() {
-        assertNotNull Jwts.SIG.get('ED25519')
-        assertNotNull Jwts.SIG.get('ed25519')
+        assertNotNull registry.get('ED25519')
+        assertNotNull registry.get('ed25519')
     }
 }

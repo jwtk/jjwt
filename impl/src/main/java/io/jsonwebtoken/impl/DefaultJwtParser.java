@@ -143,13 +143,13 @@ public class DefaultJwtParser implements JwtParser {
 
     private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
         String name = "JWS MAC or Signature Algorithm";
-        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, Jwts.SIG.values(), extras);
+        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, Jwts.SIG.get().values(), extras);
         return new IdLocator<>(DefaultHeader.ALGORITHM, MISSING_JWS_ALG_MSG, registry);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
         String name = "JWE Encryption Algorithm";
-        IdRegistry<AeadAlgorithm> registry = newRegistry(name, Jwts.ENC.values(), extras);
+        IdRegistry<AeadAlgorithm> registry = newRegistry(name, Jwts.ENC.get().values(), extras);
         return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, registry);
     }
 

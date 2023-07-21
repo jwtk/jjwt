@@ -23,12 +23,12 @@ import static org.junit.Assert.*
 
 class StandardAlgorithmsTest {
 
-    static def registries = [Jwts.SIG, Jwts.ENC, Jwts.KEY, Jwks.HASH] as List<Registry<String, ?>>
+    static def registries = [Jwts.SIG.get(), Jwts.ENC.get(), Jwts.KEY, Jwks.HASH] as List<Registry<String, ?>>
 
     @Test
     void testSize() {
-        assertEquals 14, Jwts.SIG.size()
-        assertEquals 6, Jwts.ENC.size()
+        assertEquals 14, Jwts.SIG.get().size()
+        assertEquals 6, Jwts.ENC.get().size()
         assertEquals 17, Jwts.KEY.size()
         assertEquals 6, Jwks.HASH.size()
     }

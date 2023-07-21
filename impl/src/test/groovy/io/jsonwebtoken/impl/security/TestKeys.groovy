@@ -50,9 +50,9 @@ class TestKeys {
         AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
 
-    static SecretKey A128CBC_HS256 = Jwts.ENC.@A128CBC_HS256.keyBuilder().build()
-    static SecretKey A192CBC_HS384 = Jwts.ENC.@A192CBC_HS384.keyBuilder().build()
-    static SecretKey A256CBC_HS512 = Jwts.ENC.@A256CBC_HS512.keyBuilder().build()
+    static SecretKey A128CBC_HS256 = Jwts.ENC.A128CBC_HS256.keyBuilder().build()
+    static SecretKey A192CBC_HS384 = Jwts.ENC.A192CBC_HS384.keyBuilder().build()
+    static SecretKey A256CBC_HS512 = Jwts.ENC.A256CBC_HS512.keyBuilder().build()
     static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
 
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()
@@ -125,6 +125,7 @@ class TestKeys {
             this.chain = Collections.of(cert)
             this.pair = new KeyPair(cert.getPublicKey(), privateKey)
         }
+
         Bundle(PublicKey pub, PrivateKey priv) {
             this.cert = null
             this.chain = Collections.emptyList()

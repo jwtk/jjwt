@@ -27,7 +27,7 @@ class DefaultJweTest {
 
     @Test
     void testToString() {
-        def alg = Jwts.ENC.@A128CBC_HS256 as AeadAlgorithm
+        def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
         def key = alg.keyBuilder().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def jwe = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(compact)
@@ -39,7 +39,7 @@ class DefaultJweTest {
 
     @Test
     void testEqualsAndHashCode() {
-        def alg = Jwts.ENC.@A128CBC_HS256 as AeadAlgorithm
+        def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
         def key = alg.keyBuilder().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def parser = Jwts.parserBuilder().decryptWith(key).build()

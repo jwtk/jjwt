@@ -181,7 +181,7 @@ class JwksTest {
     }
 
     static void testX509Thumbprint(int number) {
-        def algs = Jwts.SIG.values().findAll { it instanceof SignatureAlgorithm }
+        def algs = Jwts.SIG.get().values().findAll { it instanceof SignatureAlgorithm }
 
         for (def alg : algs) {
             //get test cert:
@@ -213,7 +213,7 @@ class JwksTest {
 
     @Test
     void testSecretJwks() {
-        Collection<MacAlgorithm> algs = Jwts.SIG.values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
+        Collection<MacAlgorithm> algs = Jwts.SIG.get().values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
         for (def alg : algs) {
             SecretKey secretKey = alg.keyBuilder().build()
             def jwk = Jwks.builder().forKey(secretKey).setId('id').build()
@@ -263,7 +263,7 @@ class JwksTest {
     @Test
     void testAsymmetricJwks() {
 
-        Collection<KeyPairBuilderSupplier> algs = Jwts.SIG.values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
+        Collection<KeyPairBuilderSupplier> algs = Jwts.SIG.get().values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
         for (def alg : algs) {
 
