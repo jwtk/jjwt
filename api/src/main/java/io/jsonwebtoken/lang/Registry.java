@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.lang;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -36,21 +35,7 @@ import java.util.Map;
  * @param <V> value type
  * @since JJWT_RELEASE_VERSION
  */
-public interface Registry<K, V> {
-
-    /**
-     * Returns the number of elements in the registry.
-     *
-     * @return the number of elements in the registry.
-     */
-    int size();
-
-    /**
-     * Returns all registry values as a read-only collection.
-     *
-     * @return all registry values as a read-only collection.
-     */
-    Collection<V> values();
+public interface Registry<K, V> extends Map<K, V> {
 
     /**
      * Returns the value assigned the specified key or throws an {@code IllegalArgumentException} if there is no
@@ -63,12 +48,4 @@ public interface Registry<K, V> {
      */
     V forKey(K key) throws IllegalArgumentException;
 
-    /**
-     * Returns the value assigned the specified key or {@code null} if there is no associated value.
-     *
-     * @param key the registry key assigned to the required value
-     * @return the value assigned the specified key or {@code null} if there is no associated value.
-     * @see #forKey(Object)
-     */
-    V get(Object key);
 }

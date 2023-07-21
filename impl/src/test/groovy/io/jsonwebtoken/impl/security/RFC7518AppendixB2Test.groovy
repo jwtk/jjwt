@@ -84,7 +84,7 @@ class RFC7518AppendixB2Test {
     @Test
     void test() {
 
-        def alg = Jwts.ENC.A192CBC_HS384
+        def alg = Jwts.ENC.@A192CBC_HS384
         AeadRequest req = new DefaultAeadRequest(P, null, null, KEY, A, IV)
         AeadResult result = alg.encrypt(req)
 

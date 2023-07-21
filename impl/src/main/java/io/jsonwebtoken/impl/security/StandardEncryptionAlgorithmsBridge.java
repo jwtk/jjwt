@@ -17,10 +17,12 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.AeadAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardEncryptionAlgorithms
-public final class StandardEncryptionAlgorithmsBridge extends DelegatingRegistry<AeadAlgorithm> {
+public final class StandardEncryptionAlgorithmsBridge extends DelegatingRegistry<String, AeadAlgorithm> {
+
     public StandardEncryptionAlgorithmsBridge() {
         super(new IdRegistry<>("JWE Encryption Algorithm", Collections.of(
                 (AeadAlgorithm) new HmacAesAeadAlgorithm(128),

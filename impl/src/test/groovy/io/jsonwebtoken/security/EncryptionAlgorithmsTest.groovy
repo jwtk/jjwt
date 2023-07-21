@@ -58,9 +58,9 @@ class EncryptionAlgorithmsTest {
     @Test
     void testValues() {
         assertEquals 6, Jwts.ENC.values().size()
-        assertTrue(contains(Jwts.ENC.A128CBC_HS256) &&
-                contains(Jwts.ENC.A192CBC_HS384) &&
-                contains(Jwts.ENC.A256CBC_HS512) &&
+        assertTrue(contains(Jwts.ENC.@A128CBC_HS256) &&
+                contains(Jwts.ENC.@A192CBC_HS384) &&
+                contains(Jwts.ENC.@A256CBC_HS512) &&
                 contains(Jwts.ENC.A128GCM) &&
                 contains(Jwts.ENC.A192GCM) &&
                 contains(Jwts.ENC.A256GCM)

@@ -16,10 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-
-import java.util.Collection;
 
 /**
  * Registry of various (<em>but not all</em>)
@@ -43,15 +40,14 @@ import java.util.Collection;
  * @see #get()
  * @see #values()
  * @see Registry#get(Object)
- * @see #forKey(String)
+ * @see #forKey(Object)
  * @see HashAlgorithm
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardHashAlgorithms implements Registry<String, HashAlgorithm> {
+@SuppressWarnings("unused")
+public final class StandardHashAlgorithms extends ImplRegistry<HashAlgorithm> {
 
-    private static final Registry<String, HashAlgorithm> DELEGATE =
-            Classes.newInstance("io.jsonwebtoken.impl.security.StandardHashAlgorithmsBridge");
-
+    private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardHashAlgorithmsBridge";
     private static final StandardHashAlgorithms INSTANCE = new StandardHashAlgorithms();
 
     /**
@@ -121,72 +117,6 @@ public final class StandardHashAlgorithms implements Registry<String, HashAlgori
      * Prevent external instantiation.
      */
     private StandardHashAlgorithms() {
-    }
-
-    /**
-     * Returns the number (quantity) of
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
-     * Algorithms</a> stored in this registry.
-     *
-     * @return the number (quantity) of
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
-     * Algorithms</a> stored in this registry.
-     */
-    @Override
-    public int size() {
-        return DELEGATE.size();
-    }
-
-    /**
-     * Returns common
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
-     * Algorithms</a> as an unmodifiable collection.
-     *
-     * @return common
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
-     * Algorithms</a> as an unmodifiable collection.
-     */
-    public Collection<HashAlgorithm> values() {
-        return DELEGATE.values();
-    }
-
-    /**
-     * Returns the {@code HashAlgorithm} instance with the specified IANA algorithm {@code id}, or throws an
-     * {@link IllegalArgumentException} if there is no supported algorithm for the specified {@code id}. The
-     * {@code id} parameter is expected to equal one of the string values in the <b>{@code Hash Name String}</b>
-     * column within the
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named Information
-     * Hash Algorithm Registry</a> table. If a supported instance result is not mandatory, consider using the
-     * {@link Registry#get(Object)} method instead.
-     *
-     * @param id an IANA {@code Hash Name String} hash algorithm identifier.
-     * @return the associated {@code HashAlgorithm} instance.
-     * @throws IllegalArgumentException if there is no supported algorithm for the specified identifier.
-     * @see Registry#get(Object)
-     * @see <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named
-     * Information Hash Algorithm Registry</a>
-     */
-    @Override
-    public HashAlgorithm forKey(String id) {
-        return DELEGATE.forKey(id);
-    }
-
-    /**
-     * Returns the {@code HashAlgorithm} instance with the specified IANA algorithm {@code id}, or {@code null} if
-     * the specified {@code id} cannot be found. The {@code id} parameter is expected to equal one of the string
-     * values in the <b>{@code Hash Name String}</b> column within the
-     * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named Information
-     * Hash Algorithm Registry</a> table.  If a standard instance must be resolved, consider using the
-     * {@link #forKey(String)} method instead.
-     *
-     * @param id an IANA {@code Hash Name String} hash algorithm identifier
-     * @return the associated {@code HashAlgorithm} instance if found or {@code null} otherwise.
-     * @see <a href="https://www.iana.org/assignments/named-information/named-information.xhtml">IANA Named Information
-     * Hash Algorithm Registry</a>
-     * @see #forKey(String)
-     */
-    @Override
-    public HashAlgorithm get(Object id) {
-        return DELEGATE.get(id);
+        super(IMPL_CLASSNAME);
     }
 }

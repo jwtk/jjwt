@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.DelegatingMap;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
@@ -24,16 +25,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
-
-    private final Map<K, V> VALUES;
+public class DefaultRegistry<K, V> extends DelegatingMap<K, V> implements Registry<K, V>, Function<K, V> {
 
     private final String qualifiedKeyName;
 
-    public DefaultRegistry(String name, String keyName, Collection<? extends V> values, Function<V, K> keyFn) {
-        name = Assert.hasText(Strings.clean(name), "name cannot be null or empty.");
-        keyName = Assert.hasText(Strings.clean(keyName), "keyName cannot be null or empty.");
-        this.qualifiedKeyName = name + " " + keyName;
+    private static <K, V> Map<K, V> toMap(Collection<? extends V> values, Function<V, K> keyFn) {
         Assert.notEmpty(values, "Collection of values may not be null or empty.");
         Assert.notNull(keyFn, "Key function cannot be null.");
         Map<K, V> m = new LinkedHashMap<>(values.size());
@@ -41,22 +37,19 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
             K key = Assert.notNull(keyFn.apply(value), "Key function cannot return a null value.");
             m.put(key, value);
         }
-        this.VALUES = Collections.immutable(m);
+        return Collections.immutable(m);
+    }
+
+    public DefaultRegistry(String name, String keyName, Collection<? extends V> values, Function<V, K> keyFn) {
+        super(toMap(values, keyFn));
+        name = Assert.hasText(Strings.clean(name), "name cannot be null or empty.");
+        keyName = Assert.hasText(Strings.clean(keyName), "keyName cannot be null or empty.");
+        this.qualifiedKeyName = name + " " + keyName;
     }
 
     @Override
     public V apply(K k) {
         return get(k);
-    }
-
-    @Override
-    public int size() {
-        return VALUES.size();
-    }
-
-    @Override
-    public Collection<V> values() {
-        return VALUES.values();
     }
 
     @Override
@@ -69,10 +62,27 @@ public class DefaultRegistry<K, V> implements Registry<K, V>, Function<K, V> {
         return value;
     }
 
-    @SuppressWarnings("SuspiciousMethodCalls")
+    static <T> T immutable() {
+        throw new UnsupportedOperationException("Registries are immutable and cannot be modified.");
+    }
+
     @Override
-    public V get(Object key) {
-        Assert.notNull(key, this.qualifiedKeyName + " cannot be null.");
-        return VALUES.get(key);
+    public V put(K key, V value) {
+        return immutable();
+    }
+
+    @Override
+    public V remove(Object key) {
+        return immutable();
+    }
+
+    @Override
+    public void putAll(Map<? extends K, ? extends V> m) {
+        immutable();
+    }
+
+    @Override
+    public void clear() {
+        immutable();
     }
 }

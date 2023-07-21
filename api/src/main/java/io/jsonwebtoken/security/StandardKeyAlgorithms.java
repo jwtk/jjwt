@@ -17,14 +17,11 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 
 import javax.crypto.SecretKey;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Collection;
 
 /**
  * {@link Registry} singleton containing all standard JWE
@@ -35,21 +32,20 @@ import java.util.Collection;
  *     // ... etc ...
  *     .encryptWith(rsaPublicKey, <b>{@link Jwts#KEY}.RSA_OAEP</b>, Jwts.ENC.A256GCM) // &lt;--
  *     .build()</pre></blockquote>
- * <p>Direct type-safe references as shown above are often better than calling {@link #forKey(String)} or
+ * <p>Direct type-safe references as shown above are often better than calling {@link #forKey(Object)} or
  * {@link Registry#get(Object)} which can be susceptible to misspelled or otherwise invalid string values.</p>
  *
  * @see #get()
- * @see #forKey(String)
+ * @see #forKey(Object)
  * @see Registry#get(Object)
  * @see #values()
  * @see KeyAlgorithm
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorithm<?, ?>> {
+@SuppressWarnings("unused")
+public final class StandardKeyAlgorithms extends ImplRegistry<KeyAlgorithm<?, ?>> {
 
-    private static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY =
-            Classes.newInstance("io.jsonwebtoken.impl.security.StandardKeyAlgorithmsBridge");
-
+    private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyAlgorithmsBridge";
     private static final StandardKeyAlgorithms INSTANCE = new StandardKeyAlgorithms();
 
     /**
@@ -57,7 +53,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *
      * @return this registry (a static singleton).
      */
-    public static StandardKeyAlgorithms get() { // named `forKey` to mimic java.util.function.Supplier
+    public static StandardKeyAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 
@@ -66,7 +62,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      * by <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.5">RFC 7518 (JWA), Section 4.5</a>.  This
      * algorithm does not produce encrypted key ciphertext.
      */
-    public final KeyAlgorithm<SecretKey, SecretKey> DIRECT = doGet("dir");
+    public final KeyAlgorithm<SecretKey, SecretKey> DIRECT = doForKey("dir");
 
     /**
      * AES Key Wrap algorithm with default initial value using a 128-bit key, as defined by
@@ -90,7 +86,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final SecretKeyAlgorithm A128KW = doGet("A128KW");
+    public final SecretKeyAlgorithm A128KW = doForKey("A128KW");
 
     /**
      * AES Key Wrap algorithm with default initial value using a 192-bit key, as defined by
@@ -114,7 +110,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final SecretKeyAlgorithm A192KW = doGet("A192KW");
+    public final SecretKeyAlgorithm A192KW = doForKey("A192KW");
 
     /**
      * AES Key Wrap algorithm with default initial value using a 256-bit key, as defined by
@@ -138,7 +134,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final SecretKeyAlgorithm A256KW = doGet("A256KW");
+    public final SecretKeyAlgorithm A256KW = doForKey("A256KW");
 
     /**
      * Key wrap algorithm with AES GCM using a 128-bit key, as defined by
@@ -177,7 +173,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final SecretKeyAlgorithm A128GCMKW = doGet("A128GCMKW");
+    public final SecretKeyAlgorithm A128GCMKW = doForKey("A128GCMKW");
 
     /**
      * Key wrap algorithm with AES GCM using a 192-bit key, as defined by
@@ -216,7 +212,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final SecretKeyAlgorithm A192GCMKW = doGet("A192GCMKW");
+    public final SecretKeyAlgorithm A192GCMKW = doForKey("A192GCMKW");
 
     /**
      * Key wrap algorithm with AES GCM using a 256-bit key, as defined by
@@ -255,7 +251,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final SecretKeyAlgorithm A256GCMKW = doGet("A256GCMKW");
+    public final SecretKeyAlgorithm A256GCMKW = doForKey("A256GCMKW");
 
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-256 and &quot;A128KW&quot; wrapping</code>
@@ -300,7 +296,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = doGet("PBES2-HS256+A128KW");
+    public final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = doForKey("PBES2-HS256+A128KW");
 
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-384 and &quot;A192KW&quot; wrapping</code>
@@ -345,7 +341,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = doGet("PBES2-HS384+A192KW");
+    public final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = doForKey("PBES2-HS384+A192KW");
 
     /**
      * Key encryption algorithm using <code>PBES2 with HMAC SHA-512 and &quot;A256KW&quot; wrapping</code>
@@ -390,7 +386,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = doGet("PBES2-HS512+A256KW");
+    public final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = doForKey("PBES2-HS512+A256KW");
 
     /**
      * Key Encryption with {@code RSAES-PKCS1-v1_5}, as defined by
@@ -415,7 +411,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = doGet("RSA1_5");
+    public final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = doForKey("RSA1_5");
 
     /**
      * Key Encryption with {@code RSAES OAEP using default parameters}, as defined by
@@ -440,7 +436,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = doGet("RSA-OAEP");
+    public final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = doForKey("RSA-OAEP");
 
     /**
      * Key Encryption with {@code RSAES OAEP using SHA-256 and MGF1 with SHA-256}, as defined by
@@ -465,7 +461,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = doGet("RSA-OAEP-256");
+    public final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = doForKey("RSA-OAEP-256");
 
     /**
      * Key Agreement with {@code ECDH-ES using Concat KDF} as defined by
@@ -506,7 +502,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = doGet("ECDH-ES");
+    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = doForKey("ECDH-ES");
 
     /**
      * Key Agreement with Key Wrapping via
@@ -554,7 +550,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = doGet("ECDH-ES+A128KW");
+    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = doForKey("ECDH-ES+A128KW");
 
     /**
      * Key Agreement with Key Wrapping via
@@ -603,7 +599,7 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = doGet("ECDH-ES+A192KW");
+    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = doForKey("ECDH-ES+A192KW");
 
     /**
      * Key Agreement with Key Wrapping via
@@ -652,73 +648,10 @@ public final class StandardKeyAlgorithms implements Registry<String, KeyAlgorith
      *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
      * </ol>
      */
-    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = doGet("ECDH-ES+A256KW");
+    public final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = doForKey("ECDH-ES+A256KW");
 
     //prevent instantiation
     private StandardKeyAlgorithms() {
-    }
-
-    // do not change this visibility.  Raw type method signature not be publicly exposed
-    @SuppressWarnings("unchecked")
-    private <T> T doGet(String id) {
-        Assert.hasText(id, "id cannot be null or empty.");
-        return (T) forKey(id);
-    }
-
-    /**
-     * Returns the number (quantity) of all JWA-standard
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a>.
-     *
-     * @return the number (quantity) of all JWA-standard
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a>.
-     */
-    @Override
-    public int size() {
-        return REGISTRY.size();
-    }
-
-    /**
-     * Returns all JWA-standard
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a> as an
-     * unmodifiable collection.
-     *
-     * @return all JWA-standard
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Key Management Algorithms</a> as an
-     * unmodifiable collection.
-     */
-    public Collection<KeyAlgorithm<?, ?>> values() {
-        return REGISTRY.values();
-    }
-
-    /**
-     * Returns the JWE Key Management Algorithm with the specified
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">{@code alg} key algorithm identifier</a> or
-     * {@code null} if an algorithm for the specified {@code id} cannot be found.  If a JWA-standard
-     * instance must be resolved, consider using the {@link #forKey(String)} method instead.
-     *
-     * @param id a JWA standard {@code alg} key algorithm identifier
-     * @return the associated KeyAlgorithm instance or {@code null} otherwise.
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">RFC 7518, Section 4.1</a>
-     * @see #forKey(String)
-     */
-    public KeyAlgorithm<?, ?> get(Object id) {
-        return REGISTRY.get(id);
-    }
-
-    /**
-     * Returns the JWE Key Management Algorithm with the specified
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">{@code alg} key algorithm identifier</a> or
-     * throws an {@link IllegalArgumentException} if there is no JWE-standard algorithm for the specified
-     * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link Registry#get(Object)}
-     * method instead.
-     *
-     * @param id a JWA standard {@code alg} key algorithm identifier
-     * @return the associated {@code KeyAlgorithm} instance.
-     * @throws IllegalArgumentException if there is no JWA-standard algorithm for the specified identifier.
-     * @see Registry#get(Object)
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">RFC 7518, Section 4.1</a>
-     */
-    public KeyAlgorithm<?, ?> forKey(String id) throws IllegalArgumentException {
-        return REGISTRY.forKey(id);
+        super(IMPL_CLASSNAME);
     }
 }

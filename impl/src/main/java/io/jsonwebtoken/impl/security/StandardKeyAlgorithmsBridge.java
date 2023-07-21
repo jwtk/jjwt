@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.KeyAlgorithm;
 
 import javax.crypto.spec.OAEPParameterSpec;
@@ -29,7 +30,7 @@ import java.security.spec.MGF1ParameterSpec;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardKeyAlgorithmsBridge extends DelegatingRegistry<KeyAlgorithm<?, ?>> {
+public final class StandardKeyAlgorithmsBridge extends DelegatingRegistry<String, KeyAlgorithm<?, ?>> {
 
     private static final String RSA1_5_ID = "RSA1_5";
     private static final String RSA1_5_TRANSFORMATION = "RSA/ECB/PKCS1Padding";

@@ -62,6 +62,15 @@ public final class Jwts {
      */
     public static final StandardEncryptionAlgorithms ENC = StandardEncryptionAlgorithms.get();
 
+//    public static final class ENC {
+//
+//        public static StandardEncryptionAlgorithms get() {
+//            return StandardEncryptionAlgorithms.get();
+//        }
+//
+//        public static final AeadAlgorithm A256GCM = ENC.A256GCM;
+//    }
+
     /**
      * All JWA (RFC 7518) standard <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic
      * Algorithms for Digital Signatures and MACs</a> defined in the

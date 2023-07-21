@@ -35,17 +35,17 @@ class HmacAesAeadAlgorithmTest {
         // asserts that key lengths are double than what is usually expected for AES
         // due to the encrypt-then-mac scheme requiring two separate keys
         // (encrypt key is half of the generated key, mac key is the 2nd half of the generated key):
-        assertEquals 256, Jwts.ENC.A128CBC_HS256.getKeyBitLength()
-        assertEquals 384, Jwts.ENC.A192CBC_HS384.getKeyBitLength()
-        assertEquals 512, Jwts.ENC.A256CBC_HS512.getKeyBitLength()
+        assertEquals 256, Jwts.ENC.@A128CBC_HS256.getKeyBitLength()
+        assertEquals 384, Jwts.ENC.@A192CBC_HS384.getKeyBitLength()
+        assertEquals 512, Jwts.ENC.@A256CBC_HS512.getKeyBitLength()
     }
 
     @Test
     void testGenerateKey() {
         def algs = [
-                Jwts.ENC.A128CBC_HS256,
-                Jwts.ENC.A192CBC_HS384,
-                Jwts.ENC.A256CBC_HS512
+                Jwts.ENC.@A128CBC_HS256,
+                Jwts.ENC.@A192CBC_HS384,
+                Jwts.ENC.@A256CBC_HS512
         ]
         for (AeadAlgorithm alg : algs) {
             SecretKey key = alg.keyBuilder().build()
@@ -56,7 +56,7 @@ class HmacAesAeadAlgorithmTest {
     @Test(expected = SignatureException)
     void testDecryptWithInvalidTag() {
 
-        def alg = Jwts.ENC.A128CBC_HS256
+        def alg = Jwts.ENC.@A128CBC_HS256
 
         SecretKey key = alg.keyBuilder().build()
 

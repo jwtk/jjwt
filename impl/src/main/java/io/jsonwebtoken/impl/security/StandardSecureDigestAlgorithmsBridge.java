@@ -17,10 +17,14 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardSecureDigestAlgorithms
-public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegistry<SecureDigestAlgorithm<?, ?>> {
+public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegistry<String, SecureDigestAlgorithm<?, ?>> {
+
+    private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);
+    private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
 
     public StandardSecureDigestAlgorithmsBridge() {
         super(new IdRegistry<>("JWS Digital Signature or MAC", Collections.of(
@@ -40,9 +44,6 @@ public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegist
                 new EdSignatureAlgorithm()
         ), false));
     }
-
-    private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);
-    private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
 
     @Override
     public SecureDigestAlgorithm<?, ?> get(Object id) {

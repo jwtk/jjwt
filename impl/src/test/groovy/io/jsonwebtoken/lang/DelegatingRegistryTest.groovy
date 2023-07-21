@@ -13,27 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.security
+package io.jsonwebtoken.lang
 
 import io.jsonwebtoken.impl.lang.DefaultRegistry
 import io.jsonwebtoken.impl.lang.Functions
-import io.jsonwebtoken.lang.Registry
+import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 
 class DelegatingRegistryTest {
 
-    @Test
-    void testSize() {
-        def values = ['foo', 'bar', 'baz']
-        Registry<String, String> reg = new TestDelegatingRegistry(values)
-        assertEquals values.size(), reg.size()
+    Registry<String, String> registry
+
+    @Before
+    void setUp() {
+        def src = new DefaultRegistry('test', 'id', ['a', 'b', 'c'], Functions.identity())
+        this.registry = new DelegatingRegistry(src)
     }
 
-    final class TestDelegatingRegistry extends DelegatingRegistry<String> {
-        TestDelegatingRegistry(Collection<String> values) {
-            super(new DefaultRegistry<String, String>('test', 'id', values, Functions.identity()))
-        }
+    @Test
+    void testForKey() {
+        assertEquals 'a', registry.forKey('a')
+        assertEquals 'b', registry.forKey('b')
+        assertEquals 'c', registry.forKey('c')
+
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testForKeyInvalid() {
+        registry.forKey('invalid') // any key value that doesn't exist
     }
 }

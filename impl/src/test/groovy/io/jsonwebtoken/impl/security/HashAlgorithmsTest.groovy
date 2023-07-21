@@ -32,7 +32,7 @@ class HashAlgorithmsTest {
     @Test
     void testValues() {
         assertEquals 6, Jwks.HASH.values().size()
-        assertTrue(contains(Jwks.HASH.SHA256)) // add more later
+        assertTrue(contains(Jwks.HASH.@SHA256)) // add more later
     }
 
     @Test
@@ -91,31 +91,31 @@ class HashAlgorithmsTest {
 
     @Test
     void testSha256() {
-        testSha(Jwks.HASH.SHA256)
+        testSha(Jwks.HASH.@SHA256)
     }
 
     @Test
     void testSha384() {
-        testSha(Jwks.HASH.SHA384)
+        testSha(Jwks.HASH.@SHA384)
     }
 
     @Test
     void testSha512() {
-        testSha(Jwks.HASH.SHA512)
+        testSha(Jwks.HASH.@SHA512)
     }
 
     @Test
     void testSha3_256() {
-        testSha(Jwks.HASH.SHA3_256)
+        testSha(Jwks.HASH.@SHA3_256)
     }
 
     @Test
     void testSha3_384() {
-        testSha(Jwks.HASH.SHA3_384)
+        testSha(Jwks.HASH.@SHA3_384)
     }
 
     @Test
     void testSha3_512() {
-        testSha(Jwks.HASH.SHA3_512)
+        testSha(Jwks.HASH.@SHA3_512)
     }
 }

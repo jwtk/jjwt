@@ -20,6 +20,7 @@ import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.HashAlgorithm;
 
 import java.security.MessageDigest;
@@ -32,7 +33,26 @@ import java.util.Locale;
  * @since JJWT_RELEASE_VERSION
  */
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardHashAlgorithms
-public class StandardHashAlgorithmsBridge extends DelegatingRegistry<HashAlgorithm> {
+public class StandardHashAlgorithmsBridge extends DelegatingRegistry<String, HashAlgorithm> {
+
+    private static class MessageDigestSupplier implements CheckedSupplier<MessageDigest> {
+        private final String jcaName;
+
+        private MessageDigestSupplier(String jcaName) {
+            this.jcaName = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
+        }
+
+        @Override
+        public MessageDigest get() throws Exception {
+            return MessageDigest.getInstance(jcaName);
+        }
+    }
+
+    private static DefaultHashAlgorithm fallbackProvider(String id) {
+        String jcaName = id.toUpperCase(Locale.ENGLISH);
+        Provider provider = Providers.findBouncyCastle(Conditions.notExists(new MessageDigestSupplier(jcaName)));
+        return new DefaultHashAlgorithm(id, jcaName, provider);
+    }
 
     public StandardHashAlgorithmsBridge() {
         super(new IdRegistry<>("IANA Hash Algorithm", Collections.of(
@@ -47,24 +67,5 @@ public class StandardHashAlgorithmsBridge extends DelegatingRegistry<HashAlgorit
                 fallbackProvider("sha3-384"),
                 fallbackProvider("sha3-512")
         )));
-    }
-
-    private static DefaultHashAlgorithm fallbackProvider(String id) {
-        String jcaName = id.toUpperCase(Locale.ENGLISH);
-        Provider provider = Providers.findBouncyCastle(Conditions.notExists(new MessageDigestSupplier(jcaName)));
-        return new DefaultHashAlgorithm(id, jcaName, provider);
-    }
-
-    private static class MessageDigestSupplier implements CheckedSupplier<MessageDigest> {
-        private final String jcaName;
-
-        private MessageDigestSupplier(String jcaName) {
-            this.jcaName = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
-        }
-
-        @Override
-        public MessageDigest get() throws Exception {
-            return MessageDigest.getInstance(jcaName);
-        }
     }
 }

@@ -28,7 +28,7 @@ import static org.junit.Assert.assertEquals
 
 class DefaultRsaKeyAlgorithmTest {
 
-    static final algs = [Jwts.KEY.RSA1_5, Jwts.KEY.RSA_OAEP, Jwts.KEY.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
+    static final algs = [Jwts.KEY.@RSA1_5, Jwts.KEY.@RSA_OAEP, Jwts.KEY.@RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
 
     @Test
     void testValidateNonRSAKey() {

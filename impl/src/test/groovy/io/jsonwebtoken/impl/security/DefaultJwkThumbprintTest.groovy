@@ -29,7 +29,7 @@ import static org.junit.Assert.*
 class DefaultJwkThumbprintTest {
 
     private static String content = "Hello World"
-    private static HashAlgorithm alg = StandardHashAlgorithms.get().SHA256
+    private static HashAlgorithm alg = StandardHashAlgorithms.get().@SHA256
     private static byte[] digest = alg.digest(new DefaultRequest<byte[]>(content.getBytes(StandardCharsets.UTF_8), null, null))
     private static String expectedToString = Encoders.BASE64URL.encode(digest)
     private static String expectedUriString = DefaultJwkThumbprint.URI_PREFIX + alg.getId() + ":" + expectedToString

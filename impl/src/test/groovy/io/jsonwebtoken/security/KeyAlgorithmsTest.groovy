@@ -36,23 +36,23 @@ class KeyAlgorithmsTest {
     @Test
     void testValues() {
         assertEquals 17, Jwts.KEY.values().size()
-        assertTrue(contains(Jwts.KEY.DIRECT) &&
-                contains(Jwts.KEY.A128KW) &&
-                contains(Jwts.KEY.A192KW) &&
-                contains(Jwts.KEY.A256KW) &&
-                contains(Jwts.KEY.A128GCMKW) &&
-                contains(Jwts.KEY.A192GCMKW) &&
-                contains(Jwts.KEY.A256GCMKW) &&
-                contains(Jwts.KEY.PBES2_HS256_A128KW) &&
-                contains(Jwts.KEY.PBES2_HS384_A192KW) &&
-                contains(Jwts.KEY.PBES2_HS512_A256KW) &&
-                contains(Jwts.KEY.RSA1_5) &&
-                contains(Jwts.KEY.RSA_OAEP) &&
-                contains(Jwts.KEY.RSA_OAEP_256) &&
-                contains(Jwts.KEY.ECDH_ES) &&
-                contains(Jwts.KEY.ECDH_ES_A128KW) &&
-                contains(Jwts.KEY.ECDH_ES_A192KW) &&
-                contains(Jwts.KEY.ECDH_ES_A256KW)
+        assertTrue(contains(Jwts.KEY.@DIRECT) &&
+                contains(Jwts.KEY.@A128KW) &&
+                contains(Jwts.KEY.@A192KW) &&
+                contains(Jwts.KEY.@A256KW) &&
+                contains(Jwts.KEY.@A128GCMKW) &&
+                contains(Jwts.KEY.@A192GCMKW) &&
+                contains(Jwts.KEY.@A256GCMKW) &&
+                contains(Jwts.KEY.@PBES2_HS256_A128KW) &&
+                contains(Jwts.KEY.@PBES2_HS384_A192KW) &&
+                contains(Jwts.KEY.@PBES2_HS512_A256KW) &&
+                contains(Jwts.KEY.@RSA1_5) &&
+                contains(Jwts.KEY.@RSA_OAEP) &&
+                contains(Jwts.KEY.@RSA_OAEP_256) &&
+                contains(Jwts.KEY.@ECDH_ES) &&
+                contains(Jwts.KEY.@ECDH_ES_A128KW) &&
+                contains(Jwts.KEY.@ECDH_ES_A192KW) &&
+                contains(Jwts.KEY.@ECDH_ES_A256KW)
         )
     }
 

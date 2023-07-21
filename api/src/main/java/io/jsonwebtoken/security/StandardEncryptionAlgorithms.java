@@ -16,10 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-
-import java.util.Collection;
 
 /**
  * {@link Registry} singleton containing all standard JWE
@@ -32,20 +29,19 @@ import java.util.Collection;
  *     // ... etc ...
  *     .encryptWith(secretKey, <b>{@link Jwts#ENC}.A256GCM</b>) // or A128GCM, A192GCM, etc...
  *     .build()</pre></blockquote>
- * <p>Direct type-safe references as shown above are often better than calling {@link #forKey(String)} or
+ * <p>Direct type-safe references as shown above are often better than calling {@link #forKey(Object)} or
  * {@link Registry#get(Object)} which can be susceptible to misspelled or otherwise invalid string values.</p>
  *
  * @see #get()
- * @see #forKey(String)
+ * @see #forKey(Object)
  * @see Registry#get(Object)
  * @see #values()
  * @see AeadAlgorithm
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardEncryptionAlgorithms implements Registry<String, AeadAlgorithm> {
+public final class StandardEncryptionAlgorithms extends ImplRegistry<AeadAlgorithm> {
 
-    private static final Registry<String, AeadAlgorithm> DELEGATE =
-            Classes.newInstance("io.jsonwebtoken.impl.security.StandardEncryptionAlgorithmsBridge");
+    private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithmsBridge";
 
     private static final StandardEncryptionAlgorithms INSTANCE = new StandardEncryptionAlgorithms();
 
@@ -54,7 +50,7 @@ public final class StandardEncryptionAlgorithms implements Registry<String, Aead
      *
      * @return this registry (a static singleton).
      */
-    public static StandardEncryptionAlgorithms get() { // named `forKey` to mimic java.util.function.Supplier
+    public static StandardEncryptionAlgorithms get() { // named `get` to mimic java.util.function.Supplier
         return INSTANCE;
     }
 
@@ -116,58 +112,6 @@ public final class StandardEncryptionAlgorithms implements Registry<String, Aead
      * Prevent external instantiation.
      */
     private StandardEncryptionAlgorithms() {
-    }
-
-    /**
-     * Returns the number (quantity) of all JWE-standard AEAD encryption algorithms.
-     *
-     * @return the number (quantity) of all JWE-standard AEAD encryption algorithms.
-     */
-    @Override
-    public int size() {
-        return DELEGATE.size();
-    }
-
-    /**
-     * Returns all JWE-standard AEAD encryption algorithms as an unmodifiable collection.
-     *
-     * @return all JWE-standard AEAD encryption algorithms as an unmodifiable collection.
-     */
-    public Collection<AeadAlgorithm> values() {
-        return DELEGATE.values();
-    }
-
-    /**
-     * Returns the JWE-standard Encryption Algorithm with the specified
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">{@code enc} algorithm identifier</a> or
-     * throws an {@link IllegalArgumentException} if there is no JWE-standard algorithm for the specified
-     * {@code id}.  If a JWE-standard instance result is not mandatory, consider using the {@link Registry#get(Object)}
-     * method instead.
-     *
-     * @param id a JWE standard {@code enc} algorithm identifier
-     * @return the associated Encryption Algorithm instance.
-     * @throws IllegalArgumentException if there is no JWE-standard algorithm for the specified identifier.
-     * @see Registry#get(Object)
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">RFC 7518, Section 5.1</a>
-     */
-    @Override
-    public AeadAlgorithm forKey(String id) {
-        return DELEGATE.forKey(id);
-    }
-
-    /**
-     * Returns the JWE Encryption Algorithm with the specified
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">{@code enc} algorithm identifier</a> or
-     * {@code null} if a JWE-standard algorithm for the specified {@code id} cannot be found.  If a JWE-standard
-     * instance must be resolved, consider using the {@link #forKey(String)} method instead.
-     *
-     * @param id a JWE standard {@code enc} algorithm identifier
-     * @return the associated standard Encryption Algorithm instance or {@code null} otherwise.
-     * @see #forKey(String)
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">RFC 7518, Section 5.1</a>
-     */
-    @Override
-    public AeadAlgorithm get(Object id) {
-        return DELEGATE.get(id);
+        super(IMPL_CLASSNAME);
     }
 }

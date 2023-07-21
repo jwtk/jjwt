@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue
 
 class DefaultHashAlgorithmTest {
 
-    static final def algs = [DefaultHashAlgorithm.SHA1, StandardHashAlgorithms.get().SHA256]
+    static final def algs = [DefaultHashAlgorithm.SHA1, StandardHashAlgorithms.get().@SHA256]
 
     @Test
     void testDigestAndVerify() {

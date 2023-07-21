@@ -16,12 +16,9 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 
 import java.security.Key;
-import java.util.Collection;
 
 /**
  * Registry of all standard JWS
@@ -35,16 +32,14 @@ import java.util.Collection;
  *     .build()</pre></blockquote>
  *
  * @see #get()
- * @see #forKey(String)
+ * @see #forKey(Object)
  * @see Registry#get(Object)
  * @see #values()
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardSecureDigestAlgorithms implements Registry<String, SecureDigestAlgorithm<?, ?>> {
+public final class StandardSecureDigestAlgorithms extends ImplRegistry<SecureDigestAlgorithm<?, ?>> {
 
-    private static final Registry<String, SecureDigestAlgorithm<?, ?>> IMPL =
-            Classes.newInstance("io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithmsBridge");
-
+    private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithmsBridge";
     private static final StandardSecureDigestAlgorithms INSTANCE = new StandardSecureDigestAlgorithms();
 
     /**
@@ -193,74 +188,6 @@ public final class StandardSecureDigestAlgorithms implements Registry<String, Se
      * Prevent external instantiation.
      */
     private StandardSecureDigestAlgorithms() {
-    }
-
-    // do not change this visibility.  Raw type method signature not be publicly exposed
-    @SuppressWarnings("unchecked")
-    private <T> T doForKey(String id) {
-        Assert.hasText(id, "id cannot be null or empty.");
-        return (T) forKey(id);
-    }
-
-    /**
-     * Returns the number (quantity) of all standard JWS
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>.
-     *
-     * @return the number (quantity) of all standard JWS
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>.
-     */
-    @Override
-    public int size() {
-        return IMPL.size();
-    }
-
-    /**
-     * Returns all standard JWS
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>
-     * as an unmodifiable collection.
-     *
-     * @return all standard JWS
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">Digital Signature and MAC Algorithms</a>
-     * as an unmodifiable collection.
-     */
-    public Collection<SecureDigestAlgorithm<?, ?>> values() {
-        return IMPL.values();
-    }
-
-    /**
-     * Returns the {@link SignatureAlgorithm} or {@link MacAlgorithm} instance with the specified
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">{@code alg} algorithm identifier</a> or
-     * {@code null} if an algorithm for the specified {@code id} cannot be found.  If a JWA-standard
-     * instance must be resolved, consider using the {@link #forKey(String)} method instead.
-     *
-     * @param id a JWA-standard identifier defined in
-     *           <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWA RFC 7518, Section 3.1</a>
-     *           in the <code>&quot;alg&quot; Param Value</code> column.
-     * @return the {@code SecureDigestAlgorithm} instance with the specified JWA-standard identifier, or
-     * {@code null} if no algorithm with that identifier exists.
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">RFC 7518, Section 3.1</a>
-     * @see #forKey(String)
-     */
-    public SecureDigestAlgorithm<?, ?> get(Object id) {
-        return IMPL.get(id);
-    }
-
-    /**
-     * Returns the {@link SignatureAlgorithm} or {@link MacAlgorithm} instance with the specified
-     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">{@code alg} algorithm identifier</a> or
-     * throws an {@link IllegalArgumentException} if there is no JWA-standard algorithm for the specified
-     * {@code id}.  If a JWA-standard instance result is not mandatory, consider using the {@link Registry#get(Object)}
-     * method instead.
-     *
-     * @param id a JWA-standard identifier defined in
-     *           <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">JWA RFC 7518, Section 3.1</a>
-     *           in the <code>&quot;alg&quot; Param Value</code> column.
-     * @return the associated {@code SecureDigestAlgorithm} instance.
-     * @throws IllegalArgumentException if there is no JWA-standard algorithm for the specified identifier.
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">RFC 7518, Section 3.1</a>
-     * @see Registry#get(Object)
-     */
-    public SecureDigestAlgorithm<?, ?> forKey(String id) throws IllegalArgumentException {
-        return IMPL.forKey(id);
+        super(IMPL_CLASSNAME);
     }
 }
