@@ -57,7 +57,7 @@ import javax.crypto.SecretKey;
  * <p>The resulting {@code key} is guaranteed to have the correct algorithm parameters and strength/length necessary for
  * that exact {@code aeadAlgorithm} instance.</p>
  *
- * @see Jwts#ENC
+ * @see Jwts.ENC
  * @see Identifiable#getId()
  * @see KeyLengthSupplier
  * @see KeyBuilderSupplier
