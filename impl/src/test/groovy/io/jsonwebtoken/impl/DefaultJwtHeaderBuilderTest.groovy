@@ -26,7 +26,6 @@ import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.Request
-import io.jsonwebtoken.security.StandardHashAlgorithms
 import org.junit.Before
 import org.junit.Test
 
@@ -394,7 +393,7 @@ class DefaultJwtHeaderBuilderTest {
     void testX509CertificateSha256ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
-        def x5tS256 = StandardHashAlgorithms.get().@SHA256.digest(request)
+        def x5tS256 = Jwks.HASH.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         def header = builder.setX509CertificateChain(chain).withX509Sha256Thumbprint(true).build() as JwsHeader
         assertTrue header instanceof JwsHeader

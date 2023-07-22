@@ -17,10 +17,10 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedSupplier;
 import io.jsonwebtoken.impl.lang.Conditions;
+import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.HashAlgorithm;
 
 import java.security.MessageDigest;
@@ -28,11 +28,11 @@ import java.security.Provider;
 import java.util.Locale;
 
 /**
- * Backing implementation for the {@link io.jsonwebtoken.security.StandardHashAlgorithms} implementation.
+ * Backing implementation for the {@link io.jsonwebtoken.security.Jwks.HASH} implementation.
  *
  * @since JJWT_RELEASE_VERSION
  */
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardHashAlgorithms
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Jwks.HASH
 public class StandardHashAlgorithmsBridge extends DelegatingRegistry<String, HashAlgorithm> {
 
     private static class MessageDigestSupplier implements CheckedSupplier<MessageDigest> {

@@ -16,7 +16,6 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.StandardKeyAlgorithms;
 
 /**
  * Mutation (modifications) to a {@link JweHeader} instance.
@@ -33,10 +32,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE producer to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
-     * @see StandardKeyAlgorithms#ECDH_ES
-     * @see StandardKeyAlgorithms#ECDH_ES_A128KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A192KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A256KW
+     * @see Jwts.KEY#ECDH_ES
+     * @see Jwts.KEY#ECDH_ES_A128KW
+     * @see Jwts.KEY#ECDH_ES_A192KW
+     * @see Jwts.KEY#ECDH_ES_A256KW
      */
     T setAgreementPartyUInfo(byte[] info);
 
@@ -51,10 +50,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE producer to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
-     * @see StandardKeyAlgorithms#ECDH_ES
-     * @see StandardKeyAlgorithms#ECDH_ES_A128KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A192KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A256KW
+     * @see Jwts.KEY#ECDH_ES
+     * @see Jwts.KEY#ECDH_ES_A128KW
+     * @see Jwts.KEY#ECDH_ES_A192KW
+     * @see Jwts.KEY#ECDH_ES_A256KW
      */
     T setAgreementPartyUInfo(String info);
 
@@ -65,10 +64,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE recipient to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
-     * @see StandardKeyAlgorithms#ECDH_ES
-     * @see StandardKeyAlgorithms#ECDH_ES_A128KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A192KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A256KW
+     * @see Jwts.KEY#ECDH_ES
+     * @see Jwts.KEY#ECDH_ES_A128KW
+     * @see Jwts.KEY#ECDH_ES_A192KW
+     * @see Jwts.KEY#ECDH_ES_A256KW
      */
     T setAgreementPartyVInfo(byte[] info);
 
@@ -83,10 +82,10 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @param info information about the JWE recipient to use with key agreement algorithms.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
-     * @see StandardKeyAlgorithms#ECDH_ES
-     * @see StandardKeyAlgorithms#ECDH_ES_A128KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A192KW
-     * @see StandardKeyAlgorithms#ECDH_ES_A256KW
+     * @see Jwts.KEY#ECDH_ES
+     * @see Jwts.KEY#ECDH_ES_A128KW
+     * @see Jwts.KEY#ECDH_ES_A192KW
+     * @see Jwts.KEY#ECDH_ES_A256KW
      */
     T setAgreementPartyVInfo(String info);
 
@@ -108,9 +107,9 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      *              greater than or equal to 1000 (one thousand).
      * @return the header for method chaining
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">JWE <code>p2c</code> (PBES2 Count) Header Parameter</a>
-     * @see StandardKeyAlgorithms#PBES2_HS256_A128KW
-     * @see StandardKeyAlgorithms#PBES2_HS384_A192KW
-     * @see StandardKeyAlgorithms#PBES2_HS512_A256KW
+     * @see Jwts.KEY#PBES2_HS256_A128KW
+     * @see Jwts.KEY#PBES2_HS384_A192KW
+     * @see Jwts.KEY#PBES2_HS512_A256KW
      * @see <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP PBKDF2 Iteration Recommendations</a>
      */
     T setPbes2Count(int count);

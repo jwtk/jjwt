@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.DelegatingMap;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 

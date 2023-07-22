@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.lang
+package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.impl.lang.DefaultRegistry
-import io.jsonwebtoken.impl.lang.Functions
+
+import io.jsonwebtoken.lang.Registry
 import org.junit.Before
 import org.junit.Test
 

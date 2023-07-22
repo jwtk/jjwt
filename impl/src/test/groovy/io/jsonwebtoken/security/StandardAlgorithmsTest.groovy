@@ -23,14 +23,14 @@ import static org.junit.Assert.*
 
 class StandardAlgorithmsTest {
 
-    static def registries = [Jwts.SIG.get(), Jwts.ENC.get(), Jwts.KEY, Jwks.HASH] as List<Registry<String, ?>>
+    static def registries = [Jwts.SIG.get(), Jwts.ENC.get(), Jwts.KEY.get(), Jwks.HASH.get()] as List<Registry<String, ?>>
 
     @Test
     void testSize() {
         assertEquals 14, Jwts.SIG.get().size()
         assertEquals 6, Jwts.ENC.get().size()
-        assertEquals 17, Jwts.KEY.size()
-        assertEquals 6, Jwks.HASH.size()
+        assertEquals 17, Jwts.KEY.get().size()
+        assertEquals 6, Jwks.HASH.get().size()
     }
 
     private static void eachRegAlg(Closure c) {
@@ -54,7 +54,7 @@ class StandardAlgorithmsTest {
     @Test
     void testForKeyWithInvalidId() {
         //unlike the 'get' paradigm, 'forKey' requires the value to exist
-        registries.each {reg ->
+        registries.each { reg ->
             //noinspection GroovyUnusedCatchParameter
             try {
                 reg.forKey('invalid')
@@ -81,7 +81,7 @@ class StandardAlgorithmsTest {
     @Test
     void testGetWithInvalidId() {
         // 'get' paradigm can return null if not found
-        registries.each {reg ->
+        registries.each { reg ->
             assertNull reg.get('invalid')
         }
     }

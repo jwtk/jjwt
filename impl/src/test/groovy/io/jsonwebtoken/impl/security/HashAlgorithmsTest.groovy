@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.lang.Registry
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
@@ -25,54 +26,56 @@ import static org.junit.Assert.*
 
 class HashAlgorithmsTest {
 
+    static final Registry<String, HashAlgorithm> reg = Jwks.HASH.get()
+
     static boolean contains(HashAlgorithm alg) {
-        return Jwks.HASH.values().contains(alg)
+        return reg.values().contains(alg)
     }
 
     @Test
     void testValues() {
-        assertEquals 6, Jwks.HASH.values().size()
-        assertTrue(contains(Jwks.HASH.@SHA256)) // add more later
+        assertEquals 6, reg.values().size()
+        assertTrue(contains(Jwks.HASH.SHA256)) // add more later
     }
 
     @Test
     void testForKey() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.forKey(alg.getId())
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.forKey(alg.getId())
         }
     }
 
     @Test
     void testForKeyCaseInsensitive() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.forKey(alg.getId().toLowerCase())
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.forKey(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
     void testForKeyWithInvalidId() {
         //unlike the 'get' paradigm, 'forKey' requires the value to exist
-        Jwks.HASH.forKey('invalid')
+        reg.forKey('invalid')
     }
 
     @Test
     void testGet() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.get(alg.getId())
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.get(alg.getId())
         }
     }
 
     @Test
     void testGetCaseInsensitive() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.get(alg.getId().toLowerCase())
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.get(alg.getId().toLowerCase())
         }
     }
 
     @Test
     void testGetWithInvalidId() {
         // 'get' paradigm can return null if not found
-        assertNull Jwks.HASH.get('invalid')
+        assertNull reg.get('invalid')
     }
 
     static DefaultRequest<byte[]> request(String msg) {
@@ -91,31 +94,31 @@ class HashAlgorithmsTest {
 
     @Test
     void testSha256() {
-        testSha(Jwks.HASH.@SHA256)
+        testSha(Jwks.HASH.SHA256)
     }
 
     @Test
     void testSha384() {
-        testSha(Jwks.HASH.@SHA384)
+        testSha(Jwks.HASH.SHA384)
     }
 
     @Test
     void testSha512() {
-        testSha(Jwks.HASH.@SHA512)
+        testSha(Jwks.HASH.SHA512)
     }
 
     @Test
     void testSha3_256() {
-        testSha(Jwks.HASH.@SHA3_256)
+        testSha(Jwks.HASH.SHA3_256)
     }
 
     @Test
     void testSha3_384() {
-        testSha(Jwks.HASH.@SHA3_384)
+        testSha(Jwks.HASH.SHA3_384)
     }
 
     @Test
     void testSha3_512() {
-        testSha(Jwks.HASH.@SHA3_512)
+        testSha(Jwks.HASH.SHA3_512)
     }
 }

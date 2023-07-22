@@ -23,8 +23,8 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.security.HashAlgorithm;
+import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.Request;
-import io.jsonwebtoken.security.StandardHashAlgorithms;
 import io.jsonwebtoken.security.X509Builder;
 
 import java.net.URI;
@@ -121,7 +121,7 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
                 setX509CertificateSha1Thumbprint(thumbprint);
             }
             if (computeX509Sha256) {
-                byte[] thumbprint = computeThumbprint(firstCert, StandardHashAlgorithms.get().SHA256);
+                byte[] thumbprint = computeThumbprint(firstCert, Jwks.HASH.SHA256);
                 setX509CertificateSha256Thumbprint(thumbprint);
             }
         }

@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.AeadAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.ENC

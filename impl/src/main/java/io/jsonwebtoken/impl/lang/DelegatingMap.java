@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.lang;
+package io.jsonwebtoken.impl.lang;
+
+import io.jsonwebtoken.lang.Assert;
 
 import java.util.Collection;
 import java.util.Map;

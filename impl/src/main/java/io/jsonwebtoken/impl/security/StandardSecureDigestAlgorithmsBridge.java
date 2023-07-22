@@ -15,12 +15,12 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.DelegatingRegistry;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.StandardSecureDigestAlgorithms
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.SIG
 public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegistry<String, SecureDigestAlgorithm<?, ?>> {
 
     private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);

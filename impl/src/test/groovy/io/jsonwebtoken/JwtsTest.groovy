@@ -1292,7 +1292,7 @@ class JwtsTest {
     @Test
     void testSecretKeyJwes() {
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it instanceof DirectKeyAlgorithm || it instanceof SecretKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1351,7 +1351,7 @@ class JwtsTest {
     @Test
     void testPasswordJwes() {
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it instanceof Pbes2HsAkwAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1394,7 +1394,7 @@ class JwtsTest {
                 .build()
                 .parseClaimsJwe(jwe)
         assertEquals 'bar', jwt.getPayload().get('foo')
-        assertEquals Jwts.KEY.@PBES2_HS512_A256KW, Jwts.KEY.forKey(jwt.getHeader().getAlgorithm())
+        assertEquals Jwts.KEY.PBES2_HS512_A256KW, Jwts.KEY.get().forKey(jwt.getHeader().getAlgorithm())
     }
 
     @Test
@@ -1402,7 +1402,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it instanceof DefaultRsaKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1437,7 +1437,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1472,7 +1472,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.X25519.pair, TestKeys.X448.pair]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1499,7 +1499,7 @@ class JwtsTest {
     void testEdwardsCurveEncryptionWithSigningKeys() {
         def pairs = [TestKeys.Ed25519.pair, TestKeys.Ed448.pair] // signing keys, can't be used
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1533,7 +1533,7 @@ class JwtsTest {
                 new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
         ]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 

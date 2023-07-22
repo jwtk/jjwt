@@ -1,4 +1,5 @@
-package io.jsonwebtoken.lang
+package io.jsonwebtoken.impl.lang
+
 
 import org.junit.Before
 import org.junit.Test

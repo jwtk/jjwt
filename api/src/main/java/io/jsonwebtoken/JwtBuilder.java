@@ -25,8 +25,6 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
-import io.jsonwebtoken.security.StandardKeyAlgorithms;
-import io.jsonwebtoken.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.security.WeakKeyException;
 import io.jsonwebtoken.security.X509Builder;
 
@@ -487,67 +485,67 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA256")</code><sup>1</sup></td>
      * <td>256 &lt;= size &lt;= 383 <sup>2</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#HS256 HS256}</td>
+     * <td>{@link Jwts.SIG#HS256 HS256}</td>
      * </tr>
      * <tr>
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA384")</code><sup>1</sup></td>
      * <td>384 &lt;= size &lt;= 511</td>
-     * <td>{@link StandardSecureDigestAlgorithms#HS384 HS384}</td>
+     * <td>{@link Jwts.SIG#HS384 HS384}</td>
      * </tr>
      * <tr>
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA512")</code><sup>1</sup></td>
      * <td>512 &lt;= size</td>
-     * <td>{@link StandardSecureDigestAlgorithms#HS512 HS512}</td>
+     * <td>{@link Jwts.SIG#HS512 HS512}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>256 &lt;= size &lt;= 383 <sup>3</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#ES256 ES256}</td>
+     * <td>{@link Jwts.SIG#ES256 ES256}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>384 &lt;= size &lt;= 520 <sup>4</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#ES384 ES384}</td>
+     * <td>{@link Jwts.SIG#ES384 ES384}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td><b>521</b> &lt;= size <sup>4</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#ES512 ES512}</td>
+     * <td>{@link Jwts.SIG#ES512 ES512}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>2048 &lt;= size &lt;= 3071 <sup>5,6</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#RS256 RS256}</td>
+     * <td>{@link Jwts.SIG#RS256 RS256}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>3072 &lt;= size &lt;= 4095 <sup>6</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#RS384 RS384}</td>
+     * <td>{@link Jwts.SIG#RS384 RS384}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>4096 &lt;= size <sup>5</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#RS512 RS512}</td>
+     * <td>{@link Jwts.SIG#RS512 RS512}</td>
      * </tr>
      * <tr>
      *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
      *     <td><code>instanceof {@link PrivateKey}</code></td>
      *     <td>256</td>
-     *     <td>{@link StandardSecureDigestAlgorithms#Ed25519 Ed25519}</td>
+     *     <td>{@link Jwts.SIG#Ed25519 Ed25519}</td>
      * </tr>
      * <tr>
      *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
      *     <td><code>instanceof {@link PrivateKey}</code></td>
      *     <td>456</td>
-     *     <td>{@link StandardSecureDigestAlgorithms#Ed448 Ed448}</td>
+     *     <td>{@link Jwts.SIG#Ed448 Ed448}</td>
      * </tr>
      * </tbody>
      * </table>
@@ -573,18 +571,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@code RSAKey}s with key lengths less than 2048 bits will be rejected with a
      * {@link WeakKeyException}.</li>
      * <li>Technically any RSA key of length &gt;= 2048 bits may be used with the
-     * {@link StandardSecureDigestAlgorithms#RS256 RS256}, {@link StandardSecureDigestAlgorithms#RS384 RS384}, and
-     * {@link StandardSecureDigestAlgorithms#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
+     * {@link Jwts.SIG#RS256 RS256}, {@link Jwts.SIG#RS384 RS384}, and
+     * {@link Jwts.SIG#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
      * length to parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>
      * <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a>s
      * require JDK &gt;= 15 or BouncyCastle in the runtime classpath.</li>
      * </ol>
      *
-     * <p>This implementation does not use the {@link StandardSecureDigestAlgorithms#PS256 PS256},
-     * {@link StandardSecureDigestAlgorithms#PS384 PS384}, or {@link StandardSecureDigestAlgorithms#PS512 PS512} RSA variants for any
-     * specified {@link RSAKey} because the the {@link StandardSecureDigestAlgorithms#RS256 RS256},
-     * {@link StandardSecureDigestAlgorithms#RS384 RS384}, and {@link StandardSecureDigestAlgorithms#RS512 RS512} algorithms are
+     * <p>This implementation does not use the {@link Jwts.SIG#PS256 PS256},
+     * {@link Jwts.SIG#PS384 PS384}, or {@link Jwts.SIG#PS512 PS512} RSA variants for any
+     * specified {@link RSAKey} because the the {@link Jwts.SIG#RS256 RS256},
+     * {@link Jwts.SIG#RS384 RS384}, and {@link Jwts.SIG#RS512 RS512} algorithms are
      * available in the JDK by default while the {@code PS}* variants require either JDK 11 or an additional JCA
      * Provider (like BouncyCastle).  If you wish to use a {@code PS}* variant with your key, use the
      * {@link #signWith(Key, SecureDigestAlgorithm)} method instead.</p>
@@ -597,7 +595,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @throws InvalidKeyException if the Key is insufficient, unsupported, or explicitly disallowed by the JWT
      *                             specification as described above in <em>recommended signature algorithms</em>.
-     * @see Jwts#SIG
+     * @see Jwts.SIG
      * @see #signWith(Key, SecureDigestAlgorithm)
      * @since 0.10.0
      */
@@ -698,7 +696,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p><b>This has been deprecated since JJWT_RELEASE_VERSION.  Use
      * {@link #signWith(Key, SecureDigestAlgorithm)} instead</b>.  Standard JWA algorithms
-     * are represented as instances of this new interface in the {@link Jwts#SIG}
+     * are represented as instances of this new interface in the {@link Jwts.SIG}
      * algorithm registry.</p>
      *
      * <p>Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.</p>
@@ -722,7 +720,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
      *
-     * <p>The {@link Jwts#SIG} registry makes available all standard signature
+     * <p>The {@link Jwts.SIG} registry makes available all standard signature
      * algorithms defined in the JWA specification.</p>
      *
      * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
@@ -736,7 +734,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
      *                             the specified algorithm.
      * @see #signWith(Key)
-     * @see Jwts#SIG
+     * @see Jwts.SIG
      * @since JJWT_RELEASE_VERSION
      */
     <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
@@ -752,12 +750,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <ul>
      *     <li>If the provided {@code key} is a {@link Password Password} instance,
      *     the {@code KeyAlgorithm} used will be one of the three JWA-standard password-based key algorithms
-     *      ({@link StandardKeyAlgorithms#PBES2_HS256_A128KW PBES2_HS256_A128KW},
-     *      {@link StandardKeyAlgorithms#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
-     *      {@link StandardKeyAlgorithms#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
+     *      ({@link Jwts.KEY#PBES2_HS256_A128KW PBES2_HS256_A128KW},
+     *      {@link Jwts.KEY#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
+     *      {@link Jwts.KEY#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
      *      {@link AeadAlgorithm#getKeyBitLength() key length} requirement.</li>
      *     <li>If the {@code key} is otherwise a standard {@code SecretKey}, the {@code KeyAlgorithm} will be
-     *     {@link StandardKeyAlgorithms#DIRECT}, indicating that {@code key} should be used directly with the
+     *     {@link Jwts.KEY#DIRECT DIRECT}, indicating that {@code key} should be used directly with the
      *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
      *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
      *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's
@@ -768,7 +766,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE, usually one of the JWA-standard
      *            algorithms accessible via {@link Jwts#ENC}.
      * @return the JWE builder for method chaining.
-     * @see Jwts#ENC
+     * @see Jwts.ENC
      */
     JwtBuilder encryptWith(SecretKey key, AeadAlgorithm enc);
 
@@ -789,7 +787,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * </ol>
      *
      * <p>Most application developers will reference one of the JWA
-     * {@link Jwts#KEY standard key algorithms} and {@link Jwts#ENC standard encryption algorithms}
+     * {@link Jwts#KEY standard key algorithms} and {@link Jwts.ENC standard encryption algorithms}
      * when invoking this method, but custom implementations are also supported.</p>
      *
      * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
@@ -798,7 +796,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *               {@code enc} algorithm
      * @param enc    the {@link AeadAlgorithm} algorithm used to encrypt the JWE
      * @return the JWE builder for method chaining.
-     * @see Jwts#ENC
+     * @see Jwts.ENC
      * @see Jwts#KEY
      */
     <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);

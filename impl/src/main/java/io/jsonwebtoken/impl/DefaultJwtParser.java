@@ -155,7 +155,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
         String name = "JWE Key Management Algorithm";
-        IdRegistry<KeyAlgorithm<?, ?>> registry = newRegistry(name, Jwts.KEY.values(), extras);
+        IdRegistry<KeyAlgorithm<?, ?>> registry = newRegistry(name, Jwts.KEY.get().values(), extras);
         return new IdLocator<>(DefaultHeader.ALGORITHM, MISSING_JWE_ALG_MSG, registry);
     }
 

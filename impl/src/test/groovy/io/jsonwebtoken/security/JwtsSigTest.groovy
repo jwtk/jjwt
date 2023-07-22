@@ -23,10 +23,10 @@ import static org.junit.Assert.assertNull
 
 /**
  * The {@link StandardAlgorithmsTest} class contains the majority of test cases relevant for the
- * {@link StandardSecureDigestAlgorithms} implementation.  This test class exists for additional checks/assertions
+ * {@link Jwts.SIG} implementation.  This test class exists for additional checks/assertions
  * for the convenience Ed2448 and Ed25519 aliases.
  */
-class StandardSecureDigestAlgorithmsTest {
+class JwtsSigTest {
 
     private static final def registry = Jwts.SIG.get()
 

@@ -85,7 +85,7 @@ class AbstractAsymmetricJwkBuilderTest {
     @Test
     void testX509CertificateSha256Thumbprint() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = StandardHashAlgorithms.get().@SHA256.digest(request)
+        def x5tS256 = Jwks.HASH.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateSha256Thumbprint(x5tS256).build()
         assertArrayEquals x5tS256, jwk.getX509CertificateSha256Thumbprint()
@@ -95,7 +95,7 @@ class AbstractAsymmetricJwkBuilderTest {
     @Test
     void testX509CertificateSha256ThumbprintEnabled() {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
-        def x5tS256 = StandardHashAlgorithms.get().@SHA256.digest(request)
+        def x5tS256 = Jwks.HASH.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().setX509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()
         assertArrayEquals x5tS256, jwk.getX509CertificateSha256Thumbprint()

@@ -29,9 +29,9 @@ import static org.junit.Assert.fail
 class Pbes2HsAkwAlgorithmTest {
 
     private static Password KEY = Keys.forPassword("12345678".toCharArray())
-    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwts.KEY.@PBES2_HS256_A128KW,
-                                                     Jwts.KEY.@PBES2_HS384_A192KW,
-                                                     Jwts.KEY.@PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
+    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwts.KEY.PBES2_HS256_A128KW,
+                                                     Jwts.KEY.PBES2_HS384_A192KW,
+                                                     Jwts.KEY.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
 
     @Test
     void testInsufficientIterations() {
