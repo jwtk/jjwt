@@ -455,7 +455,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * collection is added in iteration order; if a duplicate id is found when iterating the {@code encAlgs}
      * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link Jwts#ENC JWA standard encryption algorithms} are added last,
+     * <p>Finally, the {@link Jwts.ENC JWA standard encryption algorithms} are added last,
      * <em>after</em> those in the {@code encAlgs} collection, to ensure that JWA standard algorithms cannot be
      * accidentally replaced.</p>
      *
@@ -476,7 +476,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * {@code sigAlgs} collection, the later element will evict any previously-added algorithm with the same
      * {@code id}.</p>
      *
-     * <p>Finally, the {@link Jwts#SIG JWA standard signature and MAC algorithms} are
+     * <p>Finally, the {@link Jwts.SIG JWA standard signature and MAC algorithms} are
      * added last, <em>after</em> those in the {@code sigAlgs} collection, to ensure that JWA standard algorithms
      * cannot be accidentally replaced.</p>
      *

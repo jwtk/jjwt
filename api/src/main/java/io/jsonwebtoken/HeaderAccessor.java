@@ -68,7 +68,7 @@ public interface HeaderAccessor extends MapAccessor<String, Object> {
      * <ul>
      *     <li>If the JWT is a Signed JWT (a JWS), the <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">
      *      <code>alg</code></a> (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
-     *      JWS.  Consider using {@link Jwts#SIG}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)}
+     *      JWS.  Consider using {@link Jwts.SIG}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)}
      *      to convert this string value to a type-safe {@code SecureDigestAlgorithm} instance.</li>
      *      <li>If the JWT is an Encrypted JWT (a JWE), the
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
