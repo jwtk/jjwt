@@ -30,6 +30,13 @@ import java.util.Map;
 public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
 
     /**
+     * Removes all entries from the map. The map will be empty after this call returns.
+     *
+     * @return the mutator/builder for method chaining.
+     */
+    T clear();
+
+    /**
      * Sets the specified name/value pair in the map.  A {@code null} or empty value will remove the property
      * from the map entirely.
      *
@@ -38,14 +45,6 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
      * @return the mutator/builder for method chaining.
      */
     T put(K key, V value);
-
-    /**
-     * Removes the map entry with the specified key
-     *
-     * @param key the key for the map entry to remove.
-     * @return the mutator/builder for method chaining.
-     */
-    T remove(K key);
 
     /**
      * Sets the specified name/value pairs in the map.  If any name has a {@code null} or empty value, that
@@ -57,9 +56,10 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
     T putAll(Map<? extends K, ? extends V> m);
 
     /**
-     * Removes all entries from the map. The map will be empty after this call returns.
+     * Removes the map entry with the specified key
      *
+     * @param key the key for the map entry to remove.
      * @return the mutator/builder for method chaining.
      */
-    T clear();
+    T remove(K key);
 }
