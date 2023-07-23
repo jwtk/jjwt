@@ -64,7 +64,7 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      * {@link KeyRequest#getEncryptionAlgorithm() AeadAlgorithm}, along with any optional encrypted key ciphertext.
      * @throws SecurityException if there is a problem obtaining or encrypting the AEAD {@code SecretKey}.
      */
-    KeyResult getEncryptionKey(KeyRequest<E, MutableJweHeader<?>> request) throws SecurityException;
+    KeyResult getEncryptionKey(KeyRequest<E, MutableJweHeader> request) throws SecurityException;
 
     /**
      * Return the {@link SecretKey} that should be used to decrypt a JWE via the request's specified

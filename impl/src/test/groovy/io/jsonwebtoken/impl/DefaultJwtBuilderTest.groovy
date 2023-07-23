@@ -142,7 +142,6 @@ class DefaultJwtBuilderTest {
     void testSetHeaderFromMap() {
         def m = [foo: 'bar']
         builder.setHeader(m)
-        assertEquals builder.header().size(), 1
         assertEquals builder.buildHeader().foo, 'bar'
     }
 
@@ -150,7 +149,6 @@ class DefaultJwtBuilderTest {
     void testSetHeaderParams() {
         def m = [a: 'b', c: 'd']
         builder.setHeaderParams(m)
-        assertEquals builder.header().size(), 2
         assertEquals builder.buildHeader().a, 'b'
         assertEquals builder.buildHeader().c, 'd'
     }
@@ -158,7 +156,6 @@ class DefaultJwtBuilderTest {
     @Test
     void testSetHeaderParam() {
         builder.setHeaderParam('foo', 'bar')
-        assertEquals builder.header().size(), 1
         assertEquals builder.buildHeader().foo, 'bar'
     }
 
@@ -350,13 +347,13 @@ class DefaultJwtBuilderTest {
     @Test
     void testSetHeaderParamsWithNullMap() {
         builder.setHeaderParams(null)
-        assertTrue builder.header().isEmpty()
+        assertTrue builder.headerBuilder.params.isEmpty()
     }
 
     @Test
     void testSetHeaderParamsWithEmptyMap() {
         builder.setHeaderParams([:])
-        assertTrue builder.header().isEmpty()
+        assertTrue builder.headerBuilder.params.isEmpty()
     }
 
     @Test

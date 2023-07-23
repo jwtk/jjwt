@@ -20,16 +20,9 @@ import io.jsonwebtoken.security.X509Builder;
 
 /**
  * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
- * <ul>
- *     <li>If a {@link #getEncryptionAlgorithm() encryptionAlgorithm} is present (a JWE-only property), a
- *     {@link JweHeader} will be created, otherwise:</li>
- *     <li>If an {@link #getAlgorithm() algorithm} other than {@code NONE} is specified, a {@link JwsHeader}
- *     will be created, otherwise:</li>
- *     <li>A standard {@link Header} will be created by default.</li>
- * </ul>
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwtHeaderBuilder extends X509Builder<JwtHeaderBuilder>, MutableJweHeader<JwtHeaderBuilder>,
+public interface JwtHeaderBuilder extends JweHeaderMutator<JwtHeaderBuilder>, X509Builder<JwtHeaderBuilder>,
         Builder<Header> {
 }

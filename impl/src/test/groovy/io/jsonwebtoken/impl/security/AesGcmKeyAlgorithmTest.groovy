@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.impl.lang.CheckedSupplier
@@ -106,7 +107,8 @@ class AesGcmKeyAlgorithmTest {
             }
         }
 
-        def ereq = new DefaultKeyRequest(kek, null, null, header, enc)
+        def delegate = new DefaultMutableJweHeader(header)
+        def ereq = new DefaultKeyRequest(kek, null, null, delegate, enc)
 
         def result = alg.getEncryptionKey(ereq)
 
@@ -142,7 +144,8 @@ class AesGcmKeyAlgorithmTest {
                 return new FixedSecretKeyBuilder(cek)
             }
         }
-        def ereq = new DefaultKeyRequest(kek, null, null, headerBuilder, enc)
+        def delegate = new DefaultMutableJweHeader(headerBuilder)
+        def ereq = new DefaultKeyRequest(kek, null, null, delegate, enc)
         def result = alg.getEncryptionKey(ereq)
 
         headerBuilder.remove(headerName)

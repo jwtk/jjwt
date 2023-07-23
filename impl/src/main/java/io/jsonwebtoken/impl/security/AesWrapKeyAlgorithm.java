@@ -40,7 +40,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, MutableJweHeader<?>> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, MutableJweHeader> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);

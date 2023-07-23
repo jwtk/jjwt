@@ -21,13 +21,13 @@ import io.jsonwebtoken.JwtHeaderBuilder;
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJwtHeaderBuilder extends DefaultBuildableJweHeader<JwtHeaderBuilder> implements JwtHeaderBuilder {
+public class DefaultJwtHeaderBuilder extends DefaultJweHeaderBuilder<JwtHeaderBuilder> implements JwtHeaderBuilder {
 
     @SuppressWarnings("unused") // accessed via reflection from the Jwts.header() method implementation
     public DefaultJwtHeaderBuilder() {
     }
 
-    public DefaultJwtHeaderBuilder(DefaultMutableJweHeader<?> src) {
+    public DefaultJwtHeaderBuilder(DefaultJweHeaderMutator<?> src) {
         super(src);
     }
 

@@ -77,7 +77,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<PublicKey, MutableJweHeader<?>> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<PublicKey, MutableJweHeader> request) throws SecurityException {
 
         Assert.notNull(request, "Request cannot be null.");
         final PublicKey kek = Assert.notNull(request.getPayload(), "RSA PublicKey encryption key cannot be null.");

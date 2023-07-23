@@ -46,7 +46,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, MutableJweHeader<?>> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, MutableJweHeader> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());

@@ -19,8 +19,7 @@ package io.jsonwebtoken;
  * Read and write operations for standard header parameters (JWE header parameters are a superset of all JWE, Protected
  * and Unprotected Header parameters).  All write methods support method chaining for continuous configuration.
  *
- * @param <T>
  * @since JJWT_RELEASE_VERSION
  */
-public interface MutableJweHeader<T extends MutableJweHeader<T>> extends JweHeaderAccessor, JweHeaderMutator<T> {
+public interface MutableJweHeader extends JweHeaderAccessor, JweHeaderMutator<MutableJweHeader> {
 }

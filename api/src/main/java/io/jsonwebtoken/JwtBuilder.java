@@ -868,7 +868,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Header extends MutableJweHeader<Header>, X509Builder<Header> {
+    interface Header extends JweHeaderMutator<Header>, X509Builder<Header> {
 
         /**
          * Returns the associated JwtBuilder for continued configuration.

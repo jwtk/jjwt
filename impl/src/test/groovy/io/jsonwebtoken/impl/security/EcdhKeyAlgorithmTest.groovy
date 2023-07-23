@@ -45,7 +45,7 @@ class EcdhKeyAlgorithmTest {
     void testEdwardsEncryptionWithRequestProvider() {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.X25519.pair.public as PublicKey
-        def header = Jwts.header()
+        def header = new DefaultMutableJweHeader(Jwts.header())
         def provider = Providers.findBouncyCastle(Conditions.TRUE)
         def request = new DefaultKeyRequest(encKey, provider, null, header, Jwts.ENC.A128GCM)
         def result = alg.getEncryptionKey(request)
@@ -62,7 +62,8 @@ class EcdhKeyAlgorithmTest {
         def provider = Providers.findBouncyCastle(Conditions.TRUE)
 
         // encrypt
-        def request = new DefaultKeyRequest(encKey, provider, null, header, enc)
+        def delegate = new DefaultMutableJweHeader(header)
+        def request = new DefaultKeyRequest(encKey, provider, null, delegate, enc)
         def result = alg.getEncryptionKey(request)
         def cek = result.getKey()
         def cekCiphertext = result.getPayload()
@@ -118,7 +119,7 @@ class EcdhKeyAlgorithmTest {
     void testEncryptionWithInvalidPublicKey() {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.RS256.pair.public as PublicKey // not an elliptic curve key, must fail
-        def header = new DefaultMutableJweHeader()
+        def header = new DefaultMutableJweHeader(Jwts.header())
         def request = new DefaultKeyRequest(encKey, null, null, header, Jwts.ENC.A128GCM)
         try {
             alg.getEncryptionKey(request)

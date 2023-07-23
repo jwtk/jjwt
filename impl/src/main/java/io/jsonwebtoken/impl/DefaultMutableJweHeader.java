@@ -1,24 +1,7 @@
-/*
- * Copyright (C) 2023 jsonwebtoken.io
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.MutableJweHeader;
 import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.security.X509BuilderSupport;
-import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
 
 import java.net.URI;
@@ -28,36 +11,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @param <T> return type for method chaining
- * @since JJWT_RELEASE_VERSION
- */
-public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements MutableJweHeader<T> {
+public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<MutableJweHeader> implements MutableJweHeader {
 
-    protected final FieldMap params;
-
-    protected X509BuilderSupport x509;
-
-    public DefaultMutableJweHeader() {
-        // Any type of header can be created, but JWE fields reflect all potential standard ones, so we use those fields
-        // to catch any value being set, especially through generic 'put' or 'putAll' methods:
-        this.params = new FieldMap(DefaultJweHeader.FIELDS);
-        clear(); // initialize new X509Builder
-    }
-
-    public DefaultMutableJweHeader(DefaultMutableJweHeader<?> src) {
-        this.params = src.params;
-        this.x509 = src.x509;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected T self() {
-        return (T) this;
+    public DefaultMutableJweHeader(DefaultJweHeaderMutator<?> src) {
+        super(src);
     }
 
     // =============================================================
-    // MapAccessor/MapMutator methods
+    // MapAccessor methods
     // =============================================================
+
+    private <T> T get(Field<T> field) {
+        return this.params.get(field);
+    }
 
     @Override
     public int size() {
@@ -102,40 +68,6 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T put(String key, Object value) {
-        this.params.put(key, value);
-        return self();
-    }
-
-    private T put(Field<?> field, Object value) {
-        this.params.put(field, value);
-        return self();
-    }
-
-    private <FT> FT get(Field<FT> field) {
-        return this.params.get(field);
-    }
-
-    @Override
-    public T remove(String key) {
-        this.params.remove(key);
-        return self();
-    }
-
-    @Override
-    public T putAll(Map<? extends String, ?> m) {
-        this.params.putAll(m);
-        return self();
-    }
-
-    @Override
-    public T clear() {
-        this.params.clear();
-        this.x509 = new X509BuilderSupport(this.params, IllegalStateException.class);
-        return self();
-    }
-
-    @Override
     public Map<String, Object> toMap() {
         return this.params.toMap();
     }
@@ -150,18 +82,8 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setAlgorithm(String alg) {
-        return put(DefaultHeader.ALGORITHM, alg);
-    }
-
-    @Override
     public String getContentType() {
         return get(DefaultHeader.CONTENT_TYPE);
-    }
-
-    @Override
-    public T setContentType(String cty) {
-        return put(DefaultHeader.CONTENT_TYPE, cty);
     }
 
     @Override
@@ -170,18 +92,8 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setType(String typ) {
-        return put(DefaultHeader.TYPE, typ);
-    }
-
-    @Override
     public String getCompressionAlgorithm() {
         return get(DefaultHeader.COMPRESSION_ALGORITHM);
-    }
-
-    @Override
-    public T setCompressionAlgorithm(String zip) {
-        return put(DefaultHeader.COMPRESSION_ALGORITHM, zip);
     }
 
     // =============================================================
@@ -194,18 +106,8 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setJwkSetUrl(URI uri) {
-        return put(DefaultProtectedHeader.JKU, uri);
-    }
-
-    @Override
     public PublicJwk<?> getJwk() {
         return get(DefaultProtectedHeader.JWK);
-    }
-
-    @Override
-    public T setJwk(PublicJwk<?> jwk) {
-        return put(DefaultProtectedHeader.JWK, jwk);
     }
 
     @Override
@@ -214,20 +116,9 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setKeyId(String kid) {
-        return put(DefaultProtectedHeader.KID, kid);
-    }
-
-    @Override
     public Set<String> getCritical() {
         return get(DefaultProtectedHeader.CRIT);
     }
-
-    @Override
-    public T setCritical(Set<String> crit) {
-        return put(DefaultProtectedHeader.CRIT, crit);
-    }
-
 
     // =============================================================
     // X.509 methods
@@ -239,20 +130,8 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setX509Url(URI uri) {
-        this.x509.setX509Url(uri);
-        return self();
-    }
-
-    @Override
     public List<X509Certificate> getX509CertificateChain() {
         return get(DefaultProtectedHeader.X5C);
-    }
-
-    @Override
-    public T setX509CertificateChain(List<X509Certificate> chain) {
-        this.x509.setX509CertificateChain(chain);
-        return self();
     }
 
     @Override
@@ -261,20 +140,8 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        this.x509.setX509CertificateSha1Thumbprint(thumbprint);
-        return self();
-    }
-
-    @Override
     public byte[] getX509CertificateSha256Thumbprint() {
         return get(DefaultProtectedHeader.X5T_S256);
-    }
-
-    @Override
-    public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        this.x509.setX509CertificateSha256Thumbprint(thumbprint);
-        return self();
     }
 
     // =============================================================
@@ -287,38 +154,13 @@ public class DefaultMutableJweHeader<T extends MutableJweHeader<T>> implements M
     }
 
     @Override
-    public T setAgreementPartyUInfo(byte[] info) {
-        return put(DefaultJweHeader.APU, info);
-    }
-
-    @Override
-    public T setAgreementPartyUInfo(String info) {
-        return setAgreementPartyUInfo(Strings.utf8(Strings.clean(info)));
-    }
-
-    @Override
     public byte[] getAgreementPartyVInfo() {
         return get(DefaultJweHeader.APV);
     }
 
     @Override
-    public T setAgreementPartyVInfo(byte[] info) {
-        return put(DefaultJweHeader.APV, info);
-    }
-
-    @Override
-    public T setAgreementPartyVInfo(String info) {
-        return setAgreementPartyVInfo(Strings.utf8(Strings.clean(info)));
-    }
-
-    @Override
     public Integer getPbes2Count() {
         return get(DefaultJweHeader.P2C);
-    }
-
-    @Override
-    public T setPbes2Count(int count) {
-        return put(DefaultJweHeader.P2C, count);
     }
 
     @Override

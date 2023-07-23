@@ -80,7 +80,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Function<AeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key, ?> keyAlg;
-    private Function<KeyRequest<Key, MutableJweHeader<?>>, KeyResult> keyAlgFunction;
+    private Function<KeyRequest<Key, MutableJweHeader>, KeyResult> keyAlgFunction;
 
     private Key key;
 
@@ -272,9 +272,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final String algId = Assert.hasText(keyAlg.getId(), "KeyAlgorithm id cannot be null or empty.");
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
         final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
-        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key, MutableJweHeader<?>>, KeyResult>() {
+        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key, MutableJweHeader>, KeyResult>() {
             @Override
-            public KeyResult apply(KeyRequest<Key, MutableJweHeader<?>> request) {
+            public KeyResult apply(KeyRequest<Key, MutableJweHeader> request) {
                 return alg.getEncryptionKey(request);
             }
         }, SecurityException.class, cekMsg, algId);
@@ -471,8 +471,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         //only expose MutableJweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
-        MutableJweHeader<?> delegate = new DefaultMutableJweHeader<>(this.headerBuilder);
-        KeyRequest<Key, MutableJweHeader<?>> keyRequest = new DefaultKeyRequest<Key, MutableJweHeader<?>>(
+        MutableJweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
+        KeyRequest<Key, MutableJweHeader> keyRequest = new DefaultKeyRequest<>(
                 this.key, this.provider, this.secureRandom, delegate, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
@@ -504,7 +504,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
     }
 
-    private static class DefaultJwtBuilderHeader extends DefaultBuildableJweHeader<JwtBuilder.Header>
+    private static class DefaultJwtBuilderHeader extends DefaultJweHeaderBuilder<Header>
             implements JwtBuilder.Header {
 
         private final JwtBuilder builder;

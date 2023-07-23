@@ -48,16 +48,9 @@ class DefaultJwtHeaderBuilderTest {
     private static void assertSymmetry(String propName, def val) {
         def name = Strings.capitalize(propName)
         builder."set$name"(val)
-
-        if (val instanceof byte[]) {
-            assertArrayEquals val, builder."get$name"()
-        } else {
-            assertEquals val, builder."get$name"()
-        }
-
         header = builder.build()
         if (val instanceof byte[]) {
-            assertArrayEquals val, builder."get$name"()
+            assertArrayEquals val, header."get$name"()
         } else {
             assertEquals val, header."get$name"()
         }
@@ -87,43 +80,31 @@ class DefaultJwtHeaderBuilderTest {
 
     @Test
     void testSize() {
-        assertEquals 0, builder.size()
         assertEquals 0, builder.build().size()
-
         builder.put('foo', 'bar')
-        assertEquals 1, builder.size()
         assertEquals 1, builder.build().size()
     }
 
     @Test
     void testIsEmpty() {
-        assertTrue builder.isEmpty()
         assertTrue builder.build().isEmpty()
-
         builder.put('foo', 'bar')
-        assertFalse builder.isEmpty()
         assertFalse builder.build().isEmpty()
     }
 
     @Test
     void testContainsKey() {
         def key = 'foo'
-        assertFalse builder.containsKey(key)
         assertFalse builder.build().containsKey(key)
-
         builder.put(key, 'bar')
-        assertTrue builder.containsKey(key)
         assertTrue builder.build().containsKey(key)
     }
 
     @Test
     void testContainsValue() {
         def value = 'bar'
-        assertFalse builder.containsValue(value)
         assertFalse builder.build().containsValue(value)
-
         builder.put('foo', value)
-        assertTrue builder.containsValue(value)
         assertTrue builder.build().containsValue(value)
     }
 
@@ -131,11 +112,8 @@ class DefaultJwtHeaderBuilderTest {
     void testGet() {
         def key = 'foo'
         def value = 'bar'
-        assertNull builder.get(key)
         assertNull builder.build().get(key)
-
         builder.put(key, value)
-        assertEquals value, builder.get(key)
         assertEquals value, builder.build().get(key)
     }
 
@@ -143,73 +121,71 @@ class DefaultJwtHeaderBuilderTest {
     void testKeySet() {
         def key = 'foo'
         def value = 'bar'
-        assertTrue builder.keySet().isEmpty()
         assertTrue builder.build().keySet().isEmpty()
 
         builder.put(key, value)
-        assertFalse builder.keySet().isEmpty()
-        assertFalse builder.build().keySet().isEmpty()
-        assertEquals 1, builder.keySet().size()
-        assertEquals 1, builder.build().keySet().size()
-        assertEquals key, builder.keySet().iterator().next()
-        assertEquals key, builder.build().keySet().iterator().next()
+        def built = builder.build()
+        assertFalse built.keySet().isEmpty()
+        assertEquals 1, built.keySet().size()
+        assertEquals key, built.keySet().iterator().next()
 
-        def i = builder.keySet().iterator()
+        def i = builder.build().keySet().iterator()
         i.next()
-        i.remove() // assert keyset modification modifies builder state:
-        assertTrue builder.keySet().isEmpty()
-        assertTrue builder.build().keySet().isEmpty()
+        //built headers are immutable:
+        try {
+            i.remove() // assert keyset modification modifies builder state:
+            fail()
+        } catch (UnsupportedOperationException expected) {
+        }
     }
 
     @Test
     void testValues() {
         def key = 'foo'
         def value = 'bar'
-        assertTrue builder.values().isEmpty()
         assertTrue builder.build().values().isEmpty()
 
         builder.put(key, value)
-        assertFalse builder.values().isEmpty()
         assertFalse builder.build().values().isEmpty()
-        assertEquals 1, builder.values().size()
         assertEquals 1, builder.build().values().size()
-        assertEquals value, builder.values().iterator().next()
         assertEquals value, builder.build().values().iterator().next()
 
-        def i = builder.values().iterator()
+        def i = builder.build().values().iterator()
         i.next()
-        i.remove() // assert values modification modifies builder state:
-        assertTrue builder.values().isEmpty()
-        assertTrue builder.build().values().isEmpty()
+        //built headers are immutable:
+        try {
+            i.remove()
+            fail()
+        } catch (UnsupportedOperationException expected) {
+        }
     }
 
     @Test
     void testEntrySet() {
         def key = 'foo'
         def value = 'bar'
-        assertTrue builder.entrySet().isEmpty()
         assertTrue builder.build().entrySet().isEmpty()
 
         builder.put(key, value)
-        assertFalse builder.entrySet().isEmpty()
         assertFalse builder.build().entrySet().isEmpty()
-        assertEquals 1, builder.entrySet().size()
         assertEquals 1, builder.build().entrySet().size()
-        def entry = builder.entrySet().iterator().next()
+        def entry = builder.build().entrySet().iterator().next()
         assertEquals key, entry.getKey()
         assertEquals value, entry.getValue()
 
-        def i = builder.entrySet().iterator()
+        def i = builder.build().entrySet().iterator()
         i.next()
-        i.remove() // assert values modification modifies builder state:
-        assertTrue builder.entrySet().isEmpty()
-        assertTrue builder.build().entrySet().isEmpty()
+        //built headers are immutable:
+        try {
+            i.remove()
+            fail()
+        } catch (UnsupportedOperationException expected) {
+        }
     }
 
     @Test
     void testPut() {
         builder.put('foo', 'bar')
-        assertEquals 'bar', builder.get('foo')
         assertEquals 'bar', builder.build().get('foo')
     }
 
@@ -222,8 +198,10 @@ class DefaultJwtHeaderBuilderTest {
 
     @Test
     void testRemove() {
-        builder.put('foo', 'bar').remove('foo')
-        assertTrue builder.isEmpty()
+        builder.put('foo', 'bar')
+        assertEquals 'bar', builder.build().foo
+
+        builder.remove('foo')
         assertTrue builder.build().isEmpty()
     }
 
@@ -238,10 +216,10 @@ class DefaultJwtHeaderBuilderTest {
     void testToMap() {
         def m = ['foo': 'bar', 'baz': 'bat']
         builder.putAll(m)
-        assertEquals m, builder.toMap()
-        assertEquals m.size(), builder.toMap().size()
-        builder.clear()
-        assertEquals 0, builder.toMap().size()
+        def built = builder.build()
+        assertEquals m, built.toMap()
+        assertEquals m.size(), built.toMap().size()
+        assertEquals 2, built.toMap().size()
     }
 
     // ====================== Generic Header Methods =======================
@@ -348,9 +326,6 @@ class DefaultJwtHeaderBuilderTest {
         String encoded = Encoders.BASE64URL.encode(x5t)
 
         builder.setX509CertificateSha1Thumbprint(x5t)
-        assertArrayEquals x5t, builder.getX509CertificateSha1Thumbprint()
-        assertEquals encoded, builder.get('x5t')
-
         header = builder.build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
@@ -380,9 +355,6 @@ class DefaultJwtHeaderBuilderTest {
         String encoded = Encoders.BASE64URL.encode(x5tS256)
 
         builder.setX509CertificateSha256Thumbprint(x5tS256)
-        assertArrayEquals x5tS256, builder.getX509CertificateSha256Thumbprint()
-        assertEquals encoded, builder.get('x5t#S256')
-
         header = builder.build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
@@ -407,8 +379,6 @@ class DefaultJwtHeaderBuilderTest {
     void testEncryptionAlgorithm() {
         def enc = Jwts.ENC.A256GCM.getId()
         builder.put('enc', enc)
-        assertEquals enc, builder.getEncryptionAlgorithm()
-
         header = builder.build() as JweHeader
         assertEquals enc, header.getEncryptionAlgorithm()
     }
@@ -417,10 +387,7 @@ class DefaultJwtHeaderBuilderTest {
     void testEphemeralPublicKey() {
         def key = TestKeys.ES256.pair.public
         def jwk = Jwks.builder().forKey(key).build()
-
         builder.put('epk', jwk)
-        assertEquals jwk, builder.getEphemeralPublicKey()
-
         header = builder.build() as JweHeader
         assertEquals jwk, header.getEphemeralPublicKey()
     }
@@ -436,8 +403,6 @@ class DefaultJwtHeaderBuilderTest {
         def s = "UInfo"
         def info = Strings.utf8(s)
         builder.setAgreementPartyUInfo(s).build()
-        assertArrayEquals info, builder.getAgreementPartyUInfo()
-
         header = builder.build() as JweHeader
         assertArrayEquals info, header.getAgreementPartyUInfo()
     }
@@ -453,8 +418,6 @@ class DefaultJwtHeaderBuilderTest {
         def s = "VInfo"
         def info = Strings.utf8(s)
         builder.setAgreementPartyVInfo(s)
-        assertArrayEquals info, builder.getAgreementPartyVInfo()
-
         header = builder.build() as JweHeader
         assertArrayEquals info, header.getAgreementPartyVInfo()
     }
@@ -463,8 +426,6 @@ class DefaultJwtHeaderBuilderTest {
     void testPbes2Salt() {
         byte[] salt = Bytes.randomBits(256)
         builder.put('p2s', salt)
-        assertArrayEquals salt, builder.getPbes2Salt()
-
         header = builder.build() as JweHeader
         assertArrayEquals salt, header.getPbes2Salt()
     }
@@ -479,8 +440,6 @@ class DefaultJwtHeaderBuilderTest {
     void testInitializationVector() {
         byte[] val = Bytes.randomBits(96)
         builder.put('iv', val)
-        assertArrayEquals val, builder.getInitializationVector()
-
         header = builder.build() as JweHeader
         assertArrayEquals val, header.getInitializationVector()
     }
@@ -489,8 +448,6 @@ class DefaultJwtHeaderBuilderTest {
     void testAuthenticationTag() {
         byte[] val = Bytes.randomBits(128)
         builder.put('tag', val)
-        assertArrayEquals val, builder.getAuthenticationTag()
-
         header = builder.build() as JweHeader
         assertArrayEquals val, header.getAuthenticationTag()
     }

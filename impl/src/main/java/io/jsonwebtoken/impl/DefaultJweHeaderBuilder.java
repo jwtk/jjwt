@@ -15,21 +15,21 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.MutableJweHeader;
+import io.jsonwebtoken.JweHeaderMutator;
 import io.jsonwebtoken.security.X509Builder;
 
 /**
  * @param <T> return type for method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultBuildableJweHeader<T extends MutableJweHeader<T> & X509Builder<T>>
-        extends DefaultMutableJweHeader<T> implements X509Builder<T> {
+public class DefaultJweHeaderBuilder<T extends JweHeaderMutator<T> & X509Builder<T>>
+        extends DefaultJweHeaderMutator<T> implements X509Builder<T> {
 
-    public DefaultBuildableJweHeader() {
+    public DefaultJweHeaderBuilder() {
         super();
     }
 
-    public DefaultBuildableJweHeader(DefaultMutableJweHeader<?> src) {
+    public DefaultJweHeaderBuilder(DefaultJweHeaderMutator<?> src) {
         super(src);
     }
 
