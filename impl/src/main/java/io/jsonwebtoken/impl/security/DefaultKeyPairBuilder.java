@@ -50,18 +50,6 @@ public class DefaultKeyPairBuilder implements KeyPairBuilder {
     }
 
     @Override
-    public KeyPair build() {
-        JcaTemplate template = new JcaTemplate(this.jcaName, this.provider, this.random);
-        if (this.params != null) {
-            return template.generateKeyPair(this.params);
-        } else if (this.bitLength > 0) {
-            return template.generateKeyPair(this.bitLength);
-        } else {
-            return template.generateKeyPair();
-        }
-    }
-
-    @Override
     public KeyPairBuilder setProvider(Provider provider) {
         this.provider = provider;
         return this;
@@ -71,5 +59,17 @@ public class DefaultKeyPairBuilder implements KeyPairBuilder {
     public KeyPairBuilder setRandom(SecureRandom random) {
         this.random = random;
         return this;
+    }
+
+    @Override
+    public KeyPair build() {
+        JcaTemplate template = new JcaTemplate(this.jcaName, this.provider, this.random);
+        if (this.params != null) {
+            return template.generateKeyPair(this.params);
+        } else if (this.bitLength > 0) {
+            return template.generateKeyPair(this.bitLength);
+        } else {
+            return template.generateKeyPair();
+        }
     }
 }
