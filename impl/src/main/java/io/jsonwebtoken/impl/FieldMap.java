@@ -22,7 +22,6 @@ import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.MapAccessor;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
@@ -35,7 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class FieldMap implements Map<String, Object>, MapAccessor<String, Object>, FieldReadable, Nameable {
+public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
 
     protected final Registry<String, ? extends Field<?>> FIELDS;
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
@@ -127,17 +126,6 @@ public class FieldMap implements Map<String, Object>, MapAccessor<String, Object
     @Override
     public Object get(Object o) {
         return values.get(o);
-    }
-
-    /**
-     * Returns an immutable view of this FieldMap.  Child implementations are free to override this to
-     * return a mutable instance if necessary.
-     *
-     * @return an immutable view of this FieldMap.
-     */
-    @Override
-    public Map<String, Object> toMap() {
-        return mutable ? this : Collections.immutable(this);
     }
 
     /**

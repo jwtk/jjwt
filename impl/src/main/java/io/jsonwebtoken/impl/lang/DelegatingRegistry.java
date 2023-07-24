@@ -25,7 +25,7 @@ import io.jsonwebtoken.lang.Registry;
  * @param <V> Registry value type
  * @since JJWT_RELEASE_VERSION
  */
-public class DelegatingRegistry<K, V> extends DelegatingMap<K, V> implements Registry<K, V> {
+public class DelegatingRegistry<K, V> extends DelegatingMap<K, V, Registry<K, V>> implements Registry<K, V> {
 
     private final Registry<K, V> DELEGATE;
 

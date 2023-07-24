@@ -133,7 +133,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetHeader() {
-        def h = Jwts.header().put('foo', 'bar').build()
+        def h = Jwts.header().set('foo', 'bar').build()
         builder.setHeader(h)
         assertEquals h, builder.buildHeader()
     }
@@ -161,9 +161,9 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetClaims() {
-        Claims c = Jwts.claims().put('foo', 'bar').build()
+        Claims c = Jwts.claims().set('foo', 'bar').build()
         builder.setClaims(c)
-        assertEquals c, builder.claims
+        assertEquals c, builder.claimsBuilder
     }
 
     @Test
@@ -173,8 +173,8 @@ class DefaultJwtBuilderTest {
         b.setClaims(c)
         def c2 = [foo: 'bar', baz: 'buz']
         b.addClaims(c2)
-        assertEquals 'initial', b.claims.get('initial')
-        assertEquals 'bar', b.claims.get('foo')
+        assertEquals 'initial', b.claimsBuilder.get('initial')
+        assertEquals 'bar', b.claimsBuilder.get('foo')
     }
 
     @Test
@@ -182,34 +182,34 @@ class DefaultJwtBuilderTest {
         def b = new DefaultJwtBuilder()
         def c = [foo: 'bar', baz: 'buz']
         b.addClaims(c)
-        assertNotNull b.claims
-        assertEquals b.claims, c
+        assertNotNull b.claimsBuilder
+        assertEquals c, b.claimsBuilder
     }
 
     @Test
     void testClaim() {
         def b = new DefaultJwtBuilder()
         b.claim('foo', 'bar')
-        assertNotNull b.claims
-        assertEquals b.claims.size(), 1
-        assertEquals b.claims.foo, 'bar'
+        assertNotNull b.claimsBuilder
+        assertEquals b.claimsBuilder.size(), 1
+        assertEquals b.claimsBuilder.foo, 'bar'
     }
 
     @Test
     void testClaimEmptyString() {
         String value = ' '
         builder.claim('foo', value)
-        assertTrue builder.claims.isEmpty() // shouldn't populate claims instance
+        assertTrue builder.claimsBuilder.isEmpty() // shouldn't populate claims instance
     }
 
     @Test
     void testExistingClaimsAndSetClaim() {
-        Claims c = Jwts.claims().put('foo', 'bar').build()
+        Claims c = Jwts.claims().set('foo', 'bar').build()
         builder.setClaims(c)
-        assertEquals c, builder.claims
-        assertEquals builder.claims.size(), 1
+        assertEquals c, builder.claimsBuilder
+        assertEquals builder.claimsBuilder.size(), 1
         assertEquals c.size(), 1
-        assertEquals builder.claims.foo, 'bar'
+        assertEquals builder.claimsBuilder.foo, 'bar'
         assertEquals c.foo, 'bar'
     }
 
@@ -217,13 +217,13 @@ class DefaultJwtBuilderTest {
     void testRemoveClaimBySettingNullValue() {
         def b = new DefaultJwtBuilder()
         b.claim('foo', 'bar')
-        assertNotNull b.claims
-        assertEquals b.claims.size(), 1
-        assertEquals b.claims.foo, 'bar'
+        assertNotNull b.claimsBuilder
+        assertEquals b.claimsBuilder.size(), 1
+        assertEquals b.claimsBuilder.foo, 'bar'
 
         b.claim('foo', null)
-        assertNotNull b.claims
-        assertNull b.claims.foo
+        assertNotNull b.claimsBuilder
+        assertNull b.claimsBuilder.foo
     }
 
     @Test
@@ -347,62 +347,62 @@ class DefaultJwtBuilderTest {
     @Test
     void testSetHeaderParamsWithNullMap() {
         builder.setHeaderParams(null)
-        assertTrue builder.headerBuilder.params.isEmpty()
+        assertTrue builder.headerBuilder.isEmpty()
     }
 
     @Test
     void testSetHeaderParamsWithEmptyMap() {
         builder.setHeaderParams([:])
-        assertTrue builder.headerBuilder.params.isEmpty()
+        assertTrue builder.headerBuilder.isEmpty()
     }
 
     @Test
     void testSetIssuerWithNull() {
         def b = new DefaultJwtBuilder()
         b.setIssuer(null)
-        assertTrue b.claims.isEmpty()
+        assertTrue b.claimsBuilder.isEmpty()
     }
 
     @Test
     void testSetSubjectWithNull() {
         builder.setSubject(null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test
     void testSetAudienceWithNull() {
         builder.setAudience(null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test
     void testSetIdWithNull() {
         builder.setId(null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test
     void testClaimNullValue() {
         builder.claim('foo', null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test
     void testSetNullExpirationWithNullClaims() {
         builder.setExpiration(null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test
     void testSetNullNotBeforeWithNullClaims() {
         builder.setNotBefore(null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test
     void testSetNullIssuedAtWithNullClaims() {
         builder.setIssuedAt(null)
-        assertTrue builder.claims.isEmpty()
+        assertTrue builder.claimsBuilder.isEmpty()
     }
 
     @Test(expected = IllegalArgumentException)

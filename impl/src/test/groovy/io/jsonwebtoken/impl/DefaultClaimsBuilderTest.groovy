@@ -51,7 +51,7 @@ class DefaultClaimsBuilderTest {
 
     @Test
     void testPutAllNull() {
-        builder.putAll(null)
+        builder.putAll((Map<String,Object>)null)
         assertTrue builder.build().isEmpty()
     }
 

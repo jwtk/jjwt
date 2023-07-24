@@ -138,8 +138,8 @@ class DefaultMutableJweHeaderTest {
     @Test
     void testPutAll() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        def header = header.putAll(m)
-        assertEquals m, header.toMap()
+        header.putAll(m)
+        assertEquals m, header
     }
 
     @Test
@@ -151,20 +151,10 @@ class DefaultMutableJweHeaderTest {
     }
 
     @Test
-    void testToMap() {
-        def m = ['foo': 'bar', 'baz': 'bat']
-        header.putAll(m)
-        assertEquals m, header.toMap()
-        assertEquals m.size(), header.size()
-        header.clear()
-        assertEquals 0, header.toMap().size()
-    }
-
-    @Test
     void testClear() {
         def m = ['foo': 'bar', 'baz': 'bat']
         header.putAll(m)
-        assertEquals m, header.toMap()
+        assertEquals m, header
         header.clear()
         assertTrue header.isEmpty()
     }

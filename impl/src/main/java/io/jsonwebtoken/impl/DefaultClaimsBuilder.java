@@ -17,95 +17,65 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
+import io.jsonwebtoken.impl.lang.Field;
 
 import java.util.Date;
-import java.util.Map;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 @SuppressWarnings("unused") // used via reflection via Jwts.claims()
-public final class DefaultClaimsBuilder implements ClaimsBuilder {
-
-    final DefaultClaims claims;
+public final class DefaultClaimsBuilder extends DelegatingMapMutator<String, Object, FieldMap, ClaimsBuilder>
+        implements ClaimsBuilder {
 
     public DefaultClaimsBuilder() {
-        this.claims = new DefaultClaims();
+        super(new FieldMap(DefaultClaims.FIELDS));
     }
 
-    @Override
-    public ClaimsBuilder put(String name, Object value) {
-        Assert.hasText(name, "Claim property name cannot be null or empty.");
-        this.claims.put(name, value);
-        return this;
-    }
-
-    @Override
-    public ClaimsBuilder remove(String key) {
-        this.claims.remove(key);
-        return this;
-    }
-
-    @Override
-    public ClaimsBuilder putAll(Map<? extends String, ?> m) {
-        if (!Collections.isEmpty(m)) {
-            for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
-                put(entry.getKey(), entry.getValue());
-            }
-        }
-        return this;
-    }
-
-    @Override
-    public ClaimsBuilder clear() {
-        this.claims.clear();
-        return this;
+    <T> ClaimsBuilder put(Field<T> field, Object value) {
+        this.DELEGATE.put(field, value);
+        return self();
     }
 
     @Override
     public ClaimsBuilder setIssuer(String iss) {
-        claims.setIssuer(iss);
-        return this;
+        return put(DefaultClaims.ISSUER, iss);
     }
 
     @Override
     public ClaimsBuilder setSubject(String sub) {
-        claims.setSubject(sub);
-        return this;
+        return put(DefaultClaims.SUBJECT, sub);
     }
 
     @Override
     public ClaimsBuilder setAudience(String aud) {
-        claims.setAudience(aud);
-        return this;
+        return put(DefaultClaims.AUDIENCE, aud);
     }
 
     @Override
     public ClaimsBuilder setExpiration(Date exp) {
-        claims.setExpiration(exp);
-        return this;
+        return put(DefaultClaims.EXPIRATION, exp);
     }
 
     @Override
     public ClaimsBuilder setNotBefore(Date nbf) {
-        claims.setNotBefore(nbf);
-        return this;
+        return put(DefaultClaims.NOT_BEFORE, nbf);
     }
 
     @Override
     public ClaimsBuilder setIssuedAt(Date iat) {
-        claims.setIssuedAt(iat);
-        return this;
+        return put(DefaultClaims.ISSUED_AT, iat);
     }
 
     @Override
     public ClaimsBuilder setId(String jti) {
-        claims.setId(jti);
-        return this;
+        return put(DefaultClaims.JTI, jti);
     }
 
     @Override
     public Claims build() {
         // ensure a new instance is returned so that the builder may be re-used:
-        return new DefaultClaims(claims);
+        return new DefaultClaims(this.DELEGATE);
     }
 }

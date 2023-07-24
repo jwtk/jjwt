@@ -39,12 +39,12 @@ public class DefaultJwtHeaderBuilder extends DefaultJweHeaderBuilder<JwtHeaderBu
         //Use a copy constructor to ensure subsequent changes to builder state do not change the constructed header
 
         // Note: conditional sequence matters here: JWE has more specific requirements than JWS, so check that first:
-        if (DefaultJweHeader.isCandidate(this.params)) {
-            return new DefaultJweHeader(this.params);
-        } else if (DefaultProtectedHeader.isCandidate(this.params)) {
-            return new DefaultJwsHeader(this.params);
+        if (DefaultJweHeader.isCandidate(this.DELEGATE)) {
+            return new DefaultJweHeader(this.DELEGATE);
+        } else if (DefaultProtectedHeader.isCandidate(this.DELEGATE)) {
+            return new DefaultJwsHeader(this.DELEGATE);
         } else {
-            return new DefaultHeader(this.params);
+            return new DefaultHeader(this.DELEGATE);
         }
     }
 }

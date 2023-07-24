@@ -171,7 +171,7 @@ class RFC7516AppendixA1Test {
         assertArrayEquals TAG, decode(encodedTag)
 
         //read the RFC Test JWK to get the private key for decrypting
-        RsaPrivateJwk jwk = Jwks.builder().putAll(KEK_VALUES).build() as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwks.builder().set(KEK_VALUES).build() as RsaPrivateJwk
         RSAPrivateKey privKey = jwk.toKey()
 
         Jwe<byte[]> jwe = Jwts.parserBuilder().decryptWith(privKey).build().parseContentJwe(COMPLETE_JWE)

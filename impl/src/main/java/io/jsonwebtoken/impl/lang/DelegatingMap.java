@@ -28,9 +28,9 @@ import java.util.Set;
  * @param <V> Map value type
  * @since JJWT_RELEASE_VERSION
  */
-public class DelegatingMap<K, V> implements Map<K, V> {
+public class DelegatingMap<K, V, T extends Map<K, V>> implements Map<K, V> {
 
-    private final Map<K, V> DELEGATE;
+    protected T DELEGATE;
 
     /**
      * Initializes the instance with specified non-null backing delegate Map.
@@ -38,7 +38,11 @@ public class DelegatingMap<K, V> implements Map<K, V> {
      * @param delegate non-null delegate map to use for all map method implementations
      * @throws IllegalArgumentException if {@code delegate} is null.
      */
-    protected DelegatingMap(Map<K, V> delegate) {
+    protected DelegatingMap(T delegate) {
+        setDelegate(delegate);
+    }
+
+    protected void setDelegate(T delegate) {
         this.DELEGATE = Assert.notNull(delegate, "Delegate cannot be null.");
     }
 

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeaderMutator;
+import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.security.X509BuilderSupport;
 import io.jsonwebtoken.lang.Strings;
@@ -24,68 +25,42 @@ import io.jsonwebtoken.security.PublicJwk;
 import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * @param <T> return type for method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>> implements JweHeaderMutator<T> {
-
-    protected final FieldMap params;
+public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
+        extends DelegatingMapMutator<String, Object, FieldMap, T> implements JweHeaderMutator<T> {
 
     protected X509BuilderSupport x509;
 
     public DefaultJweHeaderMutator() {
         // Any type of header can be created, but JWE fields reflect all potential standard ones, so we use those fields
         // to catch any value being set, especially through generic 'put' or 'putAll' methods:
-        this.params = new FieldMap(DefaultJweHeader.FIELDS);
-        clear(); // initialize new X509Builder
+        super(new FieldMap(DefaultJweHeader.FIELDS));
+        cleare(); // initialize new X509Builder
     }
 
     public DefaultJweHeaderMutator(DefaultJweHeaderMutator<?> src) {
-        this.params = src.params;
+        super(src.DELEGATE);
         this.x509 = src.x509;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected T self() {
-        return (T) this;
     }
 
     // =============================================================
     // MapMutator methods
     // =============================================================
 
-    @Override
-    public T put(String key, Object value) {
-        this.params.put(key, value);
-        return self();
-    }
-
     private T put(Field<?> field, Object value) {
-        this.params.put(field, value);
+        this.DELEGATE.put(field, value);
         return self();
     }
 
     @Override
-    public T remove(String key) {
-        this.params.remove(key);
-        return self();
-    }
-
-    @Override
-    public T putAll(Map<? extends String, ?> m) {
-        this.params.putAll(m);
-        return self();
-    }
-
-    @Override
-    public T clear() {
-        this.params.clear();
-        this.x509 = new X509BuilderSupport(this.params, IllegalStateException.class);
-        return self();
+    public void clear() {
+        super.clear();
+        this.x509 = new X509BuilderSupport(this.DELEGATE, IllegalStateException.class);
     }
 
     // =============================================================

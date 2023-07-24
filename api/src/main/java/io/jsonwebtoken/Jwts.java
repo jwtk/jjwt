@@ -971,7 +971,7 @@ public final class Jwts {
 
     /**
      * <p><b>Deprecated since JJWT_RELEASE_VERSION in favor of
-     * {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}</b>.
+     * {@code Jwts.}{@link #claims()}{@code .set(map).build()}</b>.
      * This method will be removed before 1.0.</p>
      *
      * <p>Returns a new {@link Claims} instance populated with the specified name/value pairs.</p>
@@ -983,7 +983,7 @@ public final class Jwts {
      */
     @Deprecated
     public static Claims claims(Map<String, Object> claims) {
-        return claims().putAll(claims).build();
+        return claims().set(claims).build();
     }
 
     /**

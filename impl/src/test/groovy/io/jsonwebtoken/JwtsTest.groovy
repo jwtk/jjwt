@@ -89,7 +89,7 @@ class JwtsTest {
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header().putAll([alg: "HS256"]).build()
+        def header = Jwts.header().set([alg: "HS256"]).build()
         assertTrue header instanceof DefaultJwsHeader
         assertEquals 'HS256', header.getAlgorithm()
         assertEquals 'HS256', header.alg

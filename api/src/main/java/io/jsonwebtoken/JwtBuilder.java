@@ -77,7 +77,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      *     <b>.header()
      *         .setKeyId("keyId")
-     *         .putAll(myHeaderMap)
+     *         .set(myHeaderMap)
      *         // ... other header params ...
      *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
      *
@@ -93,7 +93,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Sets (and replaces) any existing header with the specified name/value pairs.  If you do not want to replace the
      * existing header and only want to append to it, call
-     * {@link #header()}{@code .}{@link io.jsonwebtoken.lang.MapMutator#putAll(Map) putAll(map)}
+     * {@link #header()}{@code .}{@link io.jsonwebtoken.lang.MapMutator#set(Map) set(map)}
      * instead.
      *
      * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
@@ -122,7 +122,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
-     * {@link Header#getContentType() contentType} header value so the JWT recipient may inspect that value to
+     * {@link Header#setContentType(String) contentType} header value so the JWT recipient may inspect that value to
      * determine how to convert the byte array to the final data type as desired. In this case, consider using
      * {@link #setContent(byte[], String)} instead.
      *
@@ -166,7 +166,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
-     * {@link Header#getContentType() contentType} header value to a compact {@code cty} media type
+     * {@link Header#setContentType(String) contentType} header value to a compact {@code cty} media type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.
      *
@@ -178,11 +178,11 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
      * method - instead call {@link #setContent(byte[])} and set the header's
-     * {@link Header#getContentType() contentType} independently.  For example:</p>
+     * {@link Header#setContentType(String) contentType} independently.  For example:</p>
      *
      * <blockquote><pre>
      * Jwts.builder()
-     *     .setHeader(Jwts.header().setContentType("application/whatever"))
+     *     .header().setContentType("application/whatever").and()
      *     .setContent(byteArray)
      *     ...
      *     .build();</pre></blockquote>
@@ -868,7 +868,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Header extends JweHeaderMutator<Header>, X509Builder<Header> {
+    interface Header extends Map<String, Object>, JweHeaderMutator<Header>, X509Builder<Header> {
 
         /**
          * Returns the associated JwtBuilder for continued configuration.

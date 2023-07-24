@@ -359,7 +359,7 @@ class DefaultClaimsTest {
     @Test
     void testGetClaimExpiration_Success() {
         def now = new Date(System.currentTimeMillis())
-        claims.setExpiration(now)
+        claims.put('exp', now)
         Date expected = claims.get("exp", Date.class)
         assertEquals(expected, claims.getExpiration())
     }
@@ -367,7 +367,7 @@ class DefaultClaimsTest {
     @Test
     void testGetClaimIssuedAt_Success() {
         def now = new Date(System.currentTimeMillis())
-        claims.setIssuedAt(now)
+        claims.put('iat', now)
         Date expected = claims.get("iat", Date.class)
         assertEquals(expected, claims.getIssuedAt())
     }
@@ -375,7 +375,7 @@ class DefaultClaimsTest {
     @Test
     void testGetClaimNotBefore_Success() {
         def now = new Date(System.currentTimeMillis())
-        claims.setNotBefore(now)
+        claims.put('nbf', now)
         Date expected = claims.get("nbf", Date.class)
         assertEquals(expected, claims.getNotBefore())
     }

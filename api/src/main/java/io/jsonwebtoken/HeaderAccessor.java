@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.lang.MapAccessor;
-
 /**
  * A component that is able to read JWT
  * <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5">JOSE header</a> values. This is most naturally
@@ -27,7 +25,7 @@ import io.jsonwebtoken.lang.MapAccessor;
  * @see JwtHeaderBuilder
  * @since JJWT_RELEASE_VERSION
  */
-public interface HeaderAccessor extends MapAccessor<String, Object> {
+public interface HeaderAccessor {
 
     /**
      * Returns the <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1">

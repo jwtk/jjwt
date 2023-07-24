@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
@@ -183,7 +184,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private DefaultClaims expectedClaims = new DefaultClaims();
+    private ClaimsBuilder expectedClaims = Jwts.claims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
@@ -229,7 +230,7 @@ public class DefaultJwtParser implements JwtParser {
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
-        this.expectedClaims = expectedClaims;
+        this.expectedClaims = Jwts.claims().set(expectedClaims);
         this.base64UrlDecoder = base64UrlDecoder;
         this.deserializer = deserializer;
         this.signatureAlgorithmLocator = sigFn(extraSigAlgs);

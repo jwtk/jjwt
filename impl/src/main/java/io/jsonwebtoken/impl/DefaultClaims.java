@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ClaimsMutator;
 import io.jsonwebtoken.RequiredTypeException;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
@@ -27,7 +26,7 @@ import io.jsonwebtoken.lang.Registry;
 import java.util.Date;
 import java.util.Map;
 
-public class DefaultClaims extends FieldMap implements Claims, ClaimsMutator<DefaultClaims> {
+public class DefaultClaims extends FieldMap implements Claims {
 
     private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
             "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
@@ -67,20 +66,8 @@ public class DefaultClaims extends FieldMap implements Claims, ClaimsMutator<Def
     }
 
     @Override
-    public DefaultClaims setIssuer(String iss) {
-        put(ISSUER, iss);
-        return this;
-    }
-
-    @Override
     public String getSubject() {
         return get(SUBJECT);
-    }
-
-    @Override
-    public DefaultClaims setSubject(String sub) {
-        put(SUBJECT, sub);
-        return this;
     }
 
     @Override
@@ -89,20 +76,8 @@ public class DefaultClaims extends FieldMap implements Claims, ClaimsMutator<Def
     }
 
     @Override
-    public DefaultClaims setAudience(String aud) {
-        put(AUDIENCE, aud);
-        return this;
-    }
-
-    @Override
     public Date getExpiration() {
         return get(EXPIRATION);
-    }
-
-    @Override
-    public DefaultClaims setExpiration(Date exp) {
-        put(EXPIRATION, exp);
-        return this;
     }
 
     @Override
@@ -111,31 +86,13 @@ public class DefaultClaims extends FieldMap implements Claims, ClaimsMutator<Def
     }
 
     @Override
-    public DefaultClaims setNotBefore(Date nbf) {
-        put(NOT_BEFORE, nbf);
-        return this;
-    }
-
-    @Override
     public Date getIssuedAt() {
         return get(ISSUED_AT);
     }
 
     @Override
-    public DefaultClaims setIssuedAt(Date iat) {
-        put(ISSUED_AT, iat);
-        return this;
-    }
-
-    @Override
     public String getId() {
         return get(JTI);
-    }
-
-    @Override
-    public DefaultClaims setId(String jti) {
-        put(JTI, jti);
-        return this;
     }
 
     @Override

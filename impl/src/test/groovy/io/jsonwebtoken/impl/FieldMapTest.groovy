@@ -121,31 +121,6 @@ class FieldMapTest {
         assertTrue jwtMap.values().containsAll(s) && s.containsAll(jwtMap.values())
     }
 
-    @SuppressWarnings('GroovyUnusedCatchParameter')
-    @Test
-    void testToMap() {
-        def m = [foo: 'bar']
-        jwtMap.putAll(m)
-        Map returned = jwtMap.toMap()
-        assertEquals 'bar', returned.foo
-        //assert returned Map is mutable:
-        returned.clear()
-        assertEquals 0, jwtMap.size()
-        assertEquals 0, returned.size()
-
-        // now test immutable:
-        jwtMap = new FieldMap(FIELDS, m)
-        unsupported { jwtMap.clear() }
-        //assert returned Map view reflects changes and is still immutable
-        returned = jwtMap.toMap()
-        assertEquals 'bar', returned.foo
-        try { // assert new return value is immutable:
-            returned.clear()
-            fail()
-        } catch(UnsupportedOperationException expected) {
-        }
-    }
-
     @Test
     void testEquals() throws Exception {
         def m1 = new FieldMap(FIELDS)

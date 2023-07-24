@@ -62,6 +62,6 @@ public class DefaultJwkParser implements JwkParser {
             builder.setProvider(this.provider);
         }
 
-        return builder.putAll(data).build();
+        return builder.set(data).build();
     }
 }

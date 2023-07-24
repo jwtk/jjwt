@@ -6,9 +6,7 @@ import io.jsonwebtoken.security.PublicJwk;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<MutableJweHeader> implements MutableJweHeader {
@@ -22,54 +20,7 @@ public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<MutableJweH
     // =============================================================
 
     private <T> T get(Field<T> field) {
-        return this.params.get(field);
-    }
-
-    @Override
-    public int size() {
-        return this.params.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.params.isEmpty();
-    }
-
-    @SuppressWarnings("SuspiciousMethodCalls")
-    @Override
-    public boolean containsKey(Object key) {
-        return this.params.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return this.params.containsValue(value);
-    }
-
-    @SuppressWarnings("SuspiciousMethodCalls")
-    @Override
-    public Object get(Object key) {
-        return this.params.get(key);
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return this.params.keySet();
-    }
-
-    @Override
-    public Collection<Object> values() {
-        return this.params.values();
-    }
-
-    @Override
-    public Set<Map.Entry<String, Object>> entrySet() {
-        return this.params.entrySet();
-    }
-
-    @Override
-    public Map<String, Object> toMap() {
-        return this.params.toMap();
+        return this.DELEGATE.get(field);
     }
 
     // =============================================================

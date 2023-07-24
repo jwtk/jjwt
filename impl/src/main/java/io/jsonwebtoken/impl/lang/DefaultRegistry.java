@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DefaultRegistry<K, V> extends DelegatingMap<K, V> implements Registry<K, V>, Function<K, V> {
+public class DefaultRegistry<K, V> extends DelegatingMap<K, V, Map<K, V>> implements Registry<K, V>, Function<K, V> {
 
     private final String qualifiedKeyName;
 

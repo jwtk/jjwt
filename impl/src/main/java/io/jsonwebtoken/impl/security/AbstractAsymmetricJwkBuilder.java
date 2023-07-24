@@ -48,8 +48,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
-abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
-        T extends AsymmetricJwkBuilder<K, J, T>>
+abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>, T extends AsymmetricJwkBuilder<K, J, T>>
         extends AbstractJwkBuilder<K, J, T> implements AsymmetricJwkBuilder<K, J, T> {
 
     protected Boolean applyX509KeyUse = null;
@@ -59,7 +58,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
-        FieldMap map = Assert.isInstanceOf(FieldMap.class, this.jwkContext);
+        FieldMap map = Assert.isInstanceOf(FieldMap.class, this.DELEGATE);
         this.x509 = new X509BuilderSupport(map, MalformedKeyException.class);
     }
 
@@ -72,7 +71,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     @Override
     public T setPublicKeyUse(String use) {
         Assert.hasText(use, "publicKeyUse cannot be null or empty.");
-        this.jwkContext.setPublicKeyUse(use);
+        this.DELEGATE.setPublicKeyUse(use);
         return self();
     }
 
@@ -148,7 +147,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         @Override
         public P setPrivateKey(L privateKey) {
             Assert.notNull(privateKey, "PrivateKey argument cannot be null.");
-            final K publicKey = Assert.notNull(jwkContext.getKey(), "PublicKey cannot be null.");
+            final K publicKey = Assert.notNull(DELEGATE.getKey(), "PublicKey cannot be null.");
             return newPrivateBuilder(newContext(privateKey)).setPublicKey(publicKey);
         }
 
@@ -167,12 +166,12 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
         DefaultPrivateJwkBuilder(DefaultPublicJwkBuilder<L, K, J, M, ?, ?> b, JwkContext<K> ctx) {
             super(b, ctx);
-            this.jwkContext.setPublicKey(b.jwkContext.getKey());
+            this.DELEGATE.setPublicKey(b.DELEGATE.getKey());
         }
 
         @Override
         public T setPublicKey(L publicKey) {
-            this.jwkContext.setPublicKey(publicKey);
+            this.DELEGATE.setPublicKey(publicKey);
             return self();
         }
     }

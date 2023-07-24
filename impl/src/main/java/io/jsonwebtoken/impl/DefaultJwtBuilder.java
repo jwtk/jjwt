@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -69,7 +70,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private final DefaultJwtBuilderHeader headerBuilder = new DefaultJwtBuilderHeader(this);
 
-    private final DefaultClaims claims = new DefaultClaims();
+    private final ClaimsBuilder claimsBuilder = new DefaultClaimsBuilder();
 
     protected byte[] content;
 
@@ -319,62 +320,62 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder setClaims(Map<String, ?> claims) {
         Assert.notNull(claims, "Claims map cannot be null.");
-        this.claims.clear();
-        this.claims.putAll(claims);
+        this.claimsBuilder.clear();
+        this.claimsBuilder.putAll(claims);
         return this;
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        this.claims.putAll(claims);
+        this.claimsBuilder.putAll(claims);
         return this;
     }
 
     @Override
     public JwtBuilder setIssuer(String iss) {
-        this.claims.setIssuer(iss);
+        this.claimsBuilder.setIssuer(iss);
         return this;
     }
 
     @Override
     public JwtBuilder setSubject(String sub) {
-        this.claims.setSubject(sub);
+        this.claimsBuilder.setSubject(sub);
         return this;
     }
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        this.claims.setAudience(aud);
+        this.claimsBuilder.setAudience(aud);
         return this;
     }
 
     @Override
     public JwtBuilder setExpiration(Date exp) {
-        this.claims.setExpiration(exp);
+        this.claimsBuilder.setExpiration(exp);
         return this;
     }
 
     @Override
     public JwtBuilder setNotBefore(Date nbf) {
-        this.claims.setNotBefore(nbf);
+        this.claimsBuilder.setNotBefore(nbf);
         return this;
     }
 
     @Override
     public JwtBuilder setIssuedAt(Date iat) {
-        this.claims.setIssuedAt(iat);
+        this.claimsBuilder.setIssuedAt(iat);
         return this;
     }
 
     @Override
     public JwtBuilder setId(String jti) {
-        this.claims.setId(jti);
+        this.claimsBuilder.setId(jti);
         return this;
     }
 
     @Override
     public JwtBuilder claim(String name, Object value) {
-        this.claims.put(name, value);
+        this.claimsBuilder.put(name, value);
         return this;
     }
 
@@ -387,6 +388,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
             String msg = "Both 'signWith' and 'encryptWith' cannot be specified - choose either.";
             throw new IllegalStateException(msg);
         }
+
+        final Claims claims = this.claimsBuilder.build();
 
         if (Objects.isEmpty(content) && Collections.isEmpty(claims)) {
             if (jwe) { // JWE payload can never be empty:

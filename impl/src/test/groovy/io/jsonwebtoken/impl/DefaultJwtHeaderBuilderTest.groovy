@@ -80,7 +80,7 @@ class DefaultJwtHeaderBuilderTest {
 
     @Test
     void testSize() {
-        assertEquals 0, builder.build().size()
+        assertEquals 0, builder.size()
         builder.put('foo', 'bar')
         assertEquals 1, builder.build().size()
     }
@@ -192,7 +192,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testPutAll() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        def header = builder.putAll(m).build()
+        def header = builder.set(m).build()
         assertEquals m, header
     }
 
@@ -208,7 +208,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testClear() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        def header = builder.putAll(m).clear().build()
+        def header = builder.set(m).cleare().build()
         assertTrue header.isEmpty()
     }
 
@@ -216,10 +216,8 @@ class DefaultJwtHeaderBuilderTest {
     void testToMap() {
         def m = ['foo': 'bar', 'baz': 'bat']
         builder.putAll(m)
-        def built = builder.build()
-        assertEquals m, built.toMap()
-        assertEquals m.size(), built.toMap().size()
-        assertEquals 2, built.toMap().size()
+        assertEquals m, builder
+        assertEquals m, builder.build()
     }
 
     // ====================== Generic Header Methods =======================

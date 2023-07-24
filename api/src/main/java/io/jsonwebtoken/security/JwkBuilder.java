@@ -18,6 +18,7 @@ package io.jsonwebtoken.security;
 import io.jsonwebtoken.lang.MapMutator;
 
 import java.security.Key;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,7 +42,7 @@ import java.util.Set;
  * @since JJWT_RELEASE_VERSION
  */
 public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
-        extends MapMutator<String, Object, T>, SecurityBuilder<J, T> {
+        extends Map<String, Object>, MapMutator<String, Object, T>, SecurityBuilder<J, T> {
 
     /**
      * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)

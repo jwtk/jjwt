@@ -206,7 +206,7 @@ class JwksTest {
             assertNotNull thumbprint
 
             //ensure base64url encoding/decoding of the thumbprint works:
-            def jwkFromValues = Jwks.builder().putAll(jwkFromKey).build() as PublicJwk
+            def jwkFromValues = Jwks.builder().set(jwkFromKey).build() as PublicJwk
             assertArrayEquals thumbprint, jwkFromValues."getX509CertificateSha${number}Thumbprint"() as byte[]
         }
     }
@@ -335,7 +335,7 @@ class JwksTest {
                 Map<String, ?> modified = new LinkedHashMap<>(jwk)
                 modified.put('x', Converters.BIGINT.applyTo(x))
                 try {
-                    Jwks.builder().putAll(modified).build()
+                    Jwks.builder().set(modified).build()
                 } catch (InvalidKeyException ike) {
                     String expected = EcPublicJwkFactory.jwkContainsErrorMessage(jwk.crv as String, modified)
                     assertEquals(expected, ike.getMessage())
@@ -345,7 +345,7 @@ class JwksTest {
                 Map<String, ?> modified = new LinkedHashMap<>(jwk)
                 modified.put('y', Converters.BIGINT.applyTo(y))
                 try {
-                    Jwks.builder().putAll(modified).build()
+                    Jwks.builder().set(modified).build()
                 } catch (InvalidKeyException ike) {
                     String expected = EcPublicJwkFactory.jwkContainsErrorMessage(jwk.crv as String, modified)
                     assertEquals(expected, ike.getMessage())
