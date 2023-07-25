@@ -18,9 +18,9 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MutableJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
 import io.jsonwebtoken.impl.lang.Function;
@@ -81,7 +81,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Function<AeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key, ?> keyAlg;
-    private Function<KeyRequest<Key, MutableJweHeader>, KeyResult> keyAlgFunction;
+    private Function<KeyRequest<Key>, KeyResult> keyAlgFunction;
 
     private Key key;
 
@@ -273,9 +273,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final String algId = Assert.hasText(keyAlg.getId(), "KeyAlgorithm id cannot be null or empty.");
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
         final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
-        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key, MutableJweHeader>, KeyResult>() {
+        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
             @Override
-            public KeyResult apply(KeyRequest<Key, MutableJweHeader> request) {
+            public KeyResult apply(KeyRequest<Key> request) {
                 return alg.getEncryptionKey(request);
             }
         }, SecurityException.class, cekMsg, algId);
@@ -472,11 +472,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         Assert.notEmpty(payload, "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
-        //only expose MutableJweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
+        //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
-        MutableJweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
-        KeyRequest<Key, MutableJweHeader> keyRequest = new DefaultKeyRequest<>(
-                this.key, this.provider, this.secureRandom, delegate, enc);
+        JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
+        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, delegate, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
 

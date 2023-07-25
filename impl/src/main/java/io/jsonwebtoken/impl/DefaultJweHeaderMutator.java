@@ -40,7 +40,7 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
         // Any type of header can be created, but JWE fields reflect all potential standard ones, so we use those fields
         // to catch any value being set, especially through generic 'put' or 'putAll' methods:
         super(new FieldMap(DefaultJweHeader.FIELDS));
-        cleare(); // initialize new X509Builder
+        clear(); // initialize new X509Builder
     }
 
     public DefaultJweHeaderMutator(DefaultJweHeaderMutator<?> src) {

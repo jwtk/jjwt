@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.MutableJweHeader;
+import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -46,9 +46,10 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<SecretKey, MutableJweHeader> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<SecretKey> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
+        final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);
         final byte[] iv = ensureInitializationVector(request);
@@ -72,8 +73,8 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
 
         String encodedIv = Encoders.BASE64URL.encode(iv);
         String encodedTag = Encoders.BASE64URL.encode(tag);
-        request.getHeader().put(DefaultJweHeader.IV.getId(), encodedIv);
-        request.getHeader().put(DefaultJweHeader.TAG.getId(), encodedTag);
+        header.put(DefaultJweHeader.IV.getId(), encodedIv);
+        header.put(DefaultJweHeader.TAG.getId(), encodedTag);
 
         return new DefaultKeyResult(cek, ciphertext);
     }
@@ -83,7 +84,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request.getKey());
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
-        final Object header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
+        final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         FieldReadable frHeader = Assert.isInstanceOf(FieldReadable.class, header, "Header must implement FieldReadable.");
         final FieldReadable reader = new RequiredFieldReader(frHeader);
         final byte[] tag = reader.get(DefaultJweHeader.TAG);

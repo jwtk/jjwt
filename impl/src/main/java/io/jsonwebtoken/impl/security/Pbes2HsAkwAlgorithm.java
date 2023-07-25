@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.MutableJweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -138,7 +137,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         }
     }
 
-    private SecretKey deriveKey(final KeyRequest<?, ?> request, final char[] password, final byte[] salt, final int iterations) {
+    private SecretKey deriveKey(final KeyRequest<?> request, final char[] password, final byte[] salt, final int iterations) {
         try {
             Assert.notEmpty(password, "Key password character array cannot be null or empty.");
             return jca(request).withSecretKeyFactory(new CheckedFunction<SecretKeyFactory, SecretKey>() {
@@ -152,7 +151,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         }
     }
 
-    protected byte[] generateInputSalt(KeyRequest<?, ?> request) {
+    protected byte[] generateInputSalt(KeyRequest<?> request) {
         byte[] inputSalt = new byte[this.HASH_BYTE_LENGTH];
         ensureSecureRandom(request).nextBytes(inputSalt);
         return inputSalt;
@@ -164,14 +163,15 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public KeyResult getEncryptionKey(final KeyRequest<Password, MutableJweHeader> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<Password> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
         final Password key = Assert.notNull(request.getPayload(), "Encryption Password cannot be null.");
-        Integer p2c = request.getHeader().getPbes2Count();
-        if (p2c == null) {
+        final JweHeader header = Assert.notNull(request.getHeader(), "JweHeader cannot be null.");
+        Integer p2c = header.getPbes2Count();
+        if (p2c == null) { // set a default, and ensure it's available in the header for later decryption:
             p2c = DEFAULT_ITERATIONS;
-            request.getHeader().setPbes2Count(p2c);
+            header.put(DefaultJweHeader.P2C.getId(), p2c);
         }
         final int iterations = assertIterations(p2c);
         byte[] inputSalt = generateInputSalt(request);
@@ -180,8 +180,8 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
-        KeyRequest<SecretKey, MutableJweHeader> wrapReq = new DefaultKeyRequest<>(derivedKek, request.getProvider(),
-                        request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
+        KeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derivedKek, request.getProvider(),
+                request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 
         request.getHeader().put(DefaultJweHeader.P2S.getId(), inputSalt); //retain for recipients

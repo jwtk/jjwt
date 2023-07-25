@@ -24,11 +24,12 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyRequest<byte[], JweHeader> implements DecryptionKeyRequest<K> {
+public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyRequest<byte[]> implements DecryptionKeyRequest<K> {
 
     private final K decryptionKey;
 
-    public DefaultDecryptionKeyRequest(byte[] encryptedCek, Provider provider, SecureRandom secureRandom, JweHeader header, AeadAlgorithm encryptionAlgorithm, K decryptionKey) {
+    public DefaultDecryptionKeyRequest(byte[] encryptedCek, Provider provider, SecureRandom secureRandom,
+                                       JweHeader header, AeadAlgorithm encryptionAlgorithm, K decryptionKey) {
         super(encryptedCek, provider, secureRandom, header, encryptionAlgorithm);
         this.decryptionKey = Assert.notNull(decryptionKey, "decryption key cannot be null.");
     }

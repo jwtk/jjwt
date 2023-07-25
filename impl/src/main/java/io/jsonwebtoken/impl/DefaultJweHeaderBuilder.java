@@ -25,11 +25,11 @@ import io.jsonwebtoken.security.X509Builder;
 public class DefaultJweHeaderBuilder<T extends JweHeaderMutator<T> & X509Builder<T>>
         extends DefaultJweHeaderMutator<T> implements X509Builder<T> {
 
-    public DefaultJweHeaderBuilder() {
+    protected DefaultJweHeaderBuilder() {
         super();
     }
 
-    public DefaultJweHeaderBuilder(DefaultJweHeaderMutator<?> src) {
+    protected DefaultJweHeaderBuilder(DefaultJweHeaderMutator<?> src) {
         super(src);
     }
 

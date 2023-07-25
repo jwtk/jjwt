@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.lang;
 
-import io.jsonwebtoken.HeaderAccessor;
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.security.JwkContext;
@@ -27,8 +27,8 @@ public class RequiredFieldReader implements FieldReadable {
 
     private final FieldReadable src;
 
-    public RequiredFieldReader(HeaderAccessor header) {
-        this(Assert.isInstanceOf(FieldReadable.class, header, "HeaderAccessor implementations must implement FieldReadable."));
+    public RequiredFieldReader(Header header) {
+        this(Assert.isInstanceOf(FieldReadable.class, header, "Header implementations must implement FieldReadable."));
     }
 
     public RequiredFieldReader(FieldReadable src) {

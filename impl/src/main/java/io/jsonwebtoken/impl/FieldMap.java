@@ -44,24 +44,11 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
 
     private final boolean mutable;
 
-    private FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values, boolean mutable) {
-        Assert.notNull(fields, "Field registry cannot be null.");
-        Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
-        this.FIELDS = fields;
-        this.values = new LinkedHashMap<>();
-        this.idiomaticValues = new LinkedHashMap<>();
-        if (!Collections.isEmpty(values)) {
-            putAll(values);
-        }
-        this.mutable = mutable;
-        this.initialized = true;
-    }
-
     public FieldMap(Set<Field<?>> fields) {
         this(Fields.registry(fields));
     }
 
-    public FieldMap(Registry<String, ? extends Field<?>> fields) {
+    public FieldMap(Registry<String, ? extends Field<?>> fields) { // mutable constructor
         this(fields, null, true);
     }
 
@@ -73,6 +60,19 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
      */
     public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
         this(fields, Assert.notNull(values, "Map argument cannot be null."), false);
+    }
+
+    protected FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values, boolean mutable) {
+        Assert.notNull(fields, "Field registry cannot be null.");
+        Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
+        this.FIELDS = fields;
+        this.values = new LinkedHashMap<>();
+        this.idiomaticValues = new LinkedHashMap<>();
+        if (!Collections.isEmpty(values)) {
+            putAll(values);
+        }
+        this.mutable = mutable;
+        this.initialized = true;
     }
 
     private void assertMutable() {

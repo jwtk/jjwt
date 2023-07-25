@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.MutableJweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -102,7 +101,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         return curve.keyPairBuilder().setProvider(provider).setRandom(random).build();
     }
 
-    protected byte[] generateZ(final KeyRequest<?, ?> request, final PublicKey pub, final PrivateKey priv) {
+    protected byte[] generateZ(final KeyRequest<?> request, final PublicKey pub, final PrivateKey priv) {
         return jca(request).withKeyAgreement(new CheckedFunction<KeyAgreement, byte[]>() {
             @Override
             public byte[] apply(KeyAgreement keyAgreement) throws Exception {
@@ -141,7 +140,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         return Assert.gt(bitLength, 0, "Algorithm keyBitLength must be > 0");
     }
 
-    private SecretKey deriveKey(KeyRequest<?, ?> request, PublicKey publicKey, PrivateKey privateKey) {
+    private SecretKey deriveKey(KeyRequest<?> request, PublicKey publicKey, PrivateKey privateKey) {
         AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         int requiredCekBitLen = getKeyBitLength(enc);
         final String AlgorithmID = getConcatKDFAlgorithmId(enc);
@@ -177,9 +176,9 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<PublicKey, MutableJweHeader> request) throws SecurityException {
+    public KeyResult getEncryptionKey(KeyRequest<PublicKey> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
-        MutableJweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
+        JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         PublicKey publicKey = Assert.notNull(request.getPayload(), "Encryption PublicKey cannot be null.");
 
         KeyPair pair; // generated (ephemeral) key pair
@@ -215,7 +214,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         final SecretKey derived = deriveKey(request, publicKey, pair.getPrivate());
 
-        KeyRequest<SecretKey, MutableJweHeader> wrapReq = new DefaultKeyRequest<>(derived, request.getProvider(),
+        KeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derived, request.getProvider(),
                 request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = WRAP_ALG.getEncryptionKey(wrapReq);
 

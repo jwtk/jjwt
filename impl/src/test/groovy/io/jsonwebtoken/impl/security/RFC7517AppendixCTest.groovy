@@ -295,7 +295,7 @@ class RFC7517AppendixCTest {
         }
         def alg = new Pbes2HsAkwAlgorithm(128) {
             @Override
-            protected byte[] generateInputSalt(KeyRequest<?, ?> request) {
+            protected byte[] generateInputSalt(KeyRequest<?> request) {
                 return RFC_P2S
             }
         }

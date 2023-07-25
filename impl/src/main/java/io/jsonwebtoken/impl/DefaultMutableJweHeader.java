@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.MutableJweHeader;
+import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.security.PublicJwk;
 
@@ -9,15 +9,11 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
 
-public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<MutableJweHeader> implements MutableJweHeader {
+public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<DefaultMutableJweHeader> implements JweHeader {
 
     public DefaultMutableJweHeader(DefaultJweHeaderMutator<?> src) {
         super(src);
     }
-
-    // =============================================================
-    // MapAccessor methods
-    // =============================================================
 
     private <T> T get(Field<T> field) {
         return this.DELEGATE.get(field);

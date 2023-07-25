@@ -23,9 +23,12 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * Accessor methods of X.509-specific properties of an associated JWT Header or JWK, guaranteeing consistent behavior
+ * Accessor methods of X.509-specific properties of a
+ * {@link io.jsonwebtoken.ProtectedHeader ProtectedHeader} or {@link AsymmetricJwk}, guaranteeing consistent behavior
  * across similar but distinct JWT concepts with identical parameter names.
  *
+ * @see io.jsonwebtoken.ProtectedHeader
+ * @see AsymmetricJwk
  * @since JJWT_RELEASE_VERSION
  */
 public interface X509Accessor {
@@ -39,8 +42,8 @@ public interface X509Accessor {
      * with each certificate delimited as specified in
      * <a href="https://datatracker.ietf.org/doc/html/rfc4945#section-6.1">Section 6.1 of RFC 4945</a>.
      * The key in the first certificate <em>MUST</em> match the public key represented by other members of the
-     * associated JWT or JWK.  The protocol used to acquire the resource <em>MUST</em> provide integrity protection;
-     * an HTTP GET request to retrieve the certificate <em>MUST</em> use
+     * associated ProtectedHeader or JWK.  The protocol used to acquire the resource <em>MUST</em> provide integrity
+     * protection; an HTTP GET request to retrieve the certificate <em>MUST</em> use
      * <a href="https://datatracker.ietf.org/doc/html/rfc2818">HTTP over TLS</a>; the identity of the server
      * <em>MUST</em> be validated, as per
      * <a href="https://datatracker.ietf.org/doc/html/rfc6125#section-6">Section 6 of RFC 6125</a>.</p>

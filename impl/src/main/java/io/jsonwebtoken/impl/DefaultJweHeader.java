@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.PositiveIntegerConverter;
 import io.jsonwebtoken.impl.lang.RequiredBitLengthConverter;
 import io.jsonwebtoken.impl.security.JwkConverter;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
@@ -64,7 +65,7 @@ public class DefaultJweHeader extends DefaultProtectedHeader implements JweHeade
 
     static boolean isCandidate(FieldMap fields) {
         return Strings.hasText(fields.get(ENCRYPTION_ALGORITHM)) || // MUST have at least an `enc` header
-                fields.get(EPK) != null ||
+                !Collections.isEmpty(fields.get(EPK)) ||
                 !Bytes.isEmpty(fields.get(APU)) ||
                 !Bytes.isEmpty(fields.get(APV)) ||
                 !Bytes.isEmpty(fields.get(IV)) ||

@@ -16,7 +16,6 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JweHeaderAccessor;
 
 /**
  * A request to a {@link KeyAlgorithm} to obtain the key necessary for AEAD encryption or decryption.  The exact
@@ -43,7 +42,7 @@ import io.jsonwebtoken.JweHeaderAccessor;
  * @see DecryptionKeyRequest
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyRequest<T, H extends JweHeaderAccessor> extends Request<T> {
+public interface KeyRequest<T> extends Request<T> {
 
     /**
      * Returns the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
@@ -75,5 +74,5 @@ public interface KeyRequest<T, H extends JweHeaderAccessor> extends Request<T> {
      * @return the {@link JweHeader} that will be used to construct the final JWE header, available for
      * reading or writing any {@link KeyAlgorithm}-specific information.
      */
-    H getHeader();
+    JweHeader getHeader();
 }
