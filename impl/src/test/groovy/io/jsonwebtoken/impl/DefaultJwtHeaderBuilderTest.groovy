@@ -208,7 +208,16 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testClear() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        def header = builder.set(m).cleare().build()
+        builder.set(m)
+        builder.clear()
+        def header = builder.build()
+        assertTrue header.isEmpty()
+    }
+
+    @Test
+    void testEmpty() {
+        def m = ['foo': 'bar', 'baz': 'bat']
+        def header = builder.set(m).empty().build()
         assertTrue header.isEmpty()
     }
 

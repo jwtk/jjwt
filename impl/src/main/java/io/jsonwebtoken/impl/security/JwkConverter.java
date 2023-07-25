@@ -121,7 +121,7 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
                 throw new IllegalArgumentException(msg);
             }
             String skey = (String) key;
-            builder.put(skey, entry.getValue());
+            builder.set(skey, entry.getValue());
         }
 
         Jwk<?> jwk = builder.build();

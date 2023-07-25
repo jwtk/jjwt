@@ -62,13 +62,21 @@ class AbstractJwkBuilderTest {
 
     @Test
     void testRemove() {
-        def jwk = builder().set('foo', 'bar').removee('foo').build() as Jwk
+        def jwk = builder().set('foo', 'bar').delete('foo').build() as Jwk
         assertNull jwk.get('foo')
     }
 
     @Test
     void testClear() {
-        def jwk = builder().set('foo', 'bar').cleare().build() as Jwk
+        def builder = builder().set('foo', 'bar')
+        builder.clear()
+        def jwk = builder.build()
+        assertNull jwk.get('foo')
+    }
+
+    @Test
+    void testEmpty() {
+        def jwk = builder().set('foo', 'bar').empty().build() as Jwk
         assertNull jwk.get('foo')
     }
 

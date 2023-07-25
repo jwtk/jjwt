@@ -320,14 +320,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder setClaims(Map<String, ?> claims) {
         Assert.notNull(claims, "Claims map cannot be null.");
-        this.claimsBuilder.clear();
-        this.claimsBuilder.putAll(claims);
+        this.claimsBuilder.empty();
+        this.claimsBuilder.set(claims);
         return this;
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        this.claimsBuilder.putAll(claims);
+        this.claimsBuilder.set(claims);
         return this;
     }
 
@@ -375,7 +375,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder claim(String name, Object value) {
-        this.claimsBuilder.put(name, value);
+        this.claimsBuilder.set(name, value);
         return this;
     }
 

@@ -18,8 +18,6 @@ package io.jsonwebtoken;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.MapMutator;
 
-import java.util.Map;
-
 /**
  * {@link Builder} used to create an immutable {@link Claims} instance.
  *
@@ -27,6 +25,5 @@ import java.util.Map;
  * @see Claims
  * @since JJWT_RELEASE_VERSION
  */
-public interface ClaimsBuilder extends Map<String, Object>, MapMutator<String, Object, ClaimsBuilder>,
-        ClaimsMutator<ClaimsBuilder>, Builder<Claims> {
+public interface ClaimsBuilder extends MapMutator<String, Object, ClaimsBuilder>, ClaimsMutator<ClaimsBuilder>, Builder<Claims> {
 }

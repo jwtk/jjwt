@@ -35,7 +35,7 @@ public class DelegatingMapMutator<K, V, D extends Map<K, V>, T extends MapMutato
     }
 
     @Override
-    public T cleare() {
+    public T empty() {
         clear();
         return self();
     }
@@ -53,7 +53,7 @@ public class DelegatingMapMutator<K, V, D extends Map<K, V>, T extends MapMutato
     }
 
     @Override
-    public T removee(K key) {
+    public T delete(K key) {
         remove(key);
         return self();
     }

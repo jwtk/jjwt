@@ -299,7 +299,7 @@ public class DefaultJwtParser implements JwtParser {
     public JwtParser require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.put(claimName, value);
+        expectedClaims.set(claimName, value);
         return this;
     }
 
@@ -759,9 +759,11 @@ public class DefaultJwtParser implements JwtParser {
 
     private void validateExpectedClaims(Header header, Claims claims) {
 
-        for (String expectedClaimName : expectedClaims.keySet()) {
+        final Claims expected = expectedClaims.build();
 
-            Object expectedClaimValue = normalize(expectedClaims.get(expectedClaimName));
+        for (String expectedClaimName : expected.keySet()) {
+
+            Object expectedClaimValue = normalize(expected.get(expectedClaimName));
             Object actualClaimValue = normalize(claims.get(expectedClaimName));
 
             if (expectedClaimValue instanceof Date) {

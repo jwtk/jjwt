@@ -32,13 +32,11 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
     /**
      * Removes all entries from the map. The map will be empty after this call returns.
      * <p>This method is the same as {@link Map#clear Map.clear}, but instead returns the mutator instance for
-     * method chaining. &quot;cleare&quot; can be thought of as &quot;clear e&quot; where the trailing &quot;e&quot;
-     * means <b>e</b>ntries.</p>
+     * method chaining.</p>
      *
      * @return the mutator/builder for method chaining.
      */
-    @SuppressWarnings("SpellCheckingInspection")
-    T cleare();
+    T empty();
 
     /**
      * Sets the specified name/value pair in the map.  A {@code null} or empty value will remove the property
@@ -69,5 +67,5 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
      * @param key the key for the map entry to remove.
      * @return the mutator/builder for method chaining.
      */
-    T removee(K key);
+    T delete(K key);
 }
