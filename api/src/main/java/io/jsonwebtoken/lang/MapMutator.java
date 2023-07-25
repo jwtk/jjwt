@@ -62,7 +62,9 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
     T set(Map<? extends K, ? extends V> m);
 
     /**
-     * Removes the map entry with the specified key
+     * Removes the map entry with the specified key.
+     * <p>This method is the same as {@link Map#remove Map.remove}, but instead returns the mutator instance for
+     * method chaining.</p>
      *
      * @param key the key for the map entry to remove.
      * @return the mutator/builder for method chaining.
