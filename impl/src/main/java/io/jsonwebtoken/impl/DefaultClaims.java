@@ -47,7 +47,7 @@ public class DefaultClaims extends FieldMap implements Claims {
     static final Registry<String, Field<?>> FIELDS =
             Fields.registry(ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI);
 
-    public DefaultClaims() {
+    protected DefaultClaims() { // visibility for testing
         super(FIELDS);
     }
 
