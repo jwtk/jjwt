@@ -6,6 +6,12 @@ This is a big release! JJWT now fully supports Encrypted JSON Web Tokens (JWE) a
 sections below enumerating all new features as well as important notes on breaking changes or backwards-incompatible 
 changes made in preparation for the upcoming 1.0 release.
 
+**Because breaking changes are being introduced, it is strongly recommended to wait until the upcoming 1.0 release
+where you can address breaking changes one time only**.
+
+Those that need immediate JWE encryption and JWK key support
+however will likely want to upgrade now and deal with the smaller subset of breaking changes in the 1.0 release.
+
 #### Simplified Starter Jar
 
 Those upgrading to new modular JJWT versions from old single-jar versions will transparently obtain everything 
@@ -76,11 +82,11 @@ custom code previously written to extend JJWT to use keys from those KeyStores o
 
 The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of new 
 `io.jsonwebtoken.security.SecureDigestAlgorithm`, `io.jsonwebtoken.security.MacAlgorithm`, and 
-`io.jsonwebtoken.security.SignatureAlgorithm` interfaces to allow custom algorithm implementations.  The new
-`SIG` constant in the `Jwts` helper class is a registry of all standard JWS algorithms as expected, exactly like the 
+`io.jsonwebtoken.security.SignatureAlgorithm` interfaces to allow custom algorithm implementations.  The new nested
+`Jwts.SIG` static inner class is a registry of all standard JWS algorithms as expected, exactly like the 
 old enum.  This change was made because enums are a static concept by design and cannot 
 support custom values: those who wanted to use custom signature algorithms could not do so until now.  The new 
-interface now allows anyone to plug in and support custom algorithms with JJWT as desired.
+interfaces now allow anyone to plug in and support custom algorithms with JJWT as desired.
 
 #### KeyBuilder and KeyPairBuilder
 
@@ -101,9 +107,9 @@ the old enum-based static utility methods did not.
 
 Now that the JWE and JWK specifications are implemented, only a few things remain for JJWT to be considered at 
 version 1.0.  We have been waiting to apply the 1.0 release version number until the entire set of JWT specifications 
-are fully supported and we drop JDK 7 support (to allow users to use JDK 8 APIs).  To that end, we have had to 
+are fully supported **and** we drop JDK 7 support (to allow users to use JDK 8 APIs).  To that end, we have had to 
 deprecate some concepts, or in some cases, completely break backwards compatibility to ensure the transition to 
-1.0 (and JDK 8 APIs) are possible.  Any backwards-incompatible changes are listed in the next section below.
+1.0 (and JDK 8 APIs) are possible.  Most backwards-incompatible changes are listed in the next section below.
 
 #### Backwards Compatibility Breaking Changes, Warnings and Deprecations
 
@@ -111,13 +117,13 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
   reflect correct JWT specification nomenclature/taxonomy.
 
 
+* `io.jsonwebtoken.Jws`'s `getSignature()` method has been deprecated in favor of a new `getDigest()` method to
+  support expected congruent behavior with `Jwe` instances (both have digests).
+
+
 * `io.jsonwebtoken.CompressionCodec` now inherits a new `io.jsonwebtoken.Identifiable` interface and its `getId()`
   method is preferred over the now-deprecated `getAlgorithmName()` method.  This is to guarantee API congruence with
   all other JWT-identifiable algorithm names that can be set as a header value.
-
-
-* Accordingly, the `Jwts.header()` and `Jwts.header(Map<String,?>)` now return instances of `UnprotectedHeader` instead
-  of just `Header`.
 
 
 #### Breaking Changes
@@ -160,36 +166,21 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
     `resolveSigningKey(JwsHeader, byte[])`.
 
 
-* `io.jsonwebtoken.Claims` and `io.jsonwebtoken.Header` instances are now immutable to enhance security and thread
+* **`io.jsonwebtoken.Claims` and `io.jsonwebtoken.Header` instances are now immutable** to enhance security and thread
   safety.  Creation and mutation are supported with newly introduced `ClaimsBuilder` and `HeaderBuilder` concepts.
 
 
-* Consequently, `io.jsonwebtoken.Jwts`'s `claims()` method has been changed to return a `ClaimsBuilder` instead of
-  a `Claims` instance.
+* Consequently, `io.jsonwebtoken.Jwts`'s `claims()` static method has been changed to return a `ClaimsBuilder` instead 
+  of a `Claims` instance.
 
 
-* `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been renamed to `legacyParser()` to
-  allow an updated `parser()` method to return a `JwtParserBuilder` instead of a direct `JwtParser` instance.  
-  This `legacyParser()` method will be removed entirely for the 1.0 release - please change your code to use the 
-  updated `parser()` method that returns a builder as soon as possible.
-
-
-* `io.jsonwebtoken.Jwts`'s `header()` method has been renamed to `unprotectedHeader()` to allow a newer/updated 
-  `header()` method to return a `DynamicHeaderBuilder` instead of a direct `Header` instance.  This new method / 
-  return value is the recommended approach for building headers, as it will dynamically create an `UnprotectedHeader`, 
-  `JwsHeader` or `JweHeader` automatically based on builder state.
-
-
-* `io.jsonwebtoken.Jwts`'s `headerBuilder()` method has been renamed to `header()` and returns a 
-  `DynamicHeaderBuilder` instead of a direct `Header` instance.  This builder method is the recommended approach 
-  for building headers in the future, as it will dynamically create an `UnprotectedHeader`, `JwsHeader` or `JweHeader` 
+* Similarly, `io.jsonwebtoken.Jwts`'s `header()` static method has been changed to return a `HeaderBuilder` instead of 
+  a `Header` instance.  The `HeaderBuilder` will dynamically create a `Header`, `JwsHeader` or `JweHeader` 
   automatically based on builder state.
 
 
-* `io.jsonwebtoken.Jwts`'s `header()` method now returns a `DynamicHeaderBuilder` instead of a 
-  direct `Header` instance.  This new method / return value is the recommended approach for building headers
-  in the future, as it will dynamically create an `UnprotectedHeader`, `JwsHeader` or `JweHeader` automatically
-  based on builder state.
+* `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been changed to now return a 
+  `JwtParserBuilder` instead of a direct `JwtParser` instance.
 
 
 * Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
