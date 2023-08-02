@@ -7,7 +7,8 @@ import io.jsonwebtoken.security.DigestSupplier;
  * a cryptographic digest, such as a MAC, Digital Signature or Authentication Tag.
  *
  * <p><b>Cryptographic Digest</b></p>
- * <p>This interface extends DigestSupplier to make available the associated cryptographic digest:
+ * <p>This interface extends DigestSupplier to make available the {@code ProtectedJwt}'s associated cryptographic
+ * digest:
  * <ul>
  *     <li>If the JWT is a {@link Jws}, {@link #getDigest() getDigest() } returns the JWS signature.</li>
  *     <li>If the JWT is a {@link Jwe}, {@link #getDigest() getDigest() } returns the AAD Authentication Tag.</li>
