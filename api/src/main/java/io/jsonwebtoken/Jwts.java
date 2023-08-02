@@ -953,19 +953,18 @@ public final class Jwts {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    public interface HeaderBuilder extends JweHeaderMutator<HeaderBuilder>, X509Builder<HeaderBuilder>,
-            Builder<Header> {
+    public interface HeaderBuilder extends JweHeaderMutator<HeaderBuilder>, X509Builder<HeaderBuilder>, Builder<Header> {
     }
 
     /**
-     * Returns a new {@link JwtHeaderBuilder} that can build any type of {@link Header} instance depending on
+     * Returns a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
      * which builder properties are set.
      *
-     * @return a new {@link JwtHeaderBuilder} that can build any type of {@link Header} instance depending on
+     * @return a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
      * which builder properties are set.
      * @since JJWT_RELEASE_VERSION
      */
-    public static JwtHeaderBuilder header() {
+    public static HeaderBuilder header() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder");
     }
 

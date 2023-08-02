@@ -16,12 +16,12 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.JwtHeaderBuilder;
+import io.jsonwebtoken.Jwts;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJwtHeaderBuilder extends DefaultJweHeaderBuilder<JwtHeaderBuilder> implements JwtHeaderBuilder {
+public class DefaultJwtHeaderBuilder extends DefaultJweHeaderBuilder<Jwts.HeaderBuilder> implements Jwts.HeaderBuilder {
 
     @SuppressWarnings("unused") // accessed via reflection from the Jwts.header() method implementation
     public DefaultJwtHeaderBuilder() {

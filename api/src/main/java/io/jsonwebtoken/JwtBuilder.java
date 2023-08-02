@@ -737,7 +737,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @see Jwts.SIG
      * @since JJWT_RELEASE_VERSION
      */
-    <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
+    <K extends Key> JwtBuilder signWith(K key, SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
 
     /**
      * Encrypts the constructed JWT with the specified symmetric {@code key} using the provided {@code enc}ryption
