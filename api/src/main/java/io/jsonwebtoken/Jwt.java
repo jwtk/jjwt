@@ -19,7 +19,7 @@ package io.jsonwebtoken;
  * An expanded (not compact/serialized) JSON Web Token.
  *
  * @param <H> the type of the JWT header
- * @param <P> the type of the JWT payload, either a byte array or a {@link Claims} instance.
+ * @param <P> the type of the JWT payload, either a content byte array or a {@link Claims} instance.
  * @since 0.1
  */
 public interface Jwt<H extends Header, P> {

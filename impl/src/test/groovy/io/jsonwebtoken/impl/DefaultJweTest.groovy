@@ -32,8 +32,8 @@ class DefaultJweTest {
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def jwe = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(compact)
         String encodedIv = Encoders.BASE64URL.encode(jwe.initializationVector)
-        String encodedTag = Encoders.BASE64URL.encode(jwe.aadTag)
-        String expected = "header={alg=dir, enc=A128CBC-HS256},payload={foo=bar},iv=$encodedIv,tag=$encodedTag"
+        String encodedTag = Encoders.BASE64URL.encode(jwe.digest)
+        String expected = "header={alg=dir, enc=A128CBC-HS256},payload={foo=bar},tag=$encodedTag,iv=$encodedIv"
         assertEquals expected, jwe.toString()
     }
 
