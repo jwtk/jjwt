@@ -27,8 +27,6 @@ import io.jsonwebtoken.lang.Registry;
  */
 public class DelegatingRegistry<K, V> extends DelegatingMap<K, V, Registry<K, V>> implements Registry<K, V> {
 
-    private final Registry<K, V> DELEGATE;
-
     protected DelegatingRegistry(Registry<K, V> registry) {
         super(registry);
         this.DELEGATE = Assert.notEmpty(registry, "Delegate registry cannot be null or empty.");
