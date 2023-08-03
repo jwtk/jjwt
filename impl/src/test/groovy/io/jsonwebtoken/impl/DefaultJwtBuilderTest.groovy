@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
-import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.lang.Services
@@ -293,7 +292,7 @@ class DefaultJwtBuilderTest {
         }
         def b = new DefaultJwtBuilder()
                 .setSubject("Joe") // ensures claims instance
-                .compressWith(CompressionCodecs.DEFLATE)
+                .compressWith(Jwts.ZIP.DEF)
                 .serializeToJsonWith(serializer)
         try {
             b.compact()

@@ -337,7 +337,7 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.DEFLATE).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
 
@@ -359,7 +359,7 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.GZIP).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.GZIP).compact()
 
         def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
 
@@ -394,7 +394,7 @@ class DeprecatedJwtsTest {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return CompressionCodecs.GZIP
+                    return Jwts.ZIP.GZIP
                 } else {
                     return null
                 }
@@ -439,7 +439,7 @@ class DeprecatedJwtsTest {
         String payload = "this is my test for a payload"
 
         String compact = Jwts.builder().setPayload(payload).signWith(alg, key)
-                .compressWith(CompressionCodecs.DEFLATE).compact()
+                .compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parser().setSigningKey(key).parseContentJws(compact)
 

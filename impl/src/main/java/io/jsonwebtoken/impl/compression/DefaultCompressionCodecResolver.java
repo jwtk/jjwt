@@ -17,9 +17,9 @@ package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
-import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.Services;
@@ -73,8 +73,8 @@ public class DefaultCompressionCodecResolver implements CompressionCodecResolver
         Assert.notNull(extraCodecs, "extraCodecs cannot be null.");
         Set<CompressionCodec> codecs = new LinkedHashSet<>(Services.loadAll(CompressionCodec.class));
         codecs.addAll(extraCodecs);
-        codecs.add(CompressionCodecs.DEFLATE); // standard ones are added last so they can't be accidentally replaced
-        codecs.add(CompressionCodecs.GZIP);
+        codecs.add(Jwts.ZIP.DEF); // standard ones are added last so they can't be accidentally replaced
+        codecs.add(Jwts.ZIP.GZIP);
         this.codecs = new IdRegistry<>("CompressionCodec", codecs, false);
     }
 

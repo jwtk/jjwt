@@ -24,8 +24,8 @@ package io.jsonwebtoken;
  * {@link Identifiable#getId() getId()} will be used as the JWT
  * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.</p>
  *
- * @see CompressionCodecs#DEFLATE
- * @see CompressionCodecs#GZIP
+ * @see Jwts.ZIP#DEF
+ * @see Jwts.ZIP#GZIP
  * @since 0.6.0
  */
 public interface CompressionCodec extends Identifiable {

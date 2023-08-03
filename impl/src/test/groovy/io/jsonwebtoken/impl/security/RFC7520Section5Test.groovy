@@ -430,7 +430,7 @@ class RFC7520Section5Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_73) as RsaPrivateJwk
         RSAPublicKey key = jwk.toPublicJwk().toKey()
 
-        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithmsBridge.RSA1_5_ID, StandardKeyAlgorithmsBridge.RSA1_5_TRANSFORMATION) {
+        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA1_5_ID, StandardKeyAlgorithms.RSA1_5_TRANSFORMATION) {
             @Override
             SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_74) // ensure RFC required value
@@ -494,7 +494,7 @@ class RFC7520Section5Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_84) as RsaPrivateJwk
         RSAPublicKey key = jwk.toPublicJwk().toKey()
 
-        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithmsBridge.RSA_OAEP_ID, StandardKeyAlgorithmsBridge.RSA_OAEP_TRANSFORMATION) {
+        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA_OAEP_ID, StandardKeyAlgorithms.RSA_OAEP_TRANSFORMATION) {
             @Override
             SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_85) // ensure RFC required value

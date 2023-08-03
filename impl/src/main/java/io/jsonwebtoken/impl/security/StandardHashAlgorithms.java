@@ -33,7 +33,7 @@ import java.util.Locale;
  * @since JJWT_RELEASE_VERSION
  */
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Jwks.HASH
-public class StandardHashAlgorithmsBridge extends DelegatingRegistry<String, HashAlgorithm> {
+public class StandardHashAlgorithms extends DelegatingRegistry<String, HashAlgorithm> {
 
     private static class MessageDigestSupplier implements CheckedSupplier<MessageDigest> {
         private final String jcaName;
@@ -54,7 +54,7 @@ public class StandardHashAlgorithmsBridge extends DelegatingRegistry<String, Has
         return new DefaultHashAlgorithm(id, jcaName, provider);
     }
 
-    public StandardHashAlgorithmsBridge() {
+    public StandardHashAlgorithms() {
         super(new IdRegistry<>("IANA Hash Algorithm", Collections.of(
                 // We don't include DefaultHashAlgorithm.SHA1 here on purpose because 1) it's not in the JWK IANA
                 // registry so we don't need to expose it anyway, and 2) we don't want to expose a less-safe algorithm.

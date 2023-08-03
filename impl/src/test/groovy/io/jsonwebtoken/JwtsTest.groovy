@@ -456,7 +456,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.DEFLATE).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
 
@@ -478,7 +478,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.GZIP).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.GZIP).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
 
@@ -513,7 +513,7 @@ class JwtsTest {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return CompressionCodecs.GZIP
+                    return Jwts.ZIP.GZIP
                 } else {
                     return null
                 }
@@ -558,7 +558,7 @@ class JwtsTest {
         String payload = "this is my test for a payload"
 
         String compact = Jwts.builder().setPayload(payload).signWith(key, alg)
-                .compressWith(CompressionCodecs.DEFLATE).compact()
+                .compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseContentJws(compact)
 
@@ -1323,7 +1323,7 @@ class JwtsTest {
     @Test
     void testJweCompression() {
 
-        def codecs = [CompressionCodecs.DEFLATE, CompressionCodecs.GZIP]
+        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
 
         for (CompressionCodec codec : codecs) {
 
@@ -1529,15 +1529,15 @@ class JwtsTest {
     void testEdwardsCurveDecryptionWithSigningKeys() {
 
         def pairs = [ // private keys are invalid signing keys to test decryption:
-                new KeyPair(TestKeys.X25519.pair.public, TestKeys.Ed25519.pair.private),
-                new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
+                      new KeyPair(TestKeys.X25519.pair.public, TestKeys.Ed25519.pair.private),
+                      new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
         ]
 
         def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
-        for(KeyPair pair : pairs) {
+        for (KeyPair pair : pairs) {
             for (KeyAlgorithm alg : algs) {
                 for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
                     String jwe = encrypt(pair.getPublic(), alg, enc)

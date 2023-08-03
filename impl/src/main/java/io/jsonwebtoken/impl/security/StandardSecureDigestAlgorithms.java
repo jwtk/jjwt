@@ -21,12 +21,12 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.SIG
-public final class StandardSecureDigestAlgorithmsBridge extends DelegatingRegistry<String, SecureDigestAlgorithm<?, ?>> {
+public final class StandardSecureDigestAlgorithms extends DelegatingRegistry<String, SecureDigestAlgorithm<?, ?>> {
 
     private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);
     private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
 
-    public StandardSecureDigestAlgorithmsBridge() {
+    public StandardSecureDigestAlgorithms() {
         super(new IdRegistry<>("JWS Digital Signature or MAC", Collections.of(
                 new NoneSignatureAlgorithm(),
                 new DefaultMacAlgorithm(256),

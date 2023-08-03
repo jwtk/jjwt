@@ -21,9 +21,9 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.ENC
-public final class StandardEncryptionAlgorithmsBridge extends DelegatingRegistry<String, AeadAlgorithm> {
+public final class StandardEncryptionAlgorithms extends DelegatingRegistry<String, AeadAlgorithm> {
 
-    public StandardEncryptionAlgorithmsBridge() {
+    public StandardEncryptionAlgorithms() {
         super(new IdRegistry<>("JWE Encryption Algorithm", Collections.of(
                 (AeadAlgorithm) new HmacAesAeadAlgorithm(128),
                 new HmacAesAeadAlgorithm(192),

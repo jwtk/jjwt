@@ -30,7 +30,7 @@ import java.security.spec.MGF1ParameterSpec;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardKeyAlgorithmsBridge extends DelegatingRegistry<String, KeyAlgorithm<?, ?>> {
+public final class StandardKeyAlgorithms extends DelegatingRegistry<String, KeyAlgorithm<?, ?>> {
 
     private static final String RSA1_5_ID = "RSA1_5";
     private static final String RSA1_5_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
@@ -41,7 +41,7 @@ public final class StandardKeyAlgorithmsBridge extends DelegatingRegistry<String
     private static final AlgorithmParameterSpec RSA_OAEP_256_SPEC =
             new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
 
-    public StandardKeyAlgorithmsBridge() {
+    public StandardKeyAlgorithms() {
         super(new IdRegistry<>("JWE Key Management Algorithm", Collections.<KeyAlgorithm<?, ?>>of(
                 new DirectKeyAlgorithm(),
                 new AesWrapKeyAlgorithm(128),

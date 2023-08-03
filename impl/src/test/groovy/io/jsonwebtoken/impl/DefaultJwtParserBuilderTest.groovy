@@ -181,7 +181,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDecompressUnprotectedJwtDefault() {
-        def codec = CompressionCodecs.GZIP
+        def codec = Jwts.ZIP.GZIP
         String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
         try {
             builder.enableUnsecuredJws().build().parse(jwt)
@@ -194,7 +194,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDecompressUnprotectedJwtEnabled() {
-        def codec = CompressionCodecs.GZIP
+        def codec = Jwts.ZIP.GZIP
         String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
         def jwt = builder.enableUnsecuredJws().enableUnsecuredDecompression().build().parse(jws)
         assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()

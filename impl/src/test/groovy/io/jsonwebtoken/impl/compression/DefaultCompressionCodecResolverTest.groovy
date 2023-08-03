@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.compression
 
 import io.jsonwebtoken.CompressionCodec
-import io.jsonwebtoken.CompressionCodecs
 import io.jsonwebtoken.CompressionException
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.io.FakeServiceDescriptorClassLoader
@@ -41,8 +41,8 @@ class DefaultCompressionCodecResolverTest {
     @Test
     void resolveHeaderTest() {
         assertThat resolver.resolveCompressionCodec(new DefaultHeader([:])), nullValue()
-        assertThat resolver.resolveCompressionCodec(new DefaultHeader([zip: 'def'])), is(CompressionCodecs.DEFLATE)
-        assertThat resolver.resolveCompressionCodec(new DefaultHeader([zip: 'gzip'])), is(CompressionCodecs.GZIP)
+        assertThat resolver.resolveCompressionCodec(new DefaultHeader([zip: 'def'])), is(Jwts.ZIP.DEF)
+        assertThat resolver.resolveCompressionCodec(new DefaultHeader([zip: 'gzip'])), is(Jwts.ZIP.GZIP)
     }
 
     @Test

@@ -434,7 +434,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * collection is added in iteration order; if a duplicate id is found when iterating the {@code codecs}
      * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, {@link CompressionCodecs#DEFLATE} and {@link CompressionCodecs#GZIP} are added last,
+     * <p>Finally, {@link Jwts.ZIP#DEF} and {@link Jwts.ZIP#GZIP} are added last,
      * <em>after</em> those in the {@code codecs} collection, to ensure that JWA standard algorithms cannot be
      * accidentally replaced.</p>
      *
@@ -518,8 +518,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p><b>Default Support</b></p>
      *
      * <p>JJWT's default {@link JwtParser} implementation supports both the
-     * {@link CompressionCodecs#DEFLATE DEFLATE}
-     * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
+     * {@link Jwts.ZIP#DEF DEFLATE}
+     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
      *
      * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must
@@ -556,8 +556,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p><b>Default Support</b></p>
      *
      * <p>JJWT's default {@link JwtParser} implementation supports both the
-     * {@link CompressionCodecs#DEFLATE DEFLATE}
-     * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
+     * {@link Jwts.ZIP#DEF DEFLATE}
+     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodec} {@link Locator} in these cases.</p>
      *
      * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, and

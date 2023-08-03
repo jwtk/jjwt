@@ -33,6 +33,7 @@ class PrivateConstructorsTest {
         new Jwts.SIG()
         new Jwts.ENC()
         new Jwts.KEY()
+        new Jwts.ZIP()
         new Jwks.HASH()
     }
 }

@@ -345,8 +345,8 @@ public interface JwtParser {
      * <p><b>Default Support</b></p>
      *
      * <p>JJWT's default {@link JwtParser} implementation supports both the
-     * {@link CompressionCodecs#DEFLATE DEFLATE}
-     * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
+     * {@link Jwts.ZIP#DEF DEFLATE}
+     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
      * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement
      * your own {@link CompressionCodecResolver} and specify that via this method and also when

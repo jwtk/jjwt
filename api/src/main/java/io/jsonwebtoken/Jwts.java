@@ -76,7 +76,7 @@ public final class Jwts {
      */
     public static final class ENC {
 
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithmsBridge";
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms";
         private static final Registry<String, AeadAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
@@ -168,7 +168,7 @@ public final class Jwts {
      */
     public static final class SIG {
 
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithmsBridge";
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms";
         private static final Registry<String, SecureDigestAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         //prevent instantiation
@@ -337,7 +337,7 @@ public final class Jwts {
      */
     public static final class KEY {
 
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyAlgorithmsBridge";
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyAlgorithms";
         private static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
@@ -945,6 +945,65 @@ public final class Jwts {
 
         //prevent instantiation
         private KEY() {
+        }
+    }
+
+    /**
+     * Constants for JWA (RFC 7518) compression algorithms referenced in the {@code zip} header defined in the
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">JSON Web Encryption Compression Algorithms
+     * Registry</a>. Each algorithm is available as a ({@code public static final}) constant for
+     * direct type-safe reference in application code. For example:
+     * <blockquote><pre>
+     * Jwts.builder()
+     *    // ... etc ...
+     *    .compressWith(<b>Jwts.ZIP.DEF</b>)
+     *    .build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
+     *
+     * @see #get()
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static final class ZIP {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms";
+        private static final Registry<String, CompressionCodec> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        /**
+         * Returns various useful <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">
+         * Compression Algorithms</a>.
+         *
+         * @return various standard and non-standard useful compression algorithms.
+         */
+        public static Registry<String, CompressionCodec> get() {
+            return REGISTRY;
+        }
+
+        /**
+         * The JWE-standard <a href="https://www.rfc-editor.org/rfc/rfc1951">DEFLATE</a>
+         * compression algorithm with a {@code zip} header value of {@code "DEF"}.
+         *
+         * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">JWE RFC 7516, Section 4.1.3</a>
+         */
+        public static final CompressionCodec DEF = get().forKey("DEF");
+
+        /**
+         * The commonly used, but <b>NOT JWA-STANDARD</b>
+         * <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm with a {@code zip} header value
+         * of {@code "GZIP"}.
+         *
+         * <p><b>Compatibility Warning</b></p>
+         *
+         * <p><b>This is not a standard JWE compression algorithm</b>.  Be sure to use this only when you are confident
+         * that all parties accessing the token support the gzip algorithm.</p>
+         *
+         * <p>If you're concerned about compatibility, {@link #DEF DEF} is the only JWA standards-compliant algorithm.</p>
+         *
+         * @see #DEF
+         */
+        public static final CompressionCodec GZIP = get().forKey("GZIP");
+
+        //prevent instantiation
+        private ZIP() {
         }
     }
 

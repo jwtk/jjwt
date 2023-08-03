@@ -20,8 +20,7 @@ package io.jsonwebtoken;
  * can use to decompress the JWT body.
  *
  * <p>JJWT's default {@link JwtParser} implementation supports both the
- * {@link CompressionCodecs#DEFLATE DEFLATE}
- * and {@link CompressionCodecs#GZIP GZIP} algorithms by default - you do not need to
+ * {@link Jwts.ZIP#DEF DEFLATE} and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
  * specify a {@code CompressionCodecResolver} in these cases.</p>
  *
  * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement
@@ -29,9 +28,9 @@ package io.jsonwebtoken;
  * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} and
  * {@link io.jsonwebtoken.JwtParser#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
+ * @see JwtParserBuilder#setCompressionCodecLocator(Locator)
  * @since 0.6.0
  * @deprecated in favor of {@link Locator}
- * @see JwtParserBuilder#setCompressionCodecLocator(Locator)
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated

@@ -821,7 +821,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param codec implementation of the {@link CompressionCodec} to be used.
      * @return the builder for method chaining.
-     * @see io.jsonwebtoken.CompressionCodecs
+     * @see Jwts.ZIP
      * @since 0.6.0
      */
     JwtBuilder compressWith(CompressionCodec codec);
