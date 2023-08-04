@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * A builder to construct a {@link JwtParser}. Example usage:
  * <pre>{@code
- *     Jwts.parserBuilder()
+ *     Jwts.parser()
  *         .requireIssuer("https://issuer.example.com")
  *         .verifyWith(...)
  *         .build()
@@ -331,8 +331,9 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder verifyWith(Key key);
 
     /**
-     * Sets the decryption key to be used to decrypt all encountered JWEs.  If the encountered JWT string is not a
-     * JWE (e.g. a JWS), this key is not used.
+     * Sets the decryption key used to decrypt all encountered JWEs, <b>overwriting any previously configured
+     * {@link #setKeyLocator(Locator) keyLocator}</b>. If the encountered JWT string is not a JWE (e.g. a JWS),
+     * this key is not used.
      *
      * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
      * JWEs that can always be decrypted by a single key.  This also implies that this key <em>MUST</em> be a valid
@@ -342,7 +343,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>If there is any chance that the parser will encounter JWEs that need different decryption keys based on the
      * JWE being parsed, or JWSs, it is strongly recommended to configure
      * your own {@link Locator Locator} via the {@link #setKeyLocator(Locator) setKeyLocator} method instead of
-     * using this one.</p>
+     * using {@code decryptWith}.</p>
      *
      * <p>Calling this method overrides any previously set decryption key.</p>
      *
@@ -366,7 +367,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
      *
      * <pre>
-     * Jws&lt;Claims&gt; jws = Jwts.parserBuilder().setKeyLocator(new Locator&lt;Key&gt;() {
+     * Jws&lt;Claims&gt; jws = Jwts.parser().setKeyLocator(new Locator&lt;Key&gt;() {
      *         &#64;Override
      *         public Key locate(Header&lt;?&gt; header) {
      *             if (header instanceof JwsHeader) {
@@ -412,7 +413,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *             //inspect the header or claims, lookup and return the signing key
      *             return getSigningKey(header, claims); //implement me
      *         }})
-     *     .parseClaimsJws(compact);
+     *     .build().parseClaimsJws(compact);
      * </pre>
      *
      * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>

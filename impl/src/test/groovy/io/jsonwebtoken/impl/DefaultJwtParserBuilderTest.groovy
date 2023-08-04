@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.security.ConstantKeyLocator
+import io.jsonwebtoken.impl.security.LocatingKeyResolver
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.DecodingException
@@ -54,8 +55,22 @@ class DefaultJwtParserBuilderTest {
 
         def parser = builder.setProvider(provider).build()
 
-        assertSame provider, parser.jwtParser.provider
+        assertSame provider, parser.provider
         verify provider
+    }
+
+    @Test
+    void testKeyLocatorAndVerificationKeyConfigured() {
+        try {
+            builder
+                    .setKeyLocator(new ConstantKeyLocator(null, null))
+                    .verifyWith(TestKeys.HS256)
+                    .build()
+            fail()
+        } catch (IllegalStateException e) {
+            String msg = "Both 'keyLocator' and a 'verifyWith' key cannot be configured. Prefer 'keyLocator' if possible."
+            assertEquals msg, e.getMessage()
+        }
     }
 
     @Test
@@ -67,7 +82,7 @@ class DefaultJwtParserBuilderTest {
                     .build()
             fail()
         } catch (IllegalStateException e) {
-            String msg = "Both 'keyLocator' and 'decryptWith' key cannot be configured. Prefer 'keyLocator' if possible."
+            String msg = "Both 'keyLocator' and a 'decryptWith' key cannot be configured. Prefer 'keyLocator' if possible."
             assertEquals msg, e.getMessage()
         }
     }
@@ -85,7 +100,7 @@ class DefaultJwtParserBuilderTest {
                 return null
             }
         }
-        def b = builder.base64UrlDecodeWith(decoder)
+        def b = builder.base64UrlDecodeWith(decoder).build()
         assertSame decoder, b.base64UrlDecoder
     }
 
@@ -139,7 +154,7 @@ class DefaultJwtParserBuilderTest {
             }
         }
         def parser = builder.setCompressionCodecResolver(resolver).build()
-        assertSame resolver, parser.jwtParser.compressionAlgorithmLocator.resolver
+        assertSame resolver, parser.zipAlgFn.resolver
     }
 
     @Test
@@ -147,7 +162,7 @@ class DefaultJwtParserBuilderTest {
         def codec = new TestCompressionCodec(id: 'test')
         def parser = builder.addCompressionAlgorithms([codec] as Set<CompressionCodec>).build()
         def header = Jwts.header().setCompressionAlgorithm(codec.getId()).build()
-        assertSame codec, parser.jwtParser.compressionAlgorithmLocator.locate(header)
+        assertSame codec, parser.zipAlgFn.locate(header)
     }
 
     @Test
@@ -203,10 +218,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testDefaultDeserializer() {
         JwtParser parser = builder.build()
-        assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
-
-        // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating, something like:
-        // assertThat parser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
+        assertThat parser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
     }
 
     @Test
@@ -214,20 +226,19 @@ class DefaultJwtParserBuilderTest {
         Deserializer deserializer = niceMock(Deserializer)
         JwtParser parser = builder.deserializeJsonWith(deserializer).build()
 
-        // TODO: When the ImmutableJwtParser replaces the default implementation this test will need updating
-        assertThat parser.jwtParser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
-        assertSame deserializer, parser.jwtParser.deserializer.deserializer
+        assertThat parser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
+        assertSame deserializer, parser.deserializer.deserializer
     }
 
     @Test
     void testVerificationKeyAndSigningKeyResolverBothConfigured() {
         def key = TestKeys.HS256
-        builder.verifyWith(key).setSigningKeyResolver(new ConstantKeyLocator(key, null))
+        builder.verifyWith(key).setSigningKeyResolver(new LocatingKeyResolver(new ConstantKeyLocator(key, null)))
         try {
             builder.build()
             fail()
         } catch (IllegalStateException expected) {
-            String msg = "Both 'signingKeyResolver and 'verifyWith/signWith' key cannot be configured. " + "Choose either, or prefer `keyLocator` when possible."
+            String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " + "Choose either, or prefer `keyLocator` when possible."
             assertEquals(msg, expected.getMessage())
         }
     }

@@ -20,7 +20,9 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.io.*
+import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import org.junit.Test
@@ -42,31 +44,13 @@ class DefaultJwtParserTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @Test(expected = IllegalArgumentException)
-    void testBase64UrlDecodeWithNullArgument() {
-        new DefaultJwtParser().base64UrlDecodeWith(null)
-    }
-
-    @Test
-    void testBase64UrlDecodeWithCustomDecoder() {
-        def decoder = new Decoder() {
-            @Override
-            Object decode(Object o) throws DecodingException {
-                return null
-            }
-        }
-        def b = new DefaultJwtParser().base64UrlDecodeWith(decoder)
-        assertSame decoder, b.base64UrlDecoder
+    private DefaultJwtParser newParser() {
+        return Jwts.parser().build() as DefaultJwtParser
     }
 
     @Test(expected = MalformedJwtException)
     void testBase64UrlDecodeWithInvalidInput() {
-        new DefaultJwtParser().base64UrlDecode('20:SLDKJF;3993;----', 'test')
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testDeserializeJsonWithNullArgument() {
-        new DefaultJwtParser().deserializeJsonWith(null)
+        newParser().base64UrlDecode('20:SLDKJF;3993;----', 'test')
     }
 
     @Test
@@ -77,15 +61,16 @@ class DefaultJwtParserTest {
                 return OBJECT_MAPPER.readValue(bytes, Map.class)
             }
         }
-        def p = new DefaultJwtParser().deserializeJsonWith(deserializer)
+        def pb = Jwts.parser().deserializeJsonWith(deserializer)
+        def p = pb.build() as DefaultJwtParser
         assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer )
         assertSame deserializer, p.deserializer.deserializer
 
-        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        def key = Jwts.SIG.HS256.keyBuilder().build()
 
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
+        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
 
-        assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getPayload().get('foo')
+        assertEquals 'bar', pb.verifyWith(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test(expected = MalformedJwtException)
@@ -103,7 +88,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        new DefaultJwtParser().setSigningKey(key).parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -121,7 +106,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        new DefaultJwtParser().setSigningKey(key).parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseClaimsJwe(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -139,24 +124,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        new DefaultJwtParser().setSigningKey(key).parseClaimsJws(invalidJws)
-    }
-
-    @Test
-    void testMaxAllowedClockSkewSeconds() {
-        long max = Long.MAX_VALUE / 1000 as long
-        new DefaultJwtParser().setAllowedClockSkewSeconds(max) // no exception should be thrown
-    }
-
-    @Test
-    void testExceededAllowedClockSkewSeconds() {
-        long value = Long.MAX_VALUE / 1000 as long
-        value = value + 1L
-        try {
-            new DefaultJwtParser().setAllowedClockSkewSeconds(value)
-        } catch (IllegalArgumentException expected) {
-            assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
-        }
+        Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
     }
 
     @Test

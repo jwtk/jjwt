@@ -44,7 +44,7 @@ AeadAlgorithm enc = Jwts.ENC.A256GCM;
 SecretKey key = enc.keyBuilder().build();
 String compact = Jwts.builder().setSubject("Joe").encryptWith(key, enc).compact();
 
-Jwe<Claims> jwe = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(compact);
+Jwe<Claims> jwe = Jwts.parser().decryptWith(key).build().parseClaimsJwe(compact);
 ```
 
 Many other RSA and Elliptic Curve examples are in the full README documentation. 
@@ -179,8 +179,14 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
   automatically based on builder state.
 
 
-* `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been changed to now return a 
-  `JwtParserBuilder` instead of a direct `JwtParser` instance.
+* `io.jsonwebtoken.JwtParser` is now immutable.  All mutation/modification methods (setters, etc) deprecated 4 years 
+  ago have been removed.  All parser configuration requires using the `JwtParserBuilder` (i.e.
+  `Jwts.parser()`).
+
+
+* Similarly, `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been changed to now return a 
+  `JwtParserBuilder` instead of a direct `JwtParser` instance.  The previous `Jwts.parserBuilder()` method has been 
+  removed as it is now redundant.
 
 
 * `io.jsonwebtoken.CompressionCodec` implementations are no longer discoverable via `java.util.ServiceLoader` due to

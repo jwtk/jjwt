@@ -282,16 +282,26 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         }
 
         if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
-            String msg = "Both 'signingKeyResolver and 'verifyWith/signWith' key cannot be configured. " +
+            String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " +
                     "Choose either, or prefer `keyLocator` when possible.";
             throw new IllegalStateException(msg);
         }
-        if (this.keyLocator != null && this.decryptionKey != null) {
-            String msg = "Both 'keyLocator' and 'decryptWith' key cannot be configured. Prefer 'keyLocator' if possible.";
-            throw new IllegalStateException(msg);
+        if (this.keyLocator != null) {
+            if (this.signatureVerificationKey != null) {
+                String msg = "Both 'keyLocator' and a 'verifyWith' key cannot be configured. " +
+                        "Prefer 'keyLocator' if possible.";
+                throw new IllegalStateException(msg);
+            }
+            if (this.decryptionKey != null) {
+                String msg = "Both 'keyLocator' and a 'decryptWith' key cannot be configured. " +
+                        "Prefer 'keyLocator' if possible.";
+                throw new IllegalStateException(msg);
+            }
         }
-        if (this.keyLocator == null) {
-            this.keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
+
+        Locator<? extends Key> keyLocator = this.keyLocator; // user configured default, don't overwrite to ensure further build() calls work as expected
+        if (keyLocator == null) {
+            keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
         if (!enableUnsecuredJws && enableUnsecuredDecompression) {
@@ -306,13 +316,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             throw new IllegalStateException(msg);
         }
 
-        // Invariants.  If these are ever violated, it's an error in this class implementation
-        // (we default to non-null instances, and the setters should never allow null):
-        Assert.stateNotNull(this.keyLocator, "Key locator should never be null.");
+        // Invariants.  If these are ever violated, it's an error in this class implementation:
+        Assert.stateNotNull(keyLocator, "Key locator should never be null.");
 
         final DefaultClaims expClaims = (DefaultClaims) this.expectedClaims.build();
 
-        return new ImmutableJwtParser(new DefaultJwtParser(
+        return new DefaultJwtParser(
                 provider,
                 signingKeyResolver,
                 enableUnsecuredJws,
@@ -328,6 +337,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 extraSigAlgs,
                 extraKeyAlgs,
                 extraEncAlgs
-        ));
+        );
     }
 }

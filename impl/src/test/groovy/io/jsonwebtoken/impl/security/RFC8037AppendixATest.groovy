@@ -108,7 +108,7 @@ class RFC8037AppendixATest {
         assertEquals A4_JWS_COMPACT, compact
 
         def pubJwk = a2Jwk()
-        def payloadBytes = Jwts.parserBuilder().verifyWith(pubJwk.toKey()).build().parse(compact).getPayload() as byte[]
+        def payloadBytes = Jwts.parser().verifyWith(pubJwk.toKey()).build().parse(compact).getPayload() as byte[]
         def payload = new String(payloadBytes, StandardCharsets.UTF_8)
         assertEquals A4_JWS_PAYLOAD, payload
     }
@@ -193,7 +193,7 @@ class RFC8037AppendixATest {
         assertEquals(rfcExpectedHeaderMap.get('epk'), jweHeaderMap.get('epk'))
 
         //ensure that bob can decrypt:
-        def jwt = Jwts.parserBuilder().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseClaimsJwe(jwe)
+        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseClaimsJwe(jwe)
 
         assertEquals(issuer, jwt.getPayload().getIssuer())
     }
@@ -284,7 +284,7 @@ class RFC8037AppendixATest {
         assertEquals(rfcExpectedHeaderMap.get('epk'), jweHeaderMap.get('epk'))
 
         //ensure that Bob ("Dave") can decrypt:
-        def jwt = Jwts.parserBuilder().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseClaimsJwe(jwe)
+        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseClaimsJwe(jwe)
 
         //assert that we've decrypted and the value in the body/content is as expected:
         assertEquals(issuer, jwt.getPayload().getIssuer())

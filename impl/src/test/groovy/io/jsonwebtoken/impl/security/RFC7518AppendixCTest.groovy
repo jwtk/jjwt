@@ -126,7 +126,7 @@ class RFC7518AppendixCTest {
         assertArrayEquals RFC_DERIVED_KEY, derivedKey
 
         // now reverse the process and ensure it all works:
-        Jwe<Claims> claimsJwe = Jwts.parserBuilder()
+        Jwe<Claims> claimsJwe = Jwts.parser()
                 .decryptWith(bobJwk.toKey())
                 .build().parseClaimsJwe(jwe)
 

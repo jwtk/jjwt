@@ -30,7 +30,7 @@ class DefaultJwtTest {
     @Test
     void testToString() {
         String compact = Jwts.builder().setHeaderParam('foo', 'bar').setAudience('jsmith').compact()
-        Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parseClaimsJwt(compact)
+        Jwt jwt = Jwts.parser().enableUnsecuredJws().build().parseClaimsJwt(compact)
         assertEquals 'header={foo=bar, alg=none},payload={aud=jsmith}', jwt.toString()
     }
 
@@ -39,14 +39,14 @@ class DefaultJwtTest {
         byte[] bytes = 'hello JJWT'.getBytes(StandardCharsets.UTF_8)
         String encoded = Encoders.BASE64URL.encode(bytes)
         String compact = Jwts.builder().setHeaderParam('foo', 'bar').setContent(bytes).compact()
-        Jwt jwt = Jwts.parserBuilder().enableUnsecuredJws().build().parseContentJwt(compact)
+        Jwt jwt = Jwts.parser().enableUnsecuredJws().build().parseContentJwt(compact)
         assertEquals "header={foo=bar, alg=none},payload=$encoded" as String, jwt.toString()
     }
 
     @Test
     void testEqualsAndHashCode() {
         String compact = Jwts.builder().claim('foo', 'bar').compact()
-        def parser = Jwts.parserBuilder().enableUnsecuredJws().build()
+        def parser = Jwts.parser().enableUnsecuredJws().build()
         def jwt1 = parser.parseClaimsJwt(compact)
         def jwt2 = parser.parseClaimsJwt(compact)
         assertNotEquals jwt1, 'hello' as String
@@ -60,7 +60,7 @@ class DefaultJwtTest {
     @Test
     void testBodyAndPayloadSame() {
         String compact = Jwts.builder().claim('foo', 'bar').compact()
-        def parser = Jwts.parserBuilder().enableUnsecuredJws().build()
+        def parser = Jwts.parser().enableUnsecuredJws().build()
         def jwt1 = parser.parseClaimsJwt(compact)
         def jwt2 = parser.parseClaimsJwt(compact)
         assertEquals jwt1.getBody(), jwt1.getPayload()

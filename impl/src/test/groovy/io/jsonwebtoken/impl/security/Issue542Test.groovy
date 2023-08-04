@@ -56,7 +56,7 @@ class Issue542Test {
         for (alg in algs) {
             PublicKey key = TestKeys.forAlgorithm(alg).pair.public
             String jws = JWS_0_10_7_VALUES[alg]
-            def token = Jwts.parserBuilder().verifyWith(key).build().parseClaimsJws(jws)
+            def token = Jwts.parser().verifyWith(key).build().parseClaimsJws(jws)
             assert 'joe' == token.payload.getIssuer()
         }
     }
