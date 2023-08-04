@@ -28,7 +28,7 @@ import java.util.Collection;
  * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you can implement
  * your own {@link CompressionCodecResolver} and specify that when
  * {@link io.jsonwebtoken.JwtBuilder#compressWith(io.jsonwebtoken.io.CompressionAlgorithm) building} and
- * {@link io.jsonwebtoken.JwtParser#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
+ * {@link io.jsonwebtoken.JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
  * @see JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver)
  * @see JwtParserBuilder#addCompressionAlgorithms(Collection)

@@ -138,7 +138,7 @@ class EdSignatureAlgorithmTest {
 
     static void testSig(SignatureAlgorithm alg, PrivateKey signing, PublicKey verification) {
         String jwt = Jwts.builder().setIssuer('me').setAudience('you').signWith(signing, alg).compact()
-        def token = Jwts.parserBuilder().verifyWith(verification).build().parseClaimsJws(jwt)
+        def token = Jwts.parser().verifyWith(verification).build().parseClaimsJws(jwt)
         assertEquals([alg: alg.getId()], token.header)
         assertEquals 'me', token.getPayload().getIssuer()
         assertEquals 'you', token.getPayload().getAudience()

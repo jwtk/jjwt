@@ -40,21 +40,17 @@ import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.LegacyServices;
-import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -62,7 +58,6 @@ import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
@@ -81,8 +76,6 @@ import java.util.Map;
 public class DefaultJwtParser implements JwtParser {
 
     static final char SEPARATOR_CHAR = '.';
-
-    private static final int MILLISECONDS_PER_SECOND = 1000;
 
     private static final JwtTokenizer jwtTokenizer = new JwtTokenizer();
 
@@ -131,68 +124,34 @@ public class DefaultJwtParser implements JwtParser {
             "enableUnsecuredDecompression() method (but please read the security considerations covered in that " +
             "method's JavaDoc before doing so).";
 
-    private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
-        return new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extras, MISSING_JWS_ALG_MSG);
-    }
+    private final Provider provider;
 
-    private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
-        return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, Jwts.ENC.get(), extras, MISSING_ENC_MSG);
-    }
-
-    private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
-        return new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extras, MISSING_JWE_ALG_MSG);
-    }
-
-    private static IdLocator<Header, CompressionAlgorithm> zipFn(Collection<CompressionAlgorithm> extras) {
-        return new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, Jwts.ZIP.get(), extras, null);
-    }
-
-    // TODO: make the following fields final for v1.0
-    private Provider provider;
-
-    @SuppressWarnings("deprecation") // will remove for 1.0
-    private SigningKeyResolver signingKeyResolver;
+    @SuppressWarnings("deprecation")
+    private final SigningKeyResolver signingKeyResolver;
 
     private final boolean enableUnsecuredJws;
 
     private final boolean enableUnsecuredDecompression;
 
-    private final Function<JwsHeader, SecureDigestAlgorithm<?, ?>> signatureAlgorithmLocator;
+    private final Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigAlgFn;
 
-    private final Function<JweHeader, AeadAlgorithm> encryptionAlgorithmLocator;
+    private final Function<JweHeader, AeadAlgorithm> encAlgFn;
 
-    private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
+    private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgFn;
 
-    private Function<Header, CompressionAlgorithm> compressionAlgorithmLocator;
+    private final Function<Header, CompressionAlgorithm> zipAlgFn;
 
     private final Locator<? extends Key> keyLocator;
 
-    private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
+    private final Decoder<String, byte[]> base64UrlDecoder;
 
-    private Deserializer<Map<String, ?>> deserializer;
+    private final Deserializer<Map<String, ?>> deserializer;
 
-    private ClaimsBuilder expectedClaims = Jwts.claims();
+    private final ClaimsBuilder expectedClaims;
 
-    private Clock clock = DefaultClock.INSTANCE;
+    private final Clock clock;
 
-    private long allowedClockSkewMillis = 0;
-
-    /**
-     * TODO: remove this constructor before 1.0
-     *
-     * @deprecated for backward compatibility only, see other constructors.
-     */
-    @SuppressWarnings("DeprecatedIsStillUsed") // will remove before 1.0
-    @Deprecated
-    public DefaultJwtParser() {
-        this.keyLocator = new ConstantKeyLocator(null, null);
-        this.signatureAlgorithmLocator = sigFn(Collections.<SecureDigestAlgorithm<?, ?>>emptyList());
-        this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
-        this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
-        this.compressionAlgorithmLocator = zipFn(Collections.<CompressionAlgorithm>emptyList());
-        this.enableUnsecuredJws = false;
-        this.enableUnsecuredDecompression = false;
-    }
+    private final long allowedClockSkewMillis;
 
     //SigningKeyResolver will be removed for 1.0:
     @SuppressWarnings("deprecation")
@@ -216,134 +175,17 @@ public class DefaultJwtParser implements JwtParser {
         this.enableUnsecuredDecompression = enableUnsecuredDecompression;
         this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
-        this.clock = clock;
+        this.clock = Assert.notNull(clock, "Clock cannot be null.");
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().set(expectedClaims);
-        this.base64UrlDecoder = base64UrlDecoder;
-        this.deserializer = deserializer;
-        this.signatureAlgorithmLocator = sigFn(extraSigAlgs);
-        this.keyAlgorithmLocator = keyFn(extraKeyAlgs);
-        this.encryptionAlgorithmLocator = encFn(extraEncAlgs);
+        this.base64UrlDecoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
+        this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
 
-        if (compressionCodecResolver != null) {
-            this.compressionAlgorithmLocator = new CompressionCodecLocator(compressionCodecResolver);
-        } else {
-            this.compressionAlgorithmLocator = zipFn(extraZipAlgs);
-        }
-    }
-
-    @Override
-    public JwtParser deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
-        Assert.notNull(deserializer, "deserializer cannot be null.");
-        this.deserializer = new JwtDeserializer<>(deserializer);
-        return this;
-    }
-
-    @Override
-    public JwtParser base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder) {
-        Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
-        this.base64UrlDecoder = base64UrlDecoder;
-        return this;
-    }
-
-    @Override
-    public JwtParser requireIssuedAt(Date issuedAt) {
-        expectedClaims.setIssuedAt(issuedAt);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireIssuer(String issuer) {
-        expectedClaims.setIssuer(issuer);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireAudience(String audience) {
-        expectedClaims.setAudience(audience);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireSubject(String subject) {
-        expectedClaims.setSubject(subject);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireId(String id) {
-        expectedClaims.setId(id);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireExpiration(Date expiration) {
-        expectedClaims.setExpiration(expiration);
-        return this;
-    }
-
-    @Override
-    public JwtParser requireNotBefore(Date notBefore) {
-        expectedClaims.setNotBefore(notBefore);
-        return this;
-    }
-
-    @Override
-    public JwtParser require(String claimName, Object value) {
-        Assert.hasText(claimName, "claim name cannot be null or empty.");
-        Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.set(claimName, value);
-        return this;
-    }
-
-    @Override
-    public JwtParser setClock(Clock clock) {
-        Assert.notNull(clock, "Clock instance cannot be null.");
-        this.clock = clock;
-        return this;
-    }
-
-    @Override
-    public JwtParser setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException {
-        Assert.isTrue(seconds <= DefaultJwtParserBuilder.MAX_CLOCK_SKEW_MILLIS, DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG);
-        this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
-        return this;
-    }
-
-    @Override
-    public JwtParser setSigningKey(byte[] key) {
-        Assert.notEmpty(key, "signing key cannot be null or empty.");
-        return setSigningKey(Keys.hmacShaKeyFor(key));
-    }
-
-    @Override
-    public JwtParser setSigningKey(String base64EncodedSecretKey) {
-        Assert.hasText(base64EncodedSecretKey, "signing key cannot be null or empty.");
-        byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
-        return setSigningKey(bytes);
-    }
-
-    @Override
-    public JwtParser setSigningKey(final Key key) {
-        Assert.notNull(key, "signing key cannot be null.");
-        setSigningKeyResolver(new ConstantKeyLocator(key, null));
-        return this;
-    }
-
-    @SuppressWarnings("deprecation") // required until 1.0
-    @Override
-    public JwtParser setSigningKeyResolver(SigningKeyResolver signingKeyResolver) {
-        Assert.notNull(signingKeyResolver, "SigningKeyResolver cannot be null.");
-        this.signingKeyResolver = signingKeyResolver;
-        return this;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public JwtParser setCompressionCodecResolver(CompressionCodecResolver resolver) {
-        Assert.notNull(resolver, "CompressionCodecResolver cannot be null.");
-        this.compressionAlgorithmLocator = new CompressionCodecLocator(resolver);
-        return this;
+        this.sigAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extraSigAlgs, MISSING_JWS_ALG_MSG);
+        this.keyAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extraKeyAlgs, MISSING_JWE_ALG_MSG);
+        this.encAlgFn = new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, Jwts.ENC.get(), extraEncAlgs, MISSING_ENC_MSG);
+        this.zipAlgFn = compressionCodecResolver != null ? new CompressionCodecLocator(compressionCodecResolver) :
+                new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, Jwts.ZIP.get(), extraZipAlgs, null);
     }
 
     @Override
@@ -442,7 +284,7 @@ public class DefaultJwtParser implements JwtParser {
 
         SecureDigestAlgorithm<?, Key> algorithm;
         try {
-            algorithm = (SecureDigestAlgorithm<?, Key>) signatureAlgorithmLocator.apply(jwsHeader);
+            algorithm = (SecureDigestAlgorithm<?, Key>) sigAlgFn.apply(jwsHeader);
         } catch (UnsupportedJwtException e) {
             //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
             String msg = "Unsupported signature algorithm '" + alg + "'";
@@ -493,15 +335,6 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jwt<?, ?> parse(String compact) throws ExpiredJwtException, MalformedJwtException, SignatureException {
-
-        // TODO, this logic is only need for a now deprecated code path
-        // remove this block in v1.0 (the equivalent is already in DefaultJwtParserBuilder)
-        if (this.deserializer == null) {
-            // try to find one based on the services available
-            // TODO: This util class will throw a UnavailableImplementationException here to retain behavior of previous version, remove in v1.0
-            //noinspection deprecation
-            this.deserializer = LegacyServices.loadFirst(Deserializer.class);
-        }
 
         Assert.hasText(compact, "JWT String cannot be null or empty.");
 
@@ -607,10 +440,10 @@ public class DefaultJwtParser implements JwtParser {
             if (!Strings.hasText(enc)) {
                 throw new MalformedJwtException(MISSING_ENC_MSG);
             }
-            final AeadAlgorithm encAlg = this.encryptionAlgorithmLocator.apply(jweHeader);
+            final AeadAlgorithm encAlg = this.encAlgFn.apply(jweHeader);
             Assert.stateNotNull(encAlg, "JWE Encryption Algorithm cannot be null.");
 
-            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgorithmLocator.apply(jweHeader);
+            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgFn.apply(jweHeader);
             Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
             final Key key = this.keyLocator.locate(jweHeader);
@@ -639,7 +472,7 @@ public class DefaultJwtParser implements JwtParser {
             verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
         }
 
-        CompressionAlgorithm compressionAlgorithm = compressionAlgorithmLocator.apply(header);
+        CompressionAlgorithm compressionAlgorithm = zipAlgFn.apply(header);
         if (compressionAlgorithm != null) {
             if (unsecured && !enableUnsecuredDecompression) {
                 String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionAlgorithm.getId());

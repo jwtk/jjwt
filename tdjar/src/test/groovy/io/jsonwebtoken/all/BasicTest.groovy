@@ -38,7 +38,7 @@ class BasicTest {
             .signWith(key, SignatureAlgorithm.HS256)
             .compact()
 
-        JwtParser parser = Jwts.parserBuilder()
+        JwtParser parser = Jwts.parser()
             .setSigningKey(key)
             .build()
 

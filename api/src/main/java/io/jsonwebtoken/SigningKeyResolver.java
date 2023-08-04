@@ -33,7 +33,7 @@ import java.security.Key;
  *             //inspect the header or claims, lookup and return the signing key
  *             return getSigningKeyBytes(header, claims); //implement me
  *         }})
- *     .parseClaimsJws(compact);
+ *     .build().parseClaimsJws(compact);
  * </pre>
  *
  * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>

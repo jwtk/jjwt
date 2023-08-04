@@ -481,7 +481,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_81, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().decryptWith(jwk.toKey()).build().parseContentJwe(result)
+        def parsed = Jwts.parser().decryptWith(jwk.toKey()).build().parseContentJwe(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
@@ -545,7 +545,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_92, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().decryptWith(jwk.toKey()).build().parseContentJwe(result)
+        def parsed = Jwts.parser().decryptWith(jwk.toKey()).build().parseContentJwe(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
@@ -606,7 +606,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_105, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().decryptWith(key).build().parseContentJwe(result)
+        def parsed = Jwts.parser().decryptWith(key).build().parseContentJwe(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals FIGURE_99, b64Url(parsed.header.getPbes2Salt())
         assertEquals p2c, parsed.header.getPbes2Count()
@@ -668,7 +668,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_117, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parserBuilder().decryptWith(jwk.toKey()).build().parseContentJwe(result)
+        def parsed = Jwts.parser().decryptWith(jwk.toKey()).build().parseContentJwe(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()

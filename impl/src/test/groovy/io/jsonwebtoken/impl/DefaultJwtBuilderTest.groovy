@@ -444,7 +444,7 @@ class DefaultJwtBuilderTest {
                 .claim('foo', 'bar')
                 .compact()
 
-        assertEquals 'bar', Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
+        assertEquals 'bar', Jwts.parser().setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test
@@ -476,7 +476,7 @@ class DefaultJwtBuilderTest {
         def enc = Jwts.ENC.A128GCM
         def key = enc.keyBuilder().build()
         def jwe = builder.setPayload("me").encryptWith(key, enc).compact()
-        def jwt = Jwts.parserBuilder().decryptWith(key).build().parseContentJwe(jwe)
+        def jwt = Jwts.parser().decryptWith(key).build().parseContentJwe(jwe)
         assertEquals 'me', new String(jwt.getPayload(), StandardCharsets.UTF_8)
     }
 
@@ -485,7 +485,7 @@ class DefaultJwtBuilderTest {
         def enc = Jwts.ENC.A128GCM
         def key = enc.keyBuilder().build()
         def jwe = builder.setSubject('joe').encryptWith(key, enc).compact()
-        def jwt = Jwts.parserBuilder().decryptWith(key).build().parseClaimsJwe(jwe)
+        def jwt = Jwts.parser().decryptWith(key).build().parseClaimsJwe(jwe)
         assertEquals 'joe', jwt.getPayload().getSubject()
     }
 

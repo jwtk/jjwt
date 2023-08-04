@@ -109,7 +109,7 @@ class RFC7516AppendixA3Test {
         SecretKey kek = jwk.toKey()
 
         // test decryption per the RFC
-        Jwe<byte[]> jwe = Jwts.parserBuilder().decryptWith(kek).build().parseContentJwe(COMPLETE_JWE)
+        Jwe<byte[]> jwe = Jwts.parser().decryptWith(kek).build().parseContentJwe(COMPLETE_JWE)
         assertEquals PLAINTEXT, new String(jwe.getPayload(), StandardCharsets.UTF_8)
 
         // now ensure that when JJWT does the encryption (i.e. a compact value is produced from JJWT, not from the RFC text),
