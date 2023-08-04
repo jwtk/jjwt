@@ -25,6 +25,10 @@ class StandardAlgorithmsTest {
 
     static def registries = [Jwts.SIG.get(), Jwts.ENC.get(), Jwts.KEY.get(), Jwts.ZIP.get(), Jwks.HASH.get()] as List<Registry<String, ?>>
 
+    private static void eachRegAlg(Closure c) {
+        registries.each { reg -> reg.values().each { c(reg, it) } }
+    }
+
     @Test
     void testSize() {
         assertEquals 14, Jwts.SIG.get().size()
@@ -32,10 +36,6 @@ class StandardAlgorithmsTest {
         assertEquals 17, Jwts.KEY.get().size()
         assertEquals 2, Jwts.ZIP.get().size()
         assertEquals 6, Jwks.HASH.get().size()
-    }
-
-    private static void eachRegAlg(Closure c) {
-        registries.each { reg -> reg.values().each { c(reg, it) } }
     }
 
     @Test
