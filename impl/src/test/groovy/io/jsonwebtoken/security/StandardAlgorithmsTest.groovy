@@ -23,7 +23,7 @@ import static org.junit.Assert.*
 
 class StandardAlgorithmsTest {
 
-    static def registries = [Jwts.SIG.get(), Jwts.ENC.get(), Jwts.KEY.get(), Jwts.ZIP.get(), Jwks.HASH.get()] as List<Registry<String, ?>>
+    static final List<Registry<String,?>> registries = [Jwts.SIG.get(), Jwts.ENC.get(), Jwts.KEY.get(), Jwts.ZIP.get(), Jwks.HASH.get()]
 
     private static void eachRegAlg(Closure c) {
         registries.each { reg -> reg.values().each { c(reg, it) } }
