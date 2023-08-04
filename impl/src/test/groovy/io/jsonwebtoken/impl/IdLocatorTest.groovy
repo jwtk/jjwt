@@ -15,40 +15,57 @@
  */
 package io.jsonwebtoken.impl
 
-
+import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.lang.Field
 import io.jsonwebtoken.impl.lang.Fields
-import io.jsonwebtoken.impl.lang.Functions
+import io.jsonwebtoken.impl.lang.IdRegistry
+import org.junit.Before
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.fail
+import static org.junit.Assert.*
 
 class IdLocatorTest {
 
+    private static final String exMsg = 'foo is required'
     private static final Field<String> TEST_FIELD = Fields.string('foo', 'Foo')
+
+    private static IdRegistry registry
+    private static IdLocator locator
+
+    @Before
+    void setUp() {
+        def a = new StringIdentifiable(value: 'A')
+        def b = new StringIdentifiable(value: 'B')
+        registry = new IdRegistry('Foo', [a, b], false)
+        locator = new IdLocator(TEST_FIELD, registry, Collections.emptyList(), exMsg)
+    }
+
+    @Test
+    void unrequiredHeaderValueTest() {
+        locator = new IdLocator(TEST_FIELD, registry, Collections.emptyList(), null)
+        def header = Jwts.header().setAlgorithm('none').build()
+        assertNull locator.apply(header)
+    }
 
     @Test
     void missingRequiredHeaderValueTest() {
-        def msg = 'foo is required'
-        def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultUnprotectedHeader()
+        def header = Jwts.header().build()
         try {
-            loc.apply(header)
+            locator.apply(header)
             fail()
         } catch (MalformedJwtException expected) {
-            assertEquals msg, expected.getMessage()
+            assertEquals exMsg, expected.getMessage()
         }
     }
 
     @Test
     void unlocatableJwtHeaderInstanceTest() {
-        def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultUnprotectedHeader([foo: 'foo'])
+        def header = Jwts.header().set('foo', 'foo').build()
         try {
-            loc.apply(header)
+            locator.apply(header)
         } catch (UnsupportedJwtException expected) {
             String msg = "Unrecognized JWT ${TEST_FIELD} header value: foo"
             assertEquals msg, expected.getMessage()
@@ -57,10 +74,9 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJwsHeaderInstanceTest() {
-        def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultJwsHeader([foo: 'foo'])
+        def header = Jwts.header().setAlgorithm('HS256').set('foo', 'foo').build()
         try {
-            loc.apply(header)
+            locator.apply(header)
         } catch (UnsupportedJwtException expected) {
             String msg = "Unrecognized JWS ${TEST_FIELD} header value: foo"
             assertEquals msg, expected.getMessage()
@@ -69,13 +85,21 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJweHeaderInstanceTest() {
-        def loc = new IdLocator(TEST_FIELD, 'foo is required', Functions.forNull())
-        def header = new DefaultJweHeader([foo: 'foo'])
+        def header = Jwts.header().set('enc', 'A256GCM').set('foo', 'foo').build()
         try {
-            loc.apply(header)
+            locator.apply(header)
         } catch (UnsupportedJwtException expected) {
             String msg = "Unrecognized JWE ${TEST_FIELD} header value: foo"
             assertEquals msg, expected.getMessage()
+        }
+    }
+
+    static class StringIdentifiable implements Identifiable {
+        String value;
+
+        @Override
+        String getId() {
+            return value;
         }
     }
 }

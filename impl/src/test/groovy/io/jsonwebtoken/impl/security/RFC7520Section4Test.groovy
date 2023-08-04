@@ -219,7 +219,7 @@ class RFC7520Section4Test {
 
         String result = Jwts.builder()
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .header().setKeyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
                 .signWith(key, alg)
                 .compact()
@@ -393,7 +393,7 @@ class RFC7520Section4Test {
                 .compact()
 
         String detached = result.substring(0, result.indexOf('.')) + '..' +
-                        result.substring(result.lastIndexOf('.') + 1, result.length())
+                result.substring(result.lastIndexOf('.') + 1, result.length())
 
         assertEquals FIGURE_41, detached
 

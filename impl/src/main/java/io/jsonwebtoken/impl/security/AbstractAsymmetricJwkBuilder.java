@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.FieldMap;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AsymmetricJwk;
 import io.jsonwebtoken.security.AsymmetricJwkBuilder;
@@ -47,18 +48,18 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
-abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
-        T extends AsymmetricJwkBuilder<K, J, T>>
+abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>, T extends AsymmetricJwkBuilder<K, J, T>>
         extends AbstractJwkBuilder<K, J, T> implements AsymmetricJwkBuilder<K, J, T> {
 
     protected Boolean applyX509KeyUse = null;
     private KeyUseStrategy keyUseStrategy = DefaultKeyUseStrategy.INSTANCE;
 
-    private final DefaultX509Builder<T> x509Builder;
+    private final X509BuilderSupport x509;
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
-        this.x509Builder = new DefaultX509Builder<>(this.jwkContext, self(), MalformedKeyException.class);
+        FieldMap map = Assert.isInstanceOf(FieldMap.class, this.DELEGATE);
+        this.x509 = new X509BuilderSupport(map, MalformedKeyException.class);
     }
 
     AbstractAsymmetricJwkBuilder(AbstractAsymmetricJwkBuilder<?, ?, ?> b, JwkContext<K> ctx) {
@@ -70,7 +71,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     @Override
     public T setPublicKeyUse(String use) {
         Assert.hasText(use, "publicKeyUse cannot be null or empty.");
-        this.jwkContext.setPublicKeyUse(use);
+        this.DELEGATE.setPublicKeyUse(use);
         return self();
     }
 
@@ -84,13 +85,15 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     @Override
     public T setX509CertificateChain(List<X509Certificate> chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
-        return this.x509Builder.setX509CertificateChain(chain);
+        this.x509.setX509CertificateChain(chain);
+        return self();
     }
 
     @Override
     public T setX509Url(URI uri) {
         Assert.notNull(uri, "X509Url cannot be null.");
-        return this.x509Builder.setX509Url(uri);
+        this.x509.setX509Url(uri);
+        return self();
     }
 
     /*
@@ -103,27 +106,31 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     @Override
     public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        return this.x509Builder.setX509CertificateSha1Thumbprint(thumbprint);
+        this.x509.setX509CertificateSha1Thumbprint(thumbprint);
+        return self();
     }
 
     @Override
     public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        return this.x509Builder.setX509CertificateSha256Thumbprint(thumbprint);
+        this.x509.setX509CertificateSha256Thumbprint(thumbprint);
+        return self();
     }
 
     @Override
     public T withX509Sha1Thumbprint(boolean enable) {
-        return this.x509Builder.withX509Sha1Thumbprint(enable);
+        this.x509.withX509Sha1Thumbprint(enable);
+        return self();
     }
 
     @Override
     public T withX509Sha256Thumbprint(boolean enable) {
-        return this.x509Builder.withX509Sha256Thumbprint(enable);
+        this.x509.withX509Sha256Thumbprint(enable);
+        return self();
     }
 
     @Override
     public J build() {
-        this.x509Builder.apply();
+        this.x509.apply();
         return super.build();
     }
 
@@ -140,7 +147,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         @Override
         public P setPrivateKey(L privateKey) {
             Assert.notNull(privateKey, "PrivateKey argument cannot be null.");
-            final K publicKey = Assert.notNull(jwkContext.getKey(), "PublicKey cannot be null.");
+            final K publicKey = Assert.notNull(DELEGATE.getKey(), "PublicKey cannot be null.");
             return newPrivateBuilder(newContext(privateKey)).setPublicKey(publicKey);
         }
 
@@ -159,12 +166,12 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
         DefaultPrivateJwkBuilder(DefaultPublicJwkBuilder<L, K, J, M, ?, ?> b, JwkContext<K> ctx) {
             super(b, ctx);
-            this.jwkContext.setPublicKey(b.jwkContext.getKey());
+            this.DELEGATE.setPublicKey(b.DELEGATE.getKey());
         }
 
         @Override
         public T setPublicKey(L publicKey) {
-            this.jwkContext.setPublicKey(publicKey);
+            this.DELEGATE.setPublicKey(publicKey);
             return self();
         }
     }

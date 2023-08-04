@@ -26,6 +26,15 @@ public final class Functions {
         return ConstantFunction.forNull();
     }
 
+    public static <T> Function<T, T> identity() {
+        return new Function<T, T>() {
+            @Override
+            public T apply(T t) {
+                return t;
+            }
+        };
+    }
+
     /**
      * Wraps the specified function to ensure that if any exception occurs, it is of the specified type and/or with
      * the specified message.  If no exception occurs, the function's return value is returned as expected.

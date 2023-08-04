@@ -16,10 +16,8 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.Header;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
@@ -31,16 +29,15 @@ import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
-import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
@@ -66,15 +63,15 @@ import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
-            "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " +
-            "digital signatures.";
+    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " + "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " + "digital signatures.";
 
     protected Provider provider;
     protected SecureRandom secureRandom;
 
-    protected Header<?> header;
-    protected Claims claims;
+    private final DefaultJwtBuilderHeader headerBuilder = new DefaultJwtBuilderHeader(this);
+
+    private final ClaimsBuilder claimsBuilder = new DefaultClaimsBuilder();
+
     protected byte[] content;
 
     private SecureDigestAlgorithm<Key, ?> sigAlg = Jwts.SIG.NONE;
@@ -93,7 +90,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Function<Map<String, ?>, byte[]> claimsSerializer;
 
     protected Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
-    protected CompressionCodec compressionCodec;
+    protected CompressionAlgorithm compressionAlgorithm;
+
+    @Override
+    public JwtBuilder.Header header() {
+        return this.headerBuilder;
+    }
 
     @Override
     public JwtBuilder setProvider(Provider provider) {
@@ -143,50 +145,28 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setHeader(Header<?> header) {
-        return setHeader(Jwts.header().putAll(header));
-    }
-
-    @Override
-    public JwtBuilder setHeader(Map<String, ?> header) {
-        return setHeader(Jwts.header().putAll(header));
-    }
-
-    @Override
-    public JwtBuilder setHeader(Builder<? extends Header<?>> builder) {
-        Assert.notNull(builder, "Builder cannot be null.");
-        Header<?> header = builder.build();
-        this.header = Assert.notNull(header, "Builder cannot produce a null Header instance.");
+    public JwtBuilder setHeader(Map<String, ?> map) {
+        this.headerBuilder.clear();
+        this.headerBuilder.putAll(map);
         return this;
     }
 
     @Override
     public JwtBuilder setHeaderParams(Map<String, ?> params) {
-        if (!Collections.isEmpty(params)) {
-            Header<?> header = ensureHeader();
-            header.putAll(params);
-        }
+        this.headerBuilder.putAll(params);
         return this;
-    }
-
-    protected Header<?> ensureHeader() {
-        if (this.header == null) {
-            this.header = new DefaultUnprotectedHeader();
-        }
-        return this.header;
     }
 
     @Override
     public JwtBuilder setHeaderParam(String name, Object value) {
-        ensureHeader().put(name, value);
+        this.headerBuilder.put(name, value);
         return this;
     }
 
     @SuppressWarnings("unchecked") // TODO: remove for 1.0
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
-        @SuppressWarnings("deprecation")
-        io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get(alg.getValue());
+        @SuppressWarnings("deprecation") io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
+        return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get().forKey(alg.getValue());
     }
 
     @Override
@@ -239,7 +219,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.get(alg.getValue()));
+        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.get().forKey(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -304,9 +284,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder compressWith(CompressionCodec compressionCodec) {
-        Assert.notNull(compressionCodec, "compressionCodec cannot be null");
-        this.compressionCodec = compressionCodec;
+    public JwtBuilder compressWith(CompressionAlgorithm alg) {
+        Assert.notNull(alg, "CompressionAlgorithm cannot be null");
+        Assert.hasText(alg.getId(), "CompressionAlgorithm id cannot be null or empty.");
+        this.compressionAlgorithm = alg;
         return this;
     }
 
@@ -327,87 +308,75 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.notEmpty(content, "content byte array cannot be null or empty.");
         Assert.hasText(cty, "Content Type String cannot be null or empty.");
         cty = CompactMediaTypeIdConverter.INSTANCE.applyFrom(cty);
-        ensureHeader().setContentType(cty);
+        this.headerBuilder.setContentType(cty);
         return setContent(content);
-    }
-
-    protected Claims ensureClaims() {
-        if (this.claims == null) {
-            this.claims = new DefaultClaims();
-        }
-        return this.claims;
     }
 
     @Override
     public JwtBuilder setClaims(Claims claims) {
-        this.claims = claims;
-        return this;
+        Assert.notNull(claims, "Claims argument cannot be null.");
+        return setClaims((Map<String, ?>) claims);
     }
 
     @Override
     public JwtBuilder setClaims(Map<String, ?> claims) {
-        this.claims = new DefaultClaims(claims);
+        Assert.notNull(claims, "Claims map cannot be null.");
+        this.claimsBuilder.empty();
+        this.claimsBuilder.set(claims);
         return this;
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        ensureClaims().putAll(claims);
+        this.claimsBuilder.set(claims);
         return this;
     }
 
     @Override
     public JwtBuilder setIssuer(String iss) {
-        return claim(DefaultClaims.ISSUER.getId(), iss);
+        this.claimsBuilder.setIssuer(iss);
+        return this;
     }
 
     @Override
     public JwtBuilder setSubject(String sub) {
-        return claim(DefaultClaims.SUBJECT.getId(), sub);
+        this.claimsBuilder.setSubject(sub);
+        return this;
     }
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        return claim(DefaultClaims.AUDIENCE.getId(), aud);
+        this.claimsBuilder.setAudience(aud);
+        return this;
     }
 
     @Override
     public JwtBuilder setExpiration(Date exp) {
-        return claim(DefaultClaims.EXPIRATION.getId(), exp);
+        this.claimsBuilder.setExpiration(exp);
+        return this;
     }
 
     @Override
     public JwtBuilder setNotBefore(Date nbf) {
-        return claim(DefaultClaims.NOT_BEFORE.getId(), nbf);
+        this.claimsBuilder.setNotBefore(nbf);
+        return this;
     }
 
     @Override
     public JwtBuilder setIssuedAt(Date iat) {
-        return claim(DefaultClaims.ISSUED_AT.getId(), iat);
+        this.claimsBuilder.setIssuedAt(iat);
+        return this;
     }
 
     @Override
     public JwtBuilder setId(String jti) {
-        return claim(DefaultClaims.JTI.getId(), jti);
+        this.claimsBuilder.setId(jti);
+        return this;
     }
 
     @Override
     public JwtBuilder claim(String name, Object value) {
-        Assert.hasText(name, "Claim property name cannot be null or empty.");
-        if (value instanceof String && !Strings.hasText((String) value)) {
-            value = null;
-        }
-        if (this.claims == null) {
-            if (value != null) {
-                ensureClaims().put(name, value);
-            }
-        } else {
-            if (value == null) {
-                this.claims.remove(name);
-            } else {
-                this.claims.put(name, value);
-            }
-        }
+        this.claimsBuilder.set(name, value);
         return this;
     }
 
@@ -421,6 +390,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException(msg);
         }
 
+        final Claims claims = this.claimsBuilder.build();
+
         if (Objects.isEmpty(content) && Collections.isEmpty(claims)) {
             if (jwe) { // JWE payload can never be empty:
                 String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'.";
@@ -433,8 +404,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException("Both 'content' and 'claims' cannot both be specified. Choose either one.");
         }
 
-        Header<?> header = ensureHeader();
-
         if (this.serializer == null) { // try to find one based on the services available
             //noinspection unchecked
             serializeToJsonWith(Services.loadFirst(Serializer.class));
@@ -444,28 +413,33 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (!Collections.isEmpty(claims)) {
             payload = claimsSerializer.apply(claims);
         }
-        if (!Objects.isEmpty(payload) && compressionCodec != null) {
-            payload = compressionCodec.compress(payload);
-            header.setCompressionAlgorithm(compressionCodec.getId());
+        if (!Objects.isEmpty(payload) && compressionAlgorithm != null) {
+            payload = compressionAlgorithm.compress(payload);
+            this.headerBuilder.setCompressionAlgorithm(compressionAlgorithm.getId());
         }
 
         if (jwe) {
-            JweHeader jweHeader = header instanceof JweHeader ? (JweHeader) header : new DefaultJweHeader(header);
-            return encrypt(jweHeader, payload);
+            return encrypt(payload);
         } else {
-            return compact(header, payload);
+            return compact(payload);
         }
     }
 
-    private String compact(Header<?> header, byte[] payload) {
+    private io.jsonwebtoken.Header buildHeader() {
+        return new DefaultJwtHeaderBuilder(this.headerBuilder).build();
+    }
+
+    private String compact(byte[] payload) {
 
         Assert.stateNotNull(sigAlg, "SignatureAlgorithm is required."); // invariant
 
-        if (this.key != null && !(header instanceof JwsHeader)) {
-            header = new DefaultJwsHeader(header);
-        }
+//        if (this.key != null && !(header instanceof JwsHeader)) {
+//            header = new DefaultJwsHeader(header);
+//        }
 
-        header.setAlgorithm(sigAlg.getId());
+        this.headerBuilder.setAlgorithm(sigAlg.getId());
+
+        final io.jsonwebtoken.Header header = buildHeader();
 
         byte[] headerBytes = headerSerializer.apply(header);
         String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
@@ -490,7 +464,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return jwt;
     }
 
-    private String encrypt(JweHeader header, byte[] payload) {
+    private String encrypt(byte[] payload) {
 
         Assert.stateNotNull(key, "Key is required."); // set by encryptWith*
         Assert.stateNotNull(enc, "Encryption algorithm is required."); // set by encryptWith*
@@ -499,14 +473,20 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         Assert.notEmpty(payload, "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
-        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, header, enc);
+        //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
+        // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
+        JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
+        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, delegate, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
+
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
-        header.put(AbstractHeader.ALGORITHM.getId(), keyAlg.getId());
-        header.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
+        this.headerBuilder.setAlgorithm(keyAlg.getId());
+        this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
+
+        final io.jsonwebtoken.Header header = buildHeader();
 
         byte[] headerBytes = this.headerSerializer.apply(header);
         final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
@@ -524,10 +504,22 @@ public class DefaultJwtBuilder implements JwtBuilder {
         String base64UrlEncodedCiphertext = base64UrlEncoder.encode(ciphertext);
         String base64UrlEncodedTag = base64UrlEncoder.encode(tag);
 
-        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedTag;
+        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
+    }
+
+    private static class DefaultJwtBuilderHeader extends DefaultJweHeaderBuilder<Header>
+            implements JwtBuilder.Header {
+
+        private final JwtBuilder builder;
+
+        public DefaultJwtBuilderHeader(JwtBuilder builder) {
+            super();
+            this.builder = Assert.notNull(builder, "JwtBuilder cannot be null.");
+        }
+
+        @Override
+        public JwtBuilder and() {
+            return builder;
+        }
     }
 }

@@ -37,7 +37,7 @@ public class DirectKeyAlgorithm implements KeyAlgorithm<SecretKey, SecretKey> {
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<SecretKey> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         SecretKey key = Assert.notNull(request.getPayload(), "Encryption key cannot be null.");
         return new DefaultKeyResult(key);

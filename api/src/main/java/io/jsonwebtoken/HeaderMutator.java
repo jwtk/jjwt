@@ -15,13 +15,15 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.MapMutator;
+
 /**
  * Mutation (modifications) to a {@link Header Header} instance.
  *
  * @param <T> the mutator subtype, for method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public interface HeaderMutator<T extends HeaderMutator<T>> {
+public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<String, Object, T> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1">

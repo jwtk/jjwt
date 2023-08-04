@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright (C) 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,46 +15,33 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JweHeaderMutator;
+import io.jsonwebtoken.security.X509Builder;
 
 /**
+ * @param <T> return type for method chaining
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJweHeaderBuilder extends AbstractProtectedHeaderBuilder<JweHeader, JweHeaderBuilder>
-        implements JweHeaderBuilder {
+public class DefaultJweHeaderBuilder<T extends JweHeaderMutator<T> & X509Builder<T>>
+        extends DefaultJweHeaderMutator<T> implements X509Builder<T> {
 
-    @Override
-    protected JweHeader newHeader() {
-        return new DefaultJweHeader();
+    protected DefaultJweHeaderBuilder() {
+        super();
+    }
+
+    protected DefaultJweHeaderBuilder(DefaultJweHeaderMutator<?> src) {
+        super(src);
     }
 
     @Override
-    public JweHeaderBuilder setAgreementPartyUInfo(byte[] info) {
-        this.header.setAgreementPartyUInfo(info);
-        return this;
+    public T withX509Sha1Thumbprint(boolean enable) {
+        this.x509.withX509Sha1Thumbprint(enable);
+        return self();
     }
 
     @Override
-    public JweHeaderBuilder setAgreementPartyUInfo(String info) {
-        this.header.setAgreementPartyUInfo(info);
-        return this;
-    }
-
-    @Override
-    public JweHeaderBuilder setAgreementPartyVInfo(byte[] info) {
-        this.header.setAgreementPartyVInfo(info);
-        return this;
-    }
-
-    @Override
-    public JweHeaderBuilder setAgreementPartyVInfo(String info) {
-        this.header.setAgreementPartyVInfo(info);
-        return this;
-    }
-
-    @Override
-    public JweHeaderBuilder setPbes2Count(int count) {
-        this.header.setPbes2Count(count);
-        return this;
+    public T withX509Sha256Thumbprint(boolean enable) {
+        this.x509.withX509Sha256Thumbprint(enable);
+        return self();
     }
 }

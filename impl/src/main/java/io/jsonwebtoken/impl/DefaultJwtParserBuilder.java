@@ -15,17 +15,17 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
@@ -71,21 +71,22 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
 
-    private Locator<CompressionCodec> compressionCodecLocator;
+    private final Collection<AeadAlgorithm> extraEncAlgs = new LinkedHashSet<>();
 
-    private final Collection<AeadAlgorithm> extraEncryptionAlgorithms = new LinkedHashSet<>();
+    private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgs = new LinkedHashSet<>();
 
-    private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgorithms = new LinkedHashSet<>();
+    private final Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs = new LinkedHashSet<>();
 
-    private final Collection<SecureDigestAlgorithm<?, ?>> extraDigestAlgorithms = new LinkedHashSet<>();
+    private final Collection<CompressionAlgorithm> extraZipAlgs = new LinkedHashSet<>();
 
-    private final Collection<CompressionCodec> extraCompressionCodecs = new LinkedHashSet<>();
+    @SuppressWarnings("deprecation")
+    private CompressionCodecResolver compressionCodecResolver;
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private final Claims expectedClaims = new DefaultClaims();
+    private final ClaimsBuilder expectedClaims = Jwts.claims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
@@ -172,7 +173,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public JwtParserBuilder require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.put(claimName, value);
+        expectedClaims.set(claimName, value);
         return this;
     }
 
@@ -221,30 +222,30 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addCompressionCodecs(Collection<? extends CompressionCodec> codecs) {
-        Assert.notEmpty(codecs, "Additional CompressionCodec collection cannot be null or empty.");
-        this.extraCompressionCodecs.addAll(codecs);
+    public JwtParserBuilder addCompressionAlgorithms(Collection<? extends CompressionAlgorithm> algs) {
+        Assert.notEmpty(algs, "Additional CompressionAlgorithm collection cannot be null or empty.");
+        this.extraZipAlgs.addAll(algs);
         return this;
     }
 
     @Override
     public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> encAlgs) {
         Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
-        this.extraEncryptionAlgorithms.addAll(encAlgs);
+        this.extraEncAlgs.addAll(encAlgs);
         return this;
     }
 
     @Override
     public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> sigAlgs) {
         Assert.notEmpty(sigAlgs, "Additional SignatureAlgorithm collection cannot be null or empty.");
-        this.extraDigestAlgorithms.addAll(sigAlgs);
+        this.extraSigAlgs.addAll(sigAlgs);
         return this;
     }
 
     @Override
     public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs) {
         Assert.notEmpty(keyAlgs, "Additional KeyAlgorithm collection cannot be null or empty.");
-        this.extraKeyAlgorithms.addAll(keyAlgs);
+        this.extraKeyAlgs.addAll(keyAlgs);
         return this;
     }
 
@@ -262,16 +263,10 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
-    @Override
-    public JwtParserBuilder setCompressionCodecLocator(Locator<CompressionCodec> locator) {
-        this.compressionCodecLocator = Assert.notNull(locator, "CompressionCodec locator cannot be null.");
-        return this;
-    }
-
+    @SuppressWarnings("deprecation")
     @Override
     public JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver resolver) {
-        Assert.notNull(resolver, "compressionCodecResolver cannot be null.");
-        this.compressionCodecLocator = new CompressionCodecLocator(resolver);
+        this.compressionCodecResolver = Assert.notNull(resolver, "CompressionCodecResolver cannot be null.");
         return this;
     }
 
@@ -305,19 +300,17 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                     "due to their security implications.";
             throw new IllegalStateException(msg);
         }
-        if (this.compressionCodecLocator != null && !Collections.isEmpty(extraCompressionCodecs)) {
-            String msg = "Both 'addCompressionCodecs' and 'compressionCodecLocator' " +
-                    "(or 'compressionCodecResolver') cannot be specified. Choose either.";
+        if (this.compressionCodecResolver != null && !Collections.isEmpty(extraZipAlgs)) {
+            String msg = "Both 'addCompressionAlgorithms' and 'compressionCodecResolver' " +
+                    "cannot be specified. Choose either.";
             throw new IllegalStateException(msg);
-        }
-        if (this.compressionCodecLocator == null) {
-            this.compressionCodecLocator = new DefaultCompressionCodecResolver(extraCompressionCodecs);
         }
 
         // Invariants.  If these are ever violated, it's an error in this class implementation
         // (we default to non-null instances, and the setters should never allow null):
         Assert.stateNotNull(this.keyLocator, "Key locator should never be null.");
-        Assert.stateNotNull(this.compressionCodecLocator, "CompressionCodec Locator should never be null.");
+
+        final DefaultClaims expClaims = (DefaultClaims) this.expectedClaims.build();
 
         return new ImmutableJwtParser(new DefaultJwtParser(
                 provider,
@@ -327,13 +320,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 keyLocator,
                 clock,
                 allowedClockSkewMillis,
-                expectedClaims,
+                expClaims,
                 base64UrlDecoder,
                 new JwtDeserializer<>(deserializer),
-                compressionCodecLocator,
-                extraDigestAlgorithms,
-                extraKeyAlgorithms,
-                extraEncryptionAlgorithms
+                compressionCodecResolver,
+                extraZipAlgs,
+                extraSigAlgs,
+                extraKeyAlgs,
+                extraEncAlgs
         ));
     }
 }

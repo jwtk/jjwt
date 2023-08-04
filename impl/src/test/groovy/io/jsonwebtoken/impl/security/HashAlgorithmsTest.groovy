@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.lang.Registry
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
@@ -25,54 +26,56 @@ import static org.junit.Assert.*
 
 class HashAlgorithmsTest {
 
+    static final Registry<String, HashAlgorithm> reg = Jwks.HASH.get()
+
     static boolean contains(HashAlgorithm alg) {
-        return Jwks.HASH.values().contains(alg)
+        return reg.values().contains(alg)
     }
 
     @Test
     void testValues() {
-        assertEquals 6, Jwks.HASH.values().size()
+        assertEquals 6, reg.values().size()
         assertTrue(contains(Jwks.HASH.SHA256)) // add more later
     }
 
     @Test
-    void testForId() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.get(alg.getId())
+    void testForKey() {
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.forKey(alg.getId())
         }
     }
 
     @Test
-    void testForIdCaseInsensitive() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.get(alg.getId().toLowerCase())
+    void testForKeyCaseInsensitive() {
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.forKey(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
-    void testForIdWithInvalidId() {
-        //unlike the 'find' paradigm, 'get' requires the value to exist
-        Jwks.HASH.get('invalid')
+    void testForKeyWithInvalidId() {
+        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        reg.forKey('invalid')
     }
 
     @Test
-    void testFindById() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.find(alg.getId())
+    void testGet() {
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.get(alg.getId())
         }
     }
 
     @Test
-    void testFindByIdCaseInsensitive() {
-        for (HashAlgorithm alg : Jwks.HASH.values()) {
-            assertSame alg, Jwks.HASH.find(alg.getId().toLowerCase())
+    void testGetCaseInsensitive() {
+        for (HashAlgorithm alg : reg.values()) {
+            assertSame alg, reg.get(alg.getId().toLowerCase())
         }
     }
 
     @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        assertNull Jwks.HASH.find('invalid')
+    void testGetWithInvalidId() {
+        // 'get' paradigm can return null if not found
+        assertNull reg.get('invalid')
     }
 
     static DefaultRequest<byte[]> request(String msg) {

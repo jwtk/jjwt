@@ -16,31 +16,43 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
-public class IdLocator<H extends Header<H>, R> implements Function<H, R> {
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
-    private final Field<String> headerField;
+public class IdLocator<H extends Header, R extends Identifiable> implements Locator<R>, Function<H, R> {
+
+    private final Field<String> field;
     private final String requiredMsg;
-    private final boolean headerValueRequired;
+    private final boolean valueRequired;
 
-    private final Function<String, R> registry;
+    private final Registry<String, R> registry;
 
-    public IdLocator(Field<String> field, String requiredMsg, Function<String, R> registry) {
-        this.headerField = Assert.notNull(field, "Header field cannot be null.");
-        this.registry = Assert.notNull(registry, "Registry cannot be null.");
-        this.headerValueRequired = Strings.hasText(requiredMsg);
-        this.requiredMsg = requiredMsg;
+    public IdLocator(Field<String> field, Registry<String, R> registry, Collection<R> extras, String requiredExceptionMessage) {
+        this.field = Assert.notNull(field, "Header field cannot be null.");
+        this.requiredMsg = Strings.clean(requiredExceptionMessage);
+        this.valueRequired = Strings.hasText(this.requiredMsg);
+        Assert.notEmpty(registry, "Registry cannot be null or empty.");
+        Collection<R> all = new LinkedHashSet<>(Collections.size(registry) + Collections.size(extras));
+        all.addAll(extras);
+        all.addAll(registry.values());
+        this.registry = new IdRegistry<>(field.getName(), all);
     }
 
-    private static String type(Header<?> header) {
+    private static String type(Header header) {
         if (header instanceof JweHeader) {
             return "JWE";
         } else if (header instanceof JwsHeader) {
@@ -51,24 +63,29 @@ public class IdLocator<H extends Header<H>, R> implements Function<H, R> {
     }
 
     @Override
-    public R apply(H header) {
-
+    public R locate(Header header) {
         Assert.notNull(header, "Header argument cannot be null.");
 
-        Object val = header.get(this.headerField.getId());
-        String id = val != null ? String.valueOf(val) : null;
+        Object val = header.get(this.field.getId());
+        String id = val != null ? val.toString() : null;
 
-        if (this.headerValueRequired && !Strings.hasText(id)) {
-            throw new MalformedJwtException(requiredMsg);
+        if (!Strings.hasText(id)) {
+            if (this.valueRequired) {
+                throw new MalformedJwtException(requiredMsg);
+            }
+            return null; // otherwise header value not required, so short circuit
         }
 
-        R instance = registry.apply(id);
-
-        if (this.headerValueRequired && instance == null) {
-            String msg = "Unrecognized " + type(header) + " " + this.headerField + " header value: " + id;
-            throw new UnsupportedJwtException(msg);
+        try {
+            return registry.forKey(id);
+        } catch (Exception e) {
+            String msg = "Unrecognized " + type(header) + " " + this.field + " header value: " + id;
+            throw new UnsupportedJwtException(msg, e);
         }
+    }
 
-        return instance;
+    @Override
+    public R apply(H header) {
+        return locate(header);
     }
 }

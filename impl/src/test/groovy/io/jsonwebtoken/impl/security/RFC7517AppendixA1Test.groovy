@@ -58,7 +58,7 @@ class RFC7517AppendixA1Test {
     void test() { // asserts we can parse and verify RFC values
 
         def m = keys[0]
-        EcPublicJwk ecPubJwk = Jwks.builder().putAll(m).build() as EcPublicJwk
+        EcPublicJwk ecPubJwk = Jwks.builder().set(m).build() as EcPublicJwk
         assertTrue ecPubJwk.toKey() instanceof ECPublicKey
         assertEquals m.size(), ecPubJwk.size()
         assertEquals m.kty, ecPubJwk.getType()
@@ -69,7 +69,7 @@ class RFC7517AppendixA1Test {
         assertEquals m.kid, ecPubJwk.getId()
 
         m = keys[1]
-        RsaPublicJwk rsaPublicJwk = Jwks.builder().putAll(m).build() as RsaPublicJwk
+        RsaPublicJwk rsaPublicJwk = Jwks.builder().set(m).build() as RsaPublicJwk
         assertTrue rsaPublicJwk.toKey() instanceof RSAPublicKey
         assertEquals m.size(), rsaPublicJwk.size()
         assertEquals m.kty, rsaPublicJwk.getType()

@@ -42,7 +42,7 @@ import static org.junit.Assert.*
 class EcSignatureAlgorithmTest {
 
     static Collection<EcSignatureAlgorithm> algs() {
-        return Jwts.SIG.values().findAll({ it instanceof EcSignatureAlgorithm }) as Collection<EcSignatureAlgorithm>
+        return Jwts.SIG.get().values().findAll({ it instanceof EcSignatureAlgorithm }) as Collection<EcSignatureAlgorithm>
     }
 
     @Test

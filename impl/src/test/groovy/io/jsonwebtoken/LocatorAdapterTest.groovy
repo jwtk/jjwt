@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken
 
+
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
-import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import org.junit.Test
 
 import static org.junit.Assert.assertNull
@@ -27,10 +27,10 @@ class LocatorAdapterTest {
 
     @Test
     void testJwtHeader() {
-        Header input = new DefaultUnprotectedHeader()
+        Header input = Jwts.header().build()
         def locator = new LocatorAdapter() {
             @Override
-            protected Object locate(UnprotectedHeader header) {
+            protected Object doLocate(Header header) {
                 return header
             }
         }
@@ -39,14 +39,14 @@ class LocatorAdapterTest {
 
     @Test
     void testJwtHeaderWithoutOverride() {
-        Header input = new DefaultUnprotectedHeader()
+        Header input = Jwts.header().build()
         Locator locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header /* force Groovy to avoid signature erasure */)
     }
 
     @Test
     void testJwsHeader() {
-        Header input = new DefaultJwsHeader()
+        Header input = new DefaultJwsHeader([:])
         Locator locator = new LocatorAdapter() {
             @Override
             protected Object locate(JwsHeader header) {
@@ -58,14 +58,14 @@ class LocatorAdapterTest {
 
     @Test
     void testJwsHeaderWithoutOverride() {
-        Header input = new DefaultJwsHeader()
+        Header input = new DefaultJwsHeader([:])
         Locator locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header)
     }
 
     @Test
     void testJweHeader() {
-        JweHeader input = new DefaultJweHeader()
+        JweHeader input = new DefaultJweHeader([:])
         def locator = new LocatorAdapter() {
             @Override
             protected Object locate(JweHeader header) {
@@ -77,7 +77,7 @@ class LocatorAdapterTest {
 
     @Test
     void testJweHeaderWithoutOverride() {
-        JweHeader input = new DefaultJweHeader()
+        JweHeader input = new DefaultJweHeader([:])
         def locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header)
     }

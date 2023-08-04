@@ -30,36 +30,44 @@ import java.util.Map;
 public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
 
     /**
+     * Removes all entries from the map. The map will be empty after this call returns.
+     * <p>This method is the same as {@link Map#clear Map.clear}, but instead returns the mutator instance for
+     * method chaining.</p>
+     *
+     * @return the mutator/builder for method chaining.
+     */
+    T empty();
+
+    /**
      * Sets the specified name/value pair in the map.  A {@code null} or empty value will remove the property
      * from the map entirely.
+     * <p>This method is the same as {@link Map#put Map.put}, but instead returns the mutator instance for
+     * method chaining.</p>
      *
      * @param key   the map key
      * @param value the value to set for the specified header parameter name
      * @return the mutator/builder for method chaining.
      */
-    T put(K key, V value);
-
-    /**
-     * Removes the map entry with the specified key
-     *
-     * @param key the key for the map entry to remove.
-     * @return the mutator/builder for method chaining.
-     */
-    T remove(K key);
+    T set(K key, V value);
 
     /**
      * Sets the specified name/value pairs in the map.  If any name has a {@code null} or empty value, that
      * map entry will be removed from the map entirely.
+     * <p>This method is the same as {@link Map#putAll Map.putAll}, but instead returns the mutator instance for
+     * method chaining.</p>
      *
      * @param m the map to add
      * @return the mutator/builder for method chaining.
      */
-    T putAll(Map<? extends K, ? extends V> m);
+    T set(Map<? extends K, ? extends V> m);
 
     /**
-     * Removes all entries from the map. The map will be empty after this call returns.
+     * Removes the map entry with the specified key.
+     * <p>This method is the same as {@link Map#remove Map.remove}, but instead returns the mutator instance for
+     * method chaining.</p>
      *
+     * @param key the key for the map entry to remove.
      * @return the mutator/builder for method chaining.
      */
-    T clear();
+    T delete(K key);
 }

@@ -68,7 +68,7 @@ public final class Keys {
                 "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                 "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                 "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                "output size).  Consider using the StandardSecureDigestAlgorithms.HS256.keyBuilder() method (or HS384.keyBuilder() " +
+                "output size).  Consider using the Jwts.SIG.HS256.keyBuilder() method (or HS384.keyBuilder() " +
                 "or HS512.keyBuilder()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
                 "algorithm.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
         throw new WeakKeyException(msg);
@@ -81,9 +81,9 @@ public final class Keys {
      * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:</p>
      *
      * <pre><code>
-     * {@link StandardSecureDigestAlgorithms#HS256}.keyBuilder().build();
-     * {@link StandardSecureDigestAlgorithms#HS384}.keyBuilder().build();
-     * {@link StandardSecureDigestAlgorithms#HS512}.keyBuilder().build();
+     * {@link Jwts.SIG#HS256}.keyBuilder().build();
+     * {@link Jwts.SIG#HS384}.keyBuilder().build();
+     * {@link Jwts.SIG#HS512}.keyBuilder().build();
      * </code></pre>
      *
      * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
@@ -130,7 +130,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get().get(alg.name());
         if (!(salg instanceof MacAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -145,11 +145,11 @@ public final class Keys {
      * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
      *
      * <blockquote><pre>
-     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#RS256 RS256}.keyPairBuilder().build();
-     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#RS384 RS384}.keyPairBuilder().build();
-     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#RS512 RS512}.keyPairBuilder().build();
+     * Jwts.SIG.{@link Jwts.SIG#RS256 RS256}.keyPairBuilder().build();
+     * Jwts.SIG.{@link Jwts.SIG#RS384 RS384}.keyPairBuilder().build();
+     * Jwts.SIG.{@link Jwts.SIG#RS512 RS512}.keyPairBuilder().build();
      * ... etc ...
-     * Jwts.SIG.{@link StandardSecureDigestAlgorithms#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
+     * Jwts.SIG.{@link Jwts.SIG#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
@@ -235,7 +235,7 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get().get(alg.name());
         if (!(salg instanceof SignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);

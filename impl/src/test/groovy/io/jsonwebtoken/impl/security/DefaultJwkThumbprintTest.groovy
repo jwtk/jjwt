@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.HashAlgorithm
-import io.jsonwebtoken.security.StandardHashAlgorithms
+import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
 
@@ -29,7 +29,7 @@ import static org.junit.Assert.*
 class DefaultJwkThumbprintTest {
 
     private static String content = "Hello World"
-    private static HashAlgorithm alg = StandardHashAlgorithms.get().SHA256
+    private static HashAlgorithm alg = Jwks.HASH.SHA256
     private static byte[] digest = alg.digest(new DefaultRequest<byte[]>(content.getBytes(StandardCharsets.UTF_8), null, null))
     private static String expectedToString = Encoders.BASE64URL.encode(digest)
     private static String expectedUriString = DefaultJwkThumbprint.URI_PREFIX + alg.getId() + ":" + expectedToString

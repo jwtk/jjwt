@@ -23,7 +23,7 @@ class DefaultJwsHeaderTest {
 
     @Test
     void testGetName() {
-        def header = new DefaultJwsHeader()
+        def header = new DefaultJwsHeader([:])
         assertEquals 'JWS header', header.getName()
     }
 }

@@ -55,9 +55,9 @@ import javax.crypto.SecretKey;
  * <p><b>JWA Standard Implementations</b></p>
  *
  * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard MAC algorithms are
- * available via the {@link StandardSecureDigestAlgorithms} registry singleton.</p>
+ * available via {@link io.jsonwebtoken.Jwts.SIG Jwts.SIG}.</p>
  *
- * @see StandardSecureDigestAlgorithms
+ * @see io.jsonwebtoken.Jwts.SIG Jwts.SIG
  * @since JJWT_RELEASE_VERSION
  */
 public interface MacAlgorithm extends SecureDigestAlgorithm<SecretKey, SecretKey>,

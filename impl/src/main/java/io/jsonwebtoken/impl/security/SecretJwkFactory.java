@@ -100,7 +100,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
         String id = ctx.getAlgorithm();
         if (Strings.hasText(id)) {
-            SecureDigestAlgorithm<?, ?> alg = Jwts.SIG.find(id);
+            SecureDigestAlgorithm<?, ?> alg = Jwts.SIG.get().get(id);
             if (alg instanceof MacAlgorithm) {
                 jcaName = ((CryptoAlgorithm) alg).getJcaName(); // valid for all JJWT alg implementations
                 Assert.hasText(jcaName, "Algorithm jcaName cannot be null or empty.");

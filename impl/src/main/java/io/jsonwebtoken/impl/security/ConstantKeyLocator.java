@@ -26,7 +26,7 @@ import io.jsonwebtoken.impl.lang.Function;
 import java.security.Key;
 
 @SuppressWarnings("deprecation")
-public class ConstantKeyLocator extends LocatorAdapter<Key> implements SigningKeyResolver, Function<Header<?>, Key> {
+public class ConstantKeyLocator extends LocatorAdapter<Key> implements SigningKeyResolver, Function<Header, Key> {
 
     private final Key jwsKey;
     private final Key jweKey;
@@ -57,7 +57,7 @@ public class ConstantKeyLocator extends LocatorAdapter<Key> implements SigningKe
     }
 
     @Override
-    public Key apply(Header<?> header) {
+    public Key apply(Header header) {
         return locate(header);
     }
 }

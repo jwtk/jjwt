@@ -86,7 +86,7 @@ public class JcaTemplate {
     }
 
     private <T, R> R execute(Class<T> clazz, CheckedFunction<T, R> fn) throws SecurityException {
-        InstanceFactory<?> factory = REGISTRY.find(clazz);
+        InstanceFactory<?> factory = REGISTRY.get(clazz);
         Assert.notNull(factory, "Unsupported JCA instance class.");
         return execute(factory, clazz, fn);
     }

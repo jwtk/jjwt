@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
@@ -23,19 +24,18 @@ import io.jsonwebtoken.impl.lang.PositiveIntegerConverter;
 import io.jsonwebtoken.impl.lang.RequiredBitLengthConverter;
 import io.jsonwebtoken.impl.security.JwkConverter;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Header implementation satisfying JWE header parameter requirements.
  *
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> implements JweHeader {
+public class DefaultJweHeader extends DefaultProtectedHeader implements JweHeader {
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
 
@@ -60,10 +60,18 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
     public static final Field<Integer> P2C = Fields.builder(Integer.class)
             .setConverter(PositiveIntegerConverter.INSTANCE).setId("p2c").setName("PBES2 Count").build();
 
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractProtectedHeader.FIELDS, ENCRYPTION_ALGORITHM, EPK, APU, APV, IV, TAG, P2S, P2C);
+    static final Registry<String, Field<?>> FIELDS =
+            Fields.registry(DefaultProtectedHeader.FIELDS, ENCRYPTION_ALGORITHM, EPK, APU, APV, IV, TAG, P2S, P2C);
 
-    public DefaultJweHeader() {
-        super(FIELDS);
+    static boolean isCandidate(FieldMap fields) {
+        return Strings.hasText(fields.get(ENCRYPTION_ALGORITHM)) || // MUST have at least an `enc` header
+                !Collections.isEmpty(fields.get(EPK)) ||
+                !Bytes.isEmpty(fields.get(APU)) ||
+                !Bytes.isEmpty(fields.get(APV)) ||
+                !Bytes.isEmpty(fields.get(IV)) ||
+                !Bytes.isEmpty(fields.get(TAG)) ||
+                !Bytes.isEmpty(fields.get(P2S)) ||
+                (fields.get(P2C) != null && fields.get(P2C) > 0);
     }
 
     public DefaultJweHeader(Map<String, ?> map) {
@@ -77,70 +85,40 @@ public class DefaultJweHeader extends AbstractProtectedHeader<JweHeader> impleme
 
     @Override
     public String getEncryptionAlgorithm() {
-        return idiomaticGet(ENCRYPTION_ALGORITHM);
+        return get(ENCRYPTION_ALGORITHM);
     }
 
     @Override
     public PublicJwk<?> getEphemeralPublicKey() {
-        return idiomaticGet(EPK);
+        return get(EPK);
     }
 
     @Override
     public byte[] getAgreementPartyUInfo() {
-        return idiomaticGet(APU);
-    }
-
-    @Override
-    public JweHeader setAgreementPartyUInfo(byte[] info) {
-        put(APU, info);
-        return this;
-    }
-
-    @Override
-    public JweHeader setAgreementPartyUInfo(String info) {
-        byte[] bytes = Strings.hasText(info) ? info.getBytes(StandardCharsets.UTF_8) : null;
-        return setAgreementPartyUInfo(bytes);
+        return get(APU);
     }
 
     @Override
     public byte[] getAgreementPartyVInfo() {
-        return idiomaticGet(APV);
-    }
-
-    @Override
-    public JweHeader setAgreementPartyVInfo(byte[] info) {
-        put(APV, info);
-        return this;
-    }
-
-    @Override
-    public JweHeader setAgreementPartyVInfo(String info) {
-        byte[] bytes = Strings.hasText(info) ? info.getBytes(StandardCharsets.UTF_8) : null;
-        return setAgreementPartyVInfo(bytes);
+        return get(APV);
     }
 
     @Override
     public byte[] getInitializationVector() {
-        return idiomaticGet(IV);
+        return get(IV);
     }
 
     @Override
     public byte[] getAuthenticationTag() {
-        return idiomaticGet(TAG);
+        return get(TAG);
     }
 
     public byte[] getPbes2Salt() {
-        return idiomaticGet(P2S);
+        return get(P2S);
     }
 
     @Override
     public Integer getPbes2Count() {
-        return idiomaticGet(P2C);
-    }
-
-    @Override
-    public JweHeader setPbes2Count(int count) {
-        put(P2C, count);
-        return this;
+        return get(P2C);
     }
 }

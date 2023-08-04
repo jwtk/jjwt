@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.compression.DeflateCompressionCodec
-import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.compression.DeflateCompressionAlgorithm
+import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
 import org.junit.Test
 
 import static org.junit.Assert.assertTrue
@@ -31,7 +31,7 @@ class CompressionCodecsTest {
 
     @Test
     void testStatics() {
-        assertTrue CompressionCodecs.DEFLATE instanceof DeflateCompressionCodec
-        assertTrue CompressionCodecs.GZIP instanceof GzipCompressionCodec
+        assertTrue Jwts.ZIP.DEF instanceof DeflateCompressionAlgorithm
+        assertTrue Jwts.ZIP.GZIP instanceof GzipCompressionAlgorithm
     }
 }

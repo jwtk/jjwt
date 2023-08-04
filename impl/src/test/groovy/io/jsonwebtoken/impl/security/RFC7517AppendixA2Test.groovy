@@ -88,7 +88,7 @@ class RFC7517AppendixA2Test {
     void test() { // asserts we can parse and verify RFC values
 
         def m = keys[0]
-        def jwk = Jwks.builder().putAll(m).build() as EcPrivateJwk
+        def jwk = Jwks.builder().set(m).build() as EcPrivateJwk
         def key = jwk.toKey()
         int fieldSize = key.params.curve.field.fieldSize
         assertTrue key instanceof ECPrivateKey
@@ -105,7 +105,7 @@ class RFC7517AppendixA2Test {
         assertEquals m.kid, jwk.getId()
 
         m = keys[1]
-        jwk = Jwks.builder().putAll(m).build() as RsaPrivateJwk
+        jwk = Jwks.builder().set(m).build() as RsaPrivateJwk
         key = jwk.toKey() as RSAPrivateCrtKey
         assertNotNull key
         assertEquals m.size(), jwk.size()

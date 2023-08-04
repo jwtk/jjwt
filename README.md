@@ -1426,7 +1426,7 @@ key algorithms:
 
 <sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry singleton.
+These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` convenience class.
 
 <a name="jws-key"></a>
 ### Signature Algorithms Keys
@@ -3362,7 +3362,7 @@ AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc.
 // Create the compact JWE:
 String jwe = Jwts.builder().setIssuer("me")
     // Optional work factor is specified in the header:
-    //.setHeader(Jwts.headerBuilder().setPbes2Count(pbkdf2Iterations))
+    //.header().setPbes2Count(pbkdf2Iterations)).and()
     .encryptWith(password, alg, enc)
     .compact();
 

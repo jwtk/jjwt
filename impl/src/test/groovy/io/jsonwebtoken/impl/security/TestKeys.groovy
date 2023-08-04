@@ -125,6 +125,7 @@ class TestKeys {
             this.chain = Collections.of(cert)
             this.pair = new KeyPair(cert.getPublicKey(), privateKey)
         }
+
         Bundle(PublicKey pub, PrivateKey priv) {
             this.cert = null
             this.chain = Collections.emptyList()

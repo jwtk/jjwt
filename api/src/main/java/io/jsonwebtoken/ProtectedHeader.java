@@ -24,12 +24,11 @@ import java.util.Set;
 /**
  * A JWT header that is integrity protected, either by JWS digital signature or JWE AEAD encryption.
  *
- * @param <T> The exact header subtype returned during mutation (setter) operations.
  * @see JwsHeader
  * @see JweHeader
  * @since JJWT_RELEASE_VERSION
  */
-public interface ProtectedHeader<T extends ProtectedHeader<T>> extends Header<T>, ProtectedHeaderMutator<T>, X509Accessor {
+public interface ProtectedHeader extends Header, X509Accessor {
 
     /**
      * Returns the {@code jku} (JWK Set URL) value that refers to a

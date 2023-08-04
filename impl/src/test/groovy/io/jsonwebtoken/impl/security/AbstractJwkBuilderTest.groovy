@@ -55,20 +55,28 @@ class AbstractJwkBuilderTest {
         def foo = UUID.randomUUID()
         def bar = UUID.randomUUID().toString() //different type
         def m = [foo: foo, bar: bar]
-        def jwk = builder().putAll(m).build()
+        def jwk = builder().set(m).build()
         assertEquals foo, jwk.foo
         assertEquals bar, jwk.bar
     }
 
     @Test
     void testRemove() {
-        def jwk = builder().put('foo', 'bar').remove('foo').build() as Jwk
+        def jwk = builder().set('foo', 'bar').delete('foo').build() as Jwk
         assertNull jwk.get('foo')
     }
 
     @Test
     void testClear() {
-        def jwk = builder().put('foo', 'bar').clear().build() as Jwk
+        def builder = builder().set('foo', 'bar')
+        builder.clear()
+        def jwk = builder.build()
+        assertNull jwk.get('foo')
+    }
+
+    @Test
+    void testEmpty() {
+        def jwk = builder().set('foo', 'bar').empty().build() as Jwk
         assertNull jwk.get('foo')
     }
 
@@ -83,7 +91,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testAlgorithmByPut() {
         def alg = 'someAlgorithm'
-        def jwk = builder().put('alg', alg).build() //ensure direct put still is handled properly
+        def jwk = builder().set('alg', alg).build() //ensure direct put still is handled properly
         assertEquals alg, jwk.getAlgorithm()
         assertEquals alg, jwk.alg //test raw get via JWA member id
     }
@@ -99,7 +107,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testIdByPut() {
         def kid = UUID.randomUUID().toString()
-        def jwk = builder().put('kid', kid).build()
+        def jwk = builder().set('kid', kid).build()
         assertEquals kid, jwk.getId()
         assertEquals kid, jwk.kid //test raw get via JWA member id
     }
@@ -119,7 +127,7 @@ class AbstractJwkBuilderTest {
         def a = UUID.randomUUID().toString()
         def b = UUID.randomUUID().toString()
         def set = [a, b] as Set<String>
-        def jwk = builder().put('key_ops', set).build()
+        def jwk = builder().set('key_ops', set).build()
         assertEquals set, jwk.getOperations()
         assertEquals set, jwk.key_ops
     }
@@ -129,7 +137,7 @@ class AbstractJwkBuilderTest {
     void testOperationsByPutSingleValue() {
         def a = UUID.randomUUID().toString()
         def set = [a] as Set<String>
-        def jwk = builder().put('key_ops', a).build() // <-- put uses single raw value, not a set
+        def jwk = builder().set('key_ops', a).build() // <-- put uses single raw value, not a set
         assertEquals set, jwk.getOperations() // <-- still get a set
         assertEquals set, jwk.key_ops         // <-- still get a set
     }

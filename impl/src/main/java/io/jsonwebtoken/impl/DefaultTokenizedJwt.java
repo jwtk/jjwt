@@ -49,10 +49,10 @@ class DefaultTokenizedJwt implements TokenizedJwt {
     }
 
     @Override
-    public Header<?> createHeader(Map<String, ?> m) {
+    public Header createHeader(Map<String, ?> m) {
         if (Strings.hasText(getDigest())) {
             return new DefaultJwsHeader(m);
         }
-        return new DefaultUnprotectedHeader(m);
+        return new DefaultHeader(m);
     }
 }

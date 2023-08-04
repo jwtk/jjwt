@@ -18,25 +18,31 @@ package io.jsonwebtoken;
 import java.util.Map;
 
 /**
- * A JWT <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-5">JOSE header</a>.
+ * A JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5">JOSE header</a>.
  *
- * <p>This is ultimately a JSON map and any values can be added to it, but JWT JOSE standard names are provided as
- * type-safe getters and setters for convenience.</p>
+ * <p>This is an immutable JSON map with convenient type-safe getters for JWT standard header parameter names.</p>
  *
- * <p>Because this interface extends {@code Map&lt;String, Object&gt;}, if you would like to add your own properties,
- * you simply use map methods, for example:</p>
+ * <p>Because this interface extends <code>Map&lt;String, Object&gt;</code>, you can use standard {@code Map}
+ * accessor/iterator methods as desired, for example:</p>
  *
- * <pre>
- * header.{@link Map#put(Object, Object) put}("headerParamName", "headerParamValue");
- * </pre>
+ * <blockquote><pre>
+ * header.get("someKey");</pre></blockquote>
  *
- * <h2>Creation</h2>
+ * <p>However, because {@code Header} instances are immutable, calling any of the map mutation methods
+ * (such as {@code Map.}{@link Map#put(Object, Object) put}, etc) will result in a runtime exception.</p>
  *
- * <p>It is easiest to create a {@code Header} instance by using {@link Jwts#header()}.</p>
+ * <p><b>Security</b></p>
  *
+ * <p>The {@code Header} interface itself makes no implications of integrity protection via either digital signatures or
+ * encryption. Instead, {@link JwsHeader} and {@link JweHeader} represent this information for respective
+ * {@link Jws} and {@link Jwe} instances.</p>
+ *
+ * @see ProtectedHeader
+ * @see JwsHeader
+ * @see JweHeader
  * @since 0.1
  */
-public interface Header<T extends Header<T>> extends Map<String, Object>, HeaderMutator<T> {
+public interface Header extends Map<String, Object> {
 
     /**
      * JWT {@code Type} (typ) value: <code>"JWT"</code>
@@ -74,7 +80,6 @@ public interface Header<T extends Header<T>> extends Map<String, Object>, Header
      *
      * @deprecated use {@link #COMPRESSION_ALGORITHM} instead.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     String DEPRECATED_COMPRESSION_ALGORITHM = "calg";
 
@@ -117,14 +122,14 @@ public interface Header<T extends Header<T>> extends Map<String, Object>, Header
      * <ul>
      *     <li>If the JWT is a Signed JWT (a JWS), the <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">
      *      <code>alg</code></a> (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
-     *      JWS.  Consider using {@link Jwts#SIG}.{@link io.jsonwebtoken.lang.Registry#find(Object) find(id)}
+     *      JWS.  Consider using {@link Jwts.SIG}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)}
      *      to convert this string value to a type-safe {@code SecureDigestAlgorithm} instance.</li>
      *      <li>If the JWT is an Encrypted JWT (a JWE), the
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
      * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
      * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
      * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.  Consider
-     * using {@link Jwts#KEY}.{@link io.jsonwebtoken.lang.Registry#find(Object) find(id)} to convert this string value
+     * using {@link Jwts.KEY}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)} to convert this string value
      * to a type-safe {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} instance.</li>
      * </ul>
      *

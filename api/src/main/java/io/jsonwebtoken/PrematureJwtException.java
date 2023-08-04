@@ -29,7 +29,7 @@ public class PrematureJwtException extends ClaimJwtException {
      * @param claims  jwt claims (body)
      * @param message the message explaining why the exception is thrown.
      */
-    public PrematureJwtException(Header<?> header, Claims claims, String message) {
+    public PrematureJwtException(Header header, Claims claims, String message) {
         super(header, claims, message);
     }
 
@@ -41,8 +41,10 @@ public class PrematureJwtException extends ClaimJwtException {
      * @param message exception message
      * @param cause   cause
      * @since 0.5
+     * @deprecated since JJWT_RELEASE_VERSION since it is not used in JJWT's codebase
      */
-    public PrematureJwtException(Header<?> header, Claims claims, String message, Throwable cause) {
+    @Deprecated
+    public PrematureJwtException(Header header, Claims claims, String message, Throwable cause) {
         super(header, claims, message, cause);
     }
 }

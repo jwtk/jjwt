@@ -15,20 +15,19 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
-import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
-import io.jsonwebtoken.security.StandardKeyAlgorithms;
-import io.jsonwebtoken.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.security.WeakKeyException;
+import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -70,32 +69,38 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setSecureRandom(SecureRandom secureRandom);
 
     /**
-     * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
-     * header and only want to append to it, use the {@link #setHeaderParams(java.util.Map)} method instead.
+     * Returns the {@link JwtBuilder.Header} to use to modify the constructed JWT's header name/value pairs as desired.
+     * When finished, callers may return to JWT construction via the {@link JwtBuilder.Header#and() and()} method.
+     * For example:
      *
-     * @param header the header to set (and potentially replace any existing header).
-     * @return the builder for method chaining.
-     */
-    JwtBuilder setHeader(Header<?> header); //replaces any existing header with the specified header.
-
-    /**
-     * Sets (and replaces) any existing header with the specified header.  If you do not want to replace the existing
-     * header and only want to append to it, use the {@link #setHeaderParams(java.util.Map)} method instead.
+     * <blockquote><pre>
+     * String jwt = Jwts.builder()
      *
-     * @param header the header to set (and potentially replace any existing header).
-     * @return the builder for method chaining.
-     */
-    JwtBuilder setHeader(Map<String, ?> header);
-
-    /**
-     * Sets (and replaces) any existing header with the header resulting from the specified builder's
-     * {@link Builder#build()} result.
+     *     <b>.header()
+     *         .setKeyId("keyId")
+     *         .set(myHeaderMap)
+     *         // ... other header params ...
+     *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
      *
-     * @param builder the builder to use to obtain the header
-     * @return the JwtBuilder for method chaining.
+     *     .setSubject("Joe") // resume JwtBuilder calls
+     *     // ... etc ...
+     *     .compact();</pre></blockquote>
+     *
+     * @return the {@link JwtBuilder.Header} to use for header construction.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setHeader(Builder<? extends Header<?>> builder);
+    JwtBuilder.Header header();
+
+    /**
+     * Sets (and replaces) any existing header with the specified name/value pairs.  If you do not want to replace the
+     * existing header and only want to append to it, call
+     * {@link #header()}{@code .}{@link io.jsonwebtoken.lang.MapMutator#set(Map) set(map)}
+     * instead.
+     *
+     * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
+     * @return the builder for method chaining.
+     */
+    JwtBuilder setHeader(Map<String, ?> map);
 
     /**
      * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method
@@ -118,7 +123,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
-     * {@link Header#getContentType() contentType} header value so the JWT recipient may inspect that value to
+     * {@link Header#setContentType(String) contentType} header value so the JWT recipient may inspect that value to
      * determine how to convert the byte array to the final data type as desired. In this case, consider using
      * {@link #setContent(byte[], String)} instead.
      *
@@ -173,7 +178,15 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">JWT specification recommendations</a>.</p>
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
-     * method - instead call {@link #setContent(byte[])} and {@link Header#setContentType(String)} independently.</p>
+     * method - instead call {@link #setContent(byte[])} and set the header's
+     * {@link Header#setContentType(String) contentType} independently.  For example:</p>
+     *
+     * <blockquote><pre>
+     * Jwts.builder()
+     *     .header().setContentType("application/whatever").and()
+     *     .setContent(byteArray)
+     *     ...
+     *     .build();</pre></blockquote>
      *
      * <p>If you want the JWT payload to be JSON claims, use the {@link #setClaims(Claims)} or
      * {@link #setClaims(java.util.Map)} methods instead.</p>
@@ -229,7 +242,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setIssuer(String) issuer} field with the specified value.  This allows you to write
+     * the Claims {@link Claims#getIssuer() issuer} field with the specified value.  This allows you to write
      * code like this:</p>
      *
      * <pre>
@@ -238,7 +251,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>instead of this:</p>
      * <pre>
-     * Claims claims = Jwts.claims().setIssuer("Joe");
+     * Claims claims = Jwts.claims().setIssuer("Joe").build();
      * String jwt = Jwts.builder().setClaims(claims).compact();
      * </pre>
      * <p>if desired.</p>
@@ -256,18 +269,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setSubject(String) subject} field with the specified value.  This allows you to write
+     * the Claims {@link Claims#getSubject() subject} field with the specified value.  This allows you to write
      * code like this:</p>
      *
-     * <pre>
-     * String jwt = Jwts.builder().setSubject("Me").compact();
-     * </pre>
+     * <blockquote><pre>
+     * String jwt = Jwts.builder().setSubject("Me").compact();</pre></blockquote>
      *
      * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setSubject("Me");
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
+     * <blockquote><pre>
+     * Claims claims = Jwts.claims().setSubject("Me").build();
+     * String jwt = Jwts.builder().setClaims(claims).compact();</pre></blockquote>
      * <p>if desired.</p>
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.
@@ -283,7 +294,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setAudience(String) audience} field with the specified value.  This allows you to write
+     * the Claims {@link Claims#getAudience() audience} field with the specified value.  This allows you to write
      * code like this:</p>
      *
      * <pre>
@@ -312,7 +323,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setExpiration(java.util.Date) expiration} field with the specified value.  This allows
+     * the Claims {@link Claims#getExpiration() expiration} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -341,7 +352,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setNotBefore(java.util.Date) notBefore} field with the specified value.  This allows
+     * the Claims {@link Claims#getNotBefore() notBefore} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -370,7 +381,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>The value is the timestamp when the JWT was created.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setIssuedAt(java.util.Date) issuedAt} field with the specified value.  This allows
+     * the Claims {@link Claims#getIssuedAt() issuedAt} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -401,7 +412,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.</p>
      *
      * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#setId(String) id} field with the specified value.  This allows
+     * the Claims {@link Claims#getId() id} field with the specified value.  This allows
      * you to write code like this:</p>
      *
      * <pre>
@@ -475,67 +486,67 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA256")</code><sup>1</sup></td>
      * <td>256 &lt;= size &lt;= 383 <sup>2</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#HS256 HS256}</td>
+     * <td>{@link Jwts.SIG#HS256 HS256}</td>
      * </tr>
      * <tr>
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA384")</code><sup>1</sup></td>
      * <td>384 &lt;= size &lt;= 511</td>
-     * <td>{@link StandardSecureDigestAlgorithms#HS384 HS384}</td>
+     * <td>{@link Jwts.SIG#HS384 HS384}</td>
      * </tr>
      * <tr>
      * <td>{@link SecretKey}</td>
      * <td><code>{@link Key#getAlgorithm() getAlgorithm()}.equals("HmacSHA512")</code><sup>1</sup></td>
      * <td>512 &lt;= size</td>
-     * <td>{@link StandardSecureDigestAlgorithms#HS512 HS512}</td>
+     * <td>{@link Jwts.SIG#HS512 HS512}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>256 &lt;= size &lt;= 383 <sup>3</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#ES256 ES256}</td>
+     * <td>{@link Jwts.SIG#ES256 ES256}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>384 &lt;= size &lt;= 520 <sup>4</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#ES384 ES384}</td>
+     * <td>{@link Jwts.SIG#ES384 ES384}</td>
      * </tr>
      * <tr>
      * <td>{@link ECKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td><b>521</b> &lt;= size <sup>4</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#ES512 ES512}</td>
+     * <td>{@link Jwts.SIG#ES512 ES512}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>2048 &lt;= size &lt;= 3071 <sup>5,6</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#RS256 RS256}</td>
+     * <td>{@link Jwts.SIG#RS256 RS256}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>3072 &lt;= size &lt;= 4095 <sup>6</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#RS384 RS384}</td>
+     * <td>{@link Jwts.SIG#RS384 RS384}</td>
      * </tr>
      * <tr>
      * <td>{@link RSAKey}</td>
      * <td><code>instanceof {@link PrivateKey}</code></td>
      * <td>4096 &lt;= size <sup>5</sup></td>
-     * <td>{@link StandardSecureDigestAlgorithms#RS512 RS512}</td>
+     * <td>{@link Jwts.SIG#RS512 RS512}</td>
      * </tr>
      * <tr>
      *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
      *     <td><code>instanceof {@link PrivateKey}</code></td>
      *     <td>256</td>
-     *     <td>{@link StandardSecureDigestAlgorithms#Ed25519 Ed25519}</td>
+     *     <td>{@link Jwts.SIG#Ed25519 Ed25519}</td>
      * </tr>
      * <tr>
      *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
      *     <td><code>instanceof {@link PrivateKey}</code></td>
      *     <td>456</td>
-     *     <td>{@link StandardSecureDigestAlgorithms#Ed448 Ed448}</td>
+     *     <td>{@link Jwts.SIG#Ed448 Ed448}</td>
      * </tr>
      * </tbody>
      * </table>
@@ -561,18 +572,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@code RSAKey}s with key lengths less than 2048 bits will be rejected with a
      * {@link WeakKeyException}.</li>
      * <li>Technically any RSA key of length &gt;= 2048 bits may be used with the
-     * {@link StandardSecureDigestAlgorithms#RS256 RS256}, {@link StandardSecureDigestAlgorithms#RS384 RS384}, and
-     * {@link StandardSecureDigestAlgorithms#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
+     * {@link Jwts.SIG#RS256 RS256}, {@link Jwts.SIG#RS384 RS384}, and
+     * {@link Jwts.SIG#RS512 RS512} algorithms, so we assume an RSA signature algorithm based on the key
      * length to parallel similar decisions in the JWT specification for HMAC and ECDSA signature algorithms.
      * This is not required - just a convenience.</li>
      * <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a>s
      * require JDK &gt;= 15 or BouncyCastle in the runtime classpath.</li>
      * </ol>
      *
-     * <p>This implementation does not use the {@link StandardSecureDigestAlgorithms#PS256 PS256},
-     * {@link StandardSecureDigestAlgorithms#PS384 PS384}, or {@link StandardSecureDigestAlgorithms#PS512 PS512} RSA variants for any
-     * specified {@link RSAKey} because the the {@link StandardSecureDigestAlgorithms#RS256 RS256},
-     * {@link StandardSecureDigestAlgorithms#RS384 RS384}, and {@link StandardSecureDigestAlgorithms#RS512 RS512} algorithms are
+     * <p>This implementation does not use the {@link Jwts.SIG#PS256 PS256},
+     * {@link Jwts.SIG#PS384 PS384}, or {@link Jwts.SIG#PS512 PS512} RSA variants for any
+     * specified {@link RSAKey} because the the {@link Jwts.SIG#RS256 RS256},
+     * {@link Jwts.SIG#RS384 RS384}, and {@link Jwts.SIG#RS512 RS512} algorithms are
      * available in the JDK by default while the {@code PS}* variants require either JDK 11 or an additional JCA
      * Provider (like BouncyCastle).  If you wish to use a {@code PS}* variant with your key, use the
      * {@link #signWith(Key, SecureDigestAlgorithm)} method instead.</p>
@@ -585,7 +596,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      * @throws InvalidKeyException if the Key is insufficient, unsupported, or explicitly disallowed by the JWT
      *                             specification as described above in <em>recommended signature algorithms</em>.
-     * @see Jwts#SIG
+     * @see Jwts.SIG
      * @see #signWith(Key, SecureDigestAlgorithm)
      * @since 0.10.0
      */
@@ -686,7 +697,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p><b>This has been deprecated since JJWT_RELEASE_VERSION.  Use
      * {@link #signWith(Key, SecureDigestAlgorithm)} instead</b>.  Standard JWA algorithms
-     * are represented as instances of this new interface in the {@link Jwts#SIG}
+     * are represented as instances of this new interface in the {@link Jwts.SIG}
      * algorithm registry.</p>
      *
      * <p>Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.</p>
@@ -710,7 +721,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Signs the constructed JWT with the specified key using the specified algorithm, producing a JWS.
      *
-     * <p>The {@link Jwts#SIG} registry makes available all standard signature
+     * <p>The {@link Jwts.SIG} registry makes available all standard signature
      * algorithms defined in the JWA specification.</p>
      *
      * <p>It is typically recommended to call the {@link #signWith(Key)} instead for simplicity.
@@ -724,10 +735,10 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws InvalidKeyException if the Key is insufficient or explicitly disallowed by the JWT specification for
      *                             the specified algorithm.
      * @see #signWith(Key)
-     * @see Jwts#SIG
+     * @see Jwts.SIG
      * @since JJWT_RELEASE_VERSION
      */
-    <K extends Key> JwtBuilder signWith(K key, io.jsonwebtoken.security.SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
+    <K extends Key> JwtBuilder signWith(K key, SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
 
     /**
      * Encrypts the constructed JWT with the specified symmetric {@code key} using the provided {@code enc}ryption
@@ -740,12 +751,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <ul>
      *     <li>If the provided {@code key} is a {@link Password Password} instance,
      *     the {@code KeyAlgorithm} used will be one of the three JWA-standard password-based key algorithms
-     *      ({@link StandardKeyAlgorithms#PBES2_HS256_A128KW PBES2_HS256_A128KW},
-     *      {@link StandardKeyAlgorithms#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
-     *      {@link StandardKeyAlgorithms#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
+     *      ({@link Jwts.KEY#PBES2_HS256_A128KW PBES2_HS256_A128KW},
+     *      {@link Jwts.KEY#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
+     *      {@link Jwts.KEY#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
      *      {@link AeadAlgorithm#getKeyBitLength() key length} requirement.</li>
      *     <li>If the {@code key} is otherwise a standard {@code SecretKey}, the {@code KeyAlgorithm} will be
-     *     {@link StandardKeyAlgorithms#DIRECT}, indicating that {@code key} should be used directly with the
+     *     {@link Jwts.KEY#DIRECT DIRECT}, indicating that {@code key} should be used directly with the
      *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
      *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
      *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's
@@ -754,9 +765,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param key the symmetric encryption key to use with the {@code enc} algorithm.
      * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE, usually one of the JWA-standard
-     *            algorithms accessible via {@link Jwts#ENC}.
+     *            algorithms accessible via {@link Jwts.ENC}.
      * @return the JWE builder for method chaining.
-     * @see Jwts#ENC
+     * @see Jwts.ENC
      */
     JwtBuilder encryptWith(SecretKey key, AeadAlgorithm enc);
 
@@ -777,7 +788,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * </ol>
      *
      * <p>Most application developers will reference one of the JWA
-     * {@link Jwts#KEY standard key algorithms} and {@link Jwts#ENC standard encryption algorithms}
+     * {@link Jwts.KEY standard key algorithms} and {@link Jwts.ENC standard encryption algorithms}
      * when invoking this method, but custom implementations are also supported.</p>
      *
      * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
@@ -786,13 +797,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *               {@code enc} algorithm
      * @param enc    the {@link AeadAlgorithm} algorithm used to encrypt the JWE
      * @return the JWE builder for method chaining.
-     * @see Jwts#ENC
-     * @see Jwts#KEY
+     * @see Jwts.ENC
+     * @see Jwts.KEY
      */
     <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);
 
     /**
-     * Compresses the JWT payload using the specified {@link CompressionCodec}.
+     * Compresses the JWT payload using the specified {@link CompressionAlgorithm}.
      *
      * <p>If your compact JWTs are large, and you want to reduce their total size during network transmission, this
      * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
@@ -809,12 +820,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>Compression when creating JWE tokens however should be universally accepted for any
      * library that supports JWE.</p>
      *
-     * @param codec implementation of the {@link CompressionCodec} to be used.
+     * @param alg implementation of the {@link CompressionAlgorithm} to be used.
      * @return the builder for method chaining.
-     * @see io.jsonwebtoken.CompressionCodecs
-     * @since 0.6.0
+     * @see Jwts.ZIP
+     * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder compressWith(CompressionCodec codec);
+    JwtBuilder compressWith(CompressionAlgorithm alg);
 
     /**
      * Perform Base64Url encoding with the specified Encoder.
@@ -850,4 +861,21 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return A compact URL-safe JWT string.
      */
     String compact();
+
+    /**
+     * Editable header for use with a {@link JwtBuilder} that supports method chaining for any/all
+     * standard JWT, JWS and JWE header parameters.  Once header parameters are configured, the associated
+     * {@link JwtBuilder} may be obtained with the {@link #and() and()} method for continued configuration.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Header extends JweHeaderMutator<Header>, X509Builder<Header> {
+
+        /**
+         * Returns the associated JwtBuilder for continued configuration.
+         *
+         * @return the associated JwtBuilder for continued configuration.
+         */
+        JwtBuilder and();
+    }
 }

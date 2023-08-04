@@ -73,7 +73,7 @@ class KeysTest {
                     "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                     "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                     "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                    "output size).  Consider using the StandardSecureDigestAlgorithms.HS256.keyBuilder() method (or " +
+                    "output size).  Consider using the Jwts.SIG.HS256.keyBuilder() method (or " +
                     "HS384.keyBuilder() or HS512.keyBuilder()) to create a key guaranteed to be secure enough " +
                     "for your preferred HMAC-SHA algorithm.  See " +
                     "https://tools.ietf.org/html/rfc7518#section-3.2 for more information." as String, expected.message
@@ -129,7 +129,7 @@ class KeysTest {
 
     @Test
     void testSecretKeyFor() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
             if (alg instanceof MacAlgorithm) {
                 SecretKey key = alg.keyBuilder().build()
                 assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
@@ -207,7 +207,7 @@ class KeysTest {
     @Test
     void testKeyPairFor() {
 
-        for (SecureDigestAlgorithm alg : Jwts.SIG.values()) {
+        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
 
             if (alg instanceof RsaSignatureAlgorithm) {
 

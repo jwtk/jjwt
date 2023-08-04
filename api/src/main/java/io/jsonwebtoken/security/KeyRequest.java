@@ -58,8 +58,8 @@ public interface KeyRequest<T> extends Request<T> {
     AeadAlgorithm getEncryptionAlgorithm();
 
     /**
-     * Returns the {@link JweHeader} that will be used to construct the final JWE, available for reading or writing
-     * any {@link KeyAlgorithm}-specific information.
+     * Returns the {@link JweHeader} that will be used to construct the final JWE header, available for
+     * reading or writing any {@link KeyAlgorithm}-specific information.
      *
      * <p>For an encryption key request, any <em>public</em> information specific to the called {@code KeyAlgorithm}
      * implementation that is required to be transmitted in the JWE (such as an initialization vector,
@@ -71,8 +71,8 @@ public interface KeyRequest<T> extends Request<T> {
      * (such as an initialization vector, authentication tag, ephemeral key, etc) is expected to be available in
      * this header.</p>
      *
-     * @return the {@link JweHeader} that will be used to construct the final JWE, available for reading or writing
-     * any {@link KeyAlgorithm}-specific information.
+     * @return the {@link JweHeader} that will be used to construct the final JWE header, available for
+     * reading or writing any {@link KeyAlgorithm}-specific information.
      */
     JweHeader getHeader();
 }

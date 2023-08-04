@@ -49,6 +49,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
     public KeyResult getEncryptionKey(final KeyRequest<SecretKey> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
+        final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());
         final SecretKey cek = generateKey(request);
         final byte[] iv = ensureInitializationVector(request);
@@ -72,8 +73,8 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
 
         String encodedIv = Encoders.BASE64URL.encode(iv);
         String encodedTag = Encoders.BASE64URL.encode(tag);
-        request.getHeader().put(DefaultJweHeader.IV.getId(), encodedIv);
-        request.getHeader().put(DefaultJweHeader.TAG.getId(), encodedTag);
+        header.put(DefaultJweHeader.IV.getId(), encodedIv);
+        header.put(DefaultJweHeader.TAG.getId(), encodedTag);
 
         return new DefaultKeyResult(cek, ciphertext);
     }
@@ -84,7 +85,8 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         final SecretKey kek = assertKey(request.getKey());
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
         final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
-        final FieldReadable reader = new RequiredFieldReader(header);
+        FieldReadable frHeader = Assert.isInstanceOf(FieldReadable.class, header, "Header must implement FieldReadable.");
+        final FieldReadable reader = new RequiredFieldReader(frHeader);
         final byte[] tag = reader.get(DefaultJweHeader.TAG);
         final byte[] iv = reader.get(DefaultJweHeader.IV);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);

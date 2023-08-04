@@ -19,6 +19,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
@@ -27,7 +28,6 @@ import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
-import io.jsonwebtoken.UnprotectedHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
@@ -40,6 +40,7 @@ import java.util.Map;
 /**
  * This JwtParser implementation exists as a stop gap until the mutable methods are removed from JwtParser.
  * TODO: remove this class BEFORE 1.0
+ *
  * @since 0.11.0
  */
 class ImmutableJwtParser implements JwtParser {
@@ -146,7 +147,7 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<?,?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public Jwt<?, ?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parse(jwt);
     }
 
@@ -156,12 +157,12 @@ class ImmutableJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<UnprotectedHeader, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public Jwt<Header, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parseContentJwt(jwt);
     }
 
     @Override
-    public Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+    public Jwt<Header, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         return this.jwtParser.parseClaimsJwt(jwt);
     }
 

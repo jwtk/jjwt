@@ -34,9 +34,9 @@ import io.jsonwebtoken.Identifiable;
  *
  * <p>Constant definitions and utility methods for common (<em>but not all</em>)
  * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
- * Algorithms</a> are available via the {@link StandardHashAlgorithms} singleton.</p>
+ * Algorithms</a> are available via {@link Jwks.HASH}.</p>
  *
- * @see StandardHashAlgorithms
+ * @see Jwks.HASH
  * @since JJWT_RELEASE_VERSION
  */
 public interface HashAlgorithm extends DigestAlgorithm<Request<byte[]>, VerifyDigestRequest> {

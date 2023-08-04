@@ -15,9 +15,10 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.impl.DefaultJweHeader
+import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.impl.lang.CheckedSupplier
@@ -96,7 +97,7 @@ class AesGcmKeyAlgorithmTest {
 
         def template = new JcaTemplate('AES', null)
 
-        def header = new DefaultJweHeader()
+        def header = Jwts.header()
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
@@ -106,14 +107,17 @@ class AesGcmKeyAlgorithmTest {
             }
         }
 
-        def ereq = new DefaultKeyRequest(kek, null, null, header, enc)
+        def delegate = new DefaultMutableJweHeader(header)
+        def ereq = new DefaultKeyRequest(kek, null, null, delegate, enc)
 
         def result = alg.getEncryptionKey(ereq)
 
         byte[] encryptedKeyBytes = result.getPayload()
         assertFalse "encryptedKey must be populated", Arrays.length(encryptedKeyBytes) == 0
 
-        def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, header, enc, kek))
+        def jweHeader = header.build() as JweHeader
+
+        def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, jweHeader, enc, kek))
 
         //Assert the decrypted key matches the original cek
         assertEquals cek.algorithm, dcek.algorithm
@@ -131,7 +135,7 @@ class AesGcmKeyAlgorithmTest {
         int keyLength = 128
         def alg = new AesGcmKeyAlgorithm(keyLength)
         def template = new JcaTemplate('AES', null)
-        def header = new DefaultJweHeader()
+        def headerBuilder = Jwts.header()
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
@@ -140,14 +144,17 @@ class AesGcmKeyAlgorithmTest {
                 return new FixedSecretKeyBuilder(cek)
             }
         }
-        def ereq = new DefaultKeyRequest(kek, null, null, header, enc)
+        def delegate = new DefaultMutableJweHeader(headerBuilder)
+        def ereq = new DefaultKeyRequest(kek, null, null, delegate, enc)
         def result = alg.getEncryptionKey(ereq)
 
-        header.remove(headerName)
+        headerBuilder.remove(headerName)
 
-        header.put(headerName, value)
+        headerBuilder.put(headerName, value)
 
         byte[] encryptedKeyBytes = result.getPayload()
+
+        def header = headerBuilder.build() as JweHeader
 
         try {
             alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, header, enc, kek))

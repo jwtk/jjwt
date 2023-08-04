@@ -48,5 +48,5 @@ public interface TokenizedJwt {
      * @param m the header state
      * @return a new header instance.
      */
-    Header<?> createHeader(Map<String, ?> m);
+    Header createHeader(Map<String, ?> m);
 }

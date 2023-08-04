@@ -22,7 +22,7 @@ package io.jsonwebtoken;
  * @param <B> payload type, either {@link Claims} or {@code byte[]} content.
  * @since JJWT_RELEASE_VERSION
  */
-public interface Jwe<B> extends Jwt<JweHeader, B> {
+public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
 
     /**
      * Returns the Initialization Vector used during JWE encryption and decryption.
@@ -30,13 +30,4 @@ public interface Jwe<B> extends Jwt<JweHeader, B> {
      * @return the Initialization Vector used during JWE encryption and decryption.
      */
     byte[] getInitializationVector();
-
-    /**
-     * Returns the Additional Authenticated Data authentication Tag used for JWE header
-     * authenticity and integrity verification.
-     *
-     * @return the Additional Authenticated Data authentication Tag used for JWE header
-     * authenticity and integrity verification.
-     */
-    byte[] getAadTag();
 }

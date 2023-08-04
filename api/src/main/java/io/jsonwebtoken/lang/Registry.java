@@ -15,41 +15,37 @@
  */
 package io.jsonwebtoken.lang;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
- * An immutable read-only repository of key-value pairs.
+ * An immutable (read-only) repository of key-value pairs. In addition to {@link Map} read methods, this interface also
+ * provides guaranteed/expected lookup via the {@link #forKey(Object)} method.
+ *
+ * <p><b>Immutability</b></p>
+ *
+ * <p>Registries are immutable and cannot be changed.  {@code Registry} extends the
+ * {@link Map} interface purely out of convenience: to allow easy key/value
+ * pair access and iteration, and other conveniences provided by the Map interface, as well as for seamless use with
+ * existing Map-based APIs.  Attempting to call any of
+ * the {@link Map} interface's mutation methods however (such as {@link Map#put(Object, Object) put},
+ * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
+ * {@link UnsupportedOperationException}.</p>
  *
  * @param <K> key type
  * @param <V> value type
  * @since JJWT_RELEASE_VERSION
  */
-public interface Registry<K, V> {
-
-    /**
-     * Returns all registry values as a read-only collection.
-     *
-     * @return all registry values as a read-only collection.
-     */
-    Collection<V> values();
+public interface Registry<K, V> extends Map<K, V> {
 
     /**
      * Returns the value assigned the specified key or throws an {@code IllegalArgumentException} if there is no
-     * associated value.  If a value is not required, consider using the {@link #find(Object)} method instead.
+     * associated value.  If a value is not required, consider using the {@link #get(Object)} method instead.
      *
      * @param key the registry key assigned to the required value
      * @return the value assigned the specified key
      * @throws IllegalArgumentException if there is no value assigned the specified key
-     * @see #find(Object)
-     */
-    V get(K key) throws IllegalArgumentException;
-
-    /**
-     * Returns the value assigned the specified key or {@code null} if there is no associated value.
-     *
-     * @param key the registry key assigned to the required value
-     * @return the value assigned the specified key or {@code null} if there is no associated value.
      * @see #get(Object)
      */
-    V find(K key);
+    V forKey(K key) throws IllegalArgumentException;
+
 }

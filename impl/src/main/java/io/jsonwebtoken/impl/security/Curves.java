@@ -63,16 +63,16 @@ public final class Curves {
 
     public static Curve findById(String jwaId) {
         Assert.hasText(jwaId, "jwaId cannot be null or empty.");
-        return CURVES_BY_ID.find(jwaId);
+        return CURVES_BY_ID.get(jwaId);
     }
 
     public static Curve findByJcaName(String jcaName) {
         Assert.hasText(jcaName, "jcaName cannot be null or empty.");
-        return CURVES_BY_JCA_NAME.find(jcaName);
+        return CURVES_BY_JCA_NAME.get(jcaName);
     }
 
     public static ECCurve findBy(EllipticCurve curve) {
         Assert.notNull(curve, "EllipticCurve argument cannot be null.");
-        return CURVES_BY_JCA_CURVE.find(curve);
+        return CURVES_BY_JCA_CURVE.get(curve);
     }
 }

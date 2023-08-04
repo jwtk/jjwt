@@ -37,5 +37,5 @@ public interface Locator<T> {
      *               {@link JweHeader} depending on if the respective JWT is an unprotected JWT, JWS or JWE.
      * @return an object referenced in the specified {@code header}, or {@code null} if the object couldn't be found.
      */
-    T locate(Header<?> header);
+    T locate(Header header);
 }

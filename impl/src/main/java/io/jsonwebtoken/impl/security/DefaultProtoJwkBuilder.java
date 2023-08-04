@@ -198,11 +198,11 @@ public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
 
     @Override
     public J build() {
-        if (Strings.hasText(this.jwkContext.get(AbstractJwk.KTY))) {
+        if (Strings.hasText(this.DELEGATE.get(AbstractJwk.KTY))) {
             // Ensure we have a context that represents the configured kty value.  Converting the existing context to
             // the type-specific context will also perform any necessary field value type conversion / error checking
             // this will also perform any necessary field value type conversions / error checking
-            setContext(this.jwkFactory.newContext(this.jwkContext, this.jwkContext.getKey()));
+            setDelegate(this.jwkFactory.newContext(this.DELEGATE, this.DELEGATE.getKey()));
         }
         return super.build();
     }

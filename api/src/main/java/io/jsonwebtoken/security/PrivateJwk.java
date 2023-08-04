@@ -24,7 +24,7 @@ import java.security.PublicKey;
  * <p><b>JWK Private Key vs Java {@code PrivateKey} differences</b></p>
  *
  * <p>Unlike the Java cryptography APIs, the JWK specification requires all public key <em>and</em> private key
- * properties to be contained within every private JWK. As such, a {@code PrivateJwk} of course represents
+ * properties to be contained within every private JWK. As such, a {@code PrivateJwk} indeed represents
  * private key fields as its name implies, but it is probably more similar to the Java JCA concept of a
  * {@link java.security.KeyPair} since it contains everything for both keys.</p>
  *

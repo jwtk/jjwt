@@ -21,33 +21,27 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 
-public class DefaultJwe<P> extends DefaultJwt<JweHeader, P> implements Jwe<P> {
+import java.security.MessageDigest;
+
+public class DefaultJwe<P> extends DefaultProtectedJwt<JweHeader, P> implements Jwe<P> {
+
+    private static final String DIGEST_NAME = "tag";
 
     private final byte[] iv;
-    private final byte[] aadTag;
 
     public DefaultJwe(JweHeader header, P body, byte[] iv, byte[] aadTag) {
-        super(header, body);
+        super(header, body, aadTag, DIGEST_NAME);
         this.iv = Assert.notEmpty(iv, "Initialization vector cannot be null or empty.");
-        this.aadTag = Assert.notEmpty(aadTag, "AAD tag cannot be null or empty.");
     }
 
     @Override
     public byte[] getInitializationVector() {
-        return this.iv;
-    }
-
-    @Override
-    public byte[] getAadTag() {
-        return this.aadTag;
+        return this.iv.clone();
     }
 
     @Override
     protected StringBuilder toStringBuilder() {
-        StringBuilder sb = super.toStringBuilder();
-        sb.append(",iv=").append(Encoders.BASE64URL.encode(this.iv));
-        sb.append(",tag=").append(Encoders.BASE64URL.encode(this.aadTag));
-        return sb;
+        return super.toStringBuilder().append(",iv=").append(Encoders.BASE64URL.encode(this.iv));
     }
 
     @Override
@@ -57,15 +51,13 @@ public class DefaultJwe<P> extends DefaultJwt<JweHeader, P> implements Jwe<P> {
         }
         if (obj instanceof Jwe) {
             Jwe<?> jwe = (Jwe<?>) obj;
-            return super.equals(jwe) &&
-                    Objects.nullSafeEquals(iv, jwe.getInitializationVector()) &&
-                    Objects.nullSafeEquals(aadTag, jwe.getAadTag());
+            return super.equals(jwe) && MessageDigest.isEqual(this.iv, jwe.getInitializationVector());
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.nullSafeHashCode(getHeader(), getPayload(), iv, aadTag);
+        return Objects.nullSafeHashCode(getHeader(), getPayload(), this.iv, this.digest);
     }
 }

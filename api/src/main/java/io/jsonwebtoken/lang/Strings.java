@@ -232,6 +232,32 @@ public final class Strings {
     }
 
     /**
+     * Returns the specified string's UTF-8 bytes, or {@code null} if the string is {@code null}.
+     *
+     * @param s the string to obtain UTF-8 bytes
+     * @return the specified string's UTF-8 bytes, or {@code null} if the string is {@code null}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static byte[] utf8(String s) {
+        byte[] bytes = null;
+        if (s != null) {
+            bytes = s.getBytes(UTF_8);
+        }
+        return bytes;
+    }
+
+    /**
+     * Returns {@code new String(utf8Bytes, StandardCharsets.UTF_8)}.
+     *
+     * @param utf8Bytes UTF-8 bytes to use with the {@code String} constructor.
+     * @return {@code new String(utf8Bytes, StandardCharsets.UTF_8)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static String utf8(byte[] utf8Bytes) {
+        return new String(utf8Bytes, UTF_8);
+    }
+
+    /**
      * Returns a String representation (1s and 0s) of the specified byte.
      *
      * @param b the byte to represent as 1s and 0s.
@@ -1281,6 +1307,7 @@ public final class Strings {
      * <p>To this:</p>
      * <blockquote><pre>
      * nespace(sb).append(nextWord);</pre></blockquote>
+     *
      * @param sb the string builder to append a space to if non-empty
      * @return the string builder argument for method chaining.
      * @since JJWT_RELEASE_VERSION

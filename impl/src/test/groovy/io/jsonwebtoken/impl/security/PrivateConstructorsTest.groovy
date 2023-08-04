@@ -15,9 +15,11 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
 class PrivateConstructorsTest {
@@ -28,5 +30,10 @@ class PrivateConstructorsTest {
         new KeysBridge()
         new Conditions()
         new Functions()
+        new Jwts.SIG()
+        new Jwts.ENC()
+        new Jwts.KEY()
+        new Jwts.ZIP()
+        new Jwks.HASH()
     }
 }

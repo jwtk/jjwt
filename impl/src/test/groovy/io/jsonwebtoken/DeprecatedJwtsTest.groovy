@@ -15,11 +15,10 @@
  */
 package io.jsonwebtoken
 
+import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
-import io.jsonwebtoken.impl.DefaultUnprotectedHeader
 import io.jsonwebtoken.impl.JwtTokenizer
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
-import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
@@ -32,7 +31,6 @@ import org.junit.Test
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -82,33 +80,21 @@ class DeprecatedJwtsTest {
 
     @Test
     void testHeaderWithNoArgs() {
-        def header = Jwts.unprotectedHeader()
-        assertTrue header instanceof DefaultUnprotectedHeader
+        def header = Jwts.header().build()
+        assertTrue header instanceof DefaultHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header([alg: "HS256"])
-        assertTrue header instanceof DefaultUnprotectedHeader
-        assertEquals header.alg, 'HS256'
-    }
-
-    @Test
-    void testJwsHeaderWithNoArgs() {
-        def header = Jwts.jwsHeader()
+        def header = Jwts.header().set([alg: "HS256"]).build()
         assertTrue header instanceof DefaultJwsHeader
-    }
-
-    @Test
-    void testJwsHeaderWithMapArg() {
-        def header = Jwts.jwsHeader([alg: "HS256"])
-        assertTrue header instanceof DefaultJwsHeader
-        assertEquals header.getAlgorithm(), 'HS256'
+        assertEquals 'HS256', header.getAlgorithm()
+        assertEquals 'HS256', header.alg
     }
 
     @Test
     void testClaims() {
-        Claims claims = Jwts.claims()
+        Claims claims = Jwts.claims().build()
         assertNotNull claims
     }
 
@@ -350,7 +336,7 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.DEFLATE).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
 
@@ -372,7 +358,7 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.GZIP).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.GZIP).compact()
 
         def jws = Jwts.parser().setSigningKey(key).parseClaimsJws(compact)
 
@@ -394,20 +380,20 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
             }
         }).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new DefaultCompressionCodecResolver() {
+        def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new CompressionCodecResolver() {
             @Override
-            CompressionCodec resolveCompressionCodec(Header header) {
+            CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return CompressionCodecs.GZIP
+                    return Jwts.ZIP.GZIP as CompressionCodec
                 } else {
                     return null
                 }
@@ -424,7 +410,7 @@ class DeprecatedJwtsTest {
 
     }
 
-    @Test(expected = CompressionException.class)
+    @Test(expected = UnsupportedJwtException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
         SignatureAlgorithm alg = SignatureAlgorithm.HS256
@@ -433,7 +419,7 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
@@ -452,7 +438,7 @@ class DeprecatedJwtsTest {
         String payload = "this is my test for a payload"
 
         String compact = Jwts.builder().setPayload(payload).signWith(alg, key)
-                .compressWith(CompressionCodecs.DEFLATE).compact()
+                .compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parser().setSigningKey(key).parseContentJws(compact)
 
@@ -460,7 +446,7 @@ class DeprecatedJwtsTest {
 
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
-        assertEquals "this is my test for a payload", new String(parsed, StandardCharsets.UTF_8)
+        assertEquals "this is my test for a payload", Strings.utf8(parsed)
     }
 
     @Test

@@ -29,7 +29,6 @@ import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
-import java.security.Key
 import java.security.KeyPair
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.ECParameterSpec
@@ -431,7 +430,7 @@ class RFC7520Section5Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_73) as RsaPrivateJwk
         RSAPublicKey key = jwk.toPublicJwk().toKey()
 
-        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithmsBridge.RSA1_5_ID, StandardKeyAlgorithmsBridge.RSA1_5_TRANSFORMATION) {
+        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA1_5_ID, StandardKeyAlgorithms.RSA1_5_TRANSFORMATION) {
             @Override
             SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_74) // ensure RFC required value
@@ -495,7 +494,7 @@ class RFC7520Section5Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_84) as RsaPrivateJwk
         RSAPublicKey key = jwk.toPublicJwk().toKey()
 
-        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithmsBridge.RSA_OAEP_ID, StandardKeyAlgorithmsBridge.RSA_OAEP_TRANSFORMATION) {
+        def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA_OAEP_ID, StandardKeyAlgorithms.RSA_OAEP_TRANSFORMATION) {
             @Override
             SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_85) // ensure RFC required value
@@ -562,14 +561,14 @@ class RFC7520Section5Test {
 
         def wrapAlg = new AesWrapKeyAlgorithm(256) {
             @Override
-            SecretKey generateKey(KeyRequest<? extends Key> request) {
+            SecretKey generateKey(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_97) // ensure RFC value
                 return new SecretKeySpec(encoded, "AES")
             }
         }
         def alg = new Pbes2HsAkwAlgorithm(512, wrapAlg) {
             @Override
-            protected byte[] generateInputSalt(KeyRequest<? extends Key> request) {
+            protected byte[] generateInputSalt(KeyRequest<?> request) {
                 return b64Url(FIGURE_99) // ensure RFC value
             }
         }
@@ -599,7 +598,7 @@ class RFC7520Section5Test {
 
         String result = Jwts.builder()
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeader(Jwts.header().setContentType(cty).setPbes2Count(p2c))
+                .header().setContentType(cty).setPbes2Count(p2c).and()
                 .setPayload(FIGURE_95)
                 .encryptWith(key, alg, enc)
                 .compact()

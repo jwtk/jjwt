@@ -21,12 +21,14 @@ package io.jsonwebtoken;
  * @param <B> the type of the JWS body contents, either a String or a {@link Claims} instance.
  * @since 0.1
  */
-public interface Jws<B> extends Jwt<JwsHeader, B> {
+public interface Jws<B> extends ProtectedJwt<JwsHeader, B> {
 
     /**
      * Returns the verified JWS signature as a Base64Url string.
      *
      * @return the verified JWS signature as a Base64Url string.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getDigest() getDigest()}.
      */
+    @Deprecated
     String getSignature(); //TODO for 1.0: return a byte[]
 }

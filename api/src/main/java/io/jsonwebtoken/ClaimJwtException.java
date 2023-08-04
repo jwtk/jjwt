@@ -43,7 +43,7 @@ public abstract class ClaimJwtException extends JwtException {
     /**
      * The header associated with the Claims that failed validation.
      */
-    private final Header<?> header;
+    private final Header header;
 
     /**
      * The Claims that failed validation.
@@ -57,7 +57,7 @@ public abstract class ClaimJwtException extends JwtException {
      * @param claims  the claims obtained
      * @param message the exception message
      */
-    protected ClaimJwtException(Header<?> header, Claims claims, String message) {
+    protected ClaimJwtException(Header header, Claims claims, String message) {
         super(message);
         this.header = header;
         this.claims = claims;
@@ -72,7 +72,7 @@ public abstract class ClaimJwtException extends JwtException {
      * @param message the exception message
      * @param cause   the exception that caused this ClaimJwtException to be thrown.
      */
-    protected ClaimJwtException(Header<?> header, Claims claims, String message, Throwable cause) {
+    protected ClaimJwtException(Header header, Claims claims, String message, Throwable cause) {
         super(message, cause);
         this.header = header;
         this.claims = claims;
@@ -92,7 +92,7 @@ public abstract class ClaimJwtException extends JwtException {
      *
      * @return the header associated with the {@link #getClaims() claims} that failed validation.
      */
-    public Header<?> getHeader() {
+    public Header getHeader() {
         return header;
     }
 }

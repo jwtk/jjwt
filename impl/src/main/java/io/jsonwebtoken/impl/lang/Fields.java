@@ -15,10 +15,15 @@
  */
 package io.jsonwebtoken.impl.lang;
 
+import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.lang.Registry;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -63,5 +68,20 @@ public final class Fields {
 
     public static Field<BigInteger> secretBigInt(String id, String name) {
         return bigInt(id, name).setSecret(true).build();
+    }
+
+    public static Registry<String, Field<?>> registry(Field<?>... fields) {
+        return registry(Arrays.asList(fields));
+    }
+
+    public static Registry<String, Field<?>> registry(Collection<Field<?>> fields) {
+        return new IdRegistry<>("Field", fields, true);
+    }
+
+    public static Registry<String, Field<?>> registry(Registry<String, Field<?>> parent, Field<?>... fields) {
+        Set<Field<?>> set = new LinkedHashSet<>(parent.size() + fields.length);
+        set.addAll(parent.values());
+        set.addAll(Arrays.asList(fields));
+        return new IdRegistry<>("Field", set, true);
     }
 }

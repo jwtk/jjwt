@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.lang;
 
+import io.jsonwebtoken.impl.security.Randoms;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 
@@ -29,6 +30,19 @@ public final class Bytes {
 
     //prevent instantiation
     private Bytes() {
+    }
+
+    public static byte[] randomBits(int numBits) {
+        return random(numBits / Byte.SIZE);
+    }
+
+    public static byte[] random(int numBytes) {
+        if (numBytes <= 0) {
+            throw new IllegalArgumentException("numBytes argument must be >= 0");
+        }
+        byte[] bytes = new byte[numBytes];
+        Randoms.secureRandom().nextBytes(bytes);
+        return bytes;
     }
 
     public static byte[] toBytes(int i) {
@@ -102,6 +116,7 @@ public final class Bytes {
         for (int i = srcOffset + fromIndex; i <= max; i++) { //
 
             if (source[i] != first) { // continue on to find the first matching byte
+                //noinspection StatementWithEmptyBody
                 while (++i <= max && source[i] != first) ;
             }
 

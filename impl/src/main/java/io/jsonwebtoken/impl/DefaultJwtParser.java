@@ -16,12 +16,11 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
@@ -38,18 +37,16 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
-import io.jsonwebtoken.UnprotectedHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DecodingException;
@@ -78,7 +75,6 @@ import java.security.Key;
 import java.security.Provider;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -114,12 +110,12 @@ public class DefaultJwtParser implements JwtParser {
             "https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an " +
-            AbstractHeader.ALGORITHM + " header value of '" + Jwts.SIG.NONE.getId() + "') are disallowed by " +
+            DefaultHeader.ALGORITHM + " header value of '" + Jwts.SIG.NONE.getId() + "') are disallowed by " +
             "default as mandated by https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to " +
             "allow them to be parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
             "security considerations covered in that method's JavaDoc before doing so). Header: ";
 
-    private static final String JWE_NONE_MSG = "JWEs do not support key management " + AbstractHeader.ALGORITHM +
+    private static final String JWE_NONE_MSG = "JWEs do not support key management " + DefaultHeader.ALGORITHM +
             " header value '" + Jwts.SIG.NONE.getId() + "' per " +
             "https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1";
 
@@ -127,7 +123,7 @@ public class DefaultJwtParser implements JwtParser {
             Jwts.SIG.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
             "per https://tools.ietf.org/html/rfc7518#section-3.6.";
     private static final String UNPROTECTED_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
-            "'%s', but payload decompression for Unsecured JWTs (those with an " + AbstractHeader.ALGORITHM +
+            "'%s', but payload decompression for Unsecured JWTs (those with an " + DefaultHeader.ALGORITHM +
             " header value of '" + Jwts.SIG.NONE.getId() + "') are " + "disallowed by default to protect " +
             "against [Denial of Service attacks](" +
             "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf).  If you " +
@@ -135,29 +131,20 @@ public class DefaultJwtParser implements JwtParser {
             "enableUnsecuredDecompression() method (but please read the security considerations covered in that " +
             "method's JavaDoc before doing so).";
 
-    private static <I extends Identifiable> IdRegistry<I> newRegistry(String name, Collection<I> defaults, Collection<I> extras) {
-        Collection<I> all = new LinkedHashSet<>(Collections.size(extras) + defaults.size());
-        all.addAll(extras);
-        all.addAll(defaults);
-        return new IdRegistry<>(name, all);
-    }
-
     private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
-        String name = "JWS MAC or Signature Algorithm";
-        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, Jwts.SIG.values(), extras);
-        return new IdLocator<>(AbstractHeader.ALGORITHM, MISSING_JWS_ALG_MSG, registry);
+        return new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extras, MISSING_JWS_ALG_MSG);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
-        String name = "JWE Encryption Algorithm";
-        IdRegistry<AeadAlgorithm> registry = newRegistry(name, Jwts.ENC.values(), extras);
-        return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, registry);
+        return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, Jwts.ENC.get(), extras, MISSING_ENC_MSG);
     }
 
     private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
-        String name = "JWE Key Management Algorithm";
-        IdRegistry<KeyAlgorithm<?, ?>> registry = newRegistry(name, Jwts.KEY.values(), extras);
-        return new IdLocator<>(AbstractHeader.ALGORITHM, MISSING_JWE_ALG_MSG, registry);
+        return new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extras, MISSING_JWE_ALG_MSG);
+    }
+
+    private static IdLocator<Header, CompressionAlgorithm> zipFn(Collection<CompressionAlgorithm> extras) {
+        return new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, Jwts.ZIP.get(), extras, null);
     }
 
     // TODO: make the following fields final for v1.0
@@ -165,8 +152,6 @@ public class DefaultJwtParser implements JwtParser {
 
     @SuppressWarnings("deprecation") // will remove for 1.0
     private SigningKeyResolver signingKeyResolver;
-
-    private Locator<CompressionCodec> compressionCodecLocator;
 
     private final boolean enableUnsecuredJws;
 
@@ -178,13 +163,15 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
 
+    private Function<Header, CompressionAlgorithm> compressionAlgorithmLocator;
+
     private final Locator<? extends Key> keyLocator;
 
     private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private Claims expectedClaims = new DefaultClaims();
+    private ClaimsBuilder expectedClaims = Jwts.claims();
 
     private Clock clock = DefaultClock.INSTANCE;
 
@@ -202,7 +189,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signatureAlgorithmLocator = sigFn(Collections.<SecureDigestAlgorithm<?, ?>>emptyList());
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
-        this.compressionCodecLocator = new DefaultCompressionCodecResolver();
+        this.compressionAlgorithmLocator = zipFn(Collections.<CompressionAlgorithm>emptyList());
         this.enableUnsecuredJws = false;
         this.enableUnsecuredDecompression = false;
     }
@@ -216,10 +203,11 @@ public class DefaultJwtParser implements JwtParser {
                      Locator<? extends Key> keyLocator,
                      Clock clock,
                      long allowedClockSkewMillis,
-                     Claims expectedClaims,
+                     DefaultClaims expectedClaims,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
-                     Locator<CompressionCodec> compressionCodecLocator,
+                     CompressionCodecResolver compressionCodecResolver,
+                     Collection<CompressionAlgorithm> extraZipAlgs,
                      Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs,
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
                      Collection<AeadAlgorithm> extraEncAlgs) {
@@ -230,13 +218,18 @@ public class DefaultJwtParser implements JwtParser {
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = clock;
         this.allowedClockSkewMillis = allowedClockSkewMillis;
-        this.expectedClaims = expectedClaims;
+        this.expectedClaims = Jwts.claims().set(expectedClaims);
         this.base64UrlDecoder = base64UrlDecoder;
         this.deserializer = deserializer;
         this.signatureAlgorithmLocator = sigFn(extraSigAlgs);
         this.keyAlgorithmLocator = keyFn(extraKeyAlgs);
         this.encryptionAlgorithmLocator = encFn(extraEncAlgs);
-        this.compressionCodecLocator = Assert.notNull(compressionCodecLocator, "CompressionCodec locator cannot be null.");
+
+        if (compressionCodecResolver != null) {
+            this.compressionAlgorithmLocator = new CompressionCodecLocator(compressionCodecResolver);
+        } else {
+            this.compressionAlgorithmLocator = zipFn(extraZipAlgs);
+        }
     }
 
     @Override
@@ -299,7 +292,7 @@ public class DefaultJwtParser implements JwtParser {
     public JwtParser require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.put(claimName, value);
+        expectedClaims.set(claimName, value);
         return this;
     }
 
@@ -347,9 +340,9 @@ public class DefaultJwtParser implements JwtParser {
 
     @SuppressWarnings("deprecation")
     @Override
-    public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
-        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
-        this.compressionCodecLocator = new CompressionCodecLocator(compressionCodecResolver);
+    public JwtParser setCompressionCodecResolver(CompressionCodecResolver resolver) {
+        Assert.notNull(resolver, "CompressionCodecResolver cannot be null.");
+        this.compressionAlgorithmLocator = new CompressionCodecLocator(resolver);
         return this;
     }
 
@@ -366,7 +359,7 @@ public class DefaultJwtParser implements JwtParser {
         }
     }
 
-    private static boolean hasContentType(Header<?> header) {
+    private static boolean hasContentType(Header header) {
         return header != null && Strings.hasText(header.getContentType());
     }
 
@@ -522,7 +515,7 @@ public class DefaultJwtParser implements JwtParser {
         // =============== Header =================
         final byte[] headerBytes = base64UrlDecode(base64UrlHeader, "protected header");
         Map<String, ?> m = readValue(headerBytes, "protected header");
-        Header<?> header;
+        Header header;
         try {
             header = tokenized.createHeader(m);
         } catch (Exception e) {
@@ -646,13 +639,13 @@ public class DefaultJwtParser implements JwtParser {
             verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
         }
 
-        CompressionCodec compressionCodec = compressionCodecLocator.locate(header);
-        if (compressionCodec != null) {
+        CompressionAlgorithm compressionAlgorithm = compressionAlgorithmLocator.apply(header);
+        if (compressionAlgorithm != null) {
             if (unsecured && !enableUnsecuredDecompression) {
-                String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionCodec.getId());
+                String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionAlgorithm.getId());
                 throw new UnsupportedJwtException(msg);
             }
-            payload = compressionCodec.decompress(payload);
+            payload = compressionAlgorithm.decompress(payload);
         }
 
         Claims claims = null;
@@ -757,11 +750,13 @@ public class DefaultJwtParser implements JwtParser {
         return o;
     }
 
-    private void validateExpectedClaims(Header<?> header, Claims claims) {
+    private void validateExpectedClaims(Header header, Claims claims) {
 
-        for (String expectedClaimName : expectedClaims.keySet()) {
+        final Claims expected = expectedClaims.build();
 
-            Object expectedClaimValue = normalize(expectedClaims.get(expectedClaimName));
+        for (String expectedClaimName : expected.keySet()) {
+
+            Object expectedClaimValue = normalize(expected.get(expectedClaimName));
             Object actualClaimValue = normalize(claims.get(expectedClaimName));
 
             if (expectedClaimValue instanceof Date) {
@@ -813,28 +808,28 @@ public class DefaultJwtParser implements JwtParser {
         } else {
             Object body = jwt.getPayload();
             if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<UnprotectedHeader, Claims>) jwt);
+                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
             } else {
-                return handler.onContentJwt((Jwt<UnprotectedHeader, byte[]>) jwt);
+                return handler.onContentJwt((Jwt<Header, byte[]>) jwt);
             }
         }
     }
 
     @Override
-    public Jwt<UnprotectedHeader, byte[]> parseContentJwt(String compact) {
-        return parse(compact, new JwtHandlerAdapter<Jwt<UnprotectedHeader, byte[]>>() {
+    public Jwt<Header, byte[]> parseContentJwt(String compact) {
+        return parse(compact, new JwtHandlerAdapter<Jwt<Header, byte[]>>() {
             @Override
-            public Jwt<UnprotectedHeader, byte[]> onContentJwt(Jwt<UnprotectedHeader, byte[]> jwt) {
+            public Jwt<Header, byte[]> onContentJwt(Jwt<Header, byte[]> jwt) {
                 return jwt;
             }
         });
     }
 
     @Override
-    public Jwt<UnprotectedHeader, Claims> parseClaimsJwt(String compact) {
-        return parse(compact, new JwtHandlerAdapter<Jwt<UnprotectedHeader, Claims>>() {
+    public Jwt<Header, Claims> parseClaimsJwt(String compact) {
+        return parse(compact, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
             @Override
-            public Jwt<UnprotectedHeader, Claims> onClaimsJwt(Jwt<UnprotectedHeader, Claims> jwt) {
+            public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
                 return jwt;
             }
         });

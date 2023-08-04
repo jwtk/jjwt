@@ -17,8 +17,7 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
-import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
@@ -83,33 +82,21 @@ class JwtsTest {
 
     @Test
     void testHeaderWithNoArgs() {
-        def header = Jwts.unprotectedHeader()
-        assertTrue header instanceof DefaultUnprotectedHeader
+        def header = Jwts.header().build()
+        assertTrue header instanceof DefaultHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header([alg: "HS256"])
-        assertTrue header instanceof DefaultUnprotectedHeader
+        def header = Jwts.header().set([alg: "HS256"]).build()
+        assertTrue header instanceof DefaultJwsHeader
+        assertEquals 'HS256', header.getAlgorithm()
         assertEquals 'HS256', header.alg
     }
 
     @Test
-    void testJwsHeaderWithNoArgs() {
-        def header = Jwts.jwsHeader()
-        assertTrue header instanceof DefaultJwsHeader
-    }
-
-    @Test
-    void testJwsHeaderWithMapArg() {
-        def header = Jwts.jwsHeader([alg: "HS256"])
-        assertTrue header instanceof DefaultJwsHeader
-        assertEquals 'HS256', header.getAlgorithm()
-    }
-
-    @Test
     void testClaims() {
-        Claims claims = Jwts.claims()
+        Claims claims = Jwts.claims().build()
         assertNotNull claims
     }
 
@@ -319,7 +306,7 @@ class JwtsTest {
     @Test
     void testWithInvalidCompressionAlgorithm() {
         try {
-            Jwts.builder().setHeaderParam(AbstractHeader.COMPRESSION_ALGORITHM.getId(), "CUSTOM").setId("andId").compact()
+            Jwts.builder().setHeaderParam(DefaultHeader.COMPRESSION_ALGORITHM.getId(), "CUSTOM").setId("andId").compact()
         } catch (CompressionException e) {
             assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
         }
@@ -468,7 +455,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.DEFLATE).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
 
@@ -490,7 +477,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(CompressionCodecs.GZIP).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.GZIP).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
 
@@ -512,20 +499,20 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
             }
         }).compact()
 
-        def jws = Jwts.parserBuilder().setSigningKey(key).setCompressionCodecResolver(new DefaultCompressionCodecResolver() {
+        def jws = Jwts.parserBuilder().setSigningKey(key).setCompressionCodecResolver(new CompressionCodecResolver() {
             @Override
-            CompressionCodec resolveCompressionCodec(Header header) {
+            CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return CompressionCodecs.GZIP
+                    return Jwts.ZIP.GZIP as CompressionCodec
                 } else {
                     return null
                 }
@@ -542,7 +529,7 @@ class JwtsTest {
 
     }
 
-    @Test(expected = CompressionException.class)
+    @Test(expected = UnsupportedJwtException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
         def alg = Jwts.SIG.HS256
@@ -551,7 +538,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
@@ -570,7 +557,7 @@ class JwtsTest {
         String payload = "this is my test for a payload"
 
         String compact = Jwts.builder().setPayload(payload).signWith(key, alg)
-                .compressWith(CompressionCodecs.DEFLATE).compact()
+                .compressWith(Jwts.ZIP.DEF).compact()
 
         def jws = Jwts.parserBuilder().setSigningKey(key).build().parseContentJws(compact)
 
@@ -1304,13 +1291,13 @@ class JwtsTest {
     @Test
     void testSecretKeyJwes() {
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it instanceof DirectKeyAlgorithm || it instanceof SecretKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : Jwts.ENC.values()) {
+            for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
                 SecretKey key = alg instanceof SecretKeyAlgorithm ?
                         ((SecretKeyAlgorithm) alg).keyBuilder().build() :
@@ -1335,11 +1322,11 @@ class JwtsTest {
     @Test
     void testJweCompression() {
 
-        def codecs = [CompressionCodecs.DEFLATE, CompressionCodecs.GZIP]
+        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
 
         for (CompressionCodec codec : codecs) {
 
-            for (AeadAlgorithm enc : Jwts.ENC.values()) {
+            for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
                 SecretKey key = enc.keyBuilder().build()
 
@@ -1363,7 +1350,7 @@ class JwtsTest {
     @Test
     void testPasswordJwes() {
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it instanceof Pbes2HsAkwAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1371,7 +1358,7 @@ class JwtsTest {
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : Jwts.ENC.values()) {
+            for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
                 // encrypt:
                 String jwe = Jwts.builder()
@@ -1406,7 +1393,7 @@ class JwtsTest {
                 .build()
                 .parseClaimsJwe(jwe)
         assertEquals 'bar', jwt.getPayload().get('foo')
-        assertEquals Jwts.KEY.PBES2_HS512_A256KW, Jwts.KEY.get(jwt.getHeader().getAlgorithm())
+        assertEquals Jwts.KEY.PBES2_HS512_A256KW, Jwts.KEY.get().forKey(jwt.getHeader().getAlgorithm())
     }
 
     @Test
@@ -1414,7 +1401,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it instanceof DefaultRsaKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1425,7 +1412,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
@@ -1449,7 +1436,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1460,7 +1447,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
@@ -1484,7 +1471,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.X25519.pair, TestKeys.X448.pair]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1494,7 +1481,7 @@ class JwtsTest {
             def privKey = pair.getPrivate()
 
             for (KeyAlgorithm alg : algs) {
-                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
                     String jwe = encrypt(pubKey, alg, enc)
                     def jwt = decrypt(jwe, privKey)
                     assertEquals 'bar', jwt.getPayload().get('foo')
@@ -1511,14 +1498,14 @@ class JwtsTest {
     void testEdwardsCurveEncryptionWithSigningKeys() {
         def pairs = [TestKeys.Ed25519.pair, TestKeys.Ed448.pair] // signing keys, can't be used
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
         for (KeyPair pair : pairs) {
             def pubKey = pair.getPublic()
             for (KeyAlgorithm alg : algs) {
-                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
                     try {
                         encrypt(pubKey, alg, enc)
                         fail()
@@ -1541,17 +1528,17 @@ class JwtsTest {
     void testEdwardsCurveDecryptionWithSigningKeys() {
 
         def pairs = [ // private keys are invalid signing keys to test decryption:
-                new KeyPair(TestKeys.X25519.pair.public, TestKeys.Ed25519.pair.private),
-                new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
+                      new KeyPair(TestKeys.X25519.pair.public, TestKeys.Ed25519.pair.private),
+                      new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
         ]
 
-        def algs = Jwts.KEY.values().findAll({ it ->
+        def algs = Jwts.KEY.get().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
-        for(KeyPair pair : pairs) {
+        for (KeyPair pair : pairs) {
             for (KeyAlgorithm alg : algs) {
-                for (AeadAlgorithm enc : Jwts.ENC.values()) {
+                for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
                     String jwe = encrypt(pair.getPublic(), alg, enc)
                     PrivateKey key = pair.getPrivate()
                     try {

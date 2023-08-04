@@ -16,23 +16,20 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.impl.X509Context;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.security.HashAlgorithm;
-import io.jsonwebtoken.security.X509Mutator;
 
-import java.net.URI;
 import java.security.Key;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public interface JwkContext<K extends Key> extends Identifiable, Map<String, Object>, FieldReadable, Nameable,
-        X509Mutator<JwkContext<K>> {
+        X509Context<JwkContext<K>> {
 
     JwkContext<K> setId(String id);
 
@@ -55,14 +52,6 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String, Obj
     String getPublicKeyUse();
 
     JwkContext<K> setPublicKeyUse(String use);
-
-    URI getX509Url();
-
-    List<X509Certificate> getX509CertificateChain();
-
-    byte[] getX509CertificateSha1Thumbprint();
-
-    byte[] getX509CertificateSha256Thumbprint();
 
     K getKey();
 

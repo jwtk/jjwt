@@ -30,7 +30,7 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
 
     public DefaultKeyRequest(T payload, Provider provider, SecureRandom secureRandom, JweHeader header, AeadAlgorithm encryptionAlgorithm) {
         super(payload, provider, secureRandom);
-        this.header = Assert.notNull(header, "JweHeader cannot be null.");
+        this.header = Assert.notNull(header, "JweHeader/Builder cannot be null.");
         this.encryptionAlgorithm = Assert.notNull(encryptionAlgorithm, "AeadAlgorithm argument cannot be null.");
     }
 

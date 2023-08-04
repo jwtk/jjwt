@@ -20,7 +20,7 @@ package io.jsonwebtoken;
  *
  * @since 0.1
  */
-public interface JwsHeader extends ProtectedHeader<JwsHeader> {
+public interface JwsHeader extends ProtectedHeader {
 
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">Algorithm Header</a> name: the string literal <b><code>alg</code></b>

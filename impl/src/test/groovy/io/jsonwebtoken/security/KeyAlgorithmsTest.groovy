@@ -30,12 +30,12 @@ import static org.junit.Assert.*
 class KeyAlgorithmsTest {
 
     static boolean contains(KeyAlgorithm<? extends Key, ? extends Key> alg) {
-        return Jwts.KEY.values().contains(alg)
+        return Jwts.KEY.get().values().contains(alg)
     }
 
     @Test
     void testValues() {
-        assertEquals 17, Jwts.KEY.values().size()
+        assertEquals 17, Jwts.KEY.get().values().size()
         assertTrue(contains(Jwts.KEY.DIRECT) &&
                 contains(Jwts.KEY.A128KW) &&
                 contains(Jwts.KEY.A192KW) &&
@@ -57,53 +57,42 @@ class KeyAlgorithmsTest {
     }
 
     @Test
-    void testForId() {
-        for (KeyAlgorithm alg : Jwts.KEY.values()) {
-            assertSame alg, Jwts.KEY.get(alg.getId())
+    void testForKey() {
+        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
+            assertSame alg, Jwts.KEY.get().forKey(alg.getId())
         }
     }
 
     @Test
-    void testForIdCaseInsensitive() {
-        for (KeyAlgorithm alg : Jwts.KEY.values()) {
-            assertSame alg, Jwts.KEY.get(alg.getId().toLowerCase())
+    void testForKeyCaseInsensitive() {
+        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
+            assertSame alg, Jwts.KEY.get().forKey(alg.getId().toLowerCase())
         }
     }
 
     @Test(expected = IllegalArgumentException)
-    void testForIdWithInvalidId() {
-        //unlike the 'find' paradigm, 'get' requires the value to exist
-        Jwts.KEY.get('invalid')
+    void testForKeyWithInvalidId() {
+        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        Jwts.KEY.get().forKey('invalid')
     }
 
     @Test
-    void testFindById() {
-        for (KeyAlgorithm alg : Jwts.KEY.values()) {
-            assertSame alg, Jwts.KEY.find(alg.getId())
+    void testGet() {
+        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
+            assertSame alg, Jwts.KEY.get().get(alg.getId())
         }
     }
 
     @Test
-    void testFindByIdCaseInsensitive() {
-        for (KeyAlgorithm alg : Jwts.KEY.values()) {
-            assertSame alg, Jwts.KEY.find(alg.getId().toLowerCase())
+    void testGetCaseInsensitive() {
+        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
+            assertSame alg, Jwts.KEY.get().get(alg.getId().toLowerCase())
         }
     }
 
     @Test
-    void testFindByIdWithInvalidId() {
-        // 'find' paradigm can return null if not found
-        assertNull Jwts.KEY.find('invalid')
+    void testGetWithInvalidId() {
+        // 'get' paradigm can return null if not found
+        assertNull Jwts.KEY.get().get('invalid')
     }
-
-    /*
-    @Test
-    @Ignore // temporarily until we decide if this API will remain
-    void testEstimateIterations() {
-        // keep it super short so we don't hammer the test server or slow down the build too much:
-        long desiredMillis = 50
-        int result = Jwts.KEY.estimateIterations(Jwts.KEY.PBES2_HS256_A128KW, desiredMillis)
-        assertTrue result > Pbes2HsAkwAlgorithm.MIN_RECOMMENDED_ITERATIONS
-    }
-     */
 }

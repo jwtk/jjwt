@@ -163,14 +163,15 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
     }
 
     @Override
-    public KeyResult getEncryptionKey(KeyRequest<Password> request) throws SecurityException {
+    public KeyResult getEncryptionKey(final KeyRequest<Password> request) throws SecurityException {
 
         Assert.notNull(request, "request cannot be null.");
         final Password key = Assert.notNull(request.getPayload(), "Encryption Password cannot be null.");
-        Integer p2c = request.getHeader().getPbes2Count();
-        if (p2c == null) {
+        final JweHeader header = Assert.notNull(request.getHeader(), "JweHeader cannot be null.");
+        Integer p2c = header.getPbes2Count();
+        if (p2c == null) { // set a default, and ensure it's available in the header for later decryption:
             p2c = DEFAULT_ITERATIONS;
-            request.getHeader().setPbes2Count(p2c);
+            header.put(DefaultJweHeader.P2C.getId(), p2c);
         }
         final int iterations = assertIterations(p2c);
         byte[] inputSalt = generateInputSalt(request);
@@ -179,7 +180,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
-        DefaultKeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derivedKek, request.getProvider(),
+        KeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derivedKek, request.getProvider(),
                 request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 

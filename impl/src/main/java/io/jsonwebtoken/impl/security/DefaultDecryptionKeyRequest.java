@@ -28,7 +28,8 @@ public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyReques
 
     private final K decryptionKey;
 
-    public DefaultDecryptionKeyRequest(byte[] encryptedCek, Provider provider, SecureRandom secureRandom, JweHeader header, AeadAlgorithm encryptionAlgorithm, K decryptionKey) {
+    public DefaultDecryptionKeyRequest(byte[] encryptedCek, Provider provider, SecureRandom secureRandom,
+                                       JweHeader header, AeadAlgorithm encryptionAlgorithm, K decryptionKey) {
         super(encryptedCek, provider, secureRandom, header, encryptionAlgorithm);
         this.decryptionKey = Assert.notNull(decryptionKey, "decryption key cannot be null.");
     }

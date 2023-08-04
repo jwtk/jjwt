@@ -18,10 +18,7 @@ package io.jsonwebtoken;
 /**
  * An object that may be uniquely identified by an {@link #getId() id} relative to other instances of the same type.
  *
- * <p>All JWT concepts that have a
- * <a href="https://www.rfc-editor.org/rfc/rfc7518.html">JWA</a> identifier value implement this interface.
- * Specifically, there are four JWT concepts that are {@code Identifiable}.  The following table indicates how
- * their {@link #getId() id} values are used.</p>
+ * <p>The following table indicates how various JWT or JWK {@link #getId() getId()} values are used.</p>
  *
  * <table>
  * <caption>JWA Identifiable Concepts</caption>
@@ -32,6 +29,31 @@ package io.jsonwebtoken;
  * </tr>
  * </thead>
  * <tbody>
+ * <tr>
+ * <td>{@link io.jsonwebtoken.Claims Claims}</td>
+ * <td>JWT's <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">{@code jti} (JWT ID)</a>
+ * claim.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link io.jsonwebtoken.security.Jwk Jwk}</td>
+ * <td>JWK's <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.5">{@code kid} (Key ID)</a>
+ * parameter value.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link io.jsonwebtoken.CompressionCodec CompressionCodec}</td>
+ * <td>JWE protected header's
+ * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">{@code zip} (Compression Algorithm)</a>
+ * parameter value.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link io.jsonwebtoken.security.HashAlgorithm HashAlgorithm}</td>
+ * <td>Within a {@link io.jsonwebtoken.security.JwkThumbprint JwkThumbprint}'s URI value.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link io.jsonwebtoken.security.MacAlgorithm MacAlgorithm}</td>
+ * <td>JWS protected header's
+ * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1">{@code alg} (Algorithm)</a> parameter value.</td>
+ * </tr>
  * <tr>
  * <td>{@link io.jsonwebtoken.security.SignatureAlgorithm SignatureAlgorithm}</td>
  * <td>JWS protected header's
@@ -47,11 +69,6 @@ package io.jsonwebtoken;
  * <td>{@link io.jsonwebtoken.security.AeadAlgorithm AeadAlgorithm}</td>
  * <td>JWE protected header's
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">{@code enc} (Encryption Algorithm)</a>
- * parameter value.</td>
- * </tr>
- * <tr>
- * <td>{@link io.jsonwebtoken.security.Jwk Jwk}</td>
- * <td>JWK's <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.5">{@code kid} (Key ID)</a>
  * parameter value.</td>
  * </tr>
  * </tbody>

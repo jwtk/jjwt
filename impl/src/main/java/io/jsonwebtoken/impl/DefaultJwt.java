@@ -21,7 +21,7 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 
-public class DefaultJwt<H extends Header<H>, P> implements Jwt<H, P> {
+public class DefaultJwt<H extends Header, P> implements Jwt<H, P> {
 
     private final H header;
     private final P payload;
