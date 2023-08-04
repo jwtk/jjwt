@@ -40,7 +40,7 @@ package io.jsonwebtoken;
  * parameter value.</td>
  * </tr>
  * <tr>
- * <td>{@link io.jsonwebtoken.CompressionCodec CompressionCodec}</td>
+ * <td>{@link io.jsonwebtoken.io.CompressionAlgorithm CompressionAlgorithm}</td>
  * <td>JWE protected header's
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">{@code zip} (Compression Algorithm)</a>
  * parameter value.</td>
