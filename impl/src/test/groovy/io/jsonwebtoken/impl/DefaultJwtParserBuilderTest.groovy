@@ -131,39 +131,39 @@ class DefaultJwtParserBuilderTest {
     }
 
     @Test
-    void testCompressionCodecLocator() {
-        Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
+    void testCompressionCodecResolver() {
+        def resolver = new CompressionCodecResolver() {
             @Override
-            CompressionCodec locate(Header header) {
+            CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 return null
             }
         }
-        def parser = builder.setCompressionCodecLocator(locator).build()
-        assertSame locator, parser.jwtParser.compressionCodecLocator
+        def parser = builder.setCompressionCodecResolver(resolver).build()
+        assertSame resolver, parser.jwtParser.compressionAlgorithmLocator.resolver
     }
 
     @Test
-    void testAddCompressionCodecs() {
+    void testAddCompressionAlgorithms() {
         def codec = new TestCompressionCodec(id: 'test')
-        def parser = builder.addCompressionCodecs([codec] as Set<CompressionCodec>).build()
+        def parser = builder.addCompressionAlgorithms([codec] as Set<CompressionCodec>).build()
         def header = Jwts.header().setCompressionAlgorithm(codec.getId()).build()
-        assertSame codec, parser.jwtParser.compressionCodecLocator.locate(header)
+        assertSame codec, parser.jwtParser.compressionAlgorithmLocator.locate(header)
     }
 
     @Test
-    void testCompressionCodecLocatorAndExtraCompressionCodecs() {
+    void testCompressionCodecResolverAndExtraCompressionCodecs() {
         def codec = new TestCompressionCodec(id: 'test')
-        Locator<CompressionCodec> locator = new Locator<CompressionCodec>() {
+        def resolver = new CompressionCodecResolver() {
             @Override
-            CompressionCodec locate(Header header) {
+            CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 return null
             }
         }
         try {
-            builder.setCompressionCodecLocator(locator).addCompressionCodecs([codec] as Set<CompressionCodec>).build()
+            builder.setCompressionCodecResolver(resolver).addCompressionAlgorithms([codec] as Set<CompressionCodec>).build()
             fail()
         } catch (IllegalStateException expected) {
-            String msg = "Both 'addCompressionCodecs' and 'compressionCodecLocator' (or 'compressionCodecResolver') cannot be specified. Choose either."
+            String msg = "Both 'addCompressionAlgorithms' and 'compressionCodecResolver' cannot be specified. Choose either."
             assertEquals msg, expected.getMessage()
         }
     }

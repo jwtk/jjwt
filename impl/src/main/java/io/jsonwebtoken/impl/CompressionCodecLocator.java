@@ -15,14 +15,15 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 
-public class CompressionCodecLocator implements Function<Header, CompressionCodec>, Locator<CompressionCodec> {
+//TODO: delete when deleting CompressionCodecResolver
+public class CompressionCodecLocator implements Function<Header, CompressionAlgorithm>, Locator<CompressionAlgorithm> {
 
     private final CompressionCodecResolver resolver;
 
@@ -31,12 +32,12 @@ public class CompressionCodecLocator implements Function<Header, CompressionCode
     }
 
     @Override
-    public CompressionCodec apply(Header header) {
-        return resolver.resolveCompressionCodec(header);
+    public CompressionAlgorithm apply(Header header) {
+        return locate(header);
     }
 
     @Override
-    public CompressionCodec locate(Header header) {
-        return apply(header);
+    public CompressionAlgorithm locate(Header header) {
+        return resolver.resolveCompressionCodec(header);
     }
 }

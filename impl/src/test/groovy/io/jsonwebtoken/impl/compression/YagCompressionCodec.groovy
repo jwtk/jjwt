@@ -19,18 +19,18 @@ import io.jsonwebtoken.CompressionCodec
 import io.jsonwebtoken.CompressionException
 
 /**
- * Yet Another GZIP CompressionCodec.  This codec has the same name as the Official GZIP impl. The DefaultCompressionCodecResolver will NOT resolve this class.
+ * Yet Another GZIP CompressionCodec.  This codec has the same name as the Official GZIP impl. The IdLocator will NOT resolve this class.
  */
 class YagCompressionCodec implements CompressionCodec {
 
     @Override
     String getId() {
-        return GzipCompressionCodec.GZIP
+        return GzipCompressionAlgorithm.ID
     }
 
     @Override
     String getAlgorithmName() {
-        return GzipCompressionCodec.GZIP
+        return getId()
     }
 
     @Override

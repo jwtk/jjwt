@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
@@ -802,7 +803,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);
 
     /**
-     * Compresses the JWT payload using the specified {@link CompressionCodec}.
+     * Compresses the JWT payload using the specified {@link CompressionAlgorithm}.
      *
      * <p>If your compact JWTs are large, and you want to reduce their total size during network transmission, this
      * can be useful.  For example, when embedding JWTs  in URLs, some browsers may not support URLs longer than a
@@ -819,12 +820,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <p>Compression when creating JWE tokens however should be universally accepted for any
      * library that supports JWE.</p>
      *
-     * @param codec implementation of the {@link CompressionCodec} to be used.
+     * @param alg implementation of the {@link CompressionAlgorithm} to be used.
      * @return the builder for method chaining.
      * @see Jwts.ZIP
-     * @since 0.6.0
+     * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder compressWith(CompressionCodec codec);
+    JwtBuilder compressWith(CompressionAlgorithm alg);
 
     /**
      * Perform Base64Url encoding with the specified Encoder.

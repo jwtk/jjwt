@@ -17,8 +17,7 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
-import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
@@ -500,20 +499,20 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
             }
         }).compact()
 
-        def jws = Jwts.parserBuilder().setSigningKey(key).setCompressionCodecResolver(new DefaultCompressionCodecResolver() {
+        def jws = Jwts.parserBuilder().setSigningKey(key).setCompressionCodecResolver(new CompressionCodecResolver() {
             @Override
-            CompressionCodec resolveCompressionCodec(Header header) {
+            CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return Jwts.ZIP.GZIP
+                    return Jwts.ZIP.GZIP as CompressionCodec
                 } else {
                     return null
                 }
@@ -530,7 +529,7 @@ class JwtsTest {
 
     }
 
-    @Test(expected = CompressionException.class)
+    @Test(expected = UnsupportedJwtException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
         def alg = Jwts.SIG.HS256
@@ -539,7 +538,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"

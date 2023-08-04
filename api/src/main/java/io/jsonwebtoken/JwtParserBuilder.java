@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Builder;
@@ -425,27 +426,24 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
 
     /**
-     * Adds the specified compression codecs to the parser's total set of supported compression codecs,
-     * overwriting any previously-added compression codecs with the same {@link CompressionCodec#getId() id}s. If the
-     * parser encounters a JWT {@code zip} header value that matches a compression codec's
-     * {@link CompressionCodec#getId() CompressionCodec.getId()}, that codec will be used for decompression.
+     * Adds the specified compression algorithms to the parser's total set of supported compression algorithms,
+     * overwriting any previously-added compression algorithms with the same {@link CompressionAlgorithm#getId() id}s.
+     * If the parser encounters a JWT {@code zip} header value that matches a compression algorithm's
+     * {@link CompressionAlgorithm#getId() id}, that algorithm will be used for decompression.
      *
-     * <p>There may be only one registered {@code CompressionCodec} per {@code id}, and the {@code codecs}
-     * collection is added in iteration order; if a duplicate id is found when iterating the {@code codecs}
+     * <p>There may be only one registered {@code CompressionAlgorithm} per {@code id}, and the {@code algs}
+     * collection is added in iteration order; if a duplicate id is found when iterating the {@code algs}
      * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, {@link Jwts.ZIP#DEF} and {@link Jwts.ZIP#GZIP} are added last,
-     * <em>after</em> those in the {@code codecs} collection, to ensure that JWA standard algorithms cannot be
+     * <p>Finally, {@link Jwts.ZIP#DEF} and {@link Jwts.ZIP#GZIP} algorithms are added last,
+     * <em>after</em> those in the {@code algs} collection, to ensure that JWA standard algorithms cannot be
      * accidentally replaced.</p>
      *
-     * <p>This method is a simpler alternative than creating and registering a custom locator via the
-     * {@link #setCompressionCodecLocator(Locator)} method.</p>
-     *
-     * @param codecs collection of compression codecs to add to the parser's total set of supported compression codecs.
+     * @param algs collection of compression algorithms to add to the parser's total set of supported compression algorithms.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addCompressionCodecs(Collection<? extends CompressionCodec> codecs);
+    JwtParserBuilder addCompressionAlgorithms(Collection<? extends CompressionAlgorithm> algs);
 
     /**
      * Adds the specified AEAD encryption algorithms to the parser's total set of supported encryption algorithms,
@@ -507,69 +505,34 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs);
 
     /**
+     * <p><b>Deprecated as of JJWT JJWT_RELEASE_VERSION. This method will be removed before the 1.0 release.</b></p>
+     *
+     * <p>This method has been deprecated as of JJWT version JJWT_RELEASE_VERSION because it imposed unnecessary
+     * implementation requirements on application developers when simply adding to a compression algorithm collection
+     * would suffice.  Use the {@link #addCompressionAlgorithms(Collection)} method instead to add
+     * any custom algorithm implementations without needing to also implement a Locator implementation.</p>
+     *
+     * <p><b>Previous Documentation</b></p>
+     * <p>
      * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to
      * decompress the JWT body. If the parsed JWT is not compressed, this resolver is not used.
      *
-     * <p><b>NOTE:</b> Compression is not defined by the JWS Specification - only the JWE Specification - and it is
+     * <p><b>WARNING:</b> Compression is not defined by the JWS Specification - only the JWE Specification - and it is
      * not expected that other libraries (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWS
-     * body correctly.  This method is only useful if the compact JWS was compressed with JJWT &gt;= 0.6.0 or
-     * another library that you know implements the same behavior.</p>
+     * body correctly.</p>
      *
      * <p><b>Default Support</b></p>
      *
-     * <p>JJWT's default {@link JwtParser} implementation supports both the
-     * {@link Jwts.ZIP#DEF DEFLATE}
+     * <p>JJWT's default {@link JwtParser} implementation supports both the {@link Jwts.ZIP#DEF DEF}
      * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
      *
-     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must
-     * implement your own {@link CompressionCodecResolver} and specify that via this method and also when
-     * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} JWTs.</p>
-     *
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #setCompressionCodecLocator(Locator)} to use the
-     * congruent {@code Locator} concept used elsewhere (such as {@link #setKeyLocator(Locator)}).
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #addCompressionAlgorithms(Collection)}.
      */
     @Deprecated
     JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
-
-    /**
-     * Sets the {@link CompressionCodec} {@code Locator} used to acquire the {@code CompressionCodec} that should be
-     * used to decompress the JWT body.
-     *
-     * <p><b>NOTE:</b> Compression is not defined by the JWS Specification - only the JWE Specification - and it is
-     * not expected that other libraries (including JJWT versions &lt; 0.6.0) are able to consume a compressed JWS
-     * body correctly.  This method is only useful if the compact JWS was compressed with JJWT &gt;= 0.6.0 or
-     * another library that you know implements the same behavior.</p>
-     *
-     * <p><b>Simple Registration</b></p>
-     *
-     * <p>If a CompressionCodec can be resolved in the JWT Header via a simple {@code zip} header value lookup, it is
-     * recommended to call the {@link #addCompressionCodecs(Collection)} method instead of this one.  That method
-     * will add the codec to the total set of supported codecs and lookup will achieved by matching the
-     * {@link CompressionCodec#getId() CompressionCodec.getId()} against the {@code zip} header value automatically.</p>
-     *
-     * <p>You only need to call this method with a custom locator if compression codec lookup cannot be based on the
-     * {@code zip} header value.</p>
-     *
-     * <p><b>Default Support</b></p>
-     *
-     * <p>JJWT's default {@link JwtParser} implementation supports both the
-     * {@link Jwts.ZIP#DEF DEFLATE}
-     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
-     * specify a {@code CompressionCodec} {@link Locator} in these cases.</p>
-     *
-     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, and
-     * {@link #addCompressionCodecs(Collection)} is not sufficient, you must
-     * implement your own {@code CompressionCodec} {@link Locator} and specify that via this method and also when
-     * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} JWTs.</p>
-     *
-     * @param locator the compression codec locator used to decompress the JWT body.
-     * @return the parser builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
-     */
-    JwtParserBuilder setCompressionCodecLocator(Locator<CompressionCodec> locator);
 
     /**
      * Perform Base64Url decoding with the specified Decoder

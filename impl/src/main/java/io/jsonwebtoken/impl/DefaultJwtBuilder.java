@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
-import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -30,6 +29,7 @@ import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
@@ -90,7 +90,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Function<Map<String, ?>, byte[]> claimsSerializer;
 
     protected Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
-    protected CompressionCodec compressionCodec;
+    protected CompressionAlgorithm compressionAlgorithm;
 
     @Override
     public JwtBuilder.Header header() {
@@ -284,9 +284,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder compressWith(CompressionCodec compressionCodec) {
-        Assert.notNull(compressionCodec, "compressionCodec cannot be null");
-        this.compressionCodec = compressionCodec;
+    public JwtBuilder compressWith(CompressionAlgorithm alg) {
+        Assert.notNull(alg, "CompressionAlgorithm cannot be null");
+        Assert.hasText(alg.getId(), "CompressionAlgorithm id cannot be null or empty.");
+        this.compressionAlgorithm = alg;
         return this;
     }
 
@@ -412,9 +413,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (!Collections.isEmpty(claims)) {
             payload = claimsSerializer.apply(claims);
         }
-        if (!Objects.isEmpty(payload) && compressionCodec != null) {
-            payload = compressionCodec.compress(payload);
-            this.headerBuilder.setCompressionAlgorithm(compressionCodec.getId());
+        if (!Objects.isEmpty(payload) && compressionAlgorithm != null) {
+            payload = compressionAlgorithm.compress(payload);
+            this.headerBuilder.setCompressionAlgorithm(compressionAlgorithm.getId());
         }
 
         if (jwe) {

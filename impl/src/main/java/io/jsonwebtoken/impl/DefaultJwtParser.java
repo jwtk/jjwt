@@ -18,11 +18,9 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
@@ -40,16 +38,15 @@ import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.LegacyServices;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DecodingException;
@@ -78,7 +75,6 @@ import java.security.Key;
 import java.security.Provider;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -135,29 +131,20 @@ public class DefaultJwtParser implements JwtParser {
             "enableUnsecuredDecompression() method (but please read the security considerations covered in that " +
             "method's JavaDoc before doing so).";
 
-    private static <I extends Identifiable> IdRegistry<I> newRegistry(String name, Collection<I> defaults, Collection<I> extras) {
-        Collection<I> all = new LinkedHashSet<>(Collections.size(extras) + defaults.size());
-        all.addAll(extras);
-        all.addAll(defaults);
-        return new IdRegistry<>(name, all);
-    }
-
     private static Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigFn(Collection<SecureDigestAlgorithm<?, ?>> extras) {
-        String name = "JWS MAC or Signature Algorithm";
-        IdRegistry<SecureDigestAlgorithm<?, ?>> registry = newRegistry(name, Jwts.SIG.get().values(), extras);
-        return new IdLocator<>(DefaultHeader.ALGORITHM, MISSING_JWS_ALG_MSG, registry);
+        return new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extras, MISSING_JWS_ALG_MSG);
     }
 
     private static Function<JweHeader, AeadAlgorithm> encFn(Collection<AeadAlgorithm> extras) {
-        String name = "JWE Encryption Algorithm";
-        IdRegistry<AeadAlgorithm> registry = newRegistry(name, Jwts.ENC.get().values(), extras);
-        return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, MISSING_ENC_MSG, registry);
+        return new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, Jwts.ENC.get(), extras, MISSING_ENC_MSG);
     }
 
     private static Function<JweHeader, KeyAlgorithm<?, ?>> keyFn(Collection<KeyAlgorithm<?, ?>> extras) {
-        String name = "JWE Key Management Algorithm";
-        IdRegistry<KeyAlgorithm<?, ?>> registry = newRegistry(name, Jwts.KEY.get().values(), extras);
-        return new IdLocator<>(DefaultHeader.ALGORITHM, MISSING_JWE_ALG_MSG, registry);
+        return new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extras, MISSING_JWE_ALG_MSG);
+    }
+
+    private static IdLocator<Header, CompressionAlgorithm> zipFn(Collection<CompressionAlgorithm> extras) {
+        return new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, Jwts.ZIP.get(), extras, null);
     }
 
     // TODO: make the following fields final for v1.0
@@ -165,8 +152,6 @@ public class DefaultJwtParser implements JwtParser {
 
     @SuppressWarnings("deprecation") // will remove for 1.0
     private SigningKeyResolver signingKeyResolver;
-
-    private Locator<CompressionCodec> compressionCodecLocator;
 
     private final boolean enableUnsecuredJws;
 
@@ -177,6 +162,8 @@ public class DefaultJwtParser implements JwtParser {
     private final Function<JweHeader, AeadAlgorithm> encryptionAlgorithmLocator;
 
     private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgorithmLocator;
+
+    private Function<Header, CompressionAlgorithm> compressionAlgorithmLocator;
 
     private final Locator<? extends Key> keyLocator;
 
@@ -202,7 +189,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signatureAlgorithmLocator = sigFn(Collections.<SecureDigestAlgorithm<?, ?>>emptyList());
         this.keyAlgorithmLocator = keyFn(Collections.<KeyAlgorithm<?, ?>>emptyList());
         this.encryptionAlgorithmLocator = encFn(Collections.<AeadAlgorithm>emptyList());
-        this.compressionCodecLocator = new DefaultCompressionCodecResolver();
+        this.compressionAlgorithmLocator = zipFn(Collections.<CompressionAlgorithm>emptyList());
         this.enableUnsecuredJws = false;
         this.enableUnsecuredDecompression = false;
     }
@@ -219,7 +206,8 @@ public class DefaultJwtParser implements JwtParser {
                      DefaultClaims expectedClaims,
                      Decoder<String, byte[]> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
-                     Locator<CompressionCodec> compressionCodecLocator,
+                     CompressionCodecResolver compressionCodecResolver,
+                     Collection<CompressionAlgorithm> extraZipAlgs,
                      Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs,
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
                      Collection<AeadAlgorithm> extraEncAlgs) {
@@ -236,7 +224,12 @@ public class DefaultJwtParser implements JwtParser {
         this.signatureAlgorithmLocator = sigFn(extraSigAlgs);
         this.keyAlgorithmLocator = keyFn(extraKeyAlgs);
         this.encryptionAlgorithmLocator = encFn(extraEncAlgs);
-        this.compressionCodecLocator = Assert.notNull(compressionCodecLocator, "CompressionCodec locator cannot be null.");
+
+        if (compressionCodecResolver != null) {
+            this.compressionAlgorithmLocator = new CompressionCodecLocator(compressionCodecResolver);
+        } else {
+            this.compressionAlgorithmLocator = zipFn(extraZipAlgs);
+        }
     }
 
     @Override
@@ -347,9 +340,9 @@ public class DefaultJwtParser implements JwtParser {
 
     @SuppressWarnings("deprecation")
     @Override
-    public JwtParser setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver) {
-        Assert.notNull(compressionCodecResolver, "compressionCodecResolver cannot be null.");
-        this.compressionCodecLocator = new CompressionCodecLocator(compressionCodecResolver);
+    public JwtParser setCompressionCodecResolver(CompressionCodecResolver resolver) {
+        Assert.notNull(resolver, "CompressionCodecResolver cannot be null.");
+        this.compressionAlgorithmLocator = new CompressionCodecLocator(resolver);
         return this;
     }
 
@@ -646,13 +639,13 @@ public class DefaultJwtParser implements JwtParser {
             verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
         }
 
-        CompressionCodec compressionCodec = compressionCodecLocator.locate(header);
-        if (compressionCodec != null) {
+        CompressionAlgorithm compressionAlgorithm = compressionAlgorithmLocator.apply(header);
+        if (compressionAlgorithm != null) {
             if (unsecured && !enableUnsecuredDecompression) {
-                String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionCodec.getId());
+                String msg = String.format(UNPROTECTED_DECOMPRESSION_MSG, compressionAlgorithm.getId());
                 throw new UnsupportedJwtException(msg);
             }
-            payload = compressionCodec.decompress(payload);
+            payload = compressionAlgorithm.decompress(payload);
         }
 
         Claims claims = null;

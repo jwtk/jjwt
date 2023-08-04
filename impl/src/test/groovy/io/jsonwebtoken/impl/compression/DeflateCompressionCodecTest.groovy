@@ -48,7 +48,7 @@ class DeflateCompressionCodecTest {
 
         IOException unexpected = new IOException("foo")
 
-        def codec = new DeflateCompressionCodec() {
+        def codec = new DeflateCompressionAlgorithm() {
             @Override
             byte[] doDecompressBackCompat(byte[] compressed) throws IOException {
                 throw unexpected

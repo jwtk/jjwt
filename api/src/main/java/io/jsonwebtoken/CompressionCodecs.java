@@ -23,7 +23,7 @@ package io.jsonwebtoken;
  * @since 0.7.0
  * @deprecated in favor of {@link Jwts.ZIP}.
  */
-@Deprecated
+@Deprecated //TODO: delete for 1.0
 public final class CompressionCodecs {
 
     private CompressionCodecs() {
@@ -36,7 +36,7 @@ public final class CompressionCodecs {
      * @deprecated in favor of {@link Jwts.ZIP#DEF}.
      */
     @Deprecated
-    public static final CompressionCodec DEFLATE = Jwts.ZIP.DEF;
+    public static final CompressionCodec DEFLATE = (CompressionCodec) Jwts.ZIP.DEF;
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm.
@@ -51,6 +51,6 @@ public final class CompressionCodecs {
      * @deprecated in favor of {@link Jwts.ZIP#GZIP}
      */
     @Deprecated
-    public static final CompressionCodec GZIP = Jwts.ZIP.GZIP;
+    public static final CompressionCodec GZIP = (CompressionCodec) Jwts.ZIP.GZIP;
 
 }

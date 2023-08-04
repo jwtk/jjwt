@@ -31,9 +31,9 @@ import java.util.zip.InflaterOutputStream;
  *
  * @since 0.6.0
  */
-public class DeflateCompressionCodec extends AbstractCompressionCodec {
+public class DeflateCompressionAlgorithm extends AbstractCompressionAlgorithm {
 
-    private static final String DEFLATE = "DEF";
+    private static final String ID = "DEF";
 
     private static final StreamWrapper WRAPPER = new StreamWrapper() {
         @Override
@@ -42,8 +42,8 @@ public class DeflateCompressionCodec extends AbstractCompressionCodec {
         }
     };
 
-    public DeflateCompressionCodec() {
-        super(DEFLATE);
+    public DeflateCompressionAlgorithm() {
+        super(ID);
     }
 
     @Override

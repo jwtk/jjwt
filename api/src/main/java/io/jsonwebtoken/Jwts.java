@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
@@ -966,7 +967,7 @@ public final class Jwts {
     public static final class ZIP {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms";
-        private static final Registry<String, CompressionCodec> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+        private static final Registry<String, CompressionAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
          * Returns various useful <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">
@@ -974,7 +975,7 @@ public final class Jwts {
          *
          * @return various standard and non-standard useful compression algorithms.
          */
-        public static Registry<String, CompressionCodec> get() {
+        public static Registry<String, CompressionAlgorithm> get() {
             return REGISTRY;
         }
 
@@ -984,23 +985,23 @@ public final class Jwts {
          *
          * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">JWE RFC 7516, Section 4.1.3</a>
          */
-        public static final CompressionCodec DEF = get().forKey("DEF");
+        public static final CompressionAlgorithm DEF = get().forKey("DEF");
 
         /**
-         * The commonly used, but <b>NOT JWA-STANDARD</b>
+         * A commonly used, but <b>NOT JWA-STANDARD</b>
          * <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm with a {@code zip} header value
          * of {@code "GZIP"}.
          *
          * <p><b>Compatibility Warning</b></p>
          *
          * <p><b>This is not a standard JWE compression algorithm</b>.  Be sure to use this only when you are confident
-         * that all parties accessing the token support the gzip algorithm.</p>
+         * that all parties accessing the token support the &quot;GZIP&quot; identifier and associated algorithm.</p>
          *
          * <p>If you're concerned about compatibility, {@link #DEF DEF} is the only JWA standards-compliant algorithm.</p>
          *
          * @see #DEF
          */
-        public static final CompressionCodec GZIP = get().forKey("GZIP");
+        public static final CompressionAlgorithm GZIP = get().forKey("GZIP");
 
         //prevent instantiation
         private ZIP() {

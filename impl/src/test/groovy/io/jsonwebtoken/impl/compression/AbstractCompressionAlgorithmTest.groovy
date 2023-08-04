@@ -24,10 +24,10 @@ import static org.junit.Assert.assertEquals
 /**
  * @since 0.6.0
  */
-class AbstractCompressionCodecTest {
-    static class ExceptionThrowingCodec extends AbstractCompressionCodec {
+class AbstractCompressionAlgorithmTest {
+    static class ExceptionThrowingAlgorithm extends AbstractCompressionAlgorithm {
 
-        ExceptionThrowingCodec() {
+        ExceptionThrowingAlgorithm() {
             super("Test")
         }
 
@@ -44,23 +44,23 @@ class AbstractCompressionCodecTest {
 
     @Test(expected = CompressionException.class)
     void testCompressWithException() {
-        CompressionCodec codecUT = new ExceptionThrowingCodec()
+        CompressionCodec codecUT = new ExceptionThrowingAlgorithm()
         codecUT.compress(new byte[0])
     }
 
     @Test(expected = CompressionException.class)
     void testDecompressWithException() {
-        CompressionCodec codecUT = new ExceptionThrowingCodec()
+        CompressionCodec codecUT = new ExceptionThrowingAlgorithm()
         codecUT.decompress(new byte[0])
     }
 
     @Test
     void testGetId() {
-        assertEquals "Test", new ExceptionThrowingCodec().getId()
+        assertEquals "Test", new ExceptionThrowingAlgorithm().getId()
     }
 
     @Test
     void testAlgorithmName() {
-        assertEquals "Test", new ExceptionThrowingCodec().getAlgorithmName()
+        assertEquals "Test", new ExceptionThrowingAlgorithm().getAlgorithmName()
     }
 }

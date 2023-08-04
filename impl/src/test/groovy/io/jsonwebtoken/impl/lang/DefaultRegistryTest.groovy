@@ -47,4 +47,10 @@ class DefaultRegistryTest {
         immutable { reg.remove('kty') }
         immutable { reg.clear() }
     }
+
+    @Test
+    void testApplySameAsGet() {
+        def key = 'a'
+        assertEquals reg.apply(key), reg.get(key)
+    }
 }

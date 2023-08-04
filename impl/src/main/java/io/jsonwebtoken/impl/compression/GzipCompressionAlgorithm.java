@@ -28,9 +28,9 @@ import java.util.zip.GZIPOutputStream;
  *
  * @since 0.6.0
  */
-public class GzipCompressionCodec extends AbstractCompressionCodec implements CompressionCodec {
+public class GzipCompressionAlgorithm extends AbstractCompressionAlgorithm implements CompressionCodec {
 
-    private static final String GZIP = "GZIP";
+    private static final String ID = "GZIP";
 
     private static final StreamWrapper WRAPPER = new StreamWrapper() {
         @Override
@@ -39,8 +39,8 @@ public class GzipCompressionCodec extends AbstractCompressionCodec implements Co
         }
     };
 
-    public GzipCompressionCodec() {
-        super(GZIP);
+    public GzipCompressionAlgorithm() {
+        super(ID);
     }
 
     @Override

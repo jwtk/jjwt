@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -344,18 +345,17 @@ public interface JwtParser {
      *
      * <p><b>Default Support</b></p>
      *
-     * <p>JJWT's default {@link JwtParser} implementation supports both the
-     * {@link Jwts.ZIP#DEF DEFLATE}
+     * <p>JJWT's default {@link JwtParser} implementation supports both the {@link Jwts.ZIP#DEF DEFLATE}
      * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
-     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you must implement
+     * <p>However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you may implement
      * your own {@link CompressionCodecResolver} and specify that via this method and also when
-     * {@link io.jsonwebtoken.JwtBuilder#compressWith(CompressionCodec) building} JWTs.</p>
+     * {@link io.jsonwebtoken.JwtBuilder#compressWith(io.jsonwebtoken.io.CompressionAlgorithm) building} JWTs.</p>
      *
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT payload.
      * @return the parser for method chaining.
      * @since 0.6.0
-     * @deprecated in favor of {@link JwtParserBuilder#setCompressionCodecLocator(Locator)}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwtParserBuilder#addCompressionAlgorithms(Collection)}.
      * To construct a JwtParser use the corresponding builder via {@link Jwts#parserBuilder()}. This will construct an
      * immutable JwtParser.
      * <p><b>NOTE: this method will be removed before version 1.0</b>

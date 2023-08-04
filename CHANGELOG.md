@@ -183,6 +183,11 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
   `JwtParserBuilder` instead of a direct `JwtParser` instance.
 
 
+* `io.jsonwebtoken.CompressionCodec` implementations are no longer discoverable via `java.util.ServiceLoader` due to
+  runtime performance problems with the JDK's `ServiceLoader` implementation per
+  https://github.com/jwtk/jjwt/issues/648.
+
+
 * Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
   was thrown. If there was a problem when serializing the JWT claims, an `IllegalArgumentException` was
   thrown.  This has been changed up to ensure consistency: any serialization error with either headers or claims

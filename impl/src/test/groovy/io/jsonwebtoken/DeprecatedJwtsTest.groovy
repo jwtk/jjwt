@@ -18,8 +18,7 @@ package io.jsonwebtoken
 import io.jsonwebtoken.impl.DefaultHeader
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.JwtTokenizer
-import io.jsonwebtoken.impl.compression.DefaultCompressionCodecResolver
-import io.jsonwebtoken.impl.compression.GzipCompressionCodec
+import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
@@ -381,20 +380,20 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
             }
         }).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new DefaultCompressionCodecResolver() {
+        def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new CompressionCodecResolver() {
             @Override
-            CompressionCodec resolveCompressionCodec(Header header) {
+            CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return Jwts.ZIP.GZIP
+                    return Jwts.ZIP.GZIP as CompressionCodec
                 } else {
                     return null
                 }
@@ -411,7 +410,7 @@ class DeprecatedJwtsTest {
 
     }
 
-    @Test(expected = CompressionException.class)
+    @Test(expected = UnsupportedJwtException.class)
     void testCompressedJwtWithUnrecognizedHeader() {
 
         SignatureAlgorithm alg = SignatureAlgorithm.HS256
@@ -420,7 +419,7 @@ class DeprecatedJwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(alg, key)
-                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionCodec() {
+                .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
                 return "CUSTOM"
