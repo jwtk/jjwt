@@ -495,6 +495,8 @@ public final class Assert {
      *
      * @param value value to assert is not null
      * @param msg   exception message to use if {@code value} is null
+     * @param <T> value type
+     * @return the non-null value
      * @throws IllegalStateException with the specified {@code msg} if {@code value} is null.
      * @since JJWT_RELEASE_VERSION
      */

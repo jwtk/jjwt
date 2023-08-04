@@ -24,6 +24,8 @@ import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
 
 /**
+ * Serializer using a Jackson {@link ObjectMapper}.
+ *
  * @since 0.10.0
  */
 public class JacksonSerializer<T> implements Serializer<T> {
@@ -41,11 +43,19 @@ public class JacksonSerializer<T> implements Serializer<T> {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructor using JJWT's default {@link ObjectMapper} singleton for serialization.
+     */
     @SuppressWarnings("unused") //used via reflection by RuntimeClasspathDeserializerLocator
     public JacksonSerializer() {
         this(DEFAULT_OBJECT_MAPPER);
     }
 
+    /**
+     * Creates a new Jackson Serializer that uses the specified {@link ObjectMapper} for serialization.
+     *
+     * @param objectMapper the ObjectMapper to use for serialization.
+     */
     @SuppressWarnings("WeakerAccess") //intended for end-users to use when providing a custom ObjectMapper
     public JacksonSerializer(ObjectMapper objectMapper) {
         Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
@@ -63,6 +73,13 @@ public class JacksonSerializer<T> implements Serializer<T> {
         }
     }
 
+    /**
+     * Serializes the specified instance value to a byte array using the underlying Jackson {@link ObjectMapper}.
+     *
+     * @param t the instance to serialize to a byte array
+     * @return the byte array serialization of the specified instance
+     * @throws JsonProcessingException if there is a problem during serialization
+     */
     @SuppressWarnings("WeakerAccess") //for testing
     protected byte[] writeValueAsBytes(T t) throws JsonProcessingException {
         return this.objectMapper.writeValueAsBytes(t);
