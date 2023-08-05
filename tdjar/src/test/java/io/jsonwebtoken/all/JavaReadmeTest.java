@@ -67,7 +67,7 @@ public class JavaReadmeTest {
         byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
         // Create the compact JWS:
-        String jws = Jwts.builder().setContent(content, "text/plain").signWith(key, alg).compact();
+        String jws = Jwts.builder().content(content, "text/plain").signWith(key, alg).compact();
 
         // Parse the compact JWS:
         content = Jwts.parser().verifyWith(key).build().parseContentJws(jws).getPayload();
@@ -133,7 +133,7 @@ public class JavaReadmeTest {
         byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
         // Create the compact JWE:
-        String jwe = Jwts.builder().setContent(content, "text/plain").encryptWith(key, enc).compact();
+        String jwe = Jwts.builder().content(content, "text/plain").encryptWith(key, enc).compact();
 
         // Parse the compact JWE:
         content = Jwts.parser().decryptWith(key).build().parseContentJwe(jwe).getPayload();
@@ -241,7 +241,7 @@ public class JavaReadmeTest {
         // Create the compact JWE:
         String jwe = Jwts.builder().setIssuer("me")
                 // Optional work factor is specified in the header:
-                //.header().setPbes2Count(pbkdf2Iterations)).and()
+                //.header().pbes2Count(pbkdf2Iterations)).and()
                 .encryptWith(password, alg, enc)
                 .compact();
 
@@ -256,7 +256,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleSecretJwk() {
         SecretKey key = Jwts.SIG.HS512.keyBuilder().build(); // or HS384 or HS256
-        SecretJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
+        SecretJwk jwk = builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -273,7 +273,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleRsaPublicJwk() {
         RSAPublicKey key = (RSAPublicKey) Jwts.SIG.RS512.keyPairBuilder().build().getPublic();
-        RsaPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
+        RsaPublicJwk jwk = builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -293,7 +293,7 @@ public class JavaReadmeTest {
         RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
         RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
-        RsaPrivateJwk privJwk = builder().forKey(privKey).setIdFromThumbprint().build();
+        RsaPrivateJwk privJwk = builder().key(privKey).idFromThumbprint().build();
         RsaPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -313,7 +313,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleEcPublicJwk() {
         ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPairBuilder().build().getPublic();
-        EcPublicJwk jwk = builder().forKey(key).setIdFromThumbprint().build();
+        EcPublicJwk jwk = builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -333,7 +333,7 @@ public class JavaReadmeTest {
         ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 
-        EcPrivateJwk privJwk = builder().forKey(privKey).setIdFromThumbprint().build();
+        EcPrivateJwk privJwk = builder().key(privKey).idFromThumbprint().build();
         EcPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -353,7 +353,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleEdEcPublicJwk() {
         PublicKey key = Jwts.SIG.Ed25519.keyPairBuilder().build().getPublic();
-        OctetPublicJwk<PublicKey> jwk = builder().forOctetKey(key).setIdFromThumbprint().build();
+        OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
@@ -373,7 +373,7 @@ public class JavaReadmeTest {
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 
-        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
+        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().octetKey(privKey).idFromThumbprint().build();
         OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());

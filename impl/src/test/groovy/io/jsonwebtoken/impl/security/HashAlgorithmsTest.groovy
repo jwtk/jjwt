@@ -54,7 +54,7 @@ class HashAlgorithmsTest {
 
     @Test(expected = IllegalArgumentException)
     void testForKeyWithInvalidId() {
-        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        //unlike the 'get' paradigm, 'key' requires the value to exist
         reg.forKey('invalid')
     }
 

@@ -165,7 +165,7 @@ class JwtsTest {
     void testSetContentWithContentType() {
         String s = 'Hello JJWT'
         String cty = 'text/plain'
-        String compact = Jwts.builder().setContent(s.getBytes(StandardCharsets.UTF_8), cty).compact()
+        String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
         def jwt = Jwts.parser().enableUnsecuredJws().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
@@ -176,7 +176,7 @@ class JwtsTest {
         String s = 'Hello JJWT'
         String subtype = 'foo'
         String cty = "application/$subtype"
-        String compact = Jwts.builder().setContent(s.getBytes(StandardCharsets.UTF_8), cty).compact()
+        String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
         def jwt = Jwts.parser().enableUnsecuredJws().build().parseContentJwt(compact)
         assertEquals subtype, jwt.header.getContentType() // assert that the compact form was used
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
@@ -187,7 +187,7 @@ class JwtsTest {
         String s = 'Hello JJWT'
         String subtype = 'foo'
         String cty = "application/$subtype;part=1/2"
-        String compact = Jwts.builder().setContent(s.getBytes(StandardCharsets.UTF_8), cty).compact()
+        String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
         def jwt = Jwts.parser().enableUnsecuredJws().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType() // two slashes, can't compact
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
@@ -1135,7 +1135,7 @@ class JwtsTest {
 
         try {
             Jwts.parser()
-                    .setKeyLocator(new ConstantKeyLocator(TestKeys.HS256, TestKeys.A128GCM))
+                    .keyLocator(new ConstantKeyLocator(TestKeys.HS256, TestKeys.A128GCM))
                     .addKeyAlgorithms([badKeyAlg]) // <-- add bad alg here
                     .build()
                     .parseClaimsJwe(compact)

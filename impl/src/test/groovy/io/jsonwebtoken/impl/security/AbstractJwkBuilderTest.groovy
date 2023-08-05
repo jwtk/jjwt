@@ -32,7 +32,7 @@ class AbstractJwkBuilderTest {
     private static final SecretKey SKEY = TestKeys.A256GCM
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder) Jwks.builder().forKey(SKEY)
+        return (AbstractJwkBuilder) Jwks.builder().key(SKEY)
     }
 
     @Test
@@ -83,7 +83,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testAlgorithm() {
         def alg = 'someAlgorithm'
-        def jwk = builder().setAlgorithm(alg).build()
+        def jwk = builder().algorithm(alg).build()
         assertEquals alg, jwk.getAlgorithm()
         assertEquals alg, jwk.alg //test raw get via JWA member id
     }
@@ -99,7 +99,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testId() {
         def kid = UUID.randomUUID().toString()
-        def jwk = builder().setId(kid).build()
+        def jwk = builder().id(kid).build()
         assertEquals kid, jwk.getId()
         assertEquals kid, jwk.kid //test raw get via JWA member id
     }
@@ -117,7 +117,7 @@ class AbstractJwkBuilderTest {
         def a = UUID.randomUUID().toString()
         def b = UUID.randomUUID().toString()
         def set = [a, b] as Set<String>
-        def jwk = builder().setOperations(set).build()
+        def jwk = builder().operations(set).build()
         assertEquals set, jwk.getOperations()
         assertEquals set, jwk.key_ops
     }
@@ -145,7 +145,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testProvider() {
         def provider = Providers.findBouncyCastle(Conditions.TRUE)
-        def jwk = builder().setProvider(provider).build()
+        def jwk = builder().provider(provider).build()
         assertEquals 'oct', jwk.getType()
     }
 

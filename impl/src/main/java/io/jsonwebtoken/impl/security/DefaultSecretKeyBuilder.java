@@ -39,17 +39,17 @@ public class DefaultSecretKeyBuilder implements SecretKeyBuilder {
             throw new IllegalArgumentException(msg);
         }
         this.BIT_LENGTH = Assert.gt(bitLength, 0, "bitLength must be > 0");
-        setRandom(Randoms.secureRandom());
+        random(Randoms.secureRandom());
     }
 
     @Override
-    public SecretKeyBuilder setProvider(Provider provider) {
+    public SecretKeyBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
     @Override
-    public SecretKeyBuilder setRandom(SecureRandom random) {
+    public SecretKeyBuilder random(SecureRandom random) {
         this.random = random != null ? random : Randoms.secureRandom();
         return this;
     }

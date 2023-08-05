@@ -50,13 +50,13 @@ public class DefaultKeyPairBuilder implements KeyPairBuilder {
     }
 
     @Override
-    public KeyPairBuilder setProvider(Provider provider) {
+    public KeyPairBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
     @Override
-    public KeyPairBuilder setRandom(SecureRandom random) {
+    public KeyPairBuilder random(SecureRandom random) {
         this.random = random;
         return this;
     }

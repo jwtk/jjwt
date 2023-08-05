@@ -100,7 +100,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder setProvider(Provider provider);
+    JwtParserBuilder provider(Provider provider);
 
     /**
      * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
@@ -205,8 +205,35 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the parser builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION for the more modern builder-style named {@link #clock(Clock)} method.
+     * This method will be removed before the JJWT 1.0 release.
      */
+    @Deprecated
     JwtParserBuilder setClock(Clock clock);
+
+    /**
+     * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
+     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+     *
+     * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
+     * @return the parser builder for method chaining.
+     */
+    JwtParserBuilder clock(Clock clock);
+
+    /**
+     * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
+     * and {@code nbf} claims.
+     *
+     * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
+     * @return the parser builder for method chaining.
+     * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
+     *                                  any such value would cause numeric overflow when multiplying by 1000 to obtain
+     *                                  a millisecond value.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * {@link #clockSkewSeconds(long)}. This method will be removed before the JJWT 1.0 release.
+     */
+    @Deprecated
+    JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
 
     /**
      * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
@@ -218,7 +245,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *                                  any such value would cause numeric overflow when multiplying by 1000 to obtain
      *                                  a millisecond value.
      */
-    JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
+    JwtParserBuilder clockSkewSeconds(long seconds) throws IllegalArgumentException;
 
     /**
      * <p><b>Deprecation Notice</b></p>
@@ -320,7 +347,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>If there is any chance that the parser will encounter JWSs
      * that need different signature verification keys based on the JWS being parsed, or JWEs, it is strongly
      * recommended to configure your own {@link Locator} via the
-     * {@link #setKeyLocator(Locator) setKeyLocator} method instead of using this one.</p>
+     * {@link #keyLocator(Locator) keyLocator} method instead of using this one.</p>
      *
      * <p>Calling this method overrides any previously set signature verification key.</p>
      *
@@ -332,7 +359,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Sets the decryption key used to decrypt all encountered JWEs, <b>overwriting any previously configured
-     * {@link #setKeyLocator(Locator) keyLocator}</b>. If the encountered JWT string is not a JWE (e.g. a JWS),
+     * {@link #keyLocator(Locator) keyLocator}</b>. If the encountered JWT string is not a JWE (e.g. a JWS),
      * this key is not used.
      *
      * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
@@ -342,7 +369,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p>If there is any chance that the parser will encounter JWEs that need different decryption keys based on the
      * JWE being parsed, or JWSs, it is strongly recommended to configure
-     * your own {@link Locator Locator} via the {@link #setKeyLocator(Locator) setKeyLocator} method instead of
+     * your own {@link Locator Locator} via the {@link #keyLocator(Locator) keyLocator} method instead of
      * using {@code decryptWith}.</p>
      *
      * <p>Calling this method overrides any previously set decryption key.</p>
@@ -367,7 +394,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
      *
      * <pre>
-     * Jws&lt;Claims&gt; jws = Jwts.parser().setKeyLocator(new Locator&lt;Key&gt;() {
+     * Jws&lt;Claims&gt; jws = Jwts.parser().keyLocator(new Locator&lt;Key&gt;() {
      *         &#64;Override
      *         public Key locate(Header&lt;?&gt; header) {
      *             if (header instanceof JwsHeader) {
@@ -386,14 +413,14 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the parser builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder setKeyLocator(Locator<Key> keyLocator);
+    JwtParserBuilder keyLocator(Locator<Key> keyLocator);
 
     /**
      * <p><b>Deprecation Notice</b></p>
      *
      * <p>This method has been deprecated as of JJWT version JJWT_RELEASE_VERSION because it only supports key location
      * for JWSs (signed JWTs) instead of both signed (JWS) and encrypted (JWE) scenarios.  Use the
-     * {@link #setKeyLocator(Locator) setKeyLocator} method instead to ensure a locator that can work for both JWS and
+     * {@link #keyLocator(Locator) keyLocator} method instead to ensure a locator that can work for both JWS and
      * JWE inputs.  This method will be removed for the 1.0 release.</p>
      *
      * <p><b>Previous Documentation</b></p>
@@ -420,7 +447,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #setKeyLocator(Locator)}
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #keyLocator(Locator)}
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -531,6 +558,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
      * @return the parser builder for method chaining.
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #addCompressionAlgorithms(Collection)}.
+     * This method will be removed before the 1.0 release.
      */
     @Deprecated
     JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
@@ -543,8 +571,40 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param base64UrlDecoder the decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * {@link #base64UrlDecoder(Decoder)}. This method will be removed before the JJWT 1.0 release.
      */
+    @Deprecated
     JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder);
+
+    /**
+     * Perform Base64Url decoding with the specified Decoder
+     *
+     * <p>JJWT uses a spec-compliant decoder that works on all supported JDK versions, but you may call this method
+     * to specify a different decoder if you desire.</p>
+     *
+     * @param base64UrlDecoder the decoder to use when Base64Url-decoding
+     * @return the parser builder for method chaining.
+     */
+    JwtParserBuilder base64UrlDecoder(Decoder<String, byte[]> base64UrlDecoder);
+
+    /**
+     * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
+     * used by the parser after Base64Url-decoding to convert JWT/JWS/JWT JSON headers and claims into Java Map
+     * objects.
+     *
+     * <p>If this method is not called, JJWT will use whatever deserializer it can find at runtime, checking for the
+     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+     * in the runtime classpath, an exception will be thrown when one of the various {@code parse}* methods is
+     * invoked.</p>
+     *
+     * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
+     * @return the builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * {@link #jsonDeserializer(Deserializer)}. This method will be removed before the JJWT 1.0 release.
+     */
+    @Deprecated
+    JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
     /**
      * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
@@ -559,7 +619,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
      */
-    JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
+    JwtParserBuilder jsonDeserializer(Deserializer<Map<String, ?>> deserializer);
 
     /**
      * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.

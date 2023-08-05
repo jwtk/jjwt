@@ -39,7 +39,7 @@ class JwkConverterTest {
 
     @Test
     void testSecretJwkTypeString() {
-        def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
         assertEquals 'Secret JWK', typeString(jwk)
     }
 
@@ -86,7 +86,7 @@ class JwkConverterTest {
     @Test
     void testPrivateJwk() {
         JwkConverter<PrivateJwk> converter = new JwkConverter<>(PrivateJwk.class)
-        def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
         try {
             converter.applyFrom(jwk)
             fail()
@@ -99,7 +99,7 @@ class JwkConverterTest {
     @Test
     void testRsaPrivateJwk() {
         JwkConverter<RsaPublicJwk> converter = new JwkConverter<>(RsaPublicJwk.class)
-        def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
         try {
             converter.applyFrom(jwk)
             fail()

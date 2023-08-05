@@ -32,22 +32,22 @@ class SecretJwkFactoryTest {
 
     @Test // if a jwk does not have an 'alg' or 'use' field, we default to an AES key
     void testNoAlgNoSigJcaName() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
         SecretJwk result = Jwks.builder().set(jwk).build() as SecretJwk
         assertEquals 'AES', result.toKey().getAlgorithm()
     }
 
     @Test
     void testJwkHS256AlgSetsKeyJcaNameCorrectly() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
         SecretJwk result = Jwks.builder().set(jwk).set('alg', 'HS256').build() as SecretJwk
         assertEquals 'HmacSHA256', result.toKey().getAlgorithm()
     }
 
     @Test
     void testSignOpSetsKeyHmacSHA256() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
-        SecretJwk result = Jwks.builder().set(jwk).setOperations(["sign"] as Set<String>).build() as SecretJwk
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
+        SecretJwk result = Jwks.builder().set(jwk).operations(["sign"] as Set<String>).build() as SecretJwk
         assertNull result.getAlgorithm()
         assertNull result.get('use')
         assertEquals 'HmacSHA256', result.toKey().getAlgorithm()
@@ -55,15 +55,15 @@ class SecretJwkFactoryTest {
 
     @Test
     void testJwkHS384AlgSetsKeyJcaNameCorrectly() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS384).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS384).build()
         SecretJwk result = Jwks.builder().set(jwk).set('alg', 'HS384').build() as SecretJwk
         assertEquals 'HmacSHA384', result.toKey().getAlgorithm()
     }
 
     @Test
     void testSignOpSetsKeyHmacSHA384() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS384).build()
-        SecretJwk result = Jwks.builder().set(jwk).setOperations(["sign"] as Set<String>).build() as SecretJwk
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS384).build()
+        SecretJwk result = Jwks.builder().set(jwk).operations(["sign"] as Set<String>).build() as SecretJwk
         assertNull result.getAlgorithm()
         assertNull result.get('use')
         assertEquals 'HmacSHA384', result.toKey().getAlgorithm()
@@ -71,15 +71,15 @@ class SecretJwkFactoryTest {
 
     @Test
     void testJwkHS512AlgSetsKeyJcaNameCorrectly() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS512).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS512).build()
         SecretJwk result = Jwks.builder().set(jwk).set('alg', 'HS512').build() as SecretJwk
         assertEquals 'HmacSHA512', result.toKey().getAlgorithm()
     }
 
     @Test
     void testSignOpSetsKeyHmacSHA512() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS512).build()
-        SecretJwk result = Jwks.builder().set(jwk).setOperations(["sign"] as Set<String>).build() as SecretJwk
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS512).build()
+        SecretJwk result = Jwks.builder().set(jwk).operations(["sign"] as Set<String>).build() as SecretJwk
         assertNull result.getAlgorithm()
         assertNull result.get('use')
         assertEquals 'HmacSHA512', result.toKey().getAlgorithm()
@@ -87,7 +87,7 @@ class SecretJwkFactoryTest {
 
     @Test // no 'alg' jwk property, but 'use' is 'sig', so forces jcaName to be HmacSHA256
     void testNoAlgAndSigUseForHS256() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
         assertFalse jwk.containsKey('alg')
         assertFalse jwk.containsKey('use')
         SecretJwk result = Jwks.builder().set(jwk).set('use', 'sig').build() as SecretJwk
@@ -96,7 +96,7 @@ class SecretJwkFactoryTest {
 
     @Test // no 'alg' jwk property, but 'use' is 'sig', so forces jcaName to be HmacSHA384
     void testNoAlgAndSigUseForHS384() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS384).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS384).build()
         assertFalse jwk.containsKey('alg')
         assertFalse jwk.containsKey('use')
         SecretJwk result = Jwks.builder().set(jwk).set('use', 'sig').build() as SecretJwk
@@ -105,7 +105,7 @@ class SecretJwkFactoryTest {
 
     @Test // no 'alg' jwk property, but 'use' is 'sig', so forces jcaName to be HmacSHA512
     void testNoAlgAndSigUseForHS512() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS512).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS512).build()
         assertFalse jwk.containsKey('alg')
         assertFalse jwk.containsKey('use')
         SecretJwk result = Jwks.builder().set(jwk).set('use', 'sig').build() as SecretJwk
@@ -114,7 +114,7 @@ class SecretJwkFactoryTest {
 
     @Test // no 'alg' jwk property, but 'use' is something other than 'sig', so jcaName should default to AES
     void testNoAlgAndNonSigUse() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
         assertFalse jwk.containsKey('alg')
         assertFalse jwk.containsKey('use')
         SecretJwk result = Jwks.builder().set(jwk).set('use', 'foo').build() as SecretJwk
@@ -129,7 +129,7 @@ class SecretJwkFactoryTest {
     void testSizeMismatchedSecretJwk() {
 
         //first get a valid HS256 JWK:
-        SecretJwk validJwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk validJwk = Jwks.builder().key(TestKeys.HS256).build()
 
         //now associate it with an alg identifier that is more than the key is capable of:
         try {

@@ -98,13 +98,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setProvider(Provider provider) {
+    public JwtBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
     @Override
-    public JwtBuilder setSecureRandom(SecureRandom secureRandom) {
+    public JwtBuilder random(SecureRandom secureRandom) {
         this.secureRandom = secureRandom;
         return this;
     }
@@ -294,22 +294,22 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder setPayload(String payload) {
         byte[] bytes = payload != null ? payload.getBytes(StandardCharsets.UTF_8) : null;
-        return setContent(bytes);
+        return content(bytes);
     }
 
     @Override
-    public JwtBuilder setContent(byte[] content) {
+    public JwtBuilder content(byte[] content) {
         this.content = content;
         return this;
     }
 
     @Override
-    public JwtBuilder setContent(byte[] content, String cty) {
+    public JwtBuilder content(byte[] content, String cty) {
         Assert.notEmpty(content, "content byte array cannot be null or empty.");
         Assert.hasText(cty, "Content Type String cannot be null or empty.");
         cty = CompactMediaTypeIdConverter.INSTANCE.applyFrom(cty);
-        this.headerBuilder.setContentType(cty);
-        return setContent(content);
+        this.headerBuilder.contentType(cty);
+        return content(content);
     }
 
     @Override
@@ -334,43 +334,78 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setIssuer(String iss) {
-        this.claimsBuilder.setIssuer(iss);
+        return issuer(iss);
+    }
+
+    @Override
+    public JwtBuilder issuer(String iss) {
+        this.claimsBuilder.issuer(iss);
         return this;
     }
 
     @Override
     public JwtBuilder setSubject(String sub) {
-        this.claimsBuilder.setSubject(sub);
+        return subject(sub);
+    }
+
+    @Override
+    public JwtBuilder subject(String sub) {
+        this.claimsBuilder.subject(sub);
         return this;
     }
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        this.claimsBuilder.setAudience(aud);
+        return audience(aud);
+    }
+
+    @Override
+    public JwtBuilder audience(String aud) {
+        this.claimsBuilder.audience(aud);
         return this;
     }
 
     @Override
     public JwtBuilder setExpiration(Date exp) {
-        this.claimsBuilder.setExpiration(exp);
+        return expiration(exp);
+    }
+
+    @Override
+    public JwtBuilder expiration(Date exp) {
+        this.claimsBuilder.expiration(exp);
         return this;
     }
 
     @Override
     public JwtBuilder setNotBefore(Date nbf) {
-        this.claimsBuilder.setNotBefore(nbf);
+        return notBefore(nbf);
+    }
+
+    @Override
+    public JwtBuilder notBefore(Date nbf) {
+        this.claimsBuilder.notBefore(nbf);
         return this;
     }
 
     @Override
     public JwtBuilder setIssuedAt(Date iat) {
-        this.claimsBuilder.setIssuedAt(iat);
+        return issuedAt(iat);
+    }
+
+    @Override
+    public JwtBuilder issuedAt(Date iat) {
+        this.claimsBuilder.issuedAt(iat);
         return this;
     }
 
     @Override
     public JwtBuilder setId(String jti) {
-        this.claimsBuilder.setId(jti);
+        return id(jti);
+    }
+
+    @Override
+    public JwtBuilder id(String jti) {
+        this.claimsBuilder.id(jti);
         return this;
     }
 
@@ -415,7 +450,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
         if (!Objects.isEmpty(payload) && compressionAlgorithm != null) {
             payload = compressionAlgorithm.compress(payload);
-            this.headerBuilder.setCompressionAlgorithm(compressionAlgorithm.getId());
+            this.headerBuilder.set(DefaultHeader.COMPRESSION_ALGORITHM.getId(), compressionAlgorithm.getId());
         }
 
         if (jwe) {
@@ -437,7 +472,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 //            header = new DefaultJwsHeader(header);
 //        }
 
-        this.headerBuilder.setAlgorithm(sigAlg.getId());
+        this.headerBuilder.set(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
 
         final io.jsonwebtoken.Header header = buildHeader();
 
@@ -483,7 +518,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
-        this.headerBuilder.setAlgorithm(keyAlg.getId());
+        this.headerBuilder.set(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
         this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
         final io.jsonwebtoken.Header header = buildHeader();

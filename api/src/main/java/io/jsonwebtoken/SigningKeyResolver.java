@@ -44,7 +44,7 @@ import java.security.Key;
  * the {@link io.jsonwebtoken.SigningKeyResolverAdapter} and overriding only the method you need to support instead of
  * implementing this interface directly.</p>
  *
- * @see io.jsonwebtoken.JwtParserBuilder#setKeyLocator(Locator)
+ * @see io.jsonwebtoken.JwtParserBuilder#keyLocator(Locator)
  * @since 0.4
  * @deprecated since JJWT_RELEASE_VERSION. Implement {@link Locator} instead.
  */

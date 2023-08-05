@@ -25,7 +25,7 @@ import java.security.Key;
  *
  * <p>As of JJWT JJWT_RELEASE_VERSION, various Resolver concepts (including the {@code SigningKeyResolver}) have been
  * unified into a single {@link Locator} interface.  For key location, (for both signing and encryption keys),
- * use the {@link JwtParserBuilder#setKeyLocator(Locator)} to configure a parser with your desired Key locator instead
+ * use the {@link JwtParserBuilder#keyLocator(Locator)} to configure a parser with your desired Key locator instead
  * of using a {@code SigningKeyResolver}. Also see {@link LocatorAdapter} for the Adapter pattern parallel of this
  * class. <b>This {@code SigningKeyResolverAdapter} class will be removed before the 1.0 release.</b></p>
  *
@@ -46,11 +46,11 @@ import java.security.Key;
  * are not overridden, one (or both) of the *KeyBytes variants must be overridden depending on your expected
  * use case.  You do not have to override any method that does not represent an expected condition.</p>
  *
- * @see io.jsonwebtoken.JwtParserBuilder#setKeyLocator(Locator)
+ * @see io.jsonwebtoken.JwtParserBuilder#keyLocator(Locator)
  * @see LocatorAdapter
  * @since 0.4
  * @deprecated since JJWT_RELEASE_VERSION. Use {@link LocatorAdapter LocatorAdapter} with
- * {@link JwtParserBuilder#setKeyLocator(Locator)}
+ * {@link JwtParserBuilder#keyLocator(Locator)}
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated

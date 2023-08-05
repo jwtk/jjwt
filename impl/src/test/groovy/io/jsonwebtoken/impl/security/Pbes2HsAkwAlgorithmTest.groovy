@@ -38,7 +38,7 @@ class Pbes2HsAkwAlgorithmTest {
     void testInsufficientIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
-            def header = Jwts.header().setPbes2Count(iterations) as DefaultJweHeaderMutator
+            def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
             KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwts.ENC.A256GCM)
             try {
@@ -66,7 +66,7 @@ class Pbes2HsAkwAlgorithmTest {
         //double scale = 0.5035246727
 
         def password = 'hellowor'.toCharArray()
-        def header = new DefaultJweHeader().setPbes2Count(iterations)
+        def header = new DefaultJweHeader().pbes2Count(iterations)
         def key = Keys.forPassword(password)
         def req = new DefaultKeyRequest(null, null, key, header, Jwts.ENC.A128GCM)
         int sum = 0

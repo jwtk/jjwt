@@ -62,7 +62,7 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.5">JWS <code>x5u</code> (X.509 URL) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.7">JWE <code>x5u</code> (X.509 URL) Header Parameter</a>
      */
-    T setX509Url(URI uri);
+    T x509Url(URI uri);
 
     /**
      * Sets the {@code x5c} (X.509 Certificate Chain) of the associated JWT or JWK. A {@code null} value will remove the
@@ -85,7 +85,7 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6">JWS <code>x5c</code> (X.509 Certificate Chain) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.8">JWE <code>x5c</code> (X.509 Certificate Chain) Header Parameter</a>
      */
-    T setX509CertificateChain(List<X509Certificate> chain);
+    T x509CertificateChain(List<X509Certificate> chain);
 
     /**
      * Sets the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
@@ -111,7 +111,7 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.7">JWS <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.9">JWE <code>x5t</code> (X.509 Certificate SHA-1 Thumbprint) Header Parameter</a>
      */
-    T setX509CertificateSha1Thumbprint(byte[] thumbprint);
+    T x509CertificateSha1Thumbprint(byte[] thumbprint);
 
     /**
      * Sets the {@code x5t#S256} (X.509 Certificate SHA-256 Thumbprint) (a.k.a. digest) of the DER-encoding of the
@@ -137,5 +137,5 @@ public interface X509Mutator<T extends X509Mutator<T>> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8">JWS <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.10">JWE <code>x5t#S256</code> (X.509 Certificate SHA-256 Thumbprint) Header Parameter</a>
      */
-    T setX509CertificateSha256Thumbprint(byte[] thumbprint);
+    T x509CertificateSha256Thumbprint(byte[] thumbprint);
 }

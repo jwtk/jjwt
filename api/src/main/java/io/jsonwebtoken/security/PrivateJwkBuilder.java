@@ -26,7 +26,7 @@ import java.security.PublicKey;
  * @param <M> the type of {@link PrivateJwk} created
  * @param <J> the type of {@link PublicJwk} paired with the created private JWK.
  * @param <T> the type of the builder, for subtype method chaining
- * @see #setPublicKey(PublicKey)
+ * @see #publicKey(PublicKey)
  * @since JJWT_RELEASE_VERSION
  */
 public interface PrivateJwkBuilder<K extends PrivateKey, L extends PublicKey,
@@ -40,7 +40,7 @@ public interface PrivateJwkBuilder<K extends PrivateKey, L extends PublicKey,
      *
      * <p>As discussed in the {@link PrivateJwk} documentation, the JWK and JWA specifications require private JWKs to
      * contain <em>both</em> private key <em>and</em> public key data.  If a public key is not provided via this
-     * {@code setPublicKey} method, the builder implementation must go through the work to derive the
+     * {@code publicKey} method, the builder implementation must go through the work to derive the
      * {@code PublicKey} instance based on the {@code PrivateKey} to obtain the necessary public key information.</p>
      *
      * <p>Calling this method with the {@code PrivateKey}'s matching {@code PublicKey} instance eliminates the need
@@ -49,5 +49,5 @@ public interface PrivateJwkBuilder<K extends PrivateKey, L extends PublicKey,
      * @param publicKey the {@link PublicKey} that matches the builder's existing {@link PrivateKey}.
      * @return the builder for method chaining.
      */
-    T setPublicKey(L publicKey);
+    T publicKey(L publicKey);
 }

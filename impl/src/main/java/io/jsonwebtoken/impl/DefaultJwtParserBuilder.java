@@ -108,22 +108,32 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder setProvider(Provider provider) {
+    public JwtParserBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
+        return jsonDeserializer(deserializer);
+    }
+
+    @Override
+    public JwtParserBuilder jsonDeserializer(Deserializer<Map<String, ?>> deserializer) {
         Assert.notNull(deserializer, "deserializer cannot be null.");
         this.deserializer = deserializer;
         return this;
     }
 
     @Override
-    public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder) {
-        Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
-        this.base64UrlDecoder = base64UrlDecoder;
+    public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> decoder) {
+        return base64UrlDecoder(decoder);
+    }
+
+    @Override
+    public JwtParserBuilder base64UrlDecoder(Decoder<String, byte[]> decoder) {
+        Assert.notNull(decoder, "base64UrlDecoder cannot be null.");
+        this.base64UrlDecoder = decoder;
         return this;
     }
 
@@ -179,6 +189,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setClock(Clock clock) {
+        return clock(clock);
+    }
+
+    @Override
+    public JwtParserBuilder clock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
         return this;
@@ -186,6 +201,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException {
+        return clockSkewSeconds(seconds);
+    }
+
+    @Override
+    public JwtParserBuilder clockSkewSeconds(long seconds) throws IllegalArgumentException {
         Assert.isTrue(seconds <= MAX_CLOCK_SKEW_MILLIS, MAX_CLOCK_SKEW_ILLEGAL_MSG);
         this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
         return this;
@@ -258,7 +278,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder setKeyLocator(Locator<Key> keyLocator) {
+    public JwtParserBuilder keyLocator(Locator<Key> keyLocator) {
         this.keyLocator = Assert.notNull(keyLocator, "Key locator cannot be null.");
         return this;
     }

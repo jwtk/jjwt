@@ -54,7 +54,7 @@ public final class Jwks {
      * <blockquote><pre>
      * Jwks.{@link Jwks#builder}()
      *     // ... etc ...
-     *     .{@link JwkBuilder#setIdFromThumbprint(HashAlgorithm) setIdFromThumbprint}(Jwts.HASH.{@link Jwks.HASH#SHA256 SHA256}) // &lt;---
+     *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(Jwts.HASH.{@link Jwks.HASH#SHA256 SHA256}) // &lt;---
      *     .build()</pre></blockquote>
      * <p>or</p>
      * <blockquote><pre>

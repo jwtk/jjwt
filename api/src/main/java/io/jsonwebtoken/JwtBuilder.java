@@ -55,7 +55,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setProvider(Provider provider);
+    JwtBuilder provider(Provider provider);
 
     /**
      * Sets the {@link SecureRandom} to use during cryptographic signing or encryption operations, or {@code null} if
@@ -66,7 +66,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setSecureRandom(SecureRandom secureRandom);
+    JwtBuilder random(SecureRandom secureRandom);
 
     /**
      * Returns the {@link JwtBuilder.Header} to use to modify the constructed JWT's header name/value pairs as desired.
@@ -77,7 +77,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * String jwt = Jwts.builder()
      *
      *     <b>.header()
-     *         .setKeyId("keyId")
+     *         .keyId("keyId")
      *         .set(myHeaderMap)
      *         // ... other header params ...
      *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
@@ -123,13 +123,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
-     * {@link Header#setContentType(String) contentType} header value so the JWT recipient may inspect that value to
+     * {@link Header#contentType(String) contentType} header value so the JWT recipient may inspect that value to
      * determine how to convert the byte array to the final data type as desired. In this case, consider using
-     * {@link #setContent(byte[], String)} instead.
+     * {@link #content(byte[], String)} instead.
      *
      * <p>This is a convenience method that is effectively the same as:</p>
      * <blockquote><pre>
-     * {@link #setContent(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
+     * {@link #content(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
      *
      * <p>If you want the JWT payload to be JSON, use the
      * {@link #setClaims(Claims)} or {@link #setClaims(java.util.Map)} methods instead.</p>
@@ -138,12 +138,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param payload the string used to set UTF-8-encoded bytes as the JWT payload.
      * @return the builder for method chaining.
-     * @see #setContent(byte[])
-     * @see #setContent(byte[], String)
-     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #setContent(byte[])} or {@link #setContent(byte[], String)}
+     * @see #content(byte[])
+     * @see #content(byte[], String)
+     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #content(byte[])} or {@link #content(byte[], String)}
      * because both Claims and Content are technically 'payloads', so this method name is misleading.  This method will
      * be removed before the 1.0 release.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder setPayload(String payload);
 
@@ -154,7 +155,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use
      * the given byte array without additional metadata, it is strongly recommended to use the
-     * {@link #setContent(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
+     * {@link #content(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
      * can inspect the {@code cty} header to know how to handle the byte array without ambiguity.</p>
      *
      * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
@@ -163,11 +164,11 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setContent(byte[] content);
+    JwtBuilder content(byte[] content);
 
     /**
      * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
-     * {@link Header#setContentType(String) contentType} header value to a compact {@code cty} media type
+     * {@link Header#contentType(String) contentType} header value to a compact {@code cty} media type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.
      *
@@ -178,13 +179,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">JWT specification recommendations</a>.</p>
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
-     * method - instead call {@link #setContent(byte[])} and set the header's
-     * {@link Header#setContentType(String) contentType} independently.  For example:</p>
+     * method - instead call {@link #content(byte[])} and set the header's
+     * {@link Header#contentType(String) contentType} independently.  For example:</p>
      *
      * <blockquote><pre>
      * Jwts.builder()
-     *     .header().setContentType("application/whatever").and()
-     *     .setContent(byteArray)
+     *     .header().contentType("application/whatever").and()
+     *     .content(byteArray)
      *     ...
      *     .build();</pre></blockquote>
      *
@@ -199,11 +200,11 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws IllegalArgumentException if either {@code payload} or {@code cty} are null or empty.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setContent(byte[] content, String cty) throws IllegalArgumentException;
+    JwtBuilder content(byte[] content, String cty) throws IllegalArgumentException;
 
     /**
      * Sets the JWT payload to be a JSON Claims instance.  If you do not want the JWT payload to be JSON claims and
-     * instead want it to be a byte array representing any type of content, use the {@link #setContent(byte[])}
+     * instead want it to be a byte array representing any type of content, use the {@link #content(byte[])}
      * method instead.
      *
      * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
@@ -216,7 +217,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Sets the JWT payload to be a JSON Claims instance populated by the specified name/value pairs.  If you do not
      * want the JWT payload to be JSON claims and instead want it to be a byte array for any content, use the
-     * {@link #setContent(byte[])} or {@link #setContent(byte[], String)} methods instead.
+     * {@link #content(byte[])} or {@link #content(byte[], String)} methods instead.
      *
      * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
      *

@@ -47,7 +47,11 @@ class DefaultJwtHeaderBuilderTest {
     @SuppressWarnings('GroovyAssignabilityCheck')
     private static void assertSymmetry(String propName, def val) {
         def name = Strings.capitalize(propName)
-        builder."set$name"(val)
+        switch (propName) {
+            case 'algorithm': builder.set('alg', val); break // no setter
+            case 'compressionAlgorithm': builder.set('zip', val); break // no setter
+            default: builder."$propName"(val)
+        }
         header = builder.build()
         if (val instanceof byte[]) {
             assertArrayEquals val, header."get$name"()
@@ -277,7 +281,7 @@ class DefaultJwtHeaderBuilderTest {
      */
     @Test
     void testJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
         assertJws('jwk', jwk)
     }
 
@@ -332,7 +336,7 @@ class DefaultJwtHeaderBuilderTest {
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
 
-        builder.setX509CertificateSha1Thumbprint(x5t)
+        builder.x509CertificateSha1Thumbprint(x5t)
         header = builder.build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
@@ -345,7 +349,7 @@ class DefaultJwtHeaderBuilderTest {
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
-        def header = builder.setX509CertificateChain(chain).withX509Sha1Thumbprint(true).build() as JwsHeader
+        def header = builder.x509CertificateChain(chain).withX509Sha1Thumbprint(true).build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
         assertEquals encoded, header.get('x5t')
@@ -361,7 +365,7 @@ class DefaultJwtHeaderBuilderTest {
         def x5tS256 = Jwks.HASH.@SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
 
-        builder.setX509CertificateSha256Thumbprint(x5tS256)
+        builder.x509CertificateSha256Thumbprint(x5tS256)
         header = builder.build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
@@ -374,7 +378,7 @@ class DefaultJwtHeaderBuilderTest {
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
-        def header = builder.setX509CertificateChain(chain).withX509Sha256Thumbprint(true).build() as JwsHeader
+        def header = builder.x509CertificateChain(chain).withX509Sha256Thumbprint(true).build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
@@ -393,7 +397,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testEphemeralPublicKey() {
         def key = TestKeys.ES256.pair.public
-        def jwk = Jwks.builder().forKey(key).build()
+        def jwk = Jwks.builder().key(key).build()
         builder.put('epk', jwk)
         header = builder.build() as JweHeader
         assertEquals jwk, header.getEphemeralPublicKey()
@@ -409,7 +413,7 @@ class DefaultJwtHeaderBuilderTest {
     void testAgreementPartyUInfoString() {
         def s = "UInfo"
         def info = Strings.utf8(s)
-        builder.setAgreementPartyUInfo(s).build()
+        builder.agreementPartyUInfo(s).build()
         header = builder.build() as JweHeader
         assertArrayEquals info, header.getAgreementPartyUInfo()
     }
@@ -424,7 +428,7 @@ class DefaultJwtHeaderBuilderTest {
     void testAgreementPartyVInfoString() {
         def s = "VInfo"
         def info = Strings.utf8(s)
-        builder.setAgreementPartyVInfo(s)
+        builder.agreementPartyVInfo(s)
         header = builder.build() as JweHeader
         assertArrayEquals info, header.getAgreementPartyVInfo()
     }
@@ -465,7 +469,7 @@ class DefaultJwtHeaderBuilderTest {
         assertEquals new DefaultHeader([foo: 'bar']), builder.build()
 
         // add JWS-required property:
-        builder.setAlgorithm('HS256')
+        builder.set(DefaultHeader.ALGORITHM.getId(), 'HS256')
         assertEquals new DefaultJwsHeader([foo: 'bar', alg: 'HS256']), builder.build()
 
         // add JWE required property:

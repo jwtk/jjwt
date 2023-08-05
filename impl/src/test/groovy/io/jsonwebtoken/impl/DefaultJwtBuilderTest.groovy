@@ -81,7 +81,7 @@ class DefaultJwtBuilderTest {
         }
 
         replay provider
-        def b = new DefaultJwtBuilder().setProvider(provider)
+        def b = new DefaultJwtBuilder().provider(provider)
                 .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
         assertSame provider, b.provider
         b.compact()
@@ -123,7 +123,7 @@ class DefaultJwtBuilderTest {
             }
         }
 
-        def b = new DefaultJwtBuilder().setSecureRandom(random)
+        def b = new DefaultJwtBuilder().random(random)
                 .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
@@ -253,7 +253,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactWithJwsHeader() {
         def b = new DefaultJwtBuilder()
-        b.header().setKeyId('a')
+        b.header().keyId('a')
         b.setPayload('foo')
         def alg = SignatureAlgorithm.HS256
         def key = Keys.secretKeyFor(alg)
@@ -306,7 +306,7 @@ class DefaultJwtBuilderTest {
     void testSignWithKeyOnly() {
 
         def b = new DefaultJwtBuilder()
-        b.header().setKeyId('a')
+        b.header().keyId('a')
         b.setPayload('foo')
 
         def key = KeyGenerator.getInstance('HmacSHA256').generateKey()

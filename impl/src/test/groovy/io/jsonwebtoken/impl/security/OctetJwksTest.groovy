@@ -125,13 +125,13 @@ class OctetJwksTest {
             PrivateKey priv = pair.getPrivate()
 
             // test individual keys
-            PublicJwk pubJwk = Jwks.builder().forOctetKey(pub).setPublicKeyUse("sig").build()
+            PublicJwk pubJwk = Jwks.builder().octetKey(pub).publicKeyUse("sig").build()
             PublicJwk pubValuesJwk = Jwks.builder().set(pubJwk).build() as PublicJwk // ensure value map symmetry
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
 
-            PrivateJwk privJwk = Jwks.builder().forOctetKey(priv).setPublicKey(pub).setPublicKeyUse("sig").build()
+            PrivateJwk privJwk = Jwks.builder().octetKey(priv).publicKey(pub).publicKeyUse("sig").build()
             PrivateJwk privValuesJwk = Jwks.builder().set(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
@@ -159,7 +159,7 @@ class OctetJwksTest {
             assertArrayEquals privMaterial, jwkKeyMaterial
 
             // Test public-to-private builder coercion:
-            privJwk = Jwks.builder().forOctetKey(pub).setPrivateKey(priv).setPublicKeyUse('sig').build()
+            privJwk = Jwks.builder().octetKey(pub).privateKey(priv).publicKeyUse('sig').build()
             privValuesJwk = Jwks.builder().set(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
@@ -176,7 +176,7 @@ class OctetJwksTest {
             assertEquals pub, pubValuesJwk.toKey()
 
             // test pair
-            privJwk = Jwks.builder().forOctetKeyPair(pair).setPublicKeyUse("sig").build()
+            privJwk = Jwks.builder().octetKeyPair(pair).publicKeyUse("sig").build()
             assertEquals priv, privJwk.toKey()
             // see comments above about material equality instead of encoding equality
             privMaterial = curve.getKeyMaterial(priv)
@@ -217,7 +217,7 @@ class OctetJwksTest {
         def priv = TestKeys.X448.pair.private
         def mismatchedPub = TestKeys.X25519.pair.public
         try {
-            Jwks.builder().forOctetKey(priv).setPublicKey(mismatchedPub).build()
+            Jwks.builder().octetKey(priv).publicKey(mismatchedPub).build()
             fail()
         } catch (InvalidKeyException ike) {
             String msg = "Specified Edwards Curve PublicKey does not match the specified PrivateKey's curve."

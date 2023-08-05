@@ -38,7 +38,7 @@ class DefaultJwtTest {
     void testByteArrayPayloadToString() {
         byte[] bytes = 'hello JJWT'.getBytes(StandardCharsets.UTF_8)
         String encoded = Encoders.BASE64URL.encode(bytes)
-        String compact = Jwts.builder().setHeaderParam('foo', 'bar').setContent(bytes).compact()
+        String compact = Jwts.builder().setHeaderParam('foo', 'bar').content(bytes).compact()
         Jwt jwt = Jwts.parser().enableUnsecuredJws().build().parseContentJwt(compact)
         assertEquals "header={foo=bar, alg=none},payload=$encoded" as String, jwt.toString()
     }

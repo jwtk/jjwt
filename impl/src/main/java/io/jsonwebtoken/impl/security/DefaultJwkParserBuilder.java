@@ -31,7 +31,7 @@ public class DefaultJwkParserBuilder implements JwkParserBuilder {
     private Deserializer<Map<String,?>> deserializer;
 
     @Override
-    public JwkParserBuilder setProvider(Provider provider) {
+    public JwkParserBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }

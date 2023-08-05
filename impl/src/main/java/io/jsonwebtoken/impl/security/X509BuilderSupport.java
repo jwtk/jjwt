@@ -72,25 +72,25 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
     }
 
     @Override
-    public X509BuilderSupport setX509Url(URI uri) {
+    public X509BuilderSupport x509Url(URI uri) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5U.getId(), uri);
         return this;
     }
 
     @Override
-    public X509BuilderSupport setX509CertificateChain(List<X509Certificate> chain) {
+    public X509BuilderSupport x509CertificateChain(List<X509Certificate> chain) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5C.getId(), chain);
         return this;
     }
 
     @Override
-    public X509BuilderSupport setX509CertificateSha1Thumbprint(byte[] thumbprint) {
+    public X509BuilderSupport x509CertificateSha1Thumbprint(byte[] thumbprint) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5T.getId(), thumbprint);
         return this;
     }
 
     @Override
-    public X509BuilderSupport setX509CertificateSha256Thumbprint(byte[] thumbprint) {
+    public X509BuilderSupport x509CertificateSha256Thumbprint(byte[] thumbprint) {
         this.fieldMap.put(AbstractAsymmetricJwk.X5T_S256.getId(), thumbprint);
         return this;
     }
@@ -118,11 +118,11 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
         if (firstCert != null) {
             if (computeX509Sha1Thumbprint) {
                 byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA1);
-                setX509CertificateSha1Thumbprint(thumbprint);
+                x509CertificateSha1Thumbprint(thumbprint);
             }
             if (computeX509Sha256) {
                 byte[] thumbprint = computeThumbprint(firstCert, Jwks.HASH.SHA256);
-                setX509CertificateSha256Thumbprint(thumbprint);
+                x509CertificateSha256Thumbprint(thumbprint);
             }
         }
     }

@@ -51,7 +51,7 @@ final class EdwardsPublicKeyDeriver implements Function<PrivateKey, PublicKey> {
         // Since we already have a private key, we provide a RNG that 'generates' the existing private key
         // instead of a random one, and the corresponding public key will be computed for us automatically.
         SecureRandom random = new ConstantRandom(pkBytes);
-        KeyPair pair = curve.keyPairBuilder().setRandom(random).build();
+        KeyPair pair = curve.keyPairBuilder().random(random).build();
         Assert.stateNotNull(pair, "Edwards curve generated keypair cannot be null.");
         return Assert.stateNotNull(pair.getPublic(), "Edwards curve KeyPair must have a PublicKey");
     }

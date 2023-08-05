@@ -53,7 +53,7 @@ class DefaultJwtParserBuilderTest {
         Provider provider = createMock(Provider)
         replay provider
 
-        def parser = builder.setProvider(provider).build()
+        def parser = builder.provider(provider).build()
 
         assertSame provider, parser.provider
         verify provider
@@ -63,7 +63,7 @@ class DefaultJwtParserBuilderTest {
     void testKeyLocatorAndVerificationKeyConfigured() {
         try {
             builder
-                    .setKeyLocator(new ConstantKeyLocator(null, null))
+                    .keyLocator(new ConstantKeyLocator(null, null))
                     .verifyWith(TestKeys.HS256)
                     .build()
             fail()
@@ -77,7 +77,7 @@ class DefaultJwtParserBuilderTest {
     void testKeyLocatorAndDecryptionKeyConfigured() {
         try {
             builder
-                    .setKeyLocator(new ConstantKeyLocator(null, null))
+                    .keyLocator(new ConstantKeyLocator(null, null))
                     .decryptWith(TestKeys.A128GCM)
                     .build()
             fail()
@@ -161,7 +161,7 @@ class DefaultJwtParserBuilderTest {
     void testAddCompressionAlgorithms() {
         def codec = new TestCompressionCodec(id: 'test')
         def parser = builder.addCompressionAlgorithms([codec] as Set<CompressionCodec>).build()
-        def header = Jwts.header().setCompressionAlgorithm(codec.getId()).build()
+        def header = Jwts.header().set('zip', codec.getId()).build()
         assertSame codec, parser.zipAlgFn.locate(header)
     }
 

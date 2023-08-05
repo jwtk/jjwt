@@ -43,7 +43,7 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.2">JWS JWK Set URL</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.4">JWE JWK Set URL</a>
      */
-    T setJwkSetUrl(URI uri);
+    T jwkSetUrl(URI uri);
 
     /**
      * Sets the {@code jwk} (JSON Web Key) associated with the JWT.  When set for a {@link JwsHeader}, the
@@ -56,7 +56,7 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.3">JWS <code>jwk</code> (JSON Web Key) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.5">JWE <code>jwk</code> (JSON Web Key) Header Parameter</a>
      */
-    T setJwk(PublicJwk<?> jwk);
+    T jwk(PublicJwk<?> jwk);
 
     /**
      * Sets the JWT case-sensitive {@code kid} (Key ID) header value. A {@code null} value will remove the property
@@ -73,7 +73,7 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.4">JWS Key ID</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6">JWE Key ID</a>
      */
-    T setKeyId(String kid);
+    T keyId(String kid);
 
     /**
      * Sets the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
@@ -86,5 +86,5 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS <code>crit</code> (Critical) Header Parameter</a>
      */
-    T setCritical(Set<String> crit);
+    T critical(Set<String> crit);
 }

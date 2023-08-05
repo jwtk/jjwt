@@ -840,7 +840,7 @@ Each time `setHeaderParam` is called, it simply appends the key-value pair to an
 potentially overwriting any existing identically-named key/value pair.
 
 The downside with this approach is that you lose any type-safe setter methods or additional builder utility methods
-available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
+available on the `Jwts.header()` builder such as `contentType`,`keyId`, `withX509Sha256Thumbprint`, etc.
 
 > **Note**
 > 
@@ -1527,7 +1527,7 @@ If you want to specify a specific JCA `Provider` or `SecureRandom` to use during
 as builder arguments. For example:
 
 ```java
-SecretKey key = Jwts.SIG.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
+SecretKey key = Jwts.SIG.HS256.keyBuilder().provider(aProvider).random(aSecureRandom).build();
 ```
 
 If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
@@ -2312,7 +2312,7 @@ You can read/parse a JWK by building a `JwkParser` and parsing the JWK JSON stri
 ```java
 String json = getJwkJsonString();
 Jwk<?> jwk = Jwks.parser()
-    //.setProvider(aJcaProvider)         // optional
+    //.provider(aJcaProvider)            // optional
     //.deserializeJsonWith(deserializer) // optional
     .build()                             // create the parser
     .parse(json);                        // actually parse the JSON

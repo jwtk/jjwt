@@ -57,7 +57,7 @@ class DefaultJweHeaderTest {
 
     @Test
     void testEpkWithSecretJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
         try {
             h([epk: values])
@@ -71,7 +71,7 @@ class DefaultJweHeaderTest {
 
     @Test
     void testEpkWithPrivateJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.private as ECPrivateKey).build()
+        def jwk = Jwks.builder().key(TestKeys.ES256.pair.private as ECPrivateKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
         try {
             h([epk: values])
@@ -86,7 +86,7 @@ class DefaultJweHeaderTest {
 
     @Test
     void testEpkWithRsaPublicJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
         def epk = h([epk: values]).getEphemeralPublicKey()
         assertTrue epk instanceof RsaPublicJwk
@@ -95,14 +95,14 @@ class DefaultJweHeaderTest {
 
     @Test
     void testEpkWithEcPublicJwkValues() {
-        def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
+        def jwk = Jwks.builder().key(TestKeys.ES256.pair.public as ECPublicKey).build()
         def values = new LinkedHashMap(jwk) //extract values to remove JWK type
         assertEquals jwk, h([epk: values]).get('epk')
     }
 
     @Test
     void testEpkWithInvalidEcPublicJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
+        def jwk = Jwks.builder().key(TestKeys.ES256.pair.public as ECPublicKey).build()
         def values = new LinkedHashMap(jwk) // copy fields so we can mutate
         // We have a public JWK for a point on the curve, now swap out the x coordinate for something invalid:
         values.put('x', 'Kg')
@@ -121,7 +121,7 @@ class DefaultJweHeaderTest {
 
     @Test
     void testEpkWithEcPublicJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.ES256.pair.public as ECPublicKey).build()
+        def jwk = Jwks.builder().key(TestKeys.ES256.pair.public as ECPublicKey).build()
         header = h([epk: jwk])
         assertEquals jwk, header.get('epk')
         assertEquals jwk, header.getEphemeralPublicKey()
@@ -131,7 +131,7 @@ class DefaultJweHeaderTest {
     void testEpkWithEdPublicJwk() {
         def keys = TestKeys.EdEC.collect({it -> it.pair.public as PublicKey})
         for(PublicKey key : keys) {
-            def jwk = Jwks.builder().forKey((PublicKey)key as PublicKey).build()
+            def jwk = Jwks.builder().key((PublicKey)key as PublicKey).build()
             header = h([epk: jwk])
             assertEquals jwk, header.get('epk')
             assertEquals jwk, header.getEphemeralPublicKey()

@@ -73,7 +73,7 @@ class RFC8037AppendixATest {
         PrivateKey privKey = privJwk.toKey() as PrivateKey
         PublicKey pubKey = privJwk.toPublicJwk().toKey() as PublicKey
 
-        def builtPrivJwk = Jwks.builder().forKey(privKey).setPublicKey(pubKey).build()
+        def builtPrivJwk = Jwks.builder().key(privKey).publicKey(pubKey).build()
 
         //output should equal RFC input:
         assertEquals privJwk, builtPrivJwk
@@ -102,7 +102,7 @@ class RFC8037AppendixATest {
     void test_Sections_A4_and_A5() {
         def privJwk = a1Jwk()
         String compact = Jwts.builder()
-                .setContent(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
+                .content(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
                 .signWith(privJwk.toKey() as PrivateKey, Jwts.SIG.EdDSA)
                 .compact()
         assertEquals A4_JWS_COMPACT, compact

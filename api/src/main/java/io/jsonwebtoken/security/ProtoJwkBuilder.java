@@ -43,7 +43,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @param key the {@link SecretKey} to represent as a {@link SecretJwk}.
      * @return the builder coerced as a {@link SecretJwkBuilder}.
      */
-    SecretJwkBuilder forKey(SecretKey key);
+    SecretJwkBuilder key(SecretKey key);
 
     /**
      * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link RSAPublicKey}.
@@ -51,20 +51,20 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @param key the {@link RSAPublicKey} to represent as a {@link RsaPublicJwk}.
      * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
      */
-    RsaPublicJwkBuilder forKey(RSAPublicKey key);
+    RsaPublicJwkBuilder key(RSAPublicKey key);
 
     /**
      * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java {@link RSAPrivateKey}. If
      * possible, it is recommended to also call the resulting builder's
-     * {@link RsaPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method with the private key's matching
+     * {@link RsaPrivateJwkBuilder#publicKey(PublicKey) publicKey} method with the private key's matching
      * {@link PublicKey} for better performance.  See the
-     * {@link RsaPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} and {@link PrivateJwk} JavaDoc for more
+     * {@link RsaPrivateJwkBuilder#publicKey(PublicKey) publicKey} and {@link PrivateJwk} JavaDoc for more
      * information.
      *
      * @param key the {@link RSAPublicKey} to represent as a {@link RsaPublicJwk}.
      * @return the builder coerced as an {@link RsaPrivateJwkBuilder}.
      */
-    RsaPrivateJwkBuilder forKey(RSAPrivateKey key);
+    RsaPrivateJwkBuilder key(RSAPrivateKey key);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link ECPublicKey}.
@@ -72,31 +72,31 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @param key the {@link ECPublicKey} to represent as a {@link EcPublicJwk}.
      * @return the builder coerced as an {@link EcPublicJwkBuilder}.
      */
-    EcPublicJwkBuilder forKey(ECPublicKey key);
+    EcPublicJwkBuilder key(ECPublicKey key);
 
     /**
      * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java {@link ECPrivateKey}. If
      * possible, it is recommended to also call the resulting builder's
-     * {@link EcPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method with the private key's matching
+     * {@link EcPrivateJwkBuilder#publicKey(PublicKey) publicKey} method with the private key's matching
      * {@link PublicKey} for better performance.  See the
-     * {@link EcPrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} and {@link PrivateJwk} JavaDoc for more
+     * {@link EcPrivateJwkBuilder#publicKey(PublicKey) publicKey} and {@link PrivateJwk} JavaDoc for more
      * information.
      *
      * @param key the {@link ECPublicKey} to represent as an {@link EcPublicJwk}.
      * @return the builder coerced as a {@link EcPrivateJwkBuilder}.
      */
-    EcPrivateJwkBuilder forKey(ECPrivateKey key);
+    EcPrivateJwkBuilder key(ECPrivateKey key);
 
 
     /**
      * Ensures the builder will create a {@link PublicJwk} for the specified Java {@link PublicKey} argument. This
-     * method is provided for congruence with the other {@code forKey} methods and is expected to be used when
+     * method is provided for congruence with the other {@code key} methods and is expected to be used when
      * the calling code has an untyped {@code PublicKey} reference. Based on the argument type, it will delegate to one
      * of the following methods if possible:
      * <ul>
-     *     <li>{@link #forKey(RSAPublicKey)}</li>
-     *     <li>{@link #forKey(ECPublicKey)}</li>
-     *     <li>{@link #forOctetKey(PublicKey)}</li>
+     *     <li>{@link #key(RSAPublicKey)}</li>
+     *     <li>{@link #key(ECPublicKey)}</li>
+     *     <li>{@link #octetKey(PublicKey)}</li>
      * </ul>
      *
      * <p>If the specified {@code key} argument is not capable of being supported by one of those methods, an
@@ -106,10 +106,10 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *
      * <p>In addition to the public key type <code>A</code>, the public key's associated private key type
      * <code>B</code> is parameterized as well. This ensures that any subsequent call to the builder's
-     * {@link PublicJwkBuilder#setPrivateKey(PrivateKey) setPrivateKey} method will be type-safe.  For example:</p>
+     * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;forKey(anEdECPublicKey)
-     *     .setPrivateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
+     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;key(anEdECPublicKey)
+     *     .privateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
      *
@@ -119,21 +119,21 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @param key the {@link PublicKey} to represent as a {@link PublicJwk}.
      * @return the builder coerced as a {@link PublicJwkBuilder} for continued method chaining.
      * @throws UnsupportedKeyException if the specified key is not a supported type and cannot be used to delegate to
-     *                                 other {@code forKey} methods.
+     *                                 other {@code key} methods.
      * @see PublicJwk
      * @see PrivateJwk
      */
-    <A extends PublicKey, B extends PrivateKey> PublicJwkBuilder<A, B, ?, ?, ?, ?> forKey(A key) throws UnsupportedKeyException;
+    <A extends PublicKey, B extends PrivateKey> PublicJwkBuilder<A, B, ?, ?, ?, ?> key(A key) throws UnsupportedKeyException;
 
     /**
      * Ensures the builder will create a {@link PrivateJwk} for the specified Java {@link PrivateKey} argument. This
-     * method is provided for congruence with the other {@code forKey} methods and is expected to be used when
+     * method is provided for congruence with the other {@code key} methods and is expected to be used when
      * the calling code has an untyped {@code PrivateKey} reference. Based on the argument type, it will delegate to one
      * of the following methods if possible:
      * <ul>
-     *     <li>{@link #forKey(RSAPrivateKey)}</li>
-     *     <li>{@link #forKey(ECPrivateKey)}</li>
-     *     <li>{@link #forOctetKey(PrivateKey)}</li>
+     *     <li>{@link #key(RSAPrivateKey)}</li>
+     *     <li>{@link #key(ECPrivateKey)}</li>
+     *     <li>{@link #octetKey(PrivateKey)}</li>
      * </ul>
      *
      * <p>If the specified {@code key} argument is not capable of being supported by one of those methods, an
@@ -143,10 +143,10 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *
      * <p>In addition to the private key type <code>B</code>, the private key's associated public key type
      * <code>A</code> is parameterized as well. This ensures that any subsequent call to the builder's
-     * {@link PrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method will be type-safe.  For example:</p>
+     * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;forKey(anEdECPrivateKey)
-     *     .setPublicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
+     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;key(anEdECPrivateKey)
+     *     .publicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
      *
@@ -155,11 +155,11 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @param key the {@link PrivateKey} to represent as a {@link PrivateJwk}.
      * @return the builder coerced as a {@link PrivateJwkBuilder} for continued method chaining.
      * @throws UnsupportedKeyException if the specified key is not a supported type and cannot be used to delegate to
-     *                                 other {@code forKey} methods.
+     *                                 other {@code key} methods.
      * @see PublicJwk
      * @see PrivateJwk
      */
-    <A extends PublicKey, B extends PrivateKey> PrivateJwkBuilder<B, A, ?, ?, ?> forKey(B key) throws UnsupportedKeyException;
+    <A extends PublicKey, B extends PrivateKey> PrivateJwkBuilder<B, A, ?, ?, ?> key(B key) throws UnsupportedKeyException;
 
     /**
      * Ensures the builder will create an {@link OctetPublicJwk} for the specified Edwards-curve {@code PublicKey}
@@ -175,10 +175,10 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *
      * <p>In addition to the public key type <code>A</code>, the public key's associated private key type
      * <code>B</code> is parameterized as well. This ensures that any subsequent call to the builder's
-     * {@link PublicJwkBuilder#setPrivateKey(PrivateKey) setPrivateKey} method will be type-safe.  For example:</p>
+     * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;forKey(anEdECPublicKey)
-     *     .setPrivateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
+     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;key(anEdECPublicKey)
+     *     .privateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
      *
@@ -191,7 +191,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPublicKey.html">java.security.interfaces.XECPublicKey</a>
      * @see <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPublicKey.html">java.security.interfaces.EdECPublicKey</a>
      */
-    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetKey(A key);
+    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> octetKey(A key);
 
     /**
      * Ensures the builder will create an {@link OctetPrivateJwk} for the specified Edwards-curve {@code PrivateKey}
@@ -209,10 +209,10 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *
      * <p>In addition to the private key type <code>B</code>, the private key's associated public key type
      * <code>A</code> is parameterized as well. This ensures that any subsequent call to the builder's
-     * {@link PrivateJwkBuilder#setPublicKey(PublicKey) setPublicKey} method will be type-safe.  For example:</p>
+     * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;forKey(anEdECPrivateKey)
-     *     .setPublicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
+     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;key(anEdECPrivateKey)
+     *     .publicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
      *
@@ -225,14 +225,14 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPrivateKey.html">java.security.interfaces.XECPrivateKey</a>
      * @see <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPrivateKey.html">java.security.interfaces.EdECPrivateKey</a>
      */
-    <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> forOctetKey(A key);
+    <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> octetKey(A key);
 
     /**
      * Ensures the builder will create an {@link OctetPrivateJwk} for the specified Java Edwards-curve
      * {@link KeyPair}.  The pair's {@link KeyPair#getPublic() public key} <em>MUST</em> be an
-     * Edwards-curve public key as defined by {@link #forOctetKey(PublicKey)}.  The pair's
+     * Edwards-curve public key as defined by {@link #octetKey(PublicKey)}.  The pair's
      * {@link KeyPair#getPrivate() private key} <em>MUST</em> be an Edwards-curve private key as defined by
-     * {@link #forOctetKey(PrivateKey)}.
+     * {@link #octetKey(PrivateKey)}.
      *
      * @param <A> the type of Edwards-curve {@link PublicKey} contained in the key pair.
      * @param <B> the type of the Edwards-curve {@link PrivateKey} contained in the key pair.
@@ -241,13 +241,13 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @throws IllegalArgumentException if the {@code keyPair} does not contain Edwards-curve public and private key
      *                                  instances.
      */
-    <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> forOctetKeyPair(KeyPair keyPair);
+    <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> octetKeyPair(KeyPair keyPair);
 
     /**
      * Ensures the builder will create an {@link OctetPublicJwk} for the specified Java {@link X509Certificate} chain.
      * The first {@code X509Certificate} in the chain (at list index 0) <em>MUST</em>
      * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
-     * {@link #forOctetKey(PublicKey)}.
+     * {@link #octetKey(PublicKey)}.
      *
      * @param <A> the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
      * @param <B> the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
@@ -256,13 +256,13 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *              represent as an {@link OctetPublicJwk}.
      * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
      */
-    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetChain(List<X509Certificate> chain);
+    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> octetChain(List<X509Certificate> chain);
 
     /**
      * Ensures the builder will create an {@link OctetPublicJwk} for the specified Java {@link X509Certificate} chain.
      * The first {@code X509Certificate} in the chain (at array index 0) <em>MUST</em>
      * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
-     * {@link #forOctetKey(PublicKey)}.
+     * {@link #octetKey(PublicKey)}.
      *
      * @param <A> the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
      * @param <B> the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
@@ -271,7 +271,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *              represent as an {@link OctetPublicJwk}.
      * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
      */
-    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> forOctetChain(X509Certificate... chain);
+    <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> octetChain(X509Certificate... chain);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -282,7 +282,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *              {@link EcPublicJwk}.
      * @return the builder coerced as an {@link EcPublicJwkBuilder}.
      */
-    EcPublicJwkBuilder forEcChain(X509Certificate... chain);
+    EcPublicJwkBuilder ecChain(X509Certificate... chain);
 
     /**
      * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -293,7 +293,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *              {@link EcPublicJwk}.
      * @return the builder coerced as an {@link EcPublicJwkBuilder}.
      */
-    EcPublicJwkBuilder forEcChain(List<X509Certificate> chain);
+    EcPublicJwkBuilder ecChain(List<X509Certificate> chain);
 
     /**
      * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java Elliptic Curve
@@ -306,7 +306,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link ECPublicKey} and
      *                                  {@link ECPrivateKey} instances.
      */
-    EcPrivateJwkBuilder forEcKeyPair(KeyPair keyPair) throws IllegalArgumentException;
+    EcPrivateJwkBuilder ecKeyPair(KeyPair keyPair) throws IllegalArgumentException;
 
     /**
      * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -317,7 +317,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *              {@link RsaPublicJwk}.
      * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
      */
-    RsaPublicJwkBuilder forRsaChain(X509Certificate... chain);
+    RsaPublicJwkBuilder rsaChain(X509Certificate... chain);
 
     /**
      * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
@@ -328,7 +328,7 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      *              {@link RsaPublicJwk}.
      * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
      */
-    RsaPublicJwkBuilder forRsaChain(List<X509Certificate> chain);
+    RsaPublicJwkBuilder rsaChain(List<X509Certificate> chain);
 
     /**
      * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java RSA
@@ -341,5 +341,5 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link RSAPublicKey} and
      *                                  {@link RSAPrivateKey} instances.
      */
-    RsaPrivateJwkBuilder forRsaKeyPair(KeyPair keyPair) throws IllegalArgumentException;
+    RsaPrivateJwkBuilder rsaKeyPair(KeyPair keyPair) throws IllegalArgumentException;
 }

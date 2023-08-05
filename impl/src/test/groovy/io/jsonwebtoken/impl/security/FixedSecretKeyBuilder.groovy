@@ -35,12 +35,12 @@ class FixedSecretKeyBuilder implements SecretKeyBuilder {
     }
 
     @Override
-    SecretKeyBuilder setProvider(Provider provider) {
+    SecretKeyBuilder provider(Provider provider) {
         return this
     }
 
     @Override
-    SecretKeyBuilder setRandom(SecureRandom random) {
+    SecretKeyBuilder random(SecureRandom random) {
         return this
     }
 }

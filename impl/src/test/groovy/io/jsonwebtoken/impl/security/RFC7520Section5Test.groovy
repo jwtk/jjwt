@@ -598,7 +598,7 @@ class RFC7520Section5Test {
 
         String result = Jwts.builder()
                 .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .header().setContentType(cty).setPbes2Count(p2c).and()
+                .header().contentType(cty).pbes2Count(p2c).and()
                 .setPayload(FIGURE_95)
                 .encryptWith(key, alg, enc)
                 .compact()
