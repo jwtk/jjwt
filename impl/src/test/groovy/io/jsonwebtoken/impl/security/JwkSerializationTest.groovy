@@ -105,7 +105,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserializer.deserialize(data) as Map<String, ?>
-        def jwk2 = Jwks.builder().set(map).build()
+        def jwk2 = Jwks.builder().add(map).build()
         assertTrue jwk.k instanceof Supplier
         assertEquals jwk, jwk2
         assertEquals jwk.k, jwk2.k
@@ -136,7 +136,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserializer.deserialize(data) as Map<String, ?>
-        def jwk2 = Jwks.builder().set(map).build()
+        def jwk2 = Jwks.builder().add(map).build()
         assertTrue jwk.d instanceof Supplier
         assertEquals jwk, jwk2
         assertEquals jwk.d, jwk2.d
@@ -191,7 +191,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserializer.deserialize(data) as Map<String, ?>
-        def jwk2 = Jwks.builder().set(map).build()
+        def jwk2 = Jwks.builder().add(map).build()
         assertEquals(jwk, jwk2, privateFieldNames)
     }
 }

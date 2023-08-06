@@ -128,7 +128,7 @@ class RFC8037AppendixATest {
         def bobPrivKeyHex = '5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb'
 
         //convert these two values to a JWK for convenient reference:
-        def bobPrivJwk = Jwks.builder().set([
+        def bobPrivJwk = Jwks.builder().add([
                 kty: "OKP", crv: "X25519", kid: "Bob",
                 x  : bobPubKeyHex.decodeHex().encodeBase64Url() as String,
                 d  : bobPrivKeyHex.decodeHex().encodeBase64Url() as String
@@ -144,7 +144,7 @@ class RFC8037AppendixATest {
         0d bf 3a 0d 26 38 1a f4 eb a4 a9 8e aa 9b 4e 6a''')
 
         //Turn these two values into a Java KeyPair, and ensure it is used during key algorithm execution:
-        final OctetPrivateJwk ephemJwk = Jwks.builder().set([
+        final OctetPrivateJwk ephemJwk = Jwks.builder().add([
                 kty: "OKP",
                 crv: "X25519",
                 x  : rfcEphemeralPubKeyHex.decodeHex().encodeBase64Url() as String,
@@ -215,7 +215,7 @@ class RFC8037AppendixATest {
         def bobPrivKeyHex = '1c306a7ac2a0e2e0990b294470cba339e6453772b075811d8fad0d1d6927c120bb5ee8972b0d3e21374c9c921b09d1b0366f10b65173992d'
 
         //convert these two values to a JWK for convenient reference:
-        def bobPrivJwk = Jwks.builder().set([
+        def bobPrivJwk = Jwks.builder().add([
                 kty: "OKP", crv: "X448", kid: "Dave", // "Dave" instead of expected "Bob"
                 x  : bobPubKeyHex.decodeHex().encodeBase64Url() as String,
                 d  : bobPrivKeyHex.decodeHex().encodeBase64Url() as String
@@ -235,7 +235,7 @@ class RFC8037AppendixATest {
         17 7f 80 e5 32 c4 1f a0''')
 
         //Turn these two values into a Java KeyPair, and ensure it is used during key algorithm execution:
-        final OctetPrivateJwk ephemJwk = Jwks.builder().set([
+        final OctetPrivateJwk ephemJwk = Jwks.builder().add([
                 kty: "OKP",
                 crv: "X448",
                 x  : rfcEphemeralPubKeyHex.decodeHex().encodeBase64Url() as String,

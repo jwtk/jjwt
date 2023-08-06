@@ -48,8 +48,8 @@ class DefaultJwtHeaderBuilderTest {
     private static void assertSymmetry(String propName, def val) {
         def name = Strings.capitalize(propName)
         switch (propName) {
-            case 'algorithm': builder.set('alg', val); break // no setter
-            case 'compressionAlgorithm': builder.set('zip', val); break // no setter
+            case 'algorithm': builder.add('alg', val); break // no setter
+            case 'compressionAlgorithm': builder.add('zip', val); break // no setter
             default: builder."$propName"(val)
         }
         header = builder.build()
@@ -196,7 +196,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testPutAll() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        def header = builder.set(m).build()
+        def header = builder.add(m).build()
         assertEquals m, header
     }
 
@@ -212,7 +212,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testClear() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        builder.set(m)
+        builder.add(m)
         builder.clear()
         def header = builder.build()
         assertTrue header.isEmpty()
@@ -221,7 +221,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testEmpty() {
         def m = ['foo': 'bar', 'baz': 'bat']
-        def header = builder.set(m).empty().build()
+        def header = builder.add(m).empty().build()
         assertTrue header.isEmpty()
     }
 
@@ -469,7 +469,7 @@ class DefaultJwtHeaderBuilderTest {
         assertEquals new DefaultHeader([foo: 'bar']), builder.build()
 
         // add JWS-required property:
-        builder.set(DefaultHeader.ALGORITHM.getId(), 'HS256')
+        builder.put(DefaultHeader.ALGORITHM.getId(), 'HS256')
         assertEquals new DefaultJwsHeader([foo: 'bar', alg: 'HS256']), builder.build()
 
         // add JWE required property:

@@ -177,7 +177,7 @@ public class DefaultJwtParser implements JwtParser {
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = Assert.notNull(clock, "Clock cannot be null.");
         this.allowedClockSkewMillis = allowedClockSkewMillis;
-        this.expectedClaims = Jwts.claims().set(expectedClaims);
+        this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.base64UrlDecoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
         this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
 

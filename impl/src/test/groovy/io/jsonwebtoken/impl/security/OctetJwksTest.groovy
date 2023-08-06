@@ -126,13 +126,13 @@ class OctetJwksTest {
 
             // test individual keys
             PublicJwk pubJwk = Jwks.builder().octetKey(pub).publicKeyUse("sig").build()
-            PublicJwk pubValuesJwk = Jwks.builder().set(pubJwk).build() as PublicJwk // ensure value map symmetry
+            PublicJwk pubValuesJwk = Jwks.builder().add(pubJwk).build() as PublicJwk // ensure value map symmetry
             assertEquals pubJwk, pubValuesJwk
             assertEquals pub, pubJwk.toKey()
             assertEquals pub, pubValuesJwk.toKey()
 
             PrivateJwk privJwk = Jwks.builder().octetKey(priv).publicKey(pub).publicKeyUse("sig").build()
-            PrivateJwk privValuesJwk = Jwks.builder().set(privJwk).build() as PrivateJwk // ensure value map symmetry
+            PrivateJwk privValuesJwk = Jwks.builder().add(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
             // we can't assert that priv.equals(privValuesJwk.toKey()) here because BouncyCastle uses PKCS8 V2 encoding
@@ -160,7 +160,7 @@ class OctetJwksTest {
 
             // Test public-to-private builder coercion:
             privJwk = Jwks.builder().octetKey(pub).privateKey(priv).publicKeyUse('sig').build()
-            privValuesJwk = Jwks.builder().set(privJwk).build() as PrivateJwk // ensure value map symmetry
+            privValuesJwk = Jwks.builder().add(privJwk).build() as PrivateJwk // ensure value map symmetry
             assertEquals privJwk, privValuesJwk
             assertEquals priv, privJwk.toKey()
             // see comments above about material equality instead of encoding equality
@@ -197,8 +197,8 @@ class OctetJwksTest {
     @Test
     void testUnknownCurveId() {
         def b = Jwks.builder()
-                .set(AbstractJwk.KTY.getId(), DefaultOctetPublicJwk.TYPE_VALUE)
-                .set(DefaultOctetPublicJwk.CRV.getId(), 'foo')
+                .add(AbstractJwk.KTY.getId(), DefaultOctetPublicJwk.TYPE_VALUE)
+                .add(DefaultOctetPublicJwk.CRV.getId(), 'foo')
         try {
             b.build()
             fail()

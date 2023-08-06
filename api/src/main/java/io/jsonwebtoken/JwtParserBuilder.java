@@ -355,6 +355,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
+     * @see #verifyWith(PublicKey) 
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder verifyWith(SecretKey key);
@@ -375,6 +376,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
+     * @see #verifyWith(SecretKey) 
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder verifyWith(PublicKey key);
@@ -396,6 +398,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
+     * @see #decryptWith(PrivateKey) 
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder decryptWith(SecretKey key);
@@ -416,6 +419,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
+     * @see #decryptWith(SecretKey) 
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder decryptWith(PrivateKey key);

@@ -157,7 +157,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetHeader() {
-        def h = Jwts.header().set('foo', 'bar').build()
+        def h = Jwts.header().add('foo', 'bar').build()
         builder.setHeader(h)
         assertEquals h, builder.buildHeader()
     }
@@ -185,16 +185,25 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetClaims() {
-        Claims c = Jwts.claims().set('foo', 'bar').build()
+        Claims c = Jwts.claims().add('foo', 'bar').build()
         builder.setClaims(c)
         assertEquals c, builder.claimsBuilder
+    }
+
+    @Test
+    void testSetClaimsMap() {
+        def m = [foo: 'bar']
+        builder.setClaims(m)
+        assertEquals 1, builder.claimsBuilder.size()
+        assertTrue builder.claimsBuilder.containsKey('foo')
+        assertTrue builder.claimsBuilder.containsValue('bar')
     }
 
     @Test
     void testAddClaims() {
         def b = new DefaultJwtBuilder()
         def c = Jwts.claims([initial: 'initial'])
-        b.setClaims(c)
+        b.add(c)
         def c2 = [foo: 'bar', baz: 'buz']
         b.addClaims(c2)
         assertEquals 'initial', b.claimsBuilder.get('initial')
@@ -228,8 +237,8 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testExistingClaimsAndSetClaim() {
-        Claims c = Jwts.claims().set('foo', 'bar').build()
-        builder.setClaims(c)
+        Claims c = Jwts.claims().add('foo', 'bar').build()
+        builder.add(c)
         assertEquals c, builder.claimsBuilder
         assertEquals builder.claimsBuilder.size(), 1
         assertEquals c.size(), 1

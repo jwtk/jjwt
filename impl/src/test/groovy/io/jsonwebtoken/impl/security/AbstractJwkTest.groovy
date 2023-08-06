@@ -146,20 +146,20 @@ class AbstractJwkTest {
     void testPrivateJwkHashCode() {
         assertEquals jwk.hashCode(), jwk.@context.hashCode()
 
-        def secretJwk1 = Jwks.builder().key(TestKeys.HS256).set('hello', 'world').build()
-        def secretJwk2 = Jwks.builder().key(TestKeys.HS256).set('hello', 'world').build()
+        def secretJwk1 = Jwks.builder().key(TestKeys.HS256).add('hello', 'world').build()
+        def secretJwk2 = Jwks.builder().key(TestKeys.HS256).add('hello', 'world').build()
         assertEquals secretJwk1.hashCode(), secretJwk1.@context.hashCode()
         assertEquals secretJwk2.hashCode(), secretJwk2.@context.hashCode()
         assertEquals secretJwk1.hashCode(), secretJwk2.hashCode()
 
-        def ecPrivJwk1 = Jwks.builder().key(TestKeys.ES256.pair.private).set('hello', 'ecworld').build()
-        def ecPrivJwk2 = Jwks.builder().key(TestKeys.ES256.pair.private).set('hello', 'ecworld').build()
+        def ecPrivJwk1 = Jwks.builder().key(TestKeys.ES256.pair.private).add('hello', 'ecworld').build()
+        def ecPrivJwk2 = Jwks.builder().key(TestKeys.ES256.pair.private).add('hello', 'ecworld').build()
         assertEquals ecPrivJwk1.hashCode(), ecPrivJwk2.hashCode()
         assertEquals ecPrivJwk1.hashCode(), ecPrivJwk1.@context.hashCode()
         assertEquals ecPrivJwk2.hashCode(), ecPrivJwk2.@context.hashCode()
 
-        def rsaPrivJwk1 = Jwks.builder().key(TestKeys.RS256.pair.private).set('hello', 'rsaworld').build()
-        def rsaPrivJwk2 = Jwks.builder().key(TestKeys.RS256.pair.private).set('hello', 'rsaworld').build()
+        def rsaPrivJwk1 = Jwks.builder().key(TestKeys.RS256.pair.private).add('hello', 'rsaworld').build()
+        def rsaPrivJwk2 = Jwks.builder().key(TestKeys.RS256.pair.private).add('hello', 'rsaworld').build()
         assertEquals rsaPrivJwk1.hashCode(), rsaPrivJwk2.hashCode()
         assertEquals rsaPrivJwk1.hashCode(), rsaPrivJwk1.@context.hashCode()
         assertEquals rsaPrivJwk2.hashCode(), rsaPrivJwk2.@context.hashCode()

@@ -44,8 +44,8 @@ class DefaultMutableJweHeaderTest {
     private static void assertSymmetry(String propName, def val) {
         def name = Strings.capitalize(propName)
         switch (propName) {
-            case 'algorithm': header.set('alg', val); break // no setter
-            case 'compressionAlgorithm': header.set('zip', val); break // no setter
+            case 'algorithm': header.add('alg', val); break // no setter
+            case 'compressionAlgorithm': header.add('zip', val); break // no setter
             default: header."$propName"(val)
         }
 

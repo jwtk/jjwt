@@ -186,7 +186,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public JwtParserBuilder require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.set(claimName, value);
+        expectedClaims.add(claimName, value);
         return this;
     }
 

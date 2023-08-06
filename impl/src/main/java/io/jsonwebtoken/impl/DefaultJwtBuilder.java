@@ -322,12 +322,17 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder setClaims(Map<String, ?> claims) {
         Assert.notNull(claims, "Claims map cannot be null.");
         this.claimsBuilder.empty();
-        return set(claims);
+        return add(claims);
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        return set(claims);
+        return claims(claims);
+    }
+
+    @Override
+    public JwtBuilder claims(Map<String, ?> claims) {
+        return add(claims);
     }
 
     @Override
@@ -344,14 +349,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder set(String key, Object value) {
-        this.claimsBuilder.set(key, value);
+    public JwtBuilder add(String key, Object value) {
+        this.claimsBuilder.add(key, value);
         return this;
     }
 
     @Override
-    public JwtBuilder set(Map<? extends String, ?> m) {
-        this.claimsBuilder.set(m);
+    public JwtBuilder add(Map<? extends String, ?> m) {
+        this.claimsBuilder.add(m);
         return this;
     }
 
@@ -434,7 +439,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder claim(String name, Object value) {
-        return set(name, value);
+        return add(name, value);
     }
 
     @Override
@@ -472,7 +477,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
         if (!Objects.isEmpty(payload) && compressionAlgorithm != null) {
             payload = compressionAlgorithm.compress(payload);
-            this.headerBuilder.set(DefaultHeader.COMPRESSION_ALGORITHM.getId(), compressionAlgorithm.getId());
+            this.headerBuilder.add(DefaultHeader.COMPRESSION_ALGORITHM.getId(), compressionAlgorithm.getId());
         }
 
         if (jwe) {
@@ -494,7 +499,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 //            header = new DefaultJwsHeader(header);
 //        }
 
-        this.headerBuilder.set(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
+        this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
 
         final io.jsonwebtoken.Header header = buildHeader();
 
@@ -540,7 +545,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
         byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
 
-        this.headerBuilder.set(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
+        this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
         this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
         final io.jsonwebtoken.Header header = buildHeader();

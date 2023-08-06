@@ -59,7 +59,7 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
      * @param value the value to set for the specified header parameter name
      * @return the mutator/builder for method chaining.
      */
-    T set(K key, V value);
+    T add(K key, V value);
 
     /**
      * Sets the specified key/value pairs in the map, overwriting any existing entries with the same keys.
@@ -71,5 +71,5 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
      * @param m the map to add
      * @return the mutator/builder for method chaining.
      */
-    T set(Map<? extends K, ? extends V> m);
+    T add(Map<? extends K, ? extends V> m);
 }

@@ -200,7 +200,7 @@ class RsaPrivateJwkFactoryTest {
         def map = new LinkedHashMap(jwk)
         assertEquals 4, map.size()
 
-        def jwkFromValues = Jwks.builder().set(map).build()
+        def jwkFromValues = Jwks.builder().add(map).build()
 
         //ensure they're equal:
         assertEquals jwk, jwkFromValues

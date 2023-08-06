@@ -88,7 +88,7 @@ class JwtsTest {
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header().set([alg: "HS256"]).build()
+        def header = Jwts.header().add([alg: "HS256"]).build()
         assertTrue header instanceof DefaultJwsHeader
         assertEquals 'HS256', header.getAlgorithm()
         assertEquals 'HS256', header.alg
@@ -1571,7 +1571,7 @@ class JwtsTest {
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().setClaims(claims).signWith(privateKey, alg).compact()
+        String jwt = Jwts.builder().add(claims).signWith(privateKey, alg).compact()
 
         def key = publicKey
         if (verifyWithPrivateKey) {
@@ -1591,7 +1591,7 @@ class JwtsTest {
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().setClaims(claims).signWith(key, alg).compact()
+        String jwt = Jwts.builder().add(claims).signWith(key, alg).compact()
 
         def token = Jwts.parser().verifyWith(key).build().parse(jwt)
 
@@ -1607,7 +1607,7 @@ class JwtsTest {
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().setClaims(claims).signWith(privateKey, alg).compact()
+        String jwt = Jwts.builder().add(claims).signWith(privateKey, alg).compact()
 
         def key = publicKey
         if (verifyWithPrivateKey) {
