@@ -277,10 +277,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setClaims(Map<String, ?> claims);
 
     /**
-     * Adds/appends all given name/value pairs to the JSON Claims in the payload. This is a convenience wrapper for:
+     * Adds/appends all given name/value pairs to the JSON Claims in the payload.
+     * <p>
+     * This is a convenience wrapper for:
      *
      * <blockquote><pre>
-     *{@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link Claims#and() and()}</pre></blockquote>
      *
      * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
@@ -296,8 +298,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder addClaims(Map<String, ?> claims);
 
     /**
-     * Sets a JWT Claims parameter value.  A {@code null} value will remove the property from the Claims.
-     * This is a convenience wrapper for:
+     * Sets a JWT claim, overwriting any existing claim with the same name. A {@code null} or empty
+     * value will remove the claim entirely. This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link Claims#and() and()}</pre></blockquote>
      *
@@ -309,6 +311,21 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder claim(String name, Object value);
 
     /**
+     * Adds all given name/value pairs to the JSON Claims in the payload, overwriting any existing claims
+     * with the same names.  If any name has a {@code null} or empty value, that claim will be removed from the
+     * Claims.  This is a convenience wrapper for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link Claims#and() and()}</pre></blockquote>
+     *
+     * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     *
+     * @param claims the JWT Claims to be added to the JWT payload.
+     * @return the builder instance for method chaining
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder claims(Map<String, ?> claims);
+
+    /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
      * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
@@ -318,7 +335,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param iss the JWT {@code iss} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder issuer(String iss);
 
     /**
@@ -331,7 +349,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder subject(String sub);
 
     /**
@@ -344,7 +363,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder audience(String aud);
 
     /**
@@ -360,7 +380,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder expiration(Date exp);
 
     /**
@@ -376,7 +397,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder setNotBefore(Date nbf);
 
     /**
@@ -392,7 +414,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder issuedAt(Date iat);
 
     /**
@@ -410,7 +433,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param jti the JWT {@code jti} (id) value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
-    @Override // for better/targeted JavaDoc
+    @Override
+    // for better/targeted JavaDoc
     JwtBuilder id(String jti);
 
     /**
@@ -782,16 +806,31 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder compressWith(CompressionAlgorithm alg);
 
     /**
-     * Perform Base64Url encoding with the specified Encoder.
+     * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
      *
      * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
      * to specify a different encoder if you desire.</p>
      *
      * @param base64UrlEncoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
+     * @see #encoder(Encoder)
      * @since 0.10.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
+     * {@link #encoder(Encoder)} method.
      */
     JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
+
+    /**
+     * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
+     *
+     * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
+     * to specify a different encoder if necessar.</p>
+     *
+     * @param encoder the encoder to use when Base64Url-encoding
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder encoder(Encoder<byte[], String> encoder);
 
     /**
      * Performs Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
@@ -804,8 +843,25 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param serializer the serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since 0.10.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
+     * {@link #serializer(Serializer)} method.
      */
+    @Deprecated
     JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
+
+    /**
+     * Perform Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
+     * JWT/JWS/JWE headers and Claims Maps to JSON strings as required by the JWT specification.
+     *
+     * <p>If this method is not called, JJWT will use whatever serializer it can find at runtime, checking for the
+     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+     * in the runtime classpath, an exception will be thrown when the {@link #compact()} method is invoked.</p>
+     *
+     * @param serializer the serializer to use when converting Map objects to JSON strings.
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder serializer(Serializer<Map<String, ?>> serializer);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

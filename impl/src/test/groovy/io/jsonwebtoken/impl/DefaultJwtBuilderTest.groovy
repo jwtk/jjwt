@@ -282,7 +282,7 @@ class DefaultJwtBuilderTest {
                 throw new SerializationException('foo', new Exception())
             }
         }
-        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
+        def b = new DefaultJwtBuilder().serializer(serializer)
         try {
             b.setPayload('foo').compact()
             fail()
@@ -426,8 +426,8 @@ class DefaultJwtBuilderTest {
                 return null
             }
         }
-        def b = new DefaultJwtBuilder().base64UrlEncodeWith(encoder)
-        assertSame encoder, b.base64UrlEncoder
+        def b = new DefaultJwtBuilder().encoder(encoder)
+        assertSame encoder, b.encoder
     }
 
     @Test(expected = IllegalArgumentException)

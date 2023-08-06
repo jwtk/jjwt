@@ -88,7 +88,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Function<Map<String, ?>, byte[]> headerSerializer;
     protected Function<Map<String, ?>, byte[]> claimsSerializer;
 
-    protected Encoder<byte[], String> base64UrlEncoder = Encoders.BASE64URL;
+    protected Encoder<byte[], String> encoder = Encoders.BASE64URL;
     protected CompressionAlgorithm compressionAlgorithm;
 
     @Override
@@ -134,6 +134,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder serializeToJsonWith(final Serializer<Map<String, ?>> serializer) {
+        return serializer(serializer);
+    }
+
+    @Override
+    public JwtBuilder serializer(Serializer<Map<String, ?>> serializer) {
         Assert.notNull(serializer, "Serializer cannot be null.");
         this.serializer = serializer;
         this.headerSerializer = wrap(serializer, "header");
@@ -142,9 +147,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder) {
-        Assert.notNull(base64UrlEncoder, "base64UrlEncoder cannot be null.");
-        this.base64UrlEncoder = base64UrlEncoder;
+    public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> encoder) {
+        return encoder(encoder);
+    }
+
+    @Override
+    public JwtBuilder encoder(Encoder<byte[], String> encoder) {
+        Assert.notNull(encoder, "encoder cannot be null.");
+        this.encoder = encoder;
         return this;
     }
 
@@ -319,6 +329,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
+        return claims(claims);
+    }
+
+    @Override
+    public JwtBuilder claims(Map<String, ?> claims) {
         return claims().add(claims).and();
     }
 
@@ -430,7 +445,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         if (this.serializer == null) { // try to find one based on the services available
             //noinspection unchecked
-            serializeToJsonWith(Services.loadFirst(Serializer.class));
+            serializer(Services.loadFirst(Serializer.class));
         }
 
         byte[] payload = content;
@@ -466,8 +481,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final io.jsonwebtoken.Header header = buildHeader();
 
         byte[] headerBytes = headerSerializer.apply(header);
-        String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
-        String base64UrlEncodedBody = base64UrlEncoder.encode(payload);
+        String base64UrlEncodedHeader = encoder.encode(headerBytes);
+        String base64UrlEncodedBody = encoder.encode(payload);
 
         String jwt = base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
@@ -477,7 +492,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
             SecureRequest<byte[], Key> request = new DefaultSecureRequest<>(data, provider, secureRandom, key);
             byte[] signature = signFunction.apply(request);
-            String base64UrlSignature = base64UrlEncoder.encode(signature);
+            String base64UrlSignature = encoder.encode(signature);
             jwt += DefaultJwtParser.SEPARATOR_CHAR + base64UrlSignature;
         } else {
             // no signature (unprotected JWT), but must terminate w/ a period, see
@@ -513,7 +528,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final io.jsonwebtoken.Header header = buildHeader();
 
         byte[] headerBytes = this.headerSerializer.apply(header);
-        final String base64UrlEncodedHeader = base64UrlEncoder.encode(headerBytes);
+        final String base64UrlEncodedHeader = encoder.encode(headerBytes);
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
         AeadRequest encRequest = new DefaultAeadRequest(payload, provider, secureRandom, cek, aad);
@@ -523,10 +538,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");
         byte[] tag = Assert.notEmpty(encResult.getDigest(), "Encryption result must have a non-empty authentication tag.");
 
-        String base64UrlEncodedEncryptedCek = base64UrlEncoder.encode(encryptedCek);
-        String base64UrlEncodedIv = base64UrlEncoder.encode(iv);
-        String base64UrlEncodedCiphertext = base64UrlEncoder.encode(ciphertext);
-        String base64UrlEncodedTag = base64UrlEncoder.encode(tag);
+        String base64UrlEncodedEncryptedCek = encoder.encode(encryptedCek);
+        String base64UrlEncodedIv = encoder.encode(iv);
+        String base64UrlEncodedCiphertext = encoder.encode(ciphertext);
+        String base64UrlEncodedTag = encoder.encode(tag);
 
         return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
     }
