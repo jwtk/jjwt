@@ -165,7 +165,7 @@ class RFC8037AppendixATest {
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
         String jwe = Jwts.builder()
-                .setHeaderParam('kid', bobPrivJwk.getId())
+                .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A128GCM)
                 .compact()
@@ -256,7 +256,7 @@ class RFC8037AppendixATest {
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
         String jwe = Jwts.builder()
-                .setHeaderParam('kid', bobPrivJwk.getId()) //value will be "Dave" as noted above
+                .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .setIssuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A256GCM)
                 .compact()

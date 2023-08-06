@@ -198,7 +198,7 @@ class JwtsTest {
 
         def claims = [iss: 'joe', exp: later(), 'https://example.com/is_root': true]
 
-        String jwt = Jwts.builder().setClaims(claims).compact()
+        String jwt = Jwts.builder().claims().add(claims).and().compact()
 
         def token = Jwts.parser().enableUnsecured().build().parse(jwt)
 
@@ -306,7 +306,7 @@ class JwtsTest {
     @Test
     void testWithInvalidCompressionAlgorithm() {
         try {
-            Jwts.builder().setHeaderParam(DefaultHeader.COMPRESSION_ALGORITHM.getId(), "CUSTOM").setId("andId").compact()
+            Jwts.builder().header().add('zip', 'CUSTOM').and().id("andId").compact()
         } catch (CompressionException e) {
             assertEquals "Unsupported compression algorithm 'CUSTOM'", e.getMessage()
         }
@@ -1571,7 +1571,7 @@ class JwtsTest {
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().add(claims).signWith(privateKey, alg).compact()
+        String jwt = Jwts.builder().claims().add(claims).and().signWith(privateKey, alg).compact()
 
         def key = publicKey
         if (verifyWithPrivateKey) {
@@ -1591,7 +1591,7 @@ class JwtsTest {
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().add(claims).signWith(key, alg).compact()
+        String jwt = Jwts.builder().claims().add(claims).and().signWith(key, alg).compact()
 
         def token = Jwts.parser().verifyWith(key).build().parse(jwt)
 
@@ -1607,7 +1607,7 @@ class JwtsTest {
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 
-        String jwt = Jwts.builder().add(claims).signWith(privateKey, alg).compact()
+        String jwt = Jwts.builder().claims().add(claims).and().signWith(privateKey, alg).compact()
 
         def key = publicKey
         if (verifyWithPrivateKey) {

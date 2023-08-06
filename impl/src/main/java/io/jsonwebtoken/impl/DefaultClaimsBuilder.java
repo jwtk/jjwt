@@ -17,95 +17,16 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
-import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
-import io.jsonwebtoken.impl.lang.Field;
-
-import java.util.Date;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
 @SuppressWarnings("unused") // used via reflection via Jwts.claims()
-public final class DefaultClaimsBuilder extends DelegatingMapMutator<String, Object, FieldMap, ClaimsBuilder>
+public final class DefaultClaimsBuilder extends DelegatingClaimsMutator<ClaimsBuilder>
         implements ClaimsBuilder {
 
     public DefaultClaimsBuilder() {
-        super(new FieldMap(DefaultClaims.FIELDS));
-    }
-
-    <T> ClaimsBuilder put(Field<T> field, Object value) {
-        this.DELEGATE.put(field, value);
-        return self();
-    }
-
-    @Override
-    public ClaimsBuilder setIssuer(String iss) {
-        return issuer(iss);
-    }
-
-    @Override
-    public ClaimsBuilder issuer(String iss) {
-        return put(DefaultClaims.ISSUER, iss);
-    }
-
-    @Override
-    public ClaimsBuilder setSubject(String sub) {
-        return subject(sub);
-    }
-
-    @Override
-    public ClaimsBuilder subject(String sub) {
-        return put(DefaultClaims.SUBJECT, sub);
-    }
-
-    @Override
-    public ClaimsBuilder setAudience(String aud) {
-        return audience(aud);
-    }
-
-    @Override
-    public ClaimsBuilder audience(String aud) {
-        return put(DefaultClaims.AUDIENCE, aud);
-    }
-
-    @Override
-    public ClaimsBuilder setExpiration(Date exp) {
-        return expiration(exp);
-    }
-
-    @Override
-    public ClaimsBuilder expiration(Date exp) {
-        return put(DefaultClaims.EXPIRATION, exp);
-    }
-
-    @Override
-    public ClaimsBuilder setNotBefore(Date nbf) {
-        return notBefore(nbf);
-    }
-
-    @Override
-    public ClaimsBuilder notBefore(Date nbf) {
-        return put(DefaultClaims.NOT_BEFORE, nbf);
-    }
-
-    @Override
-    public ClaimsBuilder setIssuedAt(Date iat) {
-        return issuedAt(iat);
-    }
-
-    @Override
-    public ClaimsBuilder issuedAt(Date iat) {
-        return put(DefaultClaims.ISSUED_AT, iat);
-    }
-
-    @Override
-    public ClaimsBuilder setId(String jti) {
-        return id(jti);
-    }
-
-    @Override
-    public ClaimsBuilder id(String jti) {
-        return put(DefaultClaims.JTI, jti);
+        super();
     }
 
     @Override

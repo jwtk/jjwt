@@ -400,15 +400,4 @@ public class JavaReadmeTest {
         String expected = "{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}";
         assert expected.equals(jwk.toString());
     }
-
-    @Test
-    public void testWhatever() {
-        Jwts.builder()
-                .header().keyId("foo").contentType("text/plain").and()
-                .subject("Joe").audience("You")
-                .signWith(Jwts.SIG.HS512.keyBuilder().build())
-                .compact();
-
-
-    }
 }

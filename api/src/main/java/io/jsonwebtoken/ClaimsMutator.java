@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.lang.MapMutator;
-
 import java.util.Date;
 
 /**
@@ -27,7 +25,7 @@ import java.util.Date;
  * @see io.jsonwebtoken.Claims
  * @since 0.2
  */
-public interface ClaimsMutator<T extends ClaimsMutator<T>> extends MapMutator<String, Object, T> {
+public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">

@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -38,6 +36,7 @@ import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
@@ -68,9 +67,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Provider provider;
     protected SecureRandom secureRandom;
 
-    private final DefaultJwtBuilderHeader headerBuilder = new DefaultJwtBuilderHeader(this);
+    private final BuilderHeader headerBuilder = new BuilderHeader(this);
 
-    private final ClaimsBuilder claimsBuilder = new DefaultClaimsBuilder();
+    private final BuilderClaims claimsBuilder = new BuilderClaims(this);
 
     protected byte[] content;
 
@@ -95,6 +94,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder.Header header() {
         return this.headerBuilder;
+    }
+
+    @Override
+    public JwtBuilder.Claims claims() {
+        return this.claimsBuilder;
     }
 
     @Override
@@ -146,21 +150,17 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setHeader(Map<String, ?> map) {
-        this.headerBuilder.clear();
-        this.headerBuilder.putAll(map);
-        return this;
+        return this.headerBuilder.empty().add(map).and();
     }
 
     @Override
     public JwtBuilder setHeaderParams(Map<String, ?> params) {
-        this.headerBuilder.putAll(params);
-        return this;
+        return this.headerBuilder.add(params).and();
     }
 
     @Override
     public JwtBuilder setHeaderParam(String name, Object value) {
-        this.headerBuilder.put(name, value);
-        return this;
+        return this.headerBuilder.add(name, value).and();
     }
 
     @SuppressWarnings("unchecked") // TODO: remove for 1.0
@@ -293,8 +293,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setPayload(String payload) {
-        byte[] bytes = payload != null ? payload.getBytes(StandardCharsets.UTF_8) : null;
-        return content(bytes);
+        return content(Strings.utf8(payload));
     }
 
     @Override
@@ -313,51 +312,19 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder setClaims(Claims claims) {
-        Assert.notNull(claims, "Claims argument cannot be null.");
-        return setClaims((Map<String, ?>) claims);
-    }
-
-    @Override
     public JwtBuilder setClaims(Map<String, ?> claims) {
         Assert.notNull(claims, "Claims map cannot be null.");
-        this.claimsBuilder.empty();
-        return add(claims);
+        return this.claimsBuilder.empty().add(claims).and();
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        return claims(claims);
+        return claims().add(claims).and();
     }
 
     @Override
-    public JwtBuilder claims(Map<String, ?> claims) {
-        return add(claims);
-    }
-
-    @Override
-    public JwtBuilder delete(String key) {
-        this.claimsBuilder.delete(key);
-        return this;
-    }
-
-    @Override
-    public JwtBuilder empty() {
-        this.claimsBuilder.empty();
-        this.content = null;
-        return this;
-    }
-
-    @Override
-    public JwtBuilder add(String key, Object value) {
-        this.claimsBuilder.add(key, value);
-        return this;
-    }
-
-    @Override
-    public JwtBuilder add(Map<? extends String, ?> m) {
-        this.claimsBuilder.add(m);
-        return this;
+    public JwtBuilder claim(String name, Object value) {
+        return claims().add(name, value).and();
     }
 
     @Override
@@ -435,11 +402,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder id(String jti) {
         this.claimsBuilder.id(jti);
         return this;
-    }
-
-    @Override
-    public JwtBuilder claim(String name, Object value) {
-        return add(name, value);
     }
 
     @Override
@@ -569,12 +531,31 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
     }
 
-    private static class DefaultJwtBuilderHeader extends DefaultJweHeaderBuilder<Header>
-            implements JwtBuilder.Header {
+    private static class BuilderClaims extends DelegatingClaimsMutator<JwtBuilder.Claims>
+            implements JwtBuilder.Claims {
 
         private final JwtBuilder builder;
 
-        public DefaultJwtBuilderHeader(JwtBuilder builder) {
+        private BuilderClaims(JwtBuilder builder) {
+            super();
+            this.builder = builder;
+        }
+
+        @Override
+        public JwtBuilder and() {
+            return this.builder;
+        }
+
+        public io.jsonwebtoken.Claims build() {
+            return new DefaultClaims(this.DELEGATE);
+        }
+    }
+
+    private static class BuilderHeader extends DefaultJweHeaderBuilder<Header> implements JwtBuilder.Header {
+
+        private final JwtBuilder builder;
+
+        private BuilderHeader(JwtBuilder builder) {
             super();
             this.builder = Assert.notNull(builder, "JwtBuilder cannot be null.");
         }

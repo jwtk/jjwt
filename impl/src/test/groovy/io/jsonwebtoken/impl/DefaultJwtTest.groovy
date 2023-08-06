@@ -29,7 +29,7 @@ class DefaultJwtTest {
 
     @Test
     void testToString() {
-        String compact = Jwts.builder().setHeaderParam('foo', 'bar').setAudience('jsmith').compact()
+        String compact = Jwts.builder().header().add('foo', 'bar').and().audience('jsmith').compact()
         Jwt jwt = Jwts.parser().enableUnsecured().build().parseClaimsJwt(compact)
         assertEquals 'header={foo=bar, alg=none},payload={aud=jsmith}', jwt.toString()
     }
@@ -38,7 +38,7 @@ class DefaultJwtTest {
     void testByteArrayPayloadToString() {
         byte[] bytes = 'hello JJWT'.getBytes(StandardCharsets.UTF_8)
         String encoded = Encoders.BASE64URL.encode(bytes)
-        String compact = Jwts.builder().setHeaderParam('foo', 'bar').content(bytes).compact()
+        String compact = Jwts.builder().header().add('foo', 'bar').and().content(bytes).compact()
         Jwt jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
         assertEquals "header={foo=bar, alg=none},payload=$encoded" as String, jwt.toString()
     }
