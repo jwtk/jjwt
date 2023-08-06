@@ -30,6 +30,16 @@ import java.util.Map;
 public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
 
     /**
+     * Removes the map entry with the specified key.
+     * <p>This method is the same as {@link Map#remove Map.remove}, but instead returns the mutator instance for
+     * method chaining.</p>
+     *
+     * @param key the key for the map entry to remove.
+     * @return the mutator/builder for method chaining.
+     */
+    T delete(K key);
+
+    /**
      * Removes all entries from the map. The map will be empty after this call returns.
      * <p>This method is the same as {@link Map#clear Map.clear}, but instead returns the mutator instance for
      * method chaining.</p>
@@ -39,8 +49,9 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
     T empty();
 
     /**
-     * Sets the specified name/value pair in the map.  A {@code null} or empty value will remove the property
-     * from the map entirely.
+     * Sets the specified key/value pair in the map, overwriting any existing entry with the same key.
+     * A {@code null} or empty value will remove the entry from the map entirely.
+     *
      * <p>This method is the same as {@link Map#put Map.put}, but instead returns the mutator instance for
      * method chaining.</p>
      *
@@ -51,8 +62,9 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
     T set(K key, V value);
 
     /**
-     * Sets the specified name/value pairs in the map.  If any name has a {@code null} or empty value, that
-     * map entry will be removed from the map entirely.
+     * Sets the specified key/value pairs in the map, overwriting any existing entries with the same keys.
+     * If any pair has a {@code null} or empty value, that pair will be removed from the map entirely.
+     *
      * <p>This method is the same as {@link Map#putAll Map.putAll}, but instead returns the mutator instance for
      * method chaining.</p>
      *
@@ -60,14 +72,4 @@ public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
      * @return the mutator/builder for method chaining.
      */
     T set(Map<? extends K, ? extends V> m);
-
-    /**
-     * Removes the map entry with the specified key.
-     * <p>This method is the same as {@link Map#remove Map.remove}, but instead returns the mutator instance for
-     * method chaining.</p>
-     *
-     * @param key the key for the map entry to remove.
-     * @return the mutator/builder for method chaining.
-     */
-    T delete(K key);
 }

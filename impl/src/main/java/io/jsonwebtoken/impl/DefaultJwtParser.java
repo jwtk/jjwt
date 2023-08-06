@@ -105,7 +105,7 @@ public class DefaultJwtParser implements JwtParser {
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an " +
             DefaultHeader.ALGORITHM + " header value of '" + Jwts.SIG.NONE.getId() + "') are disallowed by " +
             "default as mandated by https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to " +
-            "allow them to be parsed, call the JwtParserBuilder.enableUnsecuredJws() method (but please read the " +
+            "allow them to be parsed, call the JwtParserBuilder.enableUnsecured() method (but please read the " +
             "security considerations covered in that method's JavaDoc before doing so). Header: ";
 
     private static final String JWE_NONE_MSG = "JWEs do not support key management " + DefaultHeader.ALGORITHM +
@@ -129,7 +129,7 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("deprecation")
     private final SigningKeyResolver signingKeyResolver;
 
-    private final boolean enableUnsecuredJws;
+    private final boolean enableUnsecured;
 
     private final boolean enableUnsecuredDecompression;
 
@@ -157,7 +157,7 @@ public class DefaultJwtParser implements JwtParser {
     @SuppressWarnings("deprecation")
     DefaultJwtParser(Provider provider,
                      SigningKeyResolver signingKeyResolver,
-                     boolean enableUnsecuredJws,
+                     boolean enableUnsecured,
                      boolean enableUnsecuredDecompression,
                      Locator<? extends Key> keyLocator,
                      Clock clock,
@@ -171,7 +171,7 @@ public class DefaultJwtParser implements JwtParser {
                      Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
                      Collection<AeadAlgorithm> extraEncAlgs) {
         this.provider = provider;
-        this.enableUnsecuredJws = enableUnsecuredJws;
+        this.enableUnsecured = enableUnsecured;
         this.enableUnsecuredDecompression = enableUnsecuredDecompression;
         this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
@@ -376,7 +376,7 @@ public class DefaultJwtParser implements JwtParser {
                 throw new MalformedJwtException(JWE_NONE_MSG);
             }
             // Unsecured JWTs are disabled by default per the RFC:
-            if (!enableUnsecuredJws) {
+            if (!enableUnsecured) {
                 String msg = UNSECURED_DISABLED_MSG_PREFIX + header;
                 throw new UnsupportedJwtException(msg);
             }

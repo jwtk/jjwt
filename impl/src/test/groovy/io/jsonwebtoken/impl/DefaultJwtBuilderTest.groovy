@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.*
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Before
 import org.junit.Test
@@ -44,6 +45,30 @@ class DefaultJwtBuilderTest {
     @Before
     void setUp() {
         this.builder = new DefaultJwtBuilder()
+    }
+
+    @Test
+    void testDeleteClaim() {
+        builder.subject('Joe')
+        assertEquals 1, builder.claimsBuilder.size()
+
+        builder.delete('sub')
+        assertEquals 0, builder.claimsBuilder.size()
+    }
+
+    @Test
+    void testEmpty() {
+        builder.subject('Joe')
+        assertEquals 1, builder.claimsBuilder.size()
+
+        byte[] content = Strings.utf8("Hello World")
+        builder.content(content) // can't set subject and content simultaneously
+        assertArrayEquals content, builder.content
+
+        builder.empty()
+
+        assertEquals 0, builder.claimsBuilder.size()
+        assertNull builder.content
     }
 
     @Test

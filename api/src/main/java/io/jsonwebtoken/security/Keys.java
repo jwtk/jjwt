@@ -264,7 +264,7 @@ public final class Keys {
      * @see Password#toCharArray()
      * @since JJWT_RELEASE_VERSION
      */
-    public static Password forPassword(char[] password) {
-        return Classes.invokeStatic(BRIDGE_CLASS, "forPassword", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
+    public static Password password(char[] password) {
+        return Classes.invokeStatic(BRIDGE_CLASS, "password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
     }
 }

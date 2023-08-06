@@ -222,7 +222,7 @@ public class JavaReadmeTest {
     public void testExampleJwePassword() {
         //DO NOT use this example password in a real app, it is well-known to password crackers
         String pw = "correct horse battery staple";
-        Password password = Keys.forPassword(pw.toCharArray());
+        Password password = Keys.password(pw.toCharArray());
 
         // Choose the desired PBES2 key derivation algorithm:
         KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384...
@@ -399,5 +399,16 @@ public class JavaReadmeTest {
 
         String expected = "{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}";
         assert expected.equals(jwk.toString());
+    }
+
+    @Test
+    public void testWhatever() {
+        Jwts.builder()
+                .header().keyId("foo").contentType("text/plain").and()
+                .subject("Joe").audience("You")
+                .signWith(Jwts.SIG.HS512.keyBuilder().build())
+                .compact();
+
+
     }
 }

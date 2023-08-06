@@ -42,7 +42,7 @@ class DefaultMacAlgorithmTest {
      */
     @Test
     void testWithPasswordSpec() {
-        def password = Keys.forPassword(passwordChars)
+        def password = Keys.password(passwordChars)
         try {
             newAlg().digest(request(password))
         } catch (InvalidKeyException expected) {

@@ -36,8 +36,11 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -62,7 +65,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Provider provider;
 
-    private boolean enableUnsecuredJws = false;
+    private boolean enableUnsecured = false;
 
     private boolean enableUnsecuredDecompression = false;
 
@@ -96,8 +99,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private Key decryptionKey;
 
     @Override
-    public JwtParserBuilder enableUnsecuredJws() {
-        this.enableUnsecuredJws = true;
+    public JwtParserBuilder enableUnsecured() {
+        this.enableUnsecured = true;
         return this;
     }
 
@@ -230,13 +233,31 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder verifyWith(Key key) {
+    public JwtParserBuilder verifyWith(SecretKey key) {
+        return verifyWith((Key) key);
+    }
+
+    @Override
+    public JwtParserBuilder verifyWith(PublicKey key) {
+        return verifyWith((Key) key);
+    }
+
+    private JwtParserBuilder verifyWith(Key key) {
         this.signatureVerificationKey = Assert.notNull(key, "signature verification key cannot be null.");
         return this;
     }
 
     @Override
-    public JwtParserBuilder decryptWith(final Key key) {
+    public JwtParserBuilder decryptWith(SecretKey key) {
+        return decryptWith((Key) key);
+    }
+
+    @Override
+    public JwtParserBuilder decryptWith(PrivateKey key) {
+        return decryptWith((Key) key);
+    }
+
+    private JwtParserBuilder decryptWith(final Key key) {
         this.decryptionKey = Assert.notNull(key, "decryption key cannot be null.");
         return this;
     }
@@ -324,8 +345,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
-        if (!enableUnsecuredJws && enableUnsecuredDecompression) {
-            String msg = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecuredJws' is also " +
+        if (!enableUnsecured && enableUnsecuredDecompression) {
+            String msg = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecured' is also " +
                     "configured. Please read the JavaDoc of both features before enabling either " +
                     "due to their security implications.";
             throw new IllegalStateException(msg);
@@ -344,7 +365,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return new DefaultJwtParser(
                 provider,
                 signingKeyResolver,
-                enableUnsecuredJws,
+                enableUnsecured,
                 enableUnsecuredDecompression,
                 keyLocator,
                 clock,

@@ -555,7 +555,7 @@ class RFC7520Section5Test {
     @Test
     void testSection5_3() {
 
-        def key = Keys.forPassword(FIGURE_96.toCharArray())
+        def key = Keys.password(FIGURE_96.toCharArray())
         String cty = 'jwk-set+json'
         int p2c = 8192
 

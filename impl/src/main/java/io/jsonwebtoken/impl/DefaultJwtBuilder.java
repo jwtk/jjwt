@@ -322,13 +322,36 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder setClaims(Map<String, ?> claims) {
         Assert.notNull(claims, "Claims map cannot be null.");
         this.claimsBuilder.empty();
-        this.claimsBuilder.set(claims);
-        return this;
+        return set(claims);
     }
 
     @Override
     public JwtBuilder addClaims(Map<String, ?> claims) {
-        this.claimsBuilder.set(claims);
+        return set(claims);
+    }
+
+    @Override
+    public JwtBuilder delete(String key) {
+        this.claimsBuilder.delete(key);
+        return this;
+    }
+
+    @Override
+    public JwtBuilder empty() {
+        this.claimsBuilder.empty();
+        this.content = null;
+        return this;
+    }
+
+    @Override
+    public JwtBuilder set(String key, Object value) {
+        this.claimsBuilder.set(key, value);
+        return this;
+    }
+
+    @Override
+    public JwtBuilder set(Map<? extends String, ?> m) {
+        this.claimsBuilder.set(m);
         return this;
     }
 
@@ -411,8 +434,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder claim(String name, Object value) {
-        this.claimsBuilder.set(name, value);
-        return this;
+        return set(name, value);
     }
 
     @Override
@@ -425,7 +447,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException(msg);
         }
 
-        final Claims claims = this.claimsBuilder.build();
+        final io.jsonwebtoken.Claims claims = this.claimsBuilder.build();
 
         if (Objects.isEmpty(content) && Collections.isEmpty(claims)) {
             if (jwe) { // JWE payload can never be empty:

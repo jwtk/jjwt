@@ -23,8 +23,11 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -45,11 +48,11 @@ import java.util.Map;
 public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
-     * Enables parsing of Unsecured JWSs (JWTs with an 'alg' (Algorithm) header value of
-     * 'none'). <b>Be careful when calling this method - one should fully understand
+     * Enables parsing of Unsecured JWTs (JWTs with an 'alg' (Algorithm) header value of
+     * 'none' or missing the 'alg' header entirely). <b>Be careful when calling this method - one should fully understand
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * before enabling this feature.</b>
-     * <p>If this method is not called, Unsecured JWSs are disabled by default as mandated by
+     * <p>If this method is not called, Unsecured JWTs are disabled by default as mandated by
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">RFC 7518, Section
      * 3.6</a>.</p>
      *
@@ -60,23 +63,23 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see #enableUnsecuredDecompression()
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder enableUnsecuredJws();
+    JwtParserBuilder enableUnsecured();
 
     /**
-     * If {@link #enableUnsecuredJws() enabledUnsecuredJws} is enabled, calling this method additionally enables
-     * payload decompression of Unsecured JWSs (JWTs with an 'alg' (Algorithm) header value of 'none') that also have
+     * If {@link #enableUnsecured() enabledUnsecuredJws} is enabled, calling this method additionally enables
+     * payload decompression of Unsecured JWTs (JWTs with an 'alg' (Algorithm) header value of 'none') that also have
      * a 'zip' (Compression) header. This behavior is disabled by default because using compression
      * algorithms with data from unverified (unauthenticated) parties can be susceptible to Denial of Service attacks
      * and other data integrity problems as described in
      * <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
      * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>.
      *
-     * <p>Because this behavior is only relevant if {@link #enableUnsecuredJws() enabledUnsecuredJws} is specified,
-     * calling this method without also calling {@code enableUnsecuredJws()} will result in a build exception, as the
+     * <p>Because this behavior is only relevant if {@link #enableUnsecured() enabledUnsecured} is specified,
+     * calling this method without also calling {@code enableUnsecured()} will result in a build exception, as the
      * incongruent state could reflect a misunderstanding of both behaviors which should be remedied by the
      * application developer.</p>
      *
-     * <b>As is the case for {@link #enableUnsecuredJws()}, be careful when calling this method - one should fully
+     * <b>As is the case for {@link #enableUnsecured()}, be careful when calling this method - one should fully
      * understand
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * before enabling this feature.</b>
@@ -86,7 +89,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
      * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>
      * @see Jwts.SIG#NONE
-     * @see #enableUnsecuredJws()
+     * @see #enableUnsecured()
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder enableUnsecuredDecompression();
@@ -253,7 +256,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>This method has been deprecated since JJWT_RELEASE_VERSION and will be removed before 1.0.  It was not
      * readily obvious to many JJWT users that this method was for bytes that pertained <em>only</em> to HMAC
      * {@code SecretKey}s, and could be confused with keys of other types.  It is better to obtain a type-safe
-     * {@link Key} instance and call the {@link #verifyWith(Key)} instead.</p>
+     * {@link SecretKey} instance and call {@link #verifyWith(SecretKey)} instead.</p>
      *
      * <p>Previous Documentation</p>
      *
@@ -268,8 +271,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the algorithm-specific signature verification key used to validate any discovered JWS digital
      *            signature.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(Key)} for type safety and name congruence
-     * with the {@link #decryptWith(Key)} method.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(SecretKey)} for type safety and name
+     * congruence with the {@link #decryptWith(SecretKey)} method.
      */
     @Deprecated
     JwtParserBuilder setSigningKey(byte[] key);
@@ -295,7 +298,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * StackOverflow answer</a> explaining why raw (non-base64-encoded) strings are almost always incorrect for
      * signature operations.</p>
      *
-     * <p>Finally, please use the {@link #verifyWith(Key)} method instead, as this method (and likely
+     * <p>Finally, please use the {@link #verifyWith(SecretKey)} method instead, as this method (and likely
      * {@link #setSigningKey(byte[])}) will be removed before the 1.0.0 release.</p>
      *
      * <p><b>Previous JavaDoc</b></p>
@@ -305,12 +308,12 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <blockquote><pre>
      * byte[] bytes = Decoders.{@link io.jsonwebtoken.io.Decoders#BASE64 BASE64}.decode(base64EncodedSecretKey);
      * Key key = Keys.{@link io.jsonwebtoken.security.Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor}(bytes);
-     * return {@link #verifyWith(Key) verifyWith}(key);</pre></blockquote>
+     * return {@link #verifyWith(SecretKey) verifyWith}(key);</pre></blockquote>
      *
      * @param base64EncodedSecretKey BASE64-encoded HMAC-SHA key bytes used to create a Key which will be used to
      *                               verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
-     * @deprecated in favor of {@link #verifyWith(Key)} as explained in the above <b>Deprecation Notice</b>,
+     * @deprecated in favor of {@link #verifyWith(SecretKey)} as explained in the above <b>Deprecation Notice</b>,
      * and will be removed in 1.0.0.
      */
     @Deprecated
@@ -322,32 +325,31 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>This method is being renamed to accurately reflect its purpose - the key is not technically a signing key,
      * it is a signature verification key, and the two concepts can be different, especially with asymmetric key
      * cryptography.  The method has been deprecated since JJWT_RELEASE_VERSION in favor of
-     * {@link #verifyWith(Key)} for type safety, to reflect accurate naming of the concept, and for name congruence
-     * with the {@link #decryptWith(Key)} method.</p>
+     * {@link #verifyWith(SecretKey)} for type safety, to reflect accurate naming of the concept, and for name
+     * congruence with the {@link #decryptWith(SecretKey)} method.</p>
      *
-     * <p>This method merely delegates directly to {@link #verifyWith(Key)}.</p>
+     * <p>This method merely delegates directly to {@link #verifyWith(SecretKey)}.</p>
      *
      * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
      *            signatures.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(Key)} for naming congruence with the
-     * {@link #decryptWith(Key)} method.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(SecretKey)} for naming congruence with the
+     * {@link #decryptWith(SecretKey)} method.
      */
     @Deprecated
     JwtParserBuilder setSigningKey(Key key);
 
     /**
-     * Sets the signature verification key used to verify all encountered JWS signatures. If the encountered JWT
+     * Sets the signature verification SecretKey used to verify all encountered JWS signatures. If the encountered JWT
      * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
      *
      * <p>This is a convenience method to use in a specific scenario: when the parser will only ever encounter
-     * JWSs with signatures that can always be verified by a single key.  This also implies that this key
+     * JWSs with signatures that can always be verified by a single SecretKey.  This also implies that this key
      * <em>MUST</em> be a valid key for the signature algorithm ({@code alg} header) used for the JWS.</p>
      *
-     * <p>If there is any chance that the parser will encounter JWSs
-     * that need different signature verification keys based on the JWS being parsed, or JWEs, it is strongly
-     * recommended to configure your own {@link Locator} via the
-     * {@link #keyLocator(Locator) keyLocator} method instead of using this one.</p>
+     * <p>If there is any chance that the parser will also encounter JWEs, or JWSs that need different signature
+     * verification keys based on the JWS being parsed, it is strongly recommended to configure your own
+     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.</p>
      *
      * <p>Calling this method overrides any previously set signature verification key.</p>
      *
@@ -355,22 +357,40 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the parser builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder verifyWith(Key key);
+    JwtParserBuilder verifyWith(SecretKey key);
 
     /**
-     * Sets the decryption key used to decrypt all encountered JWEs, <b>overwriting any previously configured
-     * {@link #keyLocator(Locator) keyLocator}</b>. If the encountered JWT string is not a JWE (e.g. a JWS),
-     * this key is not used.
+     * Sets the signature verification PublicKey used to verify all encountered JWS signatures. If the encountered JWT
+     * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
+     *
+     * <p>This is a convenience method to use in a specific scenario: when the parser will only ever encounter
+     * JWSs with signatures that can always be verified by a single PublicKey.  This also implies that this key
+     * <em>MUST</em> be a valid key for the signature algorithm ({@code alg} header) used for the JWS.</p>
+     *
+     * <p>If there is any chance that the parser will also encounter JWEs, or JWSs that need different signature
+     * verification keys based on the JWS being parsed, it is strongly recommended to configure your own
+     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.</p>
+     *
+     * <p>Calling this method overrides any previously set signature verification key.</p>
+     *
+     * @param key the signature verification key to use to verify all encountered JWS digital signatures.
+     * @return the parser builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtParserBuilder verifyWith(PublicKey key);
+
+    /**
+     * Sets the decryption SecretKey used to decrypt all encountered JWEs. If the encountered JWT string is not a
+     * JWE (e.g. a JWS), this key is not used.
      *
      * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter
-     * JWEs that can always be decrypted by a single key.  This also implies that this key <em>MUST</em> be a valid
+     * JWEs that can always be decrypted by a single SecretKey. This also implies that this key <em>MUST</em> be a valid
      * key for both the key management algorithm ({@code alg} header) and the content encryption algorithm
      * ({@code enc} header) used for the JWE.</p>
      *
-     * <p>If there is any chance that the parser will encounter JWEs that need different decryption keys based on the
-     * JWE being parsed, or JWSs, it is strongly recommended to configure
-     * your own {@link Locator Locator} via the {@link #keyLocator(Locator) keyLocator} method instead of
-     * using {@code decryptWith}.</p>
+     * <p>If there is any chance that the parser will also encounter JWSs, or JWEs that need different decryption
+     * keys based on the JWE being parsed, it is strongly recommended to configure your own
+     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.</p>
      *
      * <p>Calling this method overrides any previously set decryption key.</p>
      *
@@ -378,7 +398,27 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the parser builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder decryptWith(Key key);
+    JwtParserBuilder decryptWith(SecretKey key);
+
+    /**
+     * Sets the decryption PrivateKey used to decrypt all encountered JWEs. If the encountered JWT string is not a
+     * JWE (e.g. a JWS), this key is not used.
+     *
+     * <p>This is a convenience method to use in specific circumstances: when the parser will only ever encounter JWEs
+     * that can always be decrypted by a single PrivateKey. This also implies that this key <em>MUST</em> be a valid
+     * key for the JWE's key management algorithm ({@code alg} header).</p>
+     *
+     * <p>If there is any chance that the parser will also encounter JWSs, or JWEs that need different decryption
+     * keys based on the JWE being parsed, it is strongly recommended to configure your own
+     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.</p>
+     *
+     * <p>Calling this method overrides any previously set decryption key.</p>
+     *
+     * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
+     * @return the parser builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtParserBuilder decryptWith(PrivateKey key);
 
     /**
      * Sets the {@link Locator} used to acquire any signature verification or decryption key needed during parsing.
@@ -388,8 +428,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *     <li>If the parsed String is a JWE, it will be called to find the appropriate decryption key.</li>
      * </ul>
      *
-     * <p>Specifying a key {@code Locator} is necessary when the signing or decryption key is not already known before
-     * parsing the JWT and the JWT header must be inspected first to determine how to
+     * <p>Specifying a key {@code Locator} is necessary when the signature verification or decryption key is not
+     * already known before parsing the JWT and the JWT header must be inspected first to determine how to
      * look up the verification or decryption key.  Once returned by the locator, the JwtParser will then either
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
      *

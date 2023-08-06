@@ -189,7 +189,7 @@ class DefaultJwtParserBuilderTest {
             builder.enableUnsecuredDecompression().build()
             fail()
         } catch (IllegalStateException ise) {
-            String expected = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecuredJws' " + "is also configured. Please read the JavaDoc of both features before enabling either " + "due to their security implications."
+            String expected = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecured' " + "is also configured. Please read the JavaDoc of both features before enabling either " + "due to their security implications."
             assertEquals expected, ise.getMessage()
         }
     }
@@ -199,7 +199,7 @@ class DefaultJwtParserBuilderTest {
         def codec = Jwts.ZIP.GZIP
         String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
         try {
-            builder.enableUnsecuredJws().build().parse(jwt)
+            builder.enableUnsecured().build().parse(jwt)
             fail()
         } catch (UnsupportedJwtException e) {
             String expected = String.format(DefaultJwtParser.UNPROTECTED_DECOMPRESSION_MSG, codec.getId())
@@ -211,7 +211,7 @@ class DefaultJwtParserBuilderTest {
     void testDecompressUnprotectedJwtEnabled() {
         def codec = Jwts.ZIP.GZIP
         String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
-        def jwt = builder.enableUnsecuredJws().enableUnsecuredDecompression().build().parse(jws)
+        def jwt = builder.enableUnsecured().enableUnsecuredDecompression().build().parse(jws)
         assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()
     }
 

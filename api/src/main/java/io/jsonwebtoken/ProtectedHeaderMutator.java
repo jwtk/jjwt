@@ -30,6 +30,32 @@ import java.util.Set;
 public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> extends HeaderMutator<T>, X509Mutator<T> {
 
     /**
+     * Sets the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
+     * be understood and supported by the JWT recipient. A {@code null} value will remove the
+     * property from the JSON map.
+     *
+     * @param crit the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
+     *             be understood and supported by the JWT recipient.
+     * @return the header for method chaining.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS <code>crit</code> (Critical) Header Parameter</a>
+     */
+    T critical(Set<String> crit);
+
+    /**
+     * Sets the {@code jwk} (JSON Web Key) associated with the JWT.  When set for a {@link JwsHeader}, the
+     * {@code jwk} is the public key complement of the private key used to digitally sign the JWS.  When set for a
+     * {@link JweHeader}, the {@code jwk} is the public key to which the JWE was encrypted, and may be used to
+     * determine the private key needed to decrypt the JWE.
+     *
+     * @param jwk the {@code jwk} (JSON Web Key) associated with the header.
+     * @return the header for method chaining
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.3">JWS <code>jwk</code> (JSON Web Key) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.5">JWE <code>jwk</code> (JSON Web Key) Header Parameter</a>
+     */
+    T jwk(PublicJwk<?> jwk);
+
+    /**
      * Sets the {@code jku} (JWK Set URL) value that refers to a
      * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-5">JWK Set</a>
      * resource containing JSON-encoded Public Keys, or {@code null} if not present.  When set for a
@@ -44,19 +70,6 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.4">JWE JWK Set URL</a>
      */
     T jwkSetUrl(URI uri);
-
-    /**
-     * Sets the {@code jwk} (JSON Web Key) associated with the JWT.  When set for a {@link JwsHeader}, the
-     * {@code jwk} is the public key complement of the private key used to digitally sign the JWS.  When set for a
-     * {@link JweHeader}, the {@code jwk} is the public key to which the JWE was encrypted, and may be used to
-     * determine the private key needed to decrypt the JWE.
-     *
-     * @param jwk the {@code jwk} (JSON Web Key) associated with the header.
-     * @return the header for method chaining
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.3">JWS <code>jwk</code> (JSON Web Key) Header Parameter</a>
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.5">JWE <code>jwk</code> (JSON Web Key) Header Parameter</a>
-     */
-    T jwk(PublicJwk<?> jwk);
 
     /**
      * Sets the JWT case-sensitive {@code kid} (Key ID) header value. A {@code null} value will remove the property
@@ -74,17 +87,4 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6">JWE Key ID</a>
      */
     T keyId(String kid);
-
-    /**
-     * Sets the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
-     * be understood and supported by the JWT recipient. A {@code null} value will remove the
-     * property from the JSON map.
-     *
-     * @param crit the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
-     *             be understood and supported by the JWT recipient.
-     * @return the header for method chaining.
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS <code>crit</code> (Critical) Header Parameter</a>
-     */
-    T critical(Set<String> crit);
 }

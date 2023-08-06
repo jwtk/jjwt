@@ -121,15 +121,34 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
   support expected congruent behavior with `Jwe` instances (both have digests).
 
 
-* `io.jsonwebtoken.CompressionCodec` now inherits a new `io.jsonwebtoken.Identifiable` interface and its `getId()`
-  method is preferred over the now-deprecated `getAlgorithmName()` method.  This is to guarantee API congruence with
-  all other JWT-identifiable algorithm names that can be set as a header value.
+* `io.jsonwebtoken.CompressionCodec` is now deprecated in favor of the new `io.jsonwebtoken.io.CompressionAlgorithm`
+  interface. This is to guarantee API congruence with all other JWT-identifiable algorithm IDs that can be set as a 
+  header value.
+
+
+* `io.jsonwebtoken.CompressionCodecResolver` has been deprecated in favor of the new
+  `JwtParserBuilder#addCompressionAlgorithms` method.
 
 
 #### Breaking Changes
 
+* **`io.jsonwebtoken.Claims` and `io.jsonwebtoken.Header` instances are now immutable** to enhance security and thread
+  safety.  Creation and mutation are supported with newly introduced `ClaimsBuilder` and `HeaderBuilder` concepts.
+  Even though mutation methods have migrated, there are a couple that have been removed entirely:
+  * `io.jsonwebtoken.JwsHeader#setAlgorithm` has been removed - the `JwtBuilder` will always set the appropriate
+    `alg` header automatically based on builder state.
+  * `io.jsonwebtoken.Header#setCompressionAlgorithm` has been removed - the `JwtBuilder` will always set the appropriate
+  `zip` header automatically based on builder state.
+
+
 * `io.jsonwebtoken.Jwts`'s `header(Map)`, `jwsHeader()` and `jwsHeader(Map)` methods have been removed in favor
-  of the new `header()` builder-based method to support method chaining and dynamic Header type creation.
+  of the new `header()` method that returns a `HeaderBuilder` to support method chaining and dynamic `Header` type 
+  creation. The `HeaderBuilder` will dynamically create a `Header`, `JwsHeader` or `JweHeader` automatically based on 
+  builder state.
+
+
+* Similarly, `io.jsonwebtoken.Jwts`'s `claims()` static method has been changed to return a `ClaimsBuilder` instead
+  of a `Claims` instance.
 
 
 * **JWTs that do not contain JSON Claims now have a payload type of `byte[]` instead of `String`** (that is, 
@@ -166,19 +185,6 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
     `resolveSigningKey(JwsHeader, byte[])`.
 
 
-* **`io.jsonwebtoken.Claims` and `io.jsonwebtoken.Header` instances are now immutable** to enhance security and thread
-  safety.  Creation and mutation are supported with newly introduced `ClaimsBuilder` and `HeaderBuilder` concepts.
-
-
-* Consequently, `io.jsonwebtoken.Jwts`'s `claims()` static method has been changed to return a `ClaimsBuilder` instead 
-  of a `Claims` instance.
-
-
-* Similarly, `io.jsonwebtoken.Jwts`'s `header()` static method has been changed to return a `HeaderBuilder` instead of 
-  a `Header` instance.  The `HeaderBuilder` will dynamically create a `Header`, `JwsHeader` or `JweHeader` 
-  automatically based on builder state.
-
-
 * `io.jsonwebtoken.JwtParser` is now immutable.  All mutation/modification methods (setters, etc) deprecated 4 years 
   ago have been removed.  All parser configuration requires using the `JwtParserBuilder` (i.e.
   `Jwts.parser()`).
@@ -191,7 +197,8 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
 
 * `io.jsonwebtoken.CompressionCodec` implementations are no longer discoverable via `java.util.ServiceLoader` due to
   runtime performance problems with the JDK's `ServiceLoader` implementation per
-  https://github.com/jwtk/jjwt/issues/648.
+  https://github.com/jwtk/jjwt/issues/648.  Custom implementations should be made available to the `JwtParser` via
+  the new `JwtParserBuilder#addCompressionAlgorithms` method.
 
 
 * Prior to this release, if there was a serialization problem when serializing the JWT Header, an `IllegalStateException`
@@ -202,7 +209,7 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
 
 * Parsing of unsecured JWTs (`alg` header of `none`) are now disabled by default as mandated by 
   [RFC 7518, Section 3.6](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6). If you require parsing of
-  unsecured JWTs, you must call the `enableUnsecuredJws` method on the `JwtParserBuilder`, but note the security
+  unsecured JWTs, you must call the `JwtParserBuilder#enableUnsecured()` method, but note the security
   implications mentioned in that method's JavaDoc before doing so.
 
 

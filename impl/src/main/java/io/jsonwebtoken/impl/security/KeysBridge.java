@@ -30,7 +30,7 @@ public final class KeysBridge {
     private KeysBridge() {
     }
 
-    public static Password forPassword(char[] password) {
+    public static Password password(char[] password) {
         return new PasswordSpec(password);
     }
 

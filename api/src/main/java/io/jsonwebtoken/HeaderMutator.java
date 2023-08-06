@@ -25,6 +25,33 @@ import io.jsonwebtoken.lang.MapMutator;
  */
 public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<String, Object, T> {
 
+    //IMPLEMENTOR NOTE: if this `algorithm` method ever needs to be exposed in the public API, it's probably better to
+    //                  have it in the Jwts.HeaderBuilder interface and NOT this one: in the context of
+    //                  JwtBuilder.Header, there is never a reason for an application developer to call algorithm(id)
+    //                  directly because the KeyAlgorithm or SecureDigestAlgorithm instance must always be provided
+    //                  via the signWith or encryptWith methods.  The JwtBuilder will always set the algorithm
+    //                  header based on these two instances, so there is no need for an app dev to do so.
+    /*
+     * Sets the JWT {@code alg} (Algorithm) header value.  A {@code null} value will remove the property
+     * from the JSON map.
+     * <ul>
+     *     <li>If the JWT is a Signed JWT (a JWS), the
+     *     <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">{@code alg}</a> (Algorithm) header
+     *     parameter identifies the cryptographic algorithm used to secure the JWS.</li>
+     *      <li>If the JWT is an Encrypted JWT (a JWE), the
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
+     * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
+     * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
+     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.</li>
+     * </ul>
+     *
+     * @param alg the {@code alg} header value
+     * @return this header for method chaining
+     * @since JJWT_RELEASE_VERSION
+     *
+    T algorithm(String alg);
+    */
+
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1">
      * <code>typ</code> (Type)</a> header value.  A {@code null} value will remove the property from the JSON map.
@@ -60,25 +87,4 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
      * @return the {@code Header} instance for method chaining.
      */
     T contentType(String cty);
-
-    /*
-     * Sets the JWT {@code alg} (Algorithm) header value.  A {@code null} value will remove the property
-     * from the JSON map.
-     * <ul>
-     *     <li>If the JWT is a Signed JWT (a JWS), the
-     *     <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">{@code alg}</a> (Algorithm) header
-     *     parameter identifies the cryptographic algorithm used to secure the JWS.</li>
-     *      <li>If the JWT is an Encrypted JWT (a JWE), the
-     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
-     * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
-     * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
-     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.</li>
-     * </ul>
-     *
-     * @param alg the {@code alg} header value
-     * @return this header for method chaining
-     * @since JJWT_RELEASE_VERSION
-     *
-    T algorithm(String alg);
-     */
 }
