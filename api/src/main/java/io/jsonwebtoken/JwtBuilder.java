@@ -84,7 +84,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *         // ... etc ...
      *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
      *
-     *     .setSubject("Joe") // resume JwtBuilder calls
+     *     .subject("Joe") // resume JwtBuilder calls
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
