@@ -85,7 +85,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
 
-    private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
+    private Decoder<String, byte[]> decoder = Decoders.BASE64URL;
 
     private Deserializer<Map<String, ?>> deserializer;
 
@@ -118,11 +118,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
-        return jsonDeserializer(deserializer);
+        return deserializer(deserializer);
     }
 
     @Override
-    public JwtParserBuilder jsonDeserializer(Deserializer<Map<String, ?>> deserializer) {
+    public JwtParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer) {
         Assert.notNull(deserializer, "deserializer cannot be null.");
         this.deserializer = deserializer;
         return this;
@@ -130,13 +130,13 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> decoder) {
-        return base64UrlDecoder(decoder);
+        return decoder(decoder);
     }
 
     @Override
-    public JwtParserBuilder base64UrlDecoder(Decoder<String, byte[]> decoder) {
-        Assert.notNull(decoder, "base64UrlDecoder cannot be null.");
-        this.base64UrlDecoder = decoder;
+    public JwtParserBuilder decoder(Decoder<String, byte[]> decoder) {
+        Assert.notNull(decoder, "decoder cannot be null.");
+        this.decoder = decoder;
         return this;
     }
 
@@ -371,7 +371,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 clock,
                 allowedClockSkewMillis,
                 expClaims,
-                base64UrlDecoder,
+                decoder,
                 new JwtDeserializer<>(deserializer),
                 compressionCodecResolver,
                 extraZipAlgs,

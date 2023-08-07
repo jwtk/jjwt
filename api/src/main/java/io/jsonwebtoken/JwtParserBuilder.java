@@ -616,7 +616,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param base64UrlDecoder the decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
      * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
-     * {@link #base64UrlDecoder(Decoder)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #decoder(Decoder)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder);
@@ -630,7 +630,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param base64UrlDecoder the decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
      */
-    JwtParserBuilder base64UrlDecoder(Decoder<String, byte[]> base64UrlDecoder);
+    JwtParserBuilder decoder(Decoder<String, byte[]> base64UrlDecoder);
 
     /**
      * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
@@ -645,7 +645,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
      * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
-     * {@link #jsonDeserializer(Deserializer)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #deserializer(Deserializer)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
@@ -663,7 +663,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
      */
-    JwtParserBuilder jsonDeserializer(Deserializer<Map<String, ?>> deserializer);
+    JwtParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer);
 
     /**
      * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.

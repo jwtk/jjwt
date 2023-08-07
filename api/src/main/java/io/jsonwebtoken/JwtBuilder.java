@@ -256,7 +256,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
-     * @return the {@link JwtBuilder.Header} to use for header construction.
+     * @return the {@link JwtBuilder.Claims} to use for Claims construction.
      * @since JJWT_RELEASE_VERSION
      */
     Claims claims();
@@ -818,6 +818,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
      * {@link #encoder(Encoder)} method.
      */
+    @Deprecated
     JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
 
     /**
