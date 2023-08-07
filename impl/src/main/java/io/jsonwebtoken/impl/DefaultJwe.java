@@ -29,8 +29,8 @@ public class DefaultJwe<P> extends DefaultProtectedJwt<JweHeader, P> implements 
 
     private final byte[] iv;
 
-    public DefaultJwe(JweHeader header, P body, byte[] iv, byte[] aadTag) {
-        super(header, body, aadTag, DIGEST_NAME);
+    public DefaultJwe(JweHeader header, P payload, byte[] iv, byte[] aadTag) {
+        super(header, payload, aadTag, DIGEST_NAME);
         this.iv = Assert.notEmpty(iv, "Initialization vector cannot be null or empty.");
     }
 

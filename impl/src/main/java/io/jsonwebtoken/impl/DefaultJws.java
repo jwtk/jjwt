@@ -25,8 +25,8 @@ public class DefaultJws<P> extends DefaultProtectedJwt<JwsHeader, P> implements 
 
     private final String signature;
 
-    public DefaultJws(JwsHeader header, P body, String signature) {
-        super(header, body, Decoders.BASE64URL.decode(signature), DIGEST_NAME);
+    public DefaultJws(JwsHeader header, P payload, String signature) {
+        super(header, payload, Decoders.BASE64URL.decode(signature), DIGEST_NAME);
         this.signature = signature;
     }
 

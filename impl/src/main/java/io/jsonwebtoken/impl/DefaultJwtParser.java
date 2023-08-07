@@ -304,7 +304,7 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         //re-create the jwt part without the signature.  This is what is needed for signature verification:
-        String jwtWithoutSignature = tokenized.getProtected() + SEPARATOR_CHAR + tokenized.getBody();
+        String jwtWithoutSignature = tokenized.getProtected() + SEPARATOR_CHAR + tokenized.getPayload();
 
         byte[] data = jwtWithoutSignature.getBytes(StandardCharsets.US_ASCII);
         byte[] signature = decode(tokenized.getDigest(), "JWS signature");
@@ -388,9 +388,9 @@ public class DefaultJwtParser implements JwtParser {
             throw new MalformedJwtException(msg);
         }
 
-        // =============== Body =================
-        byte[] payload = decode(tokenized.getBody(), "payload");
-        if (tokenized instanceof TokenizedJwe && Arrays.length(payload) == 0) { // Only JWS body can be empty per https://github.com/jwtk/jjwt/pull/540
+        // =============== Payload =================
+        byte[] payload = decode(tokenized.getPayload(), "payload");
+        if (tokenized instanceof TokenizedJwe && Arrays.length(payload) == 0) { // Only JWS payload can be empty per https://github.com/jwtk/jjwt/pull/540
             String msg = "Compact JWE strings MUST always contain a payload (ciphertext).";
             throw new MalformedJwtException(msg);
         }
@@ -466,7 +466,7 @@ public class DefaultJwtParser implements JwtParser {
             payload = result.getPayload();
 
         } else if (hasDigest && this.signingKeyResolver == null) { //TODO: for 1.0, remove the == null check
-            // not using a signing key resolver, so we can verify the signature before reading the body, which is
+            // not using a signing key resolver, so we can verify the signature before reading the payload, which is
             // always safer:
             verifySignature(tokenized, ((JwsHeader) header), alg, new LocatingKeyResolver(this.keyLocator), null, null);
         }

@@ -24,12 +24,12 @@ import java.util.Map;
 class DefaultTokenizedJwt implements TokenizedJwt {
 
     private final String protectedHeader;
-    private final String body;
+    private final String payload;
     private final String digest;
 
-    DefaultTokenizedJwt(String protectedHeader, String body, String digest) {
+    DefaultTokenizedJwt(String protectedHeader, String payload, String digest) {
         this.protectedHeader = protectedHeader;
-        this.body = body;
+        this.payload = payload;
         this.digest = digest;
     }
 
@@ -39,8 +39,8 @@ class DefaultTokenizedJwt implements TokenizedJwt {
     }
 
     @Override
-    public String getBody() {
-        return this.body;
+    public String getPayload() {
+        return this.payload;
     }
 
     @Override

@@ -1057,15 +1057,6 @@ public final class Jwts {
     }
 
     /**
-     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
-     *
-     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
-     */
-    public static JwtParserBuilder parser() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
-    }
-
-    /**
      * Returns a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
      * strings.
      *
@@ -1074,6 +1065,15 @@ public final class Jwts {
      */
     public static JwtBuilder builder() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder");
+    }
+
+    /**
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
+     *
+     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
+     */
+    public static JwtParserBuilder parser() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
     }
 
     /**
