@@ -149,13 +149,13 @@ enforcement.
 <a name="features"></a>
 ## Features
 
- * Fully functional on all JDKs and Android
+ * Fully functional on all Java 7+ JDKs and Android
  * Automatic security best practices and assertions
  * Easy to learn and read API
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with over 1,200+ tests and enforced 100% test code coverage.  Every single method, statement 
+ * Stable implementation with over 1,100+ tests and enforced 100% test code coverage.  Every single method, statement 
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
@@ -796,7 +796,7 @@ relevant to the JWT `payload`.  JJWT provides a number of ways of setting the en
 header parameters (name/value pairs).
 
 <a name="jwt-header-builder"></a><a name="jws-create-header-instance"></a> <!-- legacy anchors for old links -->
-#### JwtBuilder `header()`
+#### JwtBuilder Header
 
 The easiest and recommended way to set one or more JWT header parameters (name/value pairs) is to use the
 `JwtBuilder`'s `header()` builder as desired, and then call its `and()` method to return back
@@ -805,52 +805,54 @@ to the `JwtBuilder` for further configuration. For example:
 ```java
 String jwt = Jwts.builder()
         
-    .header() // <----
+    .header()                        // <----
         .keyId("aKeyId")
         .x509Url(aUri)
         .add("someName", anyValue)
         .add(mapValues)
         // ... etc ...
-        .and() // return back to the JwtBuilder
+        .and()                      // go back to the JwtBuilder
         
-    .subject("Joe") // resume JwtBuilder calls...
+    .subject("Joe")                 // resume JwtBuilder calls...
     // ... etc ...    
     .compact();
 ```
 
 The `JwtBuilder` `header()` builder also supports automatically calculating X.509 thumbprints and other builder-style benefits that
-a simple getter/setter object could not do.
+a simple property getter/setter object would not do.
 
 > **Note**
 >
-> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
-> as needed.
+> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will always set them 
+> automatically as needed.
 
 <a name="jwt-header-params"></a>
-##### Individual Header Paramters
-In addition to type-safe builder methods, `JwtBuilder.header()` can also support arbitrary name/value pairs via the
-`add` method:
+##### Custom Header Parameters
+In addition to type-safe builder methods for standard header parameters, `JwtBuilder.header()` can also support 
+arbitrary name/value pairs via the `add` method:
 
 ```java
-Jwts.builder().header()
+Jwts.builder()
         
-   .add("aHeaderName", aValue)
-   // ... etc ...
-   .and() // return to the JwtBuilder
+    .header()
+        .add("aHeaderName", aValue)
+        // ... etc ...
+        .and() // return to the JwtBuilder
    
 // ... etc ...
 ```
 
 <a name="jwt-header-map"></a><a name="jws-create-header-map"></a> <!-- legacy anchors for old links -->
 ##### Header Parameter Map
-The `add` method is also overloaded to support mutltiple header values in a `Map`:
+The `add` method is also overloaded to support multiple parameters in a `Map`:
 
 ```java
-Jwts.builder().header()
+Jwts.builder()
         
-   .add(multipleHeaderParamsMap)
-   // ... etc ...
-   .and() // return to the JwtBuilder
+    .header()
+        .add(multipleHeaderParamsMap)
+        // ... etc ...
+        .and() // return to the JwtBuilder
    
 // ... etc ...
 ```
@@ -1009,7 +1011,7 @@ String jws = Jwts.builder()
     // ... etc ...
 ```
 
-Each time `claim` is called, it simply appends the key-value pair to an internal `Claims` instance, potentially
+Each time `claim` is called, it simply appends the key-value pair to an internal `Claims` builder, potentially
 overwriting any existing identically-named key/value pair.
 
 Obviously, you do not need to call `claim` for any [standard claim name](#jws-create-claims-standard), and it is
@@ -1020,7 +1022,7 @@ recommended instead to call the standard respective type-safe setter method as t
 <a name="jwt-claims-map"></a><a name="jws-create-claims-map"></a> <!-- legacy anchors for old links -->
 ##### Claims Map
 
-If you want to specify all claims at once, you can use `JwtBuilder` `claims(Map)` method:
+If you want to add multiple claims at once, you can use `JwtBuilder` `claims(Map)` method:
 
 ```java
 

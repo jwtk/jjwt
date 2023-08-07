@@ -50,7 +50,7 @@ class DefaultJwtParserTest {
 
     @Test(expected = MalformedJwtException)
     void testBase64UrlDecodeWithInvalidInput() {
-        newParser().base64UrlDecode('20:SLDKJF;3993;----', 'test')
+        newParser().decode('20:SLDKJF;3993;----', 'test')
     }
 
     @Test
