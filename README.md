@@ -770,7 +770,7 @@ String jwt = Jwts.builder()                     // (1)
         .and()
         
     .subject("Bob")                             // (3) JSON Claims, or
-    //.content(aByteArray, "text/plain")     //     any byte[] content, with media type
+    //.content(aByteArray, "text/plain")        //     any byte[] content, with media type
         
     .signWith(signingKey)                       // (4) if signing, or
     //.encryptWith(key, keyAlg, encryptionAlg)  //     if encrypting
