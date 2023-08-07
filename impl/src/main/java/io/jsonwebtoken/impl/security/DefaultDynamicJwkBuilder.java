@@ -18,13 +18,13 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwkBuilder;
 import io.jsonwebtoken.security.EcPublicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.OctetPrivateJwkBuilder;
 import io.jsonwebtoken.security.OctetPublicJwkBuilder;
 import io.jsonwebtoken.security.PrivateJwkBuilder;
-import io.jsonwebtoken.security.ProtoJwkBuilder;
 import io.jsonwebtoken.security.PublicJwkBuilder;
 import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
 import io.jsonwebtoken.security.RsaPublicJwkBuilder;
@@ -44,10 +44,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 @SuppressWarnings("unused") //used via reflection by io.jsonwebtoken.security.Jwks
-public class DefaultProtoJwkBuilder<K extends Key, J extends Jwk<K>>
-        extends AbstractJwkBuilder<K, J, ProtoJwkBuilder<K, J>> implements ProtoJwkBuilder<K, J> {
+public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
+        extends AbstractJwkBuilder<K, J, DynamicJwkBuilder<K, J>> implements DynamicJwkBuilder<K, J> {
 
-    public DefaultProtoJwkBuilder() {
+    public DefaultDynamicJwkBuilder() {
         super(new DefaultJwkContext<K>());
     }
 

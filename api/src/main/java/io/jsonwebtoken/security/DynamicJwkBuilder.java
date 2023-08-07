@@ -28,14 +28,14 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 /**
- * A prototypical {@link JwkBuilder} that coerces to a more type-specific builder based on the {@link Key} that will
- * be represented as a JWK.
+ * A {@link JwkBuilder} that coerces to a more type-specific builder based on the {@link Key} that will be
+ * represented as a JWK.
  *
  * @param <K> the type of Java {@link Key} represented by the created {@link Jwk}.
  * @param <J> the type of {@link Jwk} created by the builder
  * @since JJWT_RELEASE_VERSION
  */
-public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBuilder<K, J, ProtoJwkBuilder<K, J>> {
+public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBuilder<K, J, DynamicJwkBuilder<K, J>> {
 
     /**
      * Ensures the builder will create a {@link SecretJwk} for the specified Java {@link SecretKey}.
@@ -234,8 +234,8 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * {@link KeyPair#getPrivate() private key} <em>MUST</em> be an Edwards-curve private key as defined by
      * {@link #octetKey(PrivateKey)}.
      *
-     * @param <A> the type of Edwards-curve {@link PublicKey} contained in the key pair.
-     * @param <B> the type of the Edwards-curve {@link PrivateKey} contained in the key pair.
+     * @param <A>     the type of Edwards-curve {@link PublicKey} contained in the key pair.
+     * @param <B>     the type of the Edwards-curve {@link PrivateKey} contained in the key pair.
      * @param keyPair the Edwards-curve {@link KeyPair} to represent as an {@link OctetPrivateJwk}.
      * @return the builder coerced as an {@link OctetPrivateJwkBuilder} for continued method chaining.
      * @throws IllegalArgumentException if the {@code keyPair} does not contain Edwards-curve public and private key
@@ -249,9 +249,9 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
      * {@link #octetKey(PublicKey)}.
      *
-     * @param <A> the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
-     * @param <B> the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
-     *            an {@link OctetPrivateJwk} if desired.
+     * @param <A>   the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
+     * @param <B>   the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
+     *              an {@link OctetPrivateJwk} if desired.
      * @param chain the {@link X509Certificate} chain to inspect to find the Edwards-curve {@code PublicKey} to
      *              represent as an {@link OctetPublicJwk}.
      * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
@@ -264,9 +264,9 @@ public interface ProtoJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBui
      * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
      * {@link #octetKey(PublicKey)}.
      *
-     * @param <A> the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
-     * @param <B> the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
-     *            an {@link OctetPrivateJwk} if desired.
+     * @param <A>   the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
+     * @param <B>   the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
+     *              an {@link OctetPrivateJwk} if desired.
      * @param chain the {@link X509Certificate} chain to inspect to find the Edwards-curve {@code PublicKey} to
      *              represent as an {@link OctetPublicJwk}.
      * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
