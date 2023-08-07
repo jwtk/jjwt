@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -62,14 +63,15 @@ import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " + "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " + "digital signatures.";
+    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
+            "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " +
+            "digital signatures.";
 
     protected Provider provider;
     protected SecureRandom secureRandom;
 
-    private final BuilderHeader headerBuilder = new BuilderHeader(this);
-
-    private final BuilderClaims claimsBuilder = new BuilderClaims(this);
+    private final DefaultBuilderHeader headerBuilder;
+    private final DefaultBuilderClaims claimsBuilder;
 
     protected byte[] content;
 
@@ -91,13 +93,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
     protected Encoder<byte[], String> encoder = Encoders.BASE64URL;
     protected CompressionAlgorithm compressionAlgorithm;
 
+    public DefaultJwtBuilder() {
+        this.headerBuilder = new DefaultBuilderHeader(this);
+        this.claimsBuilder = new DefaultBuilderClaims(this);
+    }
+
     @Override
-    public JwtBuilder.Header header() {
+    public BuilderHeader header() {
         return this.headerBuilder;
     }
 
     @Override
-    public JwtBuilder.Claims claims() {
+    public BuilderClaims claims() {
         return this.claimsBuilder;
     }
 
@@ -237,7 +244,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, byte[] secretKeyBytes) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notEmpty(secretKeyBytes, "secret key byte array cannot be null or empty.");
-        Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
+        Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  " +
+                "If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         SecretKey key = new SecretKeySpec(secretKeyBytes, alg.getJcaName());
         return signWith(key, alg);
     }
@@ -246,7 +254,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
-        Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
+        Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  " +
+                "If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
         return signWith(alg, bytes);
     }
@@ -464,21 +473,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
     }
 
-    private io.jsonwebtoken.Header buildHeader() {
-        return new DefaultJwtHeaderBuilder(this.headerBuilder).build();
-    }
-
     private String compact(byte[] payload) {
 
         Assert.stateNotNull(sigAlg, "SignatureAlgorithm is required."); // invariant
 
-//        if (this.key != null && !(header instanceof JwsHeader)) {
-//            header = new DefaultJwsHeader(header);
-//        }
-
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
 
-        final io.jsonwebtoken.Header header = buildHeader();
+        final Header header = this.headerBuilder.build();
 
         byte[] headerBytes = headerSerializer.apply(header);
         String base64UrlEncodedHeader = encoder.encode(headerBytes);
@@ -525,7 +526,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
         this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
-        final io.jsonwebtoken.Header header = buildHeader();
+        final Header header = this.headerBuilder.build();
 
         byte[] headerBytes = this.headerSerializer.apply(header);
         final String base64UrlEncodedHeader = encoder.encode(headerBytes);
@@ -543,15 +544,19 @@ public class DefaultJwtBuilder implements JwtBuilder {
         String base64UrlEncodedCiphertext = encoder.encode(ciphertext);
         String base64UrlEncodedTag = encoder.encode(tag);
 
-        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
+        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedTag;
     }
 
-    private static class BuilderClaims extends DelegatingClaimsMutator<JwtBuilder.Claims>
-            implements JwtBuilder.Claims {
+    private static class DefaultBuilderClaims extends DelegatingClaimsMutator<BuilderClaims>
+            implements BuilderClaims {
 
         private final JwtBuilder builder;
 
-        private BuilderClaims(JwtBuilder builder) {
+        private DefaultBuilderClaims(JwtBuilder builder) {
             super();
             this.builder = builder;
         }
@@ -561,16 +566,16 @@ public class DefaultJwtBuilder implements JwtBuilder {
             return this.builder;
         }
 
-        public io.jsonwebtoken.Claims build() {
+        private io.jsonwebtoken.Claims build() {
             return new DefaultClaims(this.DELEGATE);
         }
     }
 
-    private static class BuilderHeader extends DefaultJweHeaderBuilder<Header> implements JwtBuilder.Header {
+    private static class DefaultBuilderHeader extends DefaultJweHeaderBuilder<BuilderHeader> implements BuilderHeader {
 
         private final JwtBuilder builder;
 
-        private BuilderHeader(JwtBuilder builder) {
+        private DefaultBuilderHeader(JwtBuilder builder) {
             super();
             this.builder = Assert.notNull(builder, "JwtBuilder cannot be null.");
         }
@@ -578,6 +583,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         @Override
         public JwtBuilder and() {
             return builder;
+        }
+
+        private Header build() {
+            return new DefaultJwtHeaderBuilder(this).build();
         }
     }
 }

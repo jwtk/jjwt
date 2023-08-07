@@ -71,7 +71,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Returns the {@code Header} to use to modify the constructed JWT's header name/value pairs as desired.
-     * When finished, callers may return to JWT construction via the {@link JwtBuilder.Header#and() and()} method.
+     * When finished, callers may return to JWT construction via the {@link BuilderHeader#and() and()} method.
      * For example:
      *
      * <blockquote><pre>
@@ -82,33 +82,33 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *         .add("aName", aValue)
      *         .add(myHeaderMap)
      *         // ... etc ...
-     *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
+     *         .{@link BuilderHeader#and() and()}</b> //return back to the JwtBuilder
      *
      *     .subject("Joe") // resume JwtBuilder calls
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
-     * @return the {@link JwtBuilder.Header} to use for header construction.
+     * @return the {@link BuilderHeader} to use for header construction.
      * @since JJWT_RELEASE_VERSION
      */
-    Header header();
+    BuilderHeader header();
 
     /**
      * Per standard Java idiom 'setter' conventions, this method sets (and fully replaces) any existing header with the
      * specified name/value pairs.  This is a wrapper method for:
      *
      * <blockquote><pre>
-     * {@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link Header#and() and()}</pre></blockquote>
+     * {@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * <p>If you do not want to replace the existing header and only want to append to it,
-     * call <code>{@link #header()}.{@link io.jsonwebtoken.lang.MapMutator#add(Map) add(map)}.{@link Header#and() and()} instead.</p>
+     * call <code>{@link #header()}.{@link io.jsonwebtoken.lang.MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()} instead.</p>
      *
      * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
      * @return the builder for method chaining.
      * @deprecated since JJWT_RELEASE_VERSION in favor of
-     * <code>{@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link Header#and() and()}</code>
+     * <code>{@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>
      * (to replace all header parameters) or
-     * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link Header#and() and()}</code>
+     * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>
      * to only append the {@code map} entries.  This method will be removed before the 1.0 release.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -119,12 +119,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Adds the specified name/value pairs to the header.  Any parameter with an empty or null value will remove the
      * entry from the header. This is a wrapper method for:
      * <blockquote><pre>
-     * {@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link Header#and() and()}</pre></blockquote>
+     * {@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * @param params the header name/value pairs to append to the header.
      * @return the builder for method chaining.
      * @deprecated since JJWT_RELEASE_VERSION in favor of
-     * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link Header#and() and()}</code>.
+     * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>.
      * This method will be removed before the 1.0 release.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -135,13 +135,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Adds the specified name/value pair to the header. If the value is {@code null} or empty, the parameter will
      * be removed from the header entirely. This is a wrapper method for:
      * <blockquote><pre>
-     * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link Header#and() and()}</pre></blockquote>
+     * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * @param name  the header parameter name
      * @param value the header parameter value
      * @return the builder for method chaining.
      * @deprecated since JJWT_RELEASE_VERSION in favor of <code>
-     * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link Header#and() and()}</code>.
+     * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderHeader#and() and()}</code>.
      * This method will be removed before the 1.0 release.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -150,7 +150,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
-     * {@link Header#contentType(String) contentType} header value so the JWT recipient may inspect that value to
+     * {@link BuilderHeader#contentType(String) contentType} header value so the JWT recipient may inspect that value to
      * determine how to convert the byte array to the final data type as desired. In this case, consider using
      * {@link #content(byte[], String)} instead.
      *
@@ -198,7 +198,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
-     * {@link Header#contentType(String) contentType} header value to a compact {@code cty} media type
+     * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} media type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.
      *
@@ -213,7 +213,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
      * method - instead call {@link #content(byte[])} and set the header's
-     * {@link Header#contentType(String) contentType} independently.  For example:</p>
+     * {@link BuilderHeader#contentType(String) contentType} independently.  For example:</p>
      *
      * <blockquote><pre>
      * Jwts.builder()
@@ -237,7 +237,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Returns the JWT {@code Claims} payload to modify as desired. When finished, callers may
-     * return to {@code JwtBuilder} configuration via the {@link JwtBuilder.Claims#and() and()} method.
+     * return to {@code JwtBuilder} configuration via the {@link BuilderClaims#and() and()} method.
      * For example:
      *
      * <blockquote><pre>
@@ -250,16 +250,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *         .add("customClaim", customValue)
      *         .add(myClaimsMap)
      *         // ... etc ...
-     *         .{@link JwtBuilder.Claims#and() and()}</b> //return back to the JwtBuilder
+     *         .{@link BuilderClaims#and() and()}</b> //return back to the JwtBuilder
      *
      *     .signWith(key) // resume JwtBuilder calls
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
-     * @return the {@link JwtBuilder.Claims} to use for Claims construction.
+     * @return the {@link BuilderClaims} to use for Claims construction.
      * @since JJWT_RELEASE_VERSION
      */
-    Claims claims();
+    BuilderClaims claims();
 
     /**
      * Sets (and replaces) the JWT Claims payload with the specified name/value pairs. If you do not want the JWT
@@ -282,7 +282,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * This is a convenience wrapper for:
      *
      * <blockquote><pre>
-     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
@@ -290,7 +290,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since 0.8
      * @deprecated since JJWT_RELEASE_VERSION in favor of
-     * <code>{@link #claims()}.{@link Claims#add(Map) add(Map)}.{@link Claims#and() and()}</code>.
+     * <code>{@link #claims()}.{@link BuilderClaims#add(Map) add(Map)}.{@link BuilderClaims#and() and()}</code>.
      * This method will be removed before the 1.0 release.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -301,7 +301,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Sets a JWT claim, overwriting any existing claim with the same name. A {@code null} or empty
      * value will remove the claim entirely. This is a convenience wrapper for:
      * <blockquote><pre>
-     * {@link #claims()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param name  the JWT Claims property name
      * @param value the value to set for the specified Claims property name
@@ -315,7 +315,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * with the same names.  If any name has a {@code null} or empty value, that claim will be removed from the
      * Claims.  This is a convenience wrapper for:
      * <blockquote><pre>
-     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
@@ -330,7 +330,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#issuer(String) issuer(iss)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#issuer(String) issuer(iss)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param iss the JWT {@code iss} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -344,7 +344,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#subject(String) subject(sub)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#subject(String) subject(sub)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -358,7 +358,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -375,7 +375,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#expiration(Date) expiration(exp)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#expiration(Date) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -392,7 +392,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#notBefore(Date) notBefore(nbf)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#notBefore(Date) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -409,7 +409,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#issuedAt(Date) issuedAt(iat)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#issuedAt(Date) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -428,7 +428,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#id(String) id(jti)}.{@link Claims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#id(String) id(jti)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param jti the JWT {@code jti} (id) value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
@@ -874,13 +874,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     String compact();
 
     /**
-     * Claims for use with a {@link JwtBuilder} that supports method chaining for
-     * standard JWT Claims parameters.  Once claims are configured, the associated
-     * {@link JwtBuilder} may be obtained with the {@link #and() and()} method for continued configuration.
+     * Claims for use with a {@link JwtBuilder} that supports method chaining for standard JWT Claims parameters.
+     * Once claims are configured, the associated {@link JwtBuilder} may be obtained with the {@link #and() and()}
+     * method for continued configuration.
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Claims extends MapMutator<String, Object, Claims>, ClaimsMutator<Claims> {
+    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims> {
 
         /**
          * Returns the associated JwtBuilder for continued configuration.
@@ -897,7 +897,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Header extends JweHeaderMutator<Header>, X509Builder<Header> {
+    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader> {
 
         /**
          * Returns the associated JwtBuilder for continued configuration.
