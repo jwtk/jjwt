@@ -1786,7 +1786,7 @@ The JWT specification also provides for the ability to encrypt and decrypt a JWT
 1. guarantees that no-one other than the intended JWT recipient can see the JWT `payload` (it is confidential), and 
 2. guarantees that no-one has manipulated or changed the JWT after it was created (its integrity is maintained).
 
-These two properties - confidentiality and integrity - assure us that an encrypted JWT contains a `paylaod` that 
+These two properties - confidentiality and integrity - assure us that an encrypted JWT contains a `payload` that 
 no-one else can see, _nor_ has anyone changed or altered the data in transit.
 
 Encryption and confidentiality seem somewhat obvious: if you encrypt a message, it is confidential by the notion that
