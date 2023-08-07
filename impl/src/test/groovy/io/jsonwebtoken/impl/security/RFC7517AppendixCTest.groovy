@@ -284,7 +284,7 @@ class RFC7517AppendixCTest {
         //ensure that the KeyAlgorithm reflects test harness values:
         def enc = new HmacAesAeadAlgorithm(128) {
             @Override
-            SecretKeyBuilder keyBuilder() {
+            SecretKeyBuilder key() {
                 return new FixedSecretKeyBuilder(RFC_CEK)
             }
 

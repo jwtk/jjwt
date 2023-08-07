@@ -108,7 +108,7 @@ class EncryptionAlgorithmsTest {
 
         for (AeadAlgorithm alg : registry.values()) {
 
-            def key = alg.keyBuilder().build()
+            def key = alg.key().build()
 
             def request = new DefaultAeadRequest(PLAINTEXT_BYTES, key, null)
 
@@ -138,7 +138,7 @@ class EncryptionAlgorithmsTest {
 
         for (AeadAlgorithm alg : registry.values()) {
 
-            def key = alg.keyBuilder().build()
+            def key = alg.key().build()
 
             def req = new DefaultAeadRequest(PLAINTEXT_BYTES, null, null, key, AAD_BYTES)
 

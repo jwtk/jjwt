@@ -112,7 +112,7 @@ class EcSignatureAlgorithmTest {
 
     @Test
     void testSignWithInvalidKeyFieldLength() {
-        def keypair = Jwts.SIG.ES256.keyPairBuilder().build()
+        def keypair = Jwts.SIG.ES256.keyPair().build()
         def data = "foo".getBytes(StandardCharsets.UTF_8)
         def req = new DefaultSecureRequest(data, null, null, keypair.private)
         try {
@@ -130,7 +130,7 @@ class EcSignatureAlgorithmTest {
     void testVerifyWithPrivateKey() {
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
         algs().each {
-            def pair = it.keyPairBuilder().build()
+            def pair = it.keyPair().build()
             def key = pair.getPrivate()
             def signRequest = new DefaultSecureRequest(data, null, null, key)
             byte[] signature = it.digest(signRequest)
@@ -280,7 +280,7 @@ class EcSignatureAlgorithmTest {
     void verifySwarmTest() {
         algs().each { alg ->
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-            def keypair = alg.keyPairBuilder().build()
+            def keypair = alg.keyPair().build()
             assertNotNull keypair
             assertTrue keypair.getPublic() instanceof ECPublicKey
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
@@ -442,7 +442,7 @@ class EcSignatureAlgorithmTest {
     void legacySignatureCompatDefaultTest() {
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = Jwts.SIG.ES512
-        def keypair = alg.keyPairBuilder().build()
+        def keypair = alg.keyPair().build()
         def signature = Signature.getInstance(alg.jcaName as String)
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         signature.initSign(keypair.private)
@@ -469,7 +469,7 @@ class EcSignatureAlgorithmTest {
 
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
             def alg = Jwts.SIG.ES512
-            def keypair = alg.keyPairBuilder().build()
+            def keypair = alg.keyPair().build()
             def signature = Signature.getInstance(alg.jcaName as String)
             def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
             signature.initSign(keypair.private)
@@ -488,7 +488,7 @@ class EcSignatureAlgorithmTest {
         byte[] forgedSig = new byte[64]
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = Jwts.SIG.ES256
-        def keypair = alg.keyPairBuilder().build()
+        def keypair = alg.keyPair().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, forgedSig)
         assertFalse alg.verify(request)
@@ -505,7 +505,7 @@ class EcSignatureAlgorithmTest {
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = Jwts.SIG.ES256
-        def keypair = alg.keyPairBuilder().build()
+        def keypair = alg.keyPair().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, sig)
         assertFalse alg.verify(request)
@@ -522,7 +522,7 @@ class EcSignatureAlgorithmTest {
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def alg = Jwts.SIG.ES256
-        def keypair = alg.keyPairBuilder().build()
+        def keypair = alg.keyPair().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, sig)
         assertFalse alg.verify(request)
@@ -534,7 +534,7 @@ class EcSignatureAlgorithmTest {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
         def alg = Jwts.SIG.ES256
-        def keypair = alg.keyPairBuilder().build()
+        def keypair = alg.keyPair().build()
         def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
         def invalidSignature = Decoders.BASE64URL.decode(invalidEncodedSignature)
         def request = new DefaultVerifySecureDigestRequest(data, null, null, keypair.public, invalidSignature)

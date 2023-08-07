@@ -78,7 +78,7 @@ public class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     }
 
     @Override
-    public KeyPairBuilder keyPairBuilder() {
+    public KeyPairBuilder keyPair() {
         return new DefaultKeyPairBuilder("RSA", this.preferredKeyBitLength)
                 .provider(getProvider())
                 .random(Randoms.secureRandom());

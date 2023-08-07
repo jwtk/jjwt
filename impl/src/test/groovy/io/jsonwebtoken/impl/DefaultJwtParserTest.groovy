@@ -66,7 +66,7 @@ class DefaultJwtParserTest {
         assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer )
         assertSame deserializer, p.deserializer.deserializer
 
-        def key = Jwts.SIG.HS256.keyBuilder().build()
+        def key = Jwts.SIG.HS256.key().build()
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
 

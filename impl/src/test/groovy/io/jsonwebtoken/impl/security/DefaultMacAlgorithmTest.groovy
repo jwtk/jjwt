@@ -98,16 +98,16 @@ class DefaultMacAlgorithmTest {
     @Test(expected = SecurityException)
     void testKeyGeneratorNoSuchAlgorithm() {
         DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'foo', 256)
-        alg.keyBuilder().build()
+        alg.key().build()
     }
 
     @Test
     void testKeyGeneratorKeyLength() {
         DefaultMacAlgorithm alg = new DefaultMacAlgorithm('HS256', 'HmacSHA256', 256)
-        assertEquals 256, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
+        assertEquals 256, alg.key().build().getEncoded().length * Byte.SIZE
 
         alg = new DefaultMacAlgorithm('A128CBC-HS256', 'HmacSHA256', 128)
-        assertEquals 128, alg.keyBuilder().build().getEncoded().length * Byte.SIZE
+        assertEquals 128, alg.key().build().getEncoded().length * Byte.SIZE
     }
 
     @Test(expected = IllegalArgumentException)
@@ -146,7 +146,7 @@ class DefaultMacAlgorithmTest {
             String msg = 'The signing key\'s size is 192 bits which is not secure enough for the HS256 algorithm. ' +
                     'The JWT JWA Specification (RFC 7518, Section 3.2) states that keys used with HS256 MUST have a ' +
                     'size >= 256 bits (the key size must be greater than or equal to the hash output size). ' +
-                    'Consider using the Jwts.SIG.HS256.keyBuilder() method to create a key guaranteed ' +
+                    'Consider using the Jwts.SIG.HS256.key() builder to create a key guaranteed ' +
                     'to be secure enough for HS256.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more ' +
                     'information.'
             assertEquals msg, expected.getMessage()

@@ -66,7 +66,7 @@ class DirectKeyAlgorithmTest {
     void testGetDecryptionKey() {
         def alg = new DirectKeyAlgorithm()
         DecryptionKeyRequest req = createMock(DecryptionKeyRequest)
-        def key = Jwts.ENC.A128GCM.keyBuilder().build()
+        def key = Jwts.ENC.A128GCM.key().build()
         expect(req.getKey()).andReturn(key)
         replay(req)
         def result = alg.getDecryptionKey(req)

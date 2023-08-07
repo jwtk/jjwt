@@ -21,7 +21,7 @@ import java.security.KeyPair;
  * Interface implemented by components that support building/creating new {@link KeyPair}s suitable for use with their
  * associated cryptographic algorithm implementation.
  *
- * @see #keyPairBuilder()
+ * @see #keyPair()
  * @see KeyPairBuilder
  * @since JJWT_RELEASE_VERSION
  */
@@ -34,5 +34,5 @@ public interface KeyPairBuilderSupplier {
      * @return a new {@link KeyPairBuilder} that will create new secure-random {@link KeyPair}s with a length and
      * parameters sufficient for use with the component's associated cryptographic algorithm.
      */
-    KeyPairBuilder keyPairBuilder();
+    KeyPairBuilder keyPair();
 }

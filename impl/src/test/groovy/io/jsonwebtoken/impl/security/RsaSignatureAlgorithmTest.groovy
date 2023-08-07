@@ -39,7 +39,7 @@ class RsaSignatureAlgorithmTest {
     @Test
     void testKeyPairBuilder() {
         algs().each {
-            def pair = it.keyPairBuilder().build()
+            def pair = it.keyPair().build()
             assertNotNull pair.public
             assertTrue pair.public instanceof RSAPublicKey
             assertEquals it.preferredKeyBitLength, pair.public.modulus.bitLength()

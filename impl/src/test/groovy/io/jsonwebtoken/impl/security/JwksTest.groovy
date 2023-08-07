@@ -38,8 +38,8 @@ import static org.junit.Assert.*
 
 class JwksTest {
 
-    private static final SecretKey SKEY = Jwts.SIG.HS256.keyBuilder().build()
-    private static final java.security.KeyPair EC_PAIR = Jwts.SIG.ES256.keyPairBuilder().build()
+    private static final SecretKey SKEY = Jwts.SIG.HS256.key().build()
+    private static final java.security.KeyPair EC_PAIR = Jwts.SIG.ES256.keyPair().build()
 
     private static String srandom() {
         byte[] random = new byte[16]
@@ -215,7 +215,7 @@ class JwksTest {
     void testSecretJwks() {
         Collection<MacAlgorithm> algs = Jwts.SIG.get().values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
         for (def alg : algs) {
-            SecretKey secretKey = alg.keyBuilder().build()
+            SecretKey secretKey = alg.key().build()
             def jwk = Jwks.builder().key(secretKey).id('id').build()
             assertEquals 'oct', jwk.getType()
             assertTrue jwk.containsKey('k')
@@ -267,7 +267,7 @@ class JwksTest {
 
         for (def alg : algs) {
 
-            def pair = alg.keyPairBuilder().build()
+            def pair = alg.keyPair().build()
             PublicKey pub = pair.getPublic()
             PrivateKey priv = pair.getPrivate()
 
@@ -314,7 +314,7 @@ class JwksTest {
 
         for (SignatureAlgorithm alg : algs) {
 
-            def pair = alg.keyPairBuilder().build()
+            def pair = alg.keyPair().build()
             ECPublicKey pubKey = pair.getPublic() as ECPublicKey
 
             EcPublicJwk jwk = Jwks.builder().key(pubKey).build()

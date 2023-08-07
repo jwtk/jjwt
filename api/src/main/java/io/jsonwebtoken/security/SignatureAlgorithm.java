@@ -38,7 +38,7 @@ import java.security.PublicKey;
  * required by that algorithm.  For example:</p>
  *
  * <blockquote><pre>
- * KeyPair pair = signatureAlgorithm.keyPairBuilder().build();</pre></blockquote>
+ * KeyPair pair = signatureAlgorithm.keyPair().build();</pre></blockquote>
  *
  * <p>The resulting {@code pair} is guaranteed to have the correct algorithm parameters and length/strength necessary
  * for that exact {@code signatureAlgorithm} instance.</p>

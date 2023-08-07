@@ -78,7 +78,7 @@ class DefaultCurveTest {
 
     @Test
     void testKeyPairBuilder() {
-        def builder = curve.keyPairBuilder()
+        def builder = curve.keyPair()
         assertEquals 'bar', builder.jcaName //builder is an instanceof DefaultKeyPairBuilder
     }
 }

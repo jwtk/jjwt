@@ -61,7 +61,7 @@ public class ECCurve extends DefaultCurve {
     }
 
     @Override
-    public KeyPairBuilder keyPairBuilder() {
+    public KeyPairBuilder keyPair() {
         return new DefaultKeyPairBuilder(KEY_PAIR_GENERATOR_JCA_NAME, toParameterSpec());
     }
 }

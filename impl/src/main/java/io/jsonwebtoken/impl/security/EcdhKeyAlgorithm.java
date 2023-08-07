@@ -98,7 +98,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
     //visible for testing, for Edwards elliptic curves
     protected KeyPair generateKeyPair(SecureRandom random, EdwardsCurve curve, Provider provider) {
-        return curve.keyPairBuilder().provider(provider).random(random).build();
+        return curve.keyPair().provider(provider).random(random).build();
     }
 
     protected byte[] generateZ(final KeyRequest<?> request, final PublicKey pub, final PrivateKey priv) {

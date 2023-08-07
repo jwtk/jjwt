@@ -120,7 +120,7 @@ class OctetJwksTest {
 
         for (EdwardsCurve curve : EdwardsCurve.VALUES) {
 
-            def pair = curve.keyPairBuilder().build()
+            def pair = curve.keyPair().build()
             PublicKey pub = pair.getPublic()
             PrivateKey priv = pair.getPrivate()
 

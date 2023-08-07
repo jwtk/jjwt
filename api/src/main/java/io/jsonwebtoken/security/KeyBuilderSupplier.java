@@ -22,8 +22,8 @@ import java.security.Key;
  * their associated cryptographic algorithm implementation.
  *
  * @param <K> type of {@link Key} created by the builder
- * @param <B> type of builder to create each time {@link #keyBuilder()} is called.
- * @see #keyBuilder()
+ * @param <B> type of builder to create each time {@link #key()} is called.
+ * @see #key()
  * @see KeyBuilder
  * @since JJWT_RELEASE_VERSION
  */
@@ -36,5 +36,5 @@ public interface KeyBuilderSupplier<K extends Key, B extends KeyBuilder<K, B>> {
      * @return a new {@link KeyBuilder} instance that will produce new secure-random keys with a length sufficient
      * to be used by the component's associated cryptographic algorithm.
      */
-    B keyBuilder();
+    B key();
 }

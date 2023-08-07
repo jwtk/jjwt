@@ -74,7 +74,7 @@ class DefaultCurve implements Curve {
         return ID;
     }
 
-    public KeyPairBuilder keyPairBuilder() {
+    public KeyPairBuilder keyPair() {
         return new DefaultKeyPairBuilder(this.JCA_NAME).provider(this.PROVIDER);
     }
 }

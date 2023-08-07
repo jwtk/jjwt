@@ -32,7 +32,7 @@ class AbstractSecureDigestAlgorithmTest {
     @Test
     void testSignAndVerifyWithExplicitProvider() {
         Provider provider = Security.getProvider('BC')
-        def pair = Jwts.SIG.RS256.keyPairBuilder().build()
+        def pair = Jwts.SIG.RS256.keyPair().build()
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
         byte[] signature = Jwts.SIG.RS256.digest(new DefaultSecureRequest<byte[], PrivateKey>(data, provider, null, pair.getPrivate()))
         assertTrue Jwts.SIG.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(data, provider, null, pair.getPublic(), signature))
@@ -40,7 +40,7 @@ class AbstractSecureDigestAlgorithmTest {
 
     @Test
     void testSignFailsWithAnExternalException() {
-        def pair = Jwts.SIG.RS256.keyPairBuilder().build()
+        def pair = Jwts.SIG.RS256.keyPair().build()
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSecureDigestAlgorithm() {
             @Override
@@ -59,7 +59,7 @@ class AbstractSecureDigestAlgorithmTest {
 
     @Test
     void testVerifyFailsWithExternalException() {
-        def pair = Jwts.SIG.RS256.keyPairBuilder().build()
+        def pair = Jwts.SIG.RS256.keyPair().build()
         def ise = new IllegalStateException('foo')
         def alg = new TestAbstractSecureDigestAlgorithm() {
             @Override

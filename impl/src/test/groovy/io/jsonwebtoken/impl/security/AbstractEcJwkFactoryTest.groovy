@@ -83,7 +83,7 @@ class AbstractEcJwkFactoryTest {
 
     @Test
     void testAddSamePointDoublesIt() {
-        def pair = Jwts.SIG.ES256.keyPairBuilder().build()
+        def pair = Jwts.SIG.ES256.keyPair().build()
         def pub = pair.getPublic() as ECPublicKey
 
         def spec = pub.getParams()
@@ -98,7 +98,7 @@ class AbstractEcJwkFactoryTest {
     @Test
     void testDerivePublicFails() {
 
-        def pair = Jwts.SIG.ES256.keyPairBuilder().build()
+        def pair = Jwts.SIG.ES256.keyPair().build()
         def priv = pair.getPrivate() as ECPrivateKey
 
         final def context = new DefaultJwkContext(DefaultEcPrivateJwk.FIELDS)

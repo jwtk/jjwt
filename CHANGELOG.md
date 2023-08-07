@@ -41,7 +41,7 @@ available immediately.  For example:
 
 ```java
 AeadAlgorithm enc = Jwts.ENC.A256GCM;
-SecretKey key = enc.keyBuilder().build();
+SecretKey key = enc.key().build();
 String compact = Jwts.builder().setSubject("Joe").encryptWith(key, enc).compact();
 
 Jwe<Claims> jwe = Jwts.parser().decryptWith(key).build().parseClaimsJwe(compact);
@@ -56,7 +56,7 @@ Private keys - as fully encoded JSON objects according to the JWK specification 
 supported.  The new `Jwks` utility class exists to create JWK builders and parsers as desired.  For example:
 
 ```java
-SecretKey key = Jwts.SIG.HS256.keyBuilder().build();
+SecretKey key = Jwts.SIG.HS256.key().build();
 SecretJwk jwk = Jwks.builder().forKey(key).build();
 assert key.equals(jwk.toKey());
 
@@ -92,12 +92,12 @@ interfaces now allow anyone to plug in and support custom algorithms with JJWT a
 
 Because the `io.jsonwebtoken.security.Keys#secretKeyFor` and `io.jsonwebtoken.security.Keys#keyPairFor` methods 
 accepted the now-deprecated `io.jsonwebtoken.SignatureAlgorithm` enum, they have also been deprecated in favor of 
-calling new `keyBuilder()` or `keyPairBuilder()` methods on `MacAlgorithm` and `SignatureAlgorithm` instances directly.  
+calling new `key()` or `keyPair()` builder methods on `MacAlgorithm` and `SignatureAlgorithm` instances directly.  
 For example:
 
 ```java
-SecretKey key = Jwts.SIG.HS256.keyBuilder().build();
-KeyPair pair = Jwts.SIG.RS256.keyPairBuilder().build();
+SecretKey key = Jwts.SIG.HS256.key().build();
+KeyPair pair = Jwts.SIG.RS256.keyPair().build();
 ```
 
 The builders allow for customization of the JCA `Provider` and `SecureRandom` during Key or KeyPair generation if desired, whereas

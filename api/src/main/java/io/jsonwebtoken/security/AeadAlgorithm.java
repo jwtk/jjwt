@@ -51,7 +51,7 @@ import javax.crypto.SecretKey;
  * and algorithm parameters required by that algorithm.  For example:</p>
  *
  * <pre><code>
- *     SecretKey key = aeadAlgorithm.keyBuilder().build();
+ *     SecretKey key = aeadAlgorithm.key().build();
  * </code></pre>
  *
  * <p>The resulting {@code key} is guaranteed to have the correct algorithm parameters and strength/length necessary for

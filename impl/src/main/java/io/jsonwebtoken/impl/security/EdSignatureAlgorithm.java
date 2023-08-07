@@ -64,8 +64,8 @@ public class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
     }
 
     @Override
-    public KeyPairBuilder keyPairBuilder() {
-        return this.preferredCurve.keyPairBuilder();
+    public KeyPairBuilder keyPair() {
+        return this.preferredCurve.keyPair();
     }
 
     @Override

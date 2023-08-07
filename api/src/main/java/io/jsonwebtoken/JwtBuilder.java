@@ -738,7 +738,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
      *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
      *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's
-     *     {@link AeadAlgorithm#keyBuilder() keyBuilder}.</li>
+     *     {@link AeadAlgorithm#key() key()} builder.</li>
      * </ul>
      *
      * @param key the symmetric encryption key to use with the {@code enc} algorithm.

@@ -70,7 +70,7 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            KeyPairBuilder keyPairBuilder() {
+            KeyPairBuilder keyPair() {
                 throw new IllegalStateException("should not be called during build")
             }
 
@@ -82,7 +82,7 @@ class DefaultJwtBuilderTest {
 
         replay provider
         def b = new DefaultJwtBuilder().provider(provider)
-                .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(Jwts.SIG.HS256.key().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -113,7 +113,7 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            KeyPairBuilder keyPairBuilder() {
+            KeyPairBuilder keyPair() {
                 throw new IllegalStateException("should not be called during build")
             }
 
@@ -124,7 +124,7 @@ class DefaultJwtBuilderTest {
         }
 
         def b = new DefaultJwtBuilder().random(random)
-                .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
+                .setSubject('me').signWith(Jwts.SIG.HS256.key().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]
@@ -483,7 +483,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactSimplestPayload() {
         def enc = Jwts.ENC.A128GCM
-        def key = enc.keyBuilder().build()
+        def key = enc.key().build()
         def jwe = builder.setPayload("me").encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseContentJwe(jwe)
         assertEquals 'me', new String(jwt.getPayload(), StandardCharsets.UTF_8)
@@ -492,7 +492,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactSimplestClaims() {
         def enc = Jwts.ENC.A128GCM
-        def key = enc.keyBuilder().build()
+        def key = enc.key().build()
         def jwe = builder.setSubject('joe').encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseClaimsJwe(jwe)
         assertEquals 'joe', jwt.getPayload().getSubject()

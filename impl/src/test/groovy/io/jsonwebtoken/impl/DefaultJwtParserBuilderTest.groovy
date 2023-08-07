@@ -121,7 +121,7 @@ class DefaultJwtParserBuilderTest {
         assertSame deserializer, p.deserializer
 
         def alg = Jwts.SIG.HS256
-        def key = alg.keyBuilder().build()
+        def key = alg.key().build()
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
 

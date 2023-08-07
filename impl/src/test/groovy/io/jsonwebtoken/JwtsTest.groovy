@@ -290,7 +290,7 @@ class JwtsTest {
 
     @Test
     void testParseWithMissingRequiredSignature() {
-        Key key = Jwts.SIG.HS256.keyBuilder().build()
+        Key key = Jwts.SIG.HS256.key().build()
         String compact = Jwts.builder().setSubject('foo').signWith(key).compact()
         int i = compact.lastIndexOf('.')
         String missingSig = compact.substring(0, i + 1)
@@ -428,7 +428,7 @@ class JwtsTest {
     void testUncompressedJwt() {
 
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -450,7 +450,7 @@ class JwtsTest {
     void testCompressedJwtWithDeflate() {
 
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -472,7 +472,7 @@ class JwtsTest {
     void testCompressedJwtWithGZIP() {
 
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -494,7 +494,7 @@ class JwtsTest {
     void testCompressedWithCustomResolver() {
 
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -533,7 +533,7 @@ class JwtsTest {
     void testCompressedJwtWithUnrecognizedHeader() {
 
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String id = UUID.randomUUID().toString()
 
@@ -552,7 +552,7 @@ class JwtsTest {
     void testCompressStringPayloadWithDeflate() {
 
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String payload = "this is my test for a payload"
 
@@ -673,8 +673,8 @@ class JwtsTest {
     void testParseClaimsJwsWithWeakHmacKey() {
 
         def alg = Jwts.SIG.HS384
-        def key = alg.keyBuilder().build()
-        def weakKey = Jwts.SIG.HS256.keyBuilder().build()
+        def key = alg.key().build()
+        def weakKey = Jwts.SIG.HS256.key().build()
 
         String jws = Jwts.builder().setSubject("Foo").signWith(key, alg).compact()
 
@@ -744,7 +744,7 @@ class JwtsTest {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
         String jws = withoutSignature + '.' + invalidEncodedSignature
-        def keypair = Jwts.SIG.ES256.keyPairBuilder().build()
+        def keypair = Jwts.SIG.ES256.keyPair().build()
         Jwts.parser().setSigningKey(keypair.public).build().parseClaimsJws(jws)
     }
 
@@ -754,7 +754,7 @@ class JwtsTest {
 
         //create random signing key for testing:
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         String notSigned = Jwts.builder().setSubject("Foo").compact()
 
@@ -1025,8 +1025,8 @@ class JwtsTest {
         def id = realAlg.getId() + 'X' // custom id
         def alg = new MacAlgorithm() {
             @Override
-            SecretKeyBuilder keyBuilder() {
-                return realAlg.keyBuilder()
+            SecretKeyBuilder key() {
+                return realAlg.key()
             }
 
             @Override
@@ -1065,7 +1065,7 @@ class JwtsTest {
     @Test
     void testParseJweWithCustomEncryptionAlgorithm() {
         def realAlg = Jwts.ENC.A128GCM // any alg will do, we're going to wrap it
-        def key = realAlg.keyBuilder().build()
+        def key = realAlg.key().build()
         def enc = realAlg.getId() + 'X' // custom id
         def encAlg = new AeadAlgorithm() {
             @Override
@@ -1084,8 +1084,8 @@ class JwtsTest {
             }
 
             @Override
-            SecretKeyBuilder keyBuilder() {
-                return realAlg.keyBuilder()
+            SecretKeyBuilder key() {
+                return realAlg.key()
             }
 
             @Override
@@ -1165,7 +1165,7 @@ class JwtsTest {
 
         //create random signing key for testing:
         def alg = Jwts.SIG.HS256
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         //this is a 'real', valid JWT:
         String compact = Jwts.builder().setSubject("Joe").signWith(key, alg).compact()
@@ -1300,8 +1300,8 @@ class JwtsTest {
             for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
                 SecretKey key = alg instanceof SecretKeyAlgorithm ?
-                        ((SecretKeyAlgorithm) alg).keyBuilder().build() :
-                        enc.keyBuilder().build()
+                        ((SecretKeyAlgorithm) alg).key().build() :
+                        enc.key().build()
 
                 // encrypt:
                 String jwe = Jwts.builder()
@@ -1328,7 +1328,7 @@ class JwtsTest {
 
             for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
 
-                SecretKey key = enc.keyBuilder().build()
+                SecretKey key = enc.key().build()
 
                 // encrypt and compress:
                 String jwe = Jwts.builder()
@@ -1587,7 +1587,7 @@ class JwtsTest {
     static void testHmac(MacAlgorithm alg) {
 
         //create random signing key for testing:
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         def claims = new DefaultClaims([iss: 'joe', exp: later(), 'https://example.com/is_root': true])
 

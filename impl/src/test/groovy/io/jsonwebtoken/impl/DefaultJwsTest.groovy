@@ -36,7 +36,7 @@ class DefaultJwsTest {
     void testToString() {
         //create random signing key for testing:
         def alg = Jwts.SIG.HS256
-        def key = alg.keyBuilder().build()
+        def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         int i = compact.lastIndexOf('.')
         String signature = compact.substring(i + 1)
@@ -47,7 +47,7 @@ class DefaultJwsTest {
     @Test
     void testEqualsAndHashCode() {
         def alg = Jwts.SIG.HS256
-        def key = alg.keyBuilder().build()
+        def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         def parser = Jwts.parser().verifyWith(key).build()
         def jws1 = parser.parseClaimsJws(compact)

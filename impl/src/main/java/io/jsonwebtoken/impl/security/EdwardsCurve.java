@@ -357,7 +357,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     }
 
     @Override
-    public KeyPairBuilder keyPairBuilder() {
+    public KeyPairBuilder keyPair() {
         return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH).provider(getProvider());
     }
 

@@ -92,7 +92,7 @@ abstract class CryptoAlgorithm implements Identifiable {
 
     protected SecretKey generateKey(KeyRequest<?> request) {
         AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
-        SecretKeyBuilder builder = Assert.notNull(enc.keyBuilder(), "Request encryptionAlgorithm keyBuilder cannot be null.");
+        SecretKeyBuilder builder = Assert.notNull(enc.key(), "Request encryptionAlgorithm KeyBuilder cannot be null.");
         SecretKey key = builder.provider(getProvider(request)).random(request.getSecureRandom()).build();
         return Assert.notNull(key, "Request encryptionAlgorithm SecretKeyBuilder cannot produce null keys.");
     }

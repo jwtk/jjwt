@@ -28,7 +28,7 @@ class DefaultJweTest {
     @Test
     void testToString() {
         def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
-        def key = alg.keyBuilder().build()
+        def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def jwe = Jwts.parser().decryptWith(key).build().parseClaimsJwe(compact)
         String encodedIv = Encoders.BASE64URL.encode(jwe.initializationVector)
@@ -40,7 +40,7 @@ class DefaultJweTest {
     @Test
     void testEqualsAndHashCode() {
         def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
-        def key = alg.keyBuilder().build()
+        def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def parser = Jwts.parser().decryptWith(key).build()
         def jwe1 = parser.parseClaimsJwe(compact)

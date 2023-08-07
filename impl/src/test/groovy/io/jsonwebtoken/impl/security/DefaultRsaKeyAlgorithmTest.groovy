@@ -32,7 +32,7 @@ class DefaultRsaKeyAlgorithmTest {
 
     @Test
     void testValidateNonRSAKey() {
-        SecretKey key = Jwts.KEY.A128KW.keyBuilder().build()
+        SecretKey key = Jwts.KEY.A128KW.key().build()
         for (DefaultRsaKeyAlgorithm alg : algs) {
             // if RSAKey interface isn't exposed (e.g. PKCS11 or HSM), don't error:
             alg.validate(key, true)
