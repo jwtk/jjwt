@@ -142,7 +142,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Locator<? extends Key> keyLocator;
 
-    private final Decoder<String, byte[]> base64UrlDecoder;
+    private final Decoder<String, byte[]> decoder;
 
     private final Deserializer<Map<String, ?>> deserializer;
 
@@ -177,7 +177,7 @@ public class DefaultJwtParser implements JwtParser {
         this.clock = Assert.notNull(clock, "Clock cannot be null.");
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().add(expectedClaims);
-        this.base64UrlDecoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
+        this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
         this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
 
         this.sigAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extraSigAlgs, MISSING_JWS_ALG_MSG);
@@ -709,7 +709,7 @@ public class DefaultJwtParser implements JwtParser {
 
     protected byte[] decode(String base64UrlEncoded, String name) {
         try {
-            return base64UrlDecoder.decode(base64UrlEncoded);
+            return decoder.decode(base64UrlEncoded);
         } catch (DecodingException e) {
             String msg = "Invalid Base64Url " + name + ": " + base64UrlEncoded;
             throw new MalformedJwtException(msg, e);

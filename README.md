@@ -755,9 +755,9 @@ Now that we've had a quickstart 'taste' of how to create and parse JWTs, let's c
 You create a JWT as follows:
 
 1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
-2. Set any [`header` parameters](#jwt-header) as desired.
+2. Optionally set any [`header` parameters](#jwt-header) as desired.
 3. Call builder methods to set the `payload` [content](#jwt-content) or [claims](#jwt-claims).
-4. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT, respectively.
+4. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT.
 5. Call the `compact()` method to produce the resulting compact JWT string.
 
 For example:
@@ -765,7 +765,7 @@ For example:
 ```java
 String jwt = Jwts.builder()                     // (1)
         
-    .header()                                   // (2)
+    .header()                                   // (2) optional
         .keyId("aKeyId")
         .and()
         
@@ -922,15 +922,15 @@ especially for representing identity claims.
 
 As a result, the `JwtBuilder` supports two distinct payload options:
 
-* `content` if you would like the `payload` to be arbitrary byte array content, and
-* `claims` (and supporting helper methods) if you would like the `payload` to be a JSON Claims `Object`.
+* `content` if you would like the payload to be arbitrary byte array content, or
+* `claims` (and supporting helper methods) if you would like the payload to be a JSON Claims `Object`.
 
-Either option may be used, but not both. Using both will cause `build()` to throw an exception.
+Either option may be used, but not both. Using both will cause `compact()` to throw an exception.
 
 <a name="jwt-content"></a>
 #### Arbitrary Content
 
-You can set the JWT `payload` to be any arbitrary byte array content by using the `JwtBuilder` `content` method.
+You can set the JWT payload to be any arbitrary byte array content by using the `JwtBuilder` `content` method.
 For example:
 
 ```java
@@ -963,8 +963,9 @@ For these reasons, it is strongly recommended to use the two-argument `content` 
 <a name="jwt-claims"></a><a name="jws-create-claims"></a> <!-- legacy anchors for old links -->
 #### JWT Claims
 
-Instead of a content byte array, a JWT `payload` may contain assertions or claims for a JWT recipient. In 
-this case, the `payload` is a 'claims' JSON `Object`, and JJWT supports this with a type-safe `Claims` instance.
+Instead of a content byte array, a JWT payload may contain assertions or claims for a JWT recipient. In 
+this case, the payload is a `Claims` JSON `Object`, and JJWT supports claims creation with type-safe 
+builder methods.
 
 <a name="jwt-claims-standard"></a><a name="jws-create-claims-standard"></a> <!-- legacy anchors for old links -->
 ##### Standard Claims
@@ -1015,7 +1016,7 @@ Each time `claim` is called, it simply appends the key-value pair to an internal
 overwriting any existing identically-named key/value pair.
 
 Obviously, you do not need to call `claim` for any [standard claim name](#jws-create-claims-standard), and it is
-recommended instead to call the standard respective type-safe setter method as this enhances readability.
+recommended instead to call the standard respective type-safe named builder method as this enhances readability.
 
 <a name="jws-create-claims-instance"></a> <!-- legacy anchors for old links -->
 <a name="jwt-claims-instance"></a>
@@ -2533,10 +2534,13 @@ This is true for all secret or private key members in `SecretJwk` and `PrivateJw
 <a name="compression"></a>
 ## Compression
 
-**The JWT specification only standardizes this feature for JWEs (Encrypted JWTs) however JJWT supports it for JWS
-(Signed JWTs) as well**.  If you are positive that a JWT you create with JJWT 
-will _also_ be parsed with JJWT, you can use this feature with both JWEs and JWSs, otherwise it is best to only use it 
-for JWEs.
+> **Warning**
+>
+> **The JWT specification only standardizes compression for JWEs (Encrypted JWTs), however JJWT supports it for JWS
+> (Signed JWTs) as well**.
+> 
+> If you are positive that a JWT you create with JJWT will _also_ be parsed with JJWT, 
+> you can use this feature with both JWEs and JWSs, otherwise it is best to only use it for JWEs.
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
 name/value pairs (or individual values are very large or verbose) - you can reduce the size of the compact JWT by 
@@ -2550,31 +2554,37 @@ If you want to compress your JWT, you can use the `JwtBuilder`'s  `compressWith(
 example:
 
 ```java
-   Jwts.builder()
+Jwts.builder()
    
-   .compressWith(Jwts.ZIP.DEF) // or Jwts.ZIP.GZIP
+   .compressWith(Jwts.ZIP.DEF) // DEFLATE compression algorithm
    
    // .. etc ...
 ```
 
-If you use the `DEF`LATE or `GZIP` Compression Codecs - that's it, you're done.  You don't have to do anything during 
-parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress the payload as 
-expected.
-
-> **Note**
-> 
-> JJWT does not support compression for Unprotected JWTs because they are susceptible to various compression 
-> vulnerability attacks (memory exhaustion, denial of service, etc.).
+If you use any of the algorithm constants in the `Jwts.ZIP` class, that's it, you're done.  You don't have to 
+do anything during parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress 
+the payload as expected.
 
 <a name="compression-custom"></a>
 ### Custom Compression Algorithm
 
-If the default `DEF` or `GZIP` compression algorithms are not suitable for your needs, you can create your own 
+If the default `Jwts.ZIP` compression algorithms are not suitable for your needs, you can create your own 
 `CompressionAlgorithm` implementation(s).
 
 Just as you would with the default algorithms, you may specify that you want a JWT compressed by calling the 
-`JwtBuilder`'s `compressWith` method, supplying your custom implementation instance. When you call `compressWith`, 
-the JWT `payload` will be compressed with your algorithm, and the 
+`JwtBuilder`'s `compressWith` method, supplying your custom implementation instance.  For example:
+
+```java
+CompressionAlgorithm myAlg = new MyCompressionAlgorithm();
+
+Jwts.builder()
+   
+   .compressWith(myAlg) // <----
+   
+   // .. etc ...
+```
+
+When you call `compressWith`, the JWT `payload` will be compressed with your algorithm, and the 
 [`zip` (Compression Algorithm)](https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3) 
 header will automatically be set to the value returned by your algorithm's `algorithm.getId()` method as 
 required by the JWT specification.
@@ -2593,7 +2603,7 @@ Jwts.parser()
 ```
 
 This adds additional `CompressionAlgorithm` implementations to the parser's overall total set of supported compression
-algorithms (which already includes the `DEF` and `GZIP` codecs by default).
+algorithms (which already includes all of the `Jwts.ZIP` algorithms by default).
 
 The parser will then automatically check to see if the JWT `zip` header has been set to see if a compression
 algorithm has been used to compress the JWT.  If set, the parser will automatically look up your 
