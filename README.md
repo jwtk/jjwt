@@ -730,7 +730,7 @@ that pack a punch!
 > **Note**
 > 
 > **Type-safe JWTs:** To get a type-safe `Claims` JWT result, call the `parseClaimsJws` method (since there are many
-similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.]()
+similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
 
 But what if parsing or signature validation failed?  You can catch `JwtException` and react accordingly:
 
@@ -756,7 +756,7 @@ You create a JWT as follows:
 
 1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
 2. Optionally set any [`header` parameters](#jwt-header) as desired.
-3. Call builder methods to set the `payload` [content](#jwt-content) or [claims](#jwt-claims).
+3. Call builder methods to set the payload [content](#jwt-content) or [claims](#jwt-claims).
 4. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT.
 5. Call the `compact()` method to produce the resulting compact JWT string.
 
@@ -2536,7 +2536,7 @@ This is true for all secret or private key members in `SecretJwk` and `PrivateJw
 
 > **Warning**
 >
-> **The JWT specification only standardizes compression for JWEs (Encrypted JWTs), however JJWT supports it for JWS
+> **The JWT specifications tandardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
 > (Signed JWTs) as well**.
 > 
 > If you are positive that a JWT you create with JJWT will _also_ be parsed with JJWT, 

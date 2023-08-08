@@ -270,23 +270,23 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> encAlgs) {
-        Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
-        this.extraEncAlgs.addAll(encAlgs);
+    public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> algs) {
+        Assert.notEmpty(algs, "Additional AeadAlgorithm collection cannot be null or empty.");
+        this.extraEncAlgs.addAll(algs);
         return this;
     }
 
     @Override
-    public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> sigAlgs) {
-        Assert.notEmpty(sigAlgs, "Additional SignatureAlgorithm collection cannot be null or empty.");
-        this.extraSigAlgs.addAll(sigAlgs);
+    public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> algs) {
+        Assert.notEmpty(algs, "Additional SignatureAlgorithm collection cannot be null or empty.");
+        this.extraSigAlgs.addAll(algs);
         return this;
     }
 
     @Override
-    public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs) {
-        Assert.notEmpty(keyAlgs, "Additional KeyAlgorithm collection cannot be null or empty.");
-        this.extraKeyAlgs.addAll(keyAlgs);
+    public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> algs) {
+        Assert.notEmpty(algs, "Additional KeyAlgorithm collection cannot be null or empty.");
+        this.extraKeyAlgs.addAll(algs);
         return this;
     }
 

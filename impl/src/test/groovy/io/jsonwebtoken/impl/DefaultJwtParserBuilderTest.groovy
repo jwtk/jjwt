@@ -24,10 +24,12 @@ import io.jsonwebtoken.io.Decoder
 import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.security.*
 import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Test
 
+import javax.crypto.SecretKey
 import java.security.Provider
 
 import static org.easymock.EasyMock.*
@@ -101,7 +103,7 @@ class DefaultJwtParserBuilderTest {
             }
         }
         def b = builder.base64UrlDecodeWith(decoder).build()
-        assertSame decoder, b.base64UrlDecoder
+        assertSame decoder, b.decoder
     }
 
     @Test(expected = IllegalArgumentException)
@@ -163,6 +165,118 @@ class DefaultJwtParserBuilderTest {
         def parser = builder.addCompressionAlgorithms([codec] as Set<CompressionCodec>).build()
         def header = Jwts.header().add('zip', codec.getId()).build()
         assertSame codec, parser.zipAlgFn.locate(header)
+    }
+
+    @Test
+    void testAddCompressionAlgorithmsOverrideDefaults() {
+        def header = Jwts.header().add('zip', 'DEF').build()
+        def parser = builder.build()
+        assertSame Jwts.ZIP.DEF, parser.zipAlgFn.apply(header) // standard implementation default
+
+        def alg = new TestCompressionCodec(id: 'DEF') // custom impl with standard identifier
+        parser = builder.addCompressionAlgorithms([alg]).build()
+        assertSame alg, parser.zipAlgFn.apply(header) // custom one, not standard impl
+    }
+
+    @Test
+    void testCaseSensitiveCompressionAlgorithm() {
+        def standard = Jwts.header().add('zip', 'DEF').build()
+        def nonStandard = Jwts.header().add('zip', 'def').build()
+        def parser = builder.build()
+        assertSame Jwts.ZIP.DEF, parser.zipAlgFn.apply(standard) // standard implementation default
+        try {
+            parser.zipAlgFn.apply(nonStandard)
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String msg = "Unrecognized JWT ${DefaultHeader.COMPRESSION_ALGORITHM} header value: def"
+            assertEquals msg, e.getMessage()
+        }
+    }
+
+    @Test
+    void testAddEncryptionAlgorithmsOverrideDefaults() {
+        final String standardId = Jwts.ENC.A256GCM.getId()
+        def header = Jwts.header().add('enc', standardId).build()
+        def parser = builder.build()
+        assertSame Jwts.ENC.A256GCM, parser.encAlgFn.apply(header) // standard implementation default
+
+        def custom = new TestAeadAlgorithm(id: standardId) // custom impl with standard identifier
+        parser = builder.addEncryptionAlgorithms([custom]).build()
+        assertSame custom, parser.encAlgFn.apply(header) // custom one, not standard impl
+    }
+
+    @Test
+    void testCaseSensitiveEncryptionAlgorithm() {
+        def alg = Jwts.ENC.A256GCM
+        def standard = Jwts.header().add('enc', alg.id).build()
+        def nonStandard = Jwts.header().add('enc', alg.id.toLowerCase()).build()
+        def parser = builder.build()
+        assertSame alg, parser.encAlgFn.apply(standard) // standard id
+        try {
+            parser.encAlgFn.apply(nonStandard) // non-standard id
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String msg = "Unrecognized JWE ${DefaultJweHeader.ENCRYPTION_ALGORITHM} header value: ${alg.id.toLowerCase()}"
+            assertEquals msg, e.getMessage()
+        }
+    }
+
+    @Test
+    void testAddKeyAlgorithmsOverrideDefaults() {
+        final String standardId = Jwts.KEY.A256GCMKW.id
+        def header = Jwts.header().add('enc', Jwts.ENC.A256GCM.id).add('alg', standardId).build()
+        def parser = builder.build()
+        assertSame Jwts.KEY.A256GCMKW, parser.keyAlgFn.apply(header) // standard implementation default
+
+        def custom = new TestKeyAlgorithm(id: standardId) // custom impl with standard identifier
+        parser = builder.addKeyAlgorithms([custom]).build()
+        assertSame custom, parser.keyAlgFn.apply(header) // custom one, not standard impl
+    }
+
+    @Test
+    void testCaseSensitiveKeyAlgorithm() {
+        def alg = Jwts.KEY.A256GCMKW
+        def hb = Jwts.header().add('enc', Jwts.ENC.A256GCM.id)
+        def standard = hb.add('alg', alg.id).build()
+        def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()
+        def parser = builder.build()
+        assertSame alg, parser.keyAlgFn.apply(standard) // standard id
+        try {
+            parser.keyAlgFn.apply(nonStandard) // non-standard id
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String msg = "Unrecognized JWE ${DefaultJweHeader.ALGORITHM} header value: ${alg.id.toLowerCase()}"
+            assertEquals msg, e.getMessage()
+        }
+    }
+
+    @Test
+    void testAddSignatureAlgorithmsOverrideDefaults() {
+        final String standardId = Jwts.SIG.HS256.id
+        def header = Jwts.header().add('alg', standardId).build()
+        def parser = builder.build()
+        assertSame Jwts.SIG.HS256, parser.sigAlgFn.apply(header) // standard implementation default
+
+        def custom = new TestMacAlgorithm(id: standardId) // custom impl with standard identifier
+        parser = builder.addSignatureAlgorithms([custom]).build()
+        assertSame custom, parser.sigAlgFn.apply(header) // custom one, not standard impl
+    }
+
+    @Test
+    void testCaseSensitiveSignatureAlgorithm() {
+        def alg = Jwts.SIG.HS256
+        def hb = Jwts.header().add('alg', alg.id)
+        def standard = hb.build()
+        def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()
+        def parser = builder.build()
+        assertSame alg, parser.sigAlgFn.apply(standard) // standard id
+        try {
+            parser.sigAlgFn.apply(nonStandard) // non-standard id
+            fail()
+        } catch (UnsupportedJwtException e) {
+            String msg = "Unrecognized JWS ${DefaultJwsHeader.ALGORITHM} header value: ${alg.id.toLowerCase()}"
+            assertEquals msg, e.getMessage()
+        }
     }
 
     @Test
@@ -253,6 +367,11 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
+        String getId() {
+            return this.id
+        }
+
+        @Override
         byte[] compress(byte[] content) throws CompressionException {
             return new byte[0]
         }
@@ -261,10 +380,87 @@ class DefaultJwtParserBuilderTest {
         byte[] decompress(byte[] compressed) throws CompressionException {
             return new byte[0]
         }
+    }
+
+    static class TestAeadAlgorithm implements AeadAlgorithm {
+
+        String id
+        int keyBitLength = 256
 
         @Override
         String getId() {
-            return this.id
+            return id
+        }
+
+        @Override
+        AeadResult encrypt(AeadRequest request) throws SecurityException {
+            return null
+        }
+
+        @Override
+        Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException {
+            return null
+        }
+
+        @Override
+        SecretKeyBuilder key() {
+            return null
+        }
+
+        @Override
+        int getKeyBitLength() {
+            return keyBitLength
+        }
+    }
+
+    static class TestKeyAlgorithm implements KeyAlgorithm {
+
+        String id
+        int keyBitLength = 256
+
+        @Override
+        String getId() {
+            return id
+        }
+
+        @Override
+        KeyResult getEncryptionKey(KeyRequest request) throws SecurityException {
+            return null
+        }
+
+        @Override
+        SecretKey getDecryptionKey(DecryptionKeyRequest request) throws SecurityException {
+            return null
+        }
+    }
+
+    static class TestMacAlgorithm implements MacAlgorithm {
+
+        String id
+
+        @Override
+        String getId() {
+            return id
+        }
+
+        @Override
+        byte[] digest(SecureRequest<byte[], SecretKey> request) throws SecurityException {
+            return new byte[0]
+        }
+
+        @Override
+        boolean verify(VerifySecureDigestRequest<SecretKey> request) throws SecurityException {
+            return false
+        }
+
+        @Override
+        SecretKeyBuilder key() {
+            return null
+        }
+
+        @Override
+        int getKeyBitLength() {
+            return 0
         }
     }
 }

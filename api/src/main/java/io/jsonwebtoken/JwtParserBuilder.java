@@ -355,7 +355,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
-     * @see #verifyWith(PublicKey) 
+     * @see #verifyWith(PublicKey)
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder verifyWith(SecretKey key);
@@ -376,7 +376,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
-     * @see #verifyWith(SecretKey) 
+     * @see #verifyWith(SecretKey)
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder verifyWith(PublicKey key);
@@ -398,7 +398,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
-     * @see #decryptWith(PrivateKey) 
+     * @see #decryptWith(PrivateKey)
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder decryptWith(SecretKey key);
@@ -419,7 +419,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
-     * @see #decryptWith(SecretKey) 
+     * @see #decryptWith(SecretKey)
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder decryptWith(PrivateKey key);
@@ -499,82 +499,109 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Adds the specified compression algorithms to the parser's total set of supported compression algorithms,
-     * overwriting any previously-added compression algorithms with the same {@link CompressionAlgorithm#getId() id}s.
-     * If the parser encounters a JWT {@code zip} header value that matches a compression algorithm's
-     * {@link CompressionAlgorithm#getId() id}, that algorithm will be used for decompression.
+     * replacing any existing ones with identical {@link Identifiable#getId() id}s.
+     * If the parser encounters a JWT {@code zip} header value that equals a compression algorithm's
+     * {@link Identifiable#getId() id}, that algorithm will be used for decompression.
      *
-     * <p>There may be only one registered {@code CompressionAlgorithm} per {@code id}, and the {@code algs}
-     * collection is added in iteration order; if a duplicate id is found when iterating the {@code algs}
-     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     * <p>There may be only one registered {@code CompressionAlgorithm} per CaSe-SeNsItIvE {@code id}, and the
+     * {@code algs} collection is added in iteration order; if a duplicate id is found when iterating the {@code algs}
+     * collection, the later algorithm will evict any existing algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, {@link Jwts.ZIP#DEF} and {@link Jwts.ZIP#GZIP} algorithms are added last,
-     * <em>after</em> those in the {@code algs} collection, to ensure that JWA standard algorithms cannot be
-     * accidentally replaced.</p>
+     * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * @param algs collection of compression algorithms to add to the parser's total set of supported compression algorithms.
+     * <p>The {@link Jwts.ZIP} compression algorithms are supported by default and do not need
+     * to be added via this method, but beware: <b>any algorithm in the {@code algs} collection with a
+     * JWA standard {@link Identifiable#getId() id} will replace the JJWT standard algorithm implementation</b>.
+     * This is to allow application developers to favor their own implementations over JJWT's default implementations
+     * if necessary (for example, to support legacy or custom behavior).
+     *
+     * @param algs collection of compression algorithms to add to the parser's total set of supported compression
+     *             algorithms, replacing any existing ones with the same exact (CaSe-SeNsItIvE)
+     *             {@link CompressionAlgorithm#getId() id}s.
      * @return the builder for method chaining.
+     * @see Jwts.ZIP
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder addCompressionAlgorithms(Collection<? extends CompressionAlgorithm> algs);
 
     /**
      * Adds the specified AEAD encryption algorithms to the parser's total set of supported encryption algorithms,
-     * overwriting any previously-added algorithms with the same {@link AeadAlgorithm#getId() id}s.
+     * replacing any existing algorithms with the same exact (CaSe-SeNsItIvE) {@link AeadAlgorithm#getId() id}s.
+     * If the parser encounters a JWT {@code enc} header value that equals an encryption algorithm's
+     * {@link Identifiable#getId() id}, that algorithm will be used for decryption.
      *
-     * <p>There may be only one registered {@code AeadAlgorithm} per algorithm {@code id}, and the {@code encAlgs}
-     * collection is added in iteration order; if a duplicate id is found when iterating the {@code encAlgs}
-     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     * <p>There may be only one registered {@code AeadAlgorithm} per algorithm {@code id}, and the {@code algs}
+     * collection is added in iteration order; if a duplicate id is found when iterating the {@code algs}
+     * collection, the later algorithm will evict any existing algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link Jwts.ENC JWA standard encryption algorithms} are added last,
-     * <em>after</em> those in the {@code encAlgs} collection, to ensure that JWA standard algorithms cannot be
-     * accidentally replaced.</p>
+     * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * @param encAlgs collection of AEAD encryption algorithms to add to the parser's total set of supported
-     *                encryption algorithms.
+     * <p>All JWA standard encryption algorithms in {@link Jwts.ENC} are supported by default and do not need
+     * to be added via this method, but beware: <b>any algorithm in the {@code algs} collection with a
+     * JWA standard {@link Identifiable#getId() id} will replace the JJWT standard algorithm implementation</b>.
+     * This is to allow application developers to favor their own implementations over JJWT's default implementations
+     * if necessary (for example, to support legacy or custom behavior).
+     *
+     * @param algs collection of AEAD encryption algorithms to add to the parser's total set of supported
+     *             encryption algorithms, replacing any existing algorithms with the same
+     *             {@link AeadAlgorithm#getId() id}s.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> encAlgs);
+    JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> algs);
 
     /**
      * Adds the specified signature algorithms to the parser's total set of supported signature algorithms,
-     * overwriting any previously-added algorithms with the same
-     * {@link Identifiable#getId() id}s.
+     * replacing any existing algorithms with the same exact (CaSe-SeNsItIvE) {@link Identifiable#getId() id}s.
+     * If the parser encounters a JWS {@code alg} header value that equals a signature algorithm's
+     * {@link Identifiable#getId() id}, that algorithm will be used for signature verification.
      *
      * <p>There may be only one registered {@code SecureDigestAlgorithm} per algorithm {@code id}, and the
-     * {@code sigAlgs} collection is added in iteration order; if a duplicate id is found when iterating the
-     * {@code sigAlgs} collection, the later element will evict any previously-added algorithm with the same
-     * {@code id}.</p>
+     * {@code algs} collection is added in iteration order; if a duplicate id is found when iterating the
+     * {@code algs} argument, the later algorithm will evict any existing algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link Jwts.SIG JWA standard signature and MAC algorithms} are
-     * added last, <em>after</em> those in the {@code sigAlgs} collection, to ensure that JWA standard algorithms
-     * cannot be accidentally replaced.</p>
+     * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * @param sigAlgs collection of signing algorithms to add to the parser's total set of supported signature
-     *                algorithms.
+     * <p>All JWA standard signature and MAC algorithms in {@link Jwts.SIG} are supported by default and do not need
+     * to be added via this method, but beware: <b>any algorithm in the {@code algs} collection with a
+     * JWA standard {@link Identifiable#getId() id} will replace the JJWT standard
+     * algorithm implementation</b>. This is to allow application developers to favor their own implementations over
+     * JJWT's default implementations if necessary (for example, to support legacy or custom behavior).
+     *
+     * @param algs collection of signature algorithms to add to the parser's total set of supported signature
+     *             algorithms, replacing any existing algorithms with the same exact (CaSe-SeNsItIvE)
+     *             {@link Identifiable#getId() id}s.
      * @return the builder for method chaining.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Algorithm Name (id) requirements</a>
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> sigAlgs);
+    JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> algs);
 
     /**
      * Adds the specified key management algorithms to the parser's total set of supported key algorithms,
-     * overwriting any previously-added algorithms with the same {@link KeyAlgorithm#getId() id}s.
+     * replacing any existing algorithms with the same exact (CaSe-SeNsItIvE) {@link KeyAlgorithm#getId() id}s.
+     * If the parser encounters a JWE {@code alg} header value that equals a key management algorithm's
+     * {@link Identifiable#getId() id}, that algorithm will be used to obtain the content decryption key.
      *
-     * <p>There may be only one registered {@code KeyAlgorithm} per algorithm {@code id}, and the {@code keyAlgs}
-     * collection is added in iteration order; if a duplicate id is found when iterating the {@code keyAlgs}
-     * collection, the later element will evict any previously-added algorithm with the same {@code id}.</p>
+     * <p>There may be only one registered {@code KeyAlgorithm} per algorithm {@code id}, and the {@code algs}
+     * collection is added in iteration order; if a duplicate id is found when iterating the {@code algs}
+     * argument, the later algorithm will evict any existing algorithm with the same {@code id}.</p>
      *
-     * <p>Finally, the {@link Jwts.KEY#get() JWA standard key management algorithms}
-     * are added last, <em>after</em> those in the {@code keyAlgs} collection, to ensure that JWA standard algorithms
-     * cannot be accidentally replaced.</p>
+     * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * @param keyAlgs collection of key management algorithms to add to the parser's total set of supported key
-     *                management algorithms.
+     * <p>All JWA standard key management algorithms in {@link Jwts.KEY} are supported by default and do not need
+     * to be added via this method, but beware: <b>any algorithm in the {@code algs} collection with a
+     * JWA standard {@link Identifiable#getId() id} will replace the JJWT standard algorithm implementation</b>.
+     * This is to allow application developers to favor their own implementations over JJWT's default implementations
+     * if necessary (for example, to support legacy or custom behavior).
+     *
+     * @param algs collection of key management algorithms to add to the parser's total set of supported key
+     *             management algorithms, replacing any existing algorithms with the same exact (CaSe-SeNsItIvE)
+     *             {@link KeyAlgorithm#getId() id}s.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs);
+    JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> algs);
 
     /**
      * <p><b>Deprecated as of JJWT JJWT_RELEASE_VERSION. This method will be removed before the 1.0 release.</b></p>
