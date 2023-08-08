@@ -1288,7 +1288,7 @@ on the type of JWS or JWE algorithm used.  That is:
     * For JWE direct encryption, the returned decryption key should be a `SecretKey`.
     * For password-based key derivation algorithms, the returned decryption key should be a 
       `io.jsonwebtoken.security.Password`.  You can create a `Password` instance by calling 
-      `Keys.forPassword(char[] passwordCharacters)`.
+      `Keys.password(char[] passwordCharacters)`.
     * For asymmetric key management algorithms, the returned decryption key should be a `PrivateKey` (not a `PublicKey`).
 
 <a name="jwt-read-claims"></a><a name="jws-read-claims"></a> <!-- legacy anchor for old links -->
@@ -3315,7 +3315,7 @@ as shown below.
 ```java
 //DO NOT use this example password in a real app, it is well-known to password crackers:
 String pw = "correct horse battery staple";
-Password password = Keys.forPassword(pw.toCharArray());
+Password password = Keys.password(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
 KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
