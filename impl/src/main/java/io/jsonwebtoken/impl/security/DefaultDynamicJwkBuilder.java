@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
@@ -125,10 +124,14 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder<>(newContext(key));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public RsaPublicJwkBuilder rsaChain(X509Certificate... chain) {
+    public <A extends PublicKey, B extends PrivateKey> PublicJwkBuilder<A, B, ?, ?, ?, ?> chain(List<X509Certificate> chain)
+            throws UnsupportedKeyException {
         Assert.notEmpty(chain, "chain cannot be null or empty.");
-        return rsaChain(Arrays.asList(chain));
+        X509Certificate cert = Assert.notNull(chain.get(0), "The first X509Certificate cannot be null.");
+        PublicKey key = Assert.notNull(cert.getPublicKey(), "The first X509Certificate's PublicKey cannot be null.");
+        return this.<A,B>key((A)key).x509CertificateChain(chain);
     }
 
     @Override
@@ -138,12 +141,6 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         PublicKey key = cert.getPublicKey();
         RSAPublicKey pubKey = KeyPairs.assertKey(key, RSAPublicKey.class, "The first X509Certificate's ");
         return key(pubKey).x509CertificateChain(chain);
-    }
-
-    @Override
-    public EcPublicJwkBuilder ecChain(X509Certificate... chain) {
-        Assert.notEmpty(chain, "chain cannot be null or empty.");
-        return ecChain(Arrays.asList(chain));
     }
 
     @Override
@@ -163,12 +160,6 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         EdwardsCurve.assertEdwards(pub);
         EdwardsCurve.assertEdwards(priv);
         return (OctetPrivateJwkBuilder<A, B>) octetKey(priv).publicKey(pub);
-    }
-
-    @Override
-    public <A extends PublicKey, B extends PrivateKey> OctetPublicJwkBuilder<A, B> octetChain(X509Certificate... chain) {
-        Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
-        return octetChain(Arrays.asList(chain));
     }
 
     @SuppressWarnings("unchecked") // ok because of the EdwardsCurve.assertEdwards calls
@@ -194,6 +185,15 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         ECPublicKey pub = KeyPairs.getKey(pair, ECPublicKey.class);
         ECPrivateKey priv = KeyPairs.getKey(pair, ECPrivateKey.class);
         return key(priv).publicKey(pub);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <A extends PublicKey, B extends PrivateKey> PrivateJwkBuilder<B, A, ?, ?, ?> keyPair(KeyPair keyPair)
+            throws UnsupportedKeyException {
+        A pub = (A)KeyPairs.getKey(keyPair, PublicKey.class);
+        B priv = (B)KeyPairs.getKey(keyPair, PrivateKey.class);
+        return this.<A,B>key(priv).publicKey(pub);
     }
 
     @Override

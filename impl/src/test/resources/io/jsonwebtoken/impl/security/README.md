@@ -33,7 +33,7 @@ The Elliptic Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this direct
     openssl x509 -pubkey -noout -in ES384.crt.pem > ES384.pub.pem
     openssl x509 -pubkey -noout -in ES512.crt.pem > ES512.pub.pem
   
-The Edwards Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this directory were created for testing as follows
+The Edwards Curve `*.key.pem`, `*.crt.pem` and `*.pub.pem` files in this directory were created for testing as follows.
 Note that we don't/can't create self-signed certificates (`*.crt.pem` files) for X25519 and X448 because these 
 algorithms cannot be used for signing (perhaps we could have signed them with another key, but it wasn't necessary
 for our testing):

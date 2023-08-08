@@ -31,6 +31,7 @@ import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAKey
+import java.security.interfaces.RSAPublicKey
 import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 
@@ -186,16 +187,7 @@ class JwksTest {
         for (def alg : algs) {
             //get test cert:
             X509Certificate cert = TestCertificates.readTestCertificate(alg)
-            def pubKey = cert.getPublicKey()
-
-            def builder = Jwks.builder()
-            if (pubKey instanceof ECKey) {
-                builder = builder.ecChain(cert)
-            } else if (pubKey instanceof RSAKey) {
-                builder = builder.rsaChain(cert)
-            } else {
-                builder = builder.octetChain(cert)
-            }
+            def builder = Jwks.builder().chain(Arrays.asList(cert))
 
             if (number == 1) {
                 builder.withX509Sha1Thumbprint(true)
@@ -412,6 +404,76 @@ class JwksTest {
             String msg = 'There is no builder that supports specified key of type io.jsonwebtoken.impl.security.TestPrivateKey with algorithm \'null\'.'
             assertEquals(msg, expected.getMessage())
             assertNotNull expected.getCause() // ensure we always retain a cause
+        }
+    }
+
+    @Test
+    void testEcChain() {
+        TestKeys.EC.each {
+            ECPublicKey key = it.pair.public as ECPublicKey
+            def jwk = Jwks.builder().ecChain(it.chain).build()
+            assertEquals key, jwk.toKey()
+            assertEquals it.chain, jwk.getX509CertificateChain()
+        }
+    }
+
+    @Test
+    void testRsaChain() {
+        TestKeys.RSA.each {
+            RSAPublicKey key = it.pair.public as RSAPublicKey
+            def jwk = Jwks.builder().rsaChain(it.chain).build()
+            assertEquals key, jwk.toKey()
+            assertEquals it.chain, jwk.getX509CertificateChain()
+        }
+    }
+
+    @Test
+    void testOctetChain() {
+        TestKeys.EdEC.findAll({ it -> it.cert != null }).each { // no chains for XEC keys
+            PublicKey key = it.pair.public
+            def jwk = Jwks.builder().octetChain(it.chain).build()
+            assertEquals key, jwk.toKey()
+            assertEquals it.chain, jwk.getX509CertificateChain()
+        }
+    }
+
+    @Test
+    void testRsaKeyPair() {
+        TestKeys.RSA.each {
+            java.security.KeyPair pair = it.pair
+            PrivateJwk jwk = Jwks.builder().rsaKeyPair(pair).build()
+            assertEquals it.pair.public, jwk.toPublicJwk().toKey()
+            assertEquals it.pair.private, jwk.toKey()
+        }
+    }
+
+    @Test
+    void testEcKeyPair() {
+        TestKeys.EC.each {
+            java.security.KeyPair pair = it.pair
+            PrivateJwk jwk = Jwks.builder().ecKeyPair(pair).build()
+            assertEquals it.pair.public, jwk.toPublicJwk().toKey()
+            assertEquals it.pair.private, jwk.toKey()
+        }
+    }
+
+    @Test
+    void testOctetKeyPair() {
+        TestKeys.EdEC.findAll(it -> it.cert != null).each {
+            java.security.KeyPair pair = it.pair
+            PrivateJwk jwk = Jwks.builder().octetKeyPair(pair).build()
+            assertEquals it.pair.public, jwk.toPublicJwk().toKey()
+            assertEquals it.pair.private, jwk.toKey()
+        }
+    }
+
+    @Test
+    void testKeyPair() {
+        TestKeys.ASYM.each {
+            java.security.KeyPair pair = it.pair
+            PrivateJwk jwk = Jwks.builder().keyPair(pair).build()
+            assertEquals it.pair.public, jwk.toPublicJwk().toKey()
+            assertEquals it.pair.private, jwk.toKey()
         }
     }
 
