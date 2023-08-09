@@ -610,7 +610,10 @@ class RFC7520Section5Test {
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals FIGURE_99, b64Url(parsed.header.getPbes2Salt())
         assertEquals p2c, parsed.header.getPbes2Count()
-        assertEquals cty, parsed.header.getContentType()
+
+        assertEquals cty, parsed.header.get('cty') // compact form
+        assertEquals "application/$cty" as String, parsed.header.getContentType() // normalized form
+
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
         assertEquals FIGURE_95, utf8(parsed.payload)
     }

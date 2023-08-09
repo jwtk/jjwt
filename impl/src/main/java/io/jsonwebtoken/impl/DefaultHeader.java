@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Registry;
@@ -26,7 +27,9 @@ import java.util.Map;
 public class DefaultHeader extends FieldMap implements Header {
 
     static final Field<String> TYPE = Fields.string(Header.TYPE, "Type");
-    static final Field<String> CONTENT_TYPE = Fields.string(Header.CONTENT_TYPE, "Content Type");
+    static final Field<String> CONTENT_TYPE = Fields.builder(String.class)
+            .setId(Header.CONTENT_TYPE).setName("Content Type")
+            .setConverter(CompactMediaTypeIdConverter.INSTANCE).build();
     static final Field<String> ALGORITHM = Fields.string(Header.ALGORITHM, "Algorithm");
     static final Field<String> COMPRESSION_ALGORITHM = Fields.string(Header.COMPRESSION_ALGORITHM, "Compression Algorithm");
     @SuppressWarnings("DeprecatedIsStillUsed")

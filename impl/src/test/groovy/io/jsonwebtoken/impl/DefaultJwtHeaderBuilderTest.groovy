@@ -266,7 +266,10 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testDeprecatedSetters() { // TODO: remove before 1.0
         assertEquals 'foo', builder.setType('foo').build().getType()
-        assertEquals 'foo', builder.setContentType('foo').build().getContentType()
+
+        assertEquals 'foo', builder.setContentType('foo').build().get('cty') // compact form
+        assertEquals 'application/foo', builder.build().getContentType()     // normalized form
+
         assertEquals 'foo', builder.setCompressionAlgorithm('foo').build().getCompressionAlgorithm()
         assertEquals 'foo', builder.setKeyId('foo').build().getKeyId()
         assertEquals 'foo', builder.setAlgorithm('foo').build().getAlgorithm()
