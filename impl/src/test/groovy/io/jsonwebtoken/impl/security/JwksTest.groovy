@@ -459,7 +459,7 @@ class JwksTest {
 
     @Test
     void testOctetKeyPair() {
-        TestKeys.EdEC.findAll(it -> it.cert != null).each {
+        TestKeys.EdEC.findAll({ it -> it.cert != null }).each {
             java.security.KeyPair pair = it.pair
             PrivateJwk jwk = Jwks.builder().octetKeyPair(pair).build()
             assertEquals it.pair.public, jwk.toPublicJwk().toKey()
