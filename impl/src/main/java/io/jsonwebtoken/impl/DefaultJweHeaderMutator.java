@@ -82,13 +82,28 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
         return put(DefaultHeader.TYPE, typ);
     }
 
+    @Override
+    public T setType(String typ) {
+        return type(typ);
+    }
+
+    @Override
+    public T setContentType(String cty) {
+        return contentType(cty);
+    }
+
+    @Override
+    public T setCompressionAlgorithm(String zip) {
+        return put(DefaultHeader.COMPRESSION_ALGORITHM, zip);
+    }
+
     // =============================================================
     // Protected Header methods
     // =============================================================
 
     @Override
-    public T jwkSetUrl(URI uri) {
-        return put(DefaultProtectedHeader.JKU, uri);
+    public T critical(Set<String> crit) {
+        return put(DefaultProtectedHeader.CRIT, crit);
     }
 
     @Override
@@ -97,15 +112,24 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     }
 
     @Override
+    public T jwkSetUrl(URI uri) {
+        return put(DefaultProtectedHeader.JKU, uri);
+    }
+
+    @Override
     public T keyId(String kid) {
         return put(DefaultProtectedHeader.KID, kid);
     }
 
     @Override
-    public T critical(Set<String> crit) {
-        return put(DefaultProtectedHeader.CRIT, crit);
+    public T setKeyId(String kid) {
+        return keyId(kid);
     }
 
+    @Override
+    public T setAlgorithm(String alg) {
+        return put(DefaultHeader.ALGORITHM, alg);
+    }
 
     // =============================================================
     // X.509 methods

@@ -87,4 +87,28 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6">JWE Key ID</a>
      */
     T keyId(String kid);
+
+    /**
+     * Deprecated since JJWT_RELEASE_VERSION, delegates to {@link #keyId(String)}.
+     *
+     * @param kid the case-sensitive JWS {@code kid} header value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.4">JWS Key ID</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6">JWE Key ID</a>
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #keyId(String)} method.
+     */
+    @Deprecated
+    T setKeyId(String kid);
+
+    /**
+     * Deprecated as of JJWT_RELEASE_VERSION, there is no need to set this any longer as the {@code JwtBuilder} will
+     * always set the {@code alg} header as necessary.
+     *
+     * @param alg the JWS or JWE algorithm {@code alg} value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @since 0.1
+     * @deprecated since JJWT_RELEASE_VERSION and will be removed before the 1.0 release.
+     */
+    @Deprecated
+    T setAlgorithm(String alg);
 }

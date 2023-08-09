@@ -25,7 +25,7 @@ import io.jsonwebtoken.lang.MapMutator;
  */
 public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<String, Object, T> {
 
-    //IMPLEMENTOR NOTE: if this `algorithm` method ever needs to be exposed in the public API, it's probably better to
+    //IMPLEMENTOR NOTE: if this `algorithm` method ever needs to be exposed in the public API, it might be better to
     //                  have it in the Jwts.HeaderBuilder interface and NOT this one: in the context of
     //                  JwtBuilder.Header, there is never a reason for an application developer to call algorithm(id)
     //                  directly because the KeyAlgorithm or SecureDigestAlgorithm instance must always be provided
@@ -57,7 +57,7 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
      * <code>typ</code> (Type)</a> header value.  A {@code null} value will remove the property from the JSON map.
      *
      * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Header} instance for method chaining.
+     * @return the instance for method chaining.
      */
     T type(String typ);
 
@@ -84,7 +84,42 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
      * <b><code>example;part=&quot;1/2&quot;</code></b>.</p>
      *
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Header} instance for method chaining.
+     * @return the instance for method chaining.
      */
     T contentType(String cty);
+
+    /**
+     * Deprecated since of JJWT_RELEASE_VERSION, delegates to {@link #type(String)}.
+     *
+     * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @see #type(String)
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #type(String)} method.
+     * This method will be removed before the 1.0 release.
+     */
+    @Deprecated
+    T setType(String typ);
+
+    /**
+     * Deprecated as of JJWT_RELEASE_VERSION, delegates to {@link #contentType(String)}.
+     *
+     * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @see #contentType(String)
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #contentType(String)}.
+     */
+    @Deprecated
+    T setContentType(String cty);
+
+    /**
+     * Deprecated as of JJWT_RELEASE_VERSION, there is no need to set this any longer as the {@code JwtBuilder} will
+     * always set the {@code zip} header as necessary.
+     *
+     * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @since 0.6.0
+     * @deprecated since JJWT_RELEASE_VERSION and will be removed before the 1.0 release.
+     */
+    @Deprecated
+    T setCompressionAlgorithm(String zip);
 }
