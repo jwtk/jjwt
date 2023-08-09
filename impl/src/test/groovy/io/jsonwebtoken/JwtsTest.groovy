@@ -178,7 +178,10 @@ class JwtsTest {
         String cty = "application/$subtype"
         String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
         def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
-        assertEquals subtype, jwt.header.getContentType() // assert that the compact form was used
+        // assert raw value is compact form:
+        assertEquals subtype, jwt.header.get('cty')
+        // assert getter reflects normalized form per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10:
+        assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
 

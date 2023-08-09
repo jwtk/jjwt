@@ -62,28 +62,34 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
     T type(String typ);
 
     /**
-     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">
-     * <code>cty</code> (Content Type)</a> header parameter value.  A {@code null} value will remove the property from
-     * the JSON map.
+     * Sets the compact <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">
+     * <code>cty</code> (Content Type)</a> header parameter value, used by applications to declare the
+     * <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">IANA MediaType</a> of the JWT
+     * payload.  A {@code null} value will remove the property from the JSON map.
      *
-     * <p>The <code>cty</code> (Content Type) Header Parameter is used by applications to declare the
-     * <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">IANA MediaType</a> of the content
-     * (the payload).  This is intended for use by the application when more than
-     * one kind of object could be present in the Payload; the application can use this value to disambiguate among
-     * the different kinds of objects that might be present.  It will typically not be used by applications when
-     * the kind of object is already known.  This parameter is ignored by JWT implementations (like JJWT); any
-     * processing of this parameter is performed by the JWS application.  Use of this Header Parameter is OPTIONAL.</p>
+     * <p><b>Compact Media Type Identifier</b></p>
      *
-     * <p>To keep messages compact in common situations, it is RECOMMENDED that producers omit an
-     * <b><code>application/</code></b> prefix of a media type value in a {@code cty} Header Parameter when
-     * no other '<b>/</b>' appears in the media type value.  A recipient using the media type value <em>MUST</em>
-     * treat it as if <b><code>application/</code></b> were prepended to any {@code cty} value not containing a
-     * '<b>/</b>'. For instance, a {@code cty} value of <b><code>example</code></b> <em>SHOULD</em> be used to
-     * represent the <b><code>application/example</code></b> media type, whereas the media type
-     * <b><code>application/example;part=&quot;1/2&quot;</code></b> cannot be shortened to
-     * <b><code>example;part=&quot;1/2&quot;</code></b>.</p>
+     * <p>This method will automatically remove any <code><b>application/</b></code> prefix from the
+     * {@code cty} string if possible according to the rules defined in the last paragraph of
+     * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">RFC 7517, Section 4.1.10</a>:</p>
+     * <blockquote><pre>
+     *     To keep messages compact in common situations, it is RECOMMENDED that
+     *     producers omit an "application/" prefix of a media type value in a
+     *     "cty" Header Parameter when no other '/' appears in the media type
+     *     value.  A recipient using the media type value MUST treat it as if
+     *     "application/" were prepended to any "cty" value not containing a
+     *     '/'.  For instance, a "cty" value of "example" SHOULD be used to
+     *     represent the "application/example" media type, whereas the media
+     *     type "application/example;part="1/2"" cannot be shortened to
+     *     "example;part="1/2"".</pre></blockquote>
      *
-     * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
+     * <p>JJWT performs the reverse during JWT parsing: {@link Header#getContentType()} will automatically prepend the
+     * {@code application/} prefix if the parsed {@code cty} value does not contain a '<code>/</code>' character (as
+     * mandated by the RFC language above). This ensures application developers can use and read standard IANA Media
+     * Type identifiers without needing JWT-specific prefix conditional logic in application code.
+     * </p>
+     *
+     * @param cty the JWT {@code cty} header value or {@code null} to remove the property from the JSON map.
      * @return the instance for method chaining.
      */
     T contentType(String cty);

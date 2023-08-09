@@ -22,7 +22,9 @@ public final class CompactMediaTypeIdConverter implements Converter<String, Obje
 
     public static final Converter<String, Object> INSTANCE = new CompactMediaTypeIdConverter();
 
-    private static final String APP_MEDIA_TYPE_PREFIX = "application/";
+    private static final char FORWARD_SLASH = '/';
+
+    private static final String APP_MEDIA_TYPE_PREFIX = "application" + FORWARD_SLASH;
 
     static String compactIfPossible(String cty) {
         Assert.hasText(cty, "Value cannot be null or empty.");
@@ -31,7 +33,7 @@ public final class CompactMediaTypeIdConverter implements Converter<String, Obje
             // we can only use the compact form if no other '/' exists in the string
             for (int i = cty.length() - 1; i >= APP_MEDIA_TYPE_PREFIX.length(); i--) {
                 char c = cty.charAt(i);
-                if (c == '/') {
+                if (c == FORWARD_SLASH) {
                     return cty; // found another '/', can't compact, so just return unmodified
                 }
             }
@@ -49,8 +51,18 @@ public final class CompactMediaTypeIdConverter implements Converter<String, Obje
     @Override
     public String applyFrom(Object o) {
         Assert.notNull(o, "Value cannot be null.");
-        Assert.isInstanceOf(String.class, o, "Value must be a string.");
-        String s = (String) o;
-        return compactIfPossible(s);
+        String s = Assert.isInstanceOf(String.class, o, "Value must be a string.");
+
+        // https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10:
+        //
+        //     A recipient using the media type value MUST treat it as if
+        //     "application/" were prepended to any "cty" value not containing a
+        //     '/'.
+        //
+        if (s.indexOf(FORWARD_SLASH) < 0) {
+            s = APP_MEDIA_TYPE_PREFIX + s;
+        }
+
+        return s;
     }
 }

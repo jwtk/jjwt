@@ -155,7 +155,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link #content(byte[], String)} instead.
      *
      * <p>This is a wrapper method for:</p>
-     * <blockquote><pre>
+     * <blockquote><pre>s
      * {@link #content(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
      *
      * <p>If you want the JWT payload to be JSON, use the {@link #claims()} method instead.</p>
@@ -178,9 +178,6 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Sets the JWT payload to be the specified content byte array.
      *
-     * <p>This method is mutually exclusive of the {@link #claims()} and {@link #claim(String, Object)}
-     * methods.  Either {@code claims} or {@code content} method variants may be used, but not both.</p>
-     *
      * <p><b>Content Type Recommendation</b></p>
      *
      * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use
@@ -188,44 +185,57 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link #content(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
      * can inspect the {@code cty} header to know how to handle the byte array without ambiguity.</p>
      *
-     * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <p><b>Mutually Exclusive Claims and Content</b></p>
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods. Either {@code claims} or {@code content} method variants may be used, but not both. If you want the
+     * JWT payload to be JSON claims, use the {@link #claim(String, Object)} or {@link #claims()} methods instead.</p>
      *
      * @param content the content byte array to use as the JWT payload
      * @return the builder for method chaining.
+     * @see #content(byte[], String)
      * @since JJWT_RELEASE_VERSION
      */
     JwtBuilder content(byte[] content);
 
     /**
-     * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
-     * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} media type
+     * Sets the JWT payload to be the specified content byte array and also sets the
+     * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.
      *
-     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
-     * methods.  Either {@code claims} or {@code content} method variants may be used, but not both.</p>
+     * <p>This is a convenience method semantically equivalent to:</p>
+     * <blockquote><pre>
+     *     {@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}
+     *     {@link #content(byte[]) content(content)}</pre></blockquote>
      *
      * <p><b>Compact Media Type Identifier</b></p>
      *
-     * <p>As a convenience, this method will automatically trim any <code><b>application/</b></code> prefix from the
-     * {@code cty} string if possible according to the
-     * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">JWT specification recommendations</a>.</p>
-     *
-     * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
-     * method - instead call {@link #content(byte[])} and set the header's
-     * {@link BuilderHeader#contentType(String) contentType} independently.  For example:</p>
-     *
+     * <p>This method will automatically remove any <code><b>application/</b></code> prefix from the
+     * {@code cty} string if possible according to the rules defined in the last paragraph of
+     * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">RFC 7517, Section 4.1.10</a>:</p>
      * <blockquote><pre>
-     * Jwts.builder()
-     *     .header().contentType("application/whatever").and()
-     *     .content(byteArray)
-     *     ...
-     *     .build();</pre></blockquote>
+     *     To keep messages compact in common situations, it is RECOMMENDED that
+     *     producers omit an "application/" prefix of a media type value in a
+     *     "cty" Header Parameter when no other '/' appears in the media type
+     *     value.  A recipient using the media type value MUST treat it as if
+     *     "application/" were prepended to any "cty" value not containing a
+     *     '/'.  For instance, a "cty" value of "example" SHOULD be used to
+     *     represent the "application/example" media type, whereas the media
+     *     type "application/example;part="1/2"" cannot be shortened to
+     *     "example;part="1/2"".</pre></blockquote>
      *
-     * <p>If you want the JWT payload to be JSON claims, use the {@link #claim(String, Object)} or
-     * {@link #claims()} methods instead.</p>
+     * <p>JJWT performs the reverse during JWT parsing: {@link Header#getContentType()} will automatically prepend the
+     * {@code application/} prefix if the parsed {@code cty} value does not contain a '<code>/</code>' character (as
+     * mandated by the RFC language above). This ensures application developers can use and read standard IANA Media
+     * Type identifiers without needing JWT-specific prefix conditional logic in application code.
+     * </p>
      *
-     * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <p><b>Mutually Exclusive Claims and Content</b></p>
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods. Either {@code claims} or {@code content} method variants may be used, but not both. If you want the
+     * JWT payload to be JSON claims, use the {@link #claim(String, Object)} or {@link #claims()} methods instead.</p>
      *
      * @param content the content byte array that will be the JWT payload.  Cannot be null or empty.
      * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.

@@ -39,8 +39,11 @@ class DefaultHeaderTest {
     @Test
     void testContentType() {
         header = h([cty: 'bar'])
-        assertEquals 'bar', header.getContentType()
-        assertEquals 'bar', header.get('cty')
+        // Per per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10, the raw header should have a
+        // compact form, but application developers shouldn't have to check for that all the time, so our getter has
+        // the normalized form:
+        assertEquals 'bar', header.get('cty') // raw compact form
+        assertEquals 'application/bar', header.getContentType() // getter normalized form
     }
 
     @Test

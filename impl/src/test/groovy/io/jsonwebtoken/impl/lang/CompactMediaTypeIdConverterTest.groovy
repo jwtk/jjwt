@@ -52,7 +52,9 @@ class CompactMediaTypeIdConverterTest {
     void testNonApplicationMediaType() {
         String cty = 'foo'
         assertEquals cty, converter.applyTo(cty)
-        assertEquals cty, converter.applyFrom(cty)
+        // must auto-prepend 'application/' if no slash in cty value
+        // per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10:
+        assertEquals "application/$cty" as String, converter.applyFrom(cty)
     }
 
     @Test

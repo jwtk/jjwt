@@ -20,7 +20,6 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Services;
@@ -325,9 +324,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder content(byte[] content, String cty) {
         Assert.notEmpty(content, "content byte array cannot be null or empty.");
         Assert.hasText(cty, "Content Type String cannot be null or empty.");
-        cty = CompactMediaTypeIdConverter.INSTANCE.applyFrom(cty);
-        this.headerBuilder.contentType(cty);
-        return content(content);
+        return header().contentType(cty).and().content(content);
     }
 
     @Override
