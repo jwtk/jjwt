@@ -101,7 +101,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * <p>If you do not want to replace the existing header and only want to append to it,
-     * call <code>{@link #header()}.{@link io.jsonwebtoken.lang.MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()} instead.</p>
+     * call <code>{@link #header()}.{@link io.jsonwebtoken.lang.MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code> instead.</p>
      *
      * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
      * @return the builder for method chaining.
