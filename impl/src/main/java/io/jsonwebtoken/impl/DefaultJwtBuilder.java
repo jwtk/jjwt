@@ -324,9 +324,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder content(byte[] content, String cty) {
         Assert.notEmpty(content, "content byte array cannot be null or empty.");
         Assert.hasText(cty, "Content Type String cannot be null or empty.");
-        //cty = (String)CompactMediaTypeIdConverter.INSTANCE.applyTo(cty);
-        this.headerBuilder.contentType(cty);
-        return content(content);
+        return header().contentType(cty).and().content(content);
     }
 
     @Override
