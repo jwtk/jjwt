@@ -51,8 +51,7 @@ public final class CompactMediaTypeIdConverter implements Converter<String, Obje
     @Override
     public String applyFrom(Object o) {
         Assert.notNull(o, "Value cannot be null.");
-        Assert.isInstanceOf(String.class, o, "Value must be a string.");
-        String s = (String) o;
+        String s = Assert.isInstanceOf(String.class, o, "Value must be a string.");
 
         // https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10:
         //
