@@ -37,7 +37,7 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @see Jwts.KEY#ECDH_ES_A192KW
      * @see Jwts.KEY#ECDH_ES_A256KW
      */
-    T setAgreementPartyUInfo(byte[] info);
+    T agreementPartyUInfo(byte[] info);
 
     /**
      * Sets any information about the JWE producer for use with key agreement algorithms. A {@code null} value removes
@@ -45,7 +45,7 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      *
      * <p>If not {@code null}, this is a convenience method that calls the equivalent of the following:</p>
      * <blockquote><pre>
-     * {@link #setAgreementPartyUInfo(byte[]) setAgreementPartyUInfo}(info.getBytes(StandardCharsets.UTF_8))</pre></blockquote>
+     * {@link #agreementPartyUInfo(byte[]) agreementPartyUInfo}(info.getBytes(StandardCharsets.UTF_8))</pre></blockquote>
      *
      * @param info information about the JWE producer to use with key agreement algorithms.
      * @return the header for method chaining.
@@ -55,7 +55,7 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @see Jwts.KEY#ECDH_ES_A192KW
      * @see Jwts.KEY#ECDH_ES_A256KW
      */
-    T setAgreementPartyUInfo(String info);
+    T agreementPartyUInfo(String info);
 
     /**
      * Sets any information about the JWE recipient for use with key agreement algorithms. A {@code null} value removes
@@ -69,7 +69,7 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @see Jwts.KEY#ECDH_ES_A192KW
      * @see Jwts.KEY#ECDH_ES_A256KW
      */
-    T setAgreementPartyVInfo(byte[] info);
+    T agreementPartyVInfo(byte[] info);
 
     /**
      * Sets any information about the JWE recipient for use with key agreement algorithms. A {@code null} value removes
@@ -77,7 +77,7 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      *
      * <p>If not {@code null}, this is a convenience method that calls the equivalent of the following:</p>
      * <blockquote><pre>
-     * {@link #setAgreementPartyVInfo(byte[]) setAgreementPartVUInfo}(info.getBytes(StandardCharsets.UTF_8))</pre></blockquote>
+     * {@link #agreementPartyVInfo(byte[]) setAgreementPartVUInfo}(info.getBytes(StandardCharsets.UTF_8))</pre></blockquote>
      *
      * @param info information about the JWE recipient to use with key agreement algorithms.
      * @return the header for method chaining.
@@ -87,7 +87,7 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @see Jwts.KEY#ECDH_ES_A192KW
      * @see Jwts.KEY#ECDH_ES_A256KW
      */
-    T setAgreementPartyVInfo(String info);
+    T agreementPartyVInfo(String info);
 
     /**
      * Sets the number of PBKDF2 iterations necessary to derive the key used during JWE encryption. If this value
@@ -112,5 +112,5 @@ public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends Protect
      * @see Jwts.KEY#PBES2_HS512_A256KW
      * @see <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2">OWASP PBKDF2 Iteration Recommendations</a>
      */
-    T setPbes2Count(int count);
+    T pbes2Count(int count);
 }

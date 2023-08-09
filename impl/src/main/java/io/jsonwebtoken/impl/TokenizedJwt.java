@@ -33,7 +33,7 @@ public interface TokenizedJwt {
      *
      * @return the Payload for a JWS or Ciphertext for a JWE.
      */
-    String getBody();
+    String getPayload();
 
     /**
      * Returns the Signature for JWS or AAD Tag for JWE.

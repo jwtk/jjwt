@@ -32,7 +32,7 @@ class AbstractJwkBuilderTest {
     private static final SecretKey SKEY = TestKeys.A256GCM
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder) Jwks.builder().forKey(SKEY)
+        return (AbstractJwkBuilder) Jwks.builder().key(SKEY)
     }
 
     @Test
@@ -55,20 +55,20 @@ class AbstractJwkBuilderTest {
         def foo = UUID.randomUUID()
         def bar = UUID.randomUUID().toString() //different type
         def m = [foo: foo, bar: bar]
-        def jwk = builder().set(m).build()
+        def jwk = builder().add(m).build()
         assertEquals foo, jwk.foo
         assertEquals bar, jwk.bar
     }
 
     @Test
     void testRemove() {
-        def jwk = builder().set('foo', 'bar').delete('foo').build() as Jwk
+        def jwk = builder().add('foo', 'bar').delete('foo').build() as Jwk
         assertNull jwk.get('foo')
     }
 
     @Test
     void testClear() {
-        def builder = builder().set('foo', 'bar')
+        def builder = builder().add('foo', 'bar')
         builder.clear()
         def jwk = builder.build()
         assertNull jwk.get('foo')
@@ -76,14 +76,14 @@ class AbstractJwkBuilderTest {
 
     @Test
     void testEmpty() {
-        def jwk = builder().set('foo', 'bar').empty().build() as Jwk
+        def jwk = builder().add('foo', 'bar').empty().build() as Jwk
         assertNull jwk.get('foo')
     }
 
     @Test
     void testAlgorithm() {
         def alg = 'someAlgorithm'
-        def jwk = builder().setAlgorithm(alg).build()
+        def jwk = builder().algorithm(alg).build()
         assertEquals alg, jwk.getAlgorithm()
         assertEquals alg, jwk.alg //test raw get via JWA member id
     }
@@ -91,7 +91,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testAlgorithmByPut() {
         def alg = 'someAlgorithm'
-        def jwk = builder().set('alg', alg).build() //ensure direct put still is handled properly
+        def jwk = builder().add('alg', alg).build() //ensure direct put still is handled properly
         assertEquals alg, jwk.getAlgorithm()
         assertEquals alg, jwk.alg //test raw get via JWA member id
     }
@@ -99,7 +99,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testId() {
         def kid = UUID.randomUUID().toString()
-        def jwk = builder().setId(kid).build()
+        def jwk = builder().id(kid).build()
         assertEquals kid, jwk.getId()
         assertEquals kid, jwk.kid //test raw get via JWA member id
     }
@@ -107,7 +107,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testIdByPut() {
         def kid = UUID.randomUUID().toString()
-        def jwk = builder().set('kid', kid).build()
+        def jwk = builder().add('kid', kid).build()
         assertEquals kid, jwk.getId()
         assertEquals kid, jwk.kid //test raw get via JWA member id
     }
@@ -117,7 +117,7 @@ class AbstractJwkBuilderTest {
         def a = UUID.randomUUID().toString()
         def b = UUID.randomUUID().toString()
         def set = [a, b] as Set<String>
-        def jwk = builder().setOperations(set).build()
+        def jwk = builder().operations(set).build()
         assertEquals set, jwk.getOperations()
         assertEquals set, jwk.key_ops
     }
@@ -127,7 +127,7 @@ class AbstractJwkBuilderTest {
         def a = UUID.randomUUID().toString()
         def b = UUID.randomUUID().toString()
         def set = [a, b] as Set<String>
-        def jwk = builder().set('key_ops', set).build()
+        def jwk = builder().add('key_ops', set).build()
         assertEquals set, jwk.getOperations()
         assertEquals set, jwk.key_ops
     }
@@ -137,7 +137,7 @@ class AbstractJwkBuilderTest {
     void testOperationsByPutSingleValue() {
         def a = UUID.randomUUID().toString()
         def set = [a] as Set<String>
-        def jwk = builder().set('key_ops', a).build() // <-- put uses single raw value, not a set
+        def jwk = builder().add('key_ops', a).build() // <-- put uses single raw value, not a set
         assertEquals set, jwk.getOperations() // <-- still get a set
         assertEquals set, jwk.key_ops         // <-- still get a set
     }
@@ -145,7 +145,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testProvider() {
         def provider = Providers.findBouncyCastle(Conditions.TRUE)
-        def jwk = builder().setProvider(provider).build()
+        def jwk = builder().provider(provider).build()
         assertEquals 'oct', jwk.getType()
     }
 

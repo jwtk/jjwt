@@ -40,7 +40,7 @@ public final class Jwks {
     private Jwks() {
     } //prevent instantiation
 
-    private static final String BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultProtoJwkBuilder";
+    private static final String BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder";
 
     private static final String PARSERBUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
 
@@ -54,7 +54,7 @@ public final class Jwks {
      * <blockquote><pre>
      * Jwks.{@link Jwks#builder}()
      *     // ... etc ...
-     *     .{@link JwkBuilder#setIdFromThumbprint(HashAlgorithm) setIdFromThumbprint}(Jwts.HASH.{@link Jwks.HASH#SHA256 SHA256}) // &lt;---
+     *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(Jwts.HASH.{@link Jwks.HASH#SHA256 SHA256}) // &lt;---
      *     .build()</pre></blockquote>
      * <p>or</p>
      * <blockquote><pre>
@@ -152,7 +152,7 @@ public final class Jwks {
      *
      * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
      */
-    public static ProtoJwkBuilder<?, ?> builder() {
+    public static DynamicJwkBuilder<?, ?> builder() {
         return Classes.newInstance(BUILDER_CLASSNAME);
     }
 

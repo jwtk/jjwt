@@ -25,6 +25,7 @@ import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
+import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwks;
@@ -33,7 +34,6 @@ import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.OctetPublicJwk;
-import io.jsonwebtoken.security.ProtoJwkBuilder;
 import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecureRequest;
@@ -98,7 +98,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
     //visible for testing, for Edwards elliptic curves
     protected KeyPair generateKeyPair(SecureRandom random, EdwardsCurve curve, Provider provider) {
-        return curve.keyPairBuilder().setProvider(provider).setRandom(random).build();
+        return curve.keyPair().provider(provider).random(random).build();
     }
 
     protected byte[] generateZ(final KeyRequest<?> request, final PublicKey pub, final PrivateKey priv) {
@@ -183,7 +183,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         KeyPair pair; // generated (ephemeral) key pair
         final SecureRandom random = ensureSecureRandom(request);
-        ProtoJwkBuilder<?, ?> jwkBuilder = Jwks.builder().setRandom(random);
+        DynamicJwkBuilder<?, ?> jwkBuilder = Jwks.builder().random(random);
 
         if (publicKey instanceof ECKey) {
             ECKey ecPublicKey = (ECKey) publicKey;
@@ -204,13 +204,13 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
                         request.getHeader(), request.getEncryptionAlgorithm());
             }
             pair = generateKeyPair(random, curve, provider);
-            jwkBuilder.setProvider(provider);
+            jwkBuilder.provider(provider);
         }
 
         Assert.stateNotNull(pair, "Internal implementation state: KeyPair cannot be null.");
 
         // This asserts that the generated public key (and therefore the request key) is on a JWK-supported curve:
-        PublicJwk<?> jwk = jwkBuilder.forKey(pair.getPublic()).build();
+        PublicJwk<?> jwk = jwkBuilder.key(pair.getPublic()).build();
 
         final SecretKey derived = deriveKey(request, publicKey, pair.getPrivate());
 

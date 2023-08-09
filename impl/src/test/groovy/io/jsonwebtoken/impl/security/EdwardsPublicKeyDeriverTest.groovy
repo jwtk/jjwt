@@ -26,7 +26,7 @@ class EdwardsPublicKeyDeriverTest {
 
     @Test
     void testDeriveWithNonEdwardsKey() {
-        def rsaPrivKey = Jwts.SIG.RS256.keyPairBuilder().build().getPrivate()
+        def rsaPrivKey = Jwts.SIG.RS256.keyPair().build().getPrivate()
         try {
             EdwardsPublicKeyDeriver.INSTANCE.apply(rsaPrivKey)
             fail()

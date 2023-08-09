@@ -25,8 +25,8 @@ import java.security.SecureRandom;
  * during instance creation, such as a {@link java.security.Provider} or {@link java.security.SecureRandom}.
  *
  * @param <T> The type of object that will be created each time {@link #build()} is invoked.
- * @see #setProvider(Provider)
- * @see #setRandom(SecureRandom)
+ * @see #provider(Provider)
+ * @see #random(SecureRandom)
  * @since JJWT_RELEASE_VERSION
  */
 public interface SecurityBuilder<T, B extends SecurityBuilder<T, B>> extends Builder<T> {
@@ -38,7 +38,7 @@ public interface SecurityBuilder<T, B extends SecurityBuilder<T, B>> extends Bui
      * @param provider the JCA Security Provider instance to use if necessary when building the new instance.
      * @return the builder for method chaining.
      */
-    B setProvider(Provider provider);
+    B provider(Provider provider);
 
     /**
      * Sets the {@link SecureRandom} to use if necessary when calling {@link #build()}.  This is an optional property
@@ -47,5 +47,5 @@ public interface SecurityBuilder<T, B extends SecurityBuilder<T, B>> extends Bui
      * @param random the {@link SecureRandom} instance to use if necessary when building the new instance.
      * @return the builder for method chaining.
      */
-    B setRandom(SecureRandom random);
+    B random(SecureRandom random);
 }

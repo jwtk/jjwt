@@ -365,7 +365,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with a 128-bit shared symmetric key using the
          *     AES Key Wrap algorithm, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -389,7 +389,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with a 192-bit shared symmetric key using the
          *     AES Key Wrap algorithm, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -413,7 +413,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with a 256-bit shared symmetric key using the
          *     AES Key Wrap algorithm, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -437,7 +437,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Generates a new secure-random 96-bit Initialization Vector to use during key wrap/encryption.</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with a 128-bit shared symmetric key using the
          *     AES GCM Key Wrap algorithm with the generated Initialization Vector, producing encrypted key ciphertext
@@ -476,7 +476,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Generates a new secure-random 96-bit Initialization Vector to use during key wrap/encryption.</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with a 192-bit shared symmetric key using the
          *     AES GCM Key Wrap algorithm with the generated Initialization Vector, producing encrypted key ciphertext
@@ -515,7 +515,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Generates a new secure-random 96-bit Initialization Vector to use during key wrap/encryption.</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with a 256-bit shared symmetric key using the
          *     AES GCM Key Wrap algorithm with the generated Initialization Vector, producing encrypted key ciphertext
@@ -564,7 +564,7 @@ public final class Jwts {
          *     <li>Derives a 128-bit Key Encryption Key with the PBES2-HS256 password-based key derivation algorithm,
          *     using the provided password, iteration count, and input salt as arguments.</li>
          *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
-         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated Content Encryption {@code SecretKey} with the {@code A128KW} key wrap
          *      algorithm using the 128-bit derived password-based Key Encryption Key from step {@code #3},
          *      producing encrypted key ciphertext.</li>
@@ -609,7 +609,7 @@ public final class Jwts {
          *     <li>Derives a 192-bit Key Encryption Key with the PBES2-HS384 password-based key derivation algorithm,
          *     using the provided password, iteration count, and input salt as arguments.</li>
          *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
-         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated Content Encryption {@code SecretKey} with the {@code A192KW} key wrap
          *      algorithm using the 192-bit derived password-based Key Encryption Key from step {@code #3},
          *      producing encrypted key ciphertext.</li>
@@ -654,7 +654,7 @@ public final class Jwts {
          *     <li>Derives a 256-bit Key Encryption Key with the PBES2-HS512 password-based key derivation algorithm,
          *     using the provided password, iteration count, and input salt as arguments.</li>
          *     <li>Generates a new secure-random Content Encryption {@link SecretKey} suitable for use with a
-         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated Content Encryption {@code SecretKey} with the {@code A256KW} key wrap
          *      algorithm using the 256-bit derived password-based Key Encryption Key from step {@code #3},
          *      producing encrypted key ciphertext.</li>
@@ -690,7 +690,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with the RSA key wrap algorithm, using the JWE
          *     recipient's RSA Public Key, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -715,7 +715,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with the RSA OAEP with SHA-1 and MGF1 key wrap algorithm,
          *     using the JWE recipient's RSA Public Key, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -740,7 +740,7 @@ public final class Jwts {
          * <p>During JWE creation, this algorithm:</p>
          * <ol>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *     specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with the RSA OAEP with SHA-256 and MGF1 key wrap
          *     algorithm, using the JWE recipient's RSA Public Key, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -818,7 +818,7 @@ public final class Jwts {
          *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
          *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with the {@code A128KW} key wrap
          *      algorithm using the derived symmetric Key Encryption Key from step {@code #3}, producing encrypted key ciphertext.</li>
          *     <li>Returns the encrypted key ciphertext for inclusion in the final JWE as well as the newly-generated
@@ -866,7 +866,7 @@ public final class Jwts {
          *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
          *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with the {@code A192KW} key wrap
          *      algorithm using the derived symmetric Key Encryption Key from step {@code #3}, producing encrypted key
          *      ciphertext.</li>
@@ -915,7 +915,7 @@ public final class Jwts {
          *      <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">&quot;epk&quot;
          *      (Ephemeral Public Key) Header Parameter</a> to be transmitted in the JWE.</li>
          *     <li>Generates a new secure-random content encryption {@link SecretKey} suitable for use with a
-         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#keyBuilder()}).</li>
+         *      specified {@link AeadAlgorithm} (using {@link AeadAlgorithm#key()}).</li>
          *     <li>Encrypts this newly-generated {@code SecretKey} with the {@code A256KW} key wrap
          *      algorithm using the derived symmetric Key Encryption Key from step {@code #3}, producing encrypted key
          *      ciphertext.</li>
@@ -1041,7 +1041,7 @@ public final class Jwts {
 
     /**
      * <p><b>Deprecated since JJWT_RELEASE_VERSION in favor of
-     * {@code Jwts.}{@link #claims()}{@code .set(map).build()}</b>.
+     * {@code Jwts.}{@link #claims()}{@code .add(map).build()}</b>.
      * This method will be removed before 1.0.</p>
      *
      * <p>Returns a new {@link Claims} instance populated with the specified name/value pairs.</p>
@@ -1053,16 +1053,7 @@ public final class Jwts {
      */
     @Deprecated
     public static Claims claims(Map<String, Object> claims) {
-        return claims().set(claims).build();
-    }
-
-    /**
-     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
-     *
-     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
-     */
-    public static JwtParserBuilder parser() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
+        return claims().add(claims).build();
     }
 
     /**
@@ -1074,6 +1065,15 @@ public final class Jwts {
      */
     public static JwtBuilder builder() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder");
+    }
+
+    /**
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
+     *
+     * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
+     */
+    public static JwtParserBuilder parser() {
+        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
     }
 
     /**

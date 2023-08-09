@@ -36,23 +36,23 @@ class TestKeys {
     // =======================================================
     // Secret Keys
     // =======================================================
-    static SecretKey HS256 = Jwts.SIG.HS256.keyBuilder().build()
-    static SecretKey HS384 = Jwts.SIG.HS384.keyBuilder().build()
-    static SecretKey HS512 = Jwts.SIG.HS512.keyBuilder().build()
+    static SecretKey HS256 = Jwts.SIG.HS256.key().build()
+    static SecretKey HS384 = Jwts.SIG.HS384.key().build()
+    static SecretKey HS512 = Jwts.SIG.HS512.key().build()
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static Collection<SecretKey> AGCM
     static {
-        A128GCM = A128KW = A128GCMKW = Jwts.ENC.A128GCM.keyBuilder().build()
-        A192GCM = A192KW = A192GCMKW = Jwts.ENC.A192GCM.keyBuilder().build()
-        A256GCM = A256KW = A256GCMKW = Jwts.ENC.A256GCM.keyBuilder().build()
+        A128GCM = A128KW = A128GCMKW = Jwts.ENC.A128GCM.key().build()
+        A192GCM = A192KW = A192GCMKW = Jwts.ENC.A192GCM.key().build()
+        A256GCM = A256KW = A256GCMKW = Jwts.ENC.A256GCM.key().build()
         AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
 
-    static SecretKey A128CBC_HS256 = Jwts.ENC.A128CBC_HS256.keyBuilder().build()
-    static SecretKey A192CBC_HS384 = Jwts.ENC.A192CBC_HS384.keyBuilder().build()
-    static SecretKey A256CBC_HS512 = Jwts.ENC.A256CBC_HS512.keyBuilder().build()
+    static SecretKey A128CBC_HS256 = Jwts.ENC.A128CBC_HS256.key().build()
+    static SecretKey A192CBC_HS384 = Jwts.ENC.A192CBC_HS384.key().build()
+    static SecretKey A256CBC_HS512 = Jwts.ENC.A256CBC_HS512.key().build()
     static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
 
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()

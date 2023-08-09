@@ -29,7 +29,7 @@ import static org.junit.Assert.fail
 @SuppressWarnings('SpellCheckingInspection')
 class Pbes2HsAkwAlgorithmTest {
 
-    private static Password KEY = Keys.forPassword("12345678".toCharArray())
+    private static Password KEY = Keys.password("12345678".toCharArray())
     private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwts.KEY.PBES2_HS256_A128KW,
                                                      Jwts.KEY.PBES2_HS384_A192KW,
                                                      Jwts.KEY.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
@@ -38,7 +38,7 @@ class Pbes2HsAkwAlgorithmTest {
     void testInsufficientIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
-            def header = Jwts.header().setPbes2Count(iterations) as DefaultJweHeaderMutator
+            def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
             KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwts.ENC.A256GCM)
             try {
@@ -66,8 +66,8 @@ class Pbes2HsAkwAlgorithmTest {
         //double scale = 0.5035246727
 
         def password = 'hellowor'.toCharArray()
-        def header = new DefaultJweHeader().setPbes2Count(iterations)
-        def key = Keys.forPassword(password)
+        def header = new DefaultJweHeader().pbes2Count(iterations)
+        def key = Keys.password(password)
         def req = new DefaultKeyRequest(null, null, key, header, Jwts.ENC.A128GCM)
         int sum = 0
         for (int i = 0; i < tries; i++) {

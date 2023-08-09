@@ -68,8 +68,8 @@ public final class Keys {
                 "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                 "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                 "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                "output size).  Consider using the Jwts.SIG.HS256.keyBuilder() method (or HS384.keyBuilder() " +
-                "or HS512.keyBuilder()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
+                "output size).  Consider using the Jwts.SIG.HS256.key() builder (or HS384.key() " +
+                "or HS512.key()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
                 "algorithm.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
         throw new WeakKeyException(msg);
     }
@@ -78,12 +78,12 @@ public final class Keys {
      * <p><b>Deprecation Notice</b></p>
      *
      * <p>As of JJWT JJWT_RELEASE_VERSION, symmetric (secret) key algorithm instances can generate a key of suitable
-     * length for that specific algorithm by calling their {@code keyBuilder()} method directly. For example:</p>
+     * length for that specific algorithm by calling their {@code key()} builder method directly. For example:</p>
      *
      * <pre><code>
-     * {@link Jwts.SIG#HS256}.keyBuilder().build();
-     * {@link Jwts.SIG#HS384}.keyBuilder().build();
-     * {@link Jwts.SIG#HS512}.keyBuilder().build();
+     * {@link Jwts.SIG#HS256}.key().build();
+     * {@link Jwts.SIG#HS384}.key().build();
+     * {@link Jwts.SIG#HS512}.key().build();
      * </code></pre>
      *
      * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
@@ -124,7 +124,7 @@ public final class Keys {
      * @throws IllegalArgumentException for any input value other than {@link io.jsonwebtoken.SignatureAlgorithm#HS256},
      *                                  {@link io.jsonwebtoken.SignatureAlgorithm#HS384}, or {@link io.jsonwebtoken.SignatureAlgorithm#HS512}
      * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link MacAlgorithm} instance's
-     * {@link MacAlgorithm#keyBuilder() keyBuilder()} method directly.
+     * {@link MacAlgorithm#key() key()} builder method directly.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -135,21 +135,21 @@ public final class Keys {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
         }
-        return ((MacAlgorithm) salg).keyBuilder().build();
+        return ((MacAlgorithm) salg).key().build();
     }
 
     /**
      * <p><b>Deprecation Notice</b></p>
      *
      * <p>As of JJWT JJWT_RELEASE_VERSION, asymmetric key algorithm instances can generate KeyPairs of suitable strength
-     * for that specific algorithm by calling their {@code keyPairBuilder()} method directly. For example:</p>
+     * for that specific algorithm by calling their {@code keyPair()} builder method directly. For example:</p>
      *
      * <blockquote><pre>
-     * Jwts.SIG.{@link Jwts.SIG#RS256 RS256}.keyPairBuilder().build();
-     * Jwts.SIG.{@link Jwts.SIG#RS384 RS384}.keyPairBuilder().build();
-     * Jwts.SIG.{@link Jwts.SIG#RS512 RS512}.keyPairBuilder().build();
+     * Jwts.SIG.{@link Jwts.SIG#RS256 RS256}.keyPair().build();
+     * Jwts.SIG.{@link Jwts.SIG#RS384 RS384}.keyPair().build();
+     * Jwts.SIG.{@link Jwts.SIG#RS512 RS512}.keyPair().build();
      * ... etc ...
-     * Jwts.SIG.{@link Jwts.SIG#ES512 ES512}.keyPairBuilder().build();</pre></blockquote>
+     * Jwts.SIG.{@link Jwts.SIG#ES512 ES512}.keyPair().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
@@ -229,7 +229,7 @@ public final class Keys {
      * @throws IllegalArgumentException if {@code alg} is not an asymmetric algorithm
      * @deprecated since JJWT_RELEASE_VERSION in favor of your preferred
      * {@link io.jsonwebtoken.security.SignatureAlgorithm} instance's
-     * {@link SignatureAlgorithm#keyPairBuilder() keyPairBuilder()} method directly.
+     * {@link SignatureAlgorithm#keyPair() keyPair()} builder method directly.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -241,7 +241,7 @@ public final class Keys {
             throw new IllegalArgumentException(msg);
         }
         SignatureAlgorithm asalg = ((SignatureAlgorithm) salg);
-        return asalg.keyPairBuilder().build();
+        return asalg.keyPair().build();
     }
 
     /**
@@ -264,7 +264,7 @@ public final class Keys {
      * @see Password#toCharArray()
      * @since JJWT_RELEASE_VERSION
      */
-    public static Password forPassword(char[] password) {
-        return Classes.invokeStatic(BRIDGE_CLASS, "forPassword", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
+    public static Password password(char[] password) {
+        return Classes.invokeStatic(BRIDGE_CLASS, "password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
     }
 }

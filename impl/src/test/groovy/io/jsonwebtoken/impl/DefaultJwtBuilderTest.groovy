@@ -70,7 +70,7 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            KeyPairBuilder keyPairBuilder() {
+            KeyPairBuilder keyPair() {
                 throw new IllegalStateException("should not be called during build")
             }
 
@@ -81,8 +81,8 @@ class DefaultJwtBuilderTest {
         }
 
         replay provider
-        def b = new DefaultJwtBuilder().setProvider(provider)
-                .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
+        def b = new DefaultJwtBuilder().provider(provider)
+                .setSubject('me').signWith(Jwts.SIG.HS256.key().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -113,7 +113,7 @@ class DefaultJwtBuilderTest {
             }
 
             @Override
-            KeyPairBuilder keyPairBuilder() {
+            KeyPairBuilder keyPair() {
                 throw new IllegalStateException("should not be called during build")
             }
 
@@ -123,8 +123,8 @@ class DefaultJwtBuilderTest {
             }
         }
 
-        def b = new DefaultJwtBuilder().setSecureRandom(random)
-                .setSubject('me').signWith(Jwts.SIG.HS256.keyBuilder().build(), alg)
+        def b = new DefaultJwtBuilder().random(random)
+                .setSubject('me').signWith(Jwts.SIG.HS256.key().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]
@@ -132,44 +132,53 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetHeader() {
-        def h = Jwts.header().set('foo', 'bar').build()
+        def h = Jwts.header().add('foo', 'bar').build()
         builder.setHeader(h)
-        assertEquals h, builder.buildHeader()
+        assertEquals h, builder.headerBuilder.build()
     }
 
     @Test
     void testSetHeaderFromMap() {
         def m = [foo: 'bar']
         builder.setHeader(m)
-        assertEquals builder.buildHeader().foo, 'bar'
+        assertEquals builder.headerBuilder.build().foo, 'bar'
     }
 
     @Test
     void testSetHeaderParams() {
         def m = [a: 'b', c: 'd']
         builder.setHeaderParams(m)
-        assertEquals builder.buildHeader().a, 'b'
-        assertEquals builder.buildHeader().c, 'd'
+        assertEquals builder.headerBuilder.build().a, 'b'
+        assertEquals builder.headerBuilder.build().c, 'd'
     }
 
     @Test
     void testSetHeaderParam() {
         builder.setHeaderParam('foo', 'bar')
-        assertEquals builder.buildHeader().foo, 'bar'
+        assertEquals builder.headerBuilder.build().foo, 'bar'
     }
 
     @Test
     void testSetClaims() {
-        Claims c = Jwts.claims().set('foo', 'bar').build()
+        Claims c = Jwts.claims().add('foo', 'bar').build()
         builder.setClaims(c)
         assertEquals c, builder.claimsBuilder
+    }
+
+    @Test
+    void testSetClaimsMap() {
+        def m = [foo: 'bar']
+        builder.setClaims(m)
+        assertEquals 1, builder.claimsBuilder.size()
+        assertTrue builder.claimsBuilder.containsKey('foo')
+        assertTrue builder.claimsBuilder.containsValue('bar')
     }
 
     @Test
     void testAddClaims() {
         def b = new DefaultJwtBuilder()
         def c = Jwts.claims([initial: 'initial'])
-        b.setClaims(c)
+        b.claims().add(c)
         def c2 = [foo: 'bar', baz: 'buz']
         b.addClaims(c2)
         assertEquals 'initial', b.claimsBuilder.get('initial')
@@ -203,8 +212,8 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testExistingClaimsAndSetClaim() {
-        Claims c = Jwts.claims().set('foo', 'bar').build()
-        builder.setClaims(c)
+        Claims c = Jwts.claims().add('foo', 'bar').build()
+        builder.claims().add(c)
         assertEquals c, builder.claimsBuilder
         assertEquals builder.claimsBuilder.size(), 1
         assertEquals c.size(), 1
@@ -253,7 +262,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactWithJwsHeader() {
         def b = new DefaultJwtBuilder()
-        b.header().setKeyId('a')
+        b.header().keyId('a')
         b.setPayload('foo')
         def alg = SignatureAlgorithm.HS256
         def key = Keys.secretKeyFor(alg)
@@ -273,7 +282,7 @@ class DefaultJwtBuilderTest {
                 throw new SerializationException('foo', new Exception())
             }
         }
-        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
+        def b = new DefaultJwtBuilder().serializer(serializer)
         try {
             b.setPayload('foo').compact()
             fail()
@@ -306,7 +315,7 @@ class DefaultJwtBuilderTest {
     void testSignWithKeyOnly() {
 
         def b = new DefaultJwtBuilder()
-        b.header().setKeyId('a')
+        b.header().keyId('a')
         b.setPayload('foo')
 
         def key = KeyGenerator.getInstance('HmacSHA256').generateKey()
@@ -417,8 +426,8 @@ class DefaultJwtBuilderTest {
                 return null
             }
         }
-        def b = new DefaultJwtBuilder().base64UrlEncodeWith(encoder)
-        assertSame encoder, b.base64UrlEncoder
+        def b = new DefaultJwtBuilder().encoder(encoder)
+        assertSame encoder, b.encoder
     }
 
     @Test(expected = IllegalArgumentException)
@@ -474,7 +483,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactSimplestPayload() {
         def enc = Jwts.ENC.A128GCM
-        def key = enc.keyBuilder().build()
+        def key = enc.key().build()
         def jwe = builder.setPayload("me").encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseContentJwe(jwe)
         assertEquals 'me', new String(jwt.getPayload(), StandardCharsets.UTF_8)
@@ -483,7 +492,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCompactSimplestClaims() {
         def enc = Jwts.ENC.A128GCM
-        def key = enc.keyBuilder().build()
+        def key = enc.key().build()
         def jwe = builder.setSubject('joe').encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseClaimsJwe(jwe)
         assertEquals 'joe', jwt.getPayload().getSubject()

@@ -69,7 +69,7 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      *
      * <p>Per
      * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">JWK RFC 7517, Section 4.3, last paragraph</a>,
-     * the {@code use} (Public Key Use) and {@link #setOperations(Set) key_ops (Key Operations)} members
+     * the {@code use} (Public Key Use) and {@link #operations(Set) key_ops (Key Operations)} members
      * <em>SHOULD NOT</em> be used together; however, if both are used, the information they convey <em>MUST</em> be
      * consistent. Applications should specify which of these members they use, if either is to be used by the
      * application.</p>
@@ -78,5 +78,5 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if the {@code use} value is {@code null} or empty.
      */
-    T setPublicKeyUse(String use) throws IllegalArgumentException;
+    T publicKeyUse(String use) throws IllegalArgumentException;
 }

@@ -41,7 +41,7 @@ public class AbstractX509Context<T extends X509Mutator<T>> extends FieldMap impl
     }
 
     @Override
-    public T setX509Url(URI uri) {
+    public T x509Url(URI uri) {
         put(AbstractAsymmetricJwk.X5U, uri);
         return self();
     }
@@ -52,7 +52,7 @@ public class AbstractX509Context<T extends X509Mutator<T>> extends FieldMap impl
     }
 
     @Override
-    public T setX509CertificateChain(List<X509Certificate> chain) {
+    public T x509CertificateChain(List<X509Certificate> chain) {
         put(AbstractAsymmetricJwk.X5C, chain);
         return self();
     }
@@ -63,7 +63,7 @@ public class AbstractX509Context<T extends X509Mutator<T>> extends FieldMap impl
     }
 
     @Override
-    public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
+    public T x509CertificateSha1Thumbprint(byte[] thumbprint) {
         put(AbstractAsymmetricJwk.X5T, thumbprint);
         return self();
     }
@@ -74,7 +74,7 @@ public class AbstractX509Context<T extends X509Mutator<T>> extends FieldMap impl
     }
 
     @Override
-    public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
+    public T x509CertificateSha256Thumbprint(byte[] thumbprint) {
         put(AbstractAsymmetricJwk.X5T_S256, thumbprint);
         return self();
     }

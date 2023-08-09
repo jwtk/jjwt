@@ -25,7 +25,7 @@ import java.util.Map;
  * A builder to construct a {@link JwkParser}.  Example usage:
  * <blockquote><pre>
  * Jwk&lt;?&gt; jwk = Jwks.parser()
- *         .setProvider(aJcaProvider)         // optional
+ *         .provider(aJcaProvider)            // optional
  *         .deserializeJsonWith(deserializer) // optional
  *         .build()
  *         .parse(jwkString);</pre></blockquote>
@@ -42,7 +42,7 @@ public interface JwkParserBuilder extends Builder<JwkParser> {
      *                 if the JCA subsystem preferred provider should be used.
      * @return the builder for method chaining.
      */
-    JwkParserBuilder setProvider(Provider provider);
+    JwkParserBuilder provider(Provider provider);
 
     /**
      * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  The

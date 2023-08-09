@@ -73,7 +73,7 @@ class RFC8037AppendixATest {
         PrivateKey privKey = privJwk.toKey() as PrivateKey
         PublicKey pubKey = privJwk.toPublicJwk().toKey() as PublicKey
 
-        def builtPrivJwk = Jwks.builder().forKey(privKey).setPublicKey(pubKey).build()
+        def builtPrivJwk = Jwks.builder().key(privKey).publicKey(pubKey).build()
 
         //output should equal RFC input:
         assertEquals privJwk, builtPrivJwk
@@ -102,7 +102,7 @@ class RFC8037AppendixATest {
     void test_Sections_A4_and_A5() {
         def privJwk = a1Jwk()
         String compact = Jwts.builder()
-                .setContent(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
+                .content(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
                 .signWith(privJwk.toKey() as PrivateKey, Jwts.SIG.EdDSA)
                 .compact()
         assertEquals A4_JWS_COMPACT, compact
@@ -128,7 +128,7 @@ class RFC8037AppendixATest {
         def bobPrivKeyHex = '5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb'
 
         //convert these two values to a JWK for convenient reference:
-        def bobPrivJwk = Jwks.builder().set([
+        def bobPrivJwk = Jwks.builder().add([
                 kty: "OKP", crv: "X25519", kid: "Bob",
                 x  : bobPubKeyHex.decodeHex().encodeBase64Url() as String,
                 d  : bobPrivKeyHex.decodeHex().encodeBase64Url() as String
@@ -144,7 +144,7 @@ class RFC8037AppendixATest {
         0d bf 3a 0d 26 38 1a f4 eb a4 a9 8e aa 9b 4e 6a''')
 
         //Turn these two values into a Java KeyPair, and ensure it is used during key algorithm execution:
-        final OctetPrivateJwk ephemJwk = Jwks.builder().set([
+        final OctetPrivateJwk ephemJwk = Jwks.builder().add([
                 kty: "OKP",
                 crv: "X25519",
                 x  : rfcEphemeralPubKeyHex.decodeHex().encodeBase64Url() as String,
@@ -165,7 +165,7 @@ class RFC8037AppendixATest {
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
         String jwe = Jwts.builder()
-                .setHeaderParam('kid', bobPrivJwk.getId())
+                .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A128GCM)
                 .compact()
@@ -215,7 +215,7 @@ class RFC8037AppendixATest {
         def bobPrivKeyHex = '1c306a7ac2a0e2e0990b294470cba339e6453772b075811d8fad0d1d6927c120bb5ee8972b0d3e21374c9c921b09d1b0366f10b65173992d'
 
         //convert these two values to a JWK for convenient reference:
-        def bobPrivJwk = Jwks.builder().set([
+        def bobPrivJwk = Jwks.builder().add([
                 kty: "OKP", crv: "X448", kid: "Dave", // "Dave" instead of expected "Bob"
                 x  : bobPubKeyHex.decodeHex().encodeBase64Url() as String,
                 d  : bobPrivKeyHex.decodeHex().encodeBase64Url() as String
@@ -235,7 +235,7 @@ class RFC8037AppendixATest {
         17 7f 80 e5 32 c4 1f a0''')
 
         //Turn these two values into a Java KeyPair, and ensure it is used during key algorithm execution:
-        final OctetPrivateJwk ephemJwk = Jwks.builder().set([
+        final OctetPrivateJwk ephemJwk = Jwks.builder().add([
                 kty: "OKP",
                 crv: "X448",
                 x  : rfcEphemeralPubKeyHex.decodeHex().encodeBase64Url() as String,
@@ -256,7 +256,7 @@ class RFC8037AppendixATest {
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
         String jwe = Jwts.builder()
-                .setHeaderParam('kid', bobPrivJwk.getId()) //value will be "Dave" as noted above
+                .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .setIssuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A256GCM)
                 .compact()

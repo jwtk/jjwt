@@ -20,6 +20,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -55,7 +56,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setProvider(Provider provider);
+    JwtBuilder provider(Provider provider);
 
     /**
      * Sets the {@link SecureRandom} to use during cryptographic signing or encryption operations, or {@code null} if
@@ -66,95 +67,125 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setSecureRandom(SecureRandom secureRandom);
+    JwtBuilder random(SecureRandom secureRandom);
 
     /**
-     * Returns the {@link JwtBuilder.Header} to use to modify the constructed JWT's header name/value pairs as desired.
-     * When finished, callers may return to JWT construction via the {@link JwtBuilder.Header#and() and()} method.
+     * Returns the {@code Header} to use to modify the constructed JWT's header name/value pairs as desired.
+     * When finished, callers may return to JWT construction via the {@link BuilderHeader#and() and()} method.
      * For example:
      *
      * <blockquote><pre>
      * String jwt = Jwts.builder()
      *
      *     <b>.header()
-     *         .setKeyId("keyId")
-     *         .set(myHeaderMap)
-     *         // ... other header params ...
-     *         .{@link JwtBuilder.Header#and() and()}</b> //return back to the JwtBuilder
+     *         .keyId("keyId")
+     *         .add("aName", aValue)
+     *         .add(myHeaderMap)
+     *         // ... etc ...
+     *         .{@link BuilderHeader#and() and()}</b> //return back to the JwtBuilder
      *
-     *     .setSubject("Joe") // resume JwtBuilder calls
+     *     .subject("Joe") // resume JwtBuilder calls
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
-     * @return the {@link JwtBuilder.Header} to use for header construction.
+     * @return the {@link BuilderHeader} to use for header construction.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder.Header header();
+    BuilderHeader header();
 
     /**
-     * Sets (and replaces) any existing header with the specified name/value pairs.  If you do not want to replace the
-     * existing header and only want to append to it, call
-     * {@link #header()}{@code .}{@link io.jsonwebtoken.lang.MapMutator#set(Map) set(map)}
-     * instead.
+     * Per standard Java idiom 'setter' conventions, this method sets (and fully replaces) any existing header with the
+     * specified name/value pairs.  This is a wrapper method for:
+     *
+     * <blockquote><pre>
+     * {@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</pre></blockquote>
+     *
+     * <p>If you do not want to replace the existing header and only want to append to it,
+     * call <code>{@link #header()}.{@link io.jsonwebtoken.lang.MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code> instead.</p>
      *
      * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
      * @return the builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * <code>{@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>
+     * (to replace all header parameters) or
+     * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>
+     * to only append the {@code map} entries.  This method will be removed before the 1.0 release.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     JwtBuilder setHeader(Map<String, ?> map);
 
     /**
-     * Applies the specified name/value pairs to the header.  If a header does not yet exist at the time this method
-     * is called, one will be created automatically before applying the name/value pairs.
+     * Adds the specified name/value pairs to the header.  Any parameter with an empty or null value will remove the
+     * entry from the header. This is a wrapper method for:
+     * <blockquote><pre>
+     * {@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * @param params the header name/value pairs to append to the header.
      * @return the builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>.
+     * This method will be removed before the 1.0 release.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     JwtBuilder setHeaderParams(Map<String, ?> params);
 
     /**
-     * Applies the specified name/value pair to the header.  If a header does not yet exist at the time this method
-     * is called, one will be created automatically before applying the name/value pair.
+     * Adds the specified name/value pair to the header. If the value is {@code null} or empty, the parameter will
+     * be removed from the header entirely. This is a wrapper method for:
+     * <blockquote><pre>
+     * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * @param name  the header parameter name
      * @param value the header parameter value
      * @return the builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of <code>
+     * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderHeader#and() and()}</code>.
+     * This method will be removed before the 1.0 release.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     JwtBuilder setHeaderParam(String name, Object value);
 
     /**
      * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
-     * {@link Header#setContentType(String) contentType} header value so the JWT recipient may inspect that value to
+     * {@link BuilderHeader#contentType(String) contentType} header value so the JWT recipient may inspect that value to
      * determine how to convert the byte array to the final data type as desired. In this case, consider using
-     * {@link #setContent(byte[], String)} instead.
+     * {@link #content(byte[], String)} instead.
      *
-     * <p>This is a convenience method that is effectively the same as:</p>
+     * <p>This is a wrapper method for:</p>
      * <blockquote><pre>
-     * {@link #setContent(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
+     * {@link #content(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
      *
-     * <p>If you want the JWT payload to be JSON, use the
-     * {@link #setClaims(Claims)} or {@link #setClaims(java.util.Map)} methods instead.</p>
+     * <p>If you want the JWT payload to be JSON, use the {@link #claims()} method instead.</p>
      *
-     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <p>This method is mutually exclusive of the {@link #claims()} and {@link #claim(String, Object)}
+     * methods.  Either {@code claims} or {@code content}/{@code payload} method variants may be used, but not both.</p>
      *
      * @param payload the string used to set UTF-8-encoded bytes as the JWT payload.
      * @return the builder for method chaining.
-     * @see #setContent(byte[])
-     * @see #setContent(byte[], String)
-     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #setContent(byte[])} or {@link #setContent(byte[], String)}
+     * @see #content(byte[])
+     * @see #content(byte[], String)
+     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #content(byte[])} or {@link #content(byte[], String)}
      * because both Claims and Content are technically 'payloads', so this method name is misleading.  This method will
      * be removed before the 1.0 release.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder setPayload(String payload);
 
     /**
      * Sets the JWT payload to be the specified content byte array.
      *
+     * <p>This method is mutually exclusive of the {@link #claims()} and {@link #claim(String, Object)}
+     * methods.  Either {@code claims} or {@code content} method variants may be used, but not both.</p>
+     *
      * <p><b>Content Type Recommendation</b></p>
      *
      * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use
      * the given byte array without additional metadata, it is strongly recommended to use the
-     * {@link #setContent(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
+     * {@link #content(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
      * can inspect the {@code cty} header to know how to handle the byte array without ambiguity.</p>
      *
      * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
@@ -163,13 +194,16 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setContent(byte[] content);
+    JwtBuilder content(byte[] content);
 
     /**
      * Convenience method that sets the JWT payload to be the specified content byte array and also sets the
-     * {@link Header#setContentType(String) contentType} header value to a compact {@code cty} media type
+     * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} media type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods.  Either {@code claims} or {@code content} method variants may be used, but not both.</p>
      *
      * <p><b>Compact Media Type Identifier</b></p>
      *
@@ -178,18 +212,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">JWT specification recommendations</a>.</p>
      *
      * <p>If for some reason you do not wish to adhere to the JWT specification recommendation, do not call this
-     * method - instead call {@link #setContent(byte[])} and set the header's
-     * {@link Header#setContentType(String) contentType} independently.  For example:</p>
+     * method - instead call {@link #content(byte[])} and set the header's
+     * {@link BuilderHeader#contentType(String) contentType} independently.  For example:</p>
      *
      * <blockquote><pre>
      * Jwts.builder()
-     *     .header().setContentType("application/whatever").and()
-     *     .setContent(byteArray)
+     *     .header().contentType("application/whatever").and()
+     *     .content(byteArray)
      *     ...
      *     .build();</pre></blockquote>
      *
-     * <p>If you want the JWT payload to be JSON claims, use the {@link #setClaims(Claims)} or
-     * {@link #setClaims(java.util.Map)} methods instead.</p>
+     * <p>If you want the JWT payload to be JSON claims, use the {@link #claim(String, Object)} or
+     * {@link #claims()} methods instead.</p>
      *
      * <p>Note that the content and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
@@ -199,258 +233,75 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @throws IllegalArgumentException if either {@code payload} or {@code cty} are null or empty.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setContent(byte[] content, String cty) throws IllegalArgumentException;
+    JwtBuilder content(byte[] content, String cty) throws IllegalArgumentException;
 
     /**
-     * Sets the JWT payload to be a JSON Claims instance.  If you do not want the JWT payload to be JSON claims and
-     * instead want it to be a byte array representing any type of content, use the {@link #setContent(byte[])}
-     * method instead.
+     * Returns the JWT {@code Claims} payload to modify as desired. When finished, callers may
+     * return to {@code JwtBuilder} configuration via the {@link BuilderClaims#and() and()} method.
+     * For example:
      *
-     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <blockquote><pre>
+     * String jwt = Jwts.builder()
      *
-     * @param claims the JWT claims to be set as the JWT payload.
-     * @return the builder for method chaining.
+     *     <b>.claims()
+     *         .subject("Joe")
+     *         .audience("you")
+     *         .issuer("me")
+     *         .add("customClaim", customValue)
+     *         .add(myClaimsMap)
+     *         // ... etc ...
+     *         .{@link BuilderClaims#and() and()}</b> //return back to the JwtBuilder
+     *
+     *     .signWith(key) // resume JwtBuilder calls
+     *     // ... etc ...
+     *     .compact();</pre></blockquote>
+     *
+     * @return the {@link BuilderClaims} to use for Claims construction.
+     * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder setClaims(Claims claims);
+    BuilderClaims claims();
 
     /**
-     * Sets the JWT payload to be a JSON Claims instance populated by the specified name/value pairs.  If you do not
-     * want the JWT payload to be JSON claims and instead want it to be a byte array for any content, use the
-     * {@link #setContent(byte[])} or {@link #setContent(byte[], String)} methods instead.
+     * Sets (and replaces) the JWT Claims payload with the specified name/value pairs. If you do not want the JWT
+     * payload to be JSON claims and instead want it to be a byte array for any content, use the
+     * {@link #content(byte[])} or {@link #content(byte[], String)} methods instead.
      *
-     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
      * @param claims the JWT Claims to be set as the JWT payload.
      * @return the builder for method chaining.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #claims()} method.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     JwtBuilder setClaims(Map<String, ?> claims);
 
     /**
-     * Adds all given name/value pairs to the JSON Claims in the payload. If a Claims instance does not yet exist at the
-     * time this method is called, one will be created automatically before applying the name/value pairs.
+     * Adds/appends all given name/value pairs to the JSON Claims in the payload.
+     * <p>
+     * This is a convenience wrapper for:
      *
-     * <p>The payload and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
      *
      * @param claims the JWT Claims to be added to the JWT payload.
      * @return the builder for method chaining.
      * @since 0.8
+     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * <code>{@link #claims()}.{@link BuilderClaims#add(Map) add(Map)}.{@link BuilderClaims#and() and()}</code>.
+     * This method will be removed before the 1.0 release.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     JwtBuilder addClaims(Map<String, ?> claims);
 
     /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.1">
-     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getIssuer() issuer} field with the specified value.  This allows you to write
-     * code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().setIssuer("Joe").compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setIssuer("Joe").build();
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
-     *
-     * @param iss the JWT {@code iss} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setIssuer(String iss);
-
-    /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.2">
-     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getSubject() subject} field with the specified value.  This allows you to write
-     * code like this:</p>
-     *
+     * Sets a JWT claim, overwriting any existing claim with the same name. A {@code null} or empty
+     * value will remove the claim entirely. This is a convenience wrapper for:
      * <blockquote><pre>
-     * String jwt = Jwts.builder().setSubject("Me").compact();</pre></blockquote>
-     *
-     * <p>instead of this:</p>
-     * <blockquote><pre>
-     * Claims claims = Jwts.claims().setSubject("Me").build();
-     * String jwt = Jwts.builder().setClaims(claims).compact();</pre></blockquote>
-     * <p>if desired.</p>
-     *
-     * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setSubject(String sub);
-
-    /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.3">
-     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getAudience() audience} field with the specified value.  This allows you to write
-     * code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().setAudience("You").compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setAudience("You");
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
-     *
-     * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setAudience(String aud);
-
-    /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.4">
-     * <code>exp</code></a> (expiration) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>A JWT obtained after this timestamp should not be used.</p>
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getExpiration() expiration} field with the specified value.  This allows
-     * you to write code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().setExpiration(new Date(System.currentTimeMillis() + 3600000)).compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setExpiration(new Date(System.currentTimeMillis() + 3600000));
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
-     *
-     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setExpiration(Date exp);
-
-    /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.5">
-     * <code>nbf</code></a> (not before) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>A JWT obtained before this timestamp should not be used.</p>
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getNotBefore() notBefore} field with the specified value.  This allows
-     * you to write code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().setNotBefore(new Date()).compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setNotBefore(new Date());
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
-     *
-     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setNotBefore(Date nbf);
-
-    /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.6">
-     * <code>iat</code></a> (issued at) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>The value is the timestamp when the JWT was created.</p>
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getIssuedAt() issuedAt} field with the specified value.  This allows
-     * you to write code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().setIssuedAt(new Date()).compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setIssuedAt(new Date());
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
-     *
-     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setIssuedAt(Date iat);
-
-    /**
-     * Sets the JWT Claims <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-4.1.7">
-     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>The value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
-     * manner that ensures that there is a negligible probability that the same value will be accidentally
-     * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.</p>
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set
-     * the Claims {@link Claims#getId() id} field with the specified value.  This allows
-     * you to write code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().setId(UUID.randomUUID().toString()).compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().setId(UUID.randomUUID().toString());
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
-     *
-     * @param jti the JWT {@code jti} (id) value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     * @since 0.2
-     */
-    @Override
-    //only for better/targeted JavaDoc
-    JwtBuilder setId(String jti);
-
-    /**
-     * Sets a custom JWT Claims parameter value.  A {@code null} value will remove the property from the Claims.
-     *
-     * <p>This is a convenience method.  It will first ensure a Claims instance exists as the JWT payload and then set the
-     * named property on the Claims instance using the Claims {@link Claims#put(Object, Object) put} method. This allows
-     * you to write code like this:</p>
-     *
-     * <pre>
-     * String jwt = Jwts.builder().claim("aName", "aValue").compact();
-     * </pre>
-     *
-     * <p>instead of this:</p>
-     * <pre>
-     * Claims claims = Jwts.claims().put("aName", "aValue");
-     * String jwt = Jwts.builder().setClaims(claims).compact();
-     * </pre>
-     * <p>if desired.</p>
+     * {@link #claims()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param name  the JWT Claims property name
      * @param value the value to set for the specified Claims property name
@@ -458,6 +309,133 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.2
      */
     JwtBuilder claim(String name, Object value);
+
+    /**
+     * Adds all given name/value pairs to the JSON Claims in the payload, overwriting any existing claims
+     * with the same names.  If any name has a {@code null} or empty value, that claim will be removed from the
+     * Claims.  This is a convenience wrapper for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     *
+     * @param claims the JWT Claims to be added to the JWT payload.
+     * @return the builder instance for method chaining
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder claims(Map<String, ?> claims);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
+     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
+     * This is a convenience wrapper for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#issuer(String) issuer(iss)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param iss the JWT {@code iss} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder issuer(String iss);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2">
+     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
+     * This is a convenience wrapper for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#subject(String) subject(sub)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param sub the JWT {@code sub} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder subject(String sub);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
+     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
+     * This is a convenience wrapper for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder audience(String aud);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#expiration(Date) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder expiration(Date exp);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
+     * <code>nbf</code></a> (not before) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#notBefore(Date) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder setNotBefore(Date nbf);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
+     * <code>iat</code></a> (issued at) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is the timestamp when the JWT was created.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#issuedAt(Date) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder issuedAt(Date iat);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
+     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
+     * manner that ensures that there is a negligible probability that the same value will be accidentally
+     * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#id(String) id(jti)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param jti the JWT {@code jti} (id) value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    @Override
+    // for better/targeted JavaDoc
+    JwtBuilder id(String jti);
 
     /**
      * Signs the constructed JWT with the specified key using the key's <em>recommended signature algorithm</em>
@@ -760,7 +738,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
      *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
      *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's
-     *     {@link AeadAlgorithm#keyBuilder() keyBuilder}.</li>
+     *     {@link AeadAlgorithm#key() key()} builder.</li>
      * </ul>
      *
      * @param key the symmetric encryption key to use with the {@code enc} algorithm.
@@ -828,19 +806,35 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder compressWith(CompressionAlgorithm alg);
 
     /**
-     * Perform Base64Url encoding with the specified Encoder.
+     * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
      *
      * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
      * to specify a different encoder if you desire.</p>
      *
      * @param base64UrlEncoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
+     * @see #encoder(Encoder)
      * @since 0.10.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
+     * {@link #encoder(Encoder)} method.
      */
+    @Deprecated
     JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
 
     /**
-     * Performs object-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
+     * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
+     *
+     * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
+     * to specify a different encoder if necessar.</p>
+     *
+     * @param encoder the encoder to use when Base64Url-encoding
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder encoder(Encoder<byte[], String> encoder);
+
+    /**
+     * Performs Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
      * JWT/JWS/JWE headers and claims Maps to JSON strings as required by the JWT specification.
      *
      * <p>If this method is not called, JJWT will use whatever serializer it can find at runtime, checking for the
@@ -850,12 +844,29 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param serializer the serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since 0.10.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
+     * {@link #serializer(Serializer)} method.
      */
+    @Deprecated
     JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
 
     /**
+     * Perform Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
+     * JWT/JWS/JWE headers and Claims Maps to JSON strings as required by the JWT specification.
+     *
+     * <p>If this method is not called, JJWT will use whatever serializer it can find at runtime, checking for the
+     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+     * in the runtime classpath, an exception will be thrown when the {@link #compact()} method is invoked.</p>
+     *
+     * @param serializer the serializer to use when converting Map objects to JSON strings.
+     * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder serializer(Serializer<Map<String, ?>> serializer);
+
+    /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the
-     * <a href="https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-25#section-7">JWT Compact Serialization</a>
+     * <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-7.1">JWT Compact Serialization</a>
      * rules.
      *
      * @return A compact URL-safe JWT string.
@@ -863,13 +874,30 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     String compact();
 
     /**
-     * Editable header for use with a {@link JwtBuilder} that supports method chaining for any/all
+     * Claims for use with a {@link JwtBuilder} that supports method chaining for standard JWT Claims parameters.
+     * Once claims are configured, the associated {@link JwtBuilder} may be obtained with the {@link #and() and()}
+     * method for continued configuration.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims> {
+
+        /**
+         * Returns the associated JwtBuilder for continued configuration.
+         *
+         * @return the associated JwtBuilder for continued configuration.
+         */
+        JwtBuilder and();
+    }
+
+    /**
+     * Header for use with a {@link JwtBuilder} that supports method chaining for
      * standard JWT, JWS and JWE header parameters.  Once header parameters are configured, the associated
      * {@link JwtBuilder} may be obtained with the {@link #and() and()} method for continued configuration.
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Header extends JweHeaderMutator<Header>, X509Builder<Header> {
+    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader> {
 
         /**
          * Returns the associated JwtBuilder for continued configuration.

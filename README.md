@@ -149,13 +149,13 @@ enforcement.
 <a name="features"></a>
 ## Features
 
- * Fully functional on all JDKs and Android
+ * Fully functional on all Java 7+ JDKs and Android
  * Automatic security best practices and assertions
  * Easy to learn and read API
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with over 1,200+ tests and enforced 100% test code coverage.  Every single method, statement 
+ * Stable implementation with over 1,100+ tests and enforced 100% test code coverage.  Every single method, statement 
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
@@ -696,9 +696,9 @@ import java.security.Key;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
-SecretKey key = Jwts.SIG.HS256.keyBuilder().build();
+SecretKey key = Jwts.SIG.HS256.key().build();
 
-String jws = Jwts.builder().setSubject("Joe").signWith(key).compact();
+String jws = Jwts.builder().subject("Joe").signWith(key).compact();
 ```
 
 How easy was that!?
@@ -730,7 +730,7 @@ that pack a punch!
 > **Note**
 > 
 > **Type-safe JWTs:** To get a type-safe `Claims` JWT result, call the `parseClaimsJws` method (since there are many
-similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.]()
+similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
 
 But what if parsing or signature validation failed?  You can catch `JwtException` and react accordingly:
 
@@ -755,27 +755,31 @@ Now that we've had a quickstart 'taste' of how to create and parse JWTs, let's c
 You create a JWT as follows:
 
 1. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
-2. Call builder methods to set the `payload` [content](#jwt-content) or [claims](#jwt-claims) and any 
-   [`header` parameters](#jwt-header-builder) as desired.
-3. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT, respectively.
-4. Call the `compact()` method to produce the resulting compact JWT string.
+2. Optionally set any [`header` parameters](#jwt-header) as desired.
+3. Call builder methods to set the payload [content](#jwt-content) or [claims](#jwt-claims).
+4. Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT.
+5. Call the `compact()` method to produce the resulting compact JWT string.
 
 For example:
 
 ```java
 String jwt = Jwts.builder()                     // (1)
         
-    .setSubject("Bob")                          // (2) JSON Claims, or
-    //.setContent(aByteArray, "text/plain")     //     any byte[] content, with media type
+    .header()                                   // (2) optional
+        .keyId("aKeyId")
+        .and()
         
-    .signWith(signingKey)                       // (3) if signing, or
+    .subject("Bob")                             // (3) JSON Claims, or
+    //.content(aByteArray, "text/plain")        //     any byte[] content, with media type
+        
+    .signWith(signingKey)                       // (4) if signing, or
     //.encryptWith(key, keyAlg, encryptionAlg)  //     if encrypting
         
-    .compact();                                 // (4)
+    .compact();                                 // (5)
 ```
 
-* The JWT `payload` may be either `byte[]` content (via `setContent`) _or_ JSON Claims 
-(such as `setSubject`, `setClaims`, etc), but not both.
+* The JWT `payload` may be either `byte[]` content (via `content`) _or_ JSON Claims 
+(such as `subject`, `claims`, etc), but not both.
 * Either digital signatures (`signWith`) or encryption (`encryptWith`) may be used, but not both.
 
 > **Warning**
@@ -792,91 +796,122 @@ relevant to the JWT `payload`.  JJWT provides a number of ways of setting the en
 header parameters (name/value pairs).
 
 <a name="jwt-header-builder"></a><a name="jws-create-header-instance"></a> <!-- legacy anchors for old links -->
-#### Header Builder
+#### JwtBuilder Header
 
-The easiest and recommended way to set one or more JWT header parameters (name/value pairs) is to call 
-`JwtBuilder` `setHeader` with `Jwts.headerBuilder()`. For example:
+The easiest and recommended way to set one or more JWT header parameters (name/value pairs) is to use the
+`JwtBuilder`'s `header()` builder as desired, and then call its `and()` method to return back
+to the `JwtBuilder` for further configuration. For example:
 
 ```java
 String jwt = Jwts.builder()
         
-    .setHeader(Jwts.headerBuilder()   // <----
-        .setKeyId("aKeyId")
-        .setX509Url(aUri)
-        .put("someName", "anyValue")
-        .putAll(anotherMap)
+    .header()                        // <----
+        .keyId("aKeyId")
+        .x509Url(aUri)
+        .add("someName", anyValue)
+        .add(mapValues)
         // ... etc ...
-    )    
-    // ... etc ...
+        .and()                      // go back to the JwtBuilder
+        
+    .subject("Joe")                 // resume JwtBuilder calls...
+    // ... etc ...    
     .compact();
 ```
 
-In addition to type-safe setter methods, `Jwts.headerBuilder()` can also support arbitrary name/value pairs via
-`put` and `putAll` as shown above.  It can also support automatically calculating
-X.509 thumbprints and other builder-style benefits that the other `JwtBuilder` `setHeader`* methods do not support. 
-For this reason, `Jwts.headerBuilder()` is the recommended way to set a JWT header and is preferred over the other
-approaches listed next.
+The `JwtBuilder` `header()` builder also supports automatically calculating X.509 thumbprints and other builder-style benefits that
+a simple property getter/setter object would not do.
 
 > **Note**
-> 
-> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
-> as needed.
+>
+> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will always set them 
+> automatically as needed.
 
 <a name="jwt-header-params"></a>
-#### Header Parameters
-
-Another way of setting header parameters is to call `JwtBuilder` `setHeaderParam` one or more times as needed:
+##### Custom Header Parameters
+In addition to type-safe builder methods for standard header parameters, `JwtBuilder.header()` can also support 
+arbitrary name/value pairs via the `add` method:
 
 ```java
-String jwt = Jwts.builder()
-
-    .setHeaderParam("kid", "myKeyId")
-    
-    // ... etc ...
-
+Jwts.builder()
+        
+    .header()
+        .add("aHeaderName", aValue)
+        // ... etc ...
+        .and() // return to the JwtBuilder
+   
+// ... etc ...
 ```
-
-Each time `setHeaderParam` is called, it simply appends the key-value pair to an internal `Header` instance,
-potentially overwriting any existing identically-named key/value pair.
-
-The downside with this approach is that you lose any type-safe setter methods or additional builder utility methods
-available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
-
-> **Note**
-> 
-> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
-> as needed.
 
 <a name="jwt-header-map"></a><a name="jws-create-header-map"></a> <!-- legacy anchors for old links -->
-#### Header Map
-
-If you want to specify the entire header at once, and you don't want to use `Jwts.headerBuilder()`, you can use
-`JwtBuilder` `setHeader(Map)` method instead:
+##### Header Parameter Map
+The `add` method is also overloaded to support multiple parameters in a `Map`:
 
 ```java
-
-Map<String,Object> header = getMyHeaderMap(); //implement me
-
-String jwt = Jwts.builder()
-
-    .setHeader(header)
-    
-    // ... etc ...
-
+Jwts.builder()
+        
+    .header()
+        .add(multipleHeaderParamsMap)
+        // ... etc ...
+        .and() // return to the JwtBuilder
+   
+// ... etc ...
 ```
 
-> **Warning**
-> 
-> Per standard Java `setter` idioms, `setHeader` is a _full replacement_ operation - it will replace any
-> and all existing header name/value pairs.
+#### Jwts HeaderBuilder
 
-The downside with this approach is that you lose any type-safe setter methods or additional builder utility methods
-available on the `Jwts.headerBuilder()` such as `setContentType`,`setKeyId`, `withX509Sha256Thumbprint`, etc.
+Using `Jwts.builder().header()` shown above is the preferred way to modify a header when using the `JwtBuilder`.
 
-> **Note**
-> 
-> **Automatic Headers**: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will set them automatically
-> as needed.
+However, if you would like to create a 'standalone' `Header` outside of the context of using the `JwtBuilder`, you 
+can use `Jwts.header()` instead to return an independent `Header` builder.  For example:
+
+```java
+Header header = Jwts.header() 
+
+        .keyId("aKeyId")
+        .x509Url(aUri)
+        .add("someName", anyValue)
+        .add(mapValues)
+        // ... etc ...
+        
+        .build()  // <---- not 'and()'
+```
+
+There are only two differences between `Jwts.header()` and `Jwts.builder().header()`:
+1. `Jwts.header()` builds a 'detached' `Header` that is not associated with any particular JWT, whereas 
+   `Jwts.builder().header()` always modifies the header of the immediate JWT being constructed by its parent
+   `JwtBuilder`.
+
+
+2. `Jwts.header()` has a `build()` method to produce an explicit `Header` instance and 
+   `Jwts.builder().header()` does not (it has an `and()` method instead) because its parent `JwtBuilder` will implicitly
+   create the header instance when necessary.
+
+
+A standalone header might be useful if you want to aggregate common header parameters in a single 'template'
+instance so you don't have to repeat them for each `JwtBuilder` usage.  Then this 'template' `Header` can be used to 
+populate `JwtBuilder` usages by just appending it to the `JwtBuilder` header, for example:
+
+```java
+// perhaps somewhere in application configuration:
+Header commonHeaders = Jwts.header()
+    .issuer("My Company")
+    // ... etc ...
+    .build();
+
+// --------------------------------
+
+// somewhere else during actual Jwt construction:
+String jwt = Jwts.builder()
+
+    .header()
+        .add(commonHeaders)                   // <----
+        .add("specificHeader", specificValue) // jwt-specific headers...
+        .and()
+
+    .subject("whatever")
+    // ... etc ...
+    .compact();
+```
 
 <a name="jwt-payload"></a>
 ### JWT Payload
@@ -887,15 +922,15 @@ especially for representing identity claims.
 
 As a result, the `JwtBuilder` supports two distinct payload options:
 
-* `setContent` if you would like the `payload` to be arbitrary byte array content, and
-* `setClaims` (and supporting helper methods) if you would like the `payload` to be a JSON Claims `Object`.
+* `content` if you would like the payload to be arbitrary byte array content, or
+* `claims` (and supporting helper methods) if you would like the payload to be a JSON Claims `Object`.
 
-Either option may be used, but not both. Using both will cause `build()` to throw an exception.
+Either option may be used, but not both. Using both will cause `compact()` to throw an exception.
 
 <a name="jwt-content"></a>
 #### Arbitrary Content
 
-You can set the JWT `payload` to be any arbitrary byte array content by using the `JwtBuilder` `setContent` method.
+You can set the JWT payload to be any arbitrary byte array content by using the `JwtBuilder` `content` method.
 For example:
 
 ```java
@@ -903,47 +938,48 @@ byte[] content = "Hello World".getBytes(StandardCharsets.UTF_8);
 
 String jwt = Jwts.builder()
 
-    .setContent(content, "text/plain") // <---
+    .content(content, "text/plain") // <---
     
     // ... etc ...
         
     .build();
 ```
 
-Notice this particular example of `setContent` uses the two-argument convenience variant:
+Notice this particular example of `content` uses the two-argument convenience variant:
 1. The first argument is the actual byte content to set as the JWT payload
 2. The second argument is a String identifier of an IANA Media Type.
 
 The second argument will cause the `JwtBuilder` to automatically set the `cty` (Content Type) header according to the
 JWT specification's [recommended compact format](https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10).
 
-This two-argument variant is typically recommended over the single-argument `setContent(byte[])` method because it
+This two-argument variant is typically recommended over the single-argument `content(byte[])` method because it
 guarantees the JWT recipient can inspect the `cty` header to determine how to convert the `payload` byte array into
 a final form that the application can use.
 
 Without setting the `cty` header, the JWT recipient _must_ know via out-of-band (external) information how to process
 the byte array, which is usually less convenient and always requires code changes if the content format ever changes.
-For these reasons, it is strongly recommended to use the two-argument `setContent` method variant.
+For these reasons, it is strongly recommended to use the two-argument `content` method variant.
 
 <a name="jwt-claims"></a><a name="jws-create-claims"></a> <!-- legacy anchors for old links -->
 #### JWT Claims
 
-Instead of a content byte array, a JWT `payload` may contain assertions or claims for a JWT recipient. In 
-this case, the `payload` is a 'claims' JSON `Object`, and JJWT supports this with a type-safe `Claims` instance.
+Instead of a content byte array, a JWT payload may contain assertions or claims for a JWT recipient. In 
+this case, the payload is a `Claims` JSON `Object`, and JJWT supports claims creation with type-safe 
+builder methods.
 
 <a name="jwt-claims-standard"></a><a name="jws-create-claims-standard"></a> <!-- legacy anchors for old links -->
 ##### Standard Claims
 
-The `JwtBuilder` provides convenient setter methods for standard registered Claim names defined in the JWT
+The `JwtBuilder` provides convenient builder methods for standard registered Claim names defined in the JWT
 specification.  They are:
 
-* `setIssuer`: sets the [`iss` (Issuer) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.1)
-* `setSubject`: sets the [`sub` (Subject) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.2)
-* `setAudience`: sets the [`aud` (Audience) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.3)
-* `setExpiration`: sets the [`exp` (Expiration Time) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.4)
-* `setNotBefore`: sets the [`nbf` (Not Before) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.5)
-* `setIssuedAt`: sets the [`iat` (Issued At) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.6)
-* `setId`: sets the [`jti` (JWT ID) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.7)
+* `issuer`: sets the [`iss` (Issuer) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.1)
+* `subject`: sets the [`sub` (Subject) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.2)
+* `audience`: sets the [`aud` (Audience) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.3)
+* `expiration`: sets the [`exp` (Expiration Time) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.4)
+* `notBefore`: sets the [`nbf` (Not Before) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.5)
+* `issuedAt`: sets the [`iat` (Issued At) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.6)
+* `id`: sets the [`jti` (JWT ID) Claim](https://tools.ietf.org/html/rfc7519#section-4.1.7)
 
 For example:
 
@@ -951,13 +987,13 @@ For example:
 
 String jws = Jwts.builder()
 
-    .setIssuer("me")
-    .setSubject("Bob")
-    .setAudience("you")
-    .setExpiration(expiration) //a java.util.Date
-    .setNotBefore(notBefore) //a java.util.Date 
-    .setIssuedAt(new Date()) // for example, now
-    .setId(UUID.randomUUID().toString()) //just an example id
+    .issuer("me")
+    .subject("Bob")
+    .audience("you")
+    .expiration(expiration) //a java.util.Date
+    .notBefore(notBefore) //a java.util.Date 
+    .issuedAt(new Date()) // for example, now
+    .id(UUID.randomUUID().toString()) //just an example id
     
     /// ... etc ...
 ```
@@ -974,64 +1010,31 @@ String jws = Jwts.builder()
     .claim("hello", "world")
     
     // ... etc ...
-
 ```
 
-Each time `claim` is called, it simply appends the key-value pair to an internal `Claims` instance, potentially
+Each time `claim` is called, it simply appends the key-value pair to an internal `Claims` builder, potentially
 overwriting any existing identically-named key/value pair.
 
 Obviously, you do not need to call `claim` for any [standard claim name](#jws-create-claims-standard), and it is
-recommended instead to call the standard respective type-safe setter method as this enhances readability.
+recommended instead to call the standard respective type-safe named builder method as this enhances readability.
 
-<a name="jwt-claims-instance"></a><a name="jws-create-claims-instance"></a> <!-- legacy anchors for old links -->
-##### Claims Instance
-
-If you want to specify all claims at once, you can use the `Jwts.claims()` method and build up the claims
-with it:
-
-```java
-
-Claims claims = Jwts.claims();
-
-populate(claims); //implement me
-
-String jws = Jwts.builder()
-
-    .setClaims(claims)
-    
-    // ... etc ...
-
-```
-
-> **Warning**
-> 
-> Per standard Java `setter` idioms, calling `setClaims` will fully replace all existing claim name/value
-pairs with the specified values.  If you want to add (append) claims in bulk, and not fully replace them, use the 
-> `JwtBuilder`'s `addClaims` method instead.
-
+<a name="jws-create-claims-instance"></a> <!-- legacy anchors for old links -->
+<a name="jwt-claims-instance"></a>
 <a name="jwt-claims-map"></a><a name="jws-create-claims-map"></a> <!-- legacy anchors for old links -->
 ##### Claims Map
 
-If you want to specify all claims at once, and you don't want to use `Jwts.claims()`, you can use `JwtBuilder`
-`setClaims(Map)` method instead:
+If you want to add multiple claims at once, you can use `JwtBuilder` `claims(Map)` method:
 
 ```java
 
-Map<String,Object> claims = getMyClaimsMap(); //implement me
+Map<String,?> claims = getMyClaimsMap(); //implement me
 
 String jws = Jwts.builder()
 
-    .setClaims(claims)
+    .claims(claims)
     
     // ... etc ...
-
 ```
-
-> **Warning**
->
-> Per standard Java `setter` idioms, calling `setClaims` will fully replace all existing claim name/value
-pairs with the specified values.  If you want to add (append) claims in bulk, and not fully replace them, use the
-> `JwtBuilder`'s `addClaims` method instead.
 
 <a name="jwt-compression"></a><a name="jws-create-compression"></a> <!-- legacy anchors for old links -->
 ### JWT Compression
@@ -1048,7 +1051,7 @@ Please see the main [Compression](#compression) section to see how to compress a
 You read (parse) a JWT as follows:
 
 1. Use the `Jwts.parser()` method to create a `JwtParserBuilder` instance.
-2. Optionally call `setKeyLocator`, `verifyWith` or `decryptWith` methods if you expect to parse [signed](#jws) or [encrypted](#jwe) JWTs.
+2. Optionally call `keyLocator`, `verifyWith` or `decryptWith` methods if you expect to parse [signed](#jws) or [encrypted](#jwe) JWTs.
 3. Call the `build()` method on the `JwtParserBuilder` to create and return a thread-safe `JwtParser`.
 4. Call one of the various `parse*` methods with your compact JWT string, depending on the type of JWT you expect.
 5. Wrap the `parse*` call in a try/catch block in case parsing, signature verification, or decryption fails.
@@ -1059,19 +1062,19 @@ For example:
 Jwt<?,?> jwt;
 
 try {
-    jwt = Jwts.parser()        // (1)
+    jwt = Jwts.parser()     // (1)
         
-    .setKeyLocator(keyLocator) // (2) dynamically locate signing or encryption keys    
-    //.verifyWith(key)         //     or a static key used to verify all signed JWTs
-    //.decryptWith(key)        //     or a static key used to decrypt all encrypted JWTs
+    .keyLocator(keyLocator) // (2) dynamically locate signing or encryption keys    
+    //.verifyWith(key)      //     or a static key used to verify all signed JWTs
+    //.decryptWith(key)     //     or a static key used to decrypt all encrypted JWTs
         
-    .build()                   // (3)
+    .build()                // (3)
         
-    .parse(compact);           // (4) or parseClaimsJws, parseClaimsJwe, parseContentJws, etc
+    .parse(compact);        // (4) or parseClaimsJws, parseClaimsJwe, parseContentJws, etc
     
     // we can safely trust the JWT
      
-catch (JwtException ex) {      // (5)
+catch (JwtException ex) {   // (5)
     
     // we *cannot* use the JWT as intended by its creator
 }
@@ -1166,7 +1169,7 @@ received, at parse time, so you can't 'hard code' any verification or decryption
 #### Key Locator
 
 If you need to support dynamic key lookup when encountering JWTs, you'll need to implement
-the `Locator<Key>` interface and specify an instance on the `JwtParserBuilder` via the `setKeyLocator` method. For
+the `Locator<Key>` interface and specify an instance on the `JwtParserBuilder` via the `keyLocator` method. For
 example:
 
 ```java
@@ -1174,7 +1177,7 @@ Locator<Key> keyLocator = getMyKeyLocator();
 
 Jwts.parser()
 
-    .setKeyLocator(keyLocator) // <----
+    .keyLocator(keyLocator) // <----
     
     .build()
     // ... etc ...
@@ -1214,7 +1217,7 @@ String keyId = getKeyId(key); //any mechanism you have to associate a key with a
 
 String jws = Jwts.builder()
         
-    .header().setKeyId(keyId).and()            // <--- add `kid` header
+    .header().keyId(keyId).and()               // <--- add `kid` header
     
     .signWith(key)                             // for JWS
     //.encryptWith(key, keyAlg, encryptionAlg) // for JWE
@@ -1285,7 +1288,7 @@ on the type of JWS or JWE algorithm used.  That is:
     * For JWE direct encryption, the returned decryption key should be a `SecretKey`.
     * For password-based key derivation algorithms, the returned decryption key should be a 
       `io.jsonwebtoken.security.Password`.  You can create a `Password` instance by calling 
-      `Keys.forPassword(char[] passwordCharacters)`.
+      `Keys.password(char[] passwordCharacters)`.
     * For asymmetric key management algorithms, the returned decryption key should be a `PrivateKey` (not a `PublicKey`).
 
 <a name="jwt-read-claims"></a><a name="jws-read-claims"></a> <!-- legacy anchor for old links -->
@@ -1342,14 +1345,14 @@ obvious problems since `exp` and `nbf` are time-based assertions, and clock time
 assertions.
 
 You can account for these differences (usually no more than a few minutes) when parsing using the `JwtParserBuilder`'s
-`setAllowedClockSkewSeconds`. For example:
+`clockSkewSeconds`. For example:
 
 ```java
 long seconds = 3 * 60; //3 minutes
 
 Jwts.parser()
     
-    .setAllowedClockSkewSeconds(seconds) // <----
+    .clockSkewSeconds(seconds) // <----
     
     // ... etc ...
     .build()
@@ -1362,14 +1365,14 @@ atomic clocks around the world.
 <a name="jwt-read-clock-custom"></a><a name="jws-read-clock-custom"></a> <!-- legacy anchor for old links -->
 #### Custom Clock Support
 
-If the above `setAllowedClockSkewSeconds` isn't sufficient for your needs, the timestamps created
+If the above `clockSkewSeconds` isn't sufficient for your needs, the timestamps created
 during parsing for timestamp comparisons can be obtained via a custom time source.  Call the `JwtParserBuilder`'s 
-`setClock` method with an implementation of the `io.jsonwebtoken.Clock` interface.  For example:
+`clock` method with an implementation of the `io.jsonwebtoken.Clock` interface.  For example:
 
  ```java
 Clock clock = new MyClock();
 
-Jwts.parser().setClock(myClock) //... etc ...
+Jwts.parser().clock(myClock) //... etc ...
 ``` 
 
 The `JwtParser`'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
@@ -1514,10 +1517,10 @@ JWT signature algorithm you might want to use.
 ##### Secret Keys
 
 If you want to generate a sufficiently strong `SecretKey` for use with the JWT HMAC-SHA algorithms, use the respective 
-algorithm's `keyBuilder()` method:
+algorithm's `key()` builder method:
 
 ```java
-SecretKey key = Jwts.SIG.HS256.keyBuilder().build(); //or HS384.keyBuilder() or HS512.keyBuilder()
+SecretKey key = Jwts.SIG.HS256.key().build(); //or HS384.key() or HS512.key()
 ```
 
 Under the hood, JJWT uses the JCA default provider's `KeyGenerator` to create a secure-random key with the correct 
@@ -1527,7 +1530,7 @@ If you want to specify a specific JCA `Provider` or `SecureRandom` to use during
 as builder arguments. For example:
 
 ```java
-SecretKey key = Jwts.SIG.HS256.keyBuilder().setProvider(aProvider).setRandom(aSecureRandom).build();
+SecretKey key = Jwts.SIG.HS256.key().provider(aProvider).random(aSecureRandom).build();
 ```
 
 If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
@@ -1544,10 +1547,10 @@ further encrypt it, etc, before saving to disk (for example).
 ##### Asymmetric Keys
 
 If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key pairs for use with JWT ECDSA or RSA
-algorithms, use an algorithm's respective `keyPairBuilder()` method:
+algorithms, use an algorithm's respective `keyPair()` builder method:
 
 ```java
-KeyPair keyPair = Jwts.SIG.RS256.keyPairBuilder().build(); //or RS384, RS512, PS256, etc...
+KeyPair keyPair = Jwts.SIG.RS256.keyPair().build(); //or RS384, RS512, PS256, etc...
 ```
 
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the 
@@ -1578,7 +1581,7 @@ For example:
 ```java
 String jws = Jwts.builder() // (1)
 
-    .setSubject("Bob")      // (2) 
+    .subject("Bob")         // (2) 
 
     .signWith(key)          // (3) <---
      
@@ -1693,7 +1696,7 @@ Please see the main [Compression](#compression) section to see how to compress a
 You read (parse) a JWS as follows:
 
 1. Use the `Jwts.parser()` method to create a `JwtParserBuilder` instance.
-2. Call either [setKeyLocator](#key-locator) or `verifyWith` methods to determine the key used to verify the JWS signature.
+2. Call either [keyLocator](#key-locator) or `verifyWith` methods to determine the key used to verify the JWS signature.
 3. Call the `build()` method on the `JwtParserBuilder` to return a thread-safe `JwtParser`.
 4. Finally, call the `parseClaimsJws(String)` method with your jws `String`, producing the original JWS.
 5. The entire call is wrapped in a try/catch block in case parsing or signature validation fails.  We'll cover
@@ -1705,9 +1708,9 @@ For example:
 Jws<Claims> jws;
 
 try {
-    jws = Jwts.parser()  // (1)
+    jws = Jwts.parser()         // (1)
         
-    .setKeyLocator(keyLocator)  // (2) dynamically lookup verification keys based on each JWS    
+    .keyLocator(keyLocator)     // (2) dynamically lookup verification keys based on each JWS    
     //.verifyWith(key)          //     or a static key used to verify all encountered JWSs
         
     .build()                    // (3)
@@ -2145,7 +2148,7 @@ For example:
 ```java
 String jwe = Jwts.builder()                              // (1)
 
-    .setSubject("Bob")                                   // (2) 
+    .subject("Bob")                                      // (2) 
 
     .encryptWith(key, keyAlgorithm, encryptionAlgorithm) // (3)
      
@@ -2167,7 +2170,7 @@ its size.  Please see the main [Compression](#compression) section to see how to
 You read (parse) a JWE as follows:
 
 1. Use the `Jwts.parser()` method to create a `JwtParserBuilder` instance.
-2. Call either [setKeyLocator](#key-locator) or `decryptWith` methods to determine the key used to decrypt the JWE.
+2. Call either [keyLocator](#key-locator) or `decryptWith` methods to determine the key used to decrypt the JWE.
 4. Call the `JwtParserBuilder`'s `build()` method to create a thread-safe `JwtParser`.
 5. Parse the jwe string with the `JwtParser`'s `parseClaimsJwe` or `parseContentJwe` method.
 6. Wrap the entire call is in a try/catch block in case decryption or integrity verification fails.
@@ -2178,9 +2181,9 @@ For example:
 Jwe<Claims> jwe;
 
 try {
-    jwe = Jwts.parser()  // (1)
+    jwe = Jwts.parser()         // (1)
 
-    .setKeyLocator(keyLocator)  // (2) dynamically lookup decryption keys based on each JWE    
+    .keyLocator(keyLocator)     // (2) dynamically lookup decryption keys based on each JWE    
     //.decryptWith(key)         //     or a static key used to decrypt all encountered JWEs
         
     .build()                    // (3)
@@ -2261,7 +2264,7 @@ If a JWE is compressed using the `DEF` ([DEFLATE](https://www.rfc-editor.org/rfc
 after decryption, and there is nothing you need to configure.
 
 If, however, a custom compression algorithm was used to compress the JWE, you will need to tell the
-`JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
+`JwtParserBuilder` how to resolve your `CompressionAlgorithm` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
 
@@ -2287,7 +2290,7 @@ seen for JWTs.
 You create a JWK as follows:
 
 1. Use the `Jwks.builder()` method to create a `JwkBuilder` instance.
-2. Call the `forKey` method with the Java key you wish to represent as a JWK.
+2. Call the `key` method with the Java key you wish to represent as a JWK.
 3. Call builder methods to set any additional key fields or metadata, such as a `kid` (Key ID), X509 Certificates, 
    etc as desired.
 4. Call the `build()` method to produce the resulting JWK.
@@ -2295,13 +2298,24 @@ You create a JWK as follows:
 For example:
 
 ```java
-SecretKey key = getSecretKey(); // or RSA or EC PublicKey or PrivateKey
-SecretJwk = Jwts.builder().forKey(key) // (1) and (2)
+SecretKey key = getSecretKey();     // or RSA or EC PublicKey or PrivateKey
+SecretJwk = Jwks.builder().key(key) // (1) and (2)
         
-    .setId("mySecretKeyId")            // (3)
+    .id("mySecretKeyId")            // (3)
     // ... etc ...    
     
-    .build();                          // (4)
+    .build();                       // (4)
+```
+
+#### JWK from a Map
+
+If you have a `Map<String,?>` of name/value pairs that reflect an existing JWK, you add them and build a type-safe
+`Jwk` instance:
+
+```java
+Map<String,?> jwkValues = getMyJwkMap();
+
+Jwk<?> jwk = Jwks.builder().add(jwkValues).build();
 ```
 
 <a name="jwk-read"></a>
@@ -2312,12 +2326,12 @@ You can read/parse a JWK by building a `JwkParser` and parsing the JWK JSON stri
 ```java
 String json = getJwkJsonString();
 Jwk<?> jwk = Jwks.parser()
-    //.setProvider(aJcaProvider)         // optional
-    //.deserializeJsonWith(deserializer) // optional
-    .build()                             // create the parser
-    .parse(json);                        // actually parse the JSON
+    //.provider(aJcaProvider)     // optional
+    //.deserializer(deserializer) // optional
+    .build()                      // create the parser
+    .parse(json);                 // actually parse the JSON
 
-Key key = jwk.toKey();                   // convert to a Java Key instance
+Key key = jwk.toKey();            // convert to a Java Key instance
 ```
 As shown above you can specify a custom JCA Provider or [JSON deserializer](#json) in the same way as the `JwtBuilder`.
 
@@ -2344,9 +2358,9 @@ For example:
 ```java
 RSAPrivateKey rsaPrivateKey = getRSAPrivateKey(); // or ECPrivateKey
 
-RsaPrivateJwk jwk = Jwks.builder().forKey(rsaPrivateKey)
+RsaPrivateJwk jwk = Jwks.builder().key(rsaPrivateKey)
 
-        //.setPublicKey(rsaPublicKey)  // optional, but recommended to avoid extra computation work
+        //.publicKey(rsaPublicKey)  // optional, but recommended to avoid extra computation work
         
         .build();
 ```
@@ -2359,22 +2373,22 @@ If you have a Java `KeyPair` instance, then you have both the public and private
 
 ```java
 KeyPair rsaKeyPair = getRSAKeyPair();
-RsaPrivateJwk rsaPrivJwk = Jwks.builder().forRsaKeyPair(rsaKeyPair).build();
+RsaPrivateJwk rsaPrivJwk = Jwks.builder().rsaKeyPair(rsaKeyPair).build();
 
 KeyPair ecKeyPair = getECKeyPair();
-EcPrivateJwk ecPrivJwk = Jwks.builder().forEcKeyPair(ecKeyPair).build();
+EcPrivateJwk ecPrivJwk = Jwks.builder().ecKeyPair(ecKeyPair).build();
 
 KeyPair edEcKeyPair = getEdECKeyPair();
-OctetPrivateJwk edEcPrivJwk = Jwks.builder().forOctetKeyPair(edEcKeyPair).build();
+OctetPrivateJwk edEcPrivJwk = Jwks.builder().octetKeyPair(edEcKeyPair).build();
 ```
 
 Note that:
-* An exception will thrown when calling `forRsaKeyPair` if the specified `KeyPair` instance does not contain
+* An exception will thrown when calling `rsaKeyPair` if the specified `KeyPair` instance does not contain
 `RSAPublicKey` and `RSAPrivateKey` instances.  
-* Similarly, an exception will be thrown when calling `forEcKeyPair` if
+* Similarly, an exception will be thrown when calling `ecKeyPair` if
 the `KeyPair` instance does not contain `ECPublicKey` and `ECPrivateKey` instances.  
 * Finally, an exception will be 
-thrown when calling `forOctetKeyPair` if the `KeyPair` instance does not contain X25519, X448, Ed25519, or Ed448 keys
+thrown when calling `octetKeyPair` if the `KeyPair` instance does not contain X25519, X448, Ed25519, or Ed448 keys
 (introduced in JDK 11 and 15 or when using BouncyCastle).
 
 <a name="jwk-private-topub"></a>
@@ -2384,7 +2398,7 @@ Because private JWKs contain public key material, you can always obtain the priv
 Java `PublicKey` or `KeyPair`.  For example:
 
 ```java
-RsaPrivateJwk privateJwk = Jwks.builder().forKey(rsaPrivateKey).build(); // or ecPrivateKey or edEcPrivateKey
+RsaPrivateJwk privateJwk = Jwks.builder().key(rsaPrivateKey).build(); // or ecPrivateKey or edEcPrivateKey
 
 // Get the matching public JWK and/or PublicKey:
 RsaPublicJwk pubJwk = privateJwk.toPublicJwk();       // JWK instance
@@ -2411,14 +2425,15 @@ Jwk<?> jwk = Jwks.builder(). /* ... */ .build();
 
 JwkThumbprint sha256Thumbprint = jwk.thumbprint(); // SHA-256 thumbprint by default
 
-JwkThumbprint anotherThumbprint = jwk.thumbprint(hashAlg); // thumbprint using specified hash algorithm
+JwkThumbprint anotherThumbprint = jwk.thumbprint(Jwks.HASH.SHA512); // or a specified hash algorithm
 ```
 
 The resulting `JwkThumbprint` instance provides some useful methods:
 
 * `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the raw output from the hash algorithm
 * `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
-* `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint
+* `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint. Many standard IANA
+                                      hash algorithms are available as constants in the `Jwts.HASH` utility class.
 * `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) specification
 
 <a name="jwk-thumbprint-kid"></a>
@@ -2444,17 +2459,17 @@ String kid = jwk.thumbprint().toString();
 jwk.setId(kid) // Jwks are immutable - there is no `setId` method
 ```
 
-Instead, you may use the `setIdFromThumbprint` methods on the `JwkBuilder` when creating a `Jwk`:
+Instead, you may use the `idFromThumbprint` methods on the `JwkBuilder` when creating a `Jwk`:
 
 ```java
-Jwk<?> jwk = Jwks.builder().forKey(aKey)
+Jwk<?> jwk = Jwks.builder().key(aKey)
 
-    .setIdFromThumbprint() // or setIdFromThumbprint(hashAlgorithm)
+    .idFromThumbprint() // or idFromThumbprint(HashAlgorithm)
 
     .build();
 ```
 
-Calling either `setIdFromThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`
+Calling either `idFromThumbprint` method will ensure that calling `jwk.getId()` equals `thumbprint.toString()`
 (which is `Encoders.BASE64URL.encode(thumbprint.toByteArray())`).
 
 <a name="jwk-thumbprint-uri"></a>
@@ -2531,10 +2546,13 @@ This is true for all secret or private key members in `SecretJwk` and `PrivateJw
 <a name="compression"></a>
 ## Compression
 
-**The JWT specification only standardizes this feature for JWEs (Encrypted JWTs) however JJWT supports it for JWS
-(Signed JWTs) as well**.  If you are positive that a JWT you create with JJWT 
-will _also_ be parsed with JJWT, you can use this feature with both JWEs and JWSs, otherwise it is best to only use it 
-for JWEs.
+> **Warning**
+>
+> **The JWT specifications tandardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
+> (Signed JWTs) as well**.
+> 
+> If you are positive that a JWT you create with JJWT will _also_ be parsed with JJWT, 
+> you can use this feature with both JWEs and JWSs, otherwise it is best to only use it for JWEs.
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
 name/value pairs (or individual values are very large or verbose) - you can reduce the size of the compact JWT by 
@@ -2548,96 +2566,60 @@ If you want to compress your JWT, you can use the `JwtBuilder`'s  `compressWith(
 example:
 
 ```java
-   Jwts.builder()
+Jwts.builder()
    
-   .compressWith(CompressionCodecs.DEFLATE) // or CompressionCodecs.GZIP
+   .compressWith(Jwts.ZIP.DEF) // DEFLATE compression algorithm
    
    // .. etc ...
 ```
 
-If you use the `DEFLATE` or `GZIP` Compression Codecs - that's it, you're done.  You don't have to do anything during 
-parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress the payload as 
-expected.
-
-> **Note**
-> 
-> JJWT does not support compression for Unprotected JWTs because they are susceptible to various compression 
-> vulnerability attacks (memory exhaustion, denial of service, etc.).
+If you use any of the algorithm constants in the `Jwts.ZIP` class, that's it, you're done.  You don't have to 
+do anything during parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress 
+the payload as expected.
 
 <a name="compression-custom"></a>
-### Custom Compression Codec
+### Custom Compression Algorithm
 
-If the default `DEFLATE` or `GZIP` compression codecs are not suitable for your needs, you can create your own 
-`CompressionCodec` implementation(s).
+If the default `Jwts.ZIP` compression algorithms are not suitable for your needs, you can create your own 
+`CompressionAlgorithm` implementation(s).
 
-Just as you would with the default codecs, you may specify that you want a JWT compressed by calling the `JwtBuilder`'s
-`compressWith` method, supplying your custom implementation instance.   When you call `compressWith`, the JWT `payload`
-will be compressed with your algorithm, and the 
+Just as you would with the default algorithms, you may specify that you want a JWT compressed by calling the 
+`JwtBuilder`'s `compressWith` method, supplying your custom implementation instance.  For example:
+
+```java
+CompressionAlgorithm myAlg = new MyCompressionAlgorithm();
+
+Jwts.builder()
+   
+   .compressWith(myAlg) // <----
+   
+   // .. etc ...
+```
+
+When you call `compressWith`, the JWT `payload` will be compressed with your algorithm, and the 
 [`zip` (Compression Algorithm)](https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3) 
-header will automatically be set to the value returned by your codec's `getId()` method as specified in the JWT
-specification.
+header will automatically be set to the value returned by your algorithm's `algorithm.getId()` method as 
+required by the JWT specification.
 
-However, the `JwtParser` needs to be aware of this custom codec as well, so it can use it while parsing. You do this 
-by calling the `JwtParserBuilder`'s `addCompressionCodecs` method.  For example:
+However, the `JwtParser` needs to be aware of this custom algorithm as well, so it can use it while parsing. You do this 
+by calling the `JwtParserBuilder`'s `addCompressionAlgorithms` method.  For example:
 
 ```java
-CompressionCodec myCodec = new MyCompressionCodec();
+CompressionAlgorithm myAlg = new MyCompressionAlgorithm();
 
 Jwts.parser()
 
-    .addCompressionCodecs(Collections.of(myCodec)) // <----
+    .addCompressionAlgorithms(Collections.of(myAlg)) // <----
     
     // .. etc ...
 ```
 
-This adds additional `CompressionCodec` implementations to the parser's overall total set of supported codecs (which
-already includes the `DEFLATE` and `GZIP` codecs by default).
+This adds additional `CompressionAlgorithm` implementations to the parser's overall total set of supported compression
+algorithms (which already includes all of the `Jwts.ZIP` algorithms by default).
 
-The parser will then automatically check to see if the JWT `zip` header has been set to see if a compression codec
-algorithm has been used to compress the JWT.  If set, the parser will automatically look up your `CompressionCodec` by
-its `getId()` value, and use it to decompress the JWT.
-
-<a name="compression-custom-locator"></a>
-### Compression Codec Locator
-
-If for some reason the default `addCompressionCodecs` method and lookup-by-id behavior already supported by the 
-`JwtParserBuilder` is not sufficient for your needs, you can implement your own `Locator<CompressionCodec>` to look 
-up the codec.
-
-Typically, a `Locator<CompressionCodec>` implementation will inspect the `zip` header to find out what algorithm was
-used and then return a codec instance that supports that algorithm.  For example:
-
-```java
-public class MyCompressionCodecLocator implements Locator<CompressionCodec> {
-        
-    @Override
-    public CompressionCodec locate(Header<?> header) {
-        
-        String id = header.getCompressionAlgorithm(); // 'zip' header
-            
-        CompressionCodec codec = getCompressionCodec(id); //implement me
-            
-        return codec;
-    }
-}
-```
-
-Your custom `Locator<CompressionCodec>` can then inspect any other header as necessary.
-
-You then provide your custom `Locator<CompressionCodec>` to the `JwtParserBuilder` as follows:
-
-```java
-Locator<CompressionCodec> myCodecLocator = new MyCompressionCodecLocator();
-
-Jwts.parser()
-
-    .setCompressionCodecLocator(myCodecLocator) // <----
-    
-    // .. etc ...
-```
-
-Again, this is only necessary if the JWT-standard `zip` header lookup default behavior already supported by the 
-`JwtParser` is not sufficient.
+The parser will then automatically check to see if the JWT `zip` header has been set to see if a compression
+algorithm has been used to compress the JWT.  If set, the parser will automatically look up your 
+`CompressionAlgorithm` by its `getId()` value, and use it to decompress the JWT.
 
 <a name="json"></a>
 ## JSON Support
@@ -2684,7 +2666,7 @@ Serializer<Map<String,?>> serializer = getMySerializer(); //implement me
 
 Jwts.builder()
 
-    .serializeToJsonWith(serializer)
+    .serializer(serializer)
     
     // ... etc ...
 ```
@@ -2696,7 +2678,7 @@ Deserializer<Map<String,?>> deserializer = getMyDeserializer(); //implement me
 
 Jwts.parser()
 
-    .deserializeJsonWith(deserializer)
+    .deserializer(deserializer)
     
     // ... etc ...
 ```
@@ -2744,7 +2726,7 @@ ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
 String jws = Jwts.builder()
 
-    .serializeToJsonWith(new JacksonSerializer(objectMapper))
+    .serializer(new JacksonSerializer(objectMapper))
     
     // ... etc ...
 ```
@@ -2756,7 +2738,7 @@ ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
 Jwts.parser()
 
-    .deserializeJsonWith(new JacksonDeserializer(objectMapper))
+    .deserializer(new JacksonDeserializer(objectMapper))
     
     // ... etc ...
 ```
@@ -2764,7 +2746,9 @@ Jwts.parser()
 <a name="json-jackson-custom-types"></a>
 #### Parsing of Custom Claim Types
 
-By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in through a constructor. For example:
+By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to 
+deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in 
+through a constructor. For example:
 
 ```java
 new JacksonDeserializer(Maps.of("user", User.class).build())
@@ -2788,7 +2772,7 @@ The `User` object could be retrieved from the `user` claim with the following co
 ```java
 Jwts.parser()
 
-    .deserializeJsonWith(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
+    .deserializer(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
 
     .build()
 
@@ -2863,7 +2847,7 @@ Gson gson = new GsonBuilder()
 
 String jws = Jwts.builder()
 
-    .serializeToJsonWith(new GsonSerializer(gson))
+    .serializer(new GsonSerializer(gson))
     
     // ... etc ...
 ```
@@ -2875,7 +2859,7 @@ Gson gson = getGson(); //implement me
 
 Jwts.parser()
 
-    .deserializeJsonWith(new GsonDeserializer(gson))
+    .deserializer(new GsonDeserializer(gson))
     
     // ... etc ...
 ```
@@ -3010,26 +2994,26 @@ information.
 ### Custom Base64
 
 If for some reason you want to specify your own Base64Url encoder and decoder, you can use the `JwtBuilder`
-`base64UrlEncodeWith` method to set the encoder:
+`encoder` method to set the encoder:
 
 ```java
-Encoder<byte[], String> base64UrlEncoder = getMyBase64UrlEncoder(); //implement me
+Encoder<byte[], String> encoder = getMyBase64UrlEncoder(); //implement me
 
 String jws = Jwts.builder()
 
-    .base64UrlEncodeWith(base64UrlEncoder)
+    .encoder(encoder)
     
     // ... etc ...
 ```
 
-and the `JwtParserBuilder`'s `base64UrlDecodeWith` method to set the decoder:
+and the `JwtParserBuilder`'s `decoder` method to set the decoder:
 
 ```java
-Decoder<String, byte[]> base64UrlDecoder = getMyBase64UrlDecoder(); //implement me
+Decoder<String, byte[]> decoder = getMyBase64UrlDecoder(); //implement me
 
 Jwts.parser()
 
-    .base64UrlDecodeWith(base64UrlEncoder)
+    .decoder(decoder)
     
     // ... etc ...
 ```
@@ -3069,13 +3053,13 @@ Example:
 ```java
 // Create a test key suitable for the desired HMAC-SHA algorithm:
 MacAlgorithm alg = Jwts.SIG.HS512; //or HS384 or HS256
-SecretKey key = alg.keyBuilder().build();
+SecretKey key = alg.key().build();
 
 String message = "Hello World!";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
 // Create the compact JWS:
-String jws = Jwts.builder().setContent(content, "text/plain").signWith(key, alg).compact();
+String jws = Jwts.builder().content(content, "text/plain").signWith(key, alg).compact();
 
 // Parse the compact JWS:
 content = Jwts.parser().verifyWith(key).build().parseContentJws(jws).getPayload();
@@ -3096,10 +3080,10 @@ public key:
 ```java
 // Create a test key suitable for the desired RSA signature algorithm:
 SignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
-KeyPair pair = alg.keyPairBuilder().build();
+KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his RSA private key:
-String jws = Jwts.builder().setSubject("Alice")
+String jws = Jwts.builder().subject("Alice")
     .signWith(pair.getPrivate(), alg) // <-- Bob's RSA private key
     .compact();
 
@@ -3127,10 +3111,10 @@ public key:
 ```java
 // Create a test key suitable for the desired ECDSA signature algorithm:
 SignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
-KeyPair pair = alg.keyPairBuilder().build();
+KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his EC private key:
-String jws = Jwts.builder().setSubject("Alice")
+String jws = Jwts.builder().subject("Alice")
     .signWith(pair.getPrivate(), alg) // <-- Bob's EC private key
     .compact();
 
@@ -3171,10 +3155,10 @@ using Bob's Edwards Curve public key:
 ```java
 // Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
 SignatureAlgorithm alg = Jwts.SIG.Ed25519; //or Ed448
-KeyPair pair = alg.keyPairBuilder().build();
+KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his Edwards Curve private key:
-String jws = Jwts.builder().setSubject("Alice")
+String jws = Jwts.builder().subject("Alice")
     .signWith(pair.getPrivate(), alg) // <-- Bob's Edwards Curve private key
     .compact();
 
@@ -3211,13 +3195,13 @@ Example:
 // Create a test key suitable for the desired payload encryption algorithm:
 // (A*GCM algorithms are recommended, but require JDK >= 8 or BouncyCastle)
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
-SecretKey key = enc.keyBuilder().build();
+SecretKey key = enc.key().build();
 
 String message = "Live long and prosper.";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
 // Create the compact JWE:
-String jwe = Jwts.builder().setContent(content, "text/plain").encryptWith(key, enc).compact();
+String jwe = Jwts.builder().content(content, "text/plain").encryptWith(key, enc).compact();
 
 // Parse the compact JWE:
 content = Jwts.parser().decryptWith(key).build().parseContentJwe(jwe).getPayload();
@@ -3239,7 +3223,7 @@ decrypt the JWT using her RSA private key:
 
 ```java
 // Create a test KeyPair suitable for the desired RSA key algorithm:
-KeyPair pair = Jwts.SIG.RS512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.RS512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
 KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
@@ -3247,7 +3231,7 @@ KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP o
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-String jwe = Jwts.builder().setAudience("Alice")
+String jwe = Jwts.builder().audience("Alice")
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
     .compact();
 
@@ -3276,13 +3260,13 @@ efficient than the `A*KW` variants, but they do require JDK 8 or later (or JDK 7
 ```java
 // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
 SecretKeyAlgorithm alg = Jwts.KEY.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
-SecretKey key = alg.keyBuilder().build();
+SecretKey key = alg.key().build();
 
 // Chooose the Encryption Algorithm used to encrypt the payload:
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Create the compact JWE:
-String jwe = Jwts.builder().setIssuer("me").encryptWith(key, alg, enc).compact();
+String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
 
 // Parse the compact JWE:
 String issuer = Jwts.parser().decryptWith(key).build()
@@ -3307,7 +3291,7 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 
 ```java
 // Create a test KeyPair suitable for the desired EC key algorithm:
-KeyPair pair = Jwts.SIG.ES512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.ES512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
 KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc.
@@ -3315,7 +3299,7 @@ KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A19
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-String jwe = Jwts.builder().setAudience("Alice")
+String jwe = Jwts.builder().audience("Alice")
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
     .compact();
 
@@ -3343,7 +3327,7 @@ as shown below.
 ```java
 //DO NOT use this example password in a real app, it is well-known to password crackers:
 String pw = "correct horse battery staple";
-Password password = Keys.forPassword(pw.toCharArray());
+Password password = Keys.password(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
 KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
@@ -3360,9 +3344,9 @@ KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_H
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Create the compact JWE:
-String jwe = Jwts.builder().setIssuer("me")
+String jwe = Jwts.builder().issuer("me")
     // Optional work factor is specified in the header:
-    //.header().setPbes2Count(pbkdf2Iterations)).and()
+    //.header().pbes2Count(pbkdf2Iterations)).and()
     .encryptWith(password, alg, enc)
     .compact();
 
@@ -3379,8 +3363,8 @@ assert "me".equals(issuer);
 Example creating and parsing a secret JWK:
 
 ```java
-SecretKey key = Jwts.SIG.HS512.keyBuilder().build(); // or HS384 or HS256
-SecretJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+SecretKey key = Jwts.SIG.HS512.key().build(); // or HS384 or HS256
+SecretJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
@@ -3399,8 +3383,8 @@ assert jwk.equals(parsed);
 Example creating and parsing an RSA Public JWK:
 
 ```java
-RSAPublicKey key = (RSAPublicKey)Jwts.SIG.RS512.keyPairBuilder().build().getPublic();
-RsaPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+RSAPublicKey key = (RSAPublicKey)Jwts.SIG.RS512.keyPair().build().getPublic();
+RsaPublicJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
@@ -3419,11 +3403,11 @@ assert jwk.equals(parsed);
 Example creating and parsing an RSA Private JWK:
 
 ```java
-KeyPair pair = Jwts.SIG.RS512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.RS512.keyPair().build();
 RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
 RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
-RsaPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+RsaPrivateJwk privJwk = Jwks.builder().key(privKey).idFromThumbprint().build();
 RsaPublicJwk pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -3445,8 +3429,8 @@ assert privJwk.equals(parsed);
 Example creating and parsing an Elliptic Curve Public JWK:
 
 ```java
-ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPairBuilder().build().getPublic();
-EcPublicJwk jwk = Jwks.builder().forKey(key).setIdFromThumbprint().build();
+ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPair().build().getPublic();
+EcPublicJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
@@ -3465,11 +3449,11 @@ assert jwk.equals(parsed);
 Example creating and parsing an Elliptic Curve Private JWK:
 
 ```java
-KeyPair pair = Jwts.SIG.ES512.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.ES512.keyPair().build();
 ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
 ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 
-EcPrivateJwk privJwk = Jwks.builder().forKey(privKey).setIdFromThumbprint().build();
+EcPrivateJwk privJwk = Jwks.builder().key(privKey).idFromThumbprint().build();
 EcPublicJwk pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -3493,8 +3477,8 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 `OctetPublicJwk` interface names):
 
 ```java
-PublicKey key = Jwts.SIG.Ed25519.keyPairBuilder().build().getPublic();
-OctetPublicJwk<PublicKey> jwk = builder().forOctetKey(key).setIdFromThumbprint().build();
+PublicKey key = Jwts.SIG.Ed25519.keyPair().build().getPublic();
+OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
@@ -3515,11 +3499,11 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 `OctetPrivateJwk` and `OctetPublicJwk` interface names):
 
 ```java
-KeyPair pair = Jwts.SIG.Ed448.keyPairBuilder().build();
+KeyPair pair = Jwts.SIG.Ed448.keyPair().build();
 PublicKey pubKey = pair.getPublic();
 PrivateKey privKey = pair.getPrivate();
 
-OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().forOctetKey(privKey).setIdFromThumbprint().build();
+OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().octetKey(privKey).idFromThumbprint().build();
 OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());

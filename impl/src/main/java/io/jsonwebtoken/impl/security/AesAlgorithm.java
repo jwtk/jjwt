@@ -81,7 +81,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     }
 
     @Override
-    public SecretKeyBuilder keyBuilder() {
+    public SecretKeyBuilder key() {
         return new DefaultSecretKeyBuilder(KEY_ALG_NAME, getKeyBitLength());
     }
 

@@ -66,7 +66,7 @@ class RFC7517AppendixBTest {
     @Test
     void test() {
         def m = jwkPairs
-        RsaPublicJwk jwk = Jwks.builder().set(m).build() as RsaPublicJwk
+        RsaPublicJwk jwk = Jwks.builder().add(m).build() as RsaPublicJwk
         RSAPublicKey key = jwk.toKey()
         assertNotNull key
         assertEquals m.size(), jwk.size()

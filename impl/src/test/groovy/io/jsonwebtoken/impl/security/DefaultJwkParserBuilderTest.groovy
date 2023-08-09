@@ -40,7 +40,7 @@ class DefaultJwkParserBuilderTest {
     @Test
     void testProvider() {
         def provider = createMock(Provider)
-        def parser = Jwks.parser().setProvider(provider).build() as DefaultJwkParser
+        def parser = Jwks.parser().provider(provider).build() as DefaultJwkParser
         assertSame provider, parser.provider
     }
 

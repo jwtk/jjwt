@@ -51,7 +51,7 @@ class RFC7517AppendixA3Test {
     void test() { // asserts we can parse and verify RFC values
 
         def m = keys[0]
-        SecretJwk jwk = Jwks.builder().set(m).build() as SecretJwk
+        SecretJwk jwk = Jwks.builder().add(m).build() as SecretJwk
         def key = jwk.toKey() as SecretKey
         assertNotNull key
         assertEquals m.size(), jwk.size()
@@ -61,7 +61,7 @@ class RFC7517AppendixA3Test {
         assertEquals m.k, encode(key)
 
         m = keys[1]
-        jwk = Jwks.builder().set(m).build() as SecretJwk
+        jwk = Jwks.builder().add(m).build() as SecretJwk
         key = jwk.toKey() as SecretKey
         assertNotNull key
         assertEquals m.size(), jwk.size()

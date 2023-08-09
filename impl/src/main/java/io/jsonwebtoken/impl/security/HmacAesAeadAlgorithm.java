@@ -66,7 +66,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public SecretKeyBuilder keyBuilder() {
+    public SecretKeyBuilder key() {
         // The Sun JCE KeyGenerator throws an exception if bitLengths are not standard AES 128, 192 or 256 values.
         // Since the JWA HmacAes algorithms require double that, we use secure-random keys instead:
         return new RandomSecretKeyBuilder(KEY_ALG_NAME, getKeyBitLength());

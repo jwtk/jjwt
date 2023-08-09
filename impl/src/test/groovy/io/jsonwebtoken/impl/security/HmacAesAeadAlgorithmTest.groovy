@@ -48,7 +48,7 @@ class HmacAesAeadAlgorithmTest {
                 Jwts.ENC.A256CBC_HS512
         ]
         for (AeadAlgorithm alg : algs) {
-            SecretKey key = alg.keyBuilder().build()
+            SecretKey key = alg.key().build()
             assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
         }
     }
@@ -58,7 +58,7 @@ class HmacAesAeadAlgorithmTest {
 
         def alg = Jwts.ENC.A128CBC_HS256
 
-        SecretKey key = alg.keyBuilder().build()
+        SecretKey key = alg.key().build()
 
         def plaintext = "Hello World! Nice to meet you!".getBytes("UTF-8")
 

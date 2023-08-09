@@ -218,8 +218,8 @@ class RFC7520Section4Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .header().setKeyId(jwk.getId()).and()
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
                 .signWith(key, alg)
                 .compact()
@@ -257,8 +257,8 @@ class RFC7520Section4Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', kid)
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(kid).and()
                 .setPayload(FIGURE_7)
                 .signWith(key, alg)
                 .compact()
@@ -303,8 +303,8 @@ class RFC7520Section4Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
                 .signWith(key, alg)
                 .compact()
@@ -348,8 +348,8 @@ class RFC7520Section4Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
                 .signWith(key, alg)
                 .compact()
@@ -386,8 +386,8 @@ class RFC7520Section4Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
                 .signWith(key, alg)
                 .compact()

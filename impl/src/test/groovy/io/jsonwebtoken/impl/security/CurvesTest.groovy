@@ -51,7 +51,7 @@ class CurvesTest {
     @Test
     void testKeyPairBuilders() {
         Curves.VALUES.each {
-            def pair = it.keyPairBuilder().build()
+            def pair = it.keyPair().build()
             if (it instanceof ECCurve) {
                 assertEquals ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, pair.getPublic().getAlgorithm()
                 assertEquals ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, pair.getPrivate().getAlgorithm()

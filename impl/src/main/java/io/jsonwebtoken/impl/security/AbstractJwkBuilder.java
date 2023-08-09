@@ -54,26 +54,26 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
-    public T setProvider(Provider provider) {
+    public T provider(Provider provider) {
         this.DELEGATE.setProvider(provider);
         return self();
     }
 
     @Override
-    public T setRandom(SecureRandom random) {
+    public T random(SecureRandom random) {
         this.DELEGATE.setRandom(random);
         return self();
     }
 
     @Override
-    public T setAlgorithm(String alg) {
+    public T algorithm(String alg) {
         Assert.hasText(alg, "Algorithm cannot be null or empty.");
         this.DELEGATE.setAlgorithm(alg);
         return self();
     }
 
     @Override
-    public T setId(String id) {
+    public T id(String id) {
         Assert.hasText(id, "Id cannot be null or empty.");
         this.DELEGATE.setIdThumbprintAlgorithm(null); //clear out any previously set value
         this.DELEGATE.setId(id);
@@ -81,12 +81,12 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
-    public T setIdFromThumbprint() {
-        return setIdFromThumbprint(Jwks.HASH.SHA256);
+    public T idFromThumbprint() {
+        return idFromThumbprint(Jwks.HASH.SHA256);
     }
 
     @Override
-    public T setIdFromThumbprint(HashAlgorithm alg) {
+    public T idFromThumbprint(HashAlgorithm alg) {
         Assert.notNull(alg, "Thumbprint HashAlgorithm cannot be null.");
         Assert.notNull(alg.getId(), "Thumbprint HashAlgorithm ID cannot be null.");
         this.DELEGATE.setId(null); // clear out any previous value
@@ -95,7 +95,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
-    public T setOperations(Set<String> ops) {
+    public T operations(Set<String> ops) {
         Assert.notEmpty(ops, "Operations cannot be null or empty.");
         this.DELEGATE.setOperations(ops);
         return self();

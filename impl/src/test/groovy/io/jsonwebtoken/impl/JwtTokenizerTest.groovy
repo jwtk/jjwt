@@ -65,7 +65,7 @@ class JwtTokenizerTest {
         assertEquals 'header', tjwe.getProtected()
         assertEquals 'encryptedKey', tjwe.getEncryptedKey()
         assertEquals 'initializationVector', tjwe.getIv()
-        assertEquals 'body', tjwe.getBody()
+        assertEquals 'body', tjwe.getPayload()
         assertEquals 'authenticationTag', tjwe.getDigest()
     }
 }

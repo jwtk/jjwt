@@ -284,7 +284,7 @@ class RFC7517AppendixCTest {
         //ensure that the KeyAlgorithm reflects test harness values:
         def enc = new HmacAesAeadAlgorithm(128) {
             @Override
-            SecretKeyBuilder keyBuilder() {
+            SecretKeyBuilder key() {
                 return new FixedSecretKeyBuilder(RFC_CEK)
             }
 
@@ -319,13 +319,13 @@ class RFC7517AppendixCTest {
             }
         }
 
-        Password key = Keys.forPassword(RFC_SHARED_PASSPHRASE.toCharArray())
+        Password key = Keys.password(RFC_SHARED_PASSPHRASE.toCharArray())
 
         String compact = Jwts.builder()
                 .setPayload(RFC_JWK_JSON)
-                .header().setContentType('jwk+json').setPbes2Count(RFC_P2C).and()
+                .header().contentType('jwk+json').pbes2Count(RFC_P2C).and()
                 .encryptWith(key, alg, enc)
-                .serializeToJsonWith(serializer) //ensure header created as expected with an assertion serializer
+                .serializer(serializer) //ensure header created as expected with an assertion serializer
                 .compact()
 
         assertEquals RFC_COMPACT_JWE, compact

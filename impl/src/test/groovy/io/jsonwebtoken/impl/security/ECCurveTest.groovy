@@ -28,7 +28,7 @@ class ECCurveTest {
     @Test
     void testContainsTrue() {
         ECCurve curve = (ECCurve) Curves.P_256
-        def pair = curve.keyPairBuilder().build()
+        def pair = curve.keyPair().build()
         ECPublicKey ecPub = (ECPublicKey) pair.getPublic()
         assertTrue(curve.contains(ecPub.getW()))
     }

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
@@ -56,7 +57,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testJku() {
         URI uri = URI.create('https://github.com')
-        def header = h([jku: uri])
+        def header = Jwts.header().jwkSetUrl(uri).build() as DefaultProtectedHeader
         assertEquals uri.toString(), header.get('jku')
         assertEquals uri, header.getJwkSetUrl()
     }
@@ -108,7 +109,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithJwk() {
-        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         def header = h([jwk: pubJwk])
         assertEquals pubJwk, header.getJwk()
@@ -116,7 +117,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithMap() {
-        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         Map<String, ?> m = new LinkedHashMap<>(pubJwk)
         def header = h([jwk: m])
@@ -138,7 +139,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithSecretJwk() {
-        SecretJwk jwk = Jwks.builder().forKey(TestKeys.HS256).build()
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
         try {
             h([jwk: jwk])
             fail()
@@ -151,7 +152,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithPrivateJwk() {
-        EcPrivateJwk jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).build()
         try {
             h([jwk: jwk])
             fail()
@@ -212,7 +213,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testCritical() {
         Set<String> crits = Collections.setOf('foo', 'bar')
-        def header = h([crit: crits])
+        def header = Jwts.header().critical(crits).build() as DefaultProtectedHeader
         assertEquals crits, header.getCritical()
     }
 

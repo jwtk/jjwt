@@ -41,13 +41,13 @@ public class DelegatingMapMutator<K, V, D extends Map<K, V>, T extends MapMutato
     }
 
     @Override
-    public T set(K key, V value) {
+    public T add(K key, V value) {
         put(key, value);
         return self();
     }
 
     @Override
-    public T set(Map<? extends K, ? extends V> m) {
+    public T add(Map<? extends K, ? extends V> m) {
         putAll(m);
         return self();
     }

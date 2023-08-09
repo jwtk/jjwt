@@ -472,8 +472,8 @@ class RFC7520Section5Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
                 .encryptWith(key, alg, enc)
                 .compact()
@@ -536,8 +536,8 @@ class RFC7520Section5Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
                 .encryptWith(key, alg, enc)
                 .compact()
@@ -555,7 +555,7 @@ class RFC7520Section5Test {
     @Test
     void testSection5_3() {
 
-        def key = Keys.forPassword(FIGURE_96.toCharArray())
+        def key = Keys.password(FIGURE_96.toCharArray())
         String cty = 'jwk-set+json'
         int p2c = 8192
 
@@ -597,8 +597,8 @@ class RFC7520Section5Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .header().setContentType(cty).setPbes2Count(p2c).and()
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().contentType(cty).pbes2Count(p2c).and()
                 .setPayload(FIGURE_95)
                 .encryptWith(key, alg, enc)
                 .compact()
@@ -659,8 +659,8 @@ class RFC7520Section5Test {
         }
 
         String result = Jwts.builder()
-                .serializeToJsonWith(serializer) // assert input, return RFC ordered string
-                .setHeaderParam('kid', jwk.getId())
+                .serializer(serializer) // assert input, return RFC ordered string
+                .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
                 .encryptWith(encKey, alg, enc)
                 .compact()

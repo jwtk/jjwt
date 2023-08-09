@@ -49,8 +49,8 @@ class AesGcmKeyAlgorithmTest {
         def iv = new byte[12]
         Randoms.secureRandom().nextBytes(iv)
 
-        def kek = alg.keyBuilder().build()
-        def cek = alg.keyBuilder().build()
+        def kek = alg.key().build()
+        def cek = alg.key().build()
 
         final String jcaName = "AES/GCM/NoPadding"
 
@@ -102,7 +102,7 @@ class AesGcmKeyAlgorithmTest {
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
-            SecretKeyBuilder keyBuilder() {
+            SecretKeyBuilder key() {
                 return new FixedSecretKeyBuilder(cek)
             }
         }
@@ -140,7 +140,7 @@ class AesGcmKeyAlgorithmTest {
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
-            SecretKeyBuilder keyBuilder() {
+            SecretKeyBuilder key() {
                 return new FixedSecretKeyBuilder(cek)
             }
         }

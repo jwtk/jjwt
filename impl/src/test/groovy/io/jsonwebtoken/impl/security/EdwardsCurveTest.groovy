@@ -361,7 +361,7 @@ class EdwardsCurveTest {
     @Test
     void testDerivePublicKeyFromPrivateKey() {
         for(def curve : EdwardsCurve.VALUES) {
-            def pair = curve.keyPairBuilder().build() // generate a standard key pair using the JCA APIs
+            def pair = curve.keyPair().build() // generate a standard key pair using the JCA APIs
             def pubKey = pair.getPublic()
             def derivedPubKey = EdwardsCurve.derivePublic(pair.getPrivate())
             // ensure our derived key matches the original JCA one:

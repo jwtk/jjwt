@@ -28,7 +28,7 @@ class DefaultJwkContextTest {
     void testX509Url() {
         def uri = URI.create('https://github.com/jwtk/jjwt')
         def ctx = new DefaultJwkContext()
-        ctx.setX509Url(uri)
+        ctx.x509Url(uri)
         assertEquals uri, ctx.getX509Url()
         assertEquals uri.toString(), ctx.get('x5u')
     }
@@ -37,7 +37,7 @@ class DefaultJwkContextTest {
     void testX509CertificateChain() {
         def chain = TestKeys.RS256.chain
         def ctx = new DefaultJwkContext()
-        ctx.setX509CertificateChain(chain)
+        ctx.x509CertificateChain(chain)
         assertEquals chain, ctx.getX509CertificateChain()
     }
 
@@ -45,7 +45,7 @@ class DefaultJwkContextTest {
     void testX509CertificateSha1Thumbprint() {
         def thumbprint = Bytes.randomBits(128)
         def ctx = new DefaultJwkContext()
-        ctx.setX509CertificateSha1Thumbprint(thumbprint)
+        ctx.x509CertificateSha1Thumbprint(thumbprint)
         assertArrayEquals thumbprint, ctx.getX509CertificateSha1Thumbprint()
         assertEquals Encoders.BASE64URL.encode(thumbprint), ctx.get('x5t')
     }
@@ -54,7 +54,7 @@ class DefaultJwkContextTest {
     void testX509CertificateSha256Thumbprint() {
         def thumbprint = Bytes.randomBits(256)
         def ctx = new DefaultJwkContext()
-        ctx.setX509CertificateSha256Thumbprint(thumbprint)
+        ctx.x509CertificateSha256Thumbprint(thumbprint)
         assertArrayEquals thumbprint, ctx.getX509CertificateSha256Thumbprint()
         assertEquals Encoders.BASE64URL.encode(thumbprint), ctx.get('x5t#S256')
     }

@@ -88,7 +88,7 @@ class JwkSerializationTest {
     static void testSecretJwk(Serializer serializer, Deserializer deserializer) {
 
         def key = TestKeys.A128GCM
-        def jwk = Jwks.builder().forKey(key).setId('id').build()
+        def jwk = Jwks.builder().key(key).id('id').build()
         assertWrapped(jwk, ['k'])
 
         // Ensure no Groovy or Java toString prints out secret values:
@@ -105,7 +105,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserializer.deserialize(data) as Map<String, ?>
-        def jwk2 = Jwks.builder().set(map).build()
+        def jwk2 = Jwks.builder().add(map).build()
         assertTrue jwk.k instanceof Supplier
         assertEquals jwk, jwk2
         assertEquals jwk.k, jwk2.k
@@ -114,7 +114,7 @@ class JwkSerializationTest {
 
     static void testPrivateEcJwk(Serializer serializer, Deserializer deserializer) {
 
-        def jwk = Jwks.builder().forEcKeyPair(TestKeys.ES256.pair).setId('id').build()
+        def jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).id('id').build()
         assertWrapped(jwk, ['d'])
 
         // Ensure no Groovy or Java toString prints out secret values:
@@ -136,7 +136,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserializer.deserialize(data) as Map<String, ?>
-        def jwk2 = Jwks.builder().set(map).build()
+        def jwk2 = Jwks.builder().add(map).build()
         assertTrue jwk.d instanceof Supplier
         assertEquals jwk, jwk2
         assertEquals jwk.d, jwk2.d
@@ -164,7 +164,7 @@ class JwkSerializationTest {
 
     static void testPrivateRsaJwk(Serializer serializer, Deserializer deserializer) {
 
-        def jwk = Jwks.builder().forRsaKeyPair(TestKeys.RS256.pair).setId('id').build()
+        def jwk = Jwks.builder().rsaKeyPair(TestKeys.RS256.pair).id('id').build()
         def privateFieldNames = ['d', 'p', 'q', 'dp', 'dq', 'qi']
         assertWrapped(jwk, privateFieldNames)
 
@@ -191,7 +191,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserializer.deserialize(data) as Map<String, ?>
-        def jwk2 = Jwks.builder().set(map).build()
+        def jwk2 = Jwks.builder().add(map).build()
         assertEquals(jwk, jwk2, privateFieldNames)
     }
 }

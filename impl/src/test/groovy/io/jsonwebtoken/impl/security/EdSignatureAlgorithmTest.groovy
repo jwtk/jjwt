@@ -54,7 +54,7 @@ class EdSignatureAlgorithmTest {
     @Test
     void testKeyPairBuilder() {
         algs.each {
-            def pair = it.keyPairBuilder().build()
+            def pair = it.keyPair().build()
             assertNotNull pair.public
             assertTrue pair.public instanceof PublicKey
             String alg = pair.public.getAlgorithm()

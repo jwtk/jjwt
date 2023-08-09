@@ -50,7 +50,7 @@ class DefaultJwtParserTest {
 
     @Test(expected = MalformedJwtException)
     void testBase64UrlDecodeWithInvalidInput() {
-        newParser().base64UrlDecode('20:SLDKJF;3993;----', 'test')
+        newParser().decode('20:SLDKJF;3993;----', 'test')
     }
 
     @Test
@@ -66,7 +66,7 @@ class DefaultJwtParserTest {
         assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer )
         assertSame deserializer, p.deserializer.deserializer
 
-        def key = Jwts.SIG.HS256.keyBuilder().build()
+        def key = Jwts.SIG.HS256.key().build()
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
 

@@ -43,7 +43,11 @@ class DefaultMutableJweHeaderTest {
     @SuppressWarnings('GroovyAssignabilityCheck')
     private static void assertSymmetry(String propName, def val) {
         def name = Strings.capitalize(propName)
-        header."set$name"(val)
+        switch (propName) {
+            case 'algorithm': header.add('alg', val); break // no setter
+            case 'compressionAlgorithm': header.add('zip', val); break // no setter
+            default: header."$propName"(val)
+        }
 
         if (val instanceof byte[]) {
             assertArrayEquals val, header."get$name"()
@@ -214,7 +218,7 @@ class DefaultMutableJweHeaderTest {
      */
     @Test
     void testJwk() {
-        def jwk = Jwks.builder().forKey(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
         assertSymmetry('jwk', jwk)
     }
 
@@ -269,7 +273,7 @@ class DefaultMutableJweHeaderTest {
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
 
-        header.setX509CertificateSha1Thumbprint(x5t)
+        header.x509CertificateSha1Thumbprint(x5t)
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
@@ -284,7 +288,7 @@ class DefaultMutableJweHeaderTest {
         def x5tS256 = Jwks.HASH.@SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
 
-        header.setX509CertificateSha256Thumbprint(x5tS256)
+        header.x509CertificateSha256Thumbprint(x5tS256)
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
@@ -301,7 +305,7 @@ class DefaultMutableJweHeaderTest {
     @Test
     void testEphemeralPublicKey() {
         def key = TestKeys.ES256.pair.public
-        def jwk = Jwks.builder().forKey(key).build()
+        def jwk = Jwks.builder().key(key).build()
         header.put('epk', jwk)
         assertEquals jwk, header.getEphemeralPublicKey()
     }
@@ -316,7 +320,7 @@ class DefaultMutableJweHeaderTest {
     void testAgreementPartyUInfoString() {
         def s = "UInfo"
         def info = Strings.utf8(s)
-        header.setAgreementPartyVInfo(s)
+        header.agreementPartyVInfo(s)
         assertArrayEquals info, header.getAgreementPartyVInfo()
     }
 
@@ -330,7 +334,7 @@ class DefaultMutableJweHeaderTest {
     void testAgreementPartyVInfoString() {
         def s = "VInfo"
         def info = Strings.utf8(s)
-        header.setAgreementPartyVInfo(s)
+        header.agreementPartyVInfo(s)
         assertArrayEquals info, header.getAgreementPartyVInfo()
     }
 

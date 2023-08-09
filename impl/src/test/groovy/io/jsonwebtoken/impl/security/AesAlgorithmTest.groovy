@@ -108,7 +108,7 @@ class AesAlgorithmTest {
 
         def secureRandom = new SecureRandom()
 
-        def req = new DefaultAeadRequest('data'.getBytes(), null, secureRandom, alg.keyBuilder().build(), 'aad'.getBytes())
+        def req = new DefaultAeadRequest('data'.getBytes(), null, secureRandom, alg.key().build(), 'aad'.getBytes())
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 

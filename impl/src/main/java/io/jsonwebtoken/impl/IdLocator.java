@@ -47,9 +47,22 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
         this.valueRequired = Strings.hasText(this.requiredMsg);
         Assert.notEmpty(registry, "Registry cannot be null or empty.");
         Collection<R> all = new LinkedHashSet<>(Collections.size(registry) + Collections.size(extras));
+        all.addAll(registry.values()); // defaults MUST come before extras to allow extras to override if necessary
         all.addAll(extras);
-        all.addAll(registry.values());
-        this.registry = new IdRegistry<>(field.getName(), all);
+
+        // The registry requires CaSe-SeNsItIvE keys on purpose - all JWA standard algorithm identifiers
+        // (JWS 'alg', JWE 'enc', JWK 'kty', etc) are all case-sensitive per via the following RFC language:
+        //
+        //     This name is a case-sensitive ASCII string.  Names may not match other registered names in a
+        //     case-insensitive manner unless the Designated Experts state that there is a compelling reason to
+        //     allow an exception.
+        //
+        // References:
+        // - JWS/JWE alg and JWE enc 'Algorithm Name': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1
+        // - JWE zip 'Compression Algorithm Value': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1
+        // - JWK '"kty" Parameter Value': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.4.1
+
+        this.registry = new IdRegistry<>(field.getName(), all); // do not use the caseSensitive ctor argument - must be false
     }
 
     private static String type(Header header) {

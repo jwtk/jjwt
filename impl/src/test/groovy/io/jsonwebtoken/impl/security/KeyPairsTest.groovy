@@ -62,7 +62,7 @@ class KeyPairsTest {
 
     @Test
     void testGetKeyECMismatch() {
-        KeyPair pair = Jwts.SIG.RS256.keyPairBuilder().build()
+        KeyPair pair = Jwts.SIG.RS256.keyPair().build()
         Class clazz = ECPublicKey
         try {
             KeyPairs.getKey(pair, clazz)

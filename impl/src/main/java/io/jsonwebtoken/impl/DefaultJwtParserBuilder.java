@@ -36,8 +36,11 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -62,7 +65,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Provider provider;
 
-    private boolean enableUnsecuredJws = false;
+    private boolean enableUnsecured = false;
 
     private boolean enableUnsecuredDecompression = false;
 
@@ -82,7 +85,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
 
-    private Decoder<String, byte[]> base64UrlDecoder = Decoders.BASE64URL;
+    private Decoder<String, byte[]> decoder = Decoders.BASE64URL;
 
     private Deserializer<Map<String, ?>> deserializer;
 
@@ -96,8 +99,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private Key decryptionKey;
 
     @Override
-    public JwtParserBuilder enableUnsecuredJws() {
-        this.enableUnsecuredJws = true;
+    public JwtParserBuilder enableUnsecured() {
+        this.enableUnsecured = true;
         return this;
     }
 
@@ -108,22 +111,32 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder setProvider(Provider provider) {
+    public JwtParserBuilder provider(Provider provider) {
         this.provider = provider;
         return this;
     }
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
+        return deserializer(deserializer);
+    }
+
+    @Override
+    public JwtParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer) {
         Assert.notNull(deserializer, "deserializer cannot be null.");
         this.deserializer = deserializer;
         return this;
     }
 
     @Override
-    public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder) {
-        Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
-        this.base64UrlDecoder = base64UrlDecoder;
+    public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> decoder) {
+        return decoder(decoder);
+    }
+
+    @Override
+    public JwtParserBuilder decoder(Decoder<String, byte[]> decoder) {
+        Assert.notNull(decoder, "decoder cannot be null.");
+        this.decoder = decoder;
         return this;
     }
 
@@ -173,12 +186,17 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public JwtParserBuilder require(String claimName, Object value) {
         Assert.hasText(claimName, "claim name cannot be null or empty.");
         Assert.notNull(value, "The value cannot be null for claim name: " + claimName);
-        expectedClaims.set(claimName, value);
+        expectedClaims.add(claimName, value);
         return this;
     }
 
     @Override
     public JwtParserBuilder setClock(Clock clock) {
+        return clock(clock);
+    }
+
+    @Override
+    public JwtParserBuilder clock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
         return this;
@@ -186,6 +204,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException {
+        return clockSkewSeconds(seconds);
+    }
+
+    @Override
+    public JwtParserBuilder clockSkewSeconds(long seconds) throws IllegalArgumentException {
         Assert.isTrue(seconds <= MAX_CLOCK_SKEW_MILLIS, MAX_CLOCK_SKEW_ILLEGAL_MSG);
         this.allowedClockSkewMillis = Math.max(0, seconds * MILLISECONDS_PER_SECOND);
         return this;
@@ -210,13 +233,31 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder verifyWith(Key key) {
+    public JwtParserBuilder verifyWith(SecretKey key) {
+        return verifyWith((Key) key);
+    }
+
+    @Override
+    public JwtParserBuilder verifyWith(PublicKey key) {
+        return verifyWith((Key) key);
+    }
+
+    private JwtParserBuilder verifyWith(Key key) {
         this.signatureVerificationKey = Assert.notNull(key, "signature verification key cannot be null.");
         return this;
     }
 
     @Override
-    public JwtParserBuilder decryptWith(final Key key) {
+    public JwtParserBuilder decryptWith(SecretKey key) {
+        return decryptWith((Key) key);
+    }
+
+    @Override
+    public JwtParserBuilder decryptWith(PrivateKey key) {
+        return decryptWith((Key) key);
+    }
+
+    private JwtParserBuilder decryptWith(final Key key) {
         this.decryptionKey = Assert.notNull(key, "decryption key cannot be null.");
         return this;
     }
@@ -229,23 +270,23 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> encAlgs) {
-        Assert.notEmpty(encAlgs, "Additional AeadAlgorithm collection cannot be null or empty.");
-        this.extraEncAlgs.addAll(encAlgs);
+    public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> algs) {
+        Assert.notEmpty(algs, "Additional AeadAlgorithm collection cannot be null or empty.");
+        this.extraEncAlgs.addAll(algs);
         return this;
     }
 
     @Override
-    public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> sigAlgs) {
-        Assert.notEmpty(sigAlgs, "Additional SignatureAlgorithm collection cannot be null or empty.");
-        this.extraSigAlgs.addAll(sigAlgs);
+    public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> algs) {
+        Assert.notEmpty(algs, "Additional SignatureAlgorithm collection cannot be null or empty.");
+        this.extraSigAlgs.addAll(algs);
         return this;
     }
 
     @Override
-    public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> keyAlgs) {
-        Assert.notEmpty(keyAlgs, "Additional KeyAlgorithm collection cannot be null or empty.");
-        this.extraKeyAlgs.addAll(keyAlgs);
+    public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> algs) {
+        Assert.notEmpty(algs, "Additional KeyAlgorithm collection cannot be null or empty.");
+        this.extraKeyAlgs.addAll(algs);
         return this;
     }
 
@@ -258,7 +299,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder setKeyLocator(Locator<Key> keyLocator) {
+    public JwtParserBuilder keyLocator(Locator<Key> keyLocator) {
         this.keyLocator = Assert.notNull(keyLocator, "Key locator cannot be null.");
         return this;
     }
@@ -304,8 +345,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
-        if (!enableUnsecuredJws && enableUnsecuredDecompression) {
-            String msg = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecuredJws' is also " +
+        if (!enableUnsecured && enableUnsecuredDecompression) {
+            String msg = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecured' is also " +
                     "configured. Please read the JavaDoc of both features before enabling either " +
                     "due to their security implications.";
             throw new IllegalStateException(msg);
@@ -324,13 +365,13 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return new DefaultJwtParser(
                 provider,
                 signingKeyResolver,
-                enableUnsecuredJws,
+                enableUnsecured,
                 enableUnsecuredDecompression,
                 keyLocator,
                 clock,
                 allowedClockSkewMillis,
                 expClaims,
-                base64UrlDecoder,
+                decoder,
                 new JwtDeserializer<>(deserializer),
                 compressionCodecResolver,
                 extraZipAlgs,

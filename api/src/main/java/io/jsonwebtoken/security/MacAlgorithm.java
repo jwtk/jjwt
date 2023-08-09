@@ -47,7 +47,7 @@ import javax.crypto.SecretKey;
  * have a sufficient length and any algorithm parameters required by that algorithm. For example:</p>
  *
  * <blockquote><pre>
- * SecretKey key = macAlgorithm.keyBuilder().build();</pre></blockquote>
+ * SecretKey key = macAlgorithm.key().build();</pre></blockquote>
  *
  * <p>The resulting {@code key} is guaranteed to have the correct algorithm parameters and strength/length necessary for
  * that exact {@code MacAlgorithm} instance.</p>

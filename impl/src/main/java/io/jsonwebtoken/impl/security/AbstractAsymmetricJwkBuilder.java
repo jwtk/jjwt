@@ -69,7 +69,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
     }
 
     @Override
-    public T setPublicKeyUse(String use) {
+    public T publicKeyUse(String use) {
         Assert.hasText(use, "publicKeyUse cannot be null or empty.");
         this.DELEGATE.setPublicKeyUse(use);
         return self();
@@ -83,16 +83,16 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
      */
 
     @Override
-    public T setX509CertificateChain(List<X509Certificate> chain) {
+    public T x509CertificateChain(List<X509Certificate> chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
-        this.x509.setX509CertificateChain(chain);
+        this.x509.x509CertificateChain(chain);
         return self();
     }
 
     @Override
-    public T setX509Url(URI uri) {
+    public T x509Url(URI uri) {
         Assert.notNull(uri, "X509Url cannot be null.");
-        this.x509.setX509Url(uri);
+        this.x509.x509Url(uri);
         return self();
     }
 
@@ -105,14 +105,14 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
      */
 
     @Override
-    public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        this.x509.setX509CertificateSha1Thumbprint(thumbprint);
+    public T x509CertificateSha1Thumbprint(byte[] thumbprint) {
+        this.x509.x509CertificateSha1Thumbprint(thumbprint);
         return self();
     }
 
     @Override
-    public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        this.x509.setX509CertificateSha256Thumbprint(thumbprint);
+    public T x509CertificateSha256Thumbprint(byte[] thumbprint) {
+        this.x509.x509CertificateSha256Thumbprint(thumbprint);
         return self();
     }
 
@@ -145,10 +145,10 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         }
 
         @Override
-        public P setPrivateKey(L privateKey) {
+        public P privateKey(L privateKey) {
             Assert.notNull(privateKey, "PrivateKey argument cannot be null.");
             final K publicKey = Assert.notNull(DELEGATE.getKey(), "PublicKey cannot be null.");
-            return newPrivateBuilder(newContext(privateKey)).setPublicKey(publicKey);
+            return newPrivateBuilder(newContext(privateKey)).publicKey(publicKey);
         }
 
         protected abstract P newPrivateBuilder(JwkContext<L> ctx);
@@ -170,7 +170,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         }
 
         @Override
-        public T setPublicKey(L publicKey) {
+        public T publicKey(L publicKey) {
             this.DELEGATE.setPublicKey(publicKey);
             return self();
         }

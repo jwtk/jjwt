@@ -144,8 +144,8 @@ public final class StandardKeyAlgorithms extends DelegatingRegistry<String, KeyA
         for (int i = 0; points.size() < NUM_SAMPLES; i++) {
 
             char[] password = randomChars(PASSWORD_LENGTH);
-            Password key = Keys.forPassword(password);
-            HEADER.setPbes2Count(workFactor);
+            Password key = Keys.password(password);
+            HEADER.pbes2Count(workFactor);
             KeyRequest<Password> request = new DefaultKeyRequest<>(null, null, key, HEADER, ENC_ALG);
 
             long start = System.currentTimeMillis();

@@ -67,19 +67,29 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     // JWT Header methods
     // =============================================================
 
-    @Override
-    public T setAlgorithm(String alg) {
-        return put(DefaultHeader.ALGORITHM, alg);
-    }
+//    @Override
+//    public T algorithm(String alg) {
+//        return put(DefaultHeader.ALGORITHM, alg);
+//    }
 
     @Override
-    public T setContentType(String cty) {
+    public T contentType(String cty) {
         return put(DefaultHeader.CONTENT_TYPE, cty);
     }
 
     @Override
-    public T setType(String typ) {
+    public T type(String typ) {
         return put(DefaultHeader.TYPE, typ);
+    }
+
+    @Override
+    public T setType(String typ) {
+        return type(typ);
+    }
+
+    @Override
+    public T setContentType(String cty) {
+        return contentType(cty);
     }
 
     @Override
@@ -92,51 +102,60 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     // =============================================================
 
     @Override
-    public T setJwkSetUrl(URI uri) {
-        return put(DefaultProtectedHeader.JKU, uri);
+    public T critical(Set<String> crit) {
+        return put(DefaultProtectedHeader.CRIT, crit);
     }
 
     @Override
-    public T setJwk(PublicJwk<?> jwk) {
+    public T jwk(PublicJwk<?> jwk) {
         return put(DefaultProtectedHeader.JWK, jwk);
     }
 
     @Override
-    public T setKeyId(String kid) {
+    public T jwkSetUrl(URI uri) {
+        return put(DefaultProtectedHeader.JKU, uri);
+    }
+
+    @Override
+    public T keyId(String kid) {
         return put(DefaultProtectedHeader.KID, kid);
     }
 
     @Override
-    public T setCritical(Set<String> crit) {
-        return put(DefaultProtectedHeader.CRIT, crit);
+    public T setKeyId(String kid) {
+        return keyId(kid);
     }
 
+    @Override
+    public T setAlgorithm(String alg) {
+        return put(DefaultHeader.ALGORITHM, alg);
+    }
 
     // =============================================================
     // X.509 methods
     // =============================================================
 
     @Override
-    public T setX509Url(URI uri) {
-        this.x509.setX509Url(uri);
+    public T x509Url(URI uri) {
+        this.x509.x509Url(uri);
         return self();
     }
 
     @Override
-    public T setX509CertificateChain(List<X509Certificate> chain) {
-        this.x509.setX509CertificateChain(chain);
+    public T x509CertificateChain(List<X509Certificate> chain) {
+        this.x509.x509CertificateChain(chain);
         return self();
     }
 
     @Override
-    public T setX509CertificateSha1Thumbprint(byte[] thumbprint) {
-        this.x509.setX509CertificateSha1Thumbprint(thumbprint);
+    public T x509CertificateSha1Thumbprint(byte[] thumbprint) {
+        this.x509.x509CertificateSha1Thumbprint(thumbprint);
         return self();
     }
 
     @Override
-    public T setX509CertificateSha256Thumbprint(byte[] thumbprint) {
-        this.x509.setX509CertificateSha256Thumbprint(thumbprint);
+    public T x509CertificateSha256Thumbprint(byte[] thumbprint) {
+        this.x509.x509CertificateSha256Thumbprint(thumbprint);
         return self();
     }
 
@@ -145,27 +164,27 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     // =============================================================
 
     @Override
-    public T setAgreementPartyUInfo(byte[] info) {
+    public T agreementPartyUInfo(byte[] info) {
         return put(DefaultJweHeader.APU, info);
     }
 
     @Override
-    public T setAgreementPartyUInfo(String info) {
-        return setAgreementPartyUInfo(Strings.utf8(Strings.clean(info)));
+    public T agreementPartyUInfo(String info) {
+        return agreementPartyUInfo(Strings.utf8(Strings.clean(info)));
     }
 
     @Override
-    public T setAgreementPartyVInfo(byte[] info) {
+    public T agreementPartyVInfo(byte[] info) {
         return put(DefaultJweHeader.APV, info);
     }
 
     @Override
-    public T setAgreementPartyVInfo(String info) {
-        return setAgreementPartyVInfo(Strings.utf8(Strings.clean(info)));
+    public T agreementPartyVInfo(String info) {
+        return agreementPartyVInfo(Strings.utf8(Strings.clean(info)));
     }
 
     @Override
-    public T setPbes2Count(int count) {
+    public T pbes2Count(int count) {
         return put(DefaultJweHeader.P2C, count);
     }
 }

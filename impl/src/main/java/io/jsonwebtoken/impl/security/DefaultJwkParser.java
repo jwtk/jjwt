@@ -59,9 +59,9 @@ public class DefaultJwkParser implements JwkParser {
         JwkBuilder<?, ?, ?> builder = Jwks.builder();
 
         if (this.provider != null) {
-            builder.setProvider(this.provider);
+            builder.provider(this.provider);
         }
 
-        return builder.set(data).build();
+        return builder.add(data).build();
     }
 }

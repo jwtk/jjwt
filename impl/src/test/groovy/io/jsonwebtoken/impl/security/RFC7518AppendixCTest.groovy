@@ -48,7 +48,7 @@ class RFC7518AppendixCTest {
 
     private static EcPrivateJwk readJwk(String json) {
         Map<String, ?> m = fromJson(json)
-        return Jwks.builder().set(m).build() as EcPrivateJwk
+        return Jwks.builder().add(m).build() as EcPrivateJwk
     }
 
     // https://www.rfc-editor.org/rfc/rfc7517.html#appendix-C.1
@@ -112,7 +112,7 @@ class RFC7518AppendixCTest {
         }
 
         String jwe = Jwts.builder()
-                .header().setAgreementPartyUInfo("Alice").setAgreementPartyVInfo("Bob").and()
+                .header().agreementPartyUInfo("Alice").agreementPartyVInfo("Bob").and()
                 .claim("Hello", "World")
                 .encryptWith(bobJwk.toPublicJwk().toKey(), alg, Jwts.ENC.A128GCM)
                 .compact()

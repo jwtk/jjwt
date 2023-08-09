@@ -46,7 +46,7 @@ class IdLocatorTest {
     @Test
     void unrequiredHeaderValueTest() {
         locator = new IdLocator(TEST_FIELD, registry, Collections.emptyList(), null)
-        def header = Jwts.header().setAlgorithm('none').build()
+        def header = Jwts.header().add('a', 'b').build()
         assertNull locator.apply(header)
     }
 
@@ -63,7 +63,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJwtHeaderInstanceTest() {
-        def header = Jwts.header().set('foo', 'foo').build()
+        def header = Jwts.header().add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
@@ -74,7 +74,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJwsHeaderInstanceTest() {
-        def header = Jwts.header().setAlgorithm('HS256').set('foo', 'foo').build()
+        def header = Jwts.header().add('alg', 'HS256').add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
@@ -85,7 +85,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJweHeaderInstanceTest() {
-        def header = Jwts.header().set('enc', 'A256GCM').set('foo', 'foo').build()
+        def header = Jwts.header().add('enc', 'A256GCM').add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {

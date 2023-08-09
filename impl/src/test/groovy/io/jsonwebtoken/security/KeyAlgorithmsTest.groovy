@@ -72,7 +72,7 @@ class KeyAlgorithmsTest {
 
     @Test(expected = IllegalArgumentException)
     void testForKeyWithInvalidId() {
-        //unlike the 'get' paradigm, 'forKey' requires the value to exist
+        //unlike the 'get' paradigm, 'key' requires the value to exist
         Jwts.KEY.get().forKey('invalid')
     }
 

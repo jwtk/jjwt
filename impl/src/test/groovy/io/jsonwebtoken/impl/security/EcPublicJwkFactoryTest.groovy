@@ -28,7 +28,7 @@ class EcPublicJwkFactoryTest {
     @Test
     void testCurveMissing() {
         try {
-            Jwks.builder().set(['kty': 'EC']).build()
+            Jwks.builder().add(['kty': 'EC']).build()
             fail()
         } catch (MalformedKeyException expected) {
             String msg = "EC JWK is missing required 'crv' (Curve) value."
@@ -39,7 +39,7 @@ class EcPublicJwkFactoryTest {
     @Test
     void testXMissing() {
         try {
-            Jwks.builder().set(['kty': 'EC', 'crv': 'P-256']).build()
+            Jwks.builder().add(['kty': 'EC', 'crv': 'P-256']).build()
             fail()
         } catch (MalformedKeyException expected) {
             String msg = "EC JWK is missing required 'x' (X Coordinate) value."
@@ -51,7 +51,7 @@ class EcPublicJwkFactoryTest {
     void testYMissing() {
         try {
             String encoded = DefaultEcPublicJwk.X.applyTo(BigInteger.ONE)
-            Jwks.builder().set(['kty': 'EC', 'crv': 'P-256', 'x': encoded]).build()
+            Jwks.builder().add(['kty': 'EC', 'crv': 'P-256', 'x': encoded]).build()
             fail()
         } catch (MalformedKeyException expected) {
             String msg = "EC JWK is missing required 'y' (Y Coordinate) value."
@@ -63,7 +63,7 @@ class EcPublicJwkFactoryTest {
     void testPointNotOnCurve() {
         try {
             String encoded = DefaultEcPublicJwk.X.applyTo(BigInteger.ONE)
-            Jwks.builder().set(['kty': 'EC', 'crv': 'P-256', 'x': encoded, 'y': encoded]).build()
+            Jwks.builder().add(['kty': 'EC', 'crv': 'P-256', 'x': encoded, 'y': encoded]).build()
             fail()
         } catch (InvalidKeyException expected) {
             String msg = "EC JWK x,y coordinates do not exist on elliptic curve 'P-256'. " +

@@ -25,14 +25,41 @@ import io.jsonwebtoken.lang.MapMutator;
  */
 public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<String, Object, T> {
 
+    //IMPLEMENTOR NOTE: if this `algorithm` method ever needs to be exposed in the public API, it might be better to
+    //                  have it in the Jwts.HeaderBuilder interface and NOT this one: in the context of
+    //                  JwtBuilder.Header, there is never a reason for an application developer to call algorithm(id)
+    //                  directly because the KeyAlgorithm or SecureDigestAlgorithm instance must always be provided
+    //                  via the signWith or encryptWith methods.  The JwtBuilder will always set the algorithm
+    //                  header based on these two instances, so there is no need for an app dev to do so.
+    /*
+     * Sets the JWT {@code alg} (Algorithm) header value.  A {@code null} value will remove the property
+     * from the JSON map.
+     * <ul>
+     *     <li>If the JWT is a Signed JWT (a JWS), the
+     *     <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">{@code alg}</a> (Algorithm) header
+     *     parameter identifies the cryptographic algorithm used to secure the JWS.</li>
+     *      <li>If the JWT is an Encrypted JWT (a JWE), the
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
+     * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
+     * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
+     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.</li>
+     * </ul>
+     *
+     * @param alg the {@code alg} header value
+     * @return this header for method chaining
+     * @since JJWT_RELEASE_VERSION
+     *
+    T algorithm(String alg);
+    */
+
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1">
      * <code>typ</code> (Type)</a> header value.  A {@code null} value will remove the property from the JSON map.
      *
      * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Header} instance for method chaining.
+     * @return the instance for method chaining.
      */
-    T setType(String typ);
+    T type(String typ);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">
@@ -57,46 +84,42 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
      * <b><code>example;part=&quot;1/2&quot;</code></b>.</p>
      *
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Header} instance for method chaining.
+     * @return the instance for method chaining.
      */
+    T contentType(String cty);
+
+    /**
+     * Deprecated since of JJWT_RELEASE_VERSION, delegates to {@link #type(String)}.
+     *
+     * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @see #type(String)
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #type(String)} method.
+     * This method will be removed before the 1.0 release.
+     */
+    @Deprecated
+    T setType(String typ);
+
+    /**
+     * Deprecated as of JJWT_RELEASE_VERSION, delegates to {@link #contentType(String)}.
+     *
+     * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining.
+     * @see #contentType(String)
+     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #contentType(String)}.
+     */
+    @Deprecated
     T setContentType(String cty);
 
     /**
-     * Sets the JWT {@code alg} (Algorithm) header value.  A {@code null} value will remove the property
-     * from the JSON map.
-     * <ul>
-     *     <li>If the JWT is a Signed JWT (a JWS), the
-     *     <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">{@code alg}</a> (Algorithm) header
-     *     parameter identifies the cryptographic algorithm used to secure the JWS.</li>
-     *      <li>If the JWT is an Encrypted JWT (a JWE), the
-     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1"><code>alg</code></a> (Algorithm) header parameter
-     * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
-     * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
-     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.</li>
-     * </ul>
-     *
-     * @param alg the {@code alg} header value
-     * @return this header for method chaining
-     * @since JJWT_RELEASE_VERSION
-     */
-    T setAlgorithm(String alg);
-
-    /**
-     * Sets the JWT  <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a>
-     * (Compression Algorithm) header parameter value. A {@code null} value will remove
-     * the property from the JSON map.
-     *
-     * <p><b>Compatibility Note</b></p>
-     *
-     * <p>While the JWT family of specifications only defines the <code>zip</code> header in the JWE
-     * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.
-     * However, be aware that <b>if you use compression when creating a JWS token, other libraries may not be able to
-     * parse the JWS</b>. However, Compression when creating JWE tokens should be universally accepted for any library
-     * that supports JWE.</p>
+     * Deprecated as of JJWT_RELEASE_VERSION, there is no need to set this any longer as the {@code JwtBuilder} will
+     * always set the {@code zip} header as necessary.
      *
      * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Header} instance for method chaining.
+     * @return the instance for method chaining.
      * @since 0.6.0
+     * @deprecated since JJWT_RELEASE_VERSION and will be removed before the 1.0 release.
      */
+    @Deprecated
     T setCompressionAlgorithm(String zip);
 }

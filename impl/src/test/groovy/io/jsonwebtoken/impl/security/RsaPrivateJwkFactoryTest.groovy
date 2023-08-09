@@ -44,7 +44,7 @@ class RsaPrivateJwkFactoryTest {
         }
 
         try {
-            Jwks.builder().forKey(key).build()
+            Jwks.builder().key(key).build()
             fail()
         } catch (UnsupportedKeyException expected) {
             String msg = 'Unable to derive RSAPublicKey from RSAPrivateKey implementation ' +
@@ -119,7 +119,7 @@ class RsaPrivateJwkFactoryTest {
         } as RSAPrivateKey
 
         try {
-            Jwks.builder().forKey(key).build()
+            Jwks.builder().key(key).build()
             fail()
         } catch (UnsupportedKeyException expected) {
             String prefix = 'Unable to derive RSAPublicKey from RSAPrivateKey {kty=RSA}. Cause: '
@@ -139,7 +139,7 @@ class RsaPrivateJwkFactoryTest {
         //build up test key:
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, infos)
 
-        RsaPrivateJwk jwk = Jwks.builder().forKey(key).build()
+        RsaPrivateJwk jwk = Jwks.builder().key(key).build()
 
         List<RSAOtherPrimeInfo> oth = jwk.get('oth') as List<RSAOtherPrimeInfo>
         assertTrue oth instanceof List
@@ -162,11 +162,11 @@ class RsaPrivateJwkFactoryTest {
         RSAPrivateCrtKey priv = pair.private as RSAPrivateCrtKey
         RSAPublicKey pub = pair.public as RSAPublicKey
 
-        RsaPrivateJwk jwk = Jwks.builder().forKey(priv).setPublicKey(pub).build()
+        RsaPrivateJwk jwk = Jwks.builder().key(priv).publicKey(pub).build()
         // an RSAMultiPrimePrivateCrtKey without OtherInfo elements is treated the same as a normal RSAPrivateCrtKey,
         // so ensure they are equal:
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, null)
-        RsaPrivateJwk jwk2 = Jwks.builder().forKey(key).setPublicKey(pub).build()
+        RsaPrivateJwk jwk2 = Jwks.builder().key(key).publicKey(pub).build()
         assertEquals jwk, jwk2
         assertNull jwk.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())
         assertNull jwk2.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())
@@ -181,7 +181,7 @@ class RsaPrivateJwkFactoryTest {
 
         def priv = new TestRSAPrivateKey(privCrtKey)
 
-        RsaPrivateJwk jwk = Jwks.builder().forKey(priv).setPublicKey(pub).build()
+        RsaPrivateJwk jwk = Jwks.builder().key(priv).publicKey(pub).build()
         assertEquals 4, jwk.size() // kty, public exponent, modulus, private exponent
         assertEquals 'RSA', jwk.getType()
         assertEquals Converters.BIGINT.applyTo(pub.getModulus()), jwk.get(DefaultRsaPublicJwk.MODULUS.getId())
@@ -194,13 +194,13 @@ class RsaPrivateJwkFactoryTest {
         def pair = TestKeys.RS256.pair
         RSAPublicKey pub = pair.public as RSAPublicKey
         RSAPrivateKey priv = new TestRSAPrivateKey(pair.private as RSAPrivateKey)
-        def jwk = Jwks.builder().forKey(priv).setPublicKey(pub).build()
+        def jwk = Jwks.builder().key(priv).publicKey(pub).build()
         //minimal values: kty, modulus, public exponent, private exponent = 4 fields:
         assertEquals 4, jwk.size()
         def map = new LinkedHashMap(jwk)
         assertEquals 4, map.size()
 
-        def jwkFromValues = Jwks.builder().set(map).build()
+        def jwkFromValues = Jwks.builder().add(map).build()
 
         //ensure they're equal:
         assertEquals jwk, jwkFromValues
@@ -217,7 +217,7 @@ class RsaPrivateJwkFactoryTest {
         def infos = [info1, info2]
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, infos)
 
-        final RsaPrivateJwk jwk = Jwks.builder().forKey(key).setPublicKey(pub).build()
+        final RsaPrivateJwk jwk = Jwks.builder().key(key).publicKey(pub).build()
 
         //we have to test the class directly and override, since the dummy MultiPrime values won't be accepted by the
         //JVM:
