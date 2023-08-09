@@ -81,7 +81,7 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
      *     '/'.  For instance, a "cty" value of "example" SHOULD be used to
      *     represent the "application/example" media type, whereas the media
      *     type "application/example;part="1/2"" cannot be shortened to
-     *     "example;part="1/2"".</blockquote></pre>
+     *     "example;part="1/2"".</pre></blockquote>
      *
      * <p>JJWT performs the reverse during JWT parsing: {@link Header#getContentType()} will automatically prepend the
      * {@code application/} prefix if the parsed {@code cty} value does not contain a '<code>/</code>' character (as
