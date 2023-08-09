@@ -193,7 +193,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param content the content byte array to use as the JWT payload
      * @return the builder for method chaining.
-     * @see #content(byte[], String) 
+     * @see #content(byte[], String)
      * @since JJWT_RELEASE_VERSION
      */
     JwtBuilder content(byte[] content);
