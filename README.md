@@ -2307,6 +2307,17 @@ SecretJwk = Jwks.builder().key(key) // (1) and (2)
     .build();                       // (4)
 ```
 
+#### JWK from a Map
+
+If you have a `Map<String,?>` of name/value pairs that reflect an existing JWK, you add them and build a type-safe
+`Jwk` instance:
+
+```java
+Map<String,?> jwkValues = getMyJwkMap();
+
+Jwk<?> jwk = Jwks.builder().add(jwkValues).build();
+```
+
 <a name="jwk-read"></a>
 ### Read a JWK
 
@@ -2414,14 +2425,15 @@ Jwk<?> jwk = Jwks.builder(). /* ... */ .build();
 
 JwkThumbprint sha256Thumbprint = jwk.thumbprint(); // SHA-256 thumbprint by default
 
-JwkThumbprint anotherThumbprint = jwk.thumbprint(hashAlg); // thumbprint using specified hash algorithm
+JwkThumbprint anotherThumbprint = jwk.thumbprint(Jwks.HASH.SHA512); // or a specified hash algorithm
 ```
 
 The resulting `JwkThumbprint` instance provides some useful methods:
 
 * `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the raw output from the hash algorithm
 * `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
-* `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint
+* `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint. Many standard IANA
+                                      hash algorithms are available as constants in the `Jwts.HASH` utility class.
 * `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) specification
 
 <a name="jwk-thumbprint-kid"></a>
@@ -2452,7 +2464,7 @@ Instead, you may use the `idFromThumbprint` methods on the `JwkBuilder` when cre
 ```java
 Jwk<?> jwk = Jwks.builder().key(aKey)
 
-    .idFromThumbprint() // or idFromThumbprint(hashAlgorithm)
+    .idFromThumbprint() // or idFromThumbprint(HashAlgorithm)
 
     .build();
 ```
