@@ -46,7 +46,7 @@ public final class Jwks {
 
     /**
      * Constants for all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
-     * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6<a>
+     * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6</a>
      * (for Weierstrass Elliptic Curves) and
      * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
      * Each standard algorithm is available as a
@@ -65,7 +65,7 @@ public final class Jwks {
 
         /**
          * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
-         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6<a>
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6</a>
          * (for Weierstrass Elliptic Curves) and
          * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
          *

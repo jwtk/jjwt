@@ -40,6 +40,11 @@ package io.jsonwebtoken;
  * parameter value.</td>
  * </tr>
  * <tr>
+ * <td>{@link io.jsonwebtoken.security.Curve Curve}</td>
+ * <td>JWK's <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1">{@code crv} (Curve)</a>
+ * parameter value.</td>
+ * </tr>
+ * <tr>
  * <td>{@link io.jsonwebtoken.io.CompressionAlgorithm CompressionAlgorithm}</td>
  * <td>JWE protected header's
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">{@code zip} (Compression Algorithm)</a>
