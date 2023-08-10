@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.KeyPairBuilder;
 
 import java.security.Provider;
