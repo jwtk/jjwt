@@ -18,9 +18,11 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
+import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.SignatureAlgorithm
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.openssl.PEMKeyPair
@@ -71,10 +73,10 @@ class TestCertificates {
         return alg.getId()
     }
 
-    static X509Certificate readTestCertificate(Identifiable alg) {
+    static X509Certificate readTestCertificate(Identifiable alg, Provider provider) {
         InputStream is = getResourceStream(getKeyFilePrefix(alg) + '.crt.pem')
         try {
-            JcaTemplate template = new JcaTemplate("X.509", alg.getProvider())
+            JcaTemplate template = new JcaTemplate("X.509", provider)
             template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
                 @Override
                 X509Certificate apply(CertificateFactory factory) throws Exception {
@@ -83,6 +85,36 @@ class TestCertificates {
             })
         } finally {
             is.close()
+        }
+    }
+
+    static X509Certificate readTestCertificate(Identifiable alg) {
+        Provider provider = alg.getProvider() as Provider // will be null on JVMs with native support for the alg
+        try {
+            return readTestCertificate(alg, provider)
+        } catch (Throwable t) {
+
+            // All test certs were created with OpenSSL, so the only time this should happen is if the JDK natively
+            // supports the alg, but does not support the X.509 file itself per this bug:
+            //
+            // https://bugs.openjdk.org/browse/JDK-8242556
+            //
+            // But because Oracle only backported this fix to JDK 8u271+, 11.0.9+, and 15+, we'll need to fall back to
+            // BC (which can read the files correctly) on JDK 9, 10, 12, 13, and 14.
+
+            // But first assert that we're experiencing the problem we think we're experiencing, because if not,
+            // we need to fix this implementation:
+            boolean jdk8242556Bug = (alg instanceof SignatureAlgorithm) && alg.getId().startsWith("PS") &&
+                    t.message.contains('Unsupported algorithm 1.2.840.113549.1.1.10')
+            if (!jdk8242556Bug) { // some other unexpected problem, we need to know about it in test results:
+                String msg = "Unable to read ${alg.getId()} X.509 certificate file: ${t.message}"
+                throw new IllegalStateException(msg, t)
+            }
+
+            // otherwise, we are indeed experiencing the expected JVM bug, so use BC as a backup:
+            String msg = 'BouncyCastle Provider must be available to test cases.'
+            provider = Assert.notNull(Providers.findBouncyCastle(Conditions.TRUE), msg);
+            return readTestCertificate(alg, provider);
         }
     }
 
