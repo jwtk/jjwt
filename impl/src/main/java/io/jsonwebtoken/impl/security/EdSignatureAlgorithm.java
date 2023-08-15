@@ -23,25 +23,27 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifyDigestRequest;
 
 import java.security.Key;
+import java.security.PrivateKey;
 
-public class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
+final class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     private static final String ID = "EdDSA";
 
     private final EdwardsCurve preferredCurve;
 
-    public EdSignatureAlgorithm() {
+    static final EdSignatureAlgorithm INSTANCE = new EdSignatureAlgorithm();
+
+    static boolean isSigningKey(PrivateKey key) {
+        EdwardsCurve curve = EdwardsCurve.findByKey(key);
+        return curve != null && curve.isSignatureCurve();
+    }
+
+    private EdSignatureAlgorithm() {
         super(ID, ID);
         this.preferredCurve = EdwardsCurve.Ed448;
         // EdDSA is not available natively until JDK 15, so try to load BC as a backup provider if possible:
         setProvider(this.preferredCurve.getProvider());
-    }
-
-    public EdSignatureAlgorithm(EdwardsCurve preferredCurve) {
-        super(ID, preferredCurve.getJcaName());
-        this.preferredCurve = Assert.notNull(preferredCurve, "preferredCurve cannot be null.");
-        Assert.isTrue(preferredCurve.isSignatureCurve(), "EdwardsCurve must be a signature curve, not a key agreement curve.");
-        setProvider(preferredCurve.getProvider());
+        Assert.isTrue(this.preferredCurve.isSignatureCurve(), "Must be signature curve, not key agreement curve.");
     }
 
     @Override
@@ -74,7 +76,7 @@ public class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
         EdwardsCurve curve = EdwardsCurve.findByKey(key);
         if (curve != null && !curve.isSignatureCurve()) {
             String msg = curve.getId() + " keys may not be used with " + getId() + " digital signatures per " +
-                    "https://www.rfc-editor.org/rfc/rfc8037#section-3.2";
+                    "https://www.rfc-editor.org/rfc/rfc8037.html#section-3.2";
             throw new UnsupportedKeyException(msg);
         }
     }

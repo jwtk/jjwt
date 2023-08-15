@@ -87,4 +87,16 @@ class StandardAlgorithmsTest {
         }
     }
 
+    @SuppressWarnings('GroovyUnusedCatchParameter')
+    @Test
+    void testGetWithoutStringKey() {
+        registries.each { reg ->
+            try {
+                assertNull reg.get(2) // not a string, should fail
+                fail()
+            } catch (ClassCastException expected) { // allowed per Map#get contract
+            }
+        }
+    }
+
 }

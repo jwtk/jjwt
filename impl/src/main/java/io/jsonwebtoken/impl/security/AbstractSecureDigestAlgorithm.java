@@ -41,7 +41,7 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
     @Override
     public final byte[] digest(SecureRequest<byte[], S> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
-        final S key = Assert.notNull(request.getKey(), "Request key cannot be null.");
+        final S key = Assert.notNull(request.getKey(), "Signing key cannot be null.");
         Assert.notEmpty(request.getPayload(), "Request content cannot be null or empty.");
         try {
             validateKey(key, true);
@@ -60,7 +60,7 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
     @Override
     public final boolean verify(VerifySecureDigestRequest<V> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
-        final V key = Assert.notNull(request.getKey(), "Request key cannot be null.");
+        final V key = Assert.notNull(request.getKey(), "Verification key cannot be null.");
         Assert.notEmpty(request.getPayload(), "Request content cannot be null or empty.");
         Assert.notEmpty(request.getDigest(), "Request signature byte array cannot be null or empty.");
         try {

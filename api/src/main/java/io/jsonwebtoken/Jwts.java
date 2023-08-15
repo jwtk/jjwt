@@ -21,6 +21,7 @@ import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.KeyPairBuilderSupplier;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyAlgorithm;
@@ -293,33 +294,25 @@ public final class Jwts {
         public static final SignatureAlgorithm ES512 = Jwts.get(REGISTRY, "ES512");
 
         /**
-         * {@code EdDSA} signature algorithm as defined by
-         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
-         * requires either {@code Ed25519} or {@code Ed448} Edwards Curve keys.
-         * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * {@code EdDSA} signature algorithm defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a> that requires
+         * either {@code Ed25519} or {@code Ed448} Edwards Elliptic Curve<sup><b>1</b></sup> keys.
+         *
+         * <p><b>KeyPair Generation</b></p>
+         *
+         * <p>This instance's {@link KeyPairBuilderSupplier#keyPair() keyPair()} builder creates {@code Ed448} keys,
+         * and is essentially an alias for
+         * <code>{@link io.jsonwebtoken.security.Jwks.CRV Jwks.CRV}.{@link io.jsonwebtoken.security.Jwks.CRV#Ed448 Ed448}.{@link KeyPairBuilderSupplier#keyPair() keyPair()}</code>.</p>
+         *
+         * <p>If you would like to generate an {@code Ed25519} {@code KeyPair} for use with the {@code EdDSA} algorithm,
+         * you may use the
+         * <code>{@link io.jsonwebtoken.security.Jwks.CRV Jwks.CRV}.{@link io.jsonwebtoken.security.Jwks.CRV#Ed25519 Ed25519}.{@link KeyPairBuilderSupplier#keyPair() keyPair()}</code>
+         * builder instead.</p>
+         *
+         * <p><b><sup>1</sup>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
          */
         public static final SignatureAlgorithm EdDSA = Jwts.get(REGISTRY, "EdDSA");
-
-        /**
-         * {@code EdDSA} signature algorithm using Curve {@code Ed25519} as defined by
-         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
-         * requires {@code Ed25519} Edwards Curve keys to create signatures.  <b>This is a convenience alias for
-         * {@link #EdDSA}</b> that defaults key generation to {@code Ed25519} keys.
-         * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
-         * classpath.</b></p>
-         */
-        public static final SignatureAlgorithm Ed25519 = Jwts.get(REGISTRY, "Ed25519");
-
-        /**
-         * {@code EdDSA} signature algorithm using Curve {@code Ed448} as defined by
-         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>.  This algorithm
-         * requires {@code Ed448} Edwards Curve keys to create signatures. <b>This is a convenience alias for
-         * {@link #EdDSA}</b> that defaults key generation to {@code Ed448} keys.
-         * <p><b>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
-         * classpath.</b></p>
-         */
-        public static final SignatureAlgorithm Ed448 = Jwts.get(REGISTRY, "Ed448");
     }
 
     /**

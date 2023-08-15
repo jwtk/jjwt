@@ -18,51 +18,57 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+
+import javax.crypto.SecretKey;
+import java.security.Key;
+import java.security.PrivateKey;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.SIG
 public final class StandardSecureDigestAlgorithms extends DelegatingRegistry<String, SecureDigestAlgorithm<?, ?>> {
 
-    private static final EdSignatureAlgorithm Ed25519 = new EdSignatureAlgorithm(EdwardsCurve.Ed25519);
-    private static final EdSignatureAlgorithm Ed448 = new EdSignatureAlgorithm(EdwardsCurve.Ed448);
-
     public StandardSecureDigestAlgorithms() {
         super(new IdRegistry<>("JWS Digital Signature or MAC", Collections.of(
-                new NoneSignatureAlgorithm(),
-                new DefaultMacAlgorithm(256),
-                new DefaultMacAlgorithm(384),
-                new DefaultMacAlgorithm(512),
-                new RsaSignatureAlgorithm(256, 2048),
-                new RsaSignatureAlgorithm(384, 3072),
-                new RsaSignatureAlgorithm(512, 4096),
-                new RsaSignatureAlgorithm(256, 2048, 256),
-                new RsaSignatureAlgorithm(384, 3072, 384),
-                new RsaSignatureAlgorithm(512, 4096, 512),
-                new EcSignatureAlgorithm(256),
-                new EcSignatureAlgorithm(384),
-                new EcSignatureAlgorithm(521),
-                new EdSignatureAlgorithm()
+                NoneSignatureAlgorithm.INSTANCE,
+                DefaultMacAlgorithm.HS256,
+                DefaultMacAlgorithm.HS384,
+                DefaultMacAlgorithm.HS512,
+                RsaSignatureAlgorithm.RS256,
+                RsaSignatureAlgorithm.RS384,
+                RsaSignatureAlgorithm.RS512,
+                RsaSignatureAlgorithm.PS256,
+                RsaSignatureAlgorithm.PS384,
+                RsaSignatureAlgorithm.PS512,
+                EcSignatureAlgorithm.ES256,
+                EcSignatureAlgorithm.ES384,
+                EcSignatureAlgorithm.ES512,
+                EdSignatureAlgorithm.INSTANCE
         ), false));
     }
 
-    @Override
-    public SecureDigestAlgorithm<?, ?> get(Object id) {
-        String key = (String) id; // could throw ClassCastException, which is allowed per Map 'get' contract
-        if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(key)) {
-            return Ed448;
-        } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(key)) {
-            return Ed25519;
-        }
-        return super.get(key);
-    }
+    @SuppressWarnings("unchecked")
+    public static <K extends Key> SecureDigestAlgorithm<K, ?> findBySigningKey(K key) {
 
-    @Override
-    public SecureDigestAlgorithm<?, ?> forKey(String id) throws IllegalArgumentException {
-        if (EdwardsCurve.Ed448.getId().equalsIgnoreCase(id)) {
-            return Ed448;
-        } else if (EdwardsCurve.Ed25519.getId().equalsIgnoreCase(id)) {
-            return Ed25519;
+        SecureDigestAlgorithm<?, ?> alg = null; // null value means no suitable match
+
+        if (key instanceof SecretKey && !(key instanceof Password)) {
+
+            alg = DefaultMacAlgorithm.findByKey(key);
+
+        } else if (key instanceof PrivateKey) {
+
+            PrivateKey pk = (PrivateKey) key;
+
+            alg = RsaSignatureAlgorithm.findByKey(pk);
+            if (alg == null) {
+                alg = EcSignatureAlgorithm.findByKey(pk);
+            }
+            if (alg == null && EdSignatureAlgorithm.isSigningKey(pk)) {
+                alg = EdSignatureAlgorithm.INSTANCE;
+            }
         }
-        return super.forKey(id);
+
+        return (SecureDigestAlgorithm<K, ?>) alg;
     }
 }

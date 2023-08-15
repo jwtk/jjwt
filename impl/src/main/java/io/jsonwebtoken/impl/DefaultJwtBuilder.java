@@ -27,6 +27,7 @@ import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
+import io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
@@ -49,6 +50,7 @@ import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -179,10 +181,21 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this.headerBuilder.add(name, value).and();
     }
 
-    @SuppressWarnings("unchecked") // TODO: remove for 1.0
+    @SuppressWarnings({"unchecked", "deprecation"}) // TODO: remove for 1.0
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
-        @SuppressWarnings("deprecation") io.jsonwebtoken.SignatureAlgorithm alg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get().forKey(alg.getValue());
+        Assert.notNull(key, "Key cannot be null.");
+        SecureDigestAlgorithm<K, ?> alg = StandardSecureDigestAlgorithms.findBySigningKey(key);
+        if (alg == null) {
+            String msg = "Unable to determine a suitable MAC or Signature algorithm for the specified key using " +
+                    "available heuristics: either the key size is too weak be used with available algorithms, or the " +
+                    "key size is unavailable (e.g. if using a PKCS11 or HSM (Hardware Security Module) key store). " +
+                    "If you are using a PKCS11 or HSM keystore, consider using the " +
+                    "JwtBuilder.signWith(Key, SecureDigestAlgorithm) method instead.";
+            throw new UnsupportedKeyException(msg);
+        }
+        return alg;
+        // io.jsonwebtoken.SignatureAlgorithm dalg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
+        //return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get().forKey(dalg.getValue());
     }
 
     @Override
@@ -195,7 +208,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public <K extends Key> JwtBuilder signWith(K key, final SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException {
         Assert.notNull(key, "Key argument cannot be null.");
-        if (key instanceof PublicKey) { // it's always wrong to try to create signatures with PublicKeys:
+        if (key instanceof PublicKey) { // it's always wrong/insecure to try to create signatures with PublicKeys:
             throw new IllegalArgumentException(PUB_KEY_SIGN_MSG);
         }
         // Implementation note:  Ordinarily Passwords should not be used to create secure digests because they usually

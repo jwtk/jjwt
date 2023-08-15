@@ -210,6 +210,20 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
+    public boolean isSigUse() {
+        // Even though 'use' is for PUBLIC KEY use (as defined in RFC 7515), RFC 7520 shows secret keys with
+        // 'use' values, so we'll account for that as well:
+        if ("sig".equals(getPublicKeyUse())) {
+            return true;
+        }
+        Set<String> ops = getOperations();
+        if (Collections.isEmpty(ops)) {
+            return false;
+        }
+        return ops.contains("sign") || ops.contains("verify");
+    }
+
+    @Override
     public K getKey() {
         return this.key;
     }

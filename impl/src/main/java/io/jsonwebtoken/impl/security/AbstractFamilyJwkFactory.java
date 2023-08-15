@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyException;
@@ -73,8 +74,14 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
         return generateKey(ctx, this.keyType, fn);
     }
 
+    protected String getKeyFactoryJcaName(final JwkContext<?> ctx) {
+        String jcaName = KeysBridge.findAlgorithm(ctx.getKey());
+        return Strings.hasText(jcaName) ? jcaName : getId();
+    }
+
     protected <T extends Key> T generateKey(final JwkContext<?> ctx, final Class<T> type, final CheckedFunction<KeyFactory, T> fn) {
-        JcaTemplate template = new JcaTemplate(getId(), ctx.getProvider(), ctx.getRandom());
+        String jcaName = getKeyFactoryJcaName(ctx);
+        JcaTemplate template = new JcaTemplate(jcaName, ctx.getProvider(), ctx.getRandom());
         return template.withKeyFactory(new CheckedFunction<KeyFactory, T>() {
             @Override
             public T apply(KeyFactory instance) {

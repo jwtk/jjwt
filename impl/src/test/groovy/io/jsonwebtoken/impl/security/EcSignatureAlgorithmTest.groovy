@@ -48,7 +48,7 @@ class EcSignatureAlgorithmTest {
     @Test
     void testConstructorWithWeakKeyLength() {
         try {
-            new EcSignatureAlgorithm(128)
+            new EcSignatureAlgorithm(128, 'foo')
         } catch (IllegalArgumentException iae) {
             String msg = 'orderBitLength must equal 256, 384, or 521.'
             assertEquals msg, iae.getMessage()
@@ -56,8 +56,36 @@ class EcSignatureAlgorithmTest {
     }
 
     @Test
+    void testFindByNoAlgKey() {
+        assertNull EcSignatureAlgorithm.findByKey(new TestKey())
+    }
+
+    @Test
+    void testFindOidKeys() {
+        for(def alg : EcSignatureAlgorithm.ALGS_BY_OID.values()) {
+            String name = "${alg.getId()}_OID"
+            String oid = EcSignatureAlgorithm.metaClass.getAttribute(EcSignatureAlgorithm, name) as String
+            assertEquals oid, alg.OID
+            def key = new TestKey(algorithm: oid)
+            assertSame alg, EcSignatureAlgorithm.findByKey(key)
+        }
+    }
+
+    @Test
+    void testFindByWeakKey() {
+        ECPublicKey key = createMock(ECPublicKey)
+        ECParameterSpec spec = createMock(ECParameterSpec)
+        expect(key.getAlgorithm()).andStubReturn("EC")
+        expect(key.getParams()).andStubReturn(spec)
+        expect(spec.getOrder()).andStubReturn(BigInteger.ONE)
+        replay key, spec
+        assertNull EcSignatureAlgorithm.findByKey(key)
+        verify key, spec
+    }
+
+    @Test
     void testValidateKeyWithoutEcKey() {
-        def key = createMock(PublicKey)
+        PublicKey key = createMock(PublicKey)
         replay key
         algs().each {
             it.validateKey(key, false)
@@ -68,7 +96,7 @@ class EcSignatureAlgorithmTest {
 
     @Test
     void testIsValidRAndSWithoutEcKey() {
-        def key = createMock(PublicKey)
+        PublicKey key = createMock(PublicKey)
         replay key
         algs().each {
             it.isValidRAndS(key, Bytes.EMPTY)

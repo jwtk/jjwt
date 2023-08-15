@@ -352,7 +352,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEdEcPublicJwk() {
-        PublicKey key = Jwts.SIG.Ed25519.keyPair().build().getPublic();
+        PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic();
         OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -369,7 +369,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEdEcPrivateJwk() {
-        KeyPair pair = Jwts.SIG.Ed448.keyPair().build();
+        KeyPair pair = Jwks.CRV.Ed448.keyPair().build();
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 

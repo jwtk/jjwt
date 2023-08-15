@@ -29,39 +29,51 @@ import io.jsonwebtoken.security.WeakKeyException;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey, SecretKey> implements MacAlgorithm {
+final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey, SecretKey> implements MacAlgorithm {
 
-    private final int minKeyBitLength; //in bits
+    private static final String HS256_OID = "1.2.840.113549.2.9";
+    private static final String HS384_OID = "1.2.840.113549.2.10";
+    private static final String HS512_OID = "1.2.840.113549.2.11";
 
     private static final Set<String> JWA_STANDARD_IDS = new LinkedHashSet<>(Collections.of("HS256", "HS384", "HS512"));
 
-    // PKCS12 OIDs are added to these lists per https://bugs.openjdk.java.net/browse/JDK-8243551
-    private static final Set<String> HS256_JCA_NAMES = new LinkedHashSet<>(Collections.of("HMACSHA256", "1.2.840.113549.2.9"));
-    private static final Set<String> HS384_JCA_NAMES = new LinkedHashSet<>(Collections.of("HMACSHA384", "1.2.840.113549.2.10"));
-    private static final Set<String> HS512_JCA_NAMES = new LinkedHashSet<>(Collections.of("HMACSHA512", "1.2.840.113549.2.11"));
+    static final DefaultMacAlgorithm HS256 = new DefaultMacAlgorithm(256);
+    static final DefaultMacAlgorithm HS384 = new DefaultMacAlgorithm(384);
+    static final DefaultMacAlgorithm HS512 = new DefaultMacAlgorithm(512);
 
-    private static final Set<String> VALID_HS256_JCA_NAMES;
-    private static final Set<String> VALID_HS384_JCA_NAMES;
+    private static final Map<String, MacAlgorithm> JCA_NAME_MAP;
 
     static {
-        VALID_HS384_JCA_NAMES = new LinkedHashSet<>(HS384_JCA_NAMES);
-        VALID_HS384_JCA_NAMES.addAll(HS512_JCA_NAMES);
-        VALID_HS256_JCA_NAMES = new LinkedHashSet<>(HS256_JCA_NAMES);
-        VALID_HS256_JCA_NAMES.addAll(VALID_HS384_JCA_NAMES);
+        JCA_NAME_MAP = new LinkedHashMap<>(6);
+
+        // In addition to JCA names, PKCS12 OIDs are added to these per
+        // https://bugs.openjdk.java.net/browse/JDK-8243551 as well:
+        JCA_NAME_MAP.put(HS256.getJcaName().toUpperCase(Locale.ENGLISH), HS256); // for case-insensitive lookup
+        JCA_NAME_MAP.put(HS256_OID, HS256);
+
+        JCA_NAME_MAP.put(HS384.getJcaName().toUpperCase(Locale.ENGLISH), HS384);
+        JCA_NAME_MAP.put(HS384_OID, HS384);
+
+        JCA_NAME_MAP.put(HS512.getJcaName().toUpperCase(Locale.ENGLISH), HS512);
+        JCA_NAME_MAP.put(HS512_OID, HS512);
     }
 
-    public DefaultMacAlgorithm(int digestBitLength) {
+    private final int minKeyBitLength; //in bits
+
+    private DefaultMacAlgorithm(int digestBitLength) {
         this("HS" + digestBitLength, "HmacSHA" + digestBitLength, digestBitLength);
     }
 
-    public DefaultMacAlgorithm(String id, String jcaName, int minKeyBitLength) {
+    DefaultMacAlgorithm(String id, String jcaName, int minKeyBitLength) {
         super(id, jcaName);
         Assert.isTrue(minKeyBitLength > 0, "minKeyLength must be greater than zero.");
         this.minKeyBitLength = minKeyBitLength;
@@ -76,9 +88,35 @@ public class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey
         return JWA_STANDARD_IDS.contains(getId());
     }
 
-    private boolean isJwaStandardJcaName(String jcaName) {
-        return VALID_HS256_JCA_NAMES.contains(jcaName.toUpperCase(Locale.ENGLISH));
+    private static boolean isJwaStandardJcaName(String jcaName) {
+        String key = jcaName.toUpperCase(Locale.ENGLISH);
+        return JCA_NAME_MAP.containsKey(key);
     }
+
+    static MacAlgorithm findByKey(Key key) {
+
+        String alg = KeysBridge.findAlgorithm(key);
+        if (!Strings.hasText(alg)) {
+            return null;
+        }
+
+        String upper = alg.toUpperCase(Locale.ENGLISH);
+        MacAlgorithm mac = JCA_NAME_MAP.get(upper);
+        if (mac == null) {
+            return null;
+        }
+
+        // even though we found a standard alg based on the JCA name, we need to confirm that the key length is
+        // sufficient if the encoded key bytes are available:
+        byte[] encoded = KeysBridge.findEncoded(key);
+        long size = Bytes.bitLength(encoded);
+        if (size >= mac.getKeyBitLength()) {
+            return mac;
+        }
+
+        return null; // couldn't find a suitable match
+    }
+
 
     @Override
     public SecretKeyBuilder key() {
@@ -91,11 +129,11 @@ public class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey
         final String keyType = keyType(signing);
 
         if (k == null) {
-            throw new IllegalArgumentException("Signature " + keyType + " key cannot be null.");
+            throw new IllegalArgumentException("MAC " + keyType + " key cannot be null.");
         }
 
         if (!(k instanceof SecretKey)) {
-            String msg = "MAC " + keyType(signing) + " keys must be SecretKey instances.  Specified key is of type " +
+            String msg = "MAC " + keyType + " keys must be SecretKey instances.  Specified key is of type " +
                     k.getClass().getName();
             throw new InvalidKeyException(msg);
         }
@@ -116,24 +154,13 @@ public class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey
                     "HmacSHA* algorithm name or PKCS12 OID and cannot be used with " + id + ".");
         }
 
-        byte[] encoded = null;
+        int size = KeysBridge.findBitLength(key);
 
-        // https://github.com/jwtk/jjwt/issues/478
-        //
-        // Some KeyStore implementations (like Hardware Security Modules and later versions of Android) will not allow
-        // applications or libraries to obtain the secret key's encoded bytes.  In these cases, key length assertions
-        // cannot be made, so we'll need to skip the key length checks if so.
-        try {
-            encoded = key.getEncoded();
-        } catch (Exception ignored) {
-        }
-
-        // We can only perform length validation if key.getEncoded() is not null or does not throw an exception
+        // We can only perform length validation if key bit length is available
         // per https://github.com/jwtk/jjwt/issues/478 and https://github.com/jwtk/jjwt/issues/619
         // so return early if we can't:
-        if (encoded == null) return;
+        if (size < 0) return;
 
-        int size = (int) Bytes.bitLength(encoded);
         if (size < this.minKeyBitLength) {
             String msg = "The " + keyType + " key's size is " + size + " bits which " +
                     "is not secure enough for the " + id + " algorithm.";

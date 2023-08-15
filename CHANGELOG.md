@@ -186,13 +186,18 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
 
 
 * `io.jsonwebtoken.JwtParser` is now immutable.  All mutation/modification methods (setters, etc) deprecated 4 years 
-  ago have been removed.  All parser configuration requires using the `JwtParserBuilder` (i.e.
-  `Jwts.parser()`).
+  ago have been removed.  All parser configuration requires using the `JwtParserBuilder`.
 
 
 * Similarly, `io.jsonwebtoken.Jwts`'s `parser()` method deprecated 4 years ago has been changed to now return a 
   `JwtParserBuilder` instead of a direct `JwtParser` instance.  The previous `Jwts.parserBuilder()` method has been 
   removed as it is now redundant.
+
+
+* The `JwtParserBuilder` no longer supports `PrivateKey`s for signature verification.  This was an old
+  legacy behavior scheduled for removal years ago, and that change is now complete.  For various cryptographic/security
+  reasons, asymmetric public/private key signatures should always be created with `PrivateKey`s and verified with
+  `PublicKey`s.
 
 
 * `io.jsonwebtoken.CompressionCodec` implementations are no longer discoverable via `java.util.ServiceLoader` due to

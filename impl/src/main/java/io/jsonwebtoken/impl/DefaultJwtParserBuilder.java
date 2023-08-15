@@ -35,6 +35,7 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -229,7 +230,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder setSigningKey(final Key key) {
-        return verifyWith(key);
+        if (key instanceof SecretKey) {
+            return verifyWith((SecretKey) key);
+        } else if (key instanceof PublicKey) {
+            return verifyWith((PublicKey) key);
+        }
+        String msg = "JWS verification key must be either a SecretKey (for MAC algorithms) or a PublicKey " +
+                "(for Signature algorithms).";
+        throw new UnsupportedKeyException(msg);
     }
 
     @Override

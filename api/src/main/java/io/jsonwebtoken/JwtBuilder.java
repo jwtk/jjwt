@@ -527,14 +527,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <tr>
      *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
      *     <td><code>instanceof {@link PrivateKey}</code></td>
-     *     <td>256</td>
-     *     <td>{@link Jwts.SIG#Ed25519 Ed25519}</td>
-     * </tr>
-     * <tr>
-     *     <td><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECKey.html">EdECKey</a><sup>7</sup></td>
-     *     <td><code>instanceof {@link PrivateKey}</code></td>
-     *     <td>456</td>
-     *     <td>{@link Jwts.SIG#Ed448 Ed448}</td>
+     *     <td>256 || 456</td>
+     *     <td>{@link Jwts.SIG#EdDSA EdDSA}</td>
      * </tr>
      * </tbody>
      * </table>

@@ -1,18 +1,28 @@
-The RSA `*.key.pem`, `*.crt.pem`, `*.pub.pem`, and `*.pkcs1.key.pem` files in this directory were created for testing as follows:
+The RSA `*.key.pem`, `*.crt.pem`, `*.pub.pem`, and `*.pkcs1.key.pem` files in this directory were created for testing
+using the `openssl` version `3.1.2` as follows:
 
-    openssl req -x509 -newkey rsa:2048 -keyout rsa2048.key.pem -out rsa2048.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
-    openssl req -x509 -newkey rsa:3072 -keyout rsa3072.key.pem -out rsa3072.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
-    openssl req -x509 -newkey rsa:4096 -keyout rsa4096.key.pem -out rsa4096.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+    openssl req -new -x509 -newkey rsa:2048 -keyout RS256.key.pem -out RS256.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+    openssl req -new -x509 -newkey rsa:3072 -keyout RS384.key.pem -out RS384.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+    openssl req -new -x509 -newkey rsa:4096 -keyout RS512.key.pem -out RS512.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+    openssl req -new -x509 -newkey rsa-pss  -keyout PS256.key.pem -out PS256.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt' -pkeyopt rsa_keygen_bits:2048 -pkeyopt rsa_pss_keygen_md:sha256 -pkeyopt rsa_pss_keygen_mgf1_md:sha256 -pkeyopt rsa_pss_keygen_saltlen:32 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:32 -sigopt rsa_mgf1_md:sha256 -sha256
+    openssl req -new -x509 -newkey rsa-pss  -keyout PS384.key.pem -out PS384.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt' -pkeyopt rsa_keygen_bits:3072 -pkeyopt rsa_pss_keygen_md:sha384 -pkeyopt rsa_pss_keygen_mgf1_md:sha384 -pkeyopt rsa_pss_keygen_saltlen:48 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:48 -sigopt rsa_mgf1_md:sha384 -sha384
+    openssl req -new -x509 -newkey rsa-pss  -keyout PS512.key.pem -out PS512.crt.pem -days 365250 -nodes -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt' -pkeyopt rsa_keygen_bits:4096 -pkeyopt rsa_pss_keygen_md:sha512 -pkeyopt rsa_pss_keygen_mgf1_md:sha512 -pkeyopt rsa_pss_keygen_saltlen:64 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:64 -sigopt rsa_mgf1_md:sha512 -sha512
 
     # extract the public key from the X.509 certificates to their own files:
-    openssl x509 -pubkey -noout -in rsa2048.crt.pem > rsa2048.pub.pem
-    openssl x509 -pubkey -noout -in rsa3072.crt.pem > rsa3072.pub.pem
-    openssl x509 -pubkey -noout -in rsa4096.crt.pem > rsa4096.pub.pem
+    openssl x509 -pubkey -noout -in RS256.crt.pem > RS256.pub.pem
+    openssl x509 -pubkey -noout -in RS384.crt.pem > RS384.pub.pem
+    openssl x509 -pubkey -noout -in RS512.crt.pem > RS512.pub.pem
+    openssl x509 -pubkey -noout -in PS256.crt.pem > PS256.pub.pem
+    openssl x509 -pubkey -noout -in PS384.crt.pem > PS384.pub.pem
+    openssl x509 -pubkey -noout -in PS512.crt.pem > PS512.pub.pem
     
     # convert the PKCS8 private key format to PKCS1 format for additional testing:
-    openssl rsa -in rsa2048.key.pem -out rsa2048.pkcs1.key.pem
-    openssl rsa -in rsa3072.key.pem -out rsa3072.pkcs1.key.pem
-    openssl rsa -in rsa4096.key.pem -out rsa4096.pkcs1.key.pem
+    openssl rsa -in RS256.key.pem -traditional -out RS256.pkcs1.key.pem
+    openssl rsa -in RS384.key.pem -traditional -out RS384.pkcs1.key.pem
+    openssl rsa -in RS512.key.pem -traditional -out RS512.pkcs1.key.pem
+    openssl rsa -in PS256.key.pem -traditional -out PS256.pkcs1.key.pem
+    openssl rsa -in PS384.key.pem -traditional -out PS384.pkcs1.key.pem
+    openssl rsa -in PS512.key.pem -traditional -out PS512.pkcs1.key.pem
 
 The only difference is the key size and file names using sizes of `2048`, `3072`, and `4096`.
 
@@ -63,6 +73,5 @@ All `ES*`, `RS*`, `PS*`, `X*` and `Ed*` file prefixes are equal to JWA standard 
 Curve IDs.  This allows easy file lookup based on the `SignatureAlgorithm` `getId()` or `EdwardsCurve#getId()` value 
 when authoring tests.
 
-Finally, the `RS*`, `PS*`, and `EdDSA*` files in this directory are just are symlinks back to source files based on 
-the JWT alg names and their respective key sizes.  This is so the `RS*` and `PS*` algorithms can use the same files 
-since there is no difference in keys between the two sets of algorithms.
+Finally, the `EdDSA*` files in this directory are just are symlinks back to source files based on 
+the `EdSignatureAlgorithm`'s preferred `Ed448` key sizes.

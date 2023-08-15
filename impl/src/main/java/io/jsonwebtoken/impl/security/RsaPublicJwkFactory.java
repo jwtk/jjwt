@@ -25,7 +25,7 @@ import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 
-class RsaPublicJwkFactory extends AbstractFamilyJwkFactory<RSAPublicKey, RsaPublicJwk> {
+class RsaPublicJwkFactory extends RsaJwkFactory<RSAPublicKey, RsaPublicJwk> {
 
     static final RsaPublicJwkFactory INSTANCE = new RsaPublicJwkFactory();
 

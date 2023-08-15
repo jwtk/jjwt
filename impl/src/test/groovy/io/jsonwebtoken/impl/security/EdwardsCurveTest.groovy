@@ -58,11 +58,6 @@ class EdwardsCurveTest {
     }
 
     @Test
-    void testFindByNullKey() {
-        assertNull EdwardsCurve.findByKey(null)
-    }
-
-    @Test
     void testForKeyNonEdwards() {
         def alg = 'foo'
         def key = new TestKey(algorithm: alg)
@@ -72,6 +67,22 @@ class EdwardsCurveTest {
             String msg = "${key.getClass().getName()} with algorithm '${alg}' is not a recognized Edwards Curve key."
             assertEquals msg, uke.getMessage()
         }
+    }
+
+    @Test
+    void testFindByKey() { // happy path test
+        for(def alg : EdwardsCurve.VALUES) {
+            def keyPair = alg.keyPair().build()
+            def pub = keyPair.public
+            def priv = keyPair.private
+            assertSame alg, EdwardsCurve.findByKey(pub)
+            assertSame alg, EdwardsCurve.findByKey(priv)
+        }
+    }
+
+    @Test
+    void testFindByNullKey() {
+        assertNull EdwardsCurve.findByKey(null)
     }
 
     @Test

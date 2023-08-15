@@ -15,12 +15,12 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.SecureDigestAlgorithm
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.openssl.PEMKeyPair
@@ -64,14 +64,14 @@ class TestCertificates {
         return new PEMParser(new BufferedReader(new InputStreamReader(is, StandardCharsets.ISO_8859_1)))
     }
 
-    private static String getKeyFilePrefix(SecureDigestAlgorithm alg) {
+    private static String getKeyFilePrefix(Identifiable alg) {
         if (alg instanceof EdSignatureAlgorithm) {
             return alg.preferredCurve.getId()
         }
         return alg.getId()
     }
 
-    static X509Certificate readTestCertificate(SecureDigestAlgorithm alg) {
+    static X509Certificate readTestCertificate(Identifiable alg) {
         InputStream is = getResourceStream(getKeyFilePrefix(alg) + '.crt.pem')
         try {
             JcaTemplate template = new JcaTemplate("X.509", alg.getProvider())
@@ -102,7 +102,7 @@ class TestCertificates {
         }
     }
 
-    static PrivateKey readTestPrivateKey(SecureDigestAlgorithm alg) {
+    static PrivateKey readTestPrivateKey(Identifiable alg) {
         return readTestPrivateKey(getKeyFilePrefix(alg), alg.getProvider())
     }
 
@@ -146,11 +146,11 @@ class TestCertificates {
 
     static TestKeys.Bundle readBundle(EdwardsCurve curve) {
         PublicKey pub = readTestPublicKey(curve)
-        PrivateKey priv = readTestPrivateKey(curve.getId(), curve.getProvider())
+        PrivateKey priv = readTestPrivateKey(curve)
         return new TestKeys.Bundle(pub, priv)
     }
 
-    static TestKeys.Bundle readAsymmetricBundle(SecureDigestAlgorithm alg) {
+    static TestKeys.Bundle readAsymmetricBundle(Identifiable alg) {
         X509Certificate cert = readTestCertificate(alg)
         PrivateKey priv = readTestPrivateKey(alg)
         return new TestKeys.Bundle(cert, priv)

@@ -43,7 +43,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.List;
 import java.util.Set;
 
-class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
+class RsaPrivateJwkFactory extends RsaJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
 
     //All RSA Private fields _except_ for PRIVATE_EXPONENT.  That is always required:
     private static final Set<Field<BigInteger>> OPTIONAL_PRIVATE_FIELDS = Collections.setOf(
@@ -196,7 +196,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
             if (ctx.containsKey(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())) {
                 List<RSAOtherPrimeInfo> otherPrimes = reader.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO);
                 RSAOtherPrimeInfo[] arr = new RSAOtherPrimeInfo[Collections.size(otherPrimes)];
-                otherPrimes.toArray(arr);
+                arr = otherPrimes.toArray(arr);
                 spec = new RSAMultiPrimePrivateCrtKeySpec(modulus, publicExponent, privateExponent, firstPrime,
                         secondPrime, firstCrtExponent, secondCrtExponent, firstCrtCoefficient, arr);
             } else {

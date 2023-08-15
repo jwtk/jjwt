@@ -76,12 +76,13 @@ class KeysImplTest {
 
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof RSAPublicKey
-                assertEquals alg.familyName, pub.algorithm
+                def keyAlgName = alg.jcaName.equals("RSASSA-PSS") ? "RSASSA-PSS" : alg.familyName
+                assertEquals keyAlgName, pub.algorithm
                 assertEquals alg.digestLength * 8, pub.modulus.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof RSAPrivateKey
-                assertEquals alg.familyName, priv.algorithm
+                assertEquals keyAlgName, priv.algorithm
                 assertEquals alg.digestLength * 8, priv.modulus.bitLength()
 
             } else if (alg.isEllipticCurve()) {

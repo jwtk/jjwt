@@ -255,9 +255,10 @@ class JwksTest {
     @Test
     void testAsymmetricJwks() {
 
-        Collection<KeyPairBuilderSupplier> algs = Jwts.SIG.get().values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
+        Collection<SignatureAlgorithm> algs = Jwts.SIG.get().values()
+                .findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
-        for (def alg : algs) {
+        for (SignatureAlgorithm alg : algs) {
 
             def pair = alg.keyPair().build()
             PublicKey pub = pair.getPublic()
