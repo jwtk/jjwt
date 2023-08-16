@@ -86,10 +86,14 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
             // Oracle only backported this fix to JDK 8u271+, 11.0.9+, and 15+, so we'll try to fall back to
             // BC (which can read the files correctly) on JDK 9, 10, 12, 13, and 14:
             String causeMsg = t.getMessage();
-            Provider bc;
+            Provider bc = null;
             if (!Bytes.isEmpty(der) && // Base64 decoding succeeded, so we can continue to try
-                    Strings.hasText(causeMsg) && causeMsg.contains(RsaSignatureAlgorithm.PSS_OID) &&
-                    (bc = Providers.findBouncyCastle(Conditions.TRUE)) != null) { // BC is available
+                    Strings.hasText(causeMsg) && causeMsg.contains(RsaSignatureAlgorithm.PSS_OID)) {
+                // OID in exception message, so odds are high that the default provider doesn't support X.509
+                // certificates with a PSS_OID `AlgorithmId`.  But BC does, so try to obtain that if we can:
+                bc = Providers.findBouncyCastle(Conditions.TRUE);
+            }
+            if (bc != null) {
                 try {
                     return toCert(der, bc);
                 } catch (Throwable ignored) {
