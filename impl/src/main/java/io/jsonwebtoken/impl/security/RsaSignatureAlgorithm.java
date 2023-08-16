@@ -52,7 +52,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     // Defined in https://www.rfc-editor.org/rfc/rfc8017#appendix-A.2.3:
     static final String PSS_JCA_NAME = "RSASSA-PSS";
-    private static final String PSS_OID = "1.2.840.113549.1.1.10"; // RFC 8017's "id-RSASSA-PSS"
+    static final String PSS_OID = "1.2.840.113549.1.1.10"; // RFC 8017's "id-RSASSA-PSS"
 
     // Defined in https://www.rfc-editor.org/rfc/rfc8017#appendix-A.2.4:
     private static final String RS256_OID = "1.2.840.113549.1.1.11"; // RFC 8017's "sha256WithRSAEncryption"

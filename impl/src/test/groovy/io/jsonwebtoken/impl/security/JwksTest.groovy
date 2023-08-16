@@ -186,7 +186,7 @@ class JwksTest {
 
         for (def alg : algs) {
             //get test cert:
-            X509Certificate cert = TestCertificates.readTestCertificate(alg)
+            X509Certificate cert = TestKeys.forAlgorithm(alg).cert
             def builder = Jwks.builder().chain(Arrays.asList(cert))
 
             if (number == 1) {
