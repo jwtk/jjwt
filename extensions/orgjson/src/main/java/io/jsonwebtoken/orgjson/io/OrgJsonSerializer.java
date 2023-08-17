@@ -84,7 +84,7 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         }
 
         if (object instanceof Supplier) {
-            object = ((Supplier<?>)object).get();
+            object = ((Supplier<?>) object).get();
         }
 
         if (object instanceof JSONObject || object instanceof JSONArray
@@ -163,6 +163,12 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         return array;
     }
 
+    /**
+     * Serializes the specified org.json instance a byte array.
+     *
+     * @param o the org.json instance to serialize
+     * @return the JSON byte array
+     */
     @SuppressWarnings("WeakerAccess") //for testing
     protected byte[] toBytes(Object o) {
         String s;

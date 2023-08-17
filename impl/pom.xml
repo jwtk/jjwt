@@ -31,6 +31,8 @@
 
     <properties>
         <jjwt.root>${basedir}/..</jjwt.root>
+        <!-- This module is not intended for direct use or extension, no need to worry about perfect JavaDoc: -->
+        <maven.javadoc.additionalOptions>-Xdoclint:none</maven.javadoc.additionalOptions>
     </properties>
 
     <dependencies>

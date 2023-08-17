@@ -351,7 +351,7 @@ public final class Assert {
      * Assert that the provided object is an instance of the provided class.
      * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
      *
-     * @param <T> the type of instance expected
+     * @param <T>   the type of instance expected
      * @param clazz the required class
      * @param obj   the object to check
      * @return the expected instance of type {@code T}
@@ -446,6 +446,7 @@ public final class Assert {
      * Asserts that a specified {@code value} is greater than the given {@code requirement}, throwing
      * an {@link IllegalArgumentException} with the given message if not.
      *
+     * @param <T>         the type of value to check and return if the requirement is met
      * @param value       the value to check
      * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
@@ -463,6 +464,7 @@ public final class Assert {
      * Asserts that a specified {@code value} is less than or equal to the given {@code requirement}, throwing
      * an {@link IllegalArgumentException} with the given message if not.
      *
+     * @param <T>         the type of value to check and return if the requirement is met
      * @param value       the value to check
      * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
@@ -514,7 +516,7 @@ public final class Assert {
      *
      * @param value value to assert is not null
      * @param msg   exception message to use if {@code value} is null
-     * @param <T> value type
+     * @param <T>   value type
      * @return the non-null value
      * @throws IllegalStateException with the specified {@code msg} if {@code value} is null.
      * @since JJWT_RELEASE_VERSION
