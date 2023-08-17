@@ -36,11 +36,7 @@ class DefaultJwkParserTest {
 
         Set<Key> keys = new LinkedHashSet<>()
         TestKeys.HS.each { keys.add(it) }
-        TestKeys.RSA.each {
-            keys.add(it.pair.public)
-            keys.add(it.pair.private)
-        }
-        TestKeys.EC.each {
+        TestKeys.ASYM.each {
             keys.add(it.pair.public)
             keys.add(it.pair.private)
         }
@@ -61,11 +57,7 @@ class DefaultJwkParserTest {
 
         Set<Key> keys = new LinkedHashSet<>()
         TestKeys.HS.each { keys.add(it) }
-        TestKeys.RSA.each {
-            keys.add(it.pair.public)
-            keys.add(it.pair.private)
-        }
-        TestKeys.EC.each {
+        TestKeys.ASYM.each {
             keys.add(it.pair.public)
             keys.add(it.pair.private)
         }
@@ -75,7 +67,7 @@ class DefaultJwkParserTest {
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().key(key).build()
+            def jwk = Jwks.builder().provider(provider).key(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
             def parsed = Jwks.parser().provider(provider).build().parse(json)

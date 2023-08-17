@@ -43,7 +43,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.List;
 import java.util.Set;
 
-class RsaPrivateJwkFactory extends RsaJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
+class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
 
     //All RSA Private fields _except_ for PRIVATE_EXPONENT.  That is always required:
     private static final Set<Field<BigInteger>> OPTIONAL_PRIVATE_FIELDS = Collections.setOf(

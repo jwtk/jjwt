@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.UnsupportedKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -104,30 +103,6 @@ class RsaSignatureAlgorithmTest {
                         "MUST have a size >= 2048 bits.  Consider using the Jwts.SIG.${id}.keyPair() " +
                         "builder to create a KeyPair guaranteed to be secure enough for ${id}.  See " +
                         "https://tools.ietf.org/html/rfc7518#section-${section} for more information."
-                assertEquals msg, expected.getMessage()
-            }
-        }
-    }
-
-    @Test
-    void testPssDigestUsingEncryptionKey() {
-
-        def algs = Jwts.SIG.get().values()
-                .findAll({it.id.startsWith('PS')})
-
-        // standard RSA encryption key (not a RSASSA-PSS key):
-        def pair = new JcaTemplate("RSA", null).generateKeyPair()
-
-        for(def alg : algs) {
-            def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
-            try {
-                alg.digest(request)
-                fail()
-            } catch (UnsupportedKeyException expected) {
-                String msg = "RSA encryption keys should not be used with ${RsaSignatureAlgorithm.PSS_JCA_NAME} " +
-                        "signature algorithms. Consider using the Jwts.SIG.${alg.id}.keyPair() builder to generate " +
-                        "${RsaSignatureAlgorithm.PSS_JCA_NAME} KeyPairs suitable for use with the ${alg.id} " +
-                        "signature algorithm."
                 assertEquals msg, expected.getMessage()
             }
         }

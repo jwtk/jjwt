@@ -24,13 +24,11 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import java.security.Key;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.interfaces.RSAKey;
@@ -87,21 +85,6 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
         PKCSv15_ALGS.put(RS256_OID, RS256);
         PKCSv15_ALGS.put(RS384_OID, RS384);
         PKCSv15_ALGS.put(RS512_OID, RS512);
-    }
-
-    static boolean isPssAvailable(final Provider provider) {
-        return Conditions.exists(new CheckedSupplier<Signature>() {
-            @Override
-            public Signature get() {
-                JcaTemplate template = new JcaTemplate(PSS_JCA_NAME, provider);
-                return template.withSignature(new CheckedFunction<Signature, Signature>() {
-                    @Override
-                    public Signature apply(Signature signature) {
-                        return signature;
-                    }
-                });
-            }
-        }).test();
     }
 
     private final int preferredKeyBitLength;
@@ -174,18 +157,9 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
         return null;
     }
 
-    private boolean isPss() {
-        return PSS_JCA_NAME.equals(getJcaName());
-    }
-
     static boolean isPss(Key key) {
         String alg = KeysBridge.findAlgorithm(key);
         return PSS_ALG_NAMES.contains(alg);
-    }
-
-    private static boolean isPkcsv15(Key key) {
-        String alg = KeysBridge.findAlgorithm(key);
-        return "RSA".equalsIgnoreCase(alg) || PKCSv15_ALGS.containsKey(alg);
     }
 
     @Override
@@ -207,14 +181,6 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
-
-        if (signing /* robustness principle */ && isPss() && isPkcsv15(key)) { //
-            String msg = "RSA encryption keys should not be used with " + PSS_JCA_NAME + " signature algorithms. " +
-                    "Consider using the Jwts.SIG." + getId() + ".keyPair() builder to generate " + PSS_JCA_NAME +
-                    " KeyPairs suitable for use with the " + getId() + " signature algorithm.";
-            throw new UnsupportedKeyException(msg);
-        }
-
         // https://github.com/jwtk/jjwt/issues/68 :
         // Some PKCS11 providers and HSMs won't expose the RSAKey interface, so we have to check to see if we can cast
         // If so, we can provide additional safety checks:
