@@ -328,7 +328,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * {@link #verifyWith(SecretKey)} for type safety, to reflect accurate naming of the concept, and for name
      * congruence with the {@link #decryptWith(SecretKey)} method.</p>
      *
-     * <p>This method merely delegates directly to {@link #verifyWith(SecretKey)}.</p>
+     * <p>This method merely delegates directly to {@link #verifyWith(SecretKey) or {@link #verifyWith(PublicKey)}}.</p>
      *
      * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
      *            signatures.

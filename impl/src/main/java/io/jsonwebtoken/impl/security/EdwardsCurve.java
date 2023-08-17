@@ -281,14 +281,14 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         int keyLen = 0;
         if (encoded[i] == 0x05) { // NULL terminator, next should be zero byte indicator
             int unusedBytes = encoded[++i];
-            Assert.eq(0, unusedBytes, "OID NULL terminator should indicate zero unused bytes.");
+            Assert.eq(unusedBytes, 0, "OID NULL terminator should indicate zero unused bytes.");
             i++;
         }
         if (encoded[i] == 0x03) { // DER bit stream, Public Key
             i++;
             keyLen = encoded[i++];
             int unusedBytes = encoded[i++];
-            Assert.eq(0, unusedBytes, "BIT STREAM should not indicate unused bytes.");
+            Assert.eq(unusedBytes, 0, "BIT STREAM should not indicate unused bytes.");
             keyLen--;
         } else if (encoded[i] == 0x04) { // DER octet sequence, Private Key.  Key length follows as next byte.
             i++;
@@ -298,10 +298,10 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
                 keyLen = encoded[i++]; // next byte is length
             }
         }
-        Assert.eq(this.encodedKeyByteLength, keyLen, "Invalid key length.");
+        Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
         byte[] result = Arrays.copyOfRange(encoded, i, i + keyLen);
         keyLen = Bytes.length(result);
-        Assert.eq(this.encodedKeyByteLength, keyLen, "Invalid key length.");
+        Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
         return result;
     }
 

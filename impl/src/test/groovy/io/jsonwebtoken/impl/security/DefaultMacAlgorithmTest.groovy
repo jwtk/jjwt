@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
 import java.security.Key
 
-import static org.junit.Assert.assertEquals
+import static org.junit.Assert.*
 
 class DefaultMacAlgorithmTest {
 
@@ -162,6 +162,72 @@ class DefaultMacAlgorithmTest {
             alg.validateKey(new SecretKeySpec(bytes, 'HmacSHA256'), true)
         } catch (WeakKeyException expected) {
             assertEquals 'The signing key\'s size is 192 bits which is not secure enough for the foo algorithm. The foo algorithm requires keys to have a size >= 256 bits.', expected.getMessage()
+        }
+    }
+
+    @Test
+    void testFindByKeyWithNoAlgorithm() {
+        assertNull DefaultMacAlgorithm.findByKey(new TestSecretKey())
+    }
+
+    @Test
+    void testFindByKeyInvalidAlgorithm() {
+        assertNull DefaultMacAlgorithm.findByKey(new TestSecretKey(algorithm: 'foo'))
+    }
+
+    @Test
+    void testFindByKey() {
+        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+            def key = mac.key().build()
+            assertSame mac, DefaultMacAlgorithm.findByKey(key)
+        }
+    }
+
+    @Test
+    void testFindByKeyNull() {
+        assertNull DefaultMacAlgorithm.findByKey(null)
+    }
+
+    @Test
+    void testFindByNonSecretKey() {
+        assertNull DefaultMacAlgorithm.findByKey(TestKeys.RS256.pair.public)
+    }
+
+    @Test
+    void testFindByWeakKey() {
+        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+            def key = mac.key().build()
+            def encoded = new byte[key.getEncoded().length - 1] // one byte less than required
+            def weak = new TestSecretKey(algorithm: key.getAlgorithm(), format: key.getFormat(), encoded: encoded)
+            assertSame mac, DefaultMacAlgorithm.findByKey(key)
+            assertNull DefaultMacAlgorithm.findByKey(weak)
+        }
+    }
+
+    @Test
+    void testFindByLargerThanExpectedKey() {
+        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+            def key = mac.key().build()
+            def encoded = new byte[key.getEncoded().length + 1] // one byte less than required
+            def strong = new TestSecretKey(algorithm: key.getAlgorithm(), format: key.getFormat(), encoded: encoded)
+            assertSame mac, DefaultMacAlgorithm.findByKey(strong)
+        }
+    }
+
+    @Test
+    void testFindByKeyOid() {
+        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+            def key = mac.key().build()
+            def alg = key.getAlgorithm()
+            if (alg.endsWith('256')) {
+                alg = DefaultMacAlgorithm.HS256_OID
+            } else if (alg.endsWith('384')) {
+                alg = DefaultMacAlgorithm.HS384_OID
+            } else {
+                alg = DefaultMacAlgorithm.HS512_OID
+            }
+            def oidKey = new TestSecretKey(algorithm: alg, format: 'RAW', encoded: key.getEncoded())
+            assertSame mac, DefaultMacAlgorithm.findByKey(oidKey)
         }
     }
 }

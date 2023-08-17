@@ -196,7 +196,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
             if (ctx.containsKey(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())) {
                 List<RSAOtherPrimeInfo> otherPrimes = reader.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO);
                 RSAOtherPrimeInfo[] arr = new RSAOtherPrimeInfo[Collections.size(otherPrimes)];
-                otherPrimes.toArray(arr);
+                arr = otherPrimes.toArray(arr);
                 spec = new RSAMultiPrimePrivateCrtKeySpec(modulus, publicExponent, privateExponent, firstPrime,
                         secondPrime, firstCrtExponent, secondCrtExponent, firstCrtCoefficient, arr);
             } else {

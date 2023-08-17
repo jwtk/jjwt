@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.security
+package io.jsonwebtoken
 
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.impl.lang.Conditions
-import io.jsonwebtoken.impl.lang.Functions
-import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.impl.security.Curves
+import io.jsonwebtoken.impl.security.EdwardsCurve
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
-class PrivateConstructorsTest {
+import static org.junit.Assert.assertSame
+
+class JwksCRVTest {
 
     @Test
-    void testPrivateCtors() { // for code coverage only
-        new Classes()
-        new KeysBridge()
-        new Conditions()
-        new Functions()
-        new Jwts.SIG()
-        new Jwts.ENC()
-        new Jwts.KEY()
-        new Jwts.ZIP()
-        new Jwks.CRV()
-        new Jwks.HASH()
+    void testInstances() {
+        assertSame Curves.P_256, Jwks.CRV.P256
+        assertSame Curves.P_384, Jwks.CRV.P384
+        assertSame Curves.P_521, Jwks.CRV.P521
+        assertSame EdwardsCurve.X25519, Jwks.CRV.X25519
+        assertSame EdwardsCurve.X448, Jwks.CRV.X448
+        assertSame EdwardsCurve.Ed25519, Jwks.CRV.Ed25519
+        assertSame EdwardsCurve.Ed448, Jwks.CRV.Ed448
     }
 }

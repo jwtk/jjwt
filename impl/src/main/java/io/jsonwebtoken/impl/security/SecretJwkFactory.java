@@ -22,7 +22,6 @@ import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.MalformedKeyException;
@@ -87,7 +86,12 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         if (bitLen != requiredBitLen) {
             // Implementors note:  Don't print out any information about the `bytes` value itself - size,
             // content, etc., as it is considered secret material:
-            String msg = "Secret JWK " + AbstractJwk.ALG + " value is '" + alg.getId() + "', but the " + DefaultSecretJwk.K + " length does not equal the '" + alg.getId() + "' length requirement of " + Bytes.bitsMsg(requiredBitLen) + ". This discrepancy could be the result of an algorithm " + "substitution attack or simply an erroneously constructed JWK. In either case, it is likely " + "to result in unexpected or undesired security consequences.";
+            String msg = "Secret JWK " + AbstractJwk.ALG + " value is '" + alg.getId() +
+                    "', but the " + DefaultSecretJwk.K + " length does not equal the '" + alg.getId() +
+                    "' length requirement of " + Bytes.bitsMsg(requiredBitLen) +
+                    ". This discrepancy could be the result of an algorithm " +
+                    "substitution attack or simply an erroneously constructed JWK. In either case, it is likely " +
+                    "to result in unexpected or undesired security consequences.";
             throw new MalformedKeyException(msg);
         }
     }
@@ -107,21 +111,15 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
                 assertKeyBitLength(bytes, (MacAlgorithm) alg);
             }
         }
-        if (!Strings.hasText(jcaName) &&
-                ("sig".equalsIgnoreCase(ctx.getPublicKeyUse()) || // [1]
-                        (!Collections.isEmpty(ctx.getOperations()) && ctx.getOperations().contains("sign")))) { // [2]
-            // [1] Even though 'use' is for PUBLIC KEY use (as defined in RFC 7515), RFC 7520 shows secret keys with
-            //     'use' values, so we'll account for that as well
-            //
-            // [2] operations values are case-sensitive, so we don't need to test for upper/lowercase "sign" values
-
-            // The only JWA SecretKey signature algorithms are HS256, HS384, HS512, so choose based on bit length:
-            jcaName = "HmacSHA" + Bytes.bitLength(bytes);
+        if (!Strings.hasText(jcaName)) {
+            if (ctx.isSigUse()) {
+                // The only JWA SecretKey signature algorithms are HS256, HS384, HS512, so choose based on bit length:
+                jcaName = "HmacSHA" + Bytes.bitLength(bytes);
+            } else { // not an HS* algorithm, and all standard AeadAlgorithms use AES keys:
+                jcaName = AesAlgorithm.KEY_ALG_NAME;
+            }
         }
-        if (jcaName == null) { // not an HS* algorithm, no signature "use", no "sign" key op, so default to encryption:
-            jcaName = AesAlgorithm.KEY_ALG_NAME;
-        }
-
+        Assert.stateNotNull(jcaName, "jcaName cannot be null (invariant)");
         SecretKey key = new SecretKeySpec(bytes, jcaName);
         ctx.setKey(key);
         return new DefaultSecretJwk(ctx);

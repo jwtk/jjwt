@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.security;
+package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.security.KeyPairBuilderSupplier;
+import org.junit.Test
 
-public interface Curve extends Identifiable, KeyPairBuilderSupplier {
+import static org.junit.Assert.assertNull
+
+class StandardSecureDigestAlgorithmsTest {
+
+    @Test
+    void testFindByPublicSigningKey() {
+        //public keys are not supported for signing:
+        assertNull StandardSecureDigestAlgorithms.findBySigningKey(new TestPublicKey())
+    }
 }

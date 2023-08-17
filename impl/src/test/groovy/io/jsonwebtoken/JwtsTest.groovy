@@ -36,6 +36,8 @@ import java.security.Key
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.interfaces.ECPublicKey
+import java.security.interfaces.RSAPublicKey
 
 import static org.junit.Assert.*
 
@@ -615,21 +617,6 @@ class JwtsTest {
     }
 
     @Test
-    void testRSA256WithPrivateKeyValidation() {
-        testRsa(Jwts.SIG.RS256, true)
-    }
-
-    @Test
-    void testRSA384WithPrivateKeyValidation() {
-        testRsa(Jwts.SIG.RS384, true)
-    }
-
-    @Test
-    void testRSA512WithPrivateKeyValidation() {
-        testRsa(Jwts.SIG.RS512, true)
-    }
-
-    @Test
     void testES256() {
         testEC(Jwts.SIG.ES256)
     }
@@ -651,12 +638,12 @@ class JwtsTest {
 
     @Test
     void testEd25519() {
-        testEC(Jwts.SIG.Ed25519)
+        testEC(Jwts.SIG.EdDSA, TestKeys.forAlgorithm(Jwks.CRV.Ed25519).pair)
     }
 
     @Test
     void testEd448() {
-        testEC(Jwts.SIG.Ed448)
+        testEC(Jwts.SIG.EdDSA, TestKeys.forAlgorithm(Jwks.CRV.Ed448).pair)
     }
 
     @Test
@@ -1211,16 +1198,20 @@ class JwtsTest {
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
         Mac mac = Mac.getInstance('HmacSHA256')
-        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'))
+        byte[] raw = ((RSAPublicKey)publicKey).getModulus().toByteArray()
+        if (raw.length > 256) {
+            raw = Arrays.copyOfRange(raw, 1, raw.length)
+        }
+        mac.init(new SecretKeySpec(raw, 'HmacSHA256'))
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
         String encodedSignature = Encoders.BASE64URL.encode(signatureBytes)
 
         //Finally, the forged token is the header + body + forged signature:
         String forged = compact + encodedSignature
 
-        // Assert that the server (that should always use the private key) does not recognized the forged token:
+        // Assert that the server does not recognized the forged token:
         try {
-            Jwts.parser().setSigningKey(privateKey).build().parse(forged)
+            Jwts.parser().verifyWith(privateKey).build().parse(forged)
             fail("Forged token must not be successfully parsed.")
         } catch (UnsupportedJwtException expected) {
             assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
@@ -1243,7 +1234,11 @@ class JwtsTest {
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
         Mac mac = Mac.getInstance('HmacSHA256')
-        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'))
+        byte[] raw = ((RSAPublicKey)publicKey).getModulus().toByteArray()
+        if (raw.length > 256) {
+            raw = Arrays.copyOfRange(raw, 1, raw.length)
+        }
+        mac.init(new SecretKeySpec(raw, 'HmacSHA256'))
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
         String encodedSignature = Encoders.BASE64URL.encode(signatureBytes)
 
@@ -1275,7 +1270,11 @@ class JwtsTest {
         // Now for the forgery: simulate an attacker using the Elliptic Curve public key to sign a token, but
         // using it as an HMAC signing key instead of Elliptic Curve:
         Mac mac = Mac.getInstance('HmacSHA256')
-        mac.init(new SecretKeySpec(publicKey.getEncoded(), 'HmacSHA256'))
+        byte[] raw = ((ECPublicKey)publicKey).getParams().getOrder().toByteArray()
+        if (raw.length > 32) {
+            raw = Arrays.copyOfRange(raw, 1, raw.length)
+        }
+        mac.init(new SecretKeySpec(raw, 'HmacSHA256'))
         byte[] signatureBytes = mac.doFinal(compact.getBytes(Charset.forName('US-ASCII')))
         String encodedSignature = Encoders.BASE64URL.encode(signatureBytes)
 
@@ -1566,7 +1565,7 @@ class JwtsTest {
         return Jwts.parser().decryptWith(key).build().parseClaimsJwe(jwe)
     }
 
-    static void testRsa(io.jsonwebtoken.security.SignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
+    static void testRsa(io.jsonwebtoken.security.SignatureAlgorithm alg) {
 
         KeyPair kp = TestKeys.forAlgorithm(alg).pair
         PublicKey publicKey = kp.getPublic()
@@ -1576,12 +1575,7 @@ class JwtsTest {
 
         String jwt = Jwts.builder().claims().add(claims).and().signWith(privateKey, alg).compact()
 
-        def key = publicKey
-        if (verifyWithPrivateKey) {
-            key = privateKey
-        }
-
-        def token = Jwts.parser().verifyWith(key).build().parse(jwt)
+        def token = Jwts.parser().verifyWith(publicKey).build().parse(jwt)
 
         assertEquals([alg: alg.getId()], token.header)
         assertEquals(claims, token.payload)
@@ -1603,8 +1597,11 @@ class JwtsTest {
     }
 
     static void testEC(io.jsonwebtoken.security.SignatureAlgorithm alg, boolean verifyWithPrivateKey = false) {
+        testEC(alg, TestKeys.forAlgorithm(alg).pair, verifyWithPrivateKey)
+    }
 
-        KeyPair pair = TestKeys.forAlgorithm(alg).pair
+    static void testEC(io.jsonwebtoken.security.SignatureAlgorithm alg, KeyPair pair, boolean verifyWithPrivateKey = false) {
+
         PublicKey publicKey = pair.getPublic()
         PrivateKey privateKey = pair.getPrivate()
 
@@ -1621,6 +1618,7 @@ class JwtsTest {
 
         assertEquals([alg: alg.getId()], token.header)
         assertEquals(claims, token.payload)
+
     }
 }
 

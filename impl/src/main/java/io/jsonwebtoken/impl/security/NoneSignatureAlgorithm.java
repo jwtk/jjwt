@@ -23,9 +23,14 @@ import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
 import java.security.Key;
 
-public class NoneSignatureAlgorithm implements SecureDigestAlgorithm<Key, Key> {
+final class NoneSignatureAlgorithm implements SecureDigestAlgorithm<Key, Key> {
 
     private static final String ID = "none";
+
+    static final SecureDigestAlgorithm<Key, Key> INSTANCE = new NoneSignatureAlgorithm();
+
+    private NoneSignatureAlgorithm() {
+    }
 
     @Override
     public String getId() {

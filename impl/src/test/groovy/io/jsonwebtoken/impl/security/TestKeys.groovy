@@ -18,9 +18,7 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.lang.Collections
-import io.jsonwebtoken.security.KeyBuilderSupplier
-import io.jsonwebtoken.security.SecretKeyBuilder
-import io.jsonwebtoken.security.SignatureAlgorithm
+import io.jsonwebtoken.security.Jwks
 
 import javax.crypto.SecretKey
 import java.security.KeyPair
@@ -65,14 +63,14 @@ class TestKeys {
     // =======================================================
     // Elliptic Curve Keys & Certificates
     // =======================================================
-    static Bundle ES256 = TestCertificates.readAsymmetricBundle(Jwts.SIG.ES256)
-    static Bundle ES384 = TestCertificates.readAsymmetricBundle(Jwts.SIG.ES384)
-    static Bundle ES512 = TestCertificates.readAsymmetricBundle(Jwts.SIG.ES512)
+    static Bundle ES256 = TestCertificates.readBundle(Jwts.SIG.ES256)
+    static Bundle ES384 = TestCertificates.readBundle(Jwts.SIG.ES384)
+    static Bundle ES512 = TestCertificates.readBundle(Jwts.SIG.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
-    static Bundle EdDSA = TestCertificates.readAsymmetricBundle(Jwts.SIG.EdDSA)
-    static Bundle Ed25519 = TestCertificates.readAsymmetricBundle(Jwts.SIG.Ed25519)
-    static Bundle Ed448 = TestCertificates.readAsymmetricBundle(Jwts.SIG.Ed448)
+    static Bundle EdDSA = TestCertificates.readBundle(Jwts.SIG.EdDSA)
+    static Bundle Ed25519 = TestCertificates.readBundle(Jwks.CRV.Ed25519)
+    static Bundle Ed448 = TestCertificates.readBundle(Jwks.CRV.Ed448)
     static Bundle X25519 = TestCertificates.readBundle(EdwardsCurve.X25519)
     static Bundle X448 = TestCertificates.readBundle(EdwardsCurve.X448)
     static Set<Bundle> EdEC = Collections.setOf(EdDSA, Ed25519, Ed448, X25519, X448)
@@ -80,10 +78,15 @@ class TestKeys {
     // =======================================================
     // RSA Keys & Certificates
     // =======================================================
-    static Bundle RS256 = TestCertificates.readAsymmetricBundle(Jwts.SIG.RS256)
-    static Bundle RS384 = TestCertificates.readAsymmetricBundle(Jwts.SIG.RS384)
-    static Bundle RS512 = TestCertificates.readAsymmetricBundle(Jwts.SIG.RS512)
-    static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512)
+    static Bundle RS256 = TestCertificates.readBundle(Jwts.SIG.RS256)
+    static Bundle RS384 = TestCertificates.readBundle(Jwts.SIG.RS384)
+    static Bundle RS512 = TestCertificates.readBundle(Jwts.SIG.RS512)
+    static Bundle PS256 = TestCertificates.readBundle(Jwts.SIG.PS256)
+    static Bundle PS384 = TestCertificates.readBundle(Jwts.SIG.PS384)
+    static Bundle PS512 = TestCertificates.readBundle(Jwts.SIG.PS512)
+//    static Set<Bundle> PKCSv15 = Collections.setOf(RS256, RS384, RS512)
+//    static Set<Bundle> RSASSA_PSS = Collections.setOf(PS256, PS384, PS512)
+    static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512, PS256, PS384, PS512)
 
     static Set<Bundle> ASYM = new LinkedHashSet<>()
     static {
@@ -92,22 +95,8 @@ class TestKeys {
         ASYM.addAll(RSA)
     }
 
-    static <T extends KeyBuilderSupplier<SecretKey, SecretKeyBuilder> & Identifiable> SecretKey forAlgorithm(T alg) {
+    static Bundle forAlgorithm(Identifiable alg) {
         String id = alg.getId()
-        if (id.contains('-')) {
-            id = id.replace('-', '_')
-        }
-        return TestKeys.metaClass.getAttribute(TestKeys, id) as SecretKey
-    }
-
-    static Bundle forAlgorithm(SignatureAlgorithm alg) {
-        String id = alg.getId()
-        if (id.startsWith('PS')) {
-            id = 'R' + id.substring(1) //keys for PS* algs are the same as RS algs
-        }
-        if (alg instanceof EdSignatureAlgorithm) {
-            id = alg.preferredCurve.getId()
-        }
         return TestKeys.metaClass.getAttribute(TestKeys, id) as Bundle
     }
 
@@ -126,10 +115,14 @@ class TestKeys {
             this.pair = new KeyPair(cert.getPublicKey(), privateKey)
         }
 
-        Bundle(PublicKey pub, PrivateKey priv) {
+        Bundle(KeyPair pair) {
             this.cert = null
             this.chain = Collections.emptyList()
-            this.pair = new KeyPair(pub, priv)
+            this.pair = pair
+        }
+
+        Bundle(PublicKey pub, PrivateKey priv) {
+            this(new KeyPair(pub, priv))
         }
     }
 }

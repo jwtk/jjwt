@@ -19,7 +19,9 @@ package io.jsonwebtoken.security
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.DefaultJwtBuilder
 import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.impl.security.*
+import io.jsonwebtoken.impl.security.EdwardsCurve
+import io.jsonwebtoken.impl.security.KeysBridge
+import io.jsonwebtoken.impl.security.PasswordSpec
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -154,12 +156,13 @@ class KeysTest {
 
                 PublicKey pub = pair.getPublic()
                 assert pub instanceof RSAPublicKey
-                assertEquals alg.familyName, pub.algorithm
+                def keyAlgName = alg.jcaName.equals("RSASSA-PSS") ? "RSASSA-PSS" : alg.familyName
+                assertEquals keyAlgName, pub.algorithm
                 assertEquals alg.digestLength * 8, pub.modulus.bitLength()
 
                 PrivateKey priv = pair.getPrivate()
                 assert priv instanceof RSAPrivateKey
-                assertEquals alg.familyName, priv.algorithm
+                assertEquals keyAlgName, priv.algorithm
                 assertEquals alg.digestLength * 8, priv.modulus.bitLength()
 
             } else if (alg.isEllipticCurve()) {
@@ -205,11 +208,16 @@ class KeysTest {
     }
 
     @Test
-    void testKeyPairFor() {
+    void testKeyPairBuilder() {
 
-        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
+        Collection<SignatureAlgorithm> algs = Jwts.SIG.get().values()
+                .findAll({it instanceof KeyPairBuilderSupplier}) as Collection<SignatureAlgorithm>
 
-            if (alg instanceof RsaSignatureAlgorithm) {
+        for (SignatureAlgorithm alg : algs) {
+
+            String id = alg.getId()
+
+            if (id.startsWith("RS") || id.startsWith("PS")) {
 
                 def pair = alg.keyPair().build()
                 assertNotNull pair
@@ -222,7 +230,7 @@ class KeysTest {
                 assert priv instanceof RSAPrivateKey
                 assertEquals alg.preferredKeyBitLength, priv.modulus.bitLength()
 
-            } else if (alg instanceof EdSignatureAlgorithm) {
+            } else if (id == "EdDSA") {
 
                 def pair = alg.keyPair().build()
                 assertNotNull pair
@@ -235,7 +243,7 @@ class KeysTest {
                 assert priv instanceof PrivateKey
                 assertTrue EdwardsCurve.isEdwards(priv)
 
-            } else if (alg instanceof EcSignatureAlgorithm) {
+            } else if (id.startsWith("ES")) {
 
                 def pair = alg.keyPair().build()
                 assertNotNull pair
@@ -267,8 +275,8 @@ class KeysTest {
                 assertEquals alg.orderBitLength, priv.params.order.bitLength()
 
             } else {
-                assertFalse alg instanceof SignatureAlgorithm
-                //assert we've accounted for all asymmetric ones above
+                // unexpected algorithm that is not accounted for in this test:
+                fail()
             }
         }
     }

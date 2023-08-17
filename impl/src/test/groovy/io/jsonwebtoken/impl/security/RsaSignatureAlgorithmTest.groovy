@@ -16,10 +16,12 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.PublicKey
 import java.security.interfaces.RSAPrivateKey
@@ -30,15 +32,13 @@ import static org.junit.Assert.*
 
 class RsaSignatureAlgorithmTest {
 
-    static Collection<RsaSignatureAlgorithm> algs() {
-        return Jwts.SIG.get().values().findAll({
-            it.id.startsWith("RS") || it.id.startsWith("PS")
-        }) as Collection<RsaSignatureAlgorithm>
-    }
+    static final Collection<RsaSignatureAlgorithm> algs = Jwts.SIG.get().values().findAll({
+        it instanceof RsaSignatureAlgorithm
+    }) as Collection<RsaSignatureAlgorithm>
 
     @Test
     void testKeyPairBuilder() {
-        algs().each {
+        algs.each {
             def pair = it.keyPair().build()
             assertNotNull pair.public
             assertTrue pair.public instanceof RSAPublicKey
@@ -48,16 +48,11 @@ class RsaSignatureAlgorithmTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testWeakPreferredKeyLength() {
-        new RsaSignatureAlgorithm(256, 1024) //must be >= 2048
-    }
-
     @Test
     void testValidateKeyWithoutRsaKey() {
         PublicKey key = createMock(PublicKey)
         replay key
-        algs().each {
+        algs.each {
             it.validateKey(key, false)
             //no exception - can't check for RSAKey fields (e.g. PKCS11 or HSM key)
         }
@@ -72,7 +67,9 @@ class RsaSignatureAlgorithmTest {
             Jwts.SIG.RS256.digest(request)
             fail()
         } catch (InvalidKeyException e) {
-            assertTrue e.getMessage().startsWith("Asymmetric key signatures must be created with PrivateKeys. The specified key is of type: ")
+            String expected = "RS256 signing keys must be PrivateKeys (implement java.security.PrivateKey). " +
+                    "Provided key type: ${key.getClass().getName()}."
+            assertEquals expected, e.getMessage()
         }
     }
 
@@ -80,15 +77,102 @@ class RsaSignatureAlgorithmTest {
     void testValidateSigningKeyWeakKey() {
         def gen = KeyPairGenerator.getInstance("RSA")
         gen.initialize(1024) //too week for any JWA RSA algorithm
-        def pair = gen.generateKeyPair()
+        def rsaPair = gen.generateKeyPair()
 
-        def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
-        Jwts.SIG.get().values().findAll({ it.id.startsWith('RS') || it.id.startsWith('PS') }).each {
+        def provider = RsaSignatureAlgorithm.PS256.getProvider() // in case BC was loaded
+        def pssPair = new JcaTemplate(RsaSignatureAlgorithm.PSS_JCA_NAME, provider)
+                .withKeyPairGenerator(new CheckedFunction<KeyPairGenerator, KeyPair>() {
+                    @Override
+                    KeyPair apply(KeyPairGenerator generator) throws Exception {
+                        generator.initialize(1024)
+                        return generator.generateKeyPair()
+                    }
+                })
+
+        algs.each {
+            def pair = it.getId().startsWith("PS") ? pssPair : rsaPair
+            def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
             try {
                 it.digest(request)
                 fail()
             } catch (WeakKeyException expected) {
+                String id = it.getId()
+                String section = id.startsWith('PS') ? '3.5' : '3.3'
+                String msg = "The signing key's size is 1024 bits which is not secure enough for the ${it.getId()} " +
+                        "algorithm.  The JWT JWA Specification (RFC 7518, Section ${section}) states that RSA keys " +
+                        "MUST have a size >= 2048 bits.  Consider using the Jwts.SIG.${id}.keyPair() " +
+                        "builder to create a KeyPair guaranteed to be secure enough for ${id}.  See " +
+                        "https://tools.ietf.org/html/rfc7518#section-${section} for more information."
+                assertEquals msg, expected.getMessage()
             }
+        }
+    }
+
+    @Test
+    void testFindByKeyWithNoAlgorithm() {
+        assertNull RsaSignatureAlgorithm.findByKey(new TestPrivateKey())
+    }
+
+    @Test
+    void testFindByKeyInvalidAlgorithm() {
+        assertNull DefaultMacAlgorithm.findByKey(new TestPrivateKey(algorithm: 'foo'))
+    }
+
+    @Test
+    void testFindByKey() {
+        for (def alg : algs) {
+            def pair = TestKeys.forAlgorithm(alg).pair
+            assertSame alg, RsaSignatureAlgorithm.findByKey(pair.public)
+            assertSame alg, RsaSignatureAlgorithm.findByKey(pair.private)
+        }
+    }
+
+    @Test
+    void testFindByKeyNull() {
+        assertNull RsaSignatureAlgorithm.findByKey(null)
+    }
+
+    @Test
+    void testFindByNonAsymmetricKey() {
+        assertNull RsaSignatureAlgorithm.findByKey(TestKeys.HS256)
+    }
+
+    @Test
+    void testFindByWeakKey() {
+        for (def alg : algs) {
+            def pair = TestKeys.forAlgorithm(alg).pair
+            byte[] mag = new byte[255] // one byte less than 256 (2048 bits) which is the minimum
+            Randoms.secureRandom().nextBytes(mag)
+            def modulus = new BigInteger(1, mag)
+            //def modulus = pair.public.modulus
+            def weakPub = new TestRSAKey(pair.public); weakPub.modulus = modulus
+            def weakPriv = new TestRSAKey(pair.private); weakPriv.modulus = modulus
+            assertNull RsaSignatureAlgorithm.findByKey(weakPub)
+            assertNull RsaSignatureAlgorithm.findByKey(weakPriv)
+        }
+    }
+
+    @Test
+    void testFindByLargerThanExpectedKey() {
+        for (def alg : algs) {
+            def pair = TestKeys.forAlgorithm(alg).pair
+            def mag = new byte[(alg.preferredKeyBitLength / Byte.SIZE) + 1] // one byte more than required
+            Randoms.secureRandom().nextBytes(mag)
+            def modulus = new BigInteger(1, mag)
+            def strongPub = new TestRSAKey(pair.public); strongPub.modulus = modulus
+            def strongPriv = new TestRSAKey(pair.private); strongPriv.modulus = modulus
+            assertSame alg, RsaSignatureAlgorithm.findByKey(strongPub)
+            assertSame alg, RsaSignatureAlgorithm.findByKey(strongPriv)
+        }
+    }
+
+    @Test
+    void testFindByKeyOid() {
+        for (def entry : RsaSignatureAlgorithm.PKCSv15_ALGS.entrySet()) {
+            def oid = entry.getKey()
+            def alg = entry.getValue()
+            def oidKey = new TestPrivateKey(algorithm: oid)
+            assertSame alg, RsaSignatureAlgorithm.findByKey(oidKey)
         }
     }
 }

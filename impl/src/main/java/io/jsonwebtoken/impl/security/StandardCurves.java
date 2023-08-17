@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.security
+package io.jsonwebtoken.impl.security;
 
-import java.security.interfaces.RSAKey
+import io.jsonwebtoken.impl.lang.DelegatingRegistry;
+import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.security.Curve;
 
-class TestRSAKey extends TestKey implements RSAKey {
-
-    final def src
-    BigInteger modulus
-
-    TestRSAKey(def key) {
-        this.src = key
-        this.algorithm = key?.getAlgorithm()
-        this.format = key?.getFormat()
-        this.encoded = key?.getEncoded()
-        this.modulus = key?.getModulus()
-    }
-
-    @Override
-    BigInteger getModulus() {
-        return this.modulus
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwks.CRV
+public final class StandardCurves extends DelegatingRegistry<String, Curve> {
+    public StandardCurves() {
+        super(new IdRegistry<>("Elliptic Curve", Curves.VALUES, false));
     }
 }

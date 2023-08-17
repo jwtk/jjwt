@@ -21,14 +21,15 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
+import io.jsonwebtoken.impl.security.TestKey
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.*
 import io.jsonwebtoken.security.*
 import org.junit.Before
 import org.junit.Test
 
-import javax.crypto.KeyGenerator
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.security.Provider
 import java.security.SecureRandom
 
@@ -314,20 +315,56 @@ class DefaultJwtBuilderTest {
     @Test
     void testSignWithKeyOnly() {
 
-        def b = new DefaultJwtBuilder()
-        b.header().keyId('a')
-        b.setPayload('foo')
+        builder.subject("Joe") // make Claims JWS
 
-        def key = KeyGenerator.getInstance('HmacSHA256').generateKey()
+        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
+            if (alg.equals(Jwts.SIG.NONE)) { // skip
+                continue;
+            }
+            def key, vkey
+            if (alg instanceof KeyPairBuilderSupplier) {
+                def keyPair = alg.keyPair().build()
+                key = keyPair.private
+                vkey = keyPair.public
+            } else { // MAC
+                key = ((MacAlgorithm) alg).key().build()
+                vkey = key
+            }
 
-        b.signWith(key)
-        String s1 = b.compact()
+            def parser = Jwts.parser().verifyWith(vkey).build()
 
-        //ensure matches same result with specified algorithm:
-        b.signWith(key, SignatureAlgorithm.HS256)
-        String s2 = b.compact()
+            String s1 = builder.signWith(key).compact()
+            def jws = parser.parseClaimsJws(s1)
 
-        assertEquals s1, s2
+            String s2 = builder.signWith(key, alg).compact()
+            def jws2 = parser.parseClaimsJws(s2)
+
+            // signatures differ across duplicate operations for some algorithms, so we can't do
+            // assertEquals jws, jws2 (since those .equals implementations use the signature)
+            // So we check for header and payload equality instead, and check the signature when we can:
+            assertEquals jws.getHeader(), jws2.getHeader()
+            assertEquals jws2.getPayload(), jws2.getPayload()
+            // ES* and PS* signatures are nondeterministic and differ on each sign operation, even for identical
+            // input, so we can't assert signature equality for them.  But we can with the others:
+            if (!alg.id.startsWith('ES') && !alg.id.startsWith('PS')) {
+                assertTrue MessageDigest.isEqual(jws.getDigest(), jws2.getDigest())
+            }
+        }
+    }
+
+    @Test
+    void testSignWithKeyOnlyUsingUnsupportedKey() {
+        try {
+            builder.signWith(new TestKey(algorithm: 'foo'))
+            fail()
+        } catch (UnsupportedKeyException expected) {
+            String msg = 'Unable to determine a suitable MAC or Signature algorithm for the specified key using ' +
+                    'available heuristics: either the key size is too weak be used with available algorithms, or ' +
+                    'the key size is unavailable (e.g. if using a PKCS11 or HSM (Hardware Security Module) key ' +
+                    'store). If you are using a PKCS11 or HSM keystore, consider using the ' +
+                    'JwtBuilder.signWith(Key, SecureDigestAlgorithm) method instead.'
+            assertEquals msg, expected.getMessage()
+        }
     }
 
     @Test
@@ -337,7 +374,8 @@ class DefaultJwtBuilderTest {
             new DefaultJwtBuilder().signWith(SignatureAlgorithm.ES256, bytes);
             fail()
         } catch (IllegalArgumentException iae) {
-            assertEquals "Key bytes may only be specified for HMAC signatures.  If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.", iae.message
+            assertEquals "Key bytes may only be specified for HMAC signatures.  If using RSA or " +
+                    "Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.", iae.message
         }
     }
 

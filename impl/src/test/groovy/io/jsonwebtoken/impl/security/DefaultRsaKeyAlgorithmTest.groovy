@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.UnsupportedKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -41,9 +42,42 @@ class DefaultRsaKeyAlgorithmTest {
     }
 
     @Test
+    void testPssKey() {
+        for (DefaultRsaKeyAlgorithm alg : algs) {
+            RSAPublicKey key = createMock(RSAPublicKey)
+            expect(key.getAlgorithm()).andReturn(RsaSignatureAlgorithm.PSS_JCA_NAME)
+            replay(key)
+            try {
+                alg.validate(key, true)
+            } catch (UnsupportedKeyException expected) {
+                String msg = 'RSASSA-PSS keys may not be used for encryption, only digital signature algorithms.'
+                assertEquals msg, expected.getMessage()
+            }
+            verify(key)
+        }
+    }
+
+    @Test
+    void testPssOidKey() {
+        for (DefaultRsaKeyAlgorithm alg : algs) {
+            RSAPublicKey key = createMock(RSAPublicKey)
+            expect(key.getAlgorithm()).andReturn(RsaSignatureAlgorithm.PSS_OID)
+            replay(key)
+            try {
+                alg.validate(key, true)
+            } catch (UnsupportedKeyException expected) {
+                String msg = 'RSASSA-PSS keys may not be used for encryption, only digital signature algorithms.'
+                assertEquals msg, expected.getMessage()
+            }
+            verify(key)
+        }
+    }
+
+    @Test
     void testWeakEncryptionKey() {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             RSAPublicKey key = createMock(RSAPublicKey)
+            expect(key.getAlgorithm()).andReturn("RSA")
             expect(key.getModulus()).andReturn(BigInteger.ONE)
             replay(key)
             try {
@@ -65,6 +99,7 @@ class DefaultRsaKeyAlgorithmTest {
     void testWeakDecryptionKey() {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             RSAPrivateKey key = createMock(RSAPrivateKey)
+            expect(key.getAlgorithm()).andReturn("RSA")
             expect(key.getModulus()).andReturn(BigInteger.ONE)
             replay(key)
             try {

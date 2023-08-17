@@ -22,6 +22,7 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Cipher;
@@ -56,6 +57,13 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
     }
 
     protected void validate(Key key, boolean encryption) { // true = encryption, false = decryption
+
+        if (RsaSignatureAlgorithm.isPss(key)) {
+            String msg = "RSASSA-PSS keys may not be used for " + keyType(encryption) +
+                    ", only digital signature algorithms.";
+            throw new UnsupportedKeyException(msg);
+        }
+
         // Some PKCS11 providers and HSMs won't expose the RSAKey interface, so we have to check to see if we can cast
         // If so, we can provide additional safety checks:
         if (key instanceof RSAKey) {

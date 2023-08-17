@@ -53,6 +53,20 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String, Obj
 
     JwkContext<K> setPublicKeyUse(String use);
 
+    /**
+     * Returns {@code true} if relevant context values indicate JWK use with MAC or digital signature algorithms,
+     * {@code false} otherwise.  Specifically {@code true} is only returned if either:
+     * <ul>
+     *     <li>&quot;sig&quot;.equals({@link #getPublicKeyUse()}), OR</li>
+     *     <li>{@link #getOperations()} is not empty and contains either &quot;sign&quot; or &quot;verify&quot;</li>
+     * </ul>
+     * <p>otherwise {@code false}.</p>
+     *
+     * @return {@code true} if relevant context values indicate JWK use with MAC or digital signature algorithms,
+     * {@code false} otherwise.
+     */
+    boolean isSigUse();
+
     K getKey();
 
     JwkContext<K> setKey(K key);

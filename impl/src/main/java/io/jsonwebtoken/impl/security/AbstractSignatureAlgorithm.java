@@ -33,7 +33,7 @@ abstract class AbstractSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
     private static final String KEY_TYPE_MSG_PATTERN =
             "{0} {1} keys must be {2}s (implement {3}). Provided key type: {4}.";
 
-    protected AbstractSignatureAlgorithm(String id, String jcaName) {
+    AbstractSignatureAlgorithm(String id, String jcaName) {
         super(id, jcaName);
     }
 

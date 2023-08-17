@@ -3477,7 +3477,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 `OctetPublicJwk` interface names):
 
 ```java
-PublicKey key = Jwts.SIG.Ed25519.keyPair().build().getPublic();
+PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic();
 OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -3499,7 +3499,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 `OctetPrivateJwk` and `OctetPublicJwk` interface names):
 
 ```java
-KeyPair pair = Jwts.SIG.Ed448.keyPair().build();
+KeyPair pair = Jwks.CRV.Ed448.keyPair().build();
 PublicKey pubKey = pair.getPublic();
 PrivateKey privKey = pair.getPrivate();
 

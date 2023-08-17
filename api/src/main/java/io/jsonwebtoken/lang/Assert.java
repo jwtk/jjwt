@@ -351,7 +351,7 @@ public final class Assert {
      * Assert that the provided object is an instance of the provided class.
      * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
      *
-     * @param <T> the type of instance expected
+     * @param <T>   the type of instance expected
      * @param clazz the required class
      * @param obj   the object to check
      * @return the expected instance of type {@code T}
@@ -423,35 +423,56 @@ public final class Assert {
      * an {@link IllegalArgumentException} with the given message if not.
      *
      * @param <T>         the type of argument
-     * @param requirement the integer that {@code value} must be greater than
      * @param value       the value to check
+     * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
      * @return {@code value} if greater than the specified {@code requirement}.
      * @since JJWT_RELEASE_VERSION
      */
-    public static <T extends Number> T eq(T requirement, T value, String msg) {
-        notNull(requirement, "requirement cannot be null.");
-        notNull(value, "value cannot be null.");
-        if (!requirement.equals(value)) {
+    public static <T extends Comparable<T>> T eq(T value, T requirement, String msg) {
+        if (compareTo(value, requirement) != 0) {
             throw new IllegalArgumentException(msg);
         }
         return value;
+    }
+
+    private static <T extends Comparable<T>> int compareTo(T value, T requirement) {
+        notNull(value, "value cannot be null.");
+        notNull(requirement, "requirement cannot be null.");
+        return value.compareTo(requirement);
     }
 
     /**
      * Asserts that a specified {@code value} is greater than the given {@code requirement}, throwing
      * an {@link IllegalArgumentException} with the given message if not.
      *
+     * @param <T>         the type of value to check and return if the requirement is met
      * @param value       the value to check
-     * @param requirement the integer that {@code value} must be greater than
+     * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
      * @return {@code value} if greater than the specified {@code requirement}.
      * @since JJWT_RELEASE_VERSION
      */
-    public static Integer gt(Integer value, Integer requirement, String msg) {
-        notNull(value, "value cannot be null.");
-        notNull(requirement, "requirement cannot be null.");
-        if (!(value > requirement)) {
+    public static <T extends Comparable<T>> T gt(T value, T requirement, String msg) {
+        if (!(compareTo(value, requirement) > 0)) {
+            throw new IllegalArgumentException(msg);
+        }
+        return value;
+    }
+
+    /**
+     * Asserts that a specified {@code value} is less than or equal to the given {@code requirement}, throwing
+     * an {@link IllegalArgumentException} with the given message if not.
+     *
+     * @param <T>         the type of value to check and return if the requirement is met
+     * @param value       the value to check
+     * @param requirement the requirement that {@code value} must be greater than
+     * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
+     * @return {@code value} if greater than the specified {@code requirement}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static <T extends Comparable<T>> T lte(T value, T requirement, String msg) {
+        if (compareTo(value, requirement) > 0) {
             throw new IllegalArgumentException(msg);
         }
         return value;
@@ -495,7 +516,7 @@ public final class Assert {
      *
      * @param value value to assert is not null
      * @param msg   exception message to use if {@code value} is null
-     * @param <T> value type
+     * @param <T>   value type
      * @return the non-null value
      * @throws IllegalStateException with the specified {@code msg} if {@code value} is null.
      * @since JJWT_RELEASE_VERSION

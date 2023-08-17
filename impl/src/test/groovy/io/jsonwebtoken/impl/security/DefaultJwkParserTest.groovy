@@ -26,6 +26,7 @@ import org.junit.Test
 
 import java.nio.charset.StandardCharsets
 import java.security.Key
+import java.security.Provider
 
 import static org.junit.Assert.*
 
@@ -35,12 +36,8 @@ class DefaultJwkParserTest {
     void testKeys() {
 
         Set<Key> keys = new LinkedHashSet<>()
-        TestKeys.HS.each { keys.add(it) }
-        TestKeys.RSA.each {
-            keys.add(it.pair.public)
-            keys.add(it.pair.private)
-        }
-        TestKeys.EC.each {
+        TestKeys.SECRET.each { keys.add(it) }
+        TestKeys.ASYM.each {
             keys.add(it.pair.public)
             keys.add(it.pair.private)
         }
@@ -48,7 +45,13 @@ class DefaultJwkParserTest {
         def serializer = Services.loadFirst(Serializer)
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().key(key).build()
+            Provider provider = null // assume default, but switch if key requires it
+            if (key.getClass().getName().startsWith("org.bouncycastle.")) {
+                // No native JVM support for the key, so we need to enable BC:
+                provider = Providers.findBouncyCastle(Conditions.TRUE)
+            }
+            //noinspection GroovyAssignabilityCheck
+            def jwk = Jwks.builder().provider(provider).key(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
             def parsed = Jwks.parser().build().parse(json)
@@ -61,27 +64,35 @@ class DefaultJwkParserTest {
 
         Set<Key> keys = new LinkedHashSet<>()
         TestKeys.HS.each { keys.add(it) }
-        TestKeys.RSA.each {
-            keys.add(it.pair.public)
-            keys.add(it.pair.private)
-        }
-        TestKeys.EC.each {
+        TestKeys.ASYM.each {
             keys.add(it.pair.public)
             keys.add(it.pair.private)
         }
 
         def serializer = Services.loadFirst(Serializer)
-        def provider = Providers.findBouncyCastle(Conditions.TRUE)
+        def provider = Providers.findBouncyCastle(Conditions.TRUE) //always used
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().key(key).build()
+            def jwk = Jwks.builder().provider(provider).key(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
-            def parsed = Jwks.parser().provider(provider).build().parse(json)
+            def parsed = Jwks.parser().build().parse(json)
             assertEquals jwk, parsed
-            assertSame provider, parsed.@context.@provider
+            //assertSame provider, parsed.@context.@provider
         }
+    }
+
+    @Test
+    void testParseWithProvider() {
+        def provider = Providers.findBouncyCastle(Conditions.TRUE)
+        def jwk = Jwks.builder().provider(provider).key(TestKeys.HS256).build()
+        def serializer = Services.loadFirst(Serializer)
+        def data = serializer.serialize(jwk)
+        String json = new String(data, StandardCharsets.UTF_8)
+        def parsed = Jwks.parser().provider(provider).build().parse(json)
+        assertEquals jwk, parsed
+        assertSame provider, parsed.@context.@provider
     }
 
     @Test

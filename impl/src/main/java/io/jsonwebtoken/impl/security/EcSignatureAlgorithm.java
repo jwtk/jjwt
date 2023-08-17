@@ -19,9 +19,11 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
@@ -33,18 +35,27 @@ import java.security.Signature;
 import java.security.interfaces.ECKey;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 // @since JJWT_RELEASE_VERSION
-public class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
+final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 521.";
 
     private static final String DER_ENCODING_SYS_PROPERTY_NAME =
             "io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported";
 
+    private static final String ES256_OID = "1.2.840.10045.4.3.2";
+    private static final String ES384_OID = "1.2.840.10045.4.3.3";
+    private static final String ES512_OID = "1.2.840.10045.4.3.4";
+
     private final ECGenParameterSpec KEY_PAIR_GEN_PARAMS;
 
     private final int orderBitLength;
+
+    private final String OID;
 
     /**
      * JWA EC (concat formatted) length in bytes for this instance's {@link #orderBitLength}.
@@ -89,9 +100,51 @@ public class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         return orderBitLength == 256 || orderBitLength == 384 || orderBitLength == 521;
     }
 
-    public EcSignatureAlgorithm(int orderBitLength) {
+    static final EcSignatureAlgorithm ES256 = new EcSignatureAlgorithm(256, ES256_OID);
+    static final EcSignatureAlgorithm ES384 = new EcSignatureAlgorithm(384, ES384_OID);
+    static final EcSignatureAlgorithm ES512 = new EcSignatureAlgorithm(521, ES512_OID);
+
+    private static final Map<String, SignatureAlgorithm> ALGS_BY_OID;
+
+    static {
+        ALGS_BY_OID = new LinkedHashMap<>(3);
+        ALGS_BY_OID.put(ES256_OID, ES256);
+        ALGS_BY_OID.put(ES384_OID, ES384);
+        ALGS_BY_OID.put(ES512_OID, ES512);
+    }
+
+    static SignatureAlgorithm findByKey(Key key) {
+
+        String algName = KeysBridge.findAlgorithm(key);
+        if (!Strings.hasText(algName)) {
+            return null;
+        }
+        algName = algName.toUpperCase(Locale.ENGLISH);
+
+        SignatureAlgorithm alg = ALGS_BY_OID.get(algName);
+        if (alg != null) {
+            return alg;
+        }
+
+        if ("EC".equalsIgnoreCase(algName) || "ECDSA".equalsIgnoreCase(algName)) {
+            // some PKCS11 keystores and HSMs won't expose the RSAKey interface, so we can't assume it:
+            final int bitLength = KeysBridge.findBitLength(key); // returns -1 if we're unable to find out
+            if (bitLength == ES512.orderBitLength) {
+                return ES512;
+            } else if (bitLength == ES384.orderBitLength) {
+                return ES384;
+            } else if (bitLength == ES256.orderBitLength) {
+                return ES256;
+            }
+        }
+
+        return null;
+    }
+
+    private EcSignatureAlgorithm(int orderBitLength, String oid) {
         super("ES" + shaSize(orderBitLength), "SHA" + shaSize(orderBitLength) + "withECDSA");
         Assert.isTrue(isSupportedOrderBitLength(orderBitLength), REQD_ORDER_BIT_LENGTH_MSG);
+        this.OID = Assert.hasText(oid, "Invalid OID.");
         String curveName = "secp" + orderBitLength + "r1";
         this.KEY_PAIR_GEN_PARAMS = new ECGenParameterSpec(curveName);
         this.orderBitLength = orderBitLength;
@@ -142,7 +195,7 @@ public class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         });
     }
 
-    protected boolean isValidRAndS(PublicKey key, byte[] concatSignature) {
+    boolean isValidRAndS(PublicKey key, byte[] concatSignature) {
         if (key instanceof ECKey) { //Some PKCS11 providers and HSMs won't expose the ECKey interface, so we have to check first
             ECKey ecKey = (ECKey) key;
             BigInteger order = ecKey.getParams().getOrder();

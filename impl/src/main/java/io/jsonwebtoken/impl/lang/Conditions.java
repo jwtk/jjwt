@@ -82,7 +82,7 @@ public final class Conditions {
             Object value = null;
             try {
                 value = supplier.get();
-            } catch (Exception ignored) {
+            } catch (Throwable ignored) {
             }
             return value != null;
         }

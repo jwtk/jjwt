@@ -21,6 +21,7 @@ import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
+import io.jsonwebtoken.security.Curve;
 
 import java.security.spec.EllipticCurve;
 import java.util.Collection;
@@ -33,7 +34,7 @@ public final class Curves {
 
     private static final Collection<ECCurve> EC_CURVES = Collections.setOf((ECCurve) P_256, (ECCurve) P_384, (ECCurve) P_521);
 
-    private static final Collection<Curve> VALUES = new LinkedHashSet<>();
+    static final Collection<Curve> VALUES = new LinkedHashSet<>();
 
     static {
         VALUES.addAll(EC_CURVES);

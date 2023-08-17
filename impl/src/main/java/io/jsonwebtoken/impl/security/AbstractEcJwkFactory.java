@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.io.Encoders;
+import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
