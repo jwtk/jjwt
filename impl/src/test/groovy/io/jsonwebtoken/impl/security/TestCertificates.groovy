@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Assert
@@ -130,7 +131,8 @@ class TestCertificates {
     }
 
     private static def readPrivateKey = { Identifiable alg, Provider provider ->
-        PEMParser parser = getParser(alg.getId() + '.key.pem')
+        final String id = alg.id
+        PEMParser parser = getParser(id + '.key.pem')
         parser.withCloseable {
             PrivateKeyInfo info
             Object object = parser.readObject()
@@ -142,6 +144,23 @@ class TestCertificates {
             def converter = new JcaPEMKeyConverter()
             if (provider != null) {
                 converter.setProvider(provider)
+            } else if (id.startsWith("X") && System.getProperty("java.version").startsWith("11")) {
+                EdwardsCurve curve = EdwardsCurve.findById(id)
+                Assert.notNull(curve, "Curve cannot be null.")
+                int expectedByteLen = ((curve.keyBitLength + 7) / 8) as int
+                // Address the [JDK 11 SunCE provider bug](https://bugs.openjdk.org/browse/JDK-8213363) for X25519
+                // and X448 encoded keys: Even though the file is encoded properly (it was created by OpenSSL), JDK 11's
+                // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
+                // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
+                // So we get the raw bytes and use our key generator:
+                byte[] keyOctets = info.getPrivateKey().getOctets()
+                int lenDifference = Bytes.length(keyOctets) - expectedByteLen
+                if (lenDifference > 0) {
+                    byte[] derPrefixRemoved = new byte[expectedByteLen]
+                    System.arraycopy(keyOctets, lenDifference, derPrefixRemoved, 0, expectedByteLen)
+                    keyOctets = derPrefixRemoved
+                }
+                return curve.toPrivateKey(keyOctets, null)
             }
             return converter.getPrivateKey(info)
         }
