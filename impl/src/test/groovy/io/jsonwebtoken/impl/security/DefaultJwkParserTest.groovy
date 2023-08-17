@@ -26,6 +26,7 @@ import org.junit.Test
 
 import java.nio.charset.StandardCharsets
 import java.security.Key
+import java.security.Provider
 
 import static org.junit.Assert.*
 
@@ -35,7 +36,7 @@ class DefaultJwkParserTest {
     void testKeys() {
 
         Set<Key> keys = new LinkedHashSet<>()
-        TestKeys.HS.each { keys.add(it) }
+        TestKeys.SECRET.each { keys.add(it) }
         TestKeys.ASYM.each {
             keys.add(it.pair.public)
             keys.add(it.pair.private)
@@ -44,7 +45,12 @@ class DefaultJwkParserTest {
         def serializer = Services.loadFirst(Serializer)
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().key(key).build()
+            Provider provider = null // assume default
+            if (key.getClass().getName().startsWith("org.bouncycastle.")) {
+                // No native JVM support for the key, so we need to enable BC:
+                provider = Providers.findBouncyCastle(Conditions.TRUE)
+            }
+            def jwk = Jwks.builder().provider(provider).key(key).build()
             def data = serializer.serialize(jwk)
             String json = new String(data, StandardCharsets.UTF_8)
             def parsed = Jwks.parser().build().parse(json)
