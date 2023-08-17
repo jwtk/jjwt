@@ -1560,8 +1560,7 @@ public key (`keyPair.getPublic()`) to parse/verify a JWS.
 > 
 > **The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider
 > (like BouncyCastle) in the runtime classpath.**  
-> **The `EdDSA`, `Ed25519` and `Ed448` algorithms require JDK 15 or a compatible JCA Provider 
-> (like BouncyCastle) in the runtime classpath.** 
+> **The `EdDSA` algorithms requires JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.** 
 > If you want to use either set of algorithms, and you are on an earlier JDK that does not support them, 
 > see the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are 
 > natively supported by the JDK.
@@ -3154,12 +3153,12 @@ using Bob's Edwards Curve public key:
 
 ```java
 // Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
-SignatureAlgorithm alg = Jwts.SIG.Ed25519; //or Ed448
-KeyPair pair = alg.keyPair().build();
+Curve curve = Jwks.CRV.Ed25519; //or Ed448
+KeyPair pair = curve.keyPair().build();
 
 // Bob creates the compact JWS with his Edwards Curve private key:
 String jws = Jwts.builder().subject("Alice")
-    .signWith(pair.getPrivate(), alg) // <-- Bob's Edwards Curve private key
+    .signWith(pair.getPrivate(), Jwts.SIG.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
     .compact();
 
 // Alice receives and verifies the compact JWS came from Bob:
@@ -3477,7 +3476,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 `OctetPublicJwk` interface names):
 
 ```java
-PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic();
+PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
 OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -3499,7 +3498,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 `OctetPrivateJwk` and `OctetPublicJwk` interface names):
 
 ```java
-KeyPair pair = Jwks.CRV.Ed448.keyPair().build();
+KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
 PublicKey pubKey = pair.getPublic();
 PrivateKey privKey = pair.getPrivate();
 

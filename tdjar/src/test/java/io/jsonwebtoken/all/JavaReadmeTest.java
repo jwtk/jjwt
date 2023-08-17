@@ -18,6 +18,7 @@ package io.jsonwebtoken.all;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.Jwk;
@@ -85,7 +86,7 @@ public class JavaReadmeTest {
         KeyPair pair = alg.keyPair().build();
 
         // Bob creates the compact JWS with his RSA private key:
-        String jws = Jwts.builder().setSubject("Alice")
+        String jws = Jwts.builder().subject("Alice")
                 .signWith(pair.getPrivate(), alg) // <-- Bob's RSA private key
                 .compact();
 
@@ -107,13 +108,35 @@ public class JavaReadmeTest {
         KeyPair pair = alg.keyPair().build();
 
         // Bob creates the compact JWS with his EC private key:
-        String jws = Jwts.builder().setSubject("Alice")
+        String jws = Jwts.builder().subject("Alice")
                 .signWith(pair.getPrivate(), alg) // <-- Bob's EC private key
                 .compact();
 
         // Alice receives and verifies the compact JWS came from Bob:
         String subject = Jwts.parser()
                 .verifyWith(pair.getPublic()) // <-- Bob's EC public key
+                .build().parseClaimsJws(jws).getPayload().getSubject();
+
+        assert "Alice".equals(subject);
+    }
+
+    /**
+     * {@code README.md#example-jws-eddsa}
+     */
+    @Test
+    public void testExampleJwsEdDSA() {
+        // Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
+        Curve curve = Jwks.CRV.Ed25519; //or Ed448
+        KeyPair pair = curve.keyPair().build();
+
+        // Bob creates the compact JWS with his Edwards Curve private key:
+        String jws = Jwts.builder().subject("Alice")
+                .signWith(pair.getPrivate(), Jwts.SIG.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
+                .compact();
+
+        // Alice receives and verifies the compact JWS came from Bob:
+        String subject = Jwts.parser()
+                .verifyWith(pair.getPublic()) // <-- Bob's Edwards Curve public key
                 .build().parseClaimsJws(jws).getPayload().getSubject();
 
         assert "Alice".equals(subject);
@@ -155,7 +178,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-        String jwe = Jwts.builder().setAudience("Alice")
+        String jwe = Jwts.builder().audience("Alice")
                 .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
                 .compact();
 
@@ -180,7 +203,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
-        String jwe = Jwts.builder().setIssuer("me").encryptWith(key, alg, enc).compact();
+        String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
 
         // Parse the compact JWE:
         String issuer = Jwts.parser().decryptWith(key).build()
@@ -203,7 +226,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-        String jwe = Jwts.builder().setAudience("Alice")
+        String jwe = Jwts.builder().audience("Alice")
                 .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
                 .compact();
 
@@ -239,7 +262,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
-        String jwe = Jwts.builder().setIssuer("me")
+        String jwe = Jwts.builder().issuer("me")
                 // Optional work factor is specified in the header:
                 //.header().pbes2Count(pbkdf2Iterations)).and()
                 .encryptWith(password, alg, enc)
@@ -352,7 +375,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEdEcPublicJwk() {
-        PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic();
+        PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
         OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -369,7 +392,7 @@ public class JavaReadmeTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEdEcPrivateJwk() {
-        KeyPair pair = Jwks.CRV.Ed448.keyPair().build();
+        KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 
