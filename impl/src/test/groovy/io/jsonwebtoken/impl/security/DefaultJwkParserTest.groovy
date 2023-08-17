@@ -28,8 +28,7 @@ import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.security.Provider
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.fail
+import static org.junit.Assert.*
 
 class DefaultJwkParserTest {
 
@@ -82,6 +81,18 @@ class DefaultJwkParserTest {
             assertEquals jwk, parsed
             //assertSame provider, parsed.@context.@provider
         }
+    }
+
+    @Test
+    void testParseWithProvider() {
+        def provider = Providers.findBouncyCastle(Conditions.TRUE)
+        def jwk = Jwks.builder().provider(provider).key(TestKeys.HS256).build()
+        def serializer = Services.loadFirst(Serializer)
+        def data = serializer.serialize(jwk)
+        String json = new String(data, StandardCharsets.UTF_8)
+        def parsed = Jwks.parser().provider(provider).build().parse(json)
+        assertEquals jwk, parsed
+        assertSame provider, parsed.@context.@provider
     }
 
     @Test
