@@ -25,11 +25,11 @@ import java.security.spec.AlgorithmParameterSpec;
 public class NamedParameterSpecValueFinder implements Function<Key, String> {
 
     private static final Function<Key, AlgorithmParameterSpec> EDEC_KEY_GET_PARAMS =
-            new OptionalMethodInvoker<>("java.security.interfaces.EdECKey", "getParams");
+            new OptionalMethodInvoker<>("java.security.interfaces.EdECKey", "getParams"); // >= JDK 15
     private static final Function<Key, AlgorithmParameterSpec> XEC_KEY_GET_PARAMS =
-            new OptionalMethodInvoker<>("java.security.interfaces.XECKey", "getParams");
+            new OptionalMethodInvoker<>("java.security.interfaces.XECKey", "getParams"); // >= JDK 11
     private static final Function<Object, String> GET_NAME =
-            new OptionalMethodInvoker<>("java.security.spec.NamedParameterSpec", "getName");
+            new OptionalMethodInvoker<>("java.security.spec.NamedParameterSpec", "getName"); // >= JDK 11
 
     private static final Function<Key, String> COMPOSED = Functions.andThen(Functions.firstResult(EDEC_KEY_GET_PARAMS, XEC_KEY_GET_PARAMS), GET_NAME);
 

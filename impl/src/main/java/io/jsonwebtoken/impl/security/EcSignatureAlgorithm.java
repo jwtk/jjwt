@@ -155,7 +155,6 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     public KeyPairBuilder keyPair() {
         return new DefaultKeyPairBuilder(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, this.KEY_PAIR_GEN_PARAMS)
-                .provider(getProvider())
                 .random(Randoms.secureRandom());
     }
 

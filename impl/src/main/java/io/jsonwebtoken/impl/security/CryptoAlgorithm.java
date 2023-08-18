@@ -35,8 +35,6 @@ abstract class CryptoAlgorithm implements Identifiable {
 
     private final String jcaName;
 
-    private Provider provider; // default, if any
-
     CryptoAlgorithm(String id, String jcaName) {
         Assert.hasText(id, "id cannot be null or empty.");
         this.ID = id;
@@ -53,27 +51,19 @@ abstract class CryptoAlgorithm implements Identifiable {
         return this.jcaName;
     }
 
-    protected void setProvider(Provider provider) { // can be null
-        this.provider = provider;
-    }
-
-    protected Provider getProvider() {
-        return this.provider;
-    }
-
     SecureRandom ensureSecureRandom(Request<?> request) {
         SecureRandom random = request != null ? request.getSecureRandom() : null;
         return random != null ? random : Randoms.secureRandom();
     }
 
     protected JcaTemplate jca() {
-        return new JcaTemplate(getJcaName(), getProvider());
+        return new JcaTemplate(getJcaName(), null);
     }
 
     protected JcaTemplate jca(Request<?> request) {
         Assert.notNull(request, "request cannot be null.");
         String jcaName = Assert.hasText(getJcaName(request), "Request jcaName cannot be null or empty.");
-        Provider provider = getProvider(request);
+        Provider provider = request.getProvider();
         SecureRandom random = ensureSecureRandom(request);
         return new JcaTemplate(jcaName, provider, random);
     }
@@ -82,18 +72,10 @@ abstract class CryptoAlgorithm implements Identifiable {
         return getJcaName();
     }
 
-    protected Provider getProvider(Request<?> request) {
-        Provider provider = request.getProvider();
-        if (provider == null) {
-            provider = this.provider; // fallback, if any
-        }
-        return provider;
-    }
-
     protected SecretKey generateKey(KeyRequest<?> request) {
         AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         SecretKeyBuilder builder = Assert.notNull(enc.key(), "Request encryptionAlgorithm KeyBuilder cannot be null.");
-        SecretKey key = builder.provider(getProvider(request)).random(request.getSecureRandom()).build();
+        SecretKey key = builder.provider(request.getProvider()).random(request.getSecureRandom()).build();
         return Assert.notNull(key, "Request encryptionAlgorithm SecretKeyBuilder cannot produce null keys.");
     }
 

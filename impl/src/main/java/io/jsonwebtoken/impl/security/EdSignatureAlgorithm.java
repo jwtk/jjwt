@@ -41,8 +41,6 @@ final class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
     private EdSignatureAlgorithm() {
         super(ID, ID);
         this.preferredCurve = EdwardsCurve.Ed448;
-        // EdDSA is not available natively until JDK 15, so try to load BC as a backup provider if possible:
-        setProvider(this.preferredCurve.getProvider());
         Assert.isTrue(this.preferredCurve.isSignatureCurve(), "Must be signature curve, not key agreement curve.");
     }
 

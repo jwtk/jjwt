@@ -16,18 +16,14 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
-import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.impl.lang.Conditions
-import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.SignatureAlgorithm
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
 
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
@@ -36,6 +32,8 @@ import java.security.Provider
 import java.security.PublicKey
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import java.security.spec.KeySpec
+import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 
 /**
@@ -55,9 +53,6 @@ import java.security.spec.X509EncodedKeySpec
  */
 class TestCertificates {
 
-    private static Provider BC = Assert.notNull(Providers.findBouncyCastle(Conditions.TRUE),
-            "BC must be available to test cases.")
-
     private static InputStream getResourceStream(String filename) {
         String packageName = TestCertificates.class.getPackage().getName()
         String resourcePath = Strings.replace(packageName, ".", "/") + "/" + filename
@@ -69,45 +64,23 @@ class TestCertificates {
         return new PEMParser(new BufferedReader(new InputStreamReader(is, StandardCharsets.ISO_8859_1)))
     }
 
-    private static <T> T bcFallback(final Identifiable alg, Closure<T> closure) {
-        Provider provider = alg.getProvider() as Provider // null on JVMs with native support for `alg`
-        try {
-            return closure.call(alg, provider)
-        } catch (Throwable t) {
-
-            // All test cert and key files were created with OpenSSL, so the only time this should happen is if the
-            // JDK natively supports the alg, but has a bug that prevents it from reading the file correctly.  So
-            // we account for those bugs here as indicators that we should retry with BC.
-
-            // https://bugs.openjdk.org/browse/JDK-8242556
-            // Oracle only backported this fix to JDK 8u271+, 11.0.9+, and 15+, so we'll need to fall back to
-            // BC (which can read the files correctly) on JDK 9, 10, 12, 13, and 14.
-            boolean jdk8242556Bug = alg instanceof SignatureAlgorithm && alg.getId().startsWith("PS") &&
-                    t.message.contains('Unsupported algorithm 1.2.840.113549.1.1.10')
-
-            // https://bugs.openjdk.org/browse/JDK-8213363) for X25519 and X448 encoded keys. JDK 11's
-            // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
-            // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
-            boolean jdk8213363Bug = alg instanceof EdwardsCurve && !((EdwardsCurve) alg).isSignatureCurve() &&
-                    System.getProperty("java.version").startsWith("11")
-
-            // Now assert that we're experiencing one of the expected bugs, because if not, we need to know about
-            // it in test results and fix this implementation:
-            if (!jdk8242556Bug && !jdk8213363Bug) {
-                String msg = "Unable to read ${alg.getId()} file: ${t.message}"
-                throw new IllegalStateException(msg, t)
-            }
-
-            // otherwise, we are indeed experiencing one of the expected bugs, so use BC as a backup:
-            return closure.call(alg, BC)
+    private static String keyJcaName(Identifiable alg) {
+        String jcaName = alg.getId()
+        if (jcaName.startsWith('ES')) {
+            jcaName = 'EC'
+        } else if (jcaName.startsWith('PS')) {
+            jcaName = 'RSASSA-PSS'
+        } else if (jcaName.startsWith('RS')) {
+            jcaName = 'RSA'
         }
+        return jcaName
     }
 
-    private static def readPublicKey = { Identifiable alg, Provider provider ->
+    private static PublicKey readPublicKey(Identifiable alg) {
         PEMParser parser = getParser(alg.id + '.pub.pem')
         parser.withCloseable {
             SubjectPublicKeyInfo info = parser.readObject() as SubjectPublicKeyInfo
-            JcaTemplate template = new JcaTemplate(alg.getJcaName(), provider)
+            JcaTemplate template = new JcaTemplate(keyJcaName(alg), null)
             template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
                 @Override
                 PublicKey apply(KeyFactory keyFactory) throws Exception {
@@ -117,7 +90,7 @@ class TestCertificates {
         }
     }
 
-    private static def readCert = { Identifiable alg, Provider provider ->
+    private static X509Certificate readCert(Identifiable alg, Provider provider) {
         InputStream is = getResourceStream(alg.id + '.crt.pem')
         is.withCloseable {
             JcaTemplate template = new JcaTemplate("X.509", provider)
@@ -130,7 +103,7 @@ class TestCertificates {
         }
     }
 
-    private static def readPrivateKey = { Identifiable alg, Provider provider ->
+    private static PrivateKey readPrivateKey(Identifiable alg) {
         final String id = alg.id
         PEMParser parser = getParser(id + '.key.pem')
         parser.withCloseable {
@@ -141,44 +114,50 @@ class TestCertificates {
             } else {
                 info = (PrivateKeyInfo) object
             }
-            def converter = new JcaPEMKeyConverter()
-            if (provider != null) {
-                converter.setProvider(provider)
-            } else if (id.startsWith("X") && System.getProperty("java.version").startsWith("11")) {
-                EdwardsCurve curve = EdwardsCurve.findById(id)
-                Assert.notNull(curve, "Curve cannot be null.")
-                int expectedByteLen = ((curve.keyBitLength + 7) / 8) as int
+            if (alg instanceof EdwardsCurve && !(((EdwardsCurve)alg).isSignatureCurve())) {
                 // Address the [JDK 11 SunCE provider bug](https://bugs.openjdk.org/browse/JDK-8213363) for X25519
                 // and X448 encoded keys: Even though the file is encoded properly (it was created by OpenSSL), JDK 11's
                 // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
                 // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
-                // So we get the raw bytes and use our key generator:
-                byte[] keyOctets = info.getPrivateKey().getOctets()
-                int lenDifference = Bytes.length(keyOctets) - expectedByteLen
-                if (lenDifference > 0) {
-                    byte[] derPrefixRemoved = new byte[expectedByteLen]
-                    System.arraycopy(keyOctets, lenDifference, derPrefixRemoved, 0, expectedByteLen)
-                    keyOctets = derPrefixRemoved
-                }
-                return curve.toPrivateKey(keyOctets, null)
+                // So we get the raw key bytes and use our key factory method:
+                byte[] octets = info.getPrivateKey().getOctets()
+                int dLen = octets.length - 2
+                byte[] d = new byte[dLen]
+                System.arraycopy(octets, 2, d, 0, dLen) //strip off tag and length prefix
+                return ((EdwardsCurve)alg).toPrivateKey(d, null)
             }
-            return converter.getPrivateKey(info)
+            //otherwise normal keyfactory call:
+            final KeySpec spec = new PKCS8EncodedKeySpec(info.getEncoded())
+            new JcaTemplate(keyJcaName(alg), null).withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {
+                @Override
+                PrivateKey apply(KeyFactory keyFactory) throws Exception {
+                    return keyFactory.generatePrivate(spec)
+                }
+            })
         }
     }
 
-    static TestKeys.Bundle readBundle(EdwardsCurve curve) {
-        //PublicKey pub = readTestPublicKey(curve)
-        //PrivateKey priv = readTestPrivateKey(curve)
-        PublicKey pub = bcFallback(curve, readPublicKey) as PublicKey
-        PrivateKey priv = bcFallback(curve, readPrivateKey) as PrivateKey
-        return new TestKeys.Bundle(pub, priv)
-    }
-
     static TestKeys.Bundle readBundle(Identifiable alg) {
-        //X509Certificate cert = readTestCertificate(alg)
-        //PrivateKey priv = readTestPrivateKey(alg)
-        X509Certificate cert = bcFallback(alg, readCert) as X509Certificate
-        PrivateKey priv = bcFallback(alg, readPrivateKey) as PrivateKey
-        return new TestKeys.Bundle(cert, priv)
+
+        PublicKey pub = readPublicKey(alg) as PublicKey
+        PrivateKey priv = readPrivateKey(alg) as PrivateKey
+
+        // X25519 and X448 cannot have self-signed certs:
+        if (alg instanceof EdwardsCurve && !((EdwardsCurve) alg).isSignatureCurve()) {
+            return new TestKeys.Bundle(alg, pub, priv)
+        }
+        // otherwise we can get a cert:
+
+        // If the public key loaded is a BC key, the default provider doesn't understand the cert key OID
+        // (for example, an Ed25519 key on JDK 8 which doesn't natively support such keys). This means the
+        // X.509 certificate should also be loaded by BC; otherwise the Sun X.509 CertificateFactory returns
+        // a certificate with certificate.getPublicKey() being a sun X509Key instead of the type-specific key we want:
+        Provider provider = pub.getClass().getName().startsWith("org.bouncycastle") ?
+                Providers.findBouncyCastle(Conditions.TRUE) : null // otherwise default provider works
+        X509Certificate cert = readCert(alg, provider) as X509Certificate
+        PublicKey certPub = cert.getPublicKey()
+        assert pub.equals(certPub)
+
+        return new TestKeys.Bundle(alg, pub, priv, cert)
     }
 }

@@ -22,7 +22,6 @@ import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.VerifyDigestRequest;
 
 import java.security.MessageDigest;
-import java.security.Provider;
 import java.util.Locale;
 
 public final class DefaultHashAlgorithm extends CryptoAlgorithm implements HashAlgorithm {
@@ -31,11 +30,6 @@ public final class DefaultHashAlgorithm extends CryptoAlgorithm implements HashA
 
     DefaultHashAlgorithm(String id) {
         super(id, id.toUpperCase(Locale.ENGLISH));
-    }
-
-    DefaultHashAlgorithm(String id, String jcaName, Provider provider) {
-        super(id, jcaName);
-        setProvider(provider);
     }
 
     @Override

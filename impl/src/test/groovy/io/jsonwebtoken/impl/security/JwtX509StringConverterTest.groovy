@@ -21,7 +21,6 @@ import io.jsonwebtoken.security.SecurityException
 import org.junit.Before
 import org.junit.Test
 
-import java.security.Provider
 import java.security.cert.CertificateEncodingException
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
@@ -36,6 +35,21 @@ class JwtX509StringConverterTest {
     @Before
     void setUp() {
         converter = JwtX509StringConverter.INSTANCE
+    }
+
+    /**
+     * Ensures we can convert and convert-back all OpenSSL certs across all JVM versions automatically
+     * (because X25519 and X448 >= JDK 11 and Ed25519 and Ed448 are >= JDK 15), but they should still work on earlier
+     * JDKs due to JcaTemplate auto-fallback with BouncyCastle
+     */
+    @Test
+    void testOpenSSLCertRoundtrip() {
+        // X25519 and X448 don't have certs, so we filter to leave those out:
+        TestKeys.ASYM.findAll({ it.cert != null }).each {
+            X509Certificate cert = it.cert
+            String encoded = converter.applyTo(cert)
+            assertEquals cert, converter.applyFrom(encoded)
+        }
     }
 
     @Test
@@ -81,53 +95,24 @@ class JwtX509StringConverterTest {
 
     @Test
     void testApplyFromBadBase64() {
-        final CertificateException ex = new CertificateException('nope')
-        converter = new JwtX509StringConverter() {
-            @Override
-            protected X509Certificate toCert(byte[] der, Provider provider) throws SecurityException {
-                assertNull provider // ensures not called twice (no fallback) because der bytes aren't available
-                throw ex
-            }
-        }
-
-        String s = 'foo'
+        String s = 'f$oo'
         try {
             converter.applyFrom(s)
             fail()
         } catch (IllegalArgumentException expected) {
-            String expectedMsg = "Unable to convert Base64 String '$s' to X509Certificate instance. Cause: nope"
+            String expectedMsg = "Unable to convert Base64 String '$s' to X509Certificate instance. " +
+                    "Cause: Illegal base64 character: '\$'"
             assertEquals expectedMsg, expected.getMessage()
-            assertSame ex, expected.getCause()
         }
     }
 
     @Test
-    void testApplyFromRsaSsaPssCertStringWithSuccessfulBCRetry() {
-        final CertificateException ex = new CertificateException("nope: ${RsaSignatureAlgorithm.PSS_OID}")
-        converter = new JwtX509StringConverter() {
-            @Override
-            protected X509Certificate toCert(byte[] der, Provider provider) throws SecurityException {
-                if (provider == null) {
-                    throw ex // first time called, throw ex (simulates JVM parse failure)
-                } else { // this time BC is available:
-                    assertNotNull provider
-                    return super.toCert(der, provider)
-                }
-            }
-        }
-
-        def cert = TestKeys.RS256.cert
-        def validBase64 = Encoders.BASE64.encode(cert.getEncoded())
-        assertEquals cert, converter.applyFrom(validBase64)
-    }
-
-    @Test
-    void testApplyFromRsaSsaPssCertStringWithFailedBCRetry() {
+    void testApplyFromInvalidCertString() {
         final String exMsg = "nope: ${RsaSignatureAlgorithm.PSS_OID}"
         final CertificateException ex = new CertificateException(exMsg)
         converter = new JwtX509StringConverter() {
             @Override
-            protected X509Certificate toCert(byte[] der, Provider provider) throws SecurityException {
+            protected X509Certificate toCert(byte[] der) throws SecurityException {
                 throw ex // ensure fails first and second time
             }
         }

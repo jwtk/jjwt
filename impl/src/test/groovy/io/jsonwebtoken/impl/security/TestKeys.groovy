@@ -100,29 +100,18 @@ class TestKeys {
         return TestKeys.metaClass.getAttribute(TestKeys, id) as Bundle
     }
 
-    static Bundle forCurve(EdwardsCurve curve) {
-        return TestKeys.metaClass.getAttribute(TestKeys, curve.getId()) as Bundle
-    }
-
     static class Bundle {
+
+        Identifiable alg
         X509Certificate cert
         List<X509Certificate> chain
         KeyPair pair
 
-        Bundle(X509Certificate cert, PrivateKey privateKey) {
+        Bundle(Identifiable alg, PublicKey publicKey, PrivateKey privateKey, X509Certificate cert = null) {
+            this.alg = alg
             this.cert = cert
-            this.chain = Collections.of(cert)
-            this.pair = new KeyPair(cert.getPublicKey(), privateKey)
-        }
-
-        Bundle(KeyPair pair) {
-            this.cert = null
-            this.chain = Collections.emptyList()
-            this.pair = pair
-        }
-
-        Bundle(PublicKey pub, PrivateKey priv) {
-            this(new KeyPair(pub, priv))
+            this.chain = cert != null ? Collections.of(cert) : Collections.<X509Certificate>emptyList()
+            this.pair = new KeyPair(publicKey, privateKey);
         }
     }
 }

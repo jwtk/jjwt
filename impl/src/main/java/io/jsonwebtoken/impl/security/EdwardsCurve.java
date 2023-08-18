@@ -17,11 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.CheckedSupplier;
-import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.Functions;
-import io.jsonwebtoken.impl.lang.OptionalCtorInvoker;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -33,11 +29,10 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -54,17 +49,17 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     // byte is the exact edwards curve subsection OID terminal node id.
     private static final byte[] DER_OID_PREFIX = new byte[]{0x06, 0x03, 0x2B, 0x65};
 
-    private static final String NAMED_PARAM_SPEC_FQCN = "java.security.spec.NamedParameterSpec"; // JDK >= 11
-    private static final String XEC_PRIV_KEY_SPEC_FQCN = "java.security.spec.XECPrivateKeySpec"; // JDK >= 11
-    private static final String EDEC_PRIV_KEY_SPEC_FQCN = "java.security.spec.EdECPrivateKeySpec"; // JDK >= 15
-
-    private static final Function<Key, String> CURVE_NAME_FINDER = new NamedParameterSpecValueFinder();
-    private static final OptionalCtorInvoker<AlgorithmParameterSpec> NAMED_PARAM_SPEC_CTOR =
-            new OptionalCtorInvoker<>(NAMED_PARAM_SPEC_FQCN, String.class);
-    static final OptionalCtorInvoker<KeySpec> XEC_PRIV_KEY_SPEC_CTOR =
-            new OptionalCtorInvoker<>(XEC_PRIV_KEY_SPEC_FQCN, AlgorithmParameterSpec.class, byte[].class);
-    static final OptionalCtorInvoker<KeySpec> EDEC_PRIV_KEY_SPEC_CTOR =
-            new OptionalCtorInvoker<>(EDEC_PRIV_KEY_SPEC_FQCN, NAMED_PARAM_SPEC_FQCN, byte[].class);
+//    private static final String NAMED_PARAM_SPEC_FQCN = "java.security.spec.NamedParameterSpec"; // JDK >= 11
+//    private static final String XEC_PRIV_KEY_SPEC_FQCN = "java.security.spec.XECPrivateKeySpec"; // JDK >= 11
+//    private static final String EDEC_PRIV_KEY_SPEC_FQCN = "java.security.spec.EdECPrivateKeySpec"; // JDK >= 15
+//
+      private static final Function<Key, String> CURVE_NAME_FINDER = new NamedParameterSpecValueFinder();
+//    private static final OptionalCtorInvoker<AlgorithmParameterSpec> NAMED_PARAM_SPEC_CTOR =
+//            new OptionalCtorInvoker<>(NAMED_PARAM_SPEC_FQCN, String.class);
+//    static final OptionalCtorInvoker<KeySpec> XEC_PRIV_KEY_SPEC_CTOR =
+//            new OptionalCtorInvoker<>(XEC_PRIV_KEY_SPEC_FQCN, AlgorithmParameterSpec.class, byte[].class);
+//    static final OptionalCtorInvoker<KeySpec> EDEC_PRIV_KEY_SPEC_CTOR =
+//            new OptionalCtorInvoker<>(EDEC_PRIV_KEY_SPEC_FQCN, NAMED_PARAM_SPEC_FQCN, byte[].class);
 
     public static final EdwardsCurve X25519 = new EdwardsCurve("X25519", 110); // Requires JDK >= 11 or BC
     public static final EdwardsCurve X448 = new EdwardsCurve("X448", 111); // Requires JDK >= 11 or BC
@@ -86,6 +81,23 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
             REGISTRY.put(curve.getId(), curve);
             REGISTRY.put(curve.OID, curve); // add OID as an alias for alg/id lookups
         }
+    }
+
+    private static byte[] privateKeyPkcs8Prefix(int byteLength, byte[] DER_OID, boolean ber) {
+
+        byte[] keyPrefix = ber ?
+                new byte[]{0x04, (byte) (byteLength + 2), 0x04, (byte) byteLength} : // correct
+                new byte[]{0x04, (byte) byteLength}; // https://bugs.openjdk.org/browse/JDK-8213363
+
+        return Bytes.concat(
+                new byte[]{
+                        0x30,
+                        (byte) (5 + DER_OID.length + keyPrefix.length + byteLength),
+                        0x02, 0x01, 0x00, // encoding version 1 (integer, 1 byte, value 0)
+                        0x30, 0x05}, // DER SEQUENCE of 5 bytes to follow (i.e. the OID)
+                DER_OID,
+                keyPrefix
+        );
     }
 
     private final String OID;
@@ -123,9 +135,9 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     private final byte[] PUBLIC_KEY_DER_PREFIX;
 
     /**
-     * PKCS8 (DER) Version 1 encoding of a private key associated with this curve, as a prefix (that is,
+     * PKCS8 (BER) Version 1 encoding of a private key associated with this curve, as a prefix (that is,
      * <em>without</em> actual encoded key material at the end). Appending the private key material directly to the
-     * end of this value results in a complete PKCS8 (DER) V1 encoded private key.  DER (hex) notation:
+     * end of this value results in a complete PKCS8 (BER) V1 encoded private key.  BER (hex) notation:
      * <pre>
      * 30 $M                  ; DER SEQUENCE ($M bytes long), where $M = encodedKeyByteLength + 14
      *    02 01               ;   DER INTEGER (1 byte long)
@@ -138,11 +150,8 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
      *          XX XX XX ...  ;       encoded key material (not included in this PREFIX byte array variable)
      * </pre>
      */
-    private final byte[] PRIVATE_KEY_DER_PREFIX;
-
-    private final AlgorithmParameterSpec NAMED_PARAMETER_SPEC; // null on <= JDK 10
-
-    private final Function<byte[], KeySpec> PRIVATE_KEY_SPEC_FACTORY;
+    private final byte[] PRIVATE_KEY_BER_PREFIX;
+    private final byte[] PRIVATE_KEY_DER_PREFIX; // https://bugs.openjdk.org/browse/JDK-8213363
 
     /**
      * {@code true} IFF the curve is used for digital signatures, {@code false} if used for key agreement
@@ -150,14 +159,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     private final boolean signatureCurve;
 
     EdwardsCurve(final String id, int oidTerminalNode) {
-        super(id, id, // JWT ID and JCA name happen to be identical
-                // fall back to BouncyCastle if < JDK 11 (for XDH curves) or < JDK 15 (for EdDSA curves) if necessary:
-                Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<KeyPairGenerator>() {
-                    @Override
-                    public KeyPairGenerator get() throws Exception {
-                        return KeyPairGenerator.getInstance(id);
-                    }
-                })));
+        super(id, id);
 
         // OIDs (with terminal node IDs) defined here: https://www.rfc-editor.org/rfc/rfc8410#section-3
         // X25519 (oid 1.3.101.110) and X448 (oid 1.3.101.111) have 256 bits
@@ -197,25 +199,8 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
                         0x00}
         );
 
-        byte[] keyPrefix = new byte[]{
-                0x04, (byte) (this.encodedKeyByteLength + 2),
-                0x04, (byte) this.encodedKeyByteLength};
-
-        this.PRIVATE_KEY_DER_PREFIX = Bytes.concat(
-                new byte[]{
-                        0x30,
-                        (byte) (this.encodedKeyByteLength + 10 + keyPrefix.length),
-                        0x02, 0x01, 0x00, // encoding version 1 (integer, 1 byte, value 0)
-                        0x30, 0x05}, // DER SEQUENCE of 5 bytes to follow (i.e. the OID)
-                this.DER_OID,
-                keyPrefix
-        );
-
-        this.NAMED_PARAMETER_SPEC = NAMED_PARAM_SPEC_CTOR.apply(id); // null on <= JDK 10
-        Function<byte[], KeySpec> paramKeySpecFn = paramKeySpecFactory(NAMED_PARAMETER_SPEC, signatureCurve);
-        Function<byte[], KeySpec> pkcs8KeySpecFn = new Pkcs8KeySpecFactory(this.PRIVATE_KEY_DER_PREFIX);
-        // prefer the JDK KeySpec classes first, and fall back to PKCS8 encoding if unavailable:
-        this.PRIVATE_KEY_SPEC_FACTORY = Functions.firstResult(paramKeySpecFn, pkcs8KeySpecFn);
+        this.PRIVATE_KEY_BER_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.DER_OID, true);
+        this.PRIVATE_KEY_DER_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.DER_OID, false);
 
         // The Sun CE KeyPairGenerator implementation that we'll use to derive PublicKeys with is problematic here:
         //
@@ -241,13 +226,13 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         this.KEY_PAIR_GENERATOR_BIT_LENGTH = this.keyBitLength >= 448 ? 448 : 255;
     }
 
-    // visible for testing
-    protected static Function<byte[], KeySpec> paramKeySpecFactory(AlgorithmParameterSpec spec, boolean signatureCurve) {
-        if (spec == null) {
-            return Functions.forNull();
-        }
-        return new ParameterizedKeySpecFactory(spec, signatureCurve ? EDEC_PRIV_KEY_SPEC_CTOR : XEC_PRIV_KEY_SPEC_CTOR);
-    }
+//    // visible for testing
+//    protected static Function<byte[], KeySpec> paramKeySpecFactory(AlgorithmParameterSpec spec, boolean signatureCurve) {
+//        if (spec == null) {
+//            return Functions.forNull();
+//        }
+//        return new ParameterizedKeySpecFactory(spec, signatureCurve ? EDEC_PRIV_KEY_SPEC_CTOR : XEC_PRIV_KEY_SPEC_CTOR);
+//    }
 
     @Override
     public int getKeyBitLength() {
@@ -305,13 +290,6 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         return result;
     }
 
-    protected Provider fallback(Provider provider) {
-        if (provider == null) {
-            provider = getProvider();
-        }
-        return provider;
-    }
-
     private void assertLength(byte[] raw, boolean isPublic) {
         int len = Bytes.length(raw);
         if (len != this.encodedKeyByteLength) {
@@ -326,7 +304,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         assertLength(x, true);
         final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_DER_PREFIX, x);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
-        JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
+        JcaTemplate template = new JcaTemplate(getJcaName(), provider);
         return template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
             @Override
             public PublicKey apply(KeyFactory keyFactory) throws Exception {
@@ -335,14 +313,28 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         });
     }
 
-    public PrivateKey toPrivateKey(byte[] d, Provider provider) {
+    private KeySpec privateKeySpec(byte[] d, boolean ber) {
+        byte[] prefix = ber ? this.PRIVATE_KEY_BER_PREFIX : this.PRIVATE_KEY_DER_PREFIX;
+        byte[] encoded = Bytes.concat(prefix, d);
+        return new PKCS8EncodedKeySpec(encoded);
+    }
+
+    public PrivateKey toPrivateKey(final byte[] d, Provider provider) {
         assertLength(d, false);
-        final KeySpec spec = this.PRIVATE_KEY_SPEC_FACTORY.apply(d);
-        JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
+        JcaTemplate template = new JcaTemplate(getJcaName(), provider);
         return template.withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {
             @Override
             public PrivateKey apply(KeyFactory keyFactory) throws Exception {
-                return keyFactory.generatePrivate(spec);
+                KeySpec spec = privateKeySpec(d, true); // BER-encoding is RFC-correct
+                try {
+                    return keyFactory.generatePrivate(spec);
+                } catch (InvalidKeySpecException e) {
+                    if (!isSignatureCurve()) { // https://bugs.openjdk.org/browse/JDK-8213363 (X25519 and X448)
+                        spec = privateKeySpec(d, false); // adjust for Sun Provider bug
+                        return keyFactory.generatePrivate(spec);
+                    }
+                    throw e; // propagate
+                }
             }
         });
     }
@@ -358,7 +350,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     @Override
     public KeyPairBuilder keyPair() {
-        return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH).provider(getProvider());
+        return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH);
     }
 
     public static boolean isEdwards(Key key) {
@@ -439,38 +431,38 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         return key;
     }
 
-    private static final class Pkcs8KeySpecFactory implements Function<byte[], KeySpec> {
-        private final byte[] PREFIX;
+//    private static final class Pkcs8KeySpecFactory implements Function<byte[], KeySpec> {
+//        private final byte[] PREFIX;
+//
+//        private Pkcs8KeySpecFactory(byte[] pkcs8EncodedKeyPrefix) {
+//            this.PREFIX = Assert.notEmpty(pkcs8EncodedKeyPrefix, "pkcs8EncodedKeyPrefix cannot be null or empty.");
+//        }
+//
+//        @Override
+//        public KeySpec apply(byte[] d) {
+//            Assert.notEmpty(d, "Key bytes cannot be null or empty.");
+//            byte[] encoded = Bytes.concat(PREFIX, d);
+//            return new PKCS8EncodedKeySpec(encoded);
+//        }
+//    }
 
-        private Pkcs8KeySpecFactory(byte[] pkcs8EncodedKeyPrefix) {
-            this.PREFIX = Assert.notEmpty(pkcs8EncodedKeyPrefix, "pkcs8EncodedKeyPrefix cannot be null or empty.");
-        }
-
-        @Override
-        public KeySpec apply(byte[] d) {
-            Assert.notEmpty(d, "Key bytes cannot be null or empty.");
-            byte[] encoded = Bytes.concat(PREFIX, d);
-            return new PKCS8EncodedKeySpec(encoded);
-        }
-    }
-
-    // visible for testing
-    protected static final class ParameterizedKeySpecFactory implements Function<byte[], KeySpec> {
-
-        private final AlgorithmParameterSpec params;
-
-        private final Function<Object, KeySpec> keySpecFactory;
-
-        ParameterizedKeySpecFactory(AlgorithmParameterSpec params, Function<Object, KeySpec> keySpecFactory) {
-            this.params = Assert.notNull(params, "AlgorithmParameterSpec cannot be null.");
-            this.keySpecFactory = Assert.notNull(keySpecFactory, "KeySpec factory function cannot be null.");
-        }
-
-        @Override
-        public KeySpec apply(byte[] d) {
-            Assert.notEmpty(d, "Key bytes cannot be null or empty.");
-            Object[] args = new Object[]{params, d};
-            return this.keySpecFactory.apply(args);
-        }
-    }
+//    // visible for testing
+//    protected static final class ParameterizedKeySpecFactory implements Function<byte[], KeySpec> {
+//
+//        private final AlgorithmParameterSpec params;
+//
+//        private final Function<Object, KeySpec> keySpecFactory;
+//
+//        ParameterizedKeySpecFactory(AlgorithmParameterSpec params, Function<Object, KeySpec> keySpecFactory) {
+//            this.params = Assert.notNull(params, "AlgorithmParameterSpec cannot be null.");
+//            this.keySpecFactory = Assert.notNull(keySpecFactory, "KeySpec factory function cannot be null.");
+//        }
+//
+//        @Override
+//        public KeySpec apply(byte[] d) {
+//            Assert.notEmpty(d, "Key bytes cannot be null or empty.");
+//            Object[] args = new Object[]{params, d};
+//            return this.keySpecFactory.apply(args);
+//        }
+//    }
 }

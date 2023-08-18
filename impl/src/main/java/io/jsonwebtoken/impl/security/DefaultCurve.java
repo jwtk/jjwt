@@ -20,24 +20,15 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.KeyPairBuilder;
 
-import java.security.Provider;
-
 class DefaultCurve implements Curve {
 
     private final String ID;
 
     private final String JCA_NAME;
 
-    private final Provider PROVIDER; // can be null
-
     DefaultCurve(String id, String jcaName) {
-        this(id, jcaName, null);
-    }
-
-    DefaultCurve(String id, String jcaName, Provider provider) {
         this.ID = Assert.notNull(Strings.clean(id), "Curve ID cannot be null or empty.");
         this.JCA_NAME = Assert.notNull(Strings.clean(jcaName), "Curve jcaName cannot be null or empty.");
-        this.PROVIDER = provider;
     }
 
     @Override
@@ -47,10 +38,6 @@ class DefaultCurve implements Curve {
 
     public String getJcaName() {
         return this.JCA_NAME;
-    }
-
-    public Provider getProvider() {
-        return this.PROVIDER;
     }
 
     @Override
@@ -76,6 +63,6 @@ class DefaultCurve implements Curve {
     }
 
     public KeyPairBuilder keyPair() {
-        return new DefaultKeyPairBuilder(this.JCA_NAME).provider(this.PROVIDER);
+        return new DefaultKeyPairBuilder(this.JCA_NAME);
     }
 }

@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
@@ -24,7 +23,10 @@ import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import java.security.*
+import java.security.MessageDigest
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.security.interfaces.ECKey
 import java.security.interfaces.ECPublicKey
@@ -262,17 +264,11 @@ class JwksTest {
             PublicKey pub = pair.getPublic()
             PrivateKey priv = pair.getPrivate()
 
-            Provider provider = null // assume default
-            if (pub.getClass().getName().startsWith("org.bouncycastle.")) {
-                // No native JVM support for the key, so we need to enable BC:
-                provider = Providers.findBouncyCastle(Conditions.TRUE)
-            }
-
             // test individual keys
-            PublicJwk pubJwk = Jwks.builder().provider(provider).key(pub).publicKeyUse("sig").build()
+            PublicJwk pubJwk = Jwks.builder().key(pub).publicKeyUse("sig").build()
             assertEquals pub, pubJwk.toKey()
 
-            def builder = Jwks.builder().provider(provider).key(priv).publicKeyUse('sig')
+            def builder = Jwks.builder().key(priv).publicKeyUse('sig')
             if (alg instanceof EdSignatureAlgorithm) {
                 // We haven't implemented EdDSA public-key derivation yet, so public key is required
                 builder.publicKey(pub)
@@ -287,7 +283,7 @@ class JwksTest {
             assertEquals priv, jwkPair.getPrivate()
 
             // test pair
-            builder = Jwks.builder().provider(provider)
+            builder = Jwks.builder()
             if (pub instanceof ECKey) {
                 builder = builder.ecKeyPair(pair)
             } else if (pub instanceof RSAKey) {

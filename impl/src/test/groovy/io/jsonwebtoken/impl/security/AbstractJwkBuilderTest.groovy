@@ -147,6 +147,7 @@ class AbstractJwkBuilderTest {
         def provider = Providers.findBouncyCastle(Conditions.TRUE)
         def jwk = builder().provider(provider).build()
         assertEquals 'oct', jwk.getType()
+        assertSame provider, jwk.@context.@provider
     }
 
     @Test

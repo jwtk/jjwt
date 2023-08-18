@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.impl.lang.DefaultRegistry;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
@@ -45,6 +46,8 @@ import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class JcaTemplate {
 
@@ -198,6 +201,9 @@ public class JcaTemplate {
 
         private final Class<T> clazz;
 
+        // Boolean value: missing/null = haven't attempted, true = attempted and succeeded, false = attempted and failed
+        private final ConcurrentMap<String, Boolean> FALLBACK_ATTEMPTS = new ConcurrentHashMap<>();
+
         JcaInstanceFactory(Class<T> clazz) {
             this.clazz = Assert.notNull(clazz, "Class argument cannot be null.");
         }
@@ -212,24 +218,60 @@ public class JcaTemplate {
             return clazz.getSimpleName();
         }
 
+        @SuppressWarnings("GrazieInspection")
         @Override
-        public final T get(String jcaName, Provider provider) throws Exception {
+        public final T get(String jcaName, final Provider specifiedProvider) throws Exception {
             Assert.hasText(jcaName, "jcaName cannot be null or empty.");
+            Provider provider = specifiedProvider;
+            final Boolean attempted = FALLBACK_ATTEMPTS.get(jcaName);
+            if (provider == null && attempted != null && attempted) {
+                // We tried with the default provider previously, and needed to fallback, so just
+                // preemptively load the fallback to avoid the fallback/retry again:
+                provider = Providers.findBouncyCastle(Conditions.TRUE);
+            }
             try {
                 return doGet(jcaName, provider);
-            } catch (Exception e) {
-                String msg = "Unable to obtain " + getId() + " instance from ";
-                if (provider != null) {
-                    msg += "specified Provider '" + provider + "' ";
-                } else {
-                    msg += "default JCA Provider ";
+            } catch (NoSuchAlgorithmException nsa) { // try to fallback if possible
+
+                if (specifiedProvider == null && attempted == null) { // default provider doesn't support the alg name,
+                                                                      // and we haven't tried BC yet, so try that now:
+                    Provider fallback = Providers.findBouncyCastle(Conditions.TRUE);
+                    if (fallback != null) { // BC found, try again:
+                        try {
+                            T value = doGet(jcaName, fallback);
+                            // record the successful attempt so we don't have to do this again:
+                            FALLBACK_ATTEMPTS.putIfAbsent(jcaName, Boolean.TRUE);
+                            return value;
+                        } catch (Throwable ignored) {
+                            // record the failed attempt so we don't keep trying and propagate original exception:
+                            FALLBACK_ATTEMPTS.putIfAbsent(jcaName, Boolean.FALSE);
+                        }
+                    }
                 }
-                msg += "for JCA algorithm '" + jcaName + "': " + e.getMessage();
-                throw wrap(msg, e);
+                // otherwise, we tried the fallback, or there isn't a fallback, so no need to try again, so
+                // propagate the exception:
+                throw wrap(nsa, jcaName, specifiedProvider, null);
+            } catch (Exception e) {
+                throw wrap(e, jcaName, specifiedProvider, null);
             }
         }
 
         protected abstract T doGet(String jcaName, Provider provider) throws Exception;
+
+        // visible for testing:
+        protected Exception wrap(Exception e, String jcaName, Provider specifiedProvider, Provider fallbackProvider) {
+            String msg = "Unable to obtain " + getId() + " instance from ";
+            if (specifiedProvider != null) {
+                msg += "specified Provider '" + specifiedProvider + "' ";
+            } else {
+                msg += "default JCA Provider ";
+            }
+            if (fallbackProvider != null) {
+                msg += "or fallback Provider '" + fallbackProvider + "' ";
+            }
+            msg += "for JCA algorithm '" + jcaName + "': " + e.getMessage();
+            return wrap(msg, e);
+        }
 
         protected Exception wrap(String msg, Exception cause) {
             if (Signature.class.isAssignableFrom(clazz) || Mac.class.isAssignableFrom(clazz)) {
