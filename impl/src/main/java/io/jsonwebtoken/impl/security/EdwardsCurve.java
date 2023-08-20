@@ -313,7 +313,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         });
     }
 
-    private KeySpec privateKeySpec(byte[] d, boolean ber) {
+    KeySpec privateKeySpec(byte[] d, boolean ber) {
         byte[] prefix = ber ? this.PRIVATE_KEY_BER_PREFIX : this.PRIVATE_KEY_DER_PREFIX;
         byte[] encoded = Bytes.concat(prefix, d);
         return new PKCS8EncodedKeySpec(encoded);

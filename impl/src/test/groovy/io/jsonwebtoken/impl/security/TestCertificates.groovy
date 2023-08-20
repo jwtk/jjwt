@@ -26,7 +26,6 @@ import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
 
 import java.nio.charset.StandardCharsets
-import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.Provider
 import java.security.PublicKey
@@ -81,12 +80,7 @@ class TestCertificates {
         parser.withCloseable {
             SubjectPublicKeyInfo info = parser.readObject() as SubjectPublicKeyInfo
             JcaTemplate template = new JcaTemplate(keyJcaName(alg), null)
-            template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
-                @Override
-                PublicKey apply(KeyFactory keyFactory) throws Exception {
-                    return keyFactory.generatePublic(new X509EncodedKeySpec(info.getEncoded()))
-                }
-            })
+            return template.generatePublic(new X509EncodedKeySpec(info.getEncoded()))
         }
     }
 
@@ -114,26 +108,8 @@ class TestCertificates {
             } else {
                 info = (PrivateKeyInfo) object
             }
-            if (alg instanceof EdwardsCurve && !(((EdwardsCurve)alg).isSignatureCurve())) {
-                // Address the [JDK 11 SunCE provider bug](https://bugs.openjdk.org/browse/JDK-8213363) for X25519
-                // and X448 encoded keys: Even though the file is encoded properly (it was created by OpenSSL), JDK 11's
-                // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
-                // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
-                // So we get the raw key bytes and use our key factory method:
-                byte[] octets = info.getPrivateKey().getOctets()
-                int dLen = octets.length - 2
-                byte[] d = new byte[dLen]
-                System.arraycopy(octets, 2, d, 0, dLen) //strip off tag and length prefix
-                return ((EdwardsCurve)alg).toPrivateKey(d, null)
-            }
-            //otherwise normal keyfactory call:
             final KeySpec spec = new PKCS8EncodedKeySpec(info.getEncoded())
-            new JcaTemplate(keyJcaName(alg), null).withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {
-                @Override
-                PrivateKey apply(KeyFactory keyFactory) throws Exception {
-                    return keyFactory.generatePrivate(spec)
-                }
-            })
+            return new JcaTemplate(keyJcaName(alg), null).generatePrivate(spec)
         }
     }
 
@@ -152,8 +128,7 @@ class TestCertificates {
         // (for example, an Ed25519 key on JDK 8 which doesn't natively support such keys). This means the
         // X.509 certificate should also be loaded by BC; otherwise the Sun X.509 CertificateFactory returns
         // a certificate with certificate.getPublicKey() being a sun X509Key instead of the type-specific key we want:
-        Provider provider = pub.getClass().getName().startsWith("org.bouncycastle") ?
-                Providers.findBouncyCastle(Conditions.TRUE) : null // otherwise default provider works
+        Provider provider = Providers.findBouncyCastle(Conditions.of(pub.getClass().getName().startsWith("org.bouncycastle")))
         X509Certificate cert = readCert(alg, provider) as X509Certificate
         PublicKey certPub = cert.getPublicKey()
         assert pub.equals(certPub)
