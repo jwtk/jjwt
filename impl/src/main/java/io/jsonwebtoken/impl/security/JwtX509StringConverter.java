@@ -16,17 +16,13 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.SecurityException;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 public class JwtX509StringConverter implements Converter<X509Certificate, String> {
@@ -57,14 +53,7 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
 
     // visible for testing
     protected X509Certificate toCert(final byte[] der) throws SecurityException {
-        JcaTemplate template = new JcaTemplate("X.509", null);
-        final InputStream is = new ByteArrayInputStream(der);
-        return template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
-            @Override
-            public X509Certificate apply(CertificateFactory cf) throws Exception {
-                return (X509Certificate) cf.generateCertificate(is);
-            }
-        });
+        return new JcaTemplate("X.509", null).generateX509Certificate(der);
     }
 
     @Override
@@ -77,36 +66,5 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
             String msg = "Unable to convert Base64 String '" + s + "' to X509Certificate instance. Cause: " + e.getMessage();
             throw new IllegalArgumentException(msg, e);
         }
-//        Assert.hasText(s, "X.509 Certificate encoded string cannot be null or empty.");
-//        byte[] der = null;
-//        try {
-//            der = Decoders.BASE64.decode(s); //RFC requires Base64, not Base64Url
-//            return toCert(der, null);
-//        } catch (final Throwable t) {
-//
-//            // Some JDK implementations don't support RSASSA-PSS certificates:
-//            //
-//            // https://bugs.openjdk.org/browse/JDK-8242556
-//            //
-//            // Oracle only backported this fix to JDK 8u271+, 11.0.9+, and 15+, so we'll try to fall back to
-//            // BC (which can read the files correctly) on JDK 9, 10, 12, 13, and 14:
-//            String causeMsg = t.getMessage();
-//            Provider bc = null;
-//            if (!Bytes.isEmpty(der) && // Base64 decoding succeeded, so we can continue to try
-//                    Strings.hasText(causeMsg) && causeMsg.contains(RsaSignatureAlgorithm.PSS_OID)) {
-//                // OID in exception message, so odds are high that the default provider doesn't support X.509
-//                // certificates with a PSS_OID `AlgorithmId`.  But BC does, so try to obtain that if we can:
-//                bc = Providers.findBouncyCastle(Conditions.TRUE);
-//            }
-//            if (bc != null) {
-//                try {
-//                    return toCert(der, bc);
-//                } catch (Throwable ignored) {
-//                    // ignore this - we want to report the original exception to the caller
-//                }
-//            }
-//            String msg = "Unable to convert Base64 String '" + s + "' to X509Certificate instance. Cause: " + causeMsg;
-//            throw new IllegalArgumentException(msg, t);
-//        }
     }
 }

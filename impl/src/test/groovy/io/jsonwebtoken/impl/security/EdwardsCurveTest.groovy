@@ -246,7 +246,7 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_DER_PREFIX, keyBytes)
+                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_BER_PREFIX, keyBytes)
                 encoded[11] = 0x01 // should always be zero
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)
@@ -286,7 +286,7 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength - 1 // one less than required
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_DER_PREFIX, keyBytes)
+                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_BER_PREFIX, keyBytes)
                 encoded[10] = (byte) (size + 1) // DER size value (zero byte + key bytes)
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)
@@ -306,7 +306,7 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength + 1 // one less than required
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_DER_PREFIX, keyBytes)
+                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_BER_PREFIX, keyBytes)
                 encoded[10] = (byte) (size + 1) // DER size value (zero byte + key bytes)
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)

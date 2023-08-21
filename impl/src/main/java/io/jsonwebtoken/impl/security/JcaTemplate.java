@@ -37,6 +37,8 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
@@ -49,7 +51,9 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -303,6 +307,16 @@ public class JcaTemplate {
                     }
                     throw e; // could not respec, propagate
                 }
+            }
+        });
+    }
+
+    public X509Certificate generateX509Certificate(final byte[] x509DerBytes) {
+        return fallback(CertificateFactory.class, new CheckedFunction<CertificateFactory, X509Certificate>() {
+            @Override
+            public X509Certificate apply(CertificateFactory cf) throws CertificateException {
+                InputStream is = new ByteArrayInputStream(x509DerBytes);
+                return (X509Certificate) cf.generateCertificate(is);
             }
         });
     }

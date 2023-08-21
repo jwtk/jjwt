@@ -119,9 +119,9 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     private final int encodedKeyByteLength;
 
     /**
-     * X.509 (DER) encoding of a public key associated with this curve as a prefix (that is, <em>without</em> the
+     * X.509 (BER) encoding of a public key associated with this curve as a prefix (that is, <em>without</em> the
      * actual encoded key material at the end). Appending the public key material directly to the end of this value
-     * results in a complete X.509 (DER) encoded public key.  DER (hex) notation:
+     * results in a complete X.509 (DER) encoded public key.  BER (hex) notation:
      * <pre>
      * 30 $M               ; DER SEQUENCE ($M bytes long), where $M = encodedKeyByteLength + 10
      *    30 05            ;   DER SEQUENCE (5 bytes long)
@@ -132,7 +132,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
      *       XX XX XX ...  ;     encoded key material (not included in this PREFIX byte array variable)
      * </pre>
      */
-    private final byte[] PUBLIC_KEY_DER_PREFIX;
+    private final byte[] PUBLIC_KEY_BER_PREFIX;
 
     /**
      * PKCS8 (BER) Version 1 encoding of a private key associated with this curve, as a prefix (that is,
@@ -188,7 +188,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         this.DER_OID = Bytes.concat(DER_OID_PREFIX, suffix);
         this.encodedKeyByteLength = (this.keyBitLength + 7) / 8;
 
-        this.PUBLIC_KEY_DER_PREFIX = Bytes.concat(
+        this.PUBLIC_KEY_BER_PREFIX = Bytes.concat(
                 new byte[]{
                         0x30, (byte) (this.encodedKeyByteLength + 10),
                         0x30, 0x05}, // DER SEQUENCE of 5 bytes to follow (i.e. the OID)
@@ -302,7 +302,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     public PublicKey toPublicKey(byte[] x, Provider provider) {
         assertLength(x, true);
-        final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_DER_PREFIX, x);
+        final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_BER_PREFIX, x);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
         JcaTemplate template = new JcaTemplate(getJcaName(), provider);
         return template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
