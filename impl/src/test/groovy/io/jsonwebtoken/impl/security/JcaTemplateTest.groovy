@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
+import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.security.SecurityException
 import io.jsonwebtoken.security.SignatureException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -193,10 +194,10 @@ class JcaTemplateTest {
 
     @Test
     void testJdk8213363Bug() {
-        for(def bundle in [TestKeys.X25519, TestKeys.X448]) {
+        for (def bundle in [TestKeys.X25519, TestKeys.X448]) {
             def privateKey = bundle.pair.private
             byte[] d = bundle.alg.getKeyMaterial(privateKey)
-            byte[] pkcs8d = Bytes.concat(new byte[]{0x04, (byte) (d.length)}, d)
+            byte[] pkcs8d = Bytes.concat(new byte[]{(byte) 0x04, (byte) (d.length)}, d)
             int callCount = 0
             def ex = jdk8213363BugEx("key length must be ${d.length}")
             def template = new Jdk8213363JcaTemplate(bundle.alg.id) {
@@ -222,7 +223,12 @@ class JcaTemplateTest {
             template.generatePrivate(new X509EncodedKeySpec(invalid))
             fail()
         } catch (SecurityException expected) {
-            assertEquals 'KeyFactory callback execution failed: key spec not recognized', expected.getMessage()
+            boolean jdk11OrLater = Classes.isAvailable('java.security.interfaces.XECPrivateKey')
+            String msg = 'KeyFactory callback execution failed: key spec not recognized'
+            if (jdk11OrLater) {
+                msg = 'KeyFactory callback execution failed: Only PKCS8EncodedKeySpec and XECPrivateKeySpec supported'
+            }
+            assertEquals msg, expected.getMessage()
         }
     }
 
@@ -334,6 +340,7 @@ class JcaTemplateTest {
         Jdk8213363JcaTemplate(String jcaName) {
             super(jcaName, null)
         }
+
         @Override
         protected boolean isJdk11() {
             return true
