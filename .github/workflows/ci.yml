@@ -6,14 +6,15 @@ on:
     branches:
       - master
 
+env:
+  MVN_CMD: ./mvnw --no-transfer-progress -B
+
 jobs:
   oracle:
     strategy:
       matrix:
         java: [ '17' ]
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
     name: jdk-${{ matrix.java }}-oracle
     steps:
       - uses: actions/checkout@v3
@@ -31,8 +32,6 @@ jobs:
       matrix:
         java: [ '8', '11', '17', '18' ]
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
     name: jdk-${{ matrix.java }}-temurin
     steps:
       - uses: actions/checkout@v3
@@ -54,7 +53,6 @@ jobs:
         java: [ '7', '8', '9', '11', '12', '13', '14', '15', '16', '17', '18' ]
     runs-on: 'ubuntu-latest'
     env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
       JDK_MAJOR_VERSION: ${{ matrix.java }}
     name: jdk-${{ matrix.java }}-zulu
     steps:
@@ -76,8 +74,6 @@ jobs:
   # ensure all of our files have the correct/updated license header
   license-check:
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
     steps:
       - uses: actions/checkout@v3
         with:
@@ -99,8 +95,6 @@ jobs:
     # as it may be better to use instead of an artificial delay once we no longer need to build on JDK 7):
     #needs: zulu # wait until others finish so a coverage failure doesn't cancel others accidentally
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
