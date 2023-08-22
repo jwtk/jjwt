@@ -181,7 +181,8 @@ class JcaTemplateTest {
         String className = 'sun.security.ec.XDHKeyFactory'
         String methodName = 'engineGeneratePrivate'
         def ste = new StackTraceElement(className, methodName, null, 0)
-        def stes = new StackTraceElement[]{ste}
+        StackTraceElement[] stes = new StackTraceElement[1]
+        stes[0] = ste
         def cause = new InvalidKeyException(msg)
         def ex = new InvalidKeySpecException(cause) {
             @Override
