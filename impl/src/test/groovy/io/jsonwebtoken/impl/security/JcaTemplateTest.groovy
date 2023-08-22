@@ -197,7 +197,8 @@ class JcaTemplateTest {
         for (def bundle in [TestKeys.X25519, TestKeys.X448]) {
             def privateKey = bundle.pair.private
             byte[] d = bundle.alg.getKeyMaterial(privateKey)
-            byte[] pkcs8d = Bytes.concat(new byte[]{(byte) 0x04, (byte) (d.length)}, d)
+            byte[] prefix = new byte[2]; prefix[0] = (byte) 0x04; prefix[1] = (byte) d.length
+            byte[] pkcs8d = Bytes.concat(prefix, d)
             int callCount = 0
             def ex = jdk8213363BugEx("key length must be ${d.length}")
             def template = new Jdk8213363JcaTemplate(bundle.alg.id) {
