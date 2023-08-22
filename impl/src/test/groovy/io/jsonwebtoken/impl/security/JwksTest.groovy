@@ -269,10 +269,6 @@ class JwksTest {
             assertEquals pub, pubJwk.toKey()
 
             def builder = Jwks.builder().key(priv).publicKeyUse('sig')
-            if (alg instanceof EdSignatureAlgorithm) {
-                // We haven't implemented EdDSA public-key derivation yet, so public key is required
-                builder.publicKey(pub)
-            }
             PrivateJwk privJwk = builder.build()
             assertEquals priv, privJwk.toKey()
             PublicJwk privPubJwk = privJwk.toPublicJwk()

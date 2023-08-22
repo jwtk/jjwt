@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.impl.lang.CheckedFunction
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
@@ -128,7 +127,10 @@ class TestCertificates {
         // (for example, an Ed25519 key on JDK 8 which doesn't natively support such keys). This means the
         // X.509 certificate should also be loaded by BC; otherwise the Sun X.509 CertificateFactory returns
         // a certificate with certificate.getPublicKey() being a sun X509Key instead of the type-specific key we want:
-        Provider provider = Providers.findBouncyCastle(Conditions.of(pub.getClass().getName().startsWith("org.bouncycastle")))
+        Provider provider = null
+        if (pub.getClass().getName().startsWith("org.bouncycastle")) {
+            provider = Providers.findBouncyCastle()
+        }
         X509Certificate cert = readCert(alg, provider) as X509Certificate
         PublicKey certPub = cert.getPublicKey()
         assert pub.equals(certPub)

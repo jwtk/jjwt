@@ -62,6 +62,11 @@ class ProvidersTest {
     }
 
     @Test
+    void testFindBouncyCastleFalse() {
+        assertNull Providers.findBouncyCastle(Conditions.FALSE);
+    }
+
+    @Test
     void testBouncyCastleAlreadyExists() {
 
         // ensure we don't have one yet:

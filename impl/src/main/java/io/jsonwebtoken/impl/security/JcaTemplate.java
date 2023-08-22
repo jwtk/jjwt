@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -87,7 +88,8 @@ public class JcaTemplate {
                 }
             });
 
-    private static Provider findBouncyCastle() {
+    // visible for testing
+    protected Provider findBouncyCastle() {
         return Providers.findBouncyCastle(Conditions.TRUE);
     }
 
@@ -135,7 +137,6 @@ public class JcaTemplate {
         });
     }
 
-    @SuppressWarnings("SameParameterValue")
     protected <T, R> R fallback(final Class<T> clazz, final CheckedFunction<T, R> callback) throws SecurityException {
         return execute(clazz, new CheckedSupplier<R>() {
             @Override
@@ -248,6 +249,33 @@ public class JcaTemplate {
         });
     }
 
+    protected boolean isJdk11() {
+        return System.getProperty("java.version").startsWith("11");
+    }
+
+    private boolean isJdk8213363Bug(InvalidKeySpecException e) {
+        return isJdk11() &&
+                ("XDH".equals(this.jcaName) || "X25519".equals(this.jcaName) || "X448".equals(this.jcaName)) &&
+                e.getCause() instanceof InvalidKeyException &&
+                !Objects.isEmpty(e.getStackTrace()) &&
+                "sun.security.ec.XDHKeyFactory".equals(e.getStackTrace()[0].getClassName()) &&
+                "engineGeneratePrivate".equals(e.getStackTrace()[0].getMethodName());
+    }
+
+    // visible for testing
+    private int getJdk8213363BugExpectedSize(InvalidKeyException e) {
+        String msg = e.getMessage();
+        String prefix = "key length must be ";
+        if (Strings.hasText(msg) && msg.startsWith(prefix)) {
+            String expectedSizeString = msg.substring(prefix.length());
+            try {
+                return Integer.parseInt(expectedSizeString);
+            } catch (NumberFormatException ignored) { // return -1 below
+            }
+        }
+        return -1;
+    }
+
     private KeySpec respecIfNecessary(InvalidKeySpecException e, KeySpec spec) {
         if (!(spec instanceof PKCS8EncodedKeySpec)) {
             return null;
@@ -260,38 +288,24 @@ public class JcaTemplate {
         // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
         // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
         // So we get the raw key bytes and use our key factory method:
-        int xdhExpectedSize = getJdk8213363BugExpectedSize(e);
-        if ((xdhExpectedSize == 32 || xdhExpectedSize == 56) && Bytes.length(encoded) > xdhExpectedSize) {
-            byte[] adjusted = new byte[xdhExpectedSize];
-            System.arraycopy(encoded, encoded.length - xdhExpectedSize, adjusted, 0, xdhExpectedSize);
-            if (xdhExpectedSize == 32) { // X25519
-                return EdwardsCurve.X25519.privateKeySpec(adjusted, false);
-            } else { // X448
-                return EdwardsCurve.X448.privateKeySpec(adjusted, false);
+        if (isJdk8213363Bug(e)) {
+            InvalidKeyException cause = // asserted in isJdk8213363Bug method
+                    Assert.isInstanceOf(InvalidKeyException.class, e.getCause(), "Unexpected argument.");
+            int size = getJdk8213363BugExpectedSize(cause);
+            if ((size == 32 || size == 56) && Bytes.length(encoded) >= size) {
+                byte[] adjusted = new byte[size];
+                System.arraycopy(encoded, encoded.length - size, adjusted, 0, size);
+                EdwardsCurve curve = size == 32 ? EdwardsCurve.X25519 : EdwardsCurve.X448;
+                return curve.privateKeySpec(adjusted, false);
             }
         }
+
         return null;
     }
 
-    private int getJdk8213363BugExpectedSize(InvalidKeySpecException e) {
-        if (System.getProperty("java.version").startsWith("11") &&
-                ("XDH".equals(this.jcaName) || "X25519".equals(this.jcaName) || "X448".equals(this.jcaName)) &&
-                e.getCause() instanceof java.security.InvalidKeyException &&
-                !Objects.isEmpty(e.getStackTrace()) &&
-                "sun.security.ec.XDHKeyFactory".equals(e.getStackTrace()[0].getClassName()) &&
-                "engineGeneratePrivate".equals(e.getStackTrace()[0].getMethodName())) {
-            java.security.InvalidKeyException ike = (java.security.InvalidKeyException) e.getCause();
-            String msg = ike.getMessage();
-            String prefix = "key length must be ";
-            if (Strings.hasText(msg) && msg.startsWith(prefix)) {
-                String expectedSizeString = msg.substring(prefix.length());
-                try {
-                    return Integer.parseInt(expectedSizeString);
-                } catch (NumberFormatException ignored) { // return -1 below
-                }
-            }
-        }
-        return -1;
+    // visible for testing
+    protected PrivateKey generatePrivate(KeyFactory factory, KeySpec spec) throws InvalidKeySpecException {
+        return factory.generatePrivate(spec);
     }
 
     public PrivateKey generatePrivate(final KeySpec spec) {
@@ -299,11 +313,11 @@ public class JcaTemplate {
             @Override
             public PrivateKey apply(KeyFactory keyFactory) throws Exception {
                 try {
-                    return keyFactory.generatePrivate(spec);
+                    return generatePrivate(keyFactory, spec);
                 } catch (InvalidKeySpecException e) {
                     KeySpec respec = respecIfNecessary(e, spec);
-                    if (spec != null) {
-                        return keyFactory.generatePrivate(respec);
+                    if (respec != null) {
+                        return generatePrivate(keyFactory, respec);
                     }
                     throw e; // could not respec, propagate
                 }
@@ -349,6 +363,11 @@ public class JcaTemplate {
             return clazz.getSimpleName();
         }
 
+        // visible for testing
+        protected Provider findBouncyCastle() {
+            return Providers.findBouncyCastle(Conditions.TRUE);
+        }
+
         @SuppressWarnings("GrazieInspection")
         @Override
         public final T get(String jcaName, final Provider specifiedProvider) throws Exception {
@@ -358,7 +377,7 @@ public class JcaTemplate {
             if (provider == null && attempted != null && attempted) {
                 // We tried with the default provider previously, and needed to fallback, so just
                 // preemptively load the fallback to avoid the fallback/retry again:
-                provider = Providers.findBouncyCastle(Conditions.TRUE);
+                provider = findBouncyCastle();
             }
             try {
                 return doGet(jcaName, provider);
@@ -366,7 +385,7 @@ public class JcaTemplate {
 
                 if (specifiedProvider == null && attempted == null) { // default provider doesn't support the alg name,
                     // and we haven't tried BC yet, so try that now:
-                    Provider fallback = Providers.findBouncyCastle(Conditions.TRUE);
+                    Provider fallback = findBouncyCastle();
                     if (fallback != null) { // BC found, try again:
                         try {
                             T value = doGet(jcaName, fallback);
@@ -391,16 +410,16 @@ public class JcaTemplate {
 
         // visible for testing:
         protected Exception wrap(Exception e, String jcaName, Provider specifiedProvider, Provider fallbackProvider) {
-            String msg = "Unable to obtain " + getId() + " instance from ";
+            String msg = "Unable to obtain '" + jcaName + "' " + getId() + " instance from ";
             if (specifiedProvider != null) {
-                msg += "specified Provider '" + specifiedProvider + "' ";
+                msg += "specified '" + specifiedProvider + "' Provider";
             } else {
-                msg += "default JCA Provider ";
+                msg += "default JCA Provider";
             }
             if (fallbackProvider != null) {
-                msg += "or fallback Provider '" + fallbackProvider + "' ";
+                msg += " or fallback '" + fallbackProvider + "' Provider";
             }
-            msg += "for JCA algorithm '" + jcaName + "': " + e.getMessage();
+            msg += ": " + e.getMessage();
             return wrap(msg, e);
         }
 

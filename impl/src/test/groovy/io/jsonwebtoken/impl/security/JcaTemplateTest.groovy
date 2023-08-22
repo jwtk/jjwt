@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.security.SecurityException
 import io.jsonwebtoken.security.SignatureException
@@ -23,9 +24,12 @@ import org.junit.Test
 
 import javax.crypto.Cipher
 import javax.crypto.Mac
-import java.security.Provider
-import java.security.Security
-import java.security.Signature
+import java.security.*
+import java.security.cert.CertificateException
+import java.security.spec.InvalidKeySpecException
+import java.security.spec.KeySpec
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
 
 import static org.junit.Assert.*
 
@@ -37,7 +41,7 @@ class JcaTemplateTest {
     @Test
     void testGetInstanceExceptionMessage() {
         def factories = JcaTemplate.FACTORIES
-        for(def factory : factories) {
+        for (def factory : factories) {
             def clazz = factory.getInstanceClass()
             try {
                 factory.get('foo', null)
@@ -45,8 +49,8 @@ class JcaTemplateTest {
                 if (clazz == Signature || clazz == Mac) {
                     assertTrue expected instanceof SignatureException
                 }
-                String prefix = "Unable to obtain ${clazz.getSimpleName()} instance " +
-                        "from default JCA Provider for JCA algorithm 'foo': "
+                String prefix = "Unable to obtain 'foo' ${clazz.getSimpleName()} instance " +
+                        "from default JCA Provider: "
                 assertTrue expected.getMessage().startsWith(prefix)
             }
         }
@@ -56,7 +60,7 @@ class JcaTemplateTest {
     void testGetInstanceWithExplicitProviderExceptionMessage() {
         def factories = JcaTemplate.FACTORIES
         def provider = BC_PROVIDER
-        for(def factory : factories) {
+        for (def factory : factories) {
             def clazz = factory.getInstanceClass()
             try {
                 factory.get('foo', provider)
@@ -64,8 +68,8 @@ class JcaTemplateTest {
                 if (clazz == Signature || clazz == Mac) {
                     assertTrue expected instanceof SignatureException
                 }
-                String prefix = "Unable to obtain ${clazz.getSimpleName()} instance " +
-                        "from specified Provider '${provider.toString()}' for JCA algorithm 'foo': "
+                String prefix = "Unable to obtain 'foo' ${clazz.getSimpleName()} instance " +
+                        "from specified '${provider.toString()}' Provider: "
                 assertTrue expected.getMessage().startsWith(prefix)
             }
         }
@@ -102,69 +106,212 @@ class JcaTemplateTest {
         })
     }
 
-//    @Test
-//    void testGetInstanceFailureWithExplicitProvider() {
-//        //noinspection GroovyUnusedAssignment
-//        Provider provider = Security.getProvider('SunJCE')
-//        def supplier = new JcaTemplate.JcaInstanceSupplier<Cipher>(Cipher.class, "AES", provider) {
-//            @Override
-//            protected Cipher doGetInstance() {
-//                throw new IllegalStateException("foo")
-//            }
-//        }
-//
-//        try {
-//            supplier.getInstance()
-//        } catch (SecurityException ce) { //should be wrapped as SecurityException
-//            String msg = ce.getMessage()
-//            //we check for starts-with/ends-with logic here instead of equals because the JCE provider String value
-//            //contains the JCE version number, and that can differ across JDK versions.  Since we use different JDK
-//            //versions in the test machine matrix, we don't want test failures from JDKs that run on higher versions
-//            assertTrue msg.startsWith('Unable to obtain Cipher instance from specified Provider {SunJCE')
-//            assertTrue msg.endsWith('} for JCA algorithm \'AES\': foo')
-//        }
-//    }
-//
-//    @Test
-//    void testGetInstanceDoesNotWrapCryptoExceptions() {
-//        def ex = new SecurityException("foo")
-//        def supplier = new JcaTemplate.JcaInstanceSupplier<Cipher>(Cipher.class, 'AES', null) {
-//            @Override
-//            protected Cipher doGetInstance() {
-//                throw ex
-//            }
-//        }
-//
-//        try {
-//            supplier.getInstance()
-//        } catch (SecurityException ce) {
-//            assertSame ex, ce
-//        }
-//    }
-//
-//    static void wrapInSignatureException(Class instanceType, String jcaName) {
-//        def ex = new IllegalArgumentException("foo")
-//        def supplier = new JcaTemplate.JcaInstanceSupplier<Object>(instanceType, jcaName, null) {
-//            @Override
-//            protected Object doGetInstance() {
-//                throw ex
-//            }
-//        }
-//
-//        try {
-//            supplier.getInstance()
-//        } catch (SignatureException se) {
-//            assertSame ex, se.getCause()
-//            String msg = "Unable to obtain ${instanceType.simpleName} instance from default JCA Provider for JCA algorithm '${jcaName}': foo"
-//            assertEquals msg, se.getMessage()
-//        }
-//    }
+    @Test
+    void testInstanceFactoryFallbackFailureRetainsOriginalException() {
+        String alg = 'foo'
+        NoSuchAlgorithmException ex = new NoSuchAlgorithmException('foo')
+        def factory = new JcaTemplate.JcaInstanceFactory<Cipher>(Cipher.class) {
+            @Override
+            protected Cipher doGet(String jcaName, Provider provider) throws Exception {
+                throw ex
+            }
 
-//    @Test
-//    void testNonCryptoExceptionForSignatureOrMacInstanceIsWrappedInSignatureException() {
-//        wrapInSignatureException(Signature.class, 'RSA')
-//        wrapInSignatureException(Mac.class, 'HmacSHA256')
-//    }
+            @Override
+            protected Provider findBouncyCastle() {
+                return null
+            }
+        }
+
+        try {
+            factory.get(alg, null)
+            fail()
+        } catch (SecurityException se) {
+            assertSame ex, se.getCause()
+            String msg = "Unable to obtain '$alg' Cipher instance from default JCA Provider: $alg"
+            assertEquals msg, se.getMessage()
+        }
+    }
+
+    @Test
+    void testWrapWithDefaultJcaProviderAndFallbackProvider() {
+        JcaTemplate.FACTORIES.each {
+            Provider fallback = Providers.findBouncyCastle()
+            String jcaName = 'foo'
+            NoSuchAlgorithmException nsa = new NoSuchAlgorithmException("doesn't exist")
+            Exception out = ((JcaTemplate.JcaInstanceFactory) it).wrap(nsa, jcaName, null, fallback)
+            assertTrue out instanceof SecurityException
+            String msg = "Unable to obtain '${jcaName}' ${it.getId()} instance from default JCA Provider or fallback " +
+                    "'${fallback.toString()}' Provider: doesn't exist"
+            assertEquals msg, out.getMessage()
+        }
+    }
+
+    @Test
+    void testFallbackWithBouncyCastle() {
+        def template = new JcaTemplate('foo', null)
+        try {
+            template.generateX509Certificate(Bytes.random(32))
+        } catch (SecurityException expected) {
+            String prefix = "Unable to obtain 'foo' CertificateFactory instance from default JCA Provider: "
+            assertTrue expected.getMessage().startsWith(prefix)
+            assertTrue expected.getCause() instanceof CertificateException
+        }
+    }
+
+    @Test
+    void testFallbackWithoutBouncyCastle() {
+        def template = new JcaTemplate('foo', null) {
+            @Override
+            protected Provider findBouncyCastle() {
+                return null
+            }
+        }
+        try {
+            template.generateX509Certificate(Bytes.random(32))
+        } catch (SecurityException expected) {
+            String prefix = "Unable to obtain 'foo' CertificateFactory instance from default JCA Provider: "
+            assertTrue expected.getMessage().startsWith(prefix)
+            assertTrue expected.getCause() instanceof CertificateException
+        }
+    }
+
+    static InvalidKeySpecException jdk8213363BugEx(String msg) {
+        // mock up JDK 11 bug behavior:
+        String className = 'sun.security.ec.XDHKeyFactory'
+        String methodName = 'engineGeneratePrivate'
+        def ste = new StackTraceElement(className, methodName, null, 0)
+        def stes = new StackTraceElement[]{ste}
+        def cause = new InvalidKeyException(msg)
+        def ex = new InvalidKeySpecException(cause) {
+            @Override
+            StackTraceElement[] getStackTrace() {
+                return stes
+            }
+        }
+        return ex
+    }
+
+    @Test
+    void testJdk8213363Bug() {
+        for(def bundle in [TestKeys.X25519, TestKeys.X448]) {
+            def privateKey = bundle.pair.private
+            byte[] d = bundle.alg.getKeyMaterial(privateKey)
+            byte[] pkcs8d = Bytes.concat(new byte[]{0x04, (byte) (d.length)}, d)
+            int callCount = 0
+            def ex = jdk8213363BugEx("key length must be ${d.length}")
+            def template = new Jdk8213363JcaTemplate(bundle.alg.id) {
+                @Override
+                protected PrivateKey generatePrivate(KeyFactory factory, KeySpec spec) throws InvalidKeySpecException {
+                    if (callCount == 0) { // simulate first attempt throwing an exception
+                        callCount++
+                        throw ex
+                    }
+                    // otherwise 2nd call due to fallback logic, simulate a successful call:
+                    return privateKey
+                }
+            }
+            assertSame privateKey, template.generatePrivate(new PKCS8EncodedKeySpec(pkcs8d))
+        }
+    }
+
+    @Test
+    void testGeneratePrivateRespecWithoutPkcs8() {
+        byte[] invalid = Bytes.random(456)
+        def template = new JcaTemplate('X448', null)
+        try {
+            template.generatePrivate(new X509EncodedKeySpec(invalid))
+            fail()
+        } catch (SecurityException expected) {
+            assertEquals 'KeyFactory callback execution failed: key spec not recognized', expected.getMessage()
+        }
+    }
+
+    @Test
+    void testGeneratePrivateRespecTooSmall() {
+        byte[] invalid = Bytes.random(16)
+        def ex = jdk8213363BugEx("key length must be ${invalid.length}")
+        def template = new Jdk8213363JcaTemplate('X25519') {
+            @Override
+            protected PrivateKey generatePrivate(KeyFactory factory, KeySpec spec) throws InvalidKeySpecException {
+                throw ex
+            }
+        }
+        try {
+            template.generatePrivate(new PKCS8EncodedKeySpec(invalid))
+            fail()
+        } catch (SecurityException expected) {
+            String msg = "KeyFactory callback execution failed: java.security.InvalidKeyException: " +
+                    "key length must be ${invalid.length}"
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testGeneratePrivateRespecTooLarge() {
+        byte[] invalid = Bytes.random(50)
+        def ex = jdk8213363BugEx("key length must be ${invalid.length}")
+        def template = new Jdk8213363JcaTemplate('X448') {
+            @Override
+            protected PrivateKey generatePrivate(KeyFactory factory, KeySpec spec) throws InvalidKeySpecException {
+                throw ex
+            }
+        }
+        try {
+            template.generatePrivate(new PKCS8EncodedKeySpec(invalid))
+            fail()
+        } catch (SecurityException expected) {
+            String msg = "KeyFactory callback execution failed: java.security.InvalidKeyException: " +
+                    "key length must be ${invalid.length}"
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testGetJdk8213363BugExpectedSizeNoExMsg() {
+        InvalidKeyException ex = new InvalidKeyException()
+        def template = new JcaTemplate('X448', null)
+        assertEquals(-1, template.getJdk8213363BugExpectedSize(ex))
+    }
+
+    @Test
+    void testGetJdk8213363BugExpectedSizeExMsgDoesntMatch() {
+        InvalidKeyException ex = new InvalidKeyException('not what is expected')
+        def template = new JcaTemplate('X448', null)
+        assertEquals(-1, template.getJdk8213363BugExpectedSize(ex))
+    }
+
+    @Test
+    void testGetJdk8213363BugExpectedSizeExMsgDoesntContainNumber() {
+        InvalidKeyException ex = new InvalidKeyException('key length must be foo')
+        def template = new JcaTemplate('X448', null)
+        assertEquals(-1, template.getJdk8213363BugExpectedSize(ex))
+    }
+
+    @Test
+    void testRespecIfNecessaryWithoutPkcs8KeySpec() {
+        def spec = new X509EncodedKeySpec(Bytes.random(32))
+        def template = new JcaTemplate('X448', null)
+        assertNull template.respecIfNecessary(null, spec)
+    }
+
+    @Test
+    void testRespecIfNecessaryNotJdk8213363Bug() {
+        def ex = new InvalidKeySpecException('foo')
+        def template = new JcaTemplate('X448', null)
+        assertNull template.respecIfNecessary(ex, new PKCS8EncodedKeySpec(Bytes.random(32)))
+    }
+
+    @Test
+    void testIsJdk11() {
+        // determine which JDK the test is being run on in CI:
+        boolean testMachineIsJdk11 = System.getProperty('java.version').startsWith('11')
+        def template = new JcaTemplate('X448', null)
+        if (testMachineIsJdk11) {
+            assertTrue template.isJdk11()
+        } else {
+            assertFalse template.isJdk11()
+        }
+    }
 
     @Test
     void testCallbackThrowsException() {
@@ -183,4 +330,13 @@ class JcaTemplateTest {
         }
     }
 
+    private static class Jdk8213363JcaTemplate extends JcaTemplate {
+        Jdk8213363JcaTemplate(String jcaName) {
+            super(jcaName, null)
+        }
+        @Override
+        protected boolean isJdk11() {
+            return true
+        }
+    }
 }
