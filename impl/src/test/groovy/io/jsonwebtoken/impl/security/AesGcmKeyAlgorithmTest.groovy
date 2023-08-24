@@ -21,16 +21,12 @@ import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
-import io.jsonwebtoken.impl.lang.CheckedSupplier
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Arrays
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.Cipher
-import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
-import java.security.Provider
 
 import static org.junit.Assert.*
 
@@ -54,17 +50,7 @@ class AesGcmKeyAlgorithmTest {
 
         final String jcaName = "AES/GCM/NoPadding"
 
-        // AES/GCM/NoPadding is only available on JDK 8 and later, so enable BC as a backup provider if
-        // necessary for <= JDK 7:
-        // TODO: remove when dropping Java 7 support:
-        Provider provider = Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<SecretKeyFactory>() {
-            @Override
-            SecretKeyFactory get() throws Exception {
-                return SecretKeyFactory.getInstance(jcaName)
-            }
-        }))
-
-        JcaTemplate template = new JcaTemplate(jcaName, provider)
+        JcaTemplate template = new JcaTemplate(jcaName, null)
         byte[] jcaResult = template.withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             byte[] apply(Cipher cipher) throws Exception {

@@ -19,8 +19,6 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.CheckedSupplier;
-import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
@@ -114,16 +112,6 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         this.DERIVED_KEY_BIT_LENGTH = hashBitLength / 2; // results in 128, 192, or 256
 
         this.SALT_PREFIX = toRfcSaltPrefix(getId().getBytes(StandardCharsets.UTF_8));
-
-        // PBKDF2WithHmacSHA* algorithms are only available on JDK 8 and later, so enable BC as a backup provider if
-        // necessary for <= JDK 7:
-        // TODO: remove when dropping Java 7 support:
-        setProvider(Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<SecretKeyFactory>() {
-            @Override
-            public SecretKeyFactory get() throws Exception {
-                return SecretKeyFactory.getInstance(getJcaName());
-            }
-        })));
     }
 
     // protected visibility for testing

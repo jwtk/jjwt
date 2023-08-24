@@ -16,8 +16,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.CheckedSupplier;
-import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AssociatedDataSupplier;
@@ -28,7 +26,6 @@ import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.WeakKeyException;
 
-import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
@@ -62,17 +59,6 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         this.ivBitLength = jcaTransformation.equals("AESWrap") ? 0 : (this.gcm ? GCM_IV_SIZE : BLOCK_SIZE);
         // https://tools.ietf.org/html/rfc7518#section-5.2.3 through https://tools.ietf.org/html/rfc7518#section-5.3 :
         this.tagBitLength = this.gcm ? BLOCK_SIZE : this.keyBitLength;
-
-        // GCM mode only available on JDK 8 and later, so enable BC as a backup provider if necessary for <= JDK 7:
-        // TODO: remove when dropping JDK 7:
-        if (this.gcm) {
-            setProvider(Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<Cipher>() {
-                @Override
-                public Cipher get() throws Exception {
-                    return Cipher.getInstance(jcaTransformation);
-                }
-            })));
-        }
     }
 
     @Override

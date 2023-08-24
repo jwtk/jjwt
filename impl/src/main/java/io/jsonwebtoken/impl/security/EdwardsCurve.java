@@ -16,12 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.CheckedSupplier;
-import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.Functions;
-import io.jsonwebtoken.impl.lang.OptionalCtorInvoker;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -32,12 +27,9 @@ import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -50,21 +42,11 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     private static final String OID_PREFIX = "1.3.101.";
 
-    // DER-encoded edwards keys have this exact sequence identifying the type of key that follows.  The trailing
+    // ASN.1-encoded edwards keys have this exact sequence identifying the type of key that follows.  The trailing
     // byte is the exact edwards curve subsection OID terminal node id.
-    private static final byte[] DER_OID_PREFIX = new byte[]{0x06, 0x03, 0x2B, 0x65};
-
-    private static final String NAMED_PARAM_SPEC_FQCN = "java.security.spec.NamedParameterSpec"; // JDK >= 11
-    private static final String XEC_PRIV_KEY_SPEC_FQCN = "java.security.spec.XECPrivateKeySpec"; // JDK >= 11
-    private static final String EDEC_PRIV_KEY_SPEC_FQCN = "java.security.spec.EdECPrivateKeySpec"; // JDK >= 15
+    private static final byte[] ASN1_OID_PREFIX = new byte[]{0x06, 0x03, 0x2B, 0x65};
 
     private static final Function<Key, String> CURVE_NAME_FINDER = new NamedParameterSpecValueFinder();
-    private static final OptionalCtorInvoker<AlgorithmParameterSpec> NAMED_PARAM_SPEC_CTOR =
-            new OptionalCtorInvoker<>(NAMED_PARAM_SPEC_FQCN, String.class);
-    static final OptionalCtorInvoker<KeySpec> XEC_PRIV_KEY_SPEC_CTOR =
-            new OptionalCtorInvoker<>(XEC_PRIV_KEY_SPEC_FQCN, AlgorithmParameterSpec.class, byte[].class);
-    static final OptionalCtorInvoker<KeySpec> EDEC_PRIV_KEY_SPEC_CTOR =
-            new OptionalCtorInvoker<>(EDEC_PRIV_KEY_SPEC_FQCN, NAMED_PARAM_SPEC_FQCN, byte[].class);
 
     public static final EdwardsCurve X25519 = new EdwardsCurve("X25519", 110); // Requires JDK >= 11 or BC
     public static final EdwardsCurve X448 = new EdwardsCurve("X448", 111); // Requires JDK >= 11 or BC
@@ -81,24 +63,41 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         REGISTRY = new LinkedHashMap<>(8);
         BY_OID_TERMINAL_NODE = new LinkedHashMap<>(4);
         for (EdwardsCurve curve : VALUES) {
-            int subcategoryId = curve.DER_OID[curve.DER_OID.length - 1];
+            int subcategoryId = curve.ASN1_OID[curve.ASN1_OID.length - 1];
             BY_OID_TERMINAL_NODE.put(subcategoryId, curve);
             REGISTRY.put(curve.getId(), curve);
             REGISTRY.put(curve.OID, curve); // add OID as an alias for alg/id lookups
         }
     }
 
+    private static byte[] privateKeyPkcs8Prefix(int byteLength, byte[] ASN1_OID, boolean ber) {
+
+        byte[] keyPrefix = ber ?
+                new byte[]{0x04, (byte) (byteLength + 2), 0x04, (byte) byteLength} : // correct
+                new byte[]{0x04, (byte) byteLength}; // https://bugs.openjdk.org/browse/JDK-8213363
+
+        return Bytes.concat(
+                new byte[]{
+                        0x30,
+                        (byte) (5 + ASN1_OID.length + keyPrefix.length + byteLength),
+                        0x02, 0x01, 0x00, // encoding version 1 (integer, 1 byte, value 0)
+                        0x30, 0x05}, // ASN.1 SEQUENCE of 5 bytes to follow (i.e. the OID)
+                ASN1_OID,
+                keyPrefix
+        );
+    }
+
     private final String OID;
 
     /**
-     * The byte sequence within an DER-encoded key that indicates an Edwards curve encoded key follows. DER (hex)
+     * The byte sequence within an ASN.1-encoded key that indicates an Edwards curve encoded key follows. ASN.1 (hex)
      * notation:
      * <pre>
      * 06 03       ;   OBJECT IDENTIFIER (3 bytes long)
      * |  2B 65 $I ;     "1.3.101.$I" for Edwards alg OID, where $I = 6E, 6F, 70, or 71 (decimal 110, 111, 112, or 113)
      * </pre>
      */
-    final byte[] DER_OID;
+    final byte[] ASN1_OID;
 
     private final int keyBitLength;
 
@@ -107,42 +106,39 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     private final int encodedKeyByteLength;
 
     /**
-     * X.509 (DER) encoding of a public key associated with this curve as a prefix (that is, <em>without</em> the
+     * X.509 (ASN.1) encoding of a public key associated with this curve as a prefix (that is, <em>without</em> the
      * actual encoded key material at the end). Appending the public key material directly to the end of this value
-     * results in a complete X.509 (DER) encoded public key.  DER (hex) notation:
+     * results in a complete X.509 (ASN.1) encoded public key.  ASN.1 (hex) notation:
      * <pre>
-     * 30 $M               ; DER SEQUENCE ($M bytes long), where $M = encodedKeyByteLength + 10
-     *    30 05            ;   DER SEQUENCE (5 bytes long)
+     * 30 $M               ; ASN.1 SEQUENCE ($M bytes long), where $M = encodedKeyByteLength + 10
+     *    30 05            ;   ASN.1 SEQUENCE (5 bytes long)
      *       06 03         ;     OBJECT IDENTIFIER (3 bytes long)
      *          2B 65 $I   ;       "1.3.101.$I" for Edwards alg OID, where $I = 6E, 6F, 70, or 71 (110, 111, 112, or 113 decimal)
-     *    03 $S            ;   DER BIT STRING ($S bytes long), where $S = encodedKeyByteLength + 1
-     *       00            ;     DER bit string marker indicating zero unused bits at the end of the bit string
+     *    03 $S            ;   ASN.1 BIT STRING ($S bytes long), where $S = encodedKeyByteLength + 1
+     *       00            ;     ASN.1 bit string marker indicating zero unused bits at the end of the bit string
      *       XX XX XX ...  ;     encoded key material (not included in this PREFIX byte array variable)
      * </pre>
      */
-    private final byte[] PUBLIC_KEY_DER_PREFIX;
+    private final byte[] PUBLIC_KEY_ASN1_PREFIX;
 
     /**
-     * PKCS8 (DER) Version 1 encoding of a private key associated with this curve, as a prefix (that is,
+     * PKCS8 (ASN.1) Version 1 encoding of a private key associated with this curve, as a prefix (that is,
      * <em>without</em> actual encoded key material at the end). Appending the private key material directly to the
-     * end of this value results in a complete PKCS8 (DER) V1 encoded private key.  DER (hex) notation:
+     * end of this value results in a complete PKCS8 (ASN.1) V1 encoded private key.  ASN.1 (hex) notation:
      * <pre>
-     * 30 $M                  ; DER SEQUENCE ($M bytes long), where $M = encodedKeyByteLength + 14
-     *    02 01               ;   DER INTEGER (1 byte long)
+     * 30 $M                  ; ASN.1 SEQUENCE ($M bytes long), where $M = encodedKeyByteLength + 14
+     *    02 01               ;   ASN.1 INTEGER (1 byte long)
      *       00               ;     zero (private key encoding version V1)
-     *    30 05               ;   DER SEQUENCE (5 bytes long)
+     *    30 05               ;   ASN.1 SEQUENCE (5 bytes long)
      *       06 03            ;     OBJECT IDENTIFIER (3 bytes long). This is the edwards algorithm ID.
      *          2B 65 $I      ;       "1.3.101.$I" for Edwards alg OID, where $I = 6E, 6F, 70, or 71 (110, 111, 112, or 113 decimal)
-     *    04 $B               ;   DER SEQUENCE ($B bytes long, where $B = encodedKeyByteLength + 2
-     *       04 $K            ;     DER SEQUENCE ($K bytes long), where $K = encodedKeyByteLength
+     *    04 $B               ;   ASN.1 SEQUENCE ($B bytes long, where $B = encodedKeyByteLength + 2
+     *       04 $K            ;     ASN.1 SEQUENCE ($K bytes long), where $K = encodedKeyByteLength
      *          XX XX XX ...  ;       encoded key material (not included in this PREFIX byte array variable)
      * </pre>
      */
-    private final byte[] PRIVATE_KEY_DER_PREFIX;
-
-    private final AlgorithmParameterSpec NAMED_PARAMETER_SPEC; // null on <= JDK 10
-
-    private final Function<byte[], KeySpec> PRIVATE_KEY_SPEC_FACTORY;
+    private final byte[] PRIVATE_KEY_ASN1_PREFIX;
+    private final byte[] PRIVATE_KEY_JDK11_PREFIX; // https://bugs.openjdk.org/browse/JDK-8213363
 
     /**
      * {@code true} IFF the curve is used for digital signatures, {@code false} if used for key agreement
@@ -150,14 +146,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     private final boolean signatureCurve;
 
     EdwardsCurve(final String id, int oidTerminalNode) {
-        super(id, id, // JWT ID and JCA name happen to be identical
-                // fall back to BouncyCastle if < JDK 11 (for XDH curves) or < JDK 15 (for EdDSA curves) if necessary:
-                Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<KeyPairGenerator>() {
-                    @Override
-                    public KeyPairGenerator get() throws Exception {
-                        return KeyPairGenerator.getInstance(id);
-                    }
-                })));
+        super(id, id);
 
         // OIDs (with terminal node IDs) defined here: https://www.rfc-editor.org/rfc/rfc8410#section-3
         // X25519 (oid 1.3.101.110) and X448 (oid 1.3.101.111) have 256 bits
@@ -183,39 +172,22 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         this.OID = OID_PREFIX + oidTerminalNode;
         this.signatureCurve = (oidTerminalNode == 112 || oidTerminalNode == 113);
         byte[] suffix = new byte[]{(byte) oidTerminalNode};
-        this.DER_OID = Bytes.concat(DER_OID_PREFIX, suffix);
+        this.ASN1_OID = Bytes.concat(ASN1_OID_PREFIX, suffix);
         this.encodedKeyByteLength = (this.keyBitLength + 7) / 8;
 
-        this.PUBLIC_KEY_DER_PREFIX = Bytes.concat(
+        this.PUBLIC_KEY_ASN1_PREFIX = Bytes.concat(
                 new byte[]{
                         0x30, (byte) (this.encodedKeyByteLength + 10),
-                        0x30, 0x05}, // DER SEQUENCE of 5 bytes to follow (i.e. the OID)
-                this.DER_OID,
+                        0x30, 0x05}, // ASN.1 SEQUENCE of 5 bytes to follow (i.e. the OID)
+                this.ASN1_OID,
                 new byte[]{
                         0x03,
                         (byte) (this.encodedKeyByteLength + 1),
                         0x00}
         );
 
-        byte[] keyPrefix = new byte[]{
-                0x04, (byte) (this.encodedKeyByteLength + 2),
-                0x04, (byte) this.encodedKeyByteLength};
-
-        this.PRIVATE_KEY_DER_PREFIX = Bytes.concat(
-                new byte[]{
-                        0x30,
-                        (byte) (this.encodedKeyByteLength + 10 + keyPrefix.length),
-                        0x02, 0x01, 0x00, // encoding version 1 (integer, 1 byte, value 0)
-                        0x30, 0x05}, // DER SEQUENCE of 5 bytes to follow (i.e. the OID)
-                this.DER_OID,
-                keyPrefix
-        );
-
-        this.NAMED_PARAMETER_SPEC = NAMED_PARAM_SPEC_CTOR.apply(id); // null on <= JDK 10
-        Function<byte[], KeySpec> paramKeySpecFn = paramKeySpecFactory(NAMED_PARAMETER_SPEC, signatureCurve);
-        Function<byte[], KeySpec> pkcs8KeySpecFn = new Pkcs8KeySpecFactory(this.PRIVATE_KEY_DER_PREFIX);
-        // prefer the JDK KeySpec classes first, and fall back to PKCS8 encoding if unavailable:
-        this.PRIVATE_KEY_SPEC_FACTORY = Functions.firstResult(paramKeySpecFn, pkcs8KeySpecFn);
+        this.PRIVATE_KEY_ASN1_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, true);
+        this.PRIVATE_KEY_JDK11_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, false);
 
         // The Sun CE KeyPairGenerator implementation that we'll use to derive PublicKeys with is problematic here:
         //
@@ -241,14 +213,6 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         this.KEY_PAIR_GENERATOR_BIT_LENGTH = this.keyBitLength >= 448 ? 448 : 255;
     }
 
-    // visible for testing
-    protected static Function<byte[], KeySpec> paramKeySpecFactory(AlgorithmParameterSpec spec, boolean signatureCurve) {
-        if (spec == null) {
-            return Functions.forNull();
-        }
-        return new ParameterizedKeySpecFactory(spec, signatureCurve ? EDEC_PRIV_KEY_SPEC_CTOR : XEC_PRIV_KEY_SPEC_CTOR);
-    }
-
     @Override
     public int getKeyBitLength() {
         return this.keyBitLength;
@@ -261,39 +225,39 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
             if (t instanceof KeyException) { //propagate
                 throw (KeyException) t;
             }
-            String msg = "Invalid " + getId() + " DER encoding: " + t.getMessage();
+            String msg = "Invalid " + getId() + " ASN.1 encoding: " + t.getMessage();
             throw new InvalidKeyException(msg, t);
         }
     }
 
     /**
-     * Parses the DER-encoding of the specified key
+     * Parses the ASN.1-encoding of the specified key
      *
      * @param key the Edwards curve key
      * @return the key value, encoded according to <a href="https://www.rfc-editor.org/rfc/rfc8032">RFC 8032</a>
-     * @throws RuntimeException if the key's encoded bytes do not reflect a validly DER-encoded edwards key
+     * @throws RuntimeException if the key's encoded bytes do not reflect a validly ASN.1-encoded edwards key
      */
     protected byte[] doGetKeyMaterial(Key key) {
         byte[] encoded = KeysBridge.getEncoded(key);
-        int i = Bytes.indexOf(encoded, DER_OID);
+        int i = Bytes.indexOf(encoded, ASN1_OID);
         Assert.gt(i, -1, "Missing or incorrect algorithm OID.");
-        i = i + DER_OID.length;
+        i = i + ASN1_OID.length;
         int keyLen = 0;
         if (encoded[i] == 0x05) { // NULL terminator, next should be zero byte indicator
             int unusedBytes = encoded[++i];
             Assert.eq(unusedBytes, 0, "OID NULL terminator should indicate zero unused bytes.");
             i++;
         }
-        if (encoded[i] == 0x03) { // DER bit stream, Public Key
+        if (encoded[i] == 0x03) { // ASN.1 bit stream, Public Key
             i++;
             keyLen = encoded[i++];
             int unusedBytes = encoded[i++];
             Assert.eq(unusedBytes, 0, "BIT STREAM should not indicate unused bytes.");
             keyLen--;
-        } else if (encoded[i] == 0x04) { // DER octet sequence, Private Key.  Key length follows as next byte.
+        } else if (encoded[i] == 0x04) { // ASN.1 octet sequence, Private Key.  Key length follows as next byte.
             i++;
             keyLen = encoded[i++];
-            if (encoded[i] == 0x04) { // DER octet sequence, key length follows as next byte.
+            if (encoded[i] == 0x04) { // ASN.1 octet sequence, key length follows as next byte.
                 i++; // skip sequence marker
                 keyLen = encoded[i++]; // next byte is length
             }
@@ -303,13 +267,6 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         keyLen = Bytes.length(result);
         Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
         return result;
-    }
-
-    protected Provider fallback(Provider provider) {
-        if (provider == null) {
-            provider = getProvider();
-        }
-        return provider;
     }
 
     private void assertLength(byte[] raw, boolean isPublic) {
@@ -324,27 +281,23 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     public PublicKey toPublicKey(byte[] x, Provider provider) {
         assertLength(x, true);
-        final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_DER_PREFIX, x);
+        final byte[] encoded = Bytes.concat(this.PUBLIC_KEY_ASN1_PREFIX, x);
         final X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
-        JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
-        return template.withKeyFactory(new CheckedFunction<KeyFactory, PublicKey>() {
-            @Override
-            public PublicKey apply(KeyFactory keyFactory) throws Exception {
-                return keyFactory.generatePublic(spec);
-            }
-        });
+        JcaTemplate template = new JcaTemplate(getJcaName(), provider);
+        return template.generatePublic(spec);
     }
 
-    public PrivateKey toPrivateKey(byte[] d, Provider provider) {
+    KeySpec privateKeySpec(byte[] d, boolean standard) {
+        byte[] prefix = standard ? this.PRIVATE_KEY_ASN1_PREFIX : this.PRIVATE_KEY_JDK11_PREFIX;
+        byte[] encoded = Bytes.concat(prefix, d);
+        return new PKCS8EncodedKeySpec(encoded);
+    }
+
+    public PrivateKey toPrivateKey(final byte[] d, Provider provider) {
         assertLength(d, false);
-        final KeySpec spec = this.PRIVATE_KEY_SPEC_FACTORY.apply(d);
-        JcaTemplate template = new JcaTemplate(getJcaName(), fallback(provider));
-        return template.withKeyFactory(new CheckedFunction<KeyFactory, PrivateKey>() {
-            @Override
-            public PrivateKey apply(KeyFactory keyFactory) throws Exception {
-                return keyFactory.generatePrivate(spec);
-            }
-        });
+        KeySpec spec = privateKeySpec(d, true);
+        JcaTemplate template = new JcaTemplate(getJcaName(), provider);
+        return template.generatePrivate(spec);
     }
 
     /**
@@ -358,7 +311,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     @Override
     public KeyPairBuilder keyPair() {
-        return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH).provider(getProvider());
+        return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH);
     }
 
     public static boolean isEdwards(Key key) {
@@ -397,7 +350,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
             curve = findById(alg);
         }
         if (curve == null) { // Fall back to key encoding if possible:
-            // Try to find the Key DER algorithm OID:
+            // Try to find the Key ASN.1 algorithm OID:
             byte[] encoded = KeysBridge.findEncoded(key);
             if (!Bytes.isEmpty(encoded)) {
                 int oidTerminalNode = findOidTerminalNode(encoded);
@@ -411,9 +364,9 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     }
 
     private static int findOidTerminalNode(byte[] encoded) {
-        int index = Bytes.indexOf(encoded, DER_OID_PREFIX);
+        int index = Bytes.indexOf(encoded, ASN1_OID_PREFIX);
         if (index > -1) {
-            index = index + DER_OID_PREFIX.length;
+            index = index + ASN1_OID_PREFIX.length;
             if (index < encoded.length) {
                 return encoded[index];
             }
@@ -437,40 +390,5 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     static <K extends Key> K assertEdwards(K key) {
         forKey(key); // will throw UnsupportedKeyException if the key is not an Edwards key
         return key;
-    }
-
-    private static final class Pkcs8KeySpecFactory implements Function<byte[], KeySpec> {
-        private final byte[] PREFIX;
-
-        private Pkcs8KeySpecFactory(byte[] pkcs8EncodedKeyPrefix) {
-            this.PREFIX = Assert.notEmpty(pkcs8EncodedKeyPrefix, "pkcs8EncodedKeyPrefix cannot be null or empty.");
-        }
-
-        @Override
-        public KeySpec apply(byte[] d) {
-            Assert.notEmpty(d, "Key bytes cannot be null or empty.");
-            byte[] encoded = Bytes.concat(PREFIX, d);
-            return new PKCS8EncodedKeySpec(encoded);
-        }
-    }
-
-    // visible for testing
-    protected static final class ParameterizedKeySpecFactory implements Function<byte[], KeySpec> {
-
-        private final AlgorithmParameterSpec params;
-
-        private final Function<Object, KeySpec> keySpecFactory;
-
-        ParameterizedKeySpecFactory(AlgorithmParameterSpec params, Function<Object, KeySpec> keySpecFactory) {
-            this.params = Assert.notNull(params, "AlgorithmParameterSpec cannot be null.");
-            this.keySpecFactory = Assert.notNull(keySpecFactory, "KeySpec factory function cannot be null.");
-        }
-
-        @Override
-        public KeySpec apply(byte[] d) {
-            Assert.notEmpty(d, "Key bytes cannot be null or empty.");
-            Object[] args = new Object[]{params, d};
-            return this.keySpecFactory.apply(args);
-        }
     }
 }

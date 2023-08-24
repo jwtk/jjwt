@@ -16,15 +16,11 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.impl.lang.Function
-import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
-import java.security.spec.AlgorithmParameterSpec
-import java.security.spec.ECGenParameterSpec
-import java.security.spec.KeySpec
+import java.security.spec.PKCS8EncodedKeySpec
 
 import static org.junit.Assert.*
 
@@ -71,7 +67,7 @@ class EdwardsCurveTest {
 
     @Test
     void testFindByKey() { // happy path test
-        for(def alg : EdwardsCurve.VALUES) {
+        for (def alg : EdwardsCurve.VALUES) {
             def keyPair = alg.keyPair().build()
             def pub = keyPair.public
             def priv = keyPair.private
@@ -88,7 +84,7 @@ class EdwardsCurveTest {
     @Test
     void testFindByKeyUsingEncoding() {
         curves.each {
-            def pair = TestKeys.forCurve(it).pair
+            def pair = TestKeys.forAlgorithm(it).pair
             def key = new TestKey(algorithm: 'foo', encoded: pair.public.getEncoded())
             def found = EdwardsCurve.findByKey(key)
             assertEquals(it, found)
@@ -107,7 +103,7 @@ class EdwardsCurveTest {
     @Test
     void testFindByKeyUsingMalformedEncoding() {
         curves.each {
-            byte[] encoded = EdwardsCurve.DER_OID_PREFIX // just the prefix isn't enough
+            byte[] encoded = EdwardsCurve.ASN1_OID_PREFIX // just the prefix isn't enough
             def key = new TestKey(algorithm: 'foo', encoded: encoded)
             assertNull EdwardsCurve.findByKey(key)
         }
@@ -116,10 +112,10 @@ class EdwardsCurveTest {
     @Test
     void testToPrivateKey() {
         curves.each {
-            def pair = TestKeys.forCurve(it).pair
+            def pair = TestKeys.forAlgorithm(it).pair
             def key = pair.getPrivate()
             def d = it.getKeyMaterial(key)
-            def result = it.toPrivateKey(d, it.getProvider())
+            def result = it.toPrivateKey(d, null)
             assertEquals(key, result)
         }
     }
@@ -127,10 +123,11 @@ class EdwardsCurveTest {
     @Test
     void testToPublicKey() {
         curves.each {
-            def pair = TestKeys.forCurve(it).pair
+            def bundle = TestKeys.forAlgorithm(it)
+            def pair = bundle.pair
             def key = pair.getPublic()
             def x = it.getKeyMaterial(key)
-            def result = it.toPublicKey(x, it.getProvider())
+            def result = it.toPublicKey(x, null)
             assertEquals(key, result)
         }
     }
@@ -141,7 +138,7 @@ class EdwardsCurveTest {
             byte[] d = new byte[it.encodedKeyByteLength + 1] // more than required
             Randoms.secureRandom().nextBytes(d)
             try {
-                it.toPrivateKey(d, it.getProvider())
+                it.toPrivateKey(d, null)
             } catch (InvalidKeyException ike) {
                 String msg = "Invalid ${it.id} encoded PrivateKey length. Should be " +
                         "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(d.length)}."
@@ -151,12 +148,23 @@ class EdwardsCurveTest {
     }
 
     @Test
+    void testPrivateKeySpecJdk11() {
+        curves.each {
+            byte[] d = new byte[it.encodedKeyByteLength]; Randoms.secureRandom().nextBytes(d)
+            def keySpec = it.privateKeySpec(d, false) // standard = false for JDK 11 bug
+            assertTrue keySpec instanceof PKCS8EncodedKeySpec
+            def expectedEncoded = Bytes.concat(it.PRIVATE_KEY_JDK11_PREFIX, d)
+            assertArrayEquals expectedEncoded, ((PKCS8EncodedKeySpec)keySpec).getEncoded()
+        }
+    }
+
+    @Test
     void testToPublicKeyInvalidLength() {
         curves.each {
             byte[] x = new byte[it.encodedKeyByteLength - 1] // less than required
             Randoms.secureRandom().nextBytes(x)
             try {
-                it.toPublicKey(x, it.getProvider())
+                it.toPublicKey(x, null)
             } catch (InvalidKeyException ike) {
                 String msg = "Invalid ${it.id} encoded PublicKey length. Should be " +
                         "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(x.length)}."
@@ -179,7 +187,7 @@ class EdwardsCurveTest {
 
             byte[] encoded = Bytes.concat(
                     [0x30, it.encodedKeyByteLength + 10 + DER_NULL.length, 0x30, 0x05] as byte[],
-                    it.DER_OID,
+                    it.ASN1_OID,
                     DER_NULL, // this should be skipped when getting key material
                     [0x03, it.encodedKeyByteLength + 1, 0x00] as byte[],
                     x
@@ -217,7 +225,7 @@ class EdwardsCurveTest {
                 it.getKeyMaterial(key)
                 fail()
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.getId()} DER encoding: Missing or incorrect algorithm OID." as String
+                String msg = "Invalid ${it.getId()} ASN.1 encoding: Missing or incorrect algorithm OID." as String
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -231,13 +239,13 @@ class EdwardsCurveTest {
         encoded[0] = 0x20 // anything other than 0x03, 0x04, 0x05
         curves.each {
             // prefix it with the OID to make it look valid:
-            encoded = Bytes.concat(it.DER_OID, encoded)
+            encoded = Bytes.concat(it.ASN1_OID, encoded)
             def key = new TestKey(encoded: encoded)
             try {
                 it.getKeyMaterial(key)
                 fail()
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.getId()} DER encoding: Invalid key length." as String
+                String msg = "Invalid ${it.getId()} ASN.1 encoding: Invalid key length." as String
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -251,13 +259,13 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_DER_PREFIX, keyBytes)
+                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_ASN1_PREFIX, keyBytes)
                 encoded[11] = 0x01 // should always be zero
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)
                 fail()
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.getId()} DER encoding: BIT STREAM should not indicate unused bytes." as String
+                String msg = "Invalid ${it.getId()} ASN.1 encoding: BIT STREAM should not indicate unused bytes." as String
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -271,13 +279,13 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PRIVATE_KEY_DER_PREFIX, keyBytes)
-                encoded[14] = 0x0F // should always be 0x04 (DER SEQUENCE tag)
+                byte[] encoded = Bytes.concat(it.PRIVATE_KEY_ASN1_PREFIX, keyBytes)
+                encoded[14] = 0x0F // should always be 0x04 (ASN.1 SEQUENCE tag)
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)
                 fail()
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.getId()} DER encoding: Invalid key length." as String
+                String msg = "Invalid ${it.getId()} ASN.1 encoding: Invalid key length." as String
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -291,13 +299,13 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength - 1 // one less than required
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_DER_PREFIX, keyBytes)
-                encoded[10] = (byte) (size + 1) // DER size value (zero byte + key bytes)
+                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_ASN1_PREFIX, keyBytes)
+                encoded[10] = (byte) (size + 1) // ASN.1 size value (zero byte + key bytes)
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)
                 fail()
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.getId()} DER encoding: Invalid key length." as String
+                String msg = "Invalid ${it.getId()} ASN.1 encoding: Invalid key length." as String
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -311,67 +319,21 @@ class EdwardsCurveTest {
                 size = it.encodedKeyByteLength + 1 // one less than required
                 byte[] keyBytes = new byte[size]
                 Randoms.secureRandom().nextBytes(keyBytes)
-                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_DER_PREFIX, keyBytes)
-                encoded[10] = (byte) (size + 1) // DER size value (zero byte + key bytes)
+                byte[] encoded = Bytes.concat(it.PUBLIC_KEY_ASN1_PREFIX, keyBytes)
+                encoded[10] = (byte) (size + 1) // ASN.1 size value (zero byte + key bytes)
                 def key = new TestKey(encoded: encoded)
                 it.getKeyMaterial(key)
                 fail()
             } catch (InvalidKeyException ike) {
-                String msg = "Invalid ${it.getId()} DER encoding: Invalid key length." as String
+                String msg = "Invalid ${it.getId()} ASN.1 encoding: Invalid key length." as String
                 assertEquals msg, ike.getMessage()
             }
         }
     }
 
     @Test
-    void testParamKeySpecFactoryWithNullSpec() {
-        def fn = EdwardsCurve.paramKeySpecFactory(null, true)
-        assertSame Functions.forNull(), fn
-    }
-
-    @Test
-    void testXecParamKeySpecFactory() {
-        AlgorithmParameterSpec spec = new ECGenParameterSpec('foo') // any impl will do for this test
-        def fn = EdwardsCurve.paramKeySpecFactory(spec, false) as EdwardsCurve.ParameterizedKeySpecFactory
-        assertSame spec, fn.params
-        assertSame EdwardsCurve.XEC_PRIV_KEY_SPEC_CTOR, fn.keySpecFactory
-    }
-
-    @Test
-    void testEdEcParamKeySpecFactory() {
-        AlgorithmParameterSpec spec = new ECGenParameterSpec('foo') // any impl will do for this test
-        def fn = EdwardsCurve.paramKeySpecFactory(spec, true) as EdwardsCurve.ParameterizedKeySpecFactory
-        assertSame spec, fn.params
-        assertSame EdwardsCurve.EDEC_PRIV_KEY_SPEC_CTOR, fn.keySpecFactory
-    }
-
-    @Test
-    void testParamKeySpecFactoryInvocation() {
-        AlgorithmParameterSpec spec = new ECGenParameterSpec('foo') // any impl will do for this test
-        KeySpec keySpec = new PasswordSpec("foo".toCharArray()) // any KeySpec impl will do
-
-        byte[] d = new byte[32]
-        Randoms.secureRandom().nextBytes(d)
-
-        def keySpecFn = new Function<Object, KeySpec>() {
-            @Override
-            KeySpec apply(Object o) {
-                assertTrue o instanceof Object[]
-                Object[] args = (Object[]) o
-                assertSame spec, args[0]
-                assertSame d, args[1]
-                return keySpec // simulate a creation
-            }
-        }
-
-        def fn = new EdwardsCurve.ParameterizedKeySpecFactory(spec, keySpecFn)
-        def result = fn.apply(d)
-        assertSame keySpec, result
-    }
-
-    @Test
     void testDerivePublicKeyFromPrivateKey() {
-        for(def curve : EdwardsCurve.VALUES) {
+        for (def curve : EdwardsCurve.VALUES) {
             def pair = curve.keyPair().build() // generate a standard key pair using the JCA APIs
             def pubKey = pair.getPublic()
             def derivedPubKey = EdwardsCurve.derivePublic(pair.getPrivate())

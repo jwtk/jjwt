@@ -79,8 +79,7 @@ class RsaSignatureAlgorithmTest {
         gen.initialize(1024) //too week for any JWA RSA algorithm
         def rsaPair = gen.generateKeyPair()
 
-        def provider = RsaSignatureAlgorithm.PS256.getProvider() // in case BC was loaded
-        def pssPair = new JcaTemplate(RsaSignatureAlgorithm.PSS_JCA_NAME, provider)
+        def pssPair = new JcaTemplate(RsaSignatureAlgorithm.PSS_JCA_NAME, null)
                 .withKeyPairGenerator(new CheckedFunction<KeyPairGenerator, KeyPair>() {
                     @Override
                     KeyPair apply(KeyPairGenerator generator) throws Exception {

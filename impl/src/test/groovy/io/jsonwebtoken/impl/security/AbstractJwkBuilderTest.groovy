@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.Conditions
+
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
@@ -144,9 +144,10 @@ class AbstractJwkBuilderTest {
 
     @Test
     void testProvider() {
-        def provider = Providers.findBouncyCastle(Conditions.TRUE)
+        def provider = TestKeys.BC
         def jwk = builder().provider(provider).build()
         assertEquals 'oct', jwk.getType()
+        assertSame provider, jwk.@context.@provider
     }
 
     @Test

@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Classes
 import org.junit.After
 import org.junit.Before
@@ -75,12 +74,12 @@ class ProvidersTest {
         assertTrue bcRegistered() // ensure it exists in the system as expected
 
         //now ensure that we find it and cache it:
-        def returned = Providers.findBouncyCastle(Conditions.TRUE)
+        def returned = Providers.findBouncyCastle()
         assertSame bc, returned
         assertSame bc, Providers.BC_PROVIDER.get() // ensure cached for future lookup
 
         //ensure cache hit works:
-        assertSame bc, Providers.findBouncyCastle(Conditions.TRUE)
+        assertSame bc, Providers.findBouncyCastle()
 
         //cleanup() method will remove the provider from the system
     }
@@ -93,12 +92,12 @@ class ProvidersTest {
 
         // ensure we can create one and cache it, *without* modifying the system JVM:
         //now ensure that we find it and cache it:
-        def returned = Providers.findBouncyCastle(Conditions.TRUE)
+        def returned = Providers.findBouncyCastle()
         assertNotNull returned
         assertSame Providers.BC_PROVIDER.get(), returned //ensure cached for future lookup
         assertFalse bcRegistered() //ensure we don't alter the system environment
 
-        assertSame returned, Providers.findBouncyCastle(Conditions.TRUE) //ensure cache hit
+        assertSame returned, Providers.findBouncyCastle() //ensure cache hit
         assertFalse bcRegistered() //ensure we don't alter the system environment
     }
 }

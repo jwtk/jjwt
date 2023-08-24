@@ -16,8 +16,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.CheckedSupplier;
-import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -106,13 +104,6 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     // RSASSA-PSS constructor
     private RsaSignatureAlgorithm(int digestBitLength, AlgorithmParameterSpec paramSpec) {
         this("PS" + digestBitLength, PSS_JCA_NAME, digestBitLength, paramSpec);
-        // RSASSA-PSS is not available natively until JDK 11, so try to load BC as a backup provider if possible:
-        setProvider(Providers.findBouncyCastle(Conditions.notExists(new CheckedSupplier<Signature>() {
-            @Override
-            public Signature get() throws Exception {
-                return Signature.getInstance(PSS_JCA_NAME);
-            }
-        })));
     }
 
     static SignatureAlgorithm findByKey(Key key) {
@@ -173,9 +164,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
         // return new DefaultKeyPairBuilder(jcaName, keyGenSpec).provider(getProvider()).random(Randoms.secureRandom());
         //
 
-        return new DefaultKeyPairBuilder(jcaName, this.preferredKeyBitLength)
-                .provider(getProvider())
-                .random(Randoms.secureRandom());
+        return new DefaultKeyPairBuilder(jcaName, this.preferredKeyBitLength).random(Randoms.secureRandom());
     }
 
     @Override

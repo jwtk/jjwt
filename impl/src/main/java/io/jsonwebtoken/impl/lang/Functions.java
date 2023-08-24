@@ -22,10 +22,6 @@ public final class Functions {
     private Functions() {
     }
 
-    public static <T, R> Function<T, R> forNull() {
-        return ConstantFunction.forNull();
-    }
-
     public static <T> Function<T, T> identity() {
         return new Function<T, T>() {
             @Override
