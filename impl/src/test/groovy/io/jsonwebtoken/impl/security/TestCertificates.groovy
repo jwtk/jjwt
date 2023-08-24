@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
-import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
@@ -28,7 +27,6 @@ import java.nio.charset.StandardCharsets
 import java.security.PrivateKey
 import java.security.Provider
 import java.security.PublicKey
-import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.security.spec.KeySpec
 import java.security.spec.PKCS8EncodedKeySpec
@@ -50,6 +48,8 @@ import java.security.spec.X509EncodedKeySpec
  *   2) encapsulate the BouncyCastle API so it is not exposed to other Test classes.
  */
 class TestCertificates {
+
+    static Provider BC = Providers.findBouncyCastle()
 
     private static InputStream getResourceStream(String filename) {
         String packageName = TestCertificates.class.getPackage().getName()
@@ -77,7 +77,7 @@ class TestCertificates {
     private static PublicKey readPublicKey(Identifiable alg) {
         PEMParser parser = getParser(alg.id + '.pub.pem')
         parser.withCloseable {
-            SubjectPublicKeyInfo info = parser.readObject() as SubjectPublicKeyInfo
+            SubjectPublicKeyInfo info = it.readObject() as SubjectPublicKeyInfo
             JcaTemplate template = new JcaTemplate(keyJcaName(alg), null)
             return template.generatePublic(new X509EncodedKeySpec(info.getEncoded()))
         }
@@ -85,15 +85,8 @@ class TestCertificates {
 
     private static X509Certificate readCert(Identifiable alg, Provider provider) {
         InputStream is = getResourceStream(alg.id + '.crt.pem')
-        is.withCloseable {
-            JcaTemplate template = new JcaTemplate("X.509", provider)
-            template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
-                @Override
-                X509Certificate apply(CertificateFactory factory) throws Exception {
-                    return (X509Certificate) factory.generateCertificate(it)
-                }
-            })
-        }
+        JcaTemplate template = new JcaTemplate("X.509", provider)
+        return template.generateX509Certificate(is.getBytes())
     }
 
     private static PrivateKey readPrivateKey(Identifiable alg) {
@@ -101,7 +94,7 @@ class TestCertificates {
         PEMParser parser = getParser(id + '.key.pem')
         parser.withCloseable {
             PrivateKeyInfo info
-            Object object = parser.readObject()
+            Object object = it.readObject()
             if (object instanceof PEMKeyPair) {
                 info = ((PEMKeyPair) object).getPrivateKeyInfo()
             } else {
@@ -129,7 +122,7 @@ class TestCertificates {
         // a certificate with certificate.getPublicKey() being a sun X509Key instead of the type-specific key we want:
         Provider provider = null
         if (pub.getClass().getName().startsWith("org.bouncycastle")) {
-            provider = Providers.findBouncyCastle()
+            provider = BC
         }
         X509Certificate cert = readCert(alg, provider) as X509Certificate
         PublicKey certPub = cert.getPublicKey()

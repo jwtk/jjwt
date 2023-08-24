@@ -63,7 +63,7 @@ class ProvidersTest {
 
     @Test
     void testFindBouncyCastleFalse() {
-        assertNull Providers.findBouncyCastle(Conditions.FALSE);
+        assertNull Providers.findBouncyCastle(Conditions.FALSE)
     }
 
     @Test

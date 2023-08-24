@@ -23,6 +23,7 @@ import io.jsonwebtoken.security.Jwks
 import javax.crypto.SecretKey
 import java.security.KeyPair
 import java.security.PrivateKey
+import java.security.Provider
 import java.security.PublicKey
 import java.security.cert.X509Certificate
 
@@ -30,6 +31,8 @@ import java.security.cert.X509Certificate
  * Test helper with cached keys to save time across tests (so we don't have to constantly dynamically generate keys)
  */
 class TestKeys {
+
+    static Provider BC = TestCertificates.BC
 
     // =======================================================
     // Secret Keys
@@ -110,7 +113,7 @@ class TestKeys {
         Bundle(Identifiable alg, PublicKey publicKey, PrivateKey privateKey, X509Certificate cert = null) {
             this.alg = alg
             this.cert = cert
-            this.chain = cert != null ? Collections.of(cert) : Collections.<X509Certificate>emptyList()
+            this.chain = cert != null ? Collections.of(cert) : Collections.<X509Certificate> emptyList()
             this.pair = new KeyPair(publicKey, privateKey);
         }
     }

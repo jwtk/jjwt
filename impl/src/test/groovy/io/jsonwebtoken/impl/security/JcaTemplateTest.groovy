@@ -27,6 +27,8 @@ import javax.crypto.Cipher
 import javax.crypto.Mac
 import java.security.*
 import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.security.spec.InvalidKeySpecException
 import java.security.spec.KeySpec
 import java.security.spec.PKCS8EncodedKeySpec
@@ -136,7 +138,7 @@ class JcaTemplateTest {
     @Test
     void testWrapWithDefaultJcaProviderAndFallbackProvider() {
         JcaTemplate.FACTORIES.each {
-            Provider fallback = Providers.findBouncyCastle()
+            Provider fallback = TestKeys.BC
             String jcaName = 'foo'
             NoSuchAlgorithmException nsa = new NoSuchAlgorithmException("doesn't exist")
             Exception out = ((JcaTemplate.JcaInstanceFactory) it).wrap(nsa, jcaName, null, fallback)
@@ -336,6 +338,19 @@ class JcaTemplateTest {
             assertEquals 'Cipher callback execution failed: testing', e.getMessage()
             assertSame ex, e.getCause()
         }
+    }
+
+    @Test
+    void testWithCertificateFactory() {
+        def template = new JcaTemplate('X.509', null)
+        X509Certificate expected = TestKeys.RS256.cert
+        X509Certificate cert = template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
+            @Override
+            X509Certificate apply(CertificateFactory certificateFactory) throws Exception {
+                (X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(expected.getEncoded()))
+            }
+        })
+        assertEquals expected, cert
     }
 
     private static class Jdk8213363JcaTemplate extends JcaTemplate {

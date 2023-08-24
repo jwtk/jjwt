@@ -20,7 +20,6 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
@@ -46,7 +45,7 @@ class EcdhKeyAlgorithmTest {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.X25519.pair.public as PublicKey
         def header = new DefaultMutableJweHeader(Jwts.header())
-        def provider = Providers.findBouncyCastle(Conditions.TRUE)
+        def provider = TestKeys.BC
         def request = new DefaultKeyRequest(encKey, provider, null, header, Jwts.ENC.A128GCM)
         def result = alg.getEncryptionKey(request)
         assertNotNull result.getKey()
@@ -59,7 +58,7 @@ class EcdhKeyAlgorithmTest {
         PublicKey encKey = TestKeys.X25519.pair.public as PublicKey
         PrivateKey decKey = TestKeys.X25519.pair.private as PrivateKey
         def header = Jwts.header()
-        def provider = Providers.findBouncyCastle(Conditions.TRUE)
+        def provider = TestKeys.BC
 
         // encrypt
         def delegate = new DefaultMutableJweHeader(header)

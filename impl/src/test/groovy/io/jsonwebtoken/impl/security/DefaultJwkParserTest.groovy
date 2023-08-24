@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.Conditions
+
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
@@ -63,7 +63,7 @@ class DefaultJwkParserTest {
         }
 
         def serializer = Services.loadFirst(Serializer)
-        def provider = Providers.findBouncyCastle(Conditions.TRUE) //always used
+        def provider = TestKeys.BC //always used
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
