@@ -19,7 +19,6 @@ import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.CheckedSupplier;
-import io.jsonwebtoken.impl.lang.Conditions;
 import io.jsonwebtoken.impl.lang.DefaultRegistry;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
@@ -90,7 +89,7 @@ public class JcaTemplate {
 
     // visible for testing
     protected Provider findBouncyCastle() {
-        return Providers.findBouncyCastle(Conditions.TRUE);
+        return Providers.findBouncyCastle();
     }
 
     private final String jcaName;
@@ -365,7 +364,7 @@ public class JcaTemplate {
 
         // visible for testing
         protected Provider findBouncyCastle() {
-            return Providers.findBouncyCastle(Conditions.TRUE);
+            return Providers.findBouncyCastle();
         }
 
         @SuppressWarnings("GrazieInspection")

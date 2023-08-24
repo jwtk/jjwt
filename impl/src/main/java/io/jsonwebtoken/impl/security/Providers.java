@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Condition;
 import io.jsonwebtoken.lang.Classes;
 
 import java.security.Provider;
@@ -34,7 +33,21 @@ final class Providers {
     private Providers() {
     }
 
-    private static Provider findBouncyCastle() {
+    /**
+     * Returns the BouncyCastle provider if and only if BouncyCastle is available, or {@code null} otherwise.
+     *
+     * <p>If the JVM runtime already has BouncyCastle registered
+     * (e.g. {@code Security.addProvider(bcProvider)}, that Provider instance will be found and returned.
+     * If an existing BC provider is not found, a new BC instance will be created, cached for future reference,
+     * and returned.</p>
+     *
+     * <p>If a new BC provider is created and returned, it is <em>not</em> registered in the JVM via
+     * {@code Security.addProvider} to ensure JJWT doesn't interfere with the application security provider
+     * configuration and/or expectations.</p>
+     *
+     * @return any available BouncyCastle Provider, or {@code null} if BouncyCastle is not available.
+     */
+    public static Provider findBouncyCastle() {
         if (!BOUNCY_CASTLE_AVAILABLE) {
             return null;
         }
@@ -57,29 +70,5 @@ final class Providers {
             BC_PROVIDER.set(provider);
         }
         return provider;
-    }
-
-    /**
-     * Returns the BouncyCastle provider if and only if the specified Condition evaluates to {@code true}
-     * <em>and</em> BouncyCastle is available.  Returns {@code null} otherwise.
-     *
-     * <p>If the condition evaluates to true and the JVM runtime already has BouncyCastle registered
-     * (e.g. {@code Security.addProvider(bcProvider)}, that Provider instance will be found and returned.
-     * If an existing BC provider is not found, a new BC instance will be created, cached for future reference,
-     * and returned.</p>
-     *
-     * <p>If a new BC provider is created and returned, it is <em>not</em> registered in the JVM via
-     * {@code Security.addProvider} to ensure JJWT doesn't interfere with the application security provider
-     * configuration and/or expectations.</p>
-     *
-     * @param c condition to evaluate
-     * @return any available BouncyCastle Provider if {@code c} evaluates to true, or {@code null} if either
-     * {@code c} evaluates to false, or BouncyCastle is not available.
-     */
-    public static Provider findBouncyCastle(Condition c) {
-        if (c.test()) {
-            return findBouncyCastle();
-        }
-        return null;
     }
 }

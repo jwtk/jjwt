@@ -20,6 +20,7 @@ import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
 
@@ -49,7 +50,7 @@ import java.security.spec.X509EncodedKeySpec
  */
 class TestCertificates {
 
-    static Provider BC = Providers.findBouncyCastle()
+    static Provider BC = new BouncyCastleProvider()
 
     private static InputStream getResourceStream(String filename) {
         String packageName = TestCertificates.class.getPackage().getName()

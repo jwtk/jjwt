@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.lang.Classes
 import org.junit.After
 import org.junit.Test
@@ -43,7 +42,7 @@ class ProvidersWithoutBCTest {
         mockStatic(Classes)
         expect(Classes.isAvailable(eq("org.bouncycastle.jce.provider.BouncyCastleProvider"))).andReturn(Boolean.FALSE).anyTimes()
         replay Classes
-        assertNull Providers.findBouncyCastle(Conditions.TRUE) // one should not be created/exist
+        assertNull Providers.findBouncyCastle() // one should not be created/exist
         verify Classes
         assertFalse ProvidersTest.bcRegistered() // nothing should be in the environment
     }

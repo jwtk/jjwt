@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.impl.lang.Conditions
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.security.Jwks
@@ -28,7 +27,6 @@ class PrivateConstructorsTest {
     void testPrivateCtors() { // for code coverage only
         new Classes()
         new KeysBridge()
-        new Conditions()
         new Functions()
         new Jwts.SIG()
         new Jwts.ENC()
