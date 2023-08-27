@@ -62,7 +62,7 @@ class EcSignatureAlgorithmTest {
 
     @Test
     void testFindOidKeys() {
-        for(def alg : EcSignatureAlgorithm.ALGS_BY_OID.values()) {
+        for(def alg : EcSignatureAlgorithm.BY_OID.values()) {
             String name = "${alg.getId()}_OID"
             String oid = EcSignatureAlgorithm.metaClass.getAttribute(EcSignatureAlgorithm, name) as String
             assertEquals oid, alg.OID

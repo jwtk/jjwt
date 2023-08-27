@@ -22,14 +22,16 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
 
 class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJwk> {
 
@@ -44,6 +46,27 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
     @Override
     protected boolean supportsKeyValues(JwkContext<?> ctx) {
         return super.supportsKeyValues(ctx) && ctx.containsKey(DefaultEcPrivateJwk.D.getId());
+    }
+
+    // visible for testing
+    protected ECPublicKey derivePublic(KeyFactory keyFactory, ECPublicKeySpec spec) throws InvalidKeySpecException {
+        return (ECPublicKey) keyFactory.generatePublic(spec);
+    }
+
+    protected ECPublicKey derivePublic(final JwkContext<ECPrivateKey> ctx) {
+        final ECPrivateKey key = ctx.getKey();
+        return generateKey(ctx, ECPublicKey.class, new CheckedFunction<KeyFactory, ECPublicKey>() {
+            @Override
+            public ECPublicKey apply(KeyFactory kf) {
+                try {
+                    ECPublicKeySpec spec = ECCurve.publicKeySpec(key);
+                    return derivePublic(kf, spec);
+                } catch (Exception e) {
+                    String msg = "Unable to derive ECPublicKey from ECPrivateKey: " + e.getMessage();
+                    throw new UnsupportedKeyException(msg, e);
+                }
+            }
+        });
     }
 
     @Override
@@ -93,9 +116,8 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
         JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, ctx);
         EcPublicJwk pubJwk = EcPublicJwkFactory.INSTANCE.createJwk(pubCtx);
 
-        ECParameterSpec spec = getCurveByJwaId(curveId);
-        final ECPrivateKeySpec privateSpec = new ECPrivateKeySpec(d, spec);
-
+        ECCurve curve = getCurveByJwaId(curveId);
+        final ECPrivateKeySpec privateSpec = new ECPrivateKeySpec(d, curve.toParameterSpec());
         ECPrivateKey key = generateKey(ctx, new CheckedFunction<KeyFactory, ECPrivateKey>() {
             @Override
             public ECPrivateKey apply(KeyFactory kf) throws Exception {

@@ -19,6 +19,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
@@ -44,8 +45,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 521.";
 
-    private static final String DER_ENCODING_SYS_PROPERTY_NAME =
-            "io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported";
+    private static final String DER_ENCODING_SYS_PROPERTY_NAME = "io.jsonwebtoken.impl.crypto.EllipticCurveSignatureValidator.derEncodingSupported";
 
     private static final String ES256_OID = "1.2.840.10045.4.3.2";
     private static final String ES384_OID = "1.2.840.10045.4.3.3";
@@ -104,13 +104,12 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     static final EcSignatureAlgorithm ES384 = new EcSignatureAlgorithm(384, ES384_OID);
     static final EcSignatureAlgorithm ES512 = new EcSignatureAlgorithm(521, ES512_OID);
 
-    private static final Map<String, SignatureAlgorithm> ALGS_BY_OID;
+    private static final Map<String, SignatureAlgorithm> BY_OID = new LinkedHashMap<>(3);
 
     static {
-        ALGS_BY_OID = new LinkedHashMap<>(3);
-        ALGS_BY_OID.put(ES256_OID, ES256);
-        ALGS_BY_OID.put(ES384_OID, ES384);
-        ALGS_BY_OID.put(ES512_OID, ES512);
+        for (EcSignatureAlgorithm alg : Collections.of(ES256, ES384, ES512)) {
+            BY_OID.put(alg.OID, alg);
+        }
     }
 
     static SignatureAlgorithm findByKey(Key key) {
@@ -121,7 +120,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         }
         algName = algName.toUpperCase(Locale.ENGLISH);
 
-        SignatureAlgorithm alg = ALGS_BY_OID.get(algName);
+        SignatureAlgorithm alg = BY_OID.get(algName);
         if (alg != null) {
             return alg;
         }
@@ -154,8 +153,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     @Override
     public KeyPairBuilder keyPair() {
-        return new DefaultKeyPairBuilder(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, this.KEY_PAIR_GEN_PARAMS)
-                .random(Randoms.secureRandom());
+        return new DefaultKeyPairBuilder(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, this.KEY_PAIR_GEN_PARAMS).random(Randoms.secureRandom());
     }
 
     @Override
@@ -172,10 +170,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
             int concatByteLength = sigFieldByteLength * 2;
 
             if (concatByteLength != this.signatureByteLength) {
-                String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " +
-                        Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " +
-                        Bytes.bitsMsg(this.orderBitLength) + " per " +
-                        "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
+                String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " + Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " + Bytes.bitsMsg(this.orderBitLength) + " per " + "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
                 throw new InvalidKeyException(msg);
             }
         }
@@ -229,9 +224,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
                         if (concatSignature[0] == 0x30 && "true".equalsIgnoreCase(System.getProperty(DER_ENCODING_SYS_PROPERTY_NAME))) {
                             derSignature = concatSignature;
                         } else {
-                            String msg = "Provided signature is " + Bytes.bytesMsg(concatSignature.length) + " but " +
-                                    getId() + " signatures must be exactly " + Bytes.bytesMsg(signatureByteLength) + " per " +
-                                    "[RFC 7518, Section 3.4 (validation)](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
+                            String msg = "Provided signature is " + Bytes.bytesMsg(concatSignature.length) + " but " + getId() + " signatures must be exactly " + Bytes.bytesMsg(signatureByteLength) + " per " + "[RFC 7518, Section 3.4 (validation)](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
                             throw new SignatureException(msg);
                         }
                     } else {
@@ -300,10 +293,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         int rawLen = Math.max(i, j);
         rawLen = Math.max(rawLen, outputLength / 2);
 
-        if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset
-                || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength
-                || derSignature[offset] != 2
-                || derSignature[offset + 2 + rLength] != 2) {
+        if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength || derSignature[offset] != 2 || derSignature[offset + 2 + rLength] != 2) {
             throw new JwtException("Invalid ECDSA signature format");
         }
 

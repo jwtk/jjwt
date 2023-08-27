@@ -15,8 +15,16 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.MalformedKeyException
+import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
+
+import java.security.KeyFactory
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECPublicKeySpec
+import java.security.spec.InvalidKeySpecException
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.fail
@@ -33,6 +41,33 @@ class EcPrivateJwkFactoryTest {
             fail()
         } catch (MalformedKeyException expected) {
             String msg = "EC JWK is missing required 'd' (ECC Private Key) value."
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testDerivePublicFails() {
+
+        def pair = Jwts.SIG.ES256.keyPair().build()
+        def priv = pair.getPrivate() as ECPrivateKey
+
+        final def context = new DefaultJwkContext(DefaultEcPrivateJwk.FIELDS)
+        context.setKey(priv)
+
+        def ex = new InvalidKeySpecException("invalid")
+
+        def factory = new EcPrivateJwkFactory() {
+            @Override
+            protected ECPublicKey derivePublic(KeyFactory keyFactory, ECPublicKeySpec spec) throws InvalidKeySpecException {
+                throw ex
+            }
+        }
+
+        try {
+            factory.derivePublic(context)
+            fail()
+        } catch (UnsupportedKeyException expected) {
+            String msg = 'Unable to derive ECPublicKey from ECPrivateKey: invalid'
             assertEquals msg, expected.getMessage()
         }
     }

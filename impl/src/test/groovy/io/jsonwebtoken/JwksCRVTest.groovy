@@ -15,20 +15,27 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.security.Curves
+import io.jsonwebtoken.impl.security.ECCurve
 import io.jsonwebtoken.impl.security.EdwardsCurve
+import io.jsonwebtoken.impl.security.StandardCurves
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
 import static org.junit.Assert.assertSame
+import static org.junit.Assert.assertTrue
 
 class JwksCRVTest {
 
     @Test
+    void testRegistry() {
+        assertTrue Jwks.CRV.get() instanceof StandardCurves
+    }
+
+    @Test
     void testInstances() {
-        assertSame Curves.P_256, Jwks.CRV.P256
-        assertSame Curves.P_384, Jwks.CRV.P384
-        assertSame Curves.P_521, Jwks.CRV.P521
+        assertSame ECCurve.P256, Jwks.CRV.P256
+        assertSame ECCurve.P384, Jwks.CRV.P384
+        assertSame ECCurve.P521, Jwks.CRV.P521
         assertSame EdwardsCurve.X25519, Jwks.CRV.X25519
         assertSame EdwardsCurve.X448, Jwks.CRV.X448
         assertSame EdwardsCurve.Ed25519, Jwks.CRV.Ed25519

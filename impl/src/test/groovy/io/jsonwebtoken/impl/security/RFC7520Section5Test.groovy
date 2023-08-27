@@ -30,8 +30,9 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
 import java.security.KeyPair
+import java.security.Provider
+import java.security.SecureRandom
 import java.security.interfaces.RSAPublicKey
-import java.security.spec.ECParameterSpec
 
 import static org.junit.Assert.assertEquals
 
@@ -634,7 +635,7 @@ class RFC7520Section5Test {
         def RFC_EPK = Jwks.parser().build().parse(FIGURE_111) as EcPrivateJwk
         def alg = new EcdhKeyAlgorithm(wrapAlg) {
             @Override
-            protected KeyPair generateKeyPair(Request request, ECParameterSpec spec) {
+            protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return new KeyPair(RFC_EPK.toPublicJwk().toKey(), RFC_EPK.toKey()) // ensure RFC value
             }
         }

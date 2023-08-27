@@ -124,9 +124,9 @@ class EcdhKeyAlgorithmTest {
             alg.getEncryptionKey(request)
             fail()
         } catch (UnsupportedKeyException expected) {
-            String msg = 'Key Encryption Key must be a java.security.interfaces.ECKey or valid Edwards Curve ' +
-                    'PublicKey instance. Cause: sun.security.rsa.RSAPublicKeyImpl with algorithm \'RSA\' is not a ' +
-                    'recognized Edwards Curve key.'
+            String msg = 'Key Encryption Key must be a java.security.interfaces.ECKey or Edwards Curve ' +
+                    'PublicKey on a supported curve. Cause: sun.security.rsa.RSAPublicKeyImpl with ' +
+                    'algorithm \'RSA\' is not a recognized Edwards Curve key.'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -142,9 +142,9 @@ class EcdhKeyAlgorithmTest {
             alg.getDecryptionKey(request)
             fail()
         } catch (UnsupportedKeyException expected) {
-            String msg = 'Key Decryption Key must be a java.security.interfaces.ECKey or valid Edwards Curve ' +
-                    'PrivateKey instance. Cause: sun.security.rsa.RSAPrivateCrtKeyImpl with algorithm \'RSA\' is ' +
-                    'not a recognized Edwards Curve key.'
+            String msg = 'Key Decryption Key must be a java.security.interfaces.ECKey or Edwards Curve ' +
+                    'PrivateKey on a supported curve. Cause: sun.security.rsa.RSAPrivateCrtKeyImpl with ' +
+                    'algorithm \'RSA\' is not a recognized Edwards Curve key.'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -218,6 +218,19 @@ class EcdhKeyAlgorithmTest {
             String msg = 'JWE Header \'epk\' (Ephemeral Public Key) value does not represent a point on the ' +
                     'expected curve. Value: {kty=OKP, crv=X448, ' +
                     'x=_XW37ksNpY3J7qglqWh56nZP3WgdrJlMtxPaplYn4zkPBZKanWlk2gR-m1xO2NXAOL3JZhHQBCc}'
+            assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testAssertEcCurveFails() {
+        def key = TestKeys.HS256
+        try {
+            EcdhKeyAlgorithm.assertEcCurve(key, 'foo.')
+            fail()
+        } catch (UnsupportedKeyException expected) {
+            String msg = "foo. Cause: Unable to determine JWA-standard Elliptic Curve for specified " +
+                    "key: ${KeysBridge.toString(key)}"
             assertEquals msg, expected.getMessage()
         }
     }
