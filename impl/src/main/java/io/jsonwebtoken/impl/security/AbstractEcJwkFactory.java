@@ -160,12 +160,12 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
 //        }
         // above implementation (k.compareTo/k.shiftRight) works correctly , but this is a little faster:
         for (int i = k.bitLength() - 1; i >= 0; i--) {
-            if (!k.testBit(i)) { // bit == 0
-                r1 = add(r0, r1, curve);
-                r0 = doublePoint(r0, curve);
-            } else { // bit == 1
+            if (k.testBit(i)) { // bit == 1
                 r0 = add(r0, r1, curve);
                 r1 = doublePoint(r1, curve);
+            } else { // bit == 0
+                r1 = add(r0, r1, curve);
+                r0 = doublePoint(r0, curve);
             }
         }
 
