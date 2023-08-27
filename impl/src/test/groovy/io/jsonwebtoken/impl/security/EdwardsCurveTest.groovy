@@ -110,6 +110,32 @@ class EdwardsCurveTest {
     }
 
     @Test
+    void testFindByKeyWithValidCurveButExcessiveLength() {
+        curves.each {
+            byte[] badValue = Bytes.random(it.encodedKeyByteLength + 1) // invalid size, too large
+            byte[] encoded = Bytes.concat(
+                    EdwardsCurve.publicKeyAsn1Prefix(badValue.length, it.ASN1_OID),
+                    badValue
+            )
+            def badKey = new TestPublicKey(encoded: encoded)
+            assertNull EdwardsCurve.findByKey(badKey)
+        }
+    }
+
+    @Test
+    void testFindByKeyWithValidCurveButWeakLength() {
+        curves.each {
+            byte[] badValue = Bytes.random(it.encodedKeyByteLength - 1) // invalid size, too small
+            byte[] encoded = Bytes.concat(
+                    EdwardsCurve.publicKeyAsn1Prefix(badValue.length, it.ASN1_OID),
+                    badValue
+            )
+            def badKey = new TestPublicKey(encoded: encoded)
+            assertNull EdwardsCurve.findByKey(badKey)
+        }
+    }
+
+    @Test
     void testToPrivateKey() {
         curves.each {
             def pair = TestKeys.forAlgorithm(it).pair
