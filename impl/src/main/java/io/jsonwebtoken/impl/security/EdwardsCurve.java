@@ -70,6 +70,19 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         }
     }
 
+    private static byte[] publicKeyAsn1Prefix(int byteLength, byte[] ASN1_OID) {
+        return Bytes.concat(
+                new byte[]{
+                        0x30, (byte) (byteLength + 10),
+                        0x30, 0x05}, // ASN.1 SEQUENCE of 5 bytes to follow (i.e. the OID)
+                ASN1_OID,
+                new byte[]{
+                        0x03,
+                        (byte) (byteLength + 1),
+                        0x00}
+        );
+    }
+
     private static byte[] privateKeyPkcs8Prefix(int byteLength, byte[] ASN1_OID, boolean ber) {
 
         byte[] keyPrefix = ber ?
@@ -119,7 +132,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
      *       XX XX XX ...  ;     encoded key material (not included in this PREFIX byte array variable)
      * </pre>
      */
-    private final byte[] PUBLIC_KEY_ASN1_PREFIX;
+    private final byte[] PUBLIC_KEY_ASN1_PREFIX; // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.7
 
     /**
      * PKCS8 (ASN.1) Version 1 encoding of a private key associated with this curve, as a prefix (that is,
@@ -175,17 +188,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         this.ASN1_OID = Bytes.concat(ASN1_OID_PREFIX, suffix);
         this.encodedKeyByteLength = (this.keyBitLength + 7) / 8;
 
-        this.PUBLIC_KEY_ASN1_PREFIX = Bytes.concat(
-                new byte[]{
-                        0x30, (byte) (this.encodedKeyByteLength + 10),
-                        0x30, 0x05}, // ASN.1 SEQUENCE of 5 bytes to follow (i.e. the OID)
-                this.ASN1_OID,
-                new byte[]{
-                        0x03,
-                        (byte) (this.encodedKeyByteLength + 1),
-                        0x00}
-        );
-
+        this.PUBLIC_KEY_ASN1_PREFIX = publicKeyAsn1Prefix(this.encodedKeyByteLength, this.ASN1_OID);
         this.PRIVATE_KEY_ASN1_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, true);
         this.PRIVATE_KEY_JDK11_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, false);
 
@@ -349,12 +352,21 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
             alg = CURVE_NAME_FINDER.apply(key);
             curve = findById(alg);
         }
-        if (curve == null) { // Fall back to key encoding if possible:
-            // Try to find the Key ASN.1 algorithm OID:
-            byte[] encoded = KeysBridge.findEncoded(key);
-            if (!Bytes.isEmpty(encoded)) {
-                int oidTerminalNode = findOidTerminalNode(encoded);
-                curve = BY_OID_TERMINAL_NODE.get(oidTerminalNode);
+
+        // try to perform oid and/or length checks:
+        byte[] encoded = KeysBridge.findEncoded(key);
+
+        if (curve == null && !Bytes.isEmpty(encoded)) { // Try to find the Key ASN.1 algorithm OID:
+            int oidTerminalNode = findOidTerminalNode(encoded);
+            curve = BY_OID_TERMINAL_NODE.get(oidTerminalNode);
+        }
+        if (curve != null && !Bytes.isEmpty(encoded)) {
+            // found a curve, and we have encoded bytes, let's make sure that the encoding represents
+            // the correct key length:
+            try {
+                curve.getKeyMaterial(key);
+            } catch (Throwable ignored) {
+                curve = null; // key length is invalid for its indicated curve, not a match
             }
         }
 
