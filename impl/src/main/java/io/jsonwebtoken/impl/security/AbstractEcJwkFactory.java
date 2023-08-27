@@ -152,11 +152,21 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         // Montgomery Ladder implementation to mitigate side-channel attacks (i.e. an 'add' operation and a 'double'
         // operation is calculated for every loop iteration, regardless if the 'add'' is needed or not)
         // See: https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Montgomery_ladder
-        while (k.compareTo(BigInteger.ZERO) > 0) {
-            ECPoint temp = add(r0, r1, curve);
-            r0 = k.testBit(0) ? temp : r0;
-            r1 = doublePoint(r1, curve);
-            k = k.shiftRight(1);
+//        while (k.compareTo(BigInteger.ZERO) > 0) {
+//            ECPoint temp = add(r0, r1, curve);
+//            r0 = k.testBit(0) ? temp : r0;
+//            r1 = doublePoint(r1, curve);
+//            k = k.shiftRight(1);
+//        }
+        // above implementation (k.compareTo/k.shiftRight) works correctly , but this is a little faster:
+        for (int i = k.bitLength() - 1; i >= 0; i--) {
+            if (!k.testBit(i)) { // bit == 0
+                r1 = add(r0, r1, curve);
+                r0 = doublePoint(r0, curve);
+            } else { // bit == 1
+                r0 = add(r0, r1, curve);
+                r1 = doublePoint(r1, curve);
+            }
         }
 
         return r0;
