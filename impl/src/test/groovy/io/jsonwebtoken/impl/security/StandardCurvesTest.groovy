@@ -15,42 +15,25 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
-class CurvesTest {
+class StandardCurvesTest {
 
-    @Test
-    void testCtor() {
-        new Curves() // test coverage only
-    }
+    static final StandardCurves curves = (StandardCurves) Jwks.CRV.get()
 
     @Test
     void testFindById() {
-        Curves.VALUES.each {
-            it.equals(Curves.findById(it.getId()))
-        }
-    }
-
-    @Test
-    void testFindByJcaName() {
-        Curves.VALUES.each {
-            it.equals(Curves.findByJcaName(it.getJcaName()))
-        }
-    }
-
-    @Test
-    void testFindByEllipticCurve() {
-        Curves.EC_CURVES.each {
-            it.equals(Curves.findBy(it.toParameterSpec().getCurve()))
+        curves.values().each {
+            assertSame it, curves.get(it.getId())
         }
     }
 
     @Test
     void testKeyPairBuilders() {
-        Curves.VALUES.each {
+        curves.values().each {
             def pair = it.keyPair().build()
             if (it instanceof ECCurve) {
                 assertEquals ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, pair.getPublic().getAlgorithm()

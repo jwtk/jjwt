@@ -21,6 +21,7 @@ import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -32,6 +33,8 @@ import java.security.spec.EllipticCurve;
 import java.util.Map;
 
 class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> {
+
+    private static final String UNSUPPORTED_CURVE_MSG = "The specified ECKey curve does not match a JWA standard curve id.";
 
     static final EcPublicJwkFactory INSTANCE = new EcPublicJwkFactory();
 
@@ -54,6 +57,14 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         return String.format(fmt, curveId, jwk);
     }
 
+    protected static String getJwaIdByCurve(EllipticCurve curve) {
+        ECCurve c = ECCurve.findByJcaCurve(curve);
+        if (c == null) {
+            throw new UnsupportedKeyException(UNSUPPORTED_CURVE_MSG);
+        }
+        return c.getId();
+    }
+
     @Override
     protected EcPublicJwk createJwkFromKey(JwkContext<ECPublicKey> ctx) {
 
@@ -64,7 +75,7 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         ECPoint point = key.getW();
 
         String curveId = getJwaIdByCurve(curve);
-        if (!contains(curve, point)) {
+        if (!ECCurve.contains(curve, point)) {
             String msg = keyContainsErrorMessage(curveId);
             throw new InvalidKeyException(msg);
         }
@@ -89,16 +100,15 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
         BigInteger x = reader.get(DefaultEcPublicJwk.X);
         BigInteger y = reader.get(DefaultEcPublicJwk.Y);
 
-        ECParameterSpec spec = getCurveByJwaId(curveId);
+        ECCurve curve = getCurveByJwaId(curveId);
         ECPoint point = new ECPoint(x, y);
 
-        if (!contains(spec.getCurve(), point)) {
+        if (!curve.contains(point)) {
             String msg = jwkContainsErrorMessage(curveId, ctx);
             throw new InvalidKeyException(msg);
         }
 
-        final ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, spec);
-
+        final ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, curve.toParameterSpec());
         ECPublicKey key = generateKey(ctx, new CheckedFunction<KeyFactory, ECPublicKey>() {
             @Override
             public ECPublicKey apply(KeyFactory kf) throws Exception {

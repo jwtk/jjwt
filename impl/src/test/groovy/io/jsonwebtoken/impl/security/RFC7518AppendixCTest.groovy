@@ -26,7 +26,8 @@ import org.junit.Test
 
 import java.nio.charset.StandardCharsets
 import java.security.KeyPair
-import java.security.spec.ECParameterSpec
+import java.security.Provider
+import java.security.SecureRandom
 
 import static org.junit.Assert.*
 
@@ -98,7 +99,7 @@ class RFC7518AppendixCTest {
 
             //ensure keypair reflects required RFC test value:
             @Override
-            protected KeyPair generateKeyPair(Request request, ECParameterSpec spec) {
+            protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return aliceJwk.toKeyPair().toJavaKeyPair()
             }
 

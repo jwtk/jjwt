@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.RfcTests
+import io.jsonwebtoken.security.Curve
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.OctetPrivateJwk
 import io.jsonwebtoken.security.OctetPublicJwk
@@ -154,7 +155,7 @@ class RFC8037AppendixATest {
         // ensure this is used during key algorithm execution per the RFC test case:
         def alg = new EcdhKeyAlgorithm(Jwts.KEY.A128KW) {
             @Override
-            protected KeyPair generateKeyPair(SecureRandom random, EdwardsCurve curve, Provider provider) {
+            protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
             }
         }
@@ -245,7 +246,7 @@ class RFC8037AppendixATest {
         // ensure this is used during key algorithm execution per the RFC test case:
         def alg = new EcdhKeyAlgorithm(Jwts.KEY.A256KW) {
             @Override
-            protected KeyPair generateKeyPair(SecureRandom random, EdwardsCurve curve, Provider provider) {
+            protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
             }
         }

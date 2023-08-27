@@ -18,7 +18,10 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
+import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
+
+import java.security.spec.EllipticCurve
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.fail
@@ -70,6 +73,17 @@ class EcPublicJwkFactoryTest {
                     "This could be due simply to an incorrectly-created JWK or possibly an attempted " +
                     "Invalid Curve Attack (see https://safecurves.cr.yp.to/twist.html for more information)."
             assertEquals msg, expected.getMessage()
+        }
+    }
+
+    @Test
+    void testUnsupportedCurve() {
+        def curve = new EllipticCurve(new TestECField(fieldSize: 1), BigInteger.ONE, BigInteger.TEN)
+        try {
+            EcPublicJwkFactory.getJwaIdByCurve(curve)
+            fail()
+        } catch (UnsupportedKeyException e) {
+            assertEquals EcPublicJwkFactory.UNSUPPORTED_CURVE_MSG, e.getMessage()
         }
     }
 }

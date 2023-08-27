@@ -17,11 +17,28 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Curve;
 
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwks.CRV
 public final class StandardCurves extends DelegatingRegistry<String, Curve> {
+
     public StandardCurves() {
-        super(new IdRegistry<>("Elliptic Curve", Curves.VALUES, false));
+        super(new IdRegistry<>("Elliptic Curve", Collections.<Curve>of(
+                ECCurve.P256,
+                ECCurve.P384,
+                ECCurve.P521,
+                EdwardsCurve.X25519,
+                EdwardsCurve.X448,
+                EdwardsCurve.Ed25519,
+                EdwardsCurve.Ed448
+        ), false));
     }
+
+//    public static Curve findByKey(Key key) {
+//        Curve curve = ECCurve.findByKey(key);
+//        if (curve == null) {
+//            curve = EdwardsCurve.findByKey(key);
+//        }
+//        return curve;
+//    }
 }
