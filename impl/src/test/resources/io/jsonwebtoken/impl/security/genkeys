@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+
+function main() {
+
+  local pwd=
+  local file
+  local names=
+  local name=
+  local args=
+
+  if ! command -v openssl >/dev/null 2>&1; then
+    echo "openssl is not available"
+    exit 1
+  fi
+
+  pwd="$(pwd)"
+  names=('RS256' 'RS384' 'RS512' 'PS256' 'PS384' 'PS512' 'ES256' 'ES384' 'ES512' 'X25519' 'X448' 'Ed25519' 'Ed448' )
+
+  for name in "${names[@]}"; do
+    args=()
+    local size="${name:2:3}"
+    local keysize="${size}"
+    file="${pwd}/${name}"
+    local algorithm='RSA'
+    if [[ "${name}" = RS* || "${name}" = PS* ]]; then
+      keysize=$((size * 8)) # 256 -> 2048, 384-> 3072, 512 -> 4096
+      args+=( '-pkeyopt' "rsa_keygen_bits:${keysize}" )
+    fi
+    if [[ "${name}" = PS* ]]; then
+      algorithm='RSA-PSS'
+      local saltlen=$((size / 8))
+      args+=( '-pkeyopt' "rsa_pss_keygen_md:sha${size}" '-pkeyopt' "rsa_pss_keygen_mgf1_md:sha${size}" '-pkeyopt' "rsa_pss_keygen_saltlen:${saltlen}" )
+    elif [[ "${name}" = ES* ]]; then
+      algorithm='EC'
+      if [[ "${size}" == '512' ]]; then size=521; fi
+      args+=( '-pkeyopt' "ec_paramgen_curve:P-${size}" )
+    elif [[ "${name}" = X* || "${name}" = Ed* ]]; then
+      algorithm="${name}"
+    fi
+
+    openssl genpkey -algorithm "${algorithm}" "${args[@]}" -out "${name}.pkcs8.pem"
+    openssl pkey -in "${name}.pkcs8.pem" -out "${name}.pub.pem" -pubout
+    #openssl genpkey -algorithm "${algorithm}" -pkeyopt ec_paramgen_curve:P-25
+  done
+}
+main "$@"
