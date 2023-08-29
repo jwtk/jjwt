@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+#
+# Copyright © 2023 jsonwebtoken.io
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+
+_readlink() {
+  $(type -p greadlink readlink | head -1) "$1" # prefer greadlink if it exists
+}
+
+_dirpath() {
+  [[ -z "$1" ]] && echo "_dirpath: a directory argument is required." >&2 && return 1
+  [[ ! -d "$1" ]] && echo "_dirpath: argument is not a directory: $1" >&2 && return 1
+  local dirpath
+  dirpath="$(cd -P "$1" && pwd)"
+  echo "$dirpath"
+}
+
+_filepath() {
+  [[ -d "$1" ]] && echo "_filepath: directory arguments are not permitted" >&2 && return 1
+  local dirname filename canonical_dir
+  dirname="$(dirname "$1")"
+  filename="$(basename "$1")"
+  canonical_dir="$(_dirpath "$dirname")"
+  echo "$canonical_dir/$filename"
+}
+
+##
+# Returns the canonical filesystem path of the specified argument
+# Argument must be a directory or a file
+##
+_path() {
+  local target="$1"
+  if [[ -d "$target" ]]; then # target is a directory, get its canonical path:
+    target="$(_dirpath "$target")"
+  else
+    while [[ -h "$target" ]]; do # target is a symlink, so resolve it
+      target="$(_readlink "$target")"
+      if [[ "$target" != /* ]]; then # target doesn't start with '/', so it's not yet absolute.  Fix that:
+        target="$(_filepath "$target")"
+      fi
+    done
+    target="$(_filepath "$target")"
+  fi
+  echo "$target"
+}
+
+libsofthsm2=
+
+_softhsmu() {
+  softhsm2-util --so-pin 1234 --pin 1234 --token jjwt "$@"
+}
+_pkcs11t() {
+  pkcs11-tool --module "${libsofthsm2}" --so-pin 1234 --pin 1234 --token-label jjwt "$@"
+}
+_errexit() {
+  echo "$1"
+  rm -rf -- *.der >/dev/null 2>&1
+  exit 1
+}
+
+main() {
+
+  local script_file script_dir name algid index
+
+  if ! command -v command -v softhsm2-util >/dev/null 2>&1; then
+    echo "softhsm2-util command is not available. Install with 'brew install softhsm' or 'sudo apt-get -y install softhsm2'"
+    return 1
+  fi
+  if ! command -v pkcs11-tool >/dev/null 2>&1; then
+      echo "pkcs11-tool command is not available. Install with 'brew install opensc' or 'sudo apt-get -y install opensc'"
+      return 1
+  fi
+  # ensure global variable for use with _pkcs11t function:
+  libsofthsm2='/opt/homebrew/lib/softhsm/libsofthsm2.so' # MacOS
+  [[ -f "${libsofthsm2}" ]] || libsofthsm2='/usr/local/lib/softhsm/libsofthsm2.so' # Ubuntu
+  [[ -f "${libsofthsm2}" ]] || { echo "cannot locate libsofthsm2.so"; exit 1; }
+
+  script_file="$(_path "${BASH_SOURCE[0]}")"
+  script_dir="$(dirname "$script_file")"
+  readonly script_dir script_file
+
+  cd "${script_dir}"
+
+  echo
+  # delete any existing JJWT slot/tokens
+  if softhsm2-util --show-slots | grep 'Label:' | grep 'jjwt' >/dev/null 2>&1; then
+    echo "JJWT: deleting existing softhsm jjwt slot..."
+    softhsm2-util --delete-token --token jjwt || { echo "JJWT: unable to delete jjwt slot, exiting."; exit 1; }
+  fi
+
+  echo; echo "JJWT: creating softhsm jjwt slot..."
+  if ! softhsm2-util --init-token --free --label jjwt --so-pin 1234 --pin 1234; then
+    echo "JJWT: Unable to create softhsm jjwt slot, exiting."
+    exit 1
+  fi
+  echo
+
+  index=0
+  for name in $(ls *.pkcs8.pem | sort -f); do # name will be unqualified, e.g. RS256.pkcs8.pem
+
+    algid="${name%%.*}" # RS256.pkcs8.pem --> RS256
+    local privder pubpem pubder certpem certder hexid
+    privder="${algid}.priv.der"
+    pubpem="${algid}.pub.pem"
+    pubder="${algid}.pub.der"
+    certpem="${algid}.crt.pem"
+    certder="${algid}.crt.der"
+
+    hexid="$(printf '%04x' ${index})"
+    hexid="${hexid^^}"
+
+    echo "creating temporary der files for pkcs11-tool import"
+    openssl pkey -in "${name}" -out "${privder}" -outform DER || _errexit "can't create private key der file"
+    openssl pkey -in "${pubpem}" -pubin -out "${pubder}" -outform DER || _errexit "can't create public key der file"
+    openssl x509 -in "${certpem}" -out "${certder}" -outform DER || _errexit "can't create x509 cert der file"
+
+    echo "Importing ${algid} keypair with id ${hexid}"
+    if [[ "${algid}" != PS* ]]; then # softhsm import doesn't currently support RSA-PSS pem files
+      _softhsmu --import "${name}" --label "${algid}" --id "${hexid}" || _errexit "can't import key pair"
+#    else
+#      # echo "importing ${algid} keys and cert into softhsm via pkcs11-tool"
+#      _pkcs11t --write-object "${privder}" --type privkey --id "${hexid}" || _errexit "can't import private key"
+#      _pkcs11t --write-object "${pubder}" --type pubkey --id "${hexid}" || _errexit "can't import public key"
+    fi
+
+    echo "Importing ${algid} x509 cert with id ${hexid}"
+    _pkcs11t --write-object "${certder}" --label "${algid}" --type cert --id "${hexid}" || _errexit "can't import x509 cert"
+
+#    echo "importing ${algid} keys and cert into softhsm via pkcs11-tool"
+#    _pkcs11t --write-object "${privder}" --type privkey --id "${hexid}" || _errexit "can't import private key"
+#    _pkcs11t --write-object "${pubder}" --type pubkey --id "${hexid}" || _errexit "can't import public key"
+#    _pkcs11t --write-object "${certder}" --type cert --id "${hexid}" || _errexit "can't import x509 cert"
+
+    echo "deleting temporary der files"
+    rm -rf -- *.der
+
+    index=$((index+1)) # increment id counter
+
+  done # end name loop
+}
+main "$@"
+
