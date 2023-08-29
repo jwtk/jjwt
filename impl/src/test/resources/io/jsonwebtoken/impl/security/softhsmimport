@@ -96,7 +96,7 @@ main() {
   fi
   # ensure global variable for use with _pkcs11t function:
   libsofthsm2='/opt/homebrew/lib/softhsm/libsofthsm2.so' # MacOS
-  [[ -f "${libsofthsm2}" ]] || libsofthsm2='/usr/local/lib/softhsm/libsofthsm2.so' # Ubuntu
+  [[ -f "${libsofthsm2}" ]] || libsofthsm2='/usr/lib/softhsm/libsofthsm2.so' # Ubuntu
   [[ -f "${libsofthsm2}" ]] || { echo "cannot locate libsofthsm2.so"; exit 1; }
 
   script_file="$(_path "${BASH_SOURCE[0]}")"
