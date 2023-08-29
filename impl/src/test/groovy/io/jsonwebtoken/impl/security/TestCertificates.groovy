@@ -111,12 +111,6 @@ class TestCertificates {
         PublicKey pub = readPublicKey(alg) as PublicKey
         PrivateKey priv = readPrivateKey(alg) as PrivateKey
 
-        // X25519 and X448 cannot have self-signed certs:
-        if (alg instanceof EdwardsCurve && !((EdwardsCurve) alg).isSignatureCurve()) {
-            return new TestKeys.Bundle(alg, pub, priv)
-        }
-        // otherwise we can get a cert:
-
         // If the public key loaded is a BC key, the default provider doesn't understand the cert key OID
         // (for example, an Ed25519 key on JDK 8 which doesn't natively support such keys). This means the
         // X.509 certificate should also be loaded by BC; otherwise the Sun X.509 CertificateFactory returns

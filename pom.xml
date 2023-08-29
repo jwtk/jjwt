@@ -326,6 +326,7 @@
                                     <exclude>**/mvnw</exclude>
                                     <exclude>**/lombok.config</exclude>
                                     <exclude>.gitattributes</exclude>
+                                    <exclude>**/genkeys</exclude>
                                 </excludes>
                             </licenseSet>
                         </licenseSets>
