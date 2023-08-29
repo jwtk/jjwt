@@ -92,7 +92,7 @@ class TestCertificates {
 
     private static PrivateKey readPrivateKey(Identifiable alg) {
         final String id = alg.id
-        PEMParser parser = getParser(id + '.key.pem')
+        PEMParser parser = getParser(id + '.pkcs8.pem')
         parser.withCloseable {
             PrivateKeyInfo info
             Object object = it.readObject()

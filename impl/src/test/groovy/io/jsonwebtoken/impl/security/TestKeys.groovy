@@ -71,9 +71,10 @@ class TestKeys {
     static Bundle ES512 = TestCertificates.readBundle(Jwts.SIG.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
-    static Bundle EdDSA = TestCertificates.readBundle(Jwts.SIG.EdDSA)
     static Bundle Ed25519 = TestCertificates.readBundle(Jwks.CRV.Ed25519)
     static Bundle Ed448 = TestCertificates.readBundle(Jwks.CRV.Ed448)
+    // just an alias for Ed448 for now:
+    static Bundle EdDSA = Ed448
     static Bundle X25519 = TestCertificates.readBundle(EdwardsCurve.X25519)
     static Bundle X448 = TestCertificates.readBundle(EdwardsCurve.X448)
     static Set<Bundle> EdEC = Collections.setOf(EdDSA, Ed25519, Ed448, X25519, X448)

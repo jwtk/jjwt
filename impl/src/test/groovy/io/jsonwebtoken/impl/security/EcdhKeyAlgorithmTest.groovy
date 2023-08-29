@@ -176,10 +176,10 @@ class EcdhKeyAlgorithmTest {
             fail()
         } catch (UnsupportedKeyException expected) {
             String msg = 'JWE Header \'epk\' (Ephemeral Public Key) value is not a supported Elliptic Curve Public ' +
-                    'JWK. Value: {kty=RSA, n=zkH0MwxQ2cUFWsvOPVFqI_dk2EFTjQolCy97mI5_wYCbaOoZ9Rm7c675mAeemRtNzgNVE' +
-                    'z7m298ENqNGqPk2Nv3pBJ_XCaybBlp61CLez7dQ2h5jUFEJ6FJcjeKHS-MwXr56t2ISdfLNMYtVIxjvXQcYx5VmS4mIqT' +
-                    'xj5gVGtQVi0GXdH6SvpdKV0fjE9KOhjsdBfKQzZfcQlusHg8pThwvjpMwCZnkxCS0RKa9y4-5-7MkC33-8-neZUzS7b6N' +
-                    'dFxh6T_pMXpkf8d81fzVo4ZBMloweW0_l8MOdVxeX7M_7XSC1ank5i3IEZcotLmJYMwEo7rMpZVLevEQ118Eo8Q, e=AQAB}'
+                    'JWK. Value: {kty=RSA, n=vPYf1VSy58i6ic93goenzF5UO9oLxyiTSF64lGFUJ6_MBDydAvY9PS76ymvhUcSrsDUHgb' +
+                    '0arsp6MDXOfZxYHn2C7o39n8-bQ7yS4hQm6kkl8KB5OiOkJFkFjEHrwnqykXygx1VFpcVpbBvxDn640ODEScWyoUUPd4sO' +
+                    'K-esTt4D9-q0PXsXzfRT4eOrnpXHJTan_KK_a-UYmfWPr-xIEPUxnLPCD68mIHoSPAaJiv37SkAWHJ9-fm_DfnYTwTi0rx' +
+                    'e2FRQ1-vkOxe6C2-n1ebsqCZPKr0J_2MfwqP0raxLfyGicxM5ee5RSTTRMCA4UyX5dubZvh2pLoaS8PCZajw, e=AQAB}'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -196,10 +196,10 @@ class EcdhKeyAlgorithmTest {
             fail()
         } catch (UnsupportedKeyException expected) {
             String msg = 'JWE Header \'epk\' (Ephemeral Public Key) value is not a supported Elliptic Curve Public ' +
-                    'JWK. Value: {kty=RSA, n=zkH0MwxQ2cUFWsvOPVFqI_dk2EFTjQolCy97mI5_wYCbaOoZ9Rm7c675mAeemRtNzgNVE' +
-                    'z7m298ENqNGqPk2Nv3pBJ_XCaybBlp61CLez7dQ2h5jUFEJ6FJcjeKHS-MwXr56t2ISdfLNMYtVIxjvXQcYx5VmS4mIqT' +
-                    'xj5gVGtQVi0GXdH6SvpdKV0fjE9KOhjsdBfKQzZfcQlusHg8pThwvjpMwCZnkxCS0RKa9y4-5-7MkC33-8-neZUzS7b6N' +
-                    'dFxh6T_pMXpkf8d81fzVo4ZBMloweW0_l8MOdVxeX7M_7XSC1ank5i3IEZcotLmJYMwEo7rMpZVLevEQ118Eo8Q, e=AQAB}'
+                    'JWK. Value: {kty=RSA, n=vPYf1VSy58i6ic93goenzF5UO9oLxyiTSF64lGFUJ6_MBDydAvY9PS76ymvhUcSrsDUHgb' +
+                    '0arsp6MDXOfZxYHn2C7o39n8-bQ7yS4hQm6kkl8KB5OiOkJFkFjEHrwnqykXygx1VFpcVpbBvxDn640ODEScWyoUUPd4sO' +
+                    'K-esTt4D9-q0PXsXzfRT4eOrnpXHJTan_KK_a-UYmfWPr-xIEPUxnLPCD68mIHoSPAaJiv37SkAWHJ9-fm_DfnYTwTi0rx' +
+                    'e2FRQ1-vkOxe6C2-n1ebsqCZPKr0J_2MfwqP0raxLfyGicxM5ee5RSTTRMCA4UyX5dubZvh2pLoaS8PCZajw, e=AQAB}'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -217,7 +217,7 @@ class EcdhKeyAlgorithmTest {
         } catch (InvalidKeyException expected) {
             String msg = 'JWE Header \'epk\' (Ephemeral Public Key) value does not represent a point on the ' +
                     'expected curve. Value: {kty=OKP, crv=X448, ' +
-                    'x=_XW37ksNpY3J7qglqWh56nZP3WgdrJlMtxPaplYn4zkPBZKanWlk2gR-m1xO2NXAOL3JZhHQBCc}'
+                    'x=XxQlWa22S36qjui_M2IBT5vg0CmmLJkpBhXeiuBptUxJ_nnD0uITBH5N9PHkhOM8gfGtNkh6Jwc}'
             assertEquals msg, expected.getMessage()
         }
     }
