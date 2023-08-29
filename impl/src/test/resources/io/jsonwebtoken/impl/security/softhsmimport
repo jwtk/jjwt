@@ -17,6 +17,12 @@
 
 set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
+# global vars used across functions
+libsofthsm2=
+script_file=
+script_dir=
+script_name=
+
 _readlink() {
   $(type -p greadlink readlink | head -1) "$1" # prefer greadlink if it exists
 }
@@ -58,23 +64,27 @@ _path() {
   echo "$target"
 }
 
-libsofthsm2=
-
 _softhsmu() {
   softhsm2-util --so-pin 1234 --pin 1234 --token jjwt "$@"
 }
+
 _pkcs11t() {
   pkcs11-tool --module "${libsofthsm2}" --so-pin 1234 --pin 1234 --token-label jjwt "$@"
 }
+
+_log() {
+  echo "softhsmimport: $1"
+}
+
 _errexit() {
-  echo "$1"
+  _log "$1, exiting."
   rm -rf -- *.der >/dev/null 2>&1
   exit 1
 }
 
 main() {
 
-  local script_file script_dir name algid index
+  local script_file script_dir script_name name algid index
 
   if ! command -v command -v softhsm2-util >/dev/null 2>&1; then
     echo "softhsm2-util command is not available. Install with 'brew install softhsm' or 'sudo apt-get -y install softhsm2'"
@@ -91,22 +101,20 @@ main() {
 
   script_file="$(_path "${BASH_SOURCE[0]}")"
   script_dir="$(dirname "$script_file")"
-  readonly script_dir script_file
+  script_name="$(basename "${script_file}")"
+  readonly script_dir script_file script_name
 
   cd "${script_dir}"
 
   echo
   # delete any existing JJWT slot/tokens
   if softhsm2-util --show-slots | grep 'Label:' | grep 'jjwt' >/dev/null 2>&1; then
-    echo "JJWT: deleting existing softhsm jjwt slot..."
-    softhsm2-util --delete-token --token jjwt || { echo "JJWT: unable to delete jjwt slot, exiting."; exit 1; }
+    _log "deleting existing softhsm jjwt slot..."
+    softhsm2-util --delete-token --token jjwt || _errexit "unable to delete jjwt slot"
   fi
 
-  echo; echo "JJWT: creating softhsm jjwt slot..."
-  if ! softhsm2-util --init-token --free --label jjwt --so-pin 1234 --pin 1234; then
-    echo "JJWT: Unable to create softhsm jjwt slot, exiting."
-    exit 1
-  fi
+  echo; _log "creating softhsm jjwt slot..."
+  softhsm2-util --init-token --free --label jjwt --so-pin 1234 --pin 1234 || _errexit "unable to create jjwt slot"
   echo
 
   index=0
@@ -123,13 +131,15 @@ main() {
     hexid="$(printf '%04x' ${index})"
     hexid="${hexid^^}"
 
-    echo "creating temporary der files for pkcs11-tool import"
+    _log "Creating temporary ${algid} der files for pkcs11-tool import"
     openssl pkey -in "${name}" -out "${privder}" -outform DER || _errexit "can't create private key der file"
     openssl pkey -in "${pubpem}" -pubin -out "${pubder}" -outform DER || _errexit "can't create public key der file"
     openssl x509 -in "${certpem}" -out "${certder}" -outform DER || _errexit "can't create x509 cert der file"
 
-    echo "Importing ${algid} keypair with id ${hexid}"
-    if [[ "${algid}" != PS* ]]; then # softhsm import doesn't currently support RSA-PSS pem files
+    _log "Importing ${algid} keypair with id ${hexid}"
+    # softhsm import doesn't currently support RSA-PSS pem files: https://github.com/opendnssec/SoftHSMv2/issues/721
+    # TODO: remove if-block when softhsm2 supports RSA-PSS
+    if [[ "${algid}" != PS* ]]; then
       _softhsmu --import "${name}" --label "${algid}" --id "${hexid}" || _errexit "can't import key pair"
 #    else
 #      # echo "importing ${algid} keys and cert into softhsm via pkcs11-tool"
@@ -137,16 +147,12 @@ main() {
 #      _pkcs11t --write-object "${pubder}" --type pubkey --id "${hexid}" || _errexit "can't import public key"
     fi
 
-    echo "Importing ${algid} x509 cert with id ${hexid}"
+    _log "Importing ${algid} x509 cert with id ${hexid}"
     _pkcs11t --write-object "${certder}" --label "${algid}" --type cert --id "${hexid}" || _errexit "can't import x509 cert"
 
-#    echo "importing ${algid} keys and cert into softhsm via pkcs11-tool"
-#    _pkcs11t --write-object "${privder}" --type privkey --id "${hexid}" || _errexit "can't import private key"
-#    _pkcs11t --write-object "${pubder}" --type pubkey --id "${hexid}" || _errexit "can't import public key"
-#    _pkcs11t --write-object "${certder}" --type cert --id "${hexid}" || _errexit "can't import x509 cert"
-
-    echo "deleting temporary der files"
+    _log "Deleting temporary ${algid} der files"
     rm -rf -- *.der
+    echo
 
     index=$((index+1)) # increment id counter
 
