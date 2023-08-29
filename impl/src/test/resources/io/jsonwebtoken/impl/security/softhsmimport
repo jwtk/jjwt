@@ -73,7 +73,7 @@ _pkcs11t() {
 }
 
 _log() {
-  echo "softhsmimport: $1"
+  echo "${script_name}: $1"
 }
 
 _errexit() {
