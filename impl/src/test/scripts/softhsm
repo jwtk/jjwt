@@ -19,7 +19,7 @@ set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_
 
 # global vars used across functions
 SOFTHSM2_CONF="${SOFTHSM2_CONF:-}"
-script_file=
+script_file="${BASH_SOURCE[0]}"
 script_dir=
 script_name=
 user_home=
@@ -101,7 +101,7 @@ _setup() {
     _errexit "pkcs11-tool command is not available. Install with 'brew install opensc' or 'sudo apt-get -y install opensc'"
   fi
 
-  script_file="$(_path "${BASH_SOURCE[0]}")"
+  script_file="$(_path "${script_file}")" # canonicalize
   script_dir="$(dirname "$script_file")"
   script_name="$(basename "${script_file}")"
   user_home="$(_path "${HOME}")"
