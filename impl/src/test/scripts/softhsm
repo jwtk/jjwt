@@ -133,7 +133,6 @@ _configure() {
   local tokendir="${2:-}"
   if [[ "${opt}" == '--tokendir' ]]; then
     [[ -n "${tokendir}" ]] || _errexit "--tokendir value cannot be empty"
-    [[ -d "${tokendir}" ]] || _errexit "--tokendir value '${tokendir}' is not a directory"
     tokendir="$(_path "${tokendir}")" #canonicalize
   fi
 
@@ -147,7 +146,7 @@ _configure() {
 
       export SOFTHSM2_CONF="${userconf}"
       confdir="$(dirname "${SOFTHSM2_CONF}")"
-      [[ -d "${tokendir}" ]] || tokendir="${confdir}/tokens" # assign default
+      [[ -n "${tokendir}" ]] || tokendir="${confdir}/tokens" # assign default
 
       mkdir -p "${confdir}" || _errexit "unable to ensure ${confdir} exists"
       mkdir -p "${tokendir}" || _errexit "unable to ensure ${tokendir} exists"
