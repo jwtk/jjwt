@@ -16,15 +16,20 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.KeyPairBuilderSupplier
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
+import sun.security.pkcs11.SunPKCS11
 
 import java.nio.charset.StandardCharsets
+import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.Provider
 import java.security.PublicKey
@@ -56,6 +61,68 @@ class TestCertificates {
         String packageName = TestCertificates.class.getPackage().getName()
         String resourcePath = Strings.replace(packageName, ".", "/") + "/" + filename
         return Classes.getResourceAsStream(resourcePath)
+    }
+
+    static Provider PKCS11 // currently null on windows. TODO: enable windows.pkcs11.cfg file
+    /**
+     * Maintainers note:
+     *
+     * This collection will only contain relevant entries when the following are true:
+     *
+     * 1. We're running on a Linux or MacOS machine that has a valid SoftHSM installation populated with entries
+     *    via the softhsmimport script in this git repository.
+     *
+     * 2. The JVM version being tested supports the key algorithm identified in the PKCS11 PrivateKey.  This means:
+     *    On JDK < 15, Ed25519 and Ed448 PrivateKeys cannot be loaded (but their certs and PublicKeys can because
+     *    the Sun Provider implementation supports generic X509 encoding).
+     *    Also on JDK < 11 X25519 and X448 PrivateKeys cannot be loaded (but their certs and PublicKeys can).
+     *
+     * 3. RSASSA-PSS keys of any kind are not available because SoftHSM doesn't currently support them. See
+     *    https://github.com/opendnssec/SoftHSMv2/issues/721
+     */
+    static Collection<TestKeys.Bundle> PKCS11_BUNDLES // empty on windows until windows.pkcs11.cfg can be used
+    static {
+        // false implies linux/ubuntu until we need to support Windows:
+        String osname = System.getProperty('os.name').toLowerCase()
+        String prefix = osname.startsWith('mac') ? 'macos' : (osname.startsWith("linux") ? 'linux' : null)
+        if (prefix != null) { // null on windows at the moment
+            InputStream is = getResourceStream("${prefix}.pkcs11.cfg")
+            PKCS11 = new SunPKCS11(is)
+        }
+
+        Collection<TestKeys.Bundle> bundles = new ArrayList<>(20)
+
+        if (PKCS11 != null) {
+            KeyStore ks = KeyStore.getInstance("PKCS11", PKCS11)
+            char[] pin = "1234".toCharArray()
+            // equals the SoftHSM --so-pin and --pin values used in the ./softhsmimport script
+            ks.load(null, pin)
+
+            def algs = []
+            algs.addAll(Jwts.SIG.get().values().findAll({
+                it instanceof KeyPairBuilderSupplier && it.id != 'EdDSA'
+            }))
+            algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
+
+            for (Identifiable alg : algs) {
+                def priv = null
+                def pub
+                def cert
+                try {
+                    priv = ks.getKey(alg.id, pin) as PrivateKey
+                    //println "key: $key"
+                } catch (Throwable ignored) { // cannot load on current JVM (algorithm not available)
+                }
+
+                cert = ks.getCertificate(alg.id) as X509Certificate
+                if (cert != null) { // will be null for PS* algs since SoftHSM2 doesn't support them yet
+                    pub = cert.getPublicKey()
+                    def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
+                    bundles.add(bundle)
+                }
+            }
+        }
+        PKCS11_BUNDLES = Collections.unmodifiableList(bundles) // empty on windows at the moment
     }
 
     private static PEMParser getParser(String filename) {

@@ -22,6 +22,12 @@ jobs:
         uses: oracle-actions/setup-java@v1
         with:
           release: ${{ matrix.java }}
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Populate SoftHSM keys
+        run: sudo impl/src/test/resources/io/jsonwebtoken/impl/security/softhsmimport
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -42,6 +48,12 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           check-latest: true
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Populate SoftHSM keys
+        run: sudo impl/src/test/resources/io/jsonwebtoken/impl/security/softhsmimport
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -64,6 +76,12 @@ jobs:
           distribution: 'zulu'
           cache: 'maven'
           check-latest: true
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Populate SoftHSM keys
+        run: sudo impl/src/test/resources/io/jsonwebtoken/impl/security/softhsmimport
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
