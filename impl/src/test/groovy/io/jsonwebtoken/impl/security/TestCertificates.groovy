@@ -91,7 +91,7 @@ class TestCertificates {
                 InputStream is = getResourceStream(basename)
                 //noinspection UnnecessaryQualifiedReference
                 PKCS11 = new sun.security.pkcs11.SunPKCS11(is)
-            } catch (IllegalAccessError jdk9OrLater) {
+            } catch (Throwable jdk9OrLater) {
                 Provider p = Security.getProvider("SunPKCS11")
                 String fqfn = fqfn(basename)
                 PKCS11 = p.configure(fqfn) as Provider
