@@ -26,13 +26,9 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.openssl.PEMKeyPair
 import org.bouncycastle.openssl.PEMParser
-import sun.security.pkcs11.SunPKCS11
 
 import java.nio.charset.StandardCharsets
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.Provider
-import java.security.PublicKey
+import java.security.*
 import java.security.cert.X509Certificate
 import java.security.spec.KeySpec
 import java.security.spec.PKCS8EncodedKeySpec
@@ -57,9 +53,13 @@ class TestCertificates {
 
     static Provider BC = new BouncyCastleProvider()
 
-    private static InputStream getResourceStream(String filename) {
+    private static String fqfn(String basename) {
         String packageName = TestCertificates.class.getPackage().getName()
-        String resourcePath = Strings.replace(packageName, ".", "/") + "/" + filename
+        return Strings.replace(packageName, ".", "/") + "/" + basename
+    }
+
+    private static InputStream getResourceStream(String filename) {
+        String resourcePath = fqfn(filename)
         return Classes.getResourceAsStream(resourcePath)
     }
 
@@ -86,8 +86,16 @@ class TestCertificates {
         String osname = System.getProperty('os.name').toLowerCase()
         String prefix = osname.startsWith('mac') ? 'macos' : (osname.startsWith("linux") ? 'linux' : null)
         if (prefix != null) { // null on windows at the moment
-            InputStream is = getResourceStream("${prefix}.pkcs11.cfg")
-            PKCS11 = new SunPKCS11(is)
+            String basename = "${prefix}.pkcs11.cfg"
+            try {
+                InputStream is = getResourceStream(basename)
+                //noinspection UnnecessaryQualifiedReference
+                PKCS11 = new sun.security.pkcs11.SunPKCS11(is)
+            } catch (IllegalAccessError jdk9OrLater) {
+                Provider p = Security.getProvider("SunPKCS11")
+                String fqfn = fqfn(basename)
+                PKCS11 = p.configure(fqfn) as Provider
+            }
         }
 
         Collection<TestKeys.Bundle> bundles = new ArrayList<>(20)
