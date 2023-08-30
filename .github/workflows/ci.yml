@@ -26,8 +26,10 @@ jobs:
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
         run: sudo apt-get install -y opensc
-      - name: Populate SoftHSM keys
-        run: sudo impl/src/test/resources/io/jsonwebtoken/impl/security/softhsmimport
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -52,8 +54,10 @@ jobs:
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
         run: sudo apt-get install -y opensc
-      - name: Populate SoftHSM keys
-        run: sudo impl/src/test/resources/io/jsonwebtoken/impl/security/softhsmimport
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -80,8 +84,10 @@ jobs:
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
         run: sudo apt-get install -y opensc
-      - name: Populate SoftHSM keys
-        run: sudo impl/src/test/resources/io/jsonwebtoken/impl/security/softhsmimport
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -122,6 +128,14 @@ jobs:
           java-version: '8'
           cache: 'maven'
           check-latest: true
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Wait to start
         # wait a little to start: code coverage usually only takes about 1 1/2 minutes.  If coverage fails, it will
         # cancel the other running builds, and we don't want that (because we want to see if jobs fail due to
