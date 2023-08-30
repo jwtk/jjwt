@@ -52,6 +52,15 @@ import java.security.spec.X509EncodedKeySpec
 class TestCertificates {
 
     static Provider BC = new BouncyCastleProvider()
+    static final String PKCS11_LIB_ENV_VAR_NAME = 'JJWT_TEST_PKCS11_LIBRARY'
+    static final List<String> DEFAULT_PKCS11_LIB_LOCATIONS = [
+            // Tried in order:
+            '/opt/homebrew/lib/softhsm/libsofthsm2.so', // macos: brew install softhsm
+            '/usr/lib/softhsm/libsofthsm2.so',          // ubuntu: sudo apt-get install -y softhsm2
+            '/usr/local/lib/libsofthsm2.so',            // other *nixes?
+            'C:\\SoftHSM2\\lib\\softhsm2-x64.dll',      // https://github.com/disig/SoftHSM2-for-Windows
+            'C:\\SoftHSM2\\lib\\softhsm2.dll'           // https://github.com/disig/SoftHSM2-for-Windows
+    ]
 
     private static String relativePath(String basename) {
         String packageName = TestCertificates.class.getPackage().getName()
@@ -62,8 +71,6 @@ class TestCertificates {
         String resourcePath = relativePath(filename)
         return Classes.getResourceAsStream(resourcePath)
     }
-
-    static Provider PKCS11 // currently null on windows. TODO: enable windows.pkcs11.cfg file
 
     private static <T> T jvmTry(Closure<T> c) {
         try {
@@ -79,7 +86,44 @@ class TestCertificates {
         }
     }
 
+    private static Provider getAvailablePkcs11Provider() {
+        String val = Strings.clean(System.getenv(PKCS11_LIB_ENV_VAR_NAME))
+        def paths = []
+        if (val != null) {
+            paths.add(val) // highest priority
+        }
+        paths.addAll(DEFAULT_PKCS11_LIB_LOCATIONS) // remaining priorities
+        File file = null
+        for (String path : paths) {
+            file = new File(path)
+            if (!file.exists()) { // relative path? try to resolve canonical/absolute:
+                URL url = Classes.getResource(path)
+                file = url != null ? new File(url.toURI()) : null
+            }
+            if (file?.exists()) {
+                file = file.getCanonicalFile()
+                break
+            }
+        }
+        Provider provider = null
+        if (file) { // found the lib file, reference it via inline config:
+            String config = "--name=jjwt\nlibrary=${file.getCanonicalPath()}"
+            if (Provider.metaClass.respondsTo(Provider, 'configure', String)) { // JDK 9 or later
+                provider = Security.getProvider("SunPKCS11")
+                provider = provider.configure(config) as Provider
+            } else { // JDK 8 or earlier:
+                //noinspection UnnecessaryQualifiedReference
+                provider = new sun.security.pkcs11.SunPKCS11(config)
+            }
+        }
+        return provider;
+    }
+
     private static Collection<TestKeys.Bundle> findPkcs11Bundles(Provider provider) {
+
+        if (provider == null) {
+            return Collections.emptySet()
+        }
 
         Collection<TestKeys.Bundle> bundles = new ArrayList<>(20)
 
@@ -87,7 +131,7 @@ class TestCertificates {
         //This pin equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm:
         char[] pin = "1234".toCharArray()
         Boolean result = jvmTry { ks.load(null, pin); return Boolean.TRUE }
-        if (result == null) return Collections.emptySet()
+        if (result == null) return Collections.emptySet() // JVM can't support the keys or certs in SoftHSM
 
         def algs = []
         algs.addAll(Jwts.SIG.get().values().findAll({
@@ -105,15 +149,17 @@ class TestCertificates {
             bundles.add(bundle)
         }
 
-        return Collections.unmodifiableList(bundles) // empty on windows at the moment
+        return Collections.unmodifiableList(bundles)
     }
+
+    static Provider PKCS11 = getAvailablePkcs11Provider();
 
     /**
      * Maintainers note:
      *
      * This collection will only contain relevant entries when the following are true:
      *
-     * 1. We're running on a Linux or MacOS machine that has an expected SoftHSM installation populated with entries
+     * 1. We're running on a machine that has an expected SoftHSM installation populated with entries
      *    via the impl/src/test/scripts/softhsm script in this git repository.
      *
      * 2. The current JVM version supports the key algorithm identified in the PKCS11 PrivateKey or X509Certificate.
@@ -125,31 +171,7 @@ class TestCertificates {
      * 3. RSASSA-PSS keys of any kind are not available because SoftHSM doesn't currently support them. See
      *    https://github.com/opendnssec/SoftHSMv2/issues/721
      */
-    static final Collection<TestKeys.Bundle> PKCS11_BUNDLES // empty on windows until windows.pkcs11.cfg can be used
-
-    static {
-        Collection<TestKeys.Bundle> bundles = Collections.emptySet() // default
-        // false implies linux/ubuntu until we need to support Windows:
-        String osname = System.getProperty('os.name').toLowerCase()
-        String prefix = osname.startsWith('mac') ? 'macos' : (osname.startsWith("linux") ? 'linux' : null)
-        if (prefix != null) { // null on windows at the moment
-            String basename = "${prefix}.pkcs11.cfg"
-            String relativePath = relativePath(basename)
-            URL url = Classes.getResource(relativePath)
-            File file = new File(url.toURI())
-            String canonicalPath = file.getAbsolutePath()
-
-            if (Provider.metaClass.respondsTo(Provider, 'configure', String)) { // JDK 9 or later
-                Provider p = Security.getProvider("SunPKCS11")
-                PKCS11 = p.configure(canonicalPath) as Provider
-            } else { // JDK 8 or earlier:
-                //noinspection UnnecessaryQualifiedReference
-                PKCS11 = new sun.security.pkcs11.SunPKCS11(canonicalPath)
-            }
-            bundles = findPkcs11Bundles(PKCS11)
-        }
-        PKCS11_BUNDLES = bundles
-    }
+    static final Collection<TestKeys.Bundle> PKCS11_BUNDLES = findPkcs11Bundles(PKCS11)
 
     private static PEMParser getParser(String filename) {
         InputStream is = getResourceStream(filename)
