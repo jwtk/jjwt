@@ -70,7 +70,7 @@ class TestCertificates {
      * This collection will only contain relevant entries when the following are true:
      *
      * 1. We're running on a Linux or MacOS machine that has a valid SoftHSM installation populated with entries
-     *    via the softhsmimport script in this git repository.
+     *    via the impl/src/test/scripts/softhsm script in this git repository.
      *
      * 2. The JVM version being tested supports the key algorithm identified in the PKCS11 PrivateKey.  This means:
      *    On JDK < 15, Ed25519 and Ed448 PrivateKeys cannot be loaded (but their certs and PublicKeys can because
@@ -106,7 +106,7 @@ class TestCertificates {
         if (PKCS11 != null) {
             KeyStore ks = KeyStore.getInstance("PKCS11", PKCS11)
             char[] pin = "1234".toCharArray()
-            // equals the SoftHSM --so-pin and --pin values used in the ./softhsmimport script
+            // equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm
             ks.load(null, pin)
 
             def algs = []
