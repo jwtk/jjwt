@@ -118,7 +118,7 @@ class TestCertificates {
             for (Identifiable alg : algs) {
                 def priv = null
                 def cert = null
-                def pub
+                def pub = null
                 try {
                     priv = ks.getKey(alg.id, pin) as PrivateKey
                     //println "key: $key"
@@ -128,11 +128,13 @@ class TestCertificates {
                     cert = ks.getCertificate(alg.id) as X509Certificate
                 } catch (Throwable ignored) { // cannot load on current JVM (algorithm not available)
                 }
-                if (cert != null) { // will be null for PS* algs since SoftHSM2 doesn't support them yet
+                // cert will be null if the JVM doesn't support its algorithm or for any PS* algs since
+                // SoftHSM2 doesn't support them yet (https://github.com/opendnssec/SoftHSMv2/issues/721)
+                if (cert != null) {
                     pub = cert.getPublicKey()
-                    def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
-                    bundles.add(bundle)
                 }
+                def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
+                bundles.add(bundle)
             }
         }
         PKCS11_BUNDLES = Collections.unmodifiableList(bundles) // empty on windows at the moment
