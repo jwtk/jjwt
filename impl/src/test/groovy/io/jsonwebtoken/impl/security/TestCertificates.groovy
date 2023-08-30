@@ -53,13 +53,13 @@ class TestCertificates {
 
     static Provider BC = new BouncyCastleProvider()
 
-    private static String fqfn(String basename) {
+    private static String relativePath(String basename) {
         String packageName = TestCertificates.class.getPackage().getName()
         return Strings.replace(packageName, ".", "/") + "/" + basename
     }
 
     private static InputStream getResourceStream(String filename) {
-        String resourcePath = fqfn(filename)
+        String resourcePath = relativePath(filename)
         return Classes.getResourceAsStream(resourcePath)
     }
 
@@ -87,14 +87,17 @@ class TestCertificates {
         String prefix = osname.startsWith('mac') ? 'macos' : (osname.startsWith("linux") ? 'linux' : null)
         if (prefix != null) { // null on windows at the moment
             String basename = "${prefix}.pkcs11.cfg"
+            String relativePath = relativePath(basename)
+            URL url = Classes.getResource(relativePath)
+            File file = new File(url.toURI())
+            String canonicalPath = file.getAbsolutePath()
+
             try {
-                InputStream is = getResourceStream(basename)
                 //noinspection UnnecessaryQualifiedReference
-                PKCS11 = new sun.security.pkcs11.SunPKCS11(is)
+                PKCS11 = new sun.security.pkcs11.SunPKCS11(canonicalPath)
             } catch (Throwable jdk9OrLater) {
                 Provider p = Security.getProvider("SunPKCS11")
-                String fqfn = fqfn(basename)
-                PKCS11 = p.configure(fqfn) as Provider
+                PKCS11 = p.configure(canonicalPath) as Provider
             }
         }
 
