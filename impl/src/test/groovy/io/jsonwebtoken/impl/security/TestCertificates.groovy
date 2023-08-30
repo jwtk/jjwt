@@ -64,24 +64,71 @@ class TestCertificates {
     }
 
     static Provider PKCS11 // currently null on windows. TODO: enable windows.pkcs11.cfg file
+
+    private static <T> T jvmTry(Closure<T> c) {
+        try {
+            return c.call()
+        } catch (Throwable t) {
+            String msg = t.getMessage()
+            if (msg?.contains("nsupported algorithm") || msg?.contains("nknown key type")) {
+                // JVM version doesn't support a key or cert in the PKCS11 store and fails lookup,
+                // so there's nothing we can do, just return null:
+                return null
+            }
+            throw new IllegalStateException("Unexpected exception: " + msg, t)
+        }
+    }
+
+    private static Collection<TestKeys.Bundle> findPkcs11Bundles(Provider provider) {
+
+        Collection<TestKeys.Bundle> bundles = new ArrayList<>(20)
+
+        KeyStore ks = KeyStore.getInstance("PKCS11", provider)
+        //This pin equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm:
+        char[] pin = "1234".toCharArray()
+        Boolean result = jvmTry { ks.load(null, pin); return Boolean.TRUE }
+        if (result == null) return Collections.emptySet()
+
+        def algs = []
+        algs.addAll(Jwts.SIG.get().values().findAll({
+            it instanceof KeyPairBuilderSupplier && it.id != 'EdDSA'
+        }))
+        algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
+
+        for (Identifiable alg : algs) {
+            def priv = jvmTry { ks.getKey(alg.id, pin) as PrivateKey }
+            def cert = jvmTry { ks.getCertificate(alg.id) as X509Certificate }
+            // cert will be null if the JVM doesn't support its algorithm or for any PS* algs since
+            // SoftHSM2 doesn't support them yet (https://github.com/opendnssec/SoftHSMv2/issues/721):
+            def pub = cert?.getPublicKey()
+            def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
+            bundles.add(bundle)
+        }
+
+        return Collections.unmodifiableList(bundles) // empty on windows at the moment
+    }
+
     /**
      * Maintainers note:
      *
      * This collection will only contain relevant entries when the following are true:
      *
-     * 1. We're running on a Linux or MacOS machine that has a valid SoftHSM installation populated with entries
+     * 1. We're running on a Linux or MacOS machine that has an expected SoftHSM installation populated with entries
      *    via the impl/src/test/scripts/softhsm script in this git repository.
      *
-     * 2. The JVM version being tested supports the key algorithm identified in the PKCS11 PrivateKey.  This means:
-     *    On JDK < 15, Ed25519 and Ed448 PrivateKeys cannot be loaded (but their certs and PublicKeys can because
-     *    the Sun Provider implementation supports generic X509 encoding).
-     *    Also on JDK < 11 X25519 and X448 PrivateKeys cannot be loaded (but their certs and PublicKeys can).
+     * 2. The current JVM version supports the key algorithm identified in the PKCS11 PrivateKey or X509Certificate.
+     *    This means:
+     *      - On JDK < 15, Ed25519 and Ed448 PrivateKeys cannot be loaded (but their certs and PublicKeys may be
+     *        able to be loaded if/when Sun Provider implementation supports generic X509 encoding).
+     *      - On JDK < 11 X25519 and X448 PrivateKeys cannot be loaded (but their certs and PublicKeys may be).
      *
      * 3. RSASSA-PSS keys of any kind are not available because SoftHSM doesn't currently support them. See
      *    https://github.com/opendnssec/SoftHSMv2/issues/721
      */
-    static Collection<TestKeys.Bundle> PKCS11_BUNDLES // empty on windows until windows.pkcs11.cfg can be used
+    static final Collection<TestKeys.Bundle> PKCS11_BUNDLES // empty on windows until windows.pkcs11.cfg can be used
+
     static {
+        Collection<TestKeys.Bundle> bundles = Collections.emptySet() // default
         // false implies linux/ubuntu until we need to support Windows:
         String osname = System.getProperty('os.name').toLowerCase()
         String prefix = osname.startsWith('mac') ? 'macos' : (osname.startsWith("linux") ? 'linux' : null)
@@ -99,45 +146,9 @@ class TestCertificates {
                 //noinspection UnnecessaryQualifiedReference
                 PKCS11 = new sun.security.pkcs11.SunPKCS11(canonicalPath)
             }
+            bundles = findPkcs11Bundles(PKCS11)
         }
-
-        Collection<TestKeys.Bundle> bundles = new ArrayList<>(20)
-
-        if (PKCS11 != null) {
-            KeyStore ks = KeyStore.getInstance("PKCS11", PKCS11)
-            char[] pin = "1234".toCharArray()
-            // equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm
-            ks.load(null, pin)
-
-            def algs = []
-            algs.addAll(Jwts.SIG.get().values().findAll({
-                it instanceof KeyPairBuilderSupplier && it.id != 'EdDSA'
-            }))
-            algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
-
-            for (Identifiable alg : algs) {
-                def priv = null
-                def cert = null
-                def pub = null
-                try {
-                    priv = ks.getKey(alg.id, pin) as PrivateKey
-                    //println "key: $key"
-                } catch (Throwable ignored) { // cannot load on current JVM (algorithm not available)
-                }
-                try {
-                    cert = ks.getCertificate(alg.id) as X509Certificate
-                } catch (Throwable ignored) { // cannot load on current JVM (algorithm not available)
-                }
-                // cert will be null if the JVM doesn't support its algorithm or for any PS* algs since
-                // SoftHSM2 doesn't support them yet (https://github.com/opendnssec/SoftHSMv2/issues/721)
-                if (cert != null) {
-                    pub = cert.getPublicKey()
-                }
-                def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
-                bundles.add(bundle)
-            }
-        }
-        PKCS11_BUNDLES = Collections.unmodifiableList(bundles) // empty on windows at the moment
+        PKCS11_BUNDLES = bundles
     }
 
     private static PEMParser getParser(String filename) {
