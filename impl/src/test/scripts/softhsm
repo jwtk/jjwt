@@ -72,7 +72,7 @@ userconf=
 confdir=
 tokendir=
 
-script_file="$(_path "${script_file}")" # canonicalize
+script_file="$(_path "${BASH_SOURCE[0]}")" # canonicalize
 script_dir="$(dirname "$script_file")"
 script_name="$(basename "${script_file}")"
 user_home="$(_path "${HOME}")"
