@@ -117,15 +117,17 @@ class TestCertificates {
 
             for (Identifiable alg : algs) {
                 def priv = null
+                def cert = null
                 def pub
-                def cert
                 try {
                     priv = ks.getKey(alg.id, pin) as PrivateKey
                     //println "key: $key"
                 } catch (Throwable ignored) { // cannot load on current JVM (algorithm not available)
                 }
-
-                cert = ks.getCertificate(alg.id) as X509Certificate
+                try {
+                    cert = ks.getCertificate(alg.id) as X509Certificate
+                } catch (Throwable ignored) { // cannot load on current JVM (algorithm not available)
+                }
                 if (cert != null) { // will be null for PS* algs since SoftHSM2 doesn't support them yet
                     pub = cert.getPublicKey()
                     def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
