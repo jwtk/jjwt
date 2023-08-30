@@ -18,10 +18,11 @@
 set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
 # global vars used across functions
-libsofthsm2=
 script_file=
 script_dir=
 script_name=
+platform=
+libsofthsm2=
 
 _readlink() {
   $(type -p greadlink readlink | head -1) "$1" # prefer greadlink if it exists
@@ -84,7 +85,14 @@ _errexit() {
 
 main() {
 
-  local script_file script_dir script_name name algid index
+  local user_home script_file script_dir script_name name algid index globalconf userconf confdir tokendir
+
+  script_file="$(_path "${BASH_SOURCE[0]}")"
+  script_dir="$(dirname "$script_file")"
+  script_name="$(basename "${script_file}")"
+  user_home="$(_path "${HOME}")"
+  userconf="${user_home}/.config/softhsm2/softhsm2.conf"
+  readonly script_dir script_file script_name user_home userconf
 
   if ! command -v command -v softhsm2-util >/dev/null 2>&1; then
     echo "softhsm2-util command is not available. Install with 'brew install softhsm' or 'sudo apt-get -y install softhsm2'"
@@ -94,17 +102,54 @@ main() {
       echo "pkcs11-tool command is not available. Install with 'brew install opensc' or 'sudo apt-get -y install opensc'"
       return 1
   fi
-  # ensure global variable for use with _pkcs11t function:
-  libsofthsm2='/opt/homebrew/lib/softhsm/libsofthsm2.so' # MacOS
-  [[ -f "${libsofthsm2}" ]] || libsofthsm2='/usr/lib/softhsm/libsofthsm2.so' # Ubuntu
+
+  SOFTHSM2_CONF="${SOFTHSM2_CONF:-}"
+  platform='macos'
+  globalconf='/opt/homebrew/etc/softhsm/softhsm2.conf'
+  libsofthsm2='/opt/homebrew/lib/softhsm/libsofthsm2.so'
+  if [[ ! -f "${libsofthsm2}" ]]; then # assume CI (Ubuntu)
+      platform='ubuntu'
+      globalconf='/etc/softhsm/softhsm2.conf'
+      libsofthsm2='/usr/lib/softhsm/libsofthsm2.so'
+  fi
   [[ -f "${libsofthsm2}" ]] || { echo "cannot locate libsofthsm2.so"; exit 1; }
 
-  script_file="$(_path "${BASH_SOURCE[0]}")"
-  script_dir="$(dirname "$script_file")"
-  script_name="$(basename "${script_file}")"
-  readonly script_dir script_file script_name
-
   cd "${script_dir}"
+
+#  if ! softhsm2-util --show-slots >/dev/null 2>&1; then # missing or erroneous config
+#
+#    if [[ -z "${SOFTHSM2_CONF}" && ! -f "${userconf}" ]]; then # no env var or file, try to create it:
+#
+#      echo "creating stuff"
+#
+#      export SOFTHSM2_CONF="${userconf}"
+#      confdir="$(dirname ${SOFTHSM2_CONF})"
+#      tokendir="${confdir}/tokens"
+#
+#      mkdir -p "${confdir}"
+#      mkdir -p "${tokendir}"
+#
+#      cat << EOF >> "${SOFTHSM2_CONF}"
+#      # SoftHSM v2 configuration file
+#
+#      directories.tokendir = ${tokendir}
+#      objectstore.backend = file
+#
+#      # ERROR, WARNING, INFO, DEBUG
+#      log.level = DEBUG
+#
+#      # If CKF_REMOVABLE_DEVICE flag should be set
+#      slots.removable = false
+#
+#      # Enable and disable PKCS#11 mechanisms using slots.mechanisms.
+#      slots.mechanisms = ALL
+#
+#      # If the library should reset the state on fork
+#      library.reset_on_fork = false
+#EOF
+#    fi
+#  fi
+  softhsm2-util --show-slots >/dev/null 2>&1 || _errexit "Invalid or missing SoftHSM configuration, check ${userconf} or ${globalconf}"
 
   echo
   # delete any existing JJWT slot/tokens
