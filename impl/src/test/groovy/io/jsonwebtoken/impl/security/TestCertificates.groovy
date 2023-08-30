@@ -92,12 +92,12 @@ class TestCertificates {
             File file = new File(url.toURI())
             String canonicalPath = file.getAbsolutePath()
 
-            try {
-                //noinspection UnnecessaryQualifiedReference
-                PKCS11 = new sun.security.pkcs11.SunPKCS11(canonicalPath)
-            } catch (Throwable jdk9OrLater) {
+            if (Provider.metaClass.respondsTo(Provider, 'configure', String)) { // JDK 9 or later
                 Provider p = Security.getProvider("SunPKCS11")
                 PKCS11 = p.configure(canonicalPath) as Provider
+            } else { // JDK 8 or earlier:
+                //noinspection UnnecessaryQualifiedReference
+                PKCS11 = new sun.security.pkcs11.SunPKCS11(canonicalPath)
             }
         }
 
