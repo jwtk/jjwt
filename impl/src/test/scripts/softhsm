@@ -17,20 +17,6 @@
 
 set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
-# global vars used across functions
-SOFTHSM2_CONF="${SOFTHSM2_CONF:-}"
-script_file="${BASH_SOURCE[0]}"
-script_dir=
-script_name=
-user_home=
-test_keys_dir=
-platform=
-libsofthsm2=
-globalconf=
-userconf=
-confdir=
-tokendir=
-
 _readlink() {
   $(type -p greadlink readlink | head -1) "$1" # prefer greadlink if it exists
 }
@@ -72,6 +58,25 @@ _path() {
   echo "$target"
 }
 
+# global vars used across functions
+SOFTHSM2_CONF="${SOFTHSM2_CONF:-}"
+script_file=
+script_dir=
+script_name=
+user_home=
+test_keys_dir=
+platform=
+libsofthsm2=
+globalconf=
+userconf=
+confdir=
+tokendir=
+
+script_file="$(_path "${script_file}")" # canonicalize
+script_dir="$(dirname "$script_file")"
+script_name="$(basename "${script_file}")"
+user_home="$(_path "${HOME}")"
+
 _softhsmu() {
   softhsm2-util --so-pin 1234 --pin 1234 --token jjwt "$@"
 }
@@ -101,10 +106,6 @@ _setup() {
     _errexit "pkcs11-tool command is not available. Install with 'brew install opensc' or 'sudo apt-get -y install opensc'"
   fi
 
-  script_file="$(_path "${script_file}")" # canonicalize
-  script_dir="$(dirname "$script_file")"
-  script_name="$(basename "${script_file}")"
-  user_home="$(_path "${HOME}")"
   test_keys_dir="${script_dir}/../resources/io/jsonwebtoken/impl/security"
   test_keys_dir="$(_path ${test_keys_dir})" # canonicalize
 
