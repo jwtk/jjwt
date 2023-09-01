@@ -89,7 +89,7 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
         Assert.notNull(request, "Request cannot be null.");
         final PublicKey kek = Assert.notNull(request.getPayload(), "RSA PublicKey encryption key cannot be null.");
         validate(kek, true);
-        final SecretKey cek = generateKey(request);
+        final SecretKey cek = generateCek(request);
 
         byte[] ciphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override

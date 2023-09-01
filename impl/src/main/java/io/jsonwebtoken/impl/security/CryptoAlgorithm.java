@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.Request;
@@ -56,6 +57,24 @@ abstract class CryptoAlgorithm implements Identifiable {
         return random != null ? random : Randoms.secureRandom();
     }
 
+    /**
+     * Returns the request provider only if it is <em>not</em> a PCKS11 provider. This is used by algorithms that
+     * generate an ephemeral key(pair) where the resulting key material must exist for inclusion in the JWE.  PCS11
+     * providers will not expose private key material and therefore can't be used for ephemeral key(pair) generation.
+     *
+     * @param request request to inspect
+     * @return the request provider or {@code null} if there is no provider, or {@code null} if the provider is a
+     * PCKS11 provider
+     */
+    static Provider nonPkcs11Provider(Request<?> request) {
+        Provider provider = request != null ? request.getProvider() : null;
+        String name = provider != null ? Strings.clean(provider.getName()) : null;
+        if (provider != null && name != null && name.startsWith("SunPKCS11")) {
+            provider = null; // don't use PKCS11 provider
+        }
+        return provider;
+    }
+
     protected JcaTemplate jca() {
         return new JcaTemplate(getJcaName(), null);
     }
@@ -72,17 +91,11 @@ abstract class CryptoAlgorithm implements Identifiable {
         return getJcaName();
     }
 
-    protected SecretKey generateKey(KeyRequest<?> request) {
+    protected SecretKey generateCek(KeyRequest<?> request) {
         AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         SecretKeyBuilder builder = Assert.notNull(enc.key(), "Request encryptionAlgorithm KeyBuilder cannot be null.");
-//        Provider provider = request.getProvider();
-//        if (provider != null && provider.getName().startsWith("SunPKCS11")) {
-//            // PKCS11 / HSMs will not expose secret key material, and key material is
-//            // required for JWT KeyAlgorithm-generated CEKs, so we rely on the default and/or BC providers instead
-//            provider = null;
-//        }
-//        SecretKey key = builder.provider(provider).random(request.getSecureRandom()).build();
-        SecretKey key = builder.provider(request.getProvider()).random(request.getSecureRandom()).build();
+        Provider provider = nonPkcs11Provider(request); // PKCS11 / HSM check
+        SecretKey key = builder.provider(provider).random(request.getSecureRandom()).build();
         return Assert.notNull(key, "Request encryptionAlgorithm SecretKeyBuilder cannot produce null keys.");
     }
 

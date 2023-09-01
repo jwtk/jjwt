@@ -49,6 +49,7 @@ class Pkcs11Test {
         return ks.getKey(alg.id, pin) as PrivateKey
     }
 
+    @SuppressWarnings(['GroovyAssignabilityCheck', 'UnnecessaryQualifiedReference'])
     private static Provider getAvailablePkcs11Provider() {
         String val = Strings.clean(System.getenv(PKCS11_LIB_ENV_VAR_NAME))
         def paths = []
@@ -79,7 +80,6 @@ class Pkcs11Test {
                 provider = Security.getProvider("SunPKCS11")
                 provider = provider.configure(config) as Provider
             } else { // JDK 8 or earlier:
-                //noinspection UnnecessaryQualifiedReference
                 provider = new sun.security.pkcs11.SunPKCS11(config)
             }
         }
@@ -98,8 +98,8 @@ class Pkcs11Test {
         //This pin equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm:
         char[] pin = "1234".toCharArray()
         try {
-            ks.load(null, pin);
-        } catch (Throwable t) { // JVM can't support the keys or certs in SoftHSM
+            ks.load(null, pin)
+        } catch (Throwable ignored) { // JVM can't support the keys or certs in SoftHSM
             return Collections.emptyMap()
         }
 
@@ -122,7 +122,7 @@ class Pkcs11Test {
         return Collections.<String, TestKeys.Bundle> unmodifiableMap(bundles)
     }
 
-    static Provider PKCS11 = getAvailablePkcs11Provider();
+    static Provider PKCS11 = getAvailablePkcs11Provider()
 
     /**
      * Maintainers note:
@@ -156,9 +156,8 @@ class Pkcs11Test {
         ASYM.add(Jwks.CRV.Ed448)
     }
 
-    static java.security.KeyPair getKeyPair(def alg) {
+    static java.security.KeyPair findPkcs11Pair(Identifiable alg) {
         return findPkcs11(alg as Identifiable)?.pair
-        // return findPkcs11(alg as Identifiable)?.pair ?: jvmTry { kpbsup.keyPair().provider(PKCS11).build() }
     }
 
     @Test
@@ -166,7 +165,7 @@ class Pkcs11Test {
         def algs = ASYM
         algs.each { it ->
 
-            java.security.KeyPair pair = getKeyPair(it)
+            java.security.KeyPair pair = findPkcs11Pair(it as Identifiable)
 
             if (pair?.private) { // Either the SunPKCS11 provider or SoftHSM2 supports the key algorithm
 
@@ -184,13 +183,27 @@ class Pkcs11Test {
     }
 
     // create a jwe and then decrypt it
-    static void encRoundtrip(def pair, def keyalg) {
-
+    static void encRoundtrip(TestKeys.Bundle bundle, def keyalg) {
+        def pair = bundle.pair
         def pub = pair.public
+        if (pub.getAlgorithm().startsWith(EdwardsCurve.OID_PREFIX)) {
+            // If < JDK 11, the PKCS11 KeyStore doesn't understand X25519 and X448 algorithms, and just returns
+            // a generic X509Key from the X.509 certificate, but that can't be used for encryption.  So we'll
+            // use BouncyCastle to try and load the public key that way.  This is ok for testing because the
+            // public key doesn't need to be a PKCS11 key since public key material is already available.
+            // Decryption does need to use a PKCS11 key however since that is what allows us to assert
+            // a valid test
+            def cert = new JcaTemplate("X.509", TestKeys.BC, null)
+                    .generateX509Certificate(bundle.cert.getEncoded())
+            bundle.cert = cert
+            bundle.chain = [cert]
+            bundle.pair = new java.security.KeyPair(cert.getPublicKey(), bundle.pair.private)
+            pub = bundle.pair.public
+        }
         def priv = pair.private != null ? Keys.wrap(pair.private, pub) : null
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
-        def jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact()
+        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact()
 
         // The private key can be null if SunPKCS11 doesn't support the key algorithm directly.  In this case
         // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the
@@ -217,20 +230,20 @@ class Pkcs11Test {
         algs.add(Jwks.CRV.X25519)
         algs.add(Jwks.CRV.X448)
 
-        algs.each { it ->
+        algs.each {
 
-            java.security.KeyPair pair = getKeyPair(it)
+            def bundle = findPkcs11(it as Identifiable) // bundle will be null with PSS* algs
 
-            if (pair?.public) { // null on JDK 13 w/ X25519 and X448
-                String name = Assert.hasText(pair.public.algorithm, "PublicKey algorithm cannot be null/empty")
+            if (bundle?.pair?.public) { // null on JDK 13 w/ X25519 and X448
+                String name = Assert.hasText(bundle.pair.public.algorithm, "PublicKey algorithm cannot be null/empty")
                 if (name == 'RSA') {
                     // SunPKCS11 doesn't support RSA-OAEP* ciphers :(
                     // So we can only try with RSA1_5 and we have to skip RSA_OAEP and RSA_OAEP_256:
-                    encRoundtrip(pair, Jwts.KEY.RSA1_5)
-                } else if (StandardCurves.findByKey(pair.public) != null) { // EC or Ed key
+                    encRoundtrip(bundle, Jwts.KEY.RSA1_5)
+                } else if (StandardCurves.findByKey(bundle.pair.public) != null) { // EC or Ed key
                     // try all ECDH key algorithms:
                     Jwts.KEY.get().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
-                        encRoundtrip(pair, it)
+                        encRoundtrip(bundle, it)
                     }
                 } else {
                     throw new IllegalStateException("Unexpected key algorithm: $name")

@@ -433,7 +433,7 @@ class RFC7520Section5Test {
 
         def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA1_5_ID, StandardKeyAlgorithms.RSA1_5_TRANSFORMATION) {
             @Override
-            SecretKey generateKey(KeyRequest<?> request) {
+            SecretKey generateCek(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_74) // ensure RFC required value
                 return new SecretKeySpec(encoded, "AES")
             }
@@ -497,7 +497,7 @@ class RFC7520Section5Test {
 
         def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA_OAEP_ID, StandardKeyAlgorithms.RSA_OAEP_TRANSFORMATION) {
             @Override
-            SecretKey generateKey(KeyRequest<?> request) {
+            SecretKey generateCek(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_85) // ensure RFC required value
                 return new SecretKeySpec(encoded, "AES")
             }
@@ -562,7 +562,7 @@ class RFC7520Section5Test {
 
         def wrapAlg = new AesWrapKeyAlgorithm(256) {
             @Override
-            SecretKey generateKey(KeyRequest<?> request) {
+            SecretKey generateCek(KeyRequest<?> request) {
                 byte[] encoded = b64Url(FIGURE_97) // ensure RFC value
                 return new SecretKeySpec(encoded, "AES")
             }
@@ -627,7 +627,7 @@ class RFC7520Section5Test {
 
         def wrapAlg = new AesWrapKeyAlgorithm(128) {
             @Override
-            SecretKey generateKey(KeyRequest request) {
+            SecretKey generateCek(KeyRequest request) {
                 byte[] encoded = b64Url(FIGURE_109) // ensure RFC value
                 return new SecretKeySpec(encoded, "AES")
             }

@@ -182,7 +182,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         // Generate our ephemeral key pair:
         final SecureRandom random = ensureSecureRandom(request);
-        final Provider provider = request.getProvider();
+        final Provider provider = nonPkcs11Provider(request); // PKCS11 / HSM check
         DynamicJwkBuilder<?, ?> jwkBuilder = Jwks.builder().random(random).provider(provider);
         KeyPair pair = generateKeyPair(curve, provider, random);
 

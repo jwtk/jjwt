@@ -42,7 +42,7 @@ public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgori
     public KeyResult getEncryptionKey(final KeyRequest<SecretKey> request) throws SecurityException {
         Assert.notNull(request, "request cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());
-        final SecretKey cek = generateKey(request);
+        final SecretKey cek = generateCek(request);
 
         byte[] ciphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
