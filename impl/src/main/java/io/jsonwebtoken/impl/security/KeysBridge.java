@@ -40,7 +40,7 @@ public final class KeysBridge {
         return new PasswordSpec(password);
     }
 
-    public static PrivateKey associate(PrivateKey priv, PublicKey pub) {
+    public static PrivateKey wrap(PrivateKey priv, PublicKey pub) {
         Assert.notNull(priv, "PrivateKey cannot be null.");
         if (priv instanceof KeySupplier) { //already wrapped, don't wrap again
             return priv;
