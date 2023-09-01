@@ -41,15 +41,26 @@ class Pkcs11Test {
             'C:\\SoftHSM2\\lib\\softhsm2.dll'           // https://github.com/disig/SoftHSM2-for-Windows
     ]
 
+    private static boolean isProviderFailure(Throwable t) {
+        Throwable cause = t
+        while (cause != null) {
+            if (cause instanceof ProviderException ||
+                    cause instanceof NoSuchAlgorithmException || cause instanceof NoSuchPaddingException ||
+                    cause instanceof java.security.InvalidKeyException) {
+                return true
+            }
+            cause = cause.getCause()
+        }
+        return false
+    }
+
     private static <T> T jvmTry(Closure<T> c) {
         try {
             return c.call()
         } catch (Throwable t) {
-            Throwable cause = t.getCause()
-            if (t instanceof ProviderException || cause instanceof ProviderException ||
-                    cause instanceof NoSuchAlgorithmException || cause instanceof NoSuchPaddingException ||
-                    cause instanceof java.security.InvalidKeyException) {
-                // SunPKCS11 or SoftHSM2 doesn't support the key or algorithm, so just return null:
+            if (isProviderFailure(t)) {
+                // SunPKCS11 or SoftHSM2 doesn't support the key or algorithm, and there's nothing we can do about
+                // it, so just return null to indicate we can't use it
                 return null
             }
             // unexpected, propagate:
