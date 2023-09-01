@@ -202,7 +202,7 @@ class Pkcs11Test {
     static void encRoundtrip(def pair, def keyalg) {
 
         def pub = pair.public
-        def priv = Keys.wrap(pair.private, pub)
+        def priv = pair.private != null ? Keys.wrap(pair.private, pub) : null
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
         def jwe = jvmTry { Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact() }
