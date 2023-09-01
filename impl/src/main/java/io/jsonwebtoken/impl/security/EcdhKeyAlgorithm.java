@@ -153,7 +153,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         }
     }
 
-    private static Curve assertCurve(Key key) {
+    private static AbstractCurve assertCurve(Key key) {
         Curve curve = StandardCurves.findByKey(key);
         if (curve == null) {
             String type = key instanceof PublicKey ? "encryption " : "decryption ";
@@ -166,7 +166,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
                     "https://www.rfc-editor.org/rfc/rfc8037#section-3.1";
             throw new UnsupportedKeyException(msg);
         }
-        return Assert.notNull(curve, "Curve cannot be null.");
+        return Assert.isInstanceOf(AbstractCurve.class, curve, "AbstractCurve instance expected.");
     }
 
     @Override
@@ -211,7 +211,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         FieldReadable reader = new RequiredFieldReader(header);
         PublicJwk<?> epk = reader.get(DefaultJweHeader.EPK);
 
-        Curve curve = assertCurve(privateKey);
+        AbstractCurve curve = assertCurve(privateKey);
         Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
         Class<?> epkClass = curve instanceof ECCurve ? EcPublicJwk.class : OctetPublicJwk.class;
         if (!epkClass.isInstance(epk)) {
