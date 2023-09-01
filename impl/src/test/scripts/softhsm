@@ -232,9 +232,9 @@ _import() {
       if [[ "${algid}" = Ed* || "${algid}" = RS* || "${algid}" = X* ]]; then
         # pkcs11-tool backed by softhsm2 cannot import the private key .der files, so use softhsm2-util directly:
         _softhsmu --import "${name}" --label "${algid}" --id "${hexid}" || _errexit "can't import ${algid} key pair"
-      else
-        _pkcs11t --write-object "${privder}" --label "${algid}" --type privkey --id "${hexid}" || _errexit "can't import ${algid} private key"
-        _pkcs11t --write-object "${pubder}" --label "${algid}" --type pubkey --id "${hexid}" || _errexit "can't import ${algid} public key"
+      else # ES*
+        _pkcs11t --write-object "${privder}" --usage-derive --label "${algid}" --type privkey --id "${hexid}" || _errexit "can't import ${algid} private key"
+        _pkcs11t --write-object "${pubder}" --usage-derive --label "${algid}" --type pubkey --id "${hexid}" || _errexit "can't import ${algid} public key"
       fi
     fi
 

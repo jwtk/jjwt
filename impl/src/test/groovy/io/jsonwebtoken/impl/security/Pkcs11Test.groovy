@@ -23,8 +23,10 @@ import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
-import javax.crypto.NoSuchPaddingException
-import java.security.*
+import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.Provider
+import java.security.Security
 import java.security.cert.X509Certificate
 
 import static org.junit.Assert.assertEquals
@@ -41,31 +43,10 @@ class Pkcs11Test {
             'C:\\SoftHSM2\\lib\\softhsm2.dll'           // https://github.com/disig/SoftHSM2-for-Windows
     ]
 
-    private static boolean isProviderFailure(Throwable t) {
-        Throwable cause = t
-        while (cause != null) {
-            if (cause instanceof ProviderException ||
-                    cause instanceof NoSuchAlgorithmException || cause instanceof NoSuchPaddingException ||
-                    cause instanceof java.security.InvalidKeyException) {
-                return true
-            }
-            cause = cause.getCause()
-        }
-        return false
-    }
-
-    private static <T> T jvmTry(Closure<T> c) {
-        try {
-            return c.call()
-        } catch (Throwable t) {
-            if (isProviderFailure(t)) {
-                // SunPKCS11 or SoftHSM2 doesn't support the key or algorithm, and there's nothing we can do about
-                // it, so just return null to indicate we can't use it
-                return null
-            }
-            // unexpected, propagate:
-            throw t
-        }
+    private static PrivateKey getKey(KeyStore ks, Identifiable alg, char[] pin) {
+        // The SunPKCS11 KeyStore does not support Edwards Curve keys at all:
+        if (alg instanceof EdwardsCurve) return null
+        return ks.getKey(alg.id, pin) as PrivateKey
     }
 
     private static Provider getAvailablePkcs11Provider() {
@@ -89,7 +70,11 @@ class Pkcs11Test {
         }
         Provider provider = null
         if (file) { // found the lib file, reference it via inline config:
-            String config = "--name=jjwt\nlibrary=${file.getCanonicalPath()}"
+            String config = """--
+            name = jjwt
+            library = ${file.getCanonicalPath()}
+            attributes = compatibility
+            """
             if (Provider.metaClass.respondsTo(Provider, 'configure', String)) { // JDK 9 or later
                 provider = Security.getProvider("SunPKCS11")
                 provider = provider.configure(config) as Provider
@@ -98,7 +83,7 @@ class Pkcs11Test {
                 provider = new sun.security.pkcs11.SunPKCS11(config)
             }
         }
-        return provider;
+        return provider
     }
 
     private static Map<String, TestKeys.Bundle> findPkcs11Bundles(Provider provider) {
@@ -112,8 +97,11 @@ class Pkcs11Test {
         KeyStore ks = KeyStore.getInstance("PKCS11", provider)
         //This pin equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm:
         char[] pin = "1234".toCharArray()
-        Boolean result = jvmTry { ks.load(null, pin); return Boolean.TRUE }
-        if (result == null) return Collections.emptyMap() // JVM can't support the keys or certs in SoftHSM
+        try {
+            ks.load(null, pin);
+        } catch (Throwable t) { // JVM can't support the keys or certs in SoftHSM
+            return Collections.emptyMap()
+        }
 
         def algs = []
         algs.addAll(Jwts.SIG.get().values().findAll({
@@ -122,10 +110,10 @@ class Pkcs11Test {
         algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
 
         for (Identifiable alg : algs) {
-            def priv = jvmTry { ks.getKey(alg.id, pin) as PrivateKey }
-            def cert = jvmTry { ks.getCertificate(alg.id) as X509Certificate }
-            // cert will be null if the JVM doesn't support its algorithm or for any PS* algs since
-            // SoftHSM2 doesn't support them yet (https://github.com/opendnssec/SoftHSMv2/issues/721):
+            def priv = getKey(ks, alg, pin)
+            def cert = ks.getCertificate(alg.id) as X509Certificate
+            // cert will be null for any PS* algs since  SoftHSM2 doesn't support them yet:
+            // https://github.com/opendnssec/SoftHSMv2/issues/721
             def pub = cert?.getPublicKey()
             def bundle = new TestKeys.Bundle(alg, pub, priv, cert)
             bundles.put(alg.id, bundle)
@@ -169,11 +157,8 @@ class Pkcs11Test {
     }
 
     static java.security.KeyPair getKeyPair(def alg) {
-        def kpbsup = alg as KeyPairBuilderSupplier
-        java.security.KeyPair pair = jvmTry { kpbsup.keyPair().provider(PKCS11).build() }
-        // SunPKCS11 provider doesn't support key generation for that algorithm, so try to fallback by
-        // looking up test keys read in from SoftHSM:
-        return pair ?: findPkcs11(alg as Identifiable)?.pair
+        return findPkcs11(alg as Identifiable)?.pair
+        // return findPkcs11(alg as Identifiable)?.pair ?: jvmTry { kpbsup.keyPair().provider(PKCS11).build() }
     }
 
     @Test
@@ -205,14 +190,15 @@ class Pkcs11Test {
         def priv = pair.private != null ? Keys.wrap(pair.private, pub) : null
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
-        def jwe = jvmTry { Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact() }
+        def jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact()
 
-        if (jwe && priv) { // can be null if SunPKCS11 or SoftHSM2 doesn't support this key type directly
-            jvmTry { // SunPKCS11 provider may not support the algorithm even if SoftHSM2 does
-                // Decryption needs the private key, and that is inside the HSM, so the PKCS11 provider is required:
-                String iss = Jwts.parser().provider(PKCS11).decryptWith(priv).build().parseClaimsJwe(jwe).getPayload().getIssuer()
-                assertEquals 'me', iss
-            }
+        // The private key can be null if SunPKCS11 doesn't support the key algorithm directly.  In this case
+        // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the
+        // public key.  So we can only decrypt if SunPKCS11 supports the private key, so check for non-null:
+        if (priv) {
+            // Decryption needs the private key, and that is inside the HSM, so the PKCS11 provider is required:
+            String iss = Jwts.parser().provider(PKCS11).decryptWith(priv).build().parseClaimsJwe(jwe).getPayload().getIssuer()
+            assertEquals 'me', iss
         }
     }
 
@@ -221,8 +207,13 @@ class Pkcs11Test {
 
         def algs = []
         algs.addAll(Jwts.SIG.get().values().findAll({
-            it instanceof SignatureAlgorithm && it != Jwts.SIG.EdDSA // not testing signatures
+            it.id.startsWith('RS') || it.id.startsWith('ES')
+            // unfortunately we can't also match .startsWith('PS') because SoftHSM2 doesn't support RSA-PSS keys :(
+            // see https://github.com/opendnssec/SoftHSMv2/issues/721
         }))
+        // For Edwards key agreement, we can look up the public key via the X.509 cert, but SunPKCS11 doesn't
+        // support reading the private keys :(
+        // With the public key, we can at least encrypt, but we won't be able to decrypt since that needs the private key
         algs.add(Jwks.CRV.X25519)
         algs.add(Jwks.CRV.X448)
 
@@ -230,16 +221,17 @@ class Pkcs11Test {
 
             java.security.KeyPair pair = getKeyPair(it)
 
-            if (pair?.public) {
+            if (pair?.public) { // null on JDK 13 w/ X25519 and X448
                 String name = Assert.hasText(pair.public.algorithm, "PublicKey algorithm cannot be null/empty")
                 if (name == 'RSA') {
-                    // try all RSA key algorithms:
-                    def keyalgs = [Jwts.KEY.RSA1_5, Jwts.KEY.RSA_OAEP, Jwts.KEY.RSA_OAEP_256]
-                    keyalgs.each { keyalg -> encRoundtrip(pair, keyalg) }
-                } else if (StandardCurves.findByKey(pair.public) != null) {
+                    // SunPKCS11 doesn't support RSA-OAEP* ciphers :(
+                    // So we can only try with RSA1_5 and we have to skip RSA_OAEP and RSA_OAEP_256:
+                    encRoundtrip(pair, Jwts.KEY.RSA1_5)
+                } else if (StandardCurves.findByKey(pair.public) != null) { // EC or Ed key
                     // try all ECDH key algorithms:
-                    def keyalgs = [Jwts.KEY.ECDH_ES, Jwts.KEY.ECDH_ES_A128KW, Jwts.KEY.ECDH_ES_A192KW, Jwts.KEY.ECDH_ES_A256KW]
-                    keyalgs.each { keyalg -> encRoundtrip(pair, keyalg) }
+                    Jwts.KEY.get().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
+                        encRoundtrip(pair, it)
+                    }
                 } else {
                     throw new IllegalStateException("Unexpected key algorithm: $name")
                 }
