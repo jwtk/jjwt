@@ -291,12 +291,12 @@ class KeysTest {
     void testAssociateWithKeySupplier() {
         def pair = TestKeys.ES256.pair
         def key = new PrivateECKey(pair.private, pair.public.getParams())
-        assertSame key, Keys.associate(key, pair.public)
+        assertSame key, Keys.wrap(key, pair.public)
     }
 
     @Test
     void testAssociateWithKeyThatDoesntNeedToBeWrapped() {
         def pair = TestKeys.RS256.pair
-        assertSame pair.private, Keys.associate(pair.private, pair.public)
+        assertSame pair.private, Keys.wrap(pair.private, pair.public)
     }
 }

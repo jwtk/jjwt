@@ -290,10 +290,11 @@ public final class Keys {
      * @return a {@code PrivateKey} that may be used by algorithms that require the private key's public information.
      * @throws UnsupportedKeyException if the {@code PublicKey} is required but does not implement one of the required
      *                                 <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces
+     * @since JJWT_RELEASE_VERSION
      */
-    public static PrivateKey associate(PrivateKey priv, PublicKey pub) throws UnsupportedKeyException {
+    public static PrivateKey wrap(PrivateKey priv, PublicKey pub) throws UnsupportedKeyException {
         Assert.notNull(priv, "PrivateKey cannot be null.");
         Assert.notNull(pub, "PublicKey cannot be null.");
-        return Classes.invokeStatic(BRIDGE_CLASS, "associate", ASSOCIATE_ARG_TYPES, new Object[]{priv, pub});
+        return Classes.invokeStatic(BRIDGE_CLASS, "wrap", ASSOCIATE_ARG_TYPES, new Object[]{priv, pub});
     }
 }

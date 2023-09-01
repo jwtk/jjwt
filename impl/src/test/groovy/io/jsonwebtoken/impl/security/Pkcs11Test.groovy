@@ -202,13 +202,7 @@ class Pkcs11Test {
     static void encRoundtrip(def pair, def keyalg) {
 
         def pub = pair.public
-        def priv = pair.private
-        if (priv != null && keyalg instanceof EcdhKeyAlgorithm) {
-            // PKCS11 private keys don't implement the java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey} interfaces
-            // necessary for `epk` header validation, so we need to let the algorithm know about the private key's
-            // corresponding public key so it can use that for validation instead:
-            priv = Keys.associate(priv, pub)
-        }
+        def priv = Keys.wrap(pair.private, pub)
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
         def jwe = jvmTry { Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact() }
