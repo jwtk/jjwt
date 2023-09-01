@@ -20,13 +20,13 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.KeyPairBuilder;
 
-class DefaultCurve implements Curve {
+abstract class AbstractCurve implements Curve {
 
     private final String ID;
 
     private final String JCA_NAME;
 
-    DefaultCurve(String id, String jcaName) {
+    AbstractCurve(String id, String jcaName) {
         this.ID = Assert.notNull(Strings.clean(id), "Curve ID cannot be null or empty.");
         this.JCA_NAME = Assert.notNull(Strings.clean(jcaName), "Curve jcaName cannot be null or empty.");
     }

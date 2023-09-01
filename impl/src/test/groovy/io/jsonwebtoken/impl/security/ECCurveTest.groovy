@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security
 
 
-import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
 import java.security.PublicKey
@@ -187,18 +186,5 @@ class ECCurveTest {
         def spec = TestKeys.ES256.pair.public.getParams() as ECParameterSpec
         def key = new TestECPublicKey(params: spec, w: new ECPoint(BigInteger.ONE, BigInteger.ONE))
         assertNull ECCurve.findByKey(key)
-    }
-
-    @Test
-    void testForKeyWithNonECPublicKey() {
-        def key = TestKeys.HS256
-        try {
-            ECCurve.forKey(key)
-            fail()
-        } catch (UnsupportedKeyException expected) {
-            String msg = "Unable to determine JWA-standard Elliptic Curve for specified key: " +
-                    "${KeysBridge.toString(key)}"
-            assertEquals msg, expected.getMessage()
-        }
     }
 }

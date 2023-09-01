@@ -17,6 +17,8 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 
+import java.security.Key;
+
 /**
  * A cryptographic Elliptic Curve for use with digital signature or key agreement algorithms.
  *
@@ -38,4 +40,12 @@ import io.jsonwebtoken.Identifiable;
  * @since JJWT_RELEASE_VERSION
  */
 public interface Curve extends Identifiable, KeyPairBuilderSupplier {
+
+    /**
+     * Returns {@code true} if the specified key is known to represent a point on the curve, {@code false} otherwise.
+     *
+     * @param key the key to test
+     * @return {@code true} if the specified key is known to represent a point on the curve, {@code false} otherwise.
+     */
+    boolean contains(Key key);
 }

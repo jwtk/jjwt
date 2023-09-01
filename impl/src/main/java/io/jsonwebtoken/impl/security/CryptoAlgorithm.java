@@ -75,6 +75,13 @@ abstract class CryptoAlgorithm implements Identifiable {
     protected SecretKey generateKey(KeyRequest<?> request) {
         AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), "Request encryptionAlgorithm cannot be null.");
         SecretKeyBuilder builder = Assert.notNull(enc.key(), "Request encryptionAlgorithm KeyBuilder cannot be null.");
+//        Provider provider = request.getProvider();
+//        if (provider != null && provider.getName().startsWith("SunPKCS11")) {
+//            // PKCS11 / HSMs will not expose secret key material, and key material is
+//            // required for JWT KeyAlgorithm-generated CEKs, so we rely on the default and/or BC providers instead
+//            provider = null;
+//        }
+//        SecretKey key = builder.provider(provider).random(request.getSecureRandom()).build();
         SecretKey key = builder.provider(request.getProvider()).random(request.getSecureRandom()).build();
         return Assert.notNull(key, "Request encryptionAlgorithm SecretKeyBuilder cannot produce null keys.");
     }

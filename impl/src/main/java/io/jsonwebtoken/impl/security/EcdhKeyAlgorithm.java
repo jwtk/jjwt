@@ -34,6 +34,7 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
+import io.jsonwebtoken.security.KeySupplier;
 import io.jsonwebtoken.security.OctetPublicJwk;
 import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.Request;
@@ -67,10 +68,6 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
     //    where the Digest Method is SHA-256.
     private static final String CONCAT_KDF_HASH_ALG_NAME = "SHA-256";
     private static final ConcatKDF CONCAT_KDF = new ConcatKDF(CONCAT_KDF_HASH_ALG_NAME);
-    public static final String KEK_TYPE_MESSAGE = "Key Encryption Key must be a " + ECKey.class.getName() +
-            " or Edwards Curve PublicKey on a supported curve.";
-    public static final String KDK_TYPE_MESSAGE = "Key Decryption Key must be a " + ECKey.class.getName() +
-            " or Edwards Curve PrivateKey on a supported curve.";
 
     private final KeyAlgorithm<SecretKey, SecretKey> WRAP_ALG;
 
@@ -156,32 +153,20 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         }
     }
 
-    private static EdwardsCurve assertAgreement(Key key, String exMsg) {
-        EdwardsCurve curve;
-        try {
-            curve = EdwardsCurve.forKey(key);
-        } catch (Throwable t) {
-            String msg = exMsg + " Cause: " + t.getMessage();
-            throw new UnsupportedKeyException(msg, t);
+    private static Curve assertCurve(Key key) {
+        Curve curve = StandardCurves.findByKey(key);
+        if (curve == null) {
+            String type = key instanceof PublicKey ? "encryption " : "decryption ";
+            String msg = "Unable to determine JWA-standard Elliptic Curve for " + type + "key [" +
+                    KeysBridge.toString(key) + "]";
+            throw new UnsupportedKeyException(msg);
         }
-        Assert.stateNotNull(curve, "EdwardsCurve instance cannot be null.");
-        if (curve.isSignatureCurve()) {
+        if (curve instanceof EdwardsCurve && ((EdwardsCurve) curve).isSignatureCurve()) {
             String msg = curve.getId() + " keys may not be used with ECDH-ES key agreement algorithms per " +
                     "https://www.rfc-editor.org/rfc/rfc8037#section-3.1";
             throw new UnsupportedKeyException(msg);
         }
-        return curve;
-    }
-
-    private static ECCurve assertEcCurve(Key key, String exMsg) {
-        ECCurve curve;
-        try {
-            curve = ECCurve.forKey(key);
-        } catch (Throwable t) {
-            String msg = exMsg + " Cause: " + t.getMessage();
-            throw new UnsupportedKeyException(msg, t);
-        }
-        return Assert.stateNotNull(curve, "ECCurve instance cannot be null.");
+        return Assert.notNull(curve, "Curve cannot be null.");
     }
 
     @Override
@@ -190,14 +175,9 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         PublicKey publicKey = Assert.notNull(request.getPayload(), "Encryption PublicKey cannot be null.");
 
-        Curve curve;
-        if (publicKey instanceof ECKey) {
-            curve = assertEcCurve(publicKey, KEK_TYPE_MESSAGE);
-            // note: we don't need to validate if specified key's point is on a supported curve here
-            // because that will automatically be asserted when using Jwks.builder().... below
-        } else { // it must be an edwards curve key
-            curve = assertAgreement(publicKey, KEK_TYPE_MESSAGE);
-        }
+        Curve curve = assertCurve(publicKey);
+        // note: we don't need to validate if specified key's point is on a supported curve here
+        // because that will automatically be asserted when using Jwks.builder().... below
         Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
 
         // Generate our ephemeral key pair:
@@ -222,15 +202,6 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         return result;
     }
 
-    private <T> T assertEpk(Class<T> clazz, Object epk) {
-        if (!clazz.isInstance(epk)) {
-            String msg = "JWE Header " + DefaultJweHeader.EPK + " value is not a supported Elliptic Curve " +
-                    "Public JWK. Value: " + epk;
-            throw new UnsupportedKeyException(msg);
-        }
-        return clazz.cast(epk);
-    }
-
     @Override
     public SecretKey getDecryptionKey(DecryptionKeyRequest<PrivateKey> request) throws SecurityException {
 
@@ -240,32 +211,32 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         FieldReadable reader = new RequiredFieldReader(header);
         PublicJwk<?> epk = reader.get(DefaultJweHeader.EPK);
 
-        if (privateKey instanceof ECKey) {
-            ECCurve curve = assertEcCurve(privateKey, KDK_TYPE_MESSAGE);
-            EcPublicJwk ecEpk = assertEpk(EcPublicJwk.class, epk);
-            // While the EPK might be on a JWA-supported NIST curve, it must be on the private key's exact curve:
-            if (!curve.contains(ecEpk.toKey())) {
-                String msg = "JWE Header " + DefaultJweHeader.EPK + " value does not represent " +
-                        "a point on the expected curve.";
-                throw new InvalidKeyException(msg);
-            }
-        } else { // it must be an Edwards Curve key
-            EdwardsCurve privateKeyCurve = assertAgreement(privateKey, KDK_TYPE_MESSAGE);
-            OctetPublicJwk<?> oEpk = assertEpk(OctetPublicJwk.class, epk);
-            EdwardsCurve epkCurve = EdwardsCurve.forKey(oEpk.toKey());
-            if (!privateKeyCurve.equals(epkCurve)) {
-                String msg = "JWE Header " + DefaultJweHeader.EPK + " value does not represent a point " +
-                        "on the expected curve. Value: " + oEpk;
-                throw new InvalidKeyException(msg);
-            }
-            request = new DefaultDecryptionKeyRequest<>(request.getPayload(), request.getProvider(),
-                    ensureSecureRandom(request), request.getHeader(), request.getEncryptionAlgorithm(), request.getKey());
+        Curve curve = assertCurve(privateKey);
+        Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
+        Class<?> epkClass = curve instanceof ECCurve ? EcPublicJwk.class : OctetPublicJwk.class;
+        if (!epkClass.isInstance(epk)) {
+            String msg = "JWE Header " + DefaultJweHeader.EPK + " value is not a supported Elliptic Curve " +
+                    "Public JWK. Value: " + epk;
+            throw new UnsupportedKeyException(msg);
+        }
+        if (!curve.contains(epk.toKey())) {
+            String msg = "JWE Header " + DefaultJweHeader.EPK + " value does not represent " +
+                    "a point on the expected curve. Value: " + epk;
+            throw new InvalidKeyException(msg);
+        }
+
+        // PKCS11 unwrap if necessary:
+        if (privateKey instanceof KeySupplier) {
+            Key key = ((KeySupplier<?>) privateKey).getKey();
+            // wrapped keys are only produced within JJWT internal implementations (not by app devs)
+            // so the wrapped key should always be a PrivateKey:
+            privateKey = Assert.isInstanceOf(PrivateKey.class, key, "Wrapped key is not a PrivateKey.");
         }
 
         final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);
 
         DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getPayload(),
-                request.getProvider(), request.getSecureRandom(), header, request.getEncryptionAlgorithm(), derived);
+                null, request.getSecureRandom(), header, request.getEncryptionAlgorithm(), derived);
 
         return WRAP_ALG.getDecryptionKey(unwrapReq);
     }

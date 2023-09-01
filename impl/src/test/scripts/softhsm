@@ -203,7 +203,9 @@ _import() {
   ); do
 
     algid="${name%%.*}" # RS256.pkcs8.pem --> RS256
-    local privder pubpem pubder certpem certder hexid
+    local privpem privder privpkcs1 pubpem pubder certpem certder hexid
+    privpem="${name}"
+    privpkcs1="${algid}.priv.pkcs1.pem"
     privder="${algid}.priv.der"
     pubpem="${algid}.pub.pem"
     pubder="${algid}.pub.der"
@@ -214,19 +216,26 @@ _import() {
     hexid="${hexid^^}"
 
     _log "Creating temporary ${algid} der files for pkcs11-tool import"
-    openssl pkey -in "${name}" -out "${privder}" -outform DER || _errexit "can't create private key der file"
-    openssl pkey -in "${pubpem}" -pubin -out "${pubder}" -outform DER || _errexit "can't create public key der file"
-    openssl x509 -in "${certpem}" -out "${certder}" -outform DER || _errexit "can't create x509 cert der file"
+    if [[ "${algid}" = RS* ]]; then # https://github.com/OpenSC/OpenSC/issues/2854
+      openssl pkey -in "${privpem}" -out "${privpkcs1}" -traditional || _errexit "can't create ${algid} private key pkcs1 file"
+      privpem="${privpkcs1}" # reassign
+    fi
+    openssl pkey -in "${privpem}" -out "${privder}" -outform DER || { rm -rf "${privpkcs1}"; _errexit "can't create ${algid} private key der file"; }
+    rm -rf "${privpkcs1}" # in case we generated it
+    [[ -f "${privder}" ]] || _errexit "can't create ${algid} private key der file"
+
+    openssl pkey -in "${pubpem}" -pubin -out "${pubder}" -outform DER || _errexit "can't create ${algid} public key der file"
+    openssl x509 -in "${certpem}" -out "${certder}" -outform DER || _errexit "can't create ${algid} x509 cert der file"
 
     _log "Importing ${algid} keypair with id ${hexid}"
-    # softhsm import doesn't currently support RSA-PSS pem files: https://github.com/opendnssec/SoftHSMv2/issues/721
-    # TODO: remove if-block when softhsm2 supports RSA-PSS
-    if [[ "${algid}" != PS* ]]; then
-      _softhsmu --import "${name}" --label "${algid}" --id "${hexid}" || _errexit "can't import key pair"
-      #    else
-      #      # echo "importing ${algid} keys and cert into softhsm via pkcs11-tool"
-      #      _pkcs11t --write-object "${privder}" --type privkey --id "${hexid}" || _errexit "can't import private key"
-      #      _pkcs11t --write-object "${pubder}" --type pubkey --id "${hexid}" || _errexit "can't import public key"
+    if [[ "${algid}" != PS* ]]; then # no softhsm2 RSA-PSS support: https://github.com/opendnssec/SoftHSMv2/issues/721
+      if [[ "${algid}" = Ed* || "${algid}" = RS* || "${algid}" = X* ]]; then
+        # pkcs11-tool backed by softhsm2 cannot import the private key .der files, so use softhsm2-util directly:
+        _softhsmu --import "${name}" --label "${algid}" --id "${hexid}" || _errexit "can't import ${algid} key pair"
+      else
+        _pkcs11t --write-object "${privder}" --label "${algid}" --type privkey --id "${hexid}" || _errexit "can't import ${algid} private key"
+        _pkcs11t --write-object "${pubder}" --label "${algid}" --type pubkey --id "${hexid}" || _errexit "can't import ${algid} public key"
+      fi
     fi
 
     _log "Importing ${algid} x509 cert with id ${hexid}"

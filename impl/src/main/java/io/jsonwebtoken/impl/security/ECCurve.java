@@ -19,7 +19,6 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.KeyPairBuilder;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
@@ -37,7 +36,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ECCurve extends DefaultCurve {
+public class ECCurve extends AbstractCurve {
 
     private static final BigInteger TWO = BigInteger.valueOf(2);
     private static final BigInteger THREE = BigInteger.valueOf(3);
@@ -96,16 +95,6 @@ public class ECCurve extends DefaultCurve {
         return curve;
     }
 
-    static ECCurve forKey(Key key) {
-        ECCurve curve = findByKey(key);
-        if (curve == null) {
-            String msg = "Unable to determine JWA-standard Elliptic Curve for specified key: " +
-                    KeysBridge.toString(key);
-            throw new UnsupportedKeyException(msg);
-        }
-        return curve;
-    }
-
     static ECPublicKeySpec publicKeySpec(ECPrivateKey key) throws IllegalArgumentException {
         EllipticCurve jcaCurve = assertJcaCurve(key);
         ECCurve curve = BY_JCA_CURVE.get(jcaCurve);
@@ -137,7 +126,8 @@ public class ECCurve extends DefaultCurve {
         return new DefaultKeyPairBuilder(KEY_PAIR_GENERATOR_JCA_NAME, toParameterSpec());
     }
 
-    boolean contains(Key key) {
+    @Override
+    public boolean contains(Key key) {
         if (key instanceof ECPublicKey) {
             ECPublicKey pub = (ECPublicKey) key;
             ECParameterSpec pubSpec = pub.getParams();

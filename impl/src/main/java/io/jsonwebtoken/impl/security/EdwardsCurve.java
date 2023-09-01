@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
+public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
 
     private static final String OID_PREFIX = "1.3.101.";
 
@@ -373,6 +373,12 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         //TODO: check if key exists on discovered curve via equation
 
         return curve;
+    }
+
+    @Override
+    public boolean contains(Key key) {
+        EdwardsCurve curve = findByKey(key);
+        return curve.equals(this);
     }
 
     private static int findOidTerminalNode(byte[] encoded) {

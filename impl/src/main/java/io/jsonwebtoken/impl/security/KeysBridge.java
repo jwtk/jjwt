@@ -18,11 +18,13 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.KeySupplier;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
@@ -36,6 +38,26 @@ public final class KeysBridge {
 
     public static Password password(char[] password) {
         return new PasswordSpec(password);
+    }
+
+    public static PrivateKey associate(PrivateKey priv, PublicKey pub) {
+        Assert.notNull(priv, "PrivateKey cannot be null.");
+        if (priv instanceof KeySupplier) { //already wrapped, don't wrap again
+            return priv;
+        }
+        // We only need to wrap if:
+        // 1. The private key is not already an ECKey. If it is, we can validate normally
+        // 2. The public key is an ECKey - this must be true to represent EC params for the private key
+        // 3. The private key indicates via its algorithm that it is intended to be used as an EC key.
+        String privAlg = Strings.clean(priv.getAlgorithm());
+        if (!(priv instanceof ECKey) && pub instanceof ECKey &&
+                (("EC".equalsIgnoreCase(privAlg) || "ECDSA".equalsIgnoreCase(privAlg)) ||
+                        EcSignatureAlgorithm.findByKey(priv) != null /* match by OID just in case for PKCS11 keys */)) {
+            return new PrivateECKey(priv, ((ECKey) pub).getParams());
+        }
+
+        // otherwise, no need to wrap, return unchanged
+        return priv;
     }
 
     public static String findAlgorithm(Key key) {

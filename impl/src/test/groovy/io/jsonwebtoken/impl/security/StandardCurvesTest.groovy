@@ -32,6 +32,11 @@ class StandardCurvesTest {
     }
 
     @Test
+    void testFindByNullKey() {
+        assertNull StandardCurves.findByKey(null)
+    }
+
+    @Test
     void testKeyPairBuilders() {
         curves.values().each {
             def pair = it.keyPair().build()
