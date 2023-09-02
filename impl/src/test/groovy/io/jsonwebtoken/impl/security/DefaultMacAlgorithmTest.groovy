@@ -46,7 +46,7 @@ class DefaultMacAlgorithmTest {
         try {
             newAlg().digest(request(password))
         } catch (InvalidKeyException expected) {
-            String msg = 'The signing key\'s algorithm \'NONE\' does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with HS256.'
+            String msg = 'Passwords are intended for use with key derivation algorithms only.'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -64,8 +64,8 @@ class DefaultMacAlgorithmTest {
         }
         try {
             newAlg().digest(request(password))
-        } catch (SignatureException expected) {
-            String msg = "Unable to compute HS256 signature with JCA algorithm 'HmacSHA256' using key {${KeysBridge.toString(password)}}: ${expected.getCause().getMessage()}" as String
+        } catch (UnsupportedKeyException expected) {
+            String msg = 'Passwords are intended for use with key derivation algorithms only.'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -89,8 +89,8 @@ class DefaultMacAlgorithmTest {
 
         try {
             newAlg().digest(request(password))
-        } catch (SignatureException expected) {
-            String msg = "Unable to compute HS256 signature with JCA algorithm 'HmacSHA256' using key {${KeysBridge.toString(password)}}: ${expected.getCause().getMessage()}" as String
+        } catch (UnsupportedKeyException expected) {
+            String msg = 'Passwords are intended for use with key derivation algorithms only.'
             assertEquals msg, expected.getMessage()
         }
     }
@@ -130,9 +130,10 @@ class DefaultMacAlgorithmTest {
         def key = new SecretKeySpec(new byte[1], 'HmacSHA256') {
             @Override
             byte[] getEncoded() {
-                throw new UnsupportedOperationException("HSM: not allowed")
+                return null
             }
         }
+        // doesn't throw exception because it's likely an HSM key
         newAlg().validateKey(key, true)
     }
 

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.OptionalMethodInvoker;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.KeySupplier;
@@ -27,10 +28,17 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
-import java.security.interfaces.RSAKey;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
+
+    private static final String SUNPKCS11_GENERIC_SECRET_CLASSNAME = "sun.security.pkcs11.P11Key$P11SecretKey";
+    private static final String SUNPKCS11_GENERIC_SECRET_ALGNAME = "Generic Secret"; // https://github.com/openjdk/jdk/blob/4f90abaf17716493bad740dcef76d49f16d69379/src/jdk.crypto.cryptoki/share/classes/sun/security/pkcs11/P11KeyStore.java#L1292
+
+    private static final String SUN_KEYUTIL_CLASSNAME = "sun.security.util.KeyUtil";
+    private static final OptionalMethodInvoker<Key, Integer> SUN_KEYSIZE =
+            new OptionalMethodInvoker<>(SUN_KEYUTIL_CLASSNAME, "getKeySize", Key.class, true);
+    private static final String SUN_KEYUTIL_ERR = "Unexpected " + SUN_KEYUTIL_CLASSNAME + " invocation error.";
 
     // prevent instantiation
     private KeysBridge() {
@@ -84,38 +92,39 @@ public final class KeysBridge {
         return encoded;
     }
 
+    public static boolean isSunPkcs11GenericSecret(Key key) {
+        return key instanceof SecretKey &&
+                key.getClass().getName().equals(SUNPKCS11_GENERIC_SECRET_CLASSNAME) &&
+                SUNPKCS11_GENERIC_SECRET_ALGNAME.equals(key.getAlgorithm());
+    }
+
     /**
      * Returns the specified key's key length (in bits) if possible, or {@code -1} if unable to determine the length.
-     *
-     * <p>Some KeyStore implementations - like Hardware Security Modules, PKCS11 key stores, and later versions
-     * of Android - will not allow applications or libraries to determine a key's length.  In these cases,
-     * this method will return {@code -1} to indicate the length could not be determined.</p>
      *
      * @param key the key to inspect
      * @return the specified key's key length in bits, or {@code -1} if unable to determine length.
      */
     public static int findBitLength(Key key) {
-        if (key instanceof SecretKey) {
-            SecretKey sk = (SecretKey) key;
-            if ("RAW".equals(sk.getFormat())) {
-                byte[] encoded = findEncoded(key);
-                if (encoded != null) {
-                    long len = Bytes.bitLength(encoded);
-                    return Assert.lte(len, (long) Integer.MAX_VALUE, "Excessive key bit length.").intValue();
-                }
-            }
-        } else if (key instanceof RSAKey) {
-            return ((RSAKey) key).getModulus().bitLength();
-        } else if (key instanceof ECKey) {
-            return ((ECKey) key).getParams().getOrder().bitLength();
-        } else {
-            //try to see if Edwards key:
-            EdwardsCurve curve = EdwardsCurve.findByKey(key);
-            if (curve != null) {
-                return curve.getKeyBitLength();
-            }
+
+        Integer retval = SUN_KEYSIZE.apply(key);
+        int bitlen = Assert.stateNotNull(retval, SUN_KEYUTIL_ERR);
+
+        // SunPKCS11 SecretKey lengths are unfortunately reported in bytes, not bits
+        // per https://bugs.openjdk.org/browse/JDK-8163173
+        // (they should be multiplying the PKCS11 CKA_VALUE_LEN value by 8 since their own
+        // sun.security.util.Length#getLength() JavaDoc states that values are intended to be in bits, not bytes)
+        // So we account for that here:
+        if (bitlen > 0 && isSunPkcs11GenericSecret(key)) {
+            bitlen *= Byte.SIZE;
         }
-        return -1; // unable to determine
+
+        if (bitlen > 0) return bitlen;
+
+        // We can check additional logic for EdwardsCurve even if the current JDK version doesn't support it:
+        EdwardsCurve curve = EdwardsCurve.findByKey(key);
+        if (curve != null) bitlen = curve.getKeyBitLength();
+
+        return bitlen;
     }
 
     public static byte[] getEncoded(Key key) {

@@ -17,12 +17,15 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.Provider
@@ -42,6 +45,8 @@ class Pkcs11Test {
             'C:\\SoftHSM2\\lib\\softhsm2-x64.dll',      // https://github.com/disig/SoftHSM2-for-Windows
             'C:\\SoftHSM2\\lib\\softhsm2.dll'           // https://github.com/disig/SoftHSM2-for-Windows
     ]
+    //This pin equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm:
+    static final char[] PIN = "1234".toCharArray()
 
     private static PrivateKey getKey(KeyStore ks, Identifiable alg, char[] pin) {
         // The SunPKCS11 KeyStore does not support Edwards Curve keys at all:
@@ -74,7 +79,12 @@ class Pkcs11Test {
             String config = """--
             name = jjwt
             library = ${file.getCanonicalPath()}
-            attributes = compatibility
+            # Needed for JWT ECDH-ES* algorithms using SunPKCS11 KeyAgreement:
+            # https://stackoverflow.com/questions/51663622/do-sunpkcs11-supports-ck-sensitive-attribute-for-derived-key-using-ecdh
+            attributes(generate,CKO_SECRET_KEY,CKK_GENERIC_SECRET) = {
+              CKA_SENSITIVE = false
+              CKA_EXTRACTABLE = true
+            }
             """
             if (Provider.metaClass.respondsTo(Provider, 'configure', String)) { // JDK 9 or later
                 provider = Security.getProvider("SunPKCS11")
@@ -86,22 +96,56 @@ class Pkcs11Test {
         return provider
     }
 
-    private static Map<String, TestKeys.Bundle> findPkcs11Bundles(Provider provider) {
-
-        if (provider == null) {
-            return Collections.emptyMap()
+    private static KeyStore loadKeyStore(Provider provider) {
+        if (provider == null) return null
+        KeyStore ks = KeyStore.getInstance("PKCS11", provider)
+        try {
+            ks.load(null, PIN)
+            return ks
+        } catch (Throwable ignored) { // JVM can't support the keys or certs in SoftHSM
+            return null
         }
+    }
+
+    private static Map<Identifiable, SecretKey> findPkcs11SecretKeys(KeyStore ks) {
+        if (ks == null) return Collections.emptyMap()
+
+        Map<Identifiable, SecretKey> keys = new LinkedHashMap()
+
+        def prot = new KeyStore.PasswordProtection(PIN)
+
+        def algs = [] as List<Identifiable>
+        algs.addAll(Jwts.SIG.get().values().findAll({ it instanceof KeyBuilderSupplier }))
+        algs.addAll(Jwts.ENC.get().values())
+
+        algs.each { Identifiable alg ->
+            // find any previous one:
+            SecretKey key = ks.getKey(alg.id, PIN) as SecretKey
+            if (key == null) { // didn't exist, lazily create it in SoftHSM:
+                key = alg.key().build()
+                if (alg instanceof HmacAesAeadAlgorithm) {
+                    // PKCS11 provider doesn't like non-standard key lengths with the AES algorithm, so we'll
+                    // 'trick' it by using HmacSHA*** alg identifier
+                    def encoded = key.getEncoded()
+                    long bitlen = Bytes.bitLength(encoded)
+                    key = new SecretKeySpec(key.getEncoded(), "HmacSHA${bitlen}")
+                }
+                KeyStore.Entry entry = new KeyStore.SecretKeyEntry(key)
+                ks.setEntry(alg.id, entry, prot)
+                // it's saved now, but we need to look up the (restricted) PKCS11 representation to use that during
+                // testing to more accurately reflect real/restricted HSM access:
+                key = ks.getKey(alg.id, PIN) as SecretKey
+            }
+            keys.put(alg, key)
+        }
+
+        return keys
+    }
+
+    private static Map<String, TestKeys.Bundle> findPkcs11Bundles(KeyStore ks) {
+        if (ks == null) return Collections.emptyMap()
 
         Map<String, TestKeys.Bundle> bundles = new LinkedHashMap()
-
-        KeyStore ks = KeyStore.getInstance("PKCS11", provider)
-        //This pin equals the SoftHSM --so-pin and --pin values used in impl/src/test/scripts/softhsm:
-        char[] pin = "1234".toCharArray()
-        try {
-            ks.load(null, pin)
-        } catch (Throwable ignored) { // JVM can't support the keys or certs in SoftHSM
-            return Collections.emptyMap()
-        }
 
         def algs = []
         algs.addAll(Jwts.SIG.get().values().findAll({
@@ -110,7 +154,7 @@ class Pkcs11Test {
         algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
 
         for (Identifiable alg : algs) {
-            def priv = getKey(ks, alg, pin)
+            def priv = getKey(ks, alg, PIN)
             def cert = ks.getCertificate(alg.id) as X509Certificate
             // cert will be null for any PS* algs since  SoftHSM2 doesn't support them yet:
             // https://github.com/opendnssec/SoftHSMv2/issues/721
@@ -122,7 +166,11 @@ class Pkcs11Test {
         return Collections.<String, TestKeys.Bundle> unmodifiableMap(bundles)
     }
 
-    static Provider PKCS11 = getAvailablePkcs11Provider()
+    static final Provider PKCS11 = getAvailablePkcs11Provider()
+
+    static final KeyStore KEYSTORE = loadKeyStore(PKCS11)
+
+    static final Map<Identifiable, SecretKey> PKCS11_SECRETKEYS = findPkcs11SecretKeys(KEYSTORE)
 
     /**
      * Maintainers note:
@@ -141,19 +189,14 @@ class Pkcs11Test {
      * 3. RSASSA-PSS keys of any kind are not available because SoftHSM doesn't currently support them. See
      *    https://github.com/opendnssec/SoftHSMv2/issues/721
      */
-    static final Map<String, TestKeys.Bundle> PKCS11_BUNDLES = findPkcs11Bundles(PKCS11)
+    static final Map<String, TestKeys.Bundle> PKCS11_BUNDLES = findPkcs11Bundles(KEYSTORE)
 
     static TestKeys.Bundle findPkcs11(Identifiable alg) {
         return PKCS11_BUNDLES.get(alg.getId())
     }
 
-    static def ASYM = []
-    static {
-        ASYM.addAll(Jwts.SIG.get().values().findAll({
-            it instanceof SignatureAlgorithm && it != Jwts.SIG.EdDSA
-        })) // EdDSA accounted for by next two:
-        ASYM.add(Jwks.CRV.Ed25519)
-        ASYM.add(Jwks.CRV.Ed448)
+    static SecretKey findPkcs11SecretKey(Identifiable alg) {
+        return PKCS11_SECRETKEYS.get(alg)
     }
 
     static java.security.KeyPair findPkcs11Pair(Identifiable alg) {
@@ -162,23 +205,35 @@ class Pkcs11Test {
 
     @Test
     void testJws() {
-        def algs = ASYM
-        algs.each { it ->
 
-            java.security.KeyPair pair = findPkcs11Pair(it as Identifiable)
+        def algs = [] as List<Identifiable>
+        algs.addAll(Jwts.SIG.get().values().findAll({ it != Jwts.SIG.EdDSA })) // EdDSA accounted for by next two:
+        algs.add(Jwks.CRV.Ed25519)
+        algs.add(Jwks.CRV.Ed448)
 
-            if (pair?.private) { // Either the SunPKCS11 provider or SoftHSM2 supports the key algorithm
-
-                SignatureAlgorithm alg = it instanceof Curve ? Jwts.SIG.EdDSA : it as SignatureAlgorithm
-
-                // We need to specify the PKCS11 provider since we can't access the private key material:
-                def jws = Jwts.builder().provider(PKCS11).issuer('me').signWith(pair.private, alg).compact()
-
-                // Do not specify the PKCS11 provider (a JWS recipient doesn't have our HSM anyway):
-                String iss = Jwts.parser().verifyWith(pair.public).build().parseClaimsJws(jws).getPayload().getIssuer()
-
-                assertEquals 'me', iss
+        for (Identifiable alg : algs) {
+            def signKey, verifyKey // same for Mac algorithms, priv/pub for sig algorithms
+            if (alg instanceof MacAlgorithm) {
+                signKey = verifyKey = findPkcs11SecretKey(alg)
+            } else { // SignatureAlgorithm
+                java.security.KeyPair pair = findPkcs11Pair(alg)
+                signKey = pair?.private
+                verifyKey = pair?.public
             }
+            if (!signKey) continue // not supported by Either the SunPKCS11 provider or SoftHSM2, so we have to try next
+
+            alg = alg instanceof Curve ? Jwts.SIG.EdDSA : alg as SecureDigestAlgorithm
+
+            // We need to specify the PKCS11 provider since we can't access the private key material:
+            def jws = Jwts.builder().provider(PKCS11).issuer('me').signWith(signKey, alg).compact()
+
+            // We only need to specify a provider during parsing for MAC HSM keys: SignatureAlgorithm verification only
+            // needs the PublicKey, and a recipient doesn't need/won't have an HSM for public material anyway.
+            Provider provider = verifyKey instanceof SecretKey ? PKCS11 : null
+            String iss = Jwts.parser().provider(provider).verifyWith(verifyKey).build()
+                    .parseClaimsJws(jws).getPayload().getIssuer()
+
+            assertEquals 'me', iss
         }
     }
 
