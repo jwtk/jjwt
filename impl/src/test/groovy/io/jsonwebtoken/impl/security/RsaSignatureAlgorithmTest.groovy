@@ -158,7 +158,7 @@ class RsaSignatureAlgorithmTest {
         for (def alg : algs) {
             def pair = TestKeys.forAlgorithm(alg).pair
             int bitlen = alg.preferredKeyBitLength + 1 // one more bit than required
-            int len = Bytes.uintLength(bitlen)
+            int len = Bytes.length(bitlen)
             def mag = new byte[len]
             Randoms.secureRandom().nextBytes(mag)
             mag[0] = 0x01 // ensure first byte is non-zero so BigInteger doesnt discard leading zero bytes

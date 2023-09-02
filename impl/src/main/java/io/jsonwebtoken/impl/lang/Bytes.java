@@ -189,8 +189,7 @@ public final class Bytes {
     }
 
     /**
-     * Returns the minimum number of bytes required to represent the specified non-negative integer as an unsigned
-     * byte array.
+     * Returns the minimum number of bytes required to represent the specified number of bits.
      *
      * <p>This is defined/used by many specifications, such as:</p>
      * <ul>
@@ -203,13 +202,13 @@ public final class Bytes {
      *     <li>and others.</li>
      * </ul>
      *
-     * @param i the integer to represent as an unsigned byte array, must be >= 0
-     * @return the minimum number of bytes required to represent the specified integer as an unsigned byte array.
-     * @throws IllegalArgumentException if {@code i} is less than zero.
+     * @param bitLength the number of bits to represent as a byte array, must be >= 0
+     * @return the minimum number of bytes required to represent the specified number of bits.
+     * @throws IllegalArgumentException if {@code bitLength} is less than zero.
      */
-    public static int uintLength(int i) {
-        if (i < 0) throw new IllegalArgumentException("uint argument must be >= 0");
-        return (i + 7) / Byte.SIZE;
+    public static int length(int bitLength) {
+        if (bitLength < 0) throw new IllegalArgumentException("bitLength argument must be >= 0");
+        return (bitLength + 7) / Byte.SIZE;
     }
 
     public static String bitsMsg(long bitLength) {

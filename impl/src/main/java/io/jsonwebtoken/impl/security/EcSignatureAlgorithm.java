@@ -127,13 +127,14 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         String curveName = "secp" + orderBitLength + "r1";
         this.KEY_PAIR_GEN_PARAMS = new ECGenParameterSpec(curveName);
         this.orderBitLength = orderBitLength;
-        this.sigFieldByteLength = Bytes.uintLength(this.orderBitLength);
+        this.sigFieldByteLength = Bytes.length(this.orderBitLength);
         this.signatureByteLength = this.sigFieldByteLength * 2; // R bytes + S bytes = concat signature bytes
     }
 
     @Override
     public KeyPairBuilder keyPair() {
-        return new DefaultKeyPairBuilder(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, this.KEY_PAIR_GEN_PARAMS).random(Randoms.secureRandom());
+        return new DefaultKeyPairBuilder(ECCurve.KEY_PAIR_GENERATOR_JCA_NAME, this.KEY_PAIR_GEN_PARAMS)
+                .random(Randoms.secureRandom());
     }
 
     @Override
@@ -146,11 +147,14 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
             ECKey ecKey = (ECKey) key;
             BigInteger order = ecKey.getParams().getOrder();
             int orderBitLength = order.bitLength();
-            int sigFieldByteLength = Bytes.uintLength(orderBitLength);
+            int sigFieldByteLength = Bytes.length(orderBitLength);
             int concatByteLength = sigFieldByteLength * 2;
 
             if (concatByteLength != this.signatureByteLength) {
-                String msg = "The provided Elliptic Curve " + keyType(signing) + " key's size (aka Order bit length) is " + Bytes.bitsMsg(orderBitLength) + ", but the '" + name + "' algorithm requires EC Keys with " + Bytes.bitsMsg(this.orderBitLength) + " per " + "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
+                String msg = "The provided Elliptic Curve " + keyType(signing) +
+                        " key's size (aka Order bit length) is " + Bytes.bitsMsg(orderBitLength) + ", but the '" +
+                        name + "' algorithm requires EC Keys with " + Bytes.bitsMsg(this.orderBitLength) +
+                        " per [RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
                 throw new InvalidKeyException(msg);
             }
         }
@@ -201,10 +205,14 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
                          * the risk of CVE-2022-21449 attacks on early JVM versions 15, 17 and 18.
                          */
                         // TODO: remove for 1.0 (DER-encoding support is not in the JWT RFCs)
-                        if (concatSignature[0] == 0x30 && "true".equalsIgnoreCase(System.getProperty(DER_ENCODING_SYS_PROPERTY_NAME))) {
+                        if (concatSignature[0] == 0x30 &&
+                                "true".equalsIgnoreCase(System.getProperty(DER_ENCODING_SYS_PROPERTY_NAME))) {
                             derSignature = concatSignature;
                         } else {
-                            String msg = "Provided signature is " + Bytes.bytesMsg(concatSignature.length) + " but " + getId() + " signatures must be exactly " + Bytes.bytesMsg(signatureByteLength) + " per " + "[RFC 7518, Section 3.4 (validation)](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
+                            String msg = "Provided signature is " + Bytes.bytesMsg(concatSignature.length) + " but " +
+                                    getId() + " signatures must be exactly " + Bytes.bytesMsg(signatureByteLength) +
+                                    " per [RFC 7518, Section 3.4 (validation)]" +
+                                    "(https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
                             throw new SignatureException(msg);
                         }
                     } else {
@@ -273,7 +281,9 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         int rawLen = Math.max(i, j);
         rawLen = Math.max(rawLen, outputLength / 2);
 
-        if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset || (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength || derSignature[offset] != 2 || derSignature[offset + 2 + rLength] != 2) {
+        if ((derSignature[offset - 1] & 0xff) != derSignature.length - offset ||
+                (derSignature[offset - 1] & 0xff) != 2 + rLength + 2 + sLength ||
+                derSignature[offset] != 2 || derSignature[offset + 2 + rLength] != 2) {
             throw new JwtException("Invalid ECDSA signature format");
         }
 
