@@ -188,6 +188,30 @@ public final class Bytes {
         return length(bytes) * (long) Byte.SIZE;
     }
 
+    /**
+     * Returns the minimum number of bytes required to represent the specified non-negative integer as an unsigned
+     * byte array.
+     *
+     * <p>This is defined/used by many specifications, such as:</p>
+     * <ul>
+     *     <li><a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-2">JWA RFC 7518, Section 2</a>'s
+     *     <code>Base64urlUInt</code> definition</li>
+     *     <li>Elliptic Curve <code>Integer-to-OctetString</code> conversion defined by Section 2.3.7 of the
+     *     <a href="http://www.secg.org/sec1-v2.pdf">Standards for Efficient Cryptography Group,
+     *     &qupt;SEC 1: Elliptic Curve Cryptography&quot; Version 2.0, May 2009</a> (as required by
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>)</li>
+     *     <li>and others.</li>
+     * </ul>
+     *
+     * @param i the integer to represent as an unsigned byte array, must be >= 0
+     * @return the minimum number of bytes required to represent the specified integer as an unsigned byte array.
+     * @throws IllegalArgumentException if {@code i} is less than zero.
+     */
+    public static int uintLength(int i) {
+        if (i < 0) throw new IllegalArgumentException("uint argument must be >= 0");
+        return (i + 7) / Byte.SIZE;
+    }
+
     public static String bitsMsg(long bitLength) {
         return bitLength + " bits (" + bitLength / Byte.SIZE + " bytes)";
     }

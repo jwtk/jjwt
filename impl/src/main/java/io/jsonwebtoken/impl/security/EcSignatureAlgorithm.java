@@ -68,26 +68,6 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     }
 
     /**
-     * Returns the correct byte length of an R or S field in a concat signature for the given EC Key order bit length.
-     *
-     * <p>Per <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>:
-     * <quote>
-     * the Integer-to-OctetString Conversion
-     * defined in Section 2.3.7 of SEC1 [SEC1] used to represent R and S as
-     * octet sequences adds zero-valued high-order padding bits when needed
-     * to round the size up to a multiple of 8 bits; thus, each 521-bit
-     * integer is represented using 528 bits in 66 octets.
-     * </quote>
-     * </p>
-     *
-     * @param orderBitLength the EC Key order bit length (ecKey.getParams().getOrder().bitLength())
-     * @return the correct byte length of an R or S field in a concat signature for the given EC Key order bit length.
-     */
-    private static int fieldByteLength(int orderBitLength) {
-        return (orderBitLength + 7) / Byte.SIZE;
-    }
-
-    /**
      * Returns {@code true} for Order bit lengths defined in the JWA specification, {@code false} otherwise.
      * Specifically, returns {@code true} <em>only</em> for values of {@code 256}, {@code 384} and {@code 521}.  See
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a> for more.
@@ -147,7 +127,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         String curveName = "secp" + orderBitLength + "r1";
         this.KEY_PAIR_GEN_PARAMS = new ECGenParameterSpec(curveName);
         this.orderBitLength = orderBitLength;
-        this.sigFieldByteLength = fieldByteLength(this.orderBitLength);
+        this.sigFieldByteLength = Bytes.uintLength(this.orderBitLength);
         this.signatureByteLength = this.sigFieldByteLength * 2; // R bytes + S bytes = concat signature bytes
     }
 
@@ -166,7 +146,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
             ECKey ecKey = (ECKey) key;
             BigInteger order = ecKey.getParams().getOrder();
             int orderBitLength = order.bitLength();
-            int sigFieldByteLength = fieldByteLength(orderBitLength);
+            int sigFieldByteLength = Bytes.uintLength(orderBitLength);
             int concatByteLength = sigFieldByteLength * 2;
 
             if (concatByteLength != this.signatureByteLength) {

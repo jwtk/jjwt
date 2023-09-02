@@ -35,7 +35,7 @@ public class BigIntegerUBytesConverter implements Converter<BigInteger, byte[]> 
         final int bitLen = bigInt.bitLength();
         final byte[] bytes = bigInt.toByteArray();
         // round bitLen. This gives the minimal number of bytes necessary to represent an unsigned byte array:
-        final int unsignedByteLen = Math.max(1, (bitLen + 7) / Byte.SIZE);
+        final int unsignedByteLen = Bytes.uintLength(bitLen);
 
         if (bytes.length == unsignedByteLen) { // already in the form we need
             return bytes;

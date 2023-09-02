@@ -186,7 +186,7 @@ public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
         this.signatureCurve = (oidTerminalNode == 112 || oidTerminalNode == 113);
         byte[] suffix = new byte[]{(byte) oidTerminalNode};
         this.ASN1_OID = Bytes.concat(ASN1_OID_PREFIX, suffix);
-        this.encodedKeyByteLength = (this.keyBitLength + 7) / 8;
+        this.encodedKeyByteLength = Bytes.uintLength(this.keyBitLength);
 
         this.PUBLIC_KEY_ASN1_PREFIX = publicKeyAsn1Prefix(this.encodedKeyByteLength, this.ASN1_OID);
         this.PRIVATE_KEY_ASN1_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, true);
