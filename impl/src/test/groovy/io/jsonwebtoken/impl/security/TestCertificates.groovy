@@ -83,7 +83,7 @@ class TestCertificates {
         PEMParser parser = getParser(alg.id + '.pub.pem')
         parser.withCloseable {
             SubjectPublicKeyInfo info = it.readObject() as SubjectPublicKeyInfo
-            JcaTemplate template = new JcaTemplate(keyJcaName(alg), null)
+            JcaTemplate template = new JcaTemplate(keyJcaName(alg))
             return template.generatePublic(new X509EncodedKeySpec(info.getEncoded()))
         }
     }

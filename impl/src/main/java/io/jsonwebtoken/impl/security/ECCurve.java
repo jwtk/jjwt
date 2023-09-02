@@ -107,7 +107,7 @@ public class ECCurve extends AbstractCurve {
 
     public ECCurve(String id, String jcaName) {
         super(id, jcaName);
-        JcaTemplate template = new JcaTemplate(KEY_PAIR_GENERATOR_JCA_NAME, null);
+        JcaTemplate template = new JcaTemplate(KEY_PAIR_GENERATOR_JCA_NAME);
         this.spec = template.withAlgorithmParameters(new CheckedFunction<AlgorithmParameters, ECParameterSpec>() {
             @Override
             public ECParameterSpec apply(AlgorithmParameters params) throws Exception {

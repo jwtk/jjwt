@@ -440,7 +440,7 @@ class RFC7520Section5Test {
 
             @Override
             protected JcaTemplate jca(Request<?> request) {
-                return new JcaTemplate(getJcaName(), null) {
+                return new JcaTemplate(getJcaName()) {
                     // overrides parent, Groovy doesn't pick it up due to generics signature:
                     @SuppressWarnings('unused')
                     byte[] withCipher(CheckedFunction<Cipher, byte[]> fn) throws SecurityException {
@@ -504,7 +504,7 @@ class RFC7520Section5Test {
 
             @Override
             protected JcaTemplate jca(Request<?> request) {
-                return new JcaTemplate(getJcaName(), null) {
+                return new JcaTemplate(getJcaName()) {
                     // overrides parent, Groovy doesn't pick it up due to generics signature:
                     @SuppressWarnings('unused')
                     byte[] withCipher(CheckedFunction<Cipher, byte[]> fn) throws SecurityException {

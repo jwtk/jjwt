@@ -53,7 +53,7 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
 
     // visible for testing
     protected X509Certificate toCert(final byte[] der) throws SecurityException {
-        return new JcaTemplate("X.509", null).generateX509Certificate(der);
+        return new JcaTemplate("X.509").generateX509Certificate(der);
     }
 
     @Override

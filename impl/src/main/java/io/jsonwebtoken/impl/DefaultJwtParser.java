@@ -460,8 +460,15 @@ public class DefaultJwtParser implements JwtParser {
                 throw new IllegalStateException(msg);
             }
 
+            // During decryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
+            // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
+            // As such, the need for a configured Provider is much more likely necessary for the KeyAlgorithm,
+            // especially when using a HSM/PKCS11 Provider. However, if the `dir`ect key algorithm was chosen _and_
+            // a Provider was configured, then the provider is likely necessary for that key, so we represent that
+            // here:
+            final Provider aeadProvider = keyAlg.getId().equalsIgnoreCase(Jwts.KEY.DIRECT.getId()) ? this.provider : null;
             DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(this.provider, null, payload, cek, aad, tag, iv);
+                    new DefaultAeadResult(aeadProvider, null, payload, cek, aad, tag, iv);
             Message<byte[]> result = encAlg.decrypt(decryptRequest);
             payload = result.getPayload();
 

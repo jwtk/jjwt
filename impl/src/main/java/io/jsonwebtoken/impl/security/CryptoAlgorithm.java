@@ -76,7 +76,7 @@ abstract class CryptoAlgorithm implements Identifiable {
     }
 
     protected JcaTemplate jca() {
-        return new JcaTemplate(getJcaName(), null);
+        return new JcaTemplate(getJcaName());
     }
 
     protected JcaTemplate jca(Request<?> request) {

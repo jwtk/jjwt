@@ -193,8 +193,7 @@ class Pkcs11Test {
             // public key doesn't need to be a PKCS11 key since public key material is already available.
             // Decryption does need to use a PKCS11 key however since that is what allows us to assert
             // a valid test
-            def cert = new JcaTemplate("X.509", TestKeys.BC, null)
-                    .generateX509Certificate(bundle.cert.getEncoded())
+            def cert = new JcaTemplate("X.509", TestKeys.BC).generateX509Certificate(bundle.cert.getEncoded())
             bundle.cert = cert
             bundle.chain = [cert]
             bundle.pair = new java.security.KeyPair(cert.getPublicKey(), bundle.pair.private)

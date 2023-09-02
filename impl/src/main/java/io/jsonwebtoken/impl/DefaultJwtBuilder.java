@@ -181,7 +181,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this.headerBuilder.add(name, value).and();
     }
 
-    @SuppressWarnings({"unchecked", "deprecation"}) // TODO: remove for 1.0
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
         Assert.notNull(key, "Key cannot be null.");
         SecureDigestAlgorithm<K, ?> alg = StandardSecureDigestAlgorithms.findBySigningKey(key);
@@ -194,8 +193,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new UnsupportedKeyException(msg);
         }
         return alg;
-        // io.jsonwebtoken.SignatureAlgorithm dalg = io.jsonwebtoken.SignatureAlgorithm.forSigningKey(key);
-        //return (SecureDigestAlgorithm<K, ?>) Jwts.SIG.get().forKey(dalg.getValue());
     }
 
     @Override
@@ -542,7 +539,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final String base64UrlEncodedHeader = encoder.encode(headerBytes);
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
-        AeadRequest encRequest = new DefaultAeadRequest(payload, provider, secureRandom, cek, aad);
+        // During encryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
+        // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
+        // As such, the need for a configured Provider is much more likely necessary for the KeyAlgorithm,
+        // especially when using a HSM/PKCS11 Provider. However, if the `dir`ect key algorithm was chosen _and_
+        // a Provider was configured, then the provider is likely necessary for that key, so we represent that
+        // here:
+        Provider aeadProvider = this.keyAlg.getId().equals(Jwts.KEY.DIRECT.getId()) ? this.provider : null;
+        AeadRequest encRequest = new DefaultAeadRequest(payload, aeadProvider, secureRandom, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");

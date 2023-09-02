@@ -50,7 +50,7 @@ class AesGcmKeyAlgorithmTest {
 
         final String jcaName = "AES/GCM/NoPadding"
 
-        JcaTemplate template = new JcaTemplate(jcaName, null)
+        JcaTemplate template = new JcaTemplate(jcaName)
         byte[] jcaResult = template.withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             byte[] apply(Cipher cipher) throws Exception {
@@ -81,7 +81,7 @@ class AesGcmKeyAlgorithmTest {
         def alg = new AesGcmKeyAlgorithm(keyLength)
         assertEquals 'A' + keyLength + 'GCMKW', alg.getId()
 
-        def template = new JcaTemplate('AES', null)
+        def template = new JcaTemplate('AES')
 
         def header = Jwts.header()
         def kek = template.generateSecretKey(keyLength)
@@ -120,7 +120,7 @@ class AesGcmKeyAlgorithmTest {
     static void testDecryptionHeader(String headerName, Object value, String exmsg) {
         int keyLength = 128
         def alg = new AesGcmKeyAlgorithm(keyLength)
-        def template = new JcaTemplate('AES', null)
+        def template = new JcaTemplate('AES')
         def headerBuilder = Jwts.header()
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
