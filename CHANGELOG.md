@@ -78,6 +78,11 @@ but if not, as is common with keys from PKCS11 and HSM KeyStores, JJWT will stil
 expecting the underlying Security Provider to enforce any key requirements. This should reduce or eliminate any 
 custom code previously written to extend JJWT to use keys from those KeyStores or Providers.
 
+Additionally, PKCS11/HSM tests using [SoftHSMv2](https://www.opendnssec.org/softhsm/) are run on every build with
+every JWS MAC and Signature algorithm and every JWE Key algorithm to ensure continued stable support with
+Android and Sun PKCS11 implementations and spec-compliant Hardware Security Modules that use the PKCS11 interface
+(such as YubiKey, etc.)
+
 #### Custom Signature Algorithms
 
 The `io.jsonwebtoken.SignatureAlgorithm` enum has been deprecated in favor of new 
