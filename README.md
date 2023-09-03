@@ -263,31 +263,24 @@ release.
 #### Questions
 
 If the documentation or the API JavaDoc isn't sufficient, and you either have usability questions or are confused
-about something, please [ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false).
-
-After asking your question, you may wish to join our [Slack](https://jwtk.slack.com/messages/CBNACTN3A) or
-[Gittr](https://gitter.im/jwtk/jjwt) chat rooms, but note that they may not always be attended. You will usually
-have a better chance of having your question answered by 
-[asking your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false).
-   
-If you believe you have found a bug or would like to suggest a feature enhancement, please create a new GitHub issue, 
-however:
+about something, please [ask your question here](https://github.com/jwtk/jjwt/discussions/new?category=q-a). However:
 
 **Please do not create a GitHub issue to ask a question.**  
 
 We use GitHub Issues to track actionable work that requires changes to JJWT's design and/or codebase.  If you have a 
 usability question, instead please 
-[ask your question here](https://stackoverflow.com/questions/ask?tags=jjwt&guided=false), or try Slack or Gittr as 
-described above.
+[ask your question here](https://github.com/jwtk/jjwt/discussions/new?category=q-a), and we can convert that to an 
+issue if necessary.
 
 **If a GitHub Issue is created that does not represent actionable work for JJWT's codebase, it will be promptly 
 closed.**
 
 <a name="help-issues"></a>
-#### Bugs and Feature Requests
+#### Bugs, Feature Requests, Ideas and General Discussions
 
 If you do not have a usability question and believe you have a legitimate bug or feature request, 
-please do [create a new JJWT issue](https://github.com/jwtk/jjwt/issues/new).
+please [discuss it here](https://github.com/jwtk/jjwt/discussions) **_FIRST_**. Please do a quick search first to 
+see if an existing discussion related to yours exist already and join that existing discussion if necesary.
 
 If you feel like you'd like to help fix a bug or implement the new feature yourself, please read the Contributing 
 section next before starting any work.
@@ -302,7 +295,7 @@ Simple Pull Requests that fix anything other than JJWT core code (documentation,
 always appreciated and have a high likelihood of being merged quickly. Please send them!
 
 However, if you want or feel the need to change JJWT's functionality or core code, please do not issue a pull request 
-without [creating a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) and discussing your desired 
+without [starting a new JJWT discussion](https://github.com/jwtk/jjwt/discussions) and discussing your desired 
 changes **first**, _before you start working on it_.
 
 It would be a shame to reject your earnest and genuinely-appreciated pull request if it might not align with the 
@@ -310,8 +303,8 @@ project's goals, design expectations or planned functionality.  We've sadly had 
 they were out of sync with project or design expectations - all because the PR author didn't first check in with 
 the team first before working on a solution.
 
-So, please [create a new JJWT issue](https://github.com/jwtk/jjwt/issues/new) first to discuss, and then we can see if
-(or how) a PR is warranted.  Thank you!
+So, please [create a new JJWT discussion](https://github.com/jwtk/jjwt/discussions) first to discuss, and then we 
+can see easily convert the discussion to an issue and then see if (or how) a PR is warranted.  Thank you!
 
 <a name="contributing-help-wanted"></a>
 #### Help Wanted
@@ -322,7 +315,7 @@ ones there, and we'll be happy to discuss and answer questions in the issue comm
 
 If any of those don't appeal to you, no worries! Any help you would like to offer would be 
 appreciated based on the above caveats concerning [contributing pull reqeuests](#contributing-pull-requests). Feel free
-to discuss or ask questions first if you're not sure. :)
+to [discuss or ask questions first](https://github.com/jwtk/jjwt/discussions) if you're not sure. :)
 
 <a name="overview"></a>
 ## What is a JSON Web Token?
