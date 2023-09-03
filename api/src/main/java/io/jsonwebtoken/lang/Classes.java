@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 
 /**
  * Utility methods for working with {@link Class}es.
@@ -116,6 +117,29 @@ public final class Classes {
         }
 
         return is;
+    }
+
+    /**
+     * Returns the specified resource URL by checking the current thread's
+     * {@link Thread#getContextClassLoader() context class loader}, then the
+     * current ClassLoader (<code>Classes.class.getClassLoader()</code>), then the system/application
+     * ClassLoader (<code>ClassLoader.getSystemClassLoader()</code>, in that order, using
+     * {@link ClassLoader#getResource(String) getResource(name)}.
+     *
+     * @param name the name of the resource to acquire from the classloader(s).
+     * @return the URL of the resource found, or <code>null</code> if the resource cannot be found from any
+     * of the three mentioned ClassLoaders.
+     * @since JJWT_RELEASE_VERSION
+     */
+    private static URL getResource(String name) {
+        URL url = THREAD_CL_ACCESSOR.getResource(name);
+        if (url == null) {
+            url = CLASS_CL_ACCESSOR.getResource(name);
+        }
+        if (url == null) {
+            return SYSTEM_CL_ACCESSOR.getResource(name);
+        }
+        return url;
     }
 
     /**
@@ -311,6 +335,8 @@ public final class Classes {
     private interface ClassLoaderAccessor {
         Class<?> loadClass(String fqcn);
 
+        URL getResource(String name);
+
         InputStream getResourceStream(String name);
     }
 
@@ -330,6 +356,16 @@ public final class Classes {
                 }
             }
             return clazz;
+        }
+
+        @Override
+        public URL getResource(String name) {
+            URL url = null;
+            ClassLoader cl = getClassLoader();
+            if (cl != null) {
+                url = cl.getResource(name);
+            }
+            return url;
         }
 
         public InputStream getResourceStream(String name) {

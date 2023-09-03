@@ -22,6 +22,8 @@ import io.jsonwebtoken.lang.Classes;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * Utility class for securely generating {@link SecretKey}s and {@link KeyPair}s.
@@ -33,6 +35,7 @@ public final class Keys {
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] FOR_PASSWORD_ARG_TYPES = new Class[]{char[].class};
+    private static final Class<?>[] ASSOCIATE_ARG_TYPES = new Class[]{PrivateKey.class, PublicKey.class};
 
     //prevent instantiation
     private Keys() {
@@ -266,5 +269,32 @@ public final class Keys {
      */
     public static Password password(char[] password) {
         return Classes.invokeStatic(BRIDGE_CLASS, "password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
+    }
+
+    /**
+     * Returns a {@code PrivateKey} that may be used by algorithms that require the private key's public information.
+     * This method is primarily only useful for PKCS11 private keys.
+     *
+     * <p>If the private key instance is already capable of representing public information (because it
+     * implements one of the <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces),
+     * this method does nothing and returns the private key unaltered.</p>
+     *
+     * <p>If however the private key instance does <em>not</em> implement one of those interfaces, a new private key
+     * instance that wraps both the specified private key and public key will be created and returned.  JJWT
+     * algorithms that require the key's public information know how to handle these wrapper instances to obtain the
+     * 'real' private key for cryptography operations while using the associated public key for validation.</p>
+     *
+     * @param priv the private key to use for cryptographic operations
+     * @param pub  the private key's associated PublicKey which must implement one of the required
+     *             <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces
+     * @return a {@code PrivateKey} that may be used by algorithms that require the private key's public information.
+     * @throws UnsupportedKeyException if the {@code PublicKey} is required but does not implement one of the required
+     *                                 <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static PrivateKey wrap(PrivateKey priv, PublicKey pub) throws UnsupportedKeyException {
+        Assert.notNull(priv, "PrivateKey cannot be null.");
+        Assert.notNull(pub, "PublicKey cannot be null.");
+        return Classes.invokeStatic(BRIDGE_CLASS, "wrap", ASSOCIATE_ARG_TYPES, new Object[]{priv, pub});
     }
 }

@@ -20,6 +20,8 @@ import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Curve;
 
+import java.security.Key;
+
 public final class StandardCurves extends DelegatingRegistry<String, Curve> {
 
     public StandardCurves() {
@@ -34,11 +36,14 @@ public final class StandardCurves extends DelegatingRegistry<String, Curve> {
         ), false));
     }
 
-//    public static Curve findByKey(Key key) {
-//        Curve curve = ECCurve.findByKey(key);
-//        if (curve == null) {
-//            curve = EdwardsCurve.findByKey(key);
-//        }
-//        return curve;
-//    }
+    public static Curve findByKey(Key key) {
+        if (key == null) {
+            return null;
+        }
+        Curve curve = ECCurve.findByKey(key);
+        if (curve == null) {
+            curve = EdwardsCurve.findByKey(key);
+        }
+        return curve;
+    }
 }

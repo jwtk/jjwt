@@ -274,4 +274,20 @@ class BytesTest {
         assertFalse Bytes.startsWith(A, A, -1)
         assertFalse Bytes.startsWith(C, A)
     }
+
+    @Test
+    void testBytesLength() {
+        // zero bits means we don't need any bytes:
+        assertEquals 0, Bytes.length(0) // zero bits means we don't need any bytes
+        assertEquals 1, Bytes.length(1) // one bit needs at least 1 byte
+        assertEquals 1, Bytes.length(8) // 8 bits fits into 1 byte
+        assertEquals 2, Bytes.length(9) // need at least 2 bytes for 9 bits
+        assertEquals 66, Bytes.length(521) // P-521 curve order bit length
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testBytesLengthNegative() {
+        Bytes.length(-1)
+    }
+
 }

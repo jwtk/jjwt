@@ -96,6 +96,10 @@ public class JcaTemplate {
     private final Provider provider;
     private final SecureRandom secureRandom;
 
+    JcaTemplate(String jcaName) {
+        this(jcaName, null);
+    }
+
     JcaTemplate(String jcaName, Provider provider) {
         this(jcaName, provider, null);
     }

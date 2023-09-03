@@ -103,6 +103,7 @@ enforcement.
   * [Read a JWE](#jwe-read)
     * [JWE Decryption Key](#jwe-read-key)
     * [JWE Decryption Key Locator](#jwe-key-locator)
+    * [ECDH-ES Decryption with PKCS11 PrivateKeys](#jwe-key-pkcs11)
     * [JWE Decompression](#jwe-read-decompression)
 * [JSON Web Keys (JWKs)](#jwk)
   * [Create a JWK](#jwk-create)
@@ -1126,7 +1127,7 @@ So which key do we use?
   ```java
   Jwts.parser()
       
-    .decryptWith(secretKey) // <----
+    .decryptWith(secretKey) // <---- or a Password from Keys.password(charArray)
     
     .build()
     .parseClaimsJwe(jweString);
@@ -1358,7 +1359,7 @@ Jwts.parser()
     .build()
     .parse(jwt);
 ```
-This ensures that clock differences between the machines can be ignored. Two or three minutes should be more than
+This ensures that minor clock differences between the machines can be ignored. Two or three minutes should be more than
 enough; it would be fairly strange if a production machine's clock was more than 5 minutes difference from most
 atomic clocks around the world.
 
@@ -2075,7 +2076,7 @@ During JWE decryption, these algorithms:
 * Decrypt the JWE ciphertext payload with the JWE's identified [encryption algorithm](#jwe-enc) using the decrypted CEK.
 
 <a name="jwe-alg-ecdhes"></a>
-##### Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement
+##### Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement (ECDH-ES)
 
 The JWT Elliptic Curve Diffie-Hellman Ephemeral Static key agreement algorithms `ECDH-ES`, `ECDH-ES+A128KW`, 
 `ECDH-ES+A192KW`, and `ECDH-ES+A256KW` are used when you want to use the JWE recipient's Elliptic Curve _public_ key 
@@ -2219,18 +2220,20 @@ So which key do we use for decryption?
     .decryptWith(secretKey) // <----
     
     .build()
-    .parseClaimsJws(jwsString);
+    .parseClaimsJwe(jweString);
   ```
 * If the jwe was encrypted using a key produced by a Password-based key derivation `KeyAlgorithm`, the same 
   `Password` must be specified on the `JwtParserBuilder`. For example:
 
   ```java
+  Password password = Keys.password(passwordChars);
+  
   Jwts.parser()
       
     .decryptWith(password) // <---- an `io.jsonwebtoken.security.Password` instance
     
     .build()
-    .parseClaimsJws(jwsString);
+    .parseClaimsJwe(jweString);
   ```
 * If the jwe was encrypted with a key produced by an asymmetric `KeyAlgorithm`, the corresponding `PrivateKey` (not 
   the `PublicKey`) must be specified on the `JwtParserBuilder`.  For example:
@@ -2241,7 +2244,7 @@ So which key do we use for decryption?
     .decryptWith(privateKey) // <---- a `PrivateKey`, not a `PublicKey`
     
     .build()
-    .parseClaimsJws(jwsString);
+    .parseClaimsJws(jweString);
   ```
 
 <a name="jwe-key-locator"></a>
@@ -2254,6 +2257,52 @@ them?  How do you know which key to specify if you can't inspect the JWT first?
 In these cases, you can't call the `JwtParserBuilder`'s `decryptWith` method with a single key - instead, you'll need
 to use a Key `Locator`.  Please see the [Key Lookup](#key-locator) section to see how to dynamically obtain different 
 keys when parsing JWSs or JWEs.
+
+<a name="jwe-key-pkcs11"></a>
+#### ECDH-ES Decryption with PKCS11 PrivateKeys
+
+The JWT `ECDH-ES`, `ECDH-ES+A128KW`, `ECDH-ES+A192KW`, and `ECDH-ES+A256KW` key algorithms validate JWE input using
+public key information, even when using `PrivateKey`s to decrypt.  Ordinarily this is automatically performed
+by JJWT when your `PrivateKey` instances implement the 
+[ECKey](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/interfaces/ECKey.html) or 
+[EdECKey](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/interfaces/EdECKey.html)
+(or BouncyCastle equivalent) interfaces, which is the case for most JCA `Provider` implementations.
+
+However, if your decryption `PrivateKey`s are stored in a Hardware Security Module (HSM) and/or you use the 
+[SunPKCS11 Provider](https://docs.oracle.com/en/java/javase/17/security/pkcs11-reference-guide1.html#GUID-6DA72F34-6C6A-4F7D-ADBA-5811576A9331),
+it is likely that your `PrivateKey` instances _do not_ implement `ECKey`.
+
+In these cases, you need to provide both the PKCS11 `PrivateKey` and it's companion `PublicKey` during decryption
+by using the `Keys.wrap` method. For example: 
+for example:
+
+```java
+KeyPair pair = getMyPkcs11KeyPair();
+PrivateKey priv = pair.getPrivate();
+PublicKey pub = pair.getPublic(); // must implement ECKey or EdECKey or BouncyCastle equivalent
+PrivateKey decryptionKey = Keys.wrap(priv, pub);
+```
+
+You then use the resulting `decryptionKey` (not `priv`) with the `JwtParserBuilder` or as the return value from 
+a custom [Key Locator](#key-locator) implementation.  For example:
+
+```java
+PrivateKey decryptionKey = Keys.wrap(pkcs11PrivateKey, pkcs11PublicKey);
+
+Jwts.parser()
+    .decryptWith(decryptionKey) // <----
+    .build()
+    .parseClaimsJwe(jweString);
+```
+
+Or as the return value from your key locator:
+
+```java
+Jwts.parser()
+    .keyLocator(keyLocator) // your keyLocator.locate(header) would return Keys.wrap(privateKey, publicKey)
+    .build()
+    .parseClaimsJwe(jweString);
+```
 
 <a name="jwe-read-decompression"></a>
 #### JWE Decompression

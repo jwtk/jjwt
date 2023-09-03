@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
+public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
 
     private static final String OID_PREFIX = "1.3.101.";
 
@@ -114,8 +114,6 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     private final int keyBitLength;
 
-    private final int KEY_PAIR_GENERATOR_BIT_LENGTH;
-
     private final int encodedKeyByteLength;
 
     /**
@@ -161,59 +159,30 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
     EdwardsCurve(final String id, int oidTerminalNode) {
         super(id, id);
 
-        // OIDs (with terminal node IDs) defined here: https://www.rfc-editor.org/rfc/rfc8410#section-3
-        // X25519 (oid 1.3.101.110) and X448 (oid 1.3.101.111) have 256 bits
-        // Ed25519 (oid 1.3.101.112) has 256 bits
-        // Ed448 (oid 1.3.101.113) has 456 (448 + 8) bits
-        // See https://www.rfc-editor.org/rfc/rfc8032
-        switch (oidTerminalNode) {
-            case 110:
-            case 112:
-                this.keyBitLength = 256;
-                break;
-            case 111:
-                this.keyBitLength = 448;
-                break;
-            case 113:
-                this.keyBitLength = 448 + Byte.SIZE;
-                break;
-            default:
-                String msg = "Invalid Edwards Curve ASN.1 OID terminal node value";
-                throw new IllegalArgumentException(msg);
+        if (oidTerminalNode < 110 || oidTerminalNode > 113) {
+            String msg = "Invalid Edwards Curve ASN.1 OID terminal node value";
+            throw new IllegalArgumentException(msg);
         }
+
+        // OIDs (with terminal node IDs) defined here: https://www.rfc-editor.org/rfc/rfc8410#section-3
+        // X25519 (oid 1.3.101.110) has 255 bytes per https://www.rfc-editor.org/rfc/rfc7748.html#section-5 "Here, the "bits" parameter should be set to 255 for X25519 and 448 for X448"
+        // X448 (oid 1.3.101.111) have 448 bits per https://www.rfc-editor.org/rfc/rfc7748.html#section-5
+        // Ed25519 (oid 1.3.101.112) has 255 bits per https://www.rfc-editor.org/rfc/rfc8032#section-5.1
+        // Ed448 (oid 1.3.101.113) has 456 (448 + 8) bits per https://www.rfc-editor.org/rfc/rfc8032#section-5.2
+        this.keyBitLength = oidTerminalNode % 2 == 0 ? 255 : 448;
+        int encodingBitLen = oidTerminalNode == 113 ?
+                this.keyBitLength + Byte.SIZE : // https://www.rfc-editor.org/rfc/rfc8032#section-5.2.2
+                this.keyBitLength;
+        this.encodedKeyByteLength = Bytes.length(encodingBitLen);
 
         this.OID = OID_PREFIX + oidTerminalNode;
         this.signatureCurve = (oidTerminalNode == 112 || oidTerminalNode == 113);
         byte[] suffix = new byte[]{(byte) oidTerminalNode};
         this.ASN1_OID = Bytes.concat(ASN1_OID_PREFIX, suffix);
-        this.encodedKeyByteLength = (this.keyBitLength + 7) / 8;
 
         this.PUBLIC_KEY_ASN1_PREFIX = publicKeyAsn1Prefix(this.encodedKeyByteLength, this.ASN1_OID);
         this.PRIVATE_KEY_ASN1_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, true);
         this.PRIVATE_KEY_JDK11_PREFIX = privateKeyPkcs8Prefix(this.encodedKeyByteLength, this.ASN1_OID, false);
-
-        // The Sun CE KeyPairGenerator implementation that we'll use to derive PublicKeys with is problematic here:
-        //
-        // [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748) is clear that X25519 keys are 32 bytes (256 bits) and
-        // X448 keys are 56 bytes (448 bits); see the test vectors in
-        // [RFC 7748, Section 5.2](https://www.rfc-editor.org/rfc/rfc7748#section-5.2).
-        //
-        // Additionally [RFC 8032, Section 1](https://www.rfc-editor.org/rfc/rfc8032#section-1) is clear that
-        // Ed25519 keys are 32 bytes (256 bits) and Ed448 keys are 57 bytes (456 bits).
-        //
-        // HOWEVER:
-        //
-        // The JDK KeyPairGenerator#initialize(keysize, random) method that we use below ONLY accepts
-        // values of '255' and '448', which clearly are `keysize`s that do not match the RFC mandatory lengths.
-        // The Sun CE implementation:
-        //     https://github.com/AdoptOpenJDK/openjdk-jdk15/blob/4a588d89f01a650d90432cc14697a5a2ae2c97d3/src/jdk.crypto.ec/share/classes/sun/security/ec/ed/EdDSAParameters.java#L252-L297
-        //
-        // (see the two `int bits = 255` and `int bits = 448` lines).
-        //
-        // It is strange that the JDK implementation does not match the RFC-specified key length values.
-        // As such, we 'normalize' our curve's (RFC-correct) key bit length to values that the Sun CE
-        // (and also BouncyCastle) will recognize:
-        this.KEY_PAIR_GENERATOR_BIT_LENGTH = this.keyBitLength >= 448 ? 448 : 255;
     }
 
     @Override
@@ -314,7 +283,7 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
 
     @Override
     public KeyPairBuilder keyPair() {
-        return new DefaultKeyPairBuilder(getJcaName(), KEY_PAIR_GENERATOR_BIT_LENGTH);
+        return new DefaultKeyPairBuilder(getJcaName(), this.keyBitLength);
     }
 
     public static boolean isEdwards(Key key) {
@@ -373,6 +342,12 @@ public class EdwardsCurve extends DefaultCurve implements KeyLengthSupplier {
         //TODO: check if key exists on discovered curve via equation
 
         return curve;
+    }
+
+    @Override
+    public boolean contains(Key key) {
+        EdwardsCurve curve = findByKey(key);
+        return curve.equals(this);
     }
 
     private static int findOidTerminalNode(byte[] encoded) {

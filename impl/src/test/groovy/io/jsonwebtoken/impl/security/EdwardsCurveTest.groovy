@@ -40,12 +40,31 @@ class EdwardsCurveTest {
         }
     }
 
+
+    /**
+     * Asserts bit lengths defined in:
+     * - https://www.rfc-editor.org/rfc/rfc7748.html
+     * - https://www.rfc-editor.org/rfc/rfc8032
+     */
     @Test
     void testKeyBitLength() {
-        assertEquals(256, EdwardsCurve.X25519.getKeyBitLength())
-        assertEquals(256, EdwardsCurve.Ed25519.getKeyBitLength())
+        assertEquals(255, EdwardsCurve.X25519.getKeyBitLength())
+        assertEquals(255, EdwardsCurve.Ed25519.getKeyBitLength())
         assertEquals(448, EdwardsCurve.X448.getKeyBitLength())
-        assertEquals(456, EdwardsCurve.Ed448.getKeyBitLength())
+        assertEquals(448, EdwardsCurve.Ed448.getKeyBitLength())
+    }
+
+    /**
+     * Asserts encoding lengths defined in:
+     * - https://www.rfc-editor.org/rfc/rfc7748.html
+     * - https://www.rfc-editor.org/rfc/rfc8032
+     */
+    @Test
+    void testEncodedKeyByteLength() {
+        assertEquals 32, EdwardsCurve.X25519.encodedKeyByteLength
+        assertEquals 32, EdwardsCurve.Ed25519.encodedKeyByteLength
+        assertEquals 56, EdwardsCurve.X448.encodedKeyByteLength
+        assertEquals 57, EdwardsCurve.Ed448.encodedKeyByteLength
     }
 
     @Test
@@ -94,7 +113,7 @@ class EdwardsCurveTest {
     @Test
     void testFindByKeyUsingInvalidEncoding() {
         curves.each {
-            byte[] encoded = new byte[it.keyBitLength / 8]
+            byte[] encoded = new byte[it.encodedKeyByteLength]
             def key = new TestKey(algorithm: 'foo', encoded: encoded)
             assertNull EdwardsCurve.findByKey(key)
         }
@@ -167,7 +186,7 @@ class EdwardsCurveTest {
                 it.toPrivateKey(d, null)
             } catch (InvalidKeyException ike) {
                 String msg = "Invalid ${it.id} encoded PrivateKey length. Should be " +
-                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(d.length)}."
+                        "${Bytes.bytesMsg(it.encodedKeyByteLength)}, found ${Bytes.bytesMsg(d.length)}."
                 assertEquals msg, ike.getMessage()
             }
         }
@@ -193,7 +212,7 @@ class EdwardsCurveTest {
                 it.toPublicKey(x, null)
             } catch (InvalidKeyException ike) {
                 String msg = "Invalid ${it.id} encoded PublicKey length. Should be " +
-                        "${Bytes.bitsMsg(it.keyBitLength)}, found ${Bytes.bytesMsg(x.length)}."
+                        "${Bytes.bytesMsg(it.encodedKeyByteLength)}, found ${Bytes.bytesMsg(x.length)}."
                 assertEquals msg, ike.getMessage()
             }
         }

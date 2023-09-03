@@ -16,7 +16,9 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
+import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
@@ -79,7 +81,7 @@ class RsaSignatureAlgorithmTest {
         gen.initialize(1024) //too week for any JWA RSA algorithm
         def rsaPair = gen.generateKeyPair()
 
-        def pssPair = new JcaTemplate(RsaSignatureAlgorithm.PSS_JCA_NAME, null)
+        def pssPair = new JcaTemplate(RsaSignatureAlgorithm.PSS_JCA_NAME)
                 .withKeyPairGenerator(new CheckedFunction<KeyPairGenerator, KeyPair>() {
                     @Override
                     KeyPair apply(KeyPairGenerator generator) throws Exception {
@@ -155,9 +157,14 @@ class RsaSignatureAlgorithmTest {
     void testFindByLargerThanExpectedKey() {
         for (def alg : algs) {
             def pair = TestKeys.forAlgorithm(alg).pair
-            def mag = new byte[(alg.preferredKeyBitLength / Byte.SIZE) + 1] // one byte more than required
+            int bitlen = alg.preferredKeyBitLength + 1 // one more bit than required
+            int len = Bytes.length(bitlen)
+            def mag = new byte[len]
             Randoms.secureRandom().nextBytes(mag)
+            mag[0] = 0x01 // ensure first byte is non-zero so BigInteger doesnt discard leading zero bytes
             def modulus = new BigInteger(1, mag)
+            bitlen = modulus.bitLength()
+            Assert.gt(bitlen, alg.preferredKeyBitLength, "Invalid modulus creation")
             def strongPub = new TestRSAKey(pair.public); strongPub.modulus = modulus
             def strongPriv = new TestRSAKey(pair.private); strongPriv.modulus = modulus
             assertSame alg, RsaSignatureAlgorithm.findByKey(strongPub)

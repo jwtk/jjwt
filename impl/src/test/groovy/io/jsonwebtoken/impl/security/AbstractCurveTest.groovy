@@ -18,15 +18,17 @@ package io.jsonwebtoken.impl.security
 import org.junit.Before
 import org.junit.Test
 
+import java.security.Key
+
 import static org.junit.Assert.*
 
-class DefaultCurveTest {
+class AbstractCurveTest {
 
-    DefaultCurve curve
+    AbstractCurve curve
 
     @Before
     void setUp() {
-        curve = new DefaultCurve('foo', 'bar')
+        curve = new TestAbstractCurve('foo', 'bar')
     }
 
     @Test
@@ -64,14 +66,14 @@ class DefaultCurveTest {
 
     @Test
     void testEqualsId() {
-        def other = new DefaultCurve('foo', 'asdfasdf')
+        def other = new TestAbstractCurve('foo', 'asdfasdf')
         //noinspection ChangeToOperator
         assertTrue curve.equals(other)
     }
 
     @Test
     void testNotEquals() {
-        def other = new DefaultCurve('abc', 'bar')
+        def other = new TestAbstractCurve('abc', 'bar')
         //noinspection ChangeToOperator
         assertFalse curve.equals(other)
     }
@@ -80,5 +82,17 @@ class DefaultCurveTest {
     void testKeyPairBuilder() {
         def builder = curve.keyPair()
         assertEquals 'bar', builder.jcaName //builder is an instanceof DefaultKeyPairBuilder
+    }
+
+    static class TestAbstractCurve extends AbstractCurve {
+
+        def TestAbstractCurve(String id, String jcaName) {
+            super(id, jcaName)
+        }
+
+        @Override
+        boolean contains(Key key) {
+            return false
+        }
     }
 }

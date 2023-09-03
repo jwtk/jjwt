@@ -20,13 +20,15 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.KeyPairBuilder;
 
-class DefaultCurve implements Curve {
+import java.security.Key;
+
+abstract class AbstractCurve implements Curve {
 
     private final String ID;
 
     private final String JCA_NAME;
 
-    DefaultCurve(String id, String jcaName) {
+    AbstractCurve(String id, String jcaName) {
         this.ID = Assert.notNull(Strings.clean(id), "Curve ID cannot be null or empty.");
         this.JCA_NAME = Assert.notNull(Strings.clean(jcaName), "Curve jcaName cannot be null or empty.");
     }
@@ -65,4 +67,12 @@ class DefaultCurve implements Curve {
     public KeyPairBuilder keyPair() {
         return new DefaultKeyPairBuilder(this.JCA_NAME);
     }
+
+    /**
+     * Returns {@code true} if the specified key is known to represent a point on the curve, {@code false} otherwise.
+     *
+     * @param key the key to test
+     * @return {@code true} if the specified key is known to represent a point on the curve, {@code false} otherwise.
+     */
+    abstract boolean contains(Key key);
 }

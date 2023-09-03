@@ -78,7 +78,7 @@ class DefaultJweHeaderTest {
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=EC, crv=P-256, " +
-                    "x=xNKMMIsawShLG4LYxpNP0gqdgK_K69UXCLt3AE3zp-Q, y=_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk, " +
+                    "x=ZWF7HQuzPoW_HarfomiU-HCMELJ486IzskTXL5fwuy4, y=Hf3WL_YAGj1XCSa5HSIAFsItY-SQNjRb1TdKQFEb3oU, " +
                     "d=<redacted>}. Value must be a Public JWK, not an EC Private JWK."
             assertEquals msg, expected.getMessage()
         }
@@ -111,7 +111,7 @@ class DefaultJweHeaderTest {
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=EC, crv=P-256, x=Kg, " +
-                    "y=_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk}. EC JWK x,y coordinates do not exist on " +
+                    "y=Hf3WL_YAGj1XCSa5HSIAFsItY-SQNjRb1TdKQFEb3oU}. EC JWK x,y coordinates do not exist on " +
                     "elliptic curve 'P-256'. This could be due simply to an incorrectly-created JWK or possibly an " +
                     "attempted Invalid Curve Attack (see https://safecurves.cr.yp.to/twist.html for more " +
                     "information)."

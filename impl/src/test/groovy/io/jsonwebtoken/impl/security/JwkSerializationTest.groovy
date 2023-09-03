@@ -118,9 +118,9 @@ class JwkSerializationTest {
         assertWrapped(jwk, ['d'])
 
         // Ensure no Groovy or Java toString prints out secret values:
-        assertEquals '[kid:id, kty:EC, crv:P-256, x:xNKMMIsawShLG4LYxpNP0gqdgK_K69UXCLt3AE3zp-Q, y:_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk, d:<redacted>]', "$jwk" as String
+        assertEquals '[kid:id, kty:EC, crv:P-256, x:ZWF7HQuzPoW_HarfomiU-HCMELJ486IzskTXL5fwuy4, y:Hf3WL_YAGj1XCSa5HSIAFsItY-SQNjRb1TdKQFEb3oU, d:<redacted>]', "$jwk" as String
         // groovy gstring
-        assertEquals '{kid=id, kty=EC, crv=P-256, x=xNKMMIsawShLG4LYxpNP0gqdgK_K69UXCLt3AE3zp-Q, y=_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk, d=<redacted>}', jwk.toString()
+        assertEquals '{kid=id, kty=EC, crv=P-256, x=ZWF7HQuzPoW_HarfomiU-HCMELJ486IzskTXL5fwuy4, y=Hf3WL_YAGj1XCSa5HSIAFsItY-SQNjRb1TdKQFEb3oU, d=<redacted>}', jwk.toString()
         // java toString
 
         //but serialization prints the real value:
@@ -130,8 +130,8 @@ class JwkSerializationTest {
         assertTrue result.contains('"kid":"id"')
         assertTrue result.contains('"kty":"EC"')
         assertTrue result.contains('"crv":"P-256"')
-        assertTrue result.contains('"x":"xNKMMIsawShLG4LYxpNP0gqdgK_K69UXCLt3AE3zp-Q"')
-        assertTrue result.contains('"y":"_vzQymVtA7RHRTfBWZo75mxPgDkE8g7bdHI3siSuJOk"')
+        assertTrue result.contains('"x":"ZWF7HQuzPoW_HarfomiU-HCMELJ486IzskTXL5fwuy4"')
+        assertTrue result.contains('"y":"Hf3WL_YAGj1XCSa5HSIAFsItY-SQNjRb1TdKQFEb3oU"')
         assertTrue result.contains("\"d\":\"${jwk.d.get()}\"" as String)
 
         //now ensure it deserializes back to a JWK:
@@ -169,9 +169,9 @@ class JwkSerializationTest {
         assertWrapped(jwk, privateFieldNames)
 
         // Ensure no Groovy or Java toString prints out secret values:
-        assertEquals '[kid:id, kty:RSA, n:zkH0MwxQ2cUFWsvOPVFqI_dk2EFTjQolCy97mI5_wYCbaOoZ9Rm7c675mAeemRtNzgNVEz7m298ENqNGqPk2Nv3pBJ_XCaybBlp61CLez7dQ2h5jUFEJ6FJcjeKHS-MwXr56t2ISdfLNMYtVIxjvXQcYx5VmS4mIqTxj5gVGtQVi0GXdH6SvpdKV0fjE9KOhjsdBfKQzZfcQlusHg8pThwvjpMwCZnkxCS0RKa9y4-5-7MkC33-8-neZUzS7b6NdFxh6T_pMXpkf8d81fzVo4ZBMloweW0_l8MOdVxeX7M_7XSC1ank5i3IEZcotLmJYMwEo7rMpZVLevEQ118Eo8Q, e:AQAB, d:<redacted>, p:<redacted>, q:<redacted>, dp:<redacted>, dq:<redacted>, qi:<redacted>]', "$jwk" as String
+        assertEquals '[kid:id, kty:RSA, n:vPYf1VSy58i6ic93goenzF5UO9oLxyiTSF64lGFUJ6_MBDydAvY9PS76ymvhUcSrsDUHgb0arsp6MDXOfZxYHn2C7o39n8-bQ7yS4hQm6kkl8KB5OiOkJFkFjEHrwnqykXygx1VFpcVpbBvxDn640ODEScWyoUUPd4sOK-esTt4D9-q0PXsXzfRT4eOrnpXHJTan_KK_a-UYmfWPr-xIEPUxnLPCD68mIHoSPAaJiv37SkAWHJ9-fm_DfnYTwTi0rxe2FRQ1-vkOxe6C2-n1ebsqCZPKr0J_2MfwqP0raxLfyGicxM5ee5RSTTRMCA4UyX5dubZvh2pLoaS8PCZajw, e:AQAB, d:<redacted>, p:<redacted>, q:<redacted>, dp:<redacted>, dq:<redacted>, qi:<redacted>]', "$jwk" as String
         // groovy gstring
-        assertEquals '{kid=id, kty=RSA, n=zkH0MwxQ2cUFWsvOPVFqI_dk2EFTjQolCy97mI5_wYCbaOoZ9Rm7c675mAeemRtNzgNVEz7m298ENqNGqPk2Nv3pBJ_XCaybBlp61CLez7dQ2h5jUFEJ6FJcjeKHS-MwXr56t2ISdfLNMYtVIxjvXQcYx5VmS4mIqTxj5gVGtQVi0GXdH6SvpdKV0fjE9KOhjsdBfKQzZfcQlusHg8pThwvjpMwCZnkxCS0RKa9y4-5-7MkC33-8-neZUzS7b6NdFxh6T_pMXpkf8d81fzVo4ZBMloweW0_l8MOdVxeX7M_7XSC1ank5i3IEZcotLmJYMwEo7rMpZVLevEQ118Eo8Q, e=AQAB, d=<redacted>, p=<redacted>, q=<redacted>, dp=<redacted>, dq=<redacted>, qi=<redacted>}', jwk.toString()
+        assertEquals '{kid=id, kty=RSA, n=vPYf1VSy58i6ic93goenzF5UO9oLxyiTSF64lGFUJ6_MBDydAvY9PS76ymvhUcSrsDUHgb0arsp6MDXOfZxYHn2C7o39n8-bQ7yS4hQm6kkl8KB5OiOkJFkFjEHrwnqykXygx1VFpcVpbBvxDn640ODEScWyoUUPd4sOK-esTt4D9-q0PXsXzfRT4eOrnpXHJTan_KK_a-UYmfWPr-xIEPUxnLPCD68mIHoSPAaJiv37SkAWHJ9-fm_DfnYTwTi0rxe2FRQ1-vkOxe6C2-n1ebsqCZPKr0J_2MfwqP0raxLfyGicxM5ee5RSTTRMCA4UyX5dubZvh2pLoaS8PCZajw, e=AQAB, d=<redacted>, p=<redacted>, q=<redacted>, dp=<redacted>, dq=<redacted>, qi=<redacted>}', jwk.toString()
         // java toString
 
         //but serialization prints the real value:

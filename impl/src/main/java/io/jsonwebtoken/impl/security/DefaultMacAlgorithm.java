@@ -20,10 +20,11 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.MacAlgorithm;
+import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecureRequest;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Mac;
@@ -123,6 +124,29 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         return new DefaultSecretKeyBuilder(getJcaName(), getKeyBitLength());
     }
 
+    private String assertAlgorithmName(SecretKey key, boolean signing) {
+
+        String name = key.getAlgorithm();
+        if (!Strings.hasText(name)) {
+            String msg = "The " + keyType(signing) + " key's algorithm cannot be null or empty.";
+            throw new UnsupportedKeyException(msg);
+        }
+
+        // We can ignore PKCS11 key name assertions for two reasons:
+        // 1. HSM module key algorithm names don't always align with JCA standard algorithm names, and
+        // 2. Our KeysBridge.findBitLength implementation can extract the key length so we can still validate with that
+        boolean pkcs11Key = KeysBridge.isSunPkcs11GenericSecret(key);
+
+        //assert key's jca name is valid if it's a JWA standard algorithm:
+        if (!pkcs11Key && isJwaStandard() && !isJwaStandardJcaName(name)) {
+            throw new UnsupportedKeyException("The " + keyType(signing) + " key's algorithm '" + name +
+                    "' does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with " +
+                    getId() + ".");
+        }
+
+        return name;
+    }
+
     @Override
     protected void validateKey(Key k, boolean signing) {
 
@@ -135,24 +159,19 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         if (!(k instanceof SecretKey)) {
             String msg = "MAC " + keyType + " keys must be SecretKey instances.  Specified key is of type " +
                     k.getClass().getName();
-            throw new InvalidKeyException(msg);
+            throw new UnsupportedKeyException(msg);
+        }
+
+        if (k instanceof Password) {
+            String msg = "Passwords are intended for use with key derivation algorithms only.";
+            throw new UnsupportedKeyException(msg);
         }
 
         final SecretKey key = (SecretKey) k;
 
         final String id = getId();
 
-        String alg = key.getAlgorithm();
-        if (!Strings.hasText(alg)) {
-            String msg = "The " + keyType + " key's algorithm cannot be null or empty.";
-            throw new InvalidKeyException(msg);
-        }
-
-        //assert key's jca name is valid if it's a JWA standard algorithm:
-        if (isJwaStandard() && !isJwaStandardJcaName(alg)) {
-            throw new InvalidKeyException("The " + keyType + " key's algorithm '" + alg + "' does not equal a valid " +
-                    "HmacSHA* algorithm name or PKCS12 OID and cannot be used with " + id + ".");
-        }
+        assertAlgorithmName(key, signing);
 
         int size = KeysBridge.findBitLength(key);
 

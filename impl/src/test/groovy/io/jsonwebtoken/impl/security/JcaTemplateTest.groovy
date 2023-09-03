@@ -82,7 +82,7 @@ class JcaTemplateTest {
     void testCallbackThrowsSecurityException() {
         // tests that any callback that throws a SecurityException doesn't need to be wrapped
         String msg = 'fubar'
-        def template = new JcaTemplate('AES/CBC/PKCS5Padding', null)
+        def template = new JcaTemplate('AES/CBC/PKCS5Padding')
         try {
             template.withCipher(new CheckedFunction<Cipher, byte[]>() {
                 @Override
@@ -151,7 +151,7 @@ class JcaTemplateTest {
 
     @Test
     void testFallbackWithBouncyCastle() {
-        def template = new JcaTemplate('foo', null)
+        def template = new JcaTemplate('foo')
         try {
             template.generateX509Certificate(Bytes.random(32))
         } catch (SecurityException expected) {
@@ -163,7 +163,7 @@ class JcaTemplateTest {
 
     @Test
     void testFallbackWithoutBouncyCastle() {
-        def template = new JcaTemplate('foo', null) {
+        def template = new JcaTemplate('foo') {
             @Override
             protected Provider findBouncyCastle() {
                 return null
@@ -222,7 +222,7 @@ class JcaTemplateTest {
     @Test
     void testGeneratePrivateRespecWithoutPkcs8() {
         byte[] invalid = Bytes.random(456)
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         try {
             template.generatePrivate(new X509EncodedKeySpec(invalid))
             fail()
@@ -279,35 +279,35 @@ class JcaTemplateTest {
     @Test
     void testGetJdk8213363BugExpectedSizeNoExMsg() {
         InvalidKeyException ex = new InvalidKeyException()
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         assertEquals(-1, template.getJdk8213363BugExpectedSize(ex))
     }
 
     @Test
     void testGetJdk8213363BugExpectedSizeExMsgDoesntMatch() {
         InvalidKeyException ex = new InvalidKeyException('not what is expected')
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         assertEquals(-1, template.getJdk8213363BugExpectedSize(ex))
     }
 
     @Test
     void testGetJdk8213363BugExpectedSizeExMsgDoesntContainNumber() {
         InvalidKeyException ex = new InvalidKeyException('key length must be foo')
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         assertEquals(-1, template.getJdk8213363BugExpectedSize(ex))
     }
 
     @Test
     void testRespecIfNecessaryWithoutPkcs8KeySpec() {
         def spec = new X509EncodedKeySpec(Bytes.random(32))
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         assertNull template.respecIfNecessary(null, spec)
     }
 
     @Test
     void testRespecIfNecessaryNotJdk8213363Bug() {
         def ex = new InvalidKeySpecException('foo')
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         assertNull template.respecIfNecessary(ex, new PKCS8EncodedKeySpec(Bytes.random(32)))
     }
 
@@ -315,7 +315,7 @@ class JcaTemplateTest {
     void testIsJdk11() {
         // determine which JDK the test is being run on in CI:
         boolean testMachineIsJdk11 = System.getProperty('java.version').startsWith('11')
-        def template = new JcaTemplate('X448', null)
+        def template = new JcaTemplate('X448')
         if (testMachineIsJdk11) {
             assertTrue template.isJdk11()
         } else {
@@ -326,7 +326,7 @@ class JcaTemplateTest {
     @Test
     void testCallbackThrowsException() {
         def ex = new Exception("testing")
-        def template = new JcaTemplate('AES/CBC/PKCS5Padding', null)
+        def template = new JcaTemplate('AES/CBC/PKCS5Padding')
         try {
             template.withCipher(new CheckedFunction<Cipher, byte[]>() {
                 @Override
@@ -342,7 +342,7 @@ class JcaTemplateTest {
 
     @Test
     void testWithCertificateFactory() {
-        def template = new JcaTemplate('X.509', null)
+        def template = new JcaTemplate('X.509')
         X509Certificate expected = TestKeys.RS256.cert
         X509Certificate cert = template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
             @Override
@@ -355,7 +355,7 @@ class JcaTemplateTest {
 
     private static class Jdk8213363JcaTemplate extends JcaTemplate {
         Jdk8213363JcaTemplate(String jcaName) {
-            super(jcaName, null)
+            super(jcaName)
         }
 
         @Override

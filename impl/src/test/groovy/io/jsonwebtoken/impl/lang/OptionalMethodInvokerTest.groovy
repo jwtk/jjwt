@@ -15,9 +15,11 @@
  */
 package io.jsonwebtoken.impl.lang
 
+import io.jsonwebtoken.impl.security.KeysBridge
 import io.jsonwebtoken.impl.security.TestKeys
 import org.junit.Test
 
+import javax.crypto.spec.SecretKeySpec
 import java.lang.reflect.InvocationTargetException
 import java.security.Key
 
@@ -68,5 +70,13 @@ class OptionalMethodInvokerTest {
             assertEquals ReflectionFunction.ERR_MSG + msg, ise.getMessage()
             assertSame ex, ise.getCause()
         }
+    }
+
+    @Test
+    void testStatic() {
+        def i = new OptionalMethodInvoker(KeysBridge.class.getName(), "findBitLength", Key.class, true)
+        int bits = 256
+        def key = new SecretKeySpec(Bytes.random((int)(bits / 8)), "AES")
+        assertEquals bits, i.apply(key)
     }
 }

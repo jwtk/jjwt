@@ -15,8 +15,9 @@
  */
 package io.jsonwebtoken.impl.security
 
-
 import org.junit.Test
+
+import java.security.Provider
 
 import static org.junit.Assert.*
 
@@ -24,14 +25,14 @@ class CryptoAlgorithmTest {
 
     @Test
     void testEqualsSameInstance() {
-        def alg = new TestCryptoAlgorithm('test', 'test')
+        def alg = new TestCryptoAlgorithm()
         assertEquals alg, alg
     }
 
     @Test
     void testEqualsSameNameAndJcaName() {
-        def alg1 = new TestCryptoAlgorithm('test', 'test')
-        def alg2 = new TestCryptoAlgorithm('test', 'test')
+        def alg1 = new TestCryptoAlgorithm()
+        def alg2 = new TestCryptoAlgorithm()
         assertEquals alg1, alg2
     }
 
@@ -44,32 +45,69 @@ class CryptoAlgorithmTest {
 
     @Test
     void testEqualsOtherType() {
-        assertNotEquals new TestCryptoAlgorithm('test', 'test'), new Object()
+        assertNotEquals new TestCryptoAlgorithm(), new Object()
     }
 
     @Test
     void testToString() {
-        assertEquals 'test', new TestCryptoAlgorithm('test', 'whatever').toString()
+        assertEquals 'test', new TestCryptoAlgorithm().toString()
     }
 
     @Test
     void testHashCode() {
         int hash = 7
-        hash = 31 * hash + 'name'.hashCode()
+        hash = 31 * hash + 'test'.hashCode()
         hash = 31 * hash + 'jcaName'.hashCode()
-        assertEquals hash, new TestCryptoAlgorithm('name', 'jcaName').hashCode()
+        assertEquals hash, new TestCryptoAlgorithm().hashCode()
     }
 
     @Test
     void testEnsureSecureRandomWorksWithNullRequest() {
-        def alg = new TestCryptoAlgorithm('test', 'test')
+        def alg = new TestCryptoAlgorithm()
         def random = alg.ensureSecureRandom(null)
         assertSame Randoms.secureRandom(), random
     }
 
+    @Test
+    void testNonPkcs11ProviderNullRequest() {
+        assertNull CryptoAlgorithm.nonPkcs11Provider(null)
+    }
+
+    @Test
+    void testNonPkcs11ProviderNullRequestProvider() {
+        def request = new DefaultRequest('foo', null, null)
+        assertNull CryptoAlgorithm.nonPkcs11Provider(request)
+    }
+
+    @Test
+    void testNonPkcs11ProviderEmptyRequestProviderName() {
+        String name = null
+        Provider provider = new TestProvider(name)
+        def request = new DefaultRequest('foo', provider, null)
+        assertSame provider, CryptoAlgorithm.nonPkcs11Provider(request)
+    }
+
+    @Test
+    void testPkcs11ProviderReturnsNull() {
+        Provider provider = new TestProvider('SunPKCS11-test')
+        def request = new DefaultRequest('foo', provider, null)
+        assertNull CryptoAlgorithm.nonPkcs11Provider(request)
+    }
+
     class TestCryptoAlgorithm extends CryptoAlgorithm {
+        TestCryptoAlgorithm() {
+            this('test', 'jcaName')
+        }
+
         TestCryptoAlgorithm(String id, String jcaName) {
             super(id, jcaName)
         }
     }
+
+    static class TestProvider extends Provider {
+        public TestProvider(String name) {
+            super(name, 1.0d, 'info')
+        }
+    }
+
 }

@@ -427,7 +427,7 @@ class JwksTest {
 
     @Test
     void testOctetChain() {
-        TestKeys.EdEC.findAll({ it -> it.cert != null }).each { // no chains for XEC keys
+        TestKeys.EdEC.each { // no chains for XEC keys
             PublicKey key = it.pair.public
             def jwk = Jwks.builder().octetChain(it.chain).build()
             assertEquals key, jwk.toKey()
@@ -457,7 +457,7 @@ class JwksTest {
 
     @Test
     void testOctetKeyPair() {
-        TestKeys.EdEC.findAll({ it -> it.cert != null }).each {
+        TestKeys.EdEC.each {
             java.security.KeyPair pair = it.pair
             PrivateJwk jwk = Jwks.builder().octetKeyPair(pair).build()
             assertEquals it.pair.public, jwk.toPublicJwk().toKey()

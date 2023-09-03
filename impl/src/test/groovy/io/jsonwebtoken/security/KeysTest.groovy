@@ -19,9 +19,7 @@ package io.jsonwebtoken.security
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.DefaultJwtBuilder
 import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.impl.security.EdwardsCurve
-import io.jsonwebtoken.impl.security.KeysBridge
-import io.jsonwebtoken.impl.security.PasswordSpec
+import io.jsonwebtoken.impl.security.*
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -287,5 +285,18 @@ class KeysTest {
         Password key = Keys.password(password)
         assertArrayEquals password, key.toCharArray()
         assertTrue key instanceof PasswordSpec
+    }
+
+    @Test
+    void testAssociateWithKeySupplier() {
+        def pair = TestKeys.ES256.pair
+        def key = new PrivateECKey(pair.private, pair.public.getParams())
+        assertSame key, Keys.wrap(key, pair.public)
+    }
+
+    @Test
+    void testAssociateWithKeyThatDoesntNeedToBeWrapped() {
+        def pair = TestKeys.RS256.pair
+        assertSame pair.private, Keys.wrap(pair.private, pair.public)
     }
 }

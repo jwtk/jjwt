@@ -52,9 +52,13 @@ class TestCertificates {
 
     static Provider BC = new BouncyCastleProvider()
 
-    private static InputStream getResourceStream(String filename) {
+    private static String relativePath(String basename) {
         String packageName = TestCertificates.class.getPackage().getName()
-        String resourcePath = Strings.replace(packageName, ".", "/") + "/" + filename
+        return Strings.replace(packageName, ".", "/") + "/" + basename
+    }
+
+    private static InputStream getResourceStream(String filename) {
+        String resourcePath = relativePath(filename)
         return Classes.getResourceAsStream(resourcePath)
     }
 
@@ -79,7 +83,7 @@ class TestCertificates {
         PEMParser parser = getParser(alg.id + '.pub.pem')
         parser.withCloseable {
             SubjectPublicKeyInfo info = it.readObject() as SubjectPublicKeyInfo
-            JcaTemplate template = new JcaTemplate(keyJcaName(alg), null)
+            JcaTemplate template = new JcaTemplate(keyJcaName(alg))
             return template.generatePublic(new X509EncodedKeySpec(info.getEncoded()))
         }
     }
@@ -92,7 +96,7 @@ class TestCertificates {
 
     private static PrivateKey readPrivateKey(Identifiable alg) {
         final String id = alg.id
-        PEMParser parser = getParser(id + '.key.pem')
+        PEMParser parser = getParser(id + '.pkcs8.pem')
         parser.withCloseable {
             PrivateKeyInfo info
             Object object = it.readObject()
@@ -110,12 +114,6 @@ class TestCertificates {
 
         PublicKey pub = readPublicKey(alg) as PublicKey
         PrivateKey priv = readPrivateKey(alg) as PrivateKey
-
-        // X25519 and X448 cannot have self-signed certs:
-        if (alg instanceof EdwardsCurve && !((EdwardsCurve) alg).isSignatureCurve()) {
-            return new TestKeys.Bundle(alg, pub, priv)
-        }
-        // otherwise we can get a cert:
 
         // If the public key loaded is a BC key, the default provider doesn't understand the cert key OID
         // (for example, an Ed25519 key on JDK 8 which doesn't natively support such keys). This means the

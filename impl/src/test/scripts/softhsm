@@ -1,0 +1,287 @@
+#!/usr/bin/env bash
+#
+# Copyright © 2023 jsonwebtoken.io
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+
+_readlink() {
+  $(type -p greadlink readlink | head -1) "$1" # prefer greadlink if it exists
+}
+
+_dirpath() {
+  [[ -z "$1" ]] && echo "_dirpath: a directory argument is required." >&2 && return 1
+  [[ ! -d "$1" ]] && echo "_dirpath: argument is not a directory: $1" >&2 && return 1
+  local dirpath
+  dirpath="$(cd -P "$1" && pwd)"
+  echo "$dirpath"
+}
+
+_filepath() {
+  [[ -d "$1" ]] && echo "_filepath: directory arguments are not permitted" >&2 && return 1
+  local dirname filename canonical_dir
+  dirname="$(dirname "$1")"
+  filename="$(basename "$1")"
+  canonical_dir="$(_dirpath "$dirname")"
+  echo "$canonical_dir/$filename"
+}
+
+##
+# Returns the canonical filesystem path of the specified argument
+# Argument must be a directory or a file
+##
+_path() {
+  local target="$1"
+  if [[ -d "$target" ]]; then # target is a directory, get its canonical path:
+    target="$(_dirpath "$target")"
+  else
+    while [[ -L "$target" ]]; do # target is a symlink, so resolve it
+      target="$(_readlink "$target")"
+      if [[ "$target" != /* ]]; then # target doesn't start with '/', so it's not yet absolute.  Fix that:
+        target="$(_filepath "$target")"
+      fi
+    done
+    target="$(_filepath "$target")"
+  fi
+  echo "$target"
+}
+
+# global vars used across functions
+SOFTHSM2_CONF="${SOFTHSM2_CONF:-}"
+script_file=
+script_dir=
+script_name=
+user_home=
+test_keys_dir=
+platform=
+libsofthsm2=
+globalconf=
+userconf=
+confdir=
+tokendir=
+
+script_file="$(_path "${BASH_SOURCE[0]}")" # canonicalize
+script_dir="$(dirname "$script_file")"
+script_name="$(basename "${script_file}")"
+user_home="$(_path "${HOME}")"
+
+_softhsmu() {
+  softhsm2-util --so-pin 1234 --pin 1234 --token jjwt "$@"
+}
+
+_pkcs11t() {
+  pkcs11-tool --module "${libsofthsm2}" --so-pin 1234 --pin 1234 --token-label jjwt "$@"
+}
+
+_log() {
+  echo "${script_name}: $1"
+}
+
+_errexit() {
+  _log "$1, exiting."
+  # cleanup any leftover intermediate DER files that may exist
+  cd "${test_keys_dir}" >/dev/null 2>&1 && rm -rf -- *.der >/dev/null 2>&1
+  exit 1
+}
+
+# Common setup logic necessary for both 'import' and 'configure'
+_setup() {
+
+  if ! command -v command -v softhsm2-util >/dev/null 2>&1; then
+    _errexit "softhsm2-util command is not available. Install with 'brew install softhsm' or 'sudo apt-get -y install softhsm2'"
+  fi
+  if ! command -v pkcs11-tool >/dev/null 2>&1; then
+    _errexit "pkcs11-tool command is not available. Install with 'brew install opensc' or 'sudo apt-get -y install opensc'"
+  fi
+
+  test_keys_dir="${script_dir}/../resources/io/jsonwebtoken/impl/security"
+  test_keys_dir="$(_path ${test_keys_dir})" # canonicalize
+
+  platform='macos'
+  globalconf='/opt/homebrew/etc/softhsm/softhsm2.conf'
+  libsofthsm2='/opt/homebrew/lib/softhsm/libsofthsm2.so'
+  if [[ ! -f "${libsofthsm2}" ]]; then # assume CI (Ubuntu)
+    platform='ubuntu'
+    globalconf='/etc/softhsm/softhsm2.conf'
+    libsofthsm2='/usr/lib/softhsm/libsofthsm2.so'
+  fi
+  [[ -f "${libsofthsm2}" ]] || _errexit "cannot locate libsofthsm2.so"
+
+  userconf="${user_home}/.config/softhsm2/softhsm2.conf" # canonical due to user_home above
+}
+
+_assert_conf() {
+  softhsm2-util --show-slots >/dev/null 2>&1 || _errexit "Invalid or missing SoftHSM configuration, check ${userconf} or ${globalconf}"
+}
+
+_configure() {
+
+  local confdir=
+  local opt="${1:-}"
+  local tokendir="${2:-}"
+  if [[ "${opt}" == '--tokendir' ]]; then
+    [[ -n "${tokendir}" ]] || _errexit "--tokendir value cannot be empty"
+    tokendir="$(_path "${tokendir}")" #canonicalize
+  fi
+
+  _setup
+
+  if ! softhsm2-util --show-slots >/dev/null 2>&1; then # missing or erroneous config
+
+    if [[ -z "${SOFTHSM2_CONF}" && ! -f "${userconf}" ]]; then # no env var or file, try to create it:
+
+      _log "Creating ${userconf} file..."
+
+      export SOFTHSM2_CONF="${userconf}"
+      confdir="$(dirname "${SOFTHSM2_CONF}")"
+      [[ -n "${tokendir}" ]] || tokendir="${confdir}/tokens" # assign default
+
+      mkdir -p "${confdir}" || _errexit "unable to ensure ${confdir} exists"
+      mkdir -p "${tokendir}" || _errexit "unable to ensure ${tokendir} exists"
+
+      cat <<EOF >>"${SOFTHSM2_CONF}"
+      # SoftHSM v2 configuration file
+
+      directories.tokendir = ${tokendir}
+      objectstore.backend = file
+
+      # ERROR, WARNING, INFO, DEBUG
+      log.level = DEBUG
+
+      # If CKF_REMOVABLE_DEVICE flag should be set
+      slots.removable = false
+
+      # Enable and disable PKCS#11 mechanisms using slots.mechanisms.
+      slots.mechanisms = ALL
+
+      # If the library should reset the state on fork
+      library.reset_on_fork = false
+EOF
+      local retval="$?"
+      [[ "${retval}" -eq 0 ]] && _log "created ${SOFTHSM2_CONF}" || _errexit "unable to create ${SOFTHSM2_CONF}"
+    fi
+  fi
+
+  _assert_conf
+}
+
+_import() {
+
+  local name algid index
+
+  _setup
+  _assert_conf
+  cd "${test_keys_dir}" || _errexit "Unable to cd to ${test_keys_dir}"
+
+  echo
+  # delete any existing JJWT slot/tokens
+  if softhsm2-util --show-slots | grep 'Label:' | grep 'jjwt' >/dev/null 2>&1; then
+    _log "deleting existing softhsm jjwt slot..."
+    softhsm2-util --delete-token --token jjwt || _errexit "unable to delete jjwt slot"
+  fi
+
+  echo
+  _log "creating softhsm jjwt slot..."
+  softhsm2-util --init-token --free --label jjwt --so-pin 1234 --pin 1234 || _errexit "unable to create jjwt slot"
+  echo
+
+  index=0
+  for name in $(# name will be unqualified, e.g. RS256.pkcs8.pem
+    ls *.pkcs8.pem | sort -f
+  ); do
+
+    algid="${name%%.*}" # RS256.pkcs8.pem --> RS256
+    local privpem privder privpkcs1 pubpem pubder certpem certder hexid
+    privpem="${name}"
+    privpkcs1="${algid}.priv.pkcs1.pem"
+    privder="${algid}.priv.der"
+    pubpem="${algid}.pub.pem"
+    pubder="${algid}.pub.der"
+    certpem="${algid}.crt.pem"
+    certder="${algid}.crt.der"
+
+    hexid="$(printf '%04x' ${index})"
+    hexid="${hexid^^}"
+
+    _log "Creating temporary ${algid} der files for pkcs11-tool import"
+    if [[ "${algid}" = RS* ]]; then # https://github.com/OpenSC/OpenSC/issues/2854
+      openssl pkey -in "${privpem}" -out "${privpkcs1}" -traditional || _errexit "can't create ${algid} private key pkcs1 file"
+      privpem="${privpkcs1}" # reassign
+    fi
+    openssl pkey -in "${privpem}" -out "${privder}" -outform DER || { rm -rf "${privpkcs1}"; _errexit "can't create ${algid} private key der file"; }
+    rm -rf "${privpkcs1}" # in case we generated it
+    [[ -f "${privder}" ]] || _errexit "can't create ${algid} private key der file"
+
+    openssl pkey -in "${pubpem}" -pubin -out "${pubder}" -outform DER || _errexit "can't create ${algid} public key der file"
+    openssl x509 -in "${certpem}" -out "${certder}" -outform DER || _errexit "can't create ${algid} x509 cert der file"
+
+    _log "Importing ${algid} keypair with id ${hexid}"
+    if [[ "${algid}" != PS* ]]; then # no softhsm2 RSA-PSS support: https://github.com/opendnssec/SoftHSMv2/issues/721
+      if [[ "${algid}" = Ed* || "${algid}" = RS* || "${algid}" = X* ]]; then
+        # pkcs11-tool backed by softhsm2 cannot import the private key .der files, so use softhsm2-util directly:
+        _softhsmu --import "${name}" --label "${algid}" --id "${hexid}" || _errexit "can't import ${algid} key pair"
+      else # ES*
+        _pkcs11t --write-object "${privder}" --usage-derive --label "${algid}" --type privkey --id "${hexid}" || _errexit "can't import ${algid} private key"
+        _pkcs11t --write-object "${pubder}" --usage-derive --label "${algid}" --type pubkey --id "${hexid}" || _errexit "can't import ${algid} public key"
+      fi
+    fi
+
+    _log "Importing ${algid} x509 cert with id ${hexid}"
+    _pkcs11t --write-object "${certder}" --label "${algid}" --type cert --id "${hexid}" || _errexit "can't import x509 cert"
+
+    _log "Deleting temporary ${algid} der files"
+    rm -rf -- *.der
+    echo
+
+    index=$((index + 1)) # increment id counter
+
+  done # end name loop
+}
+
+main() {
+  local command="${1:-}"
+  local retval=0
+  case "$command" in
+  "" | "-h" | "--help")
+    echo "usage: softhsm [options...] <command>"
+    echo
+    echo "commands:"
+    echo "   help         Display this help notice"
+    echo "   configure    Ensure SoftHSM2 user config file ~/.config/softhsm2/softhsm2.conf exists"
+    echo "   import       (Re)create SoftHSM2 'jjwt' slot and import all JJWT test keys and certificates"
+    echo
+    echo "For further help, search for answers or ask a question here:"
+    echo "https://github.com/jwtk/jjwt/discussions/new/choose"
+    ;;
+  "import")
+    shift 1
+    _import "$@"
+    retval="$?"
+    ;;
+  "configure")
+    shift 1
+    _configure "$@"
+    retval="$?"
+    ;;
+  *)
+    echo "softhsm: no such command '$command'" >&2
+    exit 1
+    ;;
+  esac
+
+  return ${retval}
+}
+main "$@"
+exit "$?"

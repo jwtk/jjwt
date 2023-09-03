@@ -25,26 +25,40 @@ public class OptionalMethodInvoker<T, R> extends ReflectionFunction<T, R> {
     private final Class<?> CLASS;
     private final Method METHOD;
 
+    private final Class<?>[] PARAM_TYPES;
+    private final boolean STATIC;
+
     public OptionalMethodInvoker(String fqcn, String methodName) {
+        this(fqcn, methodName, null, false);
+    }
+
+    public OptionalMethodInvoker(String fqcn, String methodName, Class<?> paramType, boolean isStatic) {
         Class<?> clazz = null;
         Method method = null;
+        Class<?>[] paramTypes = paramType != null ? new Class<?>[]{paramType} : null;
         try {
             clazz = Classes.forName(fqcn);
-            method = clazz.getMethod(methodName, (Class<?>[]) null);
-        } catch (Exception ignored) {
+            method = clazz.getMethod(methodName, paramTypes);
+        } catch (Throwable ignored) {
         }
         this.CLASS = clazz;
         this.METHOD = method;
+        this.PARAM_TYPES = paramTypes;
+        this.STATIC = isStatic;
     }
 
     @Override
     protected boolean supports(T input) {
-        return CLASS != null && METHOD != null && CLASS.isInstance(input);
+        Class<?> clazz = null;
+        if (CLASS != null && METHOD != null) {
+            clazz = STATIC && PARAM_TYPES != null ? PARAM_TYPES[0] : CLASS;
+        }
+        return clazz != null && clazz.isInstance(input);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected R invoke(T input) throws InvocationTargetException, IllegalAccessException {
-        return (R) METHOD.invoke(input);
+        return (STATIC) ? (R) METHOD.invoke(null, input) : (R) METHOD.invoke(input);
     }
 }

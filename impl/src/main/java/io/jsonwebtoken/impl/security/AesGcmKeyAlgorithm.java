@@ -51,7 +51,7 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         Assert.notNull(request, "request cannot be null.");
         final JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         final SecretKey kek = assertKey(request.getPayload());
-        final SecretKey cek = generateKey(request);
+        final SecretKey cek = generateCek(request);
         final byte[] iv = ensureInitializationVector(request);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
