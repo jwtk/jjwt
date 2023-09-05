@@ -87,7 +87,10 @@ class Pkcs11Test {
                 provider = Security.getProvider("SunPKCS11")
                 provider = provider.configure(config) as Provider
             } else { // JDK 8 or earlier:
-                provider = new sun.security.pkcs11.SunPKCS11(config)
+                try {
+                    provider = new sun.security.pkcs11.SunPKCS11(config)
+                } catch (Throwable ignored) { // MacOS on JDK 7: libsofthsm2.so is arm64, JDK is x86_64, can't load
+                }
             }
         }
         return provider
@@ -184,8 +187,7 @@ class Pkcs11Test {
      *      - On JDK < 11 X25519 and X448 PrivateKeys cannot be loaded (but their certs and PublicKeys may be).
      *
      * 3. RSASSA-PSS keys of any kind are not available because SoftHSM doesn't currently support them. See
-     *    https://github.com/opendnssec/SoftHSMv2/issues/721
-     */
+     *    https://github.com/opendnssec/SoftHSMv2/issues/721*/
     static final Map<String, TestKeys.Bundle> PKCS11_BUNDLES = findPkcs11Bundles(KEYSTORE)
 
     static TestKeys.Bundle findPkcs11(Identifiable alg) {
@@ -324,10 +326,10 @@ class Pkcs11Test {
     /**
      * Ensures that for all JWE and JWS algorithms, when the PKCS11 provider is installed as a JVM provider, 
      * no calls to JwtBuilder/Parser .provider are needed, and no ProviderKeys (Keys.builder) calls are needed
-     * anywhere in application code.
-     */
+     * anywhere in application code.*/
     @Test
     void testPkcs11JvmProviderDoesNotRequireProviderKeys() {
+        if (PKCS11 == null) return; // couldn't load on MacOS (arm64 libsofthsm2.so) on JDK 7 (x86_64)
         Security.addProvider(PKCS11)
         try {
             testJws(null)

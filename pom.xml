@@ -117,7 +117,9 @@
         <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.76</bouncycastle.version>
+        <bcprov.artifactId>bcprov-jdk18on</bcprov.artifactId>
+        <bcpkix.artifactId>bcpkix-jdk18on</bcpkix.artifactId>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <groovy.version>2.5.16</groovy.version> <!-- higher version used in jdk8AndLater profile below -->
@@ -210,13 +212,13 @@
             <!-- Used only during testing for PS256, PS384 and PS512 since JDK <= 10 doesn't support them: -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
+                <artifactId>${bcprov.artifactId}</artifactId>
                 <version>${bouncycastle.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
+                <artifactId>${bcpkix.artifactId}</artifactId>
                 <version>${bouncycastle.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -637,6 +639,16 @@
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <id>jdk7</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <properties>
+                <bcprov.artifactId>bcprov-jdk15to18</bcprov.artifactId>
+                <bcpkix.artifactId>bcpkix-jdk15to18</bcpkix.artifactId>
+            </properties>
+        </profile>
         <profile>
             <id>jdk8AndLater</id>
             <activation>
