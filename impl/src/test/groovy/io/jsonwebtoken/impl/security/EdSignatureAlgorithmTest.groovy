@@ -57,11 +57,11 @@ class EdSignatureAlgorithmTest {
      * Likely when keys are from an HSM or PKCS key store
      */
     @Test
-    void testGetAlgorithmJcaNameWhenCantFindCurve() {
-        def key = new TestKey(algorithm: 'foo')
+    void testGetRequestJcaNameByKeyAlgorithmNameOnly() {
+        def key = new TestKey(algorithm: EdwardsCurve.X25519.OID)
         def payload = [0x00] as byte[]
         def req = new DefaultSecureRequest(payload, null, null, key)
-        assertEquals alg.getJcaName(), alg.getJcaName(req)
+        assertEquals 'X25519', alg.getJcaName(req) // Not the EdDSA default
     }
 
     @Test

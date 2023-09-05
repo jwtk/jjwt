@@ -124,7 +124,7 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         return new DefaultSecretKeyBuilder(getJcaName(), getKeyBitLength());
     }
 
-    private String assertAlgorithmName(SecretKey key, boolean signing) {
+    private void assertAlgorithmName(SecretKey key, boolean signing) {
 
         String name = key.getAlgorithm();
         if (!Strings.hasText(name)) {
@@ -143,8 +143,6 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
                     "' does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with " +
                     getId() + ".");
         }
-
-        return name;
     }
 
     @Override

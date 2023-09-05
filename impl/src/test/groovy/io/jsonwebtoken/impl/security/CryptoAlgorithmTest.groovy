@@ -17,8 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import org.junit.Test
 
-import java.security.Provider
-
 import static org.junit.Assert.*
 
 class CryptoAlgorithmTest {
@@ -68,32 +66,6 @@ class CryptoAlgorithmTest {
         assertSame Randoms.secureRandom(), random
     }
 
-    @Test
-    void testNonPkcs11ProviderNullRequest() {
-        assertNull CryptoAlgorithm.nonPkcs11Provider(null)
-    }
-
-    @Test
-    void testNonPkcs11ProviderNullRequestProvider() {
-        def request = new DefaultRequest('foo', null, null)
-        assertNull CryptoAlgorithm.nonPkcs11Provider(request)
-    }
-
-    @Test
-    void testNonPkcs11ProviderEmptyRequestProviderName() {
-        String name = null
-        Provider provider = new TestProvider(name)
-        def request = new DefaultRequest('foo', provider, null)
-        assertSame provider, CryptoAlgorithm.nonPkcs11Provider(request)
-    }
-
-    @Test
-    void testPkcs11ProviderReturnsNull() {
-        Provider provider = new TestProvider('SunPKCS11-test')
-        def request = new DefaultRequest('foo', provider, null)
-        assertNull CryptoAlgorithm.nonPkcs11Provider(request)
-    }
-
     class TestCryptoAlgorithm extends CryptoAlgorithm {
         TestCryptoAlgorithm() {
             this('test', 'jcaName')
@@ -103,11 +75,4 @@ class CryptoAlgorithmTest {
             super(id, jcaName)
         }
     }
-
-    static class TestProvider extends Provider {
-        public TestProvider(String name) {
-            super(name, 1.0d, 'info')
-        }
-    }
-
 }

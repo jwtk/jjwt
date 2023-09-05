@@ -125,7 +125,7 @@ class RFC7516AppendixA3Test {
 
             @Override
             SecretKeyBuilder key() {
-                return new FixedSecretKeyBuilder(CEK)
+                return Keys.builder(CEK)
             }
         }
 

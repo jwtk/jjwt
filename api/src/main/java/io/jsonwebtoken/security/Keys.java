@@ -23,6 +23,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 
 /**
@@ -35,7 +36,12 @@ public final class Keys {
     private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
     private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
     private static final Class<?>[] FOR_PASSWORD_ARG_TYPES = new Class[]{char[].class};
-    private static final Class<?>[] ASSOCIATE_ARG_TYPES = new Class[]{PrivateKey.class, PublicKey.class};
+    private static final Class<?>[] SECRET_BUILDER_ARG_TYPES = new Class[]{SecretKey.class};
+    private static final Class<?>[] PRIVATE_BUILDER_ARG_TYPES = new Class[]{PrivateKey.class};
+
+    private static <T> T invokeStatic(String method, Class<?>[] argTypes, Object... args) {
+        return Classes.invokeStatic(BRIDGE_CLASS, method, argTypes, args);
+    }
 
     //prevent instantiation
     private Keys() {
@@ -268,33 +274,59 @@ public final class Keys {
      * @since JJWT_RELEASE_VERSION
      */
     public static Password password(char[] password) {
-        return Classes.invokeStatic(BRIDGE_CLASS, "password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
+        return invokeStatic("password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
     }
 
     /**
-     * Returns a {@code PrivateKey} that may be used by algorithms that require the private key's public information.
-     * This method is primarily only useful for PKCS11 private keys.
+     * Returns a {@code SecretKeyBuilder} that produces the specified key, allowing association with a
+     * {@link SecretKeyBuilder#provider(Provider) provider} that must be used with the key during cryptographic
+     * operations.  For example:
      *
-     * <p>If the private key instance is already capable of representing public information (because it
-     * implements one of the <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces),
-     * this method does nothing and returns the private key unaltered.</p>
+     * <blockquote><pre>
+     * SecretKey key = Keys.builder(key).provider(mandatoryProvider).build();</pre></blockquote>
      *
-     * <p>If however the private key instance does <em>not</em> implement one of those interfaces, a new private key
-     * instance that wraps both the specified private key and public key will be created and returned.  JJWT
-     * algorithms that require the key's public information know how to handle these wrapper instances to obtain the
-     * 'real' private key for cryptography operations while using the associated public key for validation.</p>
+     * <p>Cryptographic algorithm implementations can inspect the resulting {@code key} instance and obtain its
+     * mandatory {@code Provider} if necessary.</p>
      *
-     * @param priv the private key to use for cryptographic operations
-     * @param pub  the private key's associated PublicKey which must implement one of the required
-     *             <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces
-     * @return a {@code PrivateKey} that may be used by algorithms that require the private key's public information.
-     * @throws UnsupportedKeyException if the {@code PublicKey} is required but does not implement one of the required
-     *                                 <code>java.security.interfaces.{ECKey,RSAKey,XECKey,EdECKey}</code> interfaces
+     * <p>This method is primarily only useful for keys that cannot expose key material, such as PKCS11 or HSM
+     * (Hardware Security Module) keys, and require a specific {@code Provider} to be used during cryptographic
+     * operations.</p>
+     *
+     * @param key the secret key to use for cryptographic operations, potentially associated with a configured
+     *            {@link Provider}
+     * @return a new {@code SecretKeyBuilder} that produces the specified key, potentially associated with any
+     * specified provider.
      * @since JJWT_RELEASE_VERSION
      */
-    public static PrivateKey wrap(PrivateKey priv, PublicKey pub) throws UnsupportedKeyException {
-        Assert.notNull(priv, "PrivateKey cannot be null.");
-        Assert.notNull(pub, "PublicKey cannot be null.");
-        return Classes.invokeStatic(BRIDGE_CLASS, "wrap", ASSOCIATE_ARG_TYPES, new Object[]{priv, pub});
+    public static SecretKeyBuilder builder(SecretKey key) {
+        Assert.notNull(key, "SecretKey cannot be null.");
+        return invokeStatic("builder", SECRET_BUILDER_ARG_TYPES, key);
+    }
+
+    /**
+     * Returns a {@code PrivateKeyBuilder} that produces the specified key, allowing association with a
+     * {@link PrivateKeyBuilder#publicKey(PublicKey) publicKey} to obtain public key data if necessary, or a
+     * {@link SecretKeyBuilder#provider(Provider) provider} that must be used with the key during cryptographic
+     * operations.  For example:
+     *
+     * <blockquote><pre>
+     * PrivateKey key = Keys.builder(privateKey).publicKey(publicKey).provider(mandatoryProvider).build();</pre></blockquote>
+     *
+     * <p>Cryptographic algorithm implementations can inspect the resulting {@code key} instance and obtain its
+     * mandatory {@code Provider} or {@code PublicKey} if necessary.</p>
+     *
+     * <p>This method is primarily only useful for keys that cannot expose key material, such as PKCS11 or HSM
+     * (Hardware Security Module) keys, and require a specific {@code Provider} or public key data to be used
+     * during cryptographic operations.</p>
+     *
+     * @param key the private key to use for cryptographic operations, potentially associated with a configured
+     *            {@link Provider} or {@link PublicKey}.
+     * @return a new {@code PrivateKeyBuilder} that produces the specified private key, potentially associated with any
+     * specified provider or {@code PublicKey}
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static PrivateKeyBuilder builder(PrivateKey key) {
+        Assert.notNull(key, "PrivateKey cannot be null.");
+        return invokeStatic("builder", PRIVATE_BUILDER_ARG_TYPES, key);
     }
 }

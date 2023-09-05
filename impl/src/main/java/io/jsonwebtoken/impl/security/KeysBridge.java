@@ -21,13 +21,14 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.KeySupplier;
 import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.PrivateKeyBuilder;
+import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.ECKey;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
@@ -48,24 +49,30 @@ public final class KeysBridge {
         return new PasswordSpec(password);
     }
 
-    public static PrivateKey wrap(PrivateKey priv, PublicKey pub) {
-        Assert.notNull(priv, "PrivateKey cannot be null.");
-        if (priv instanceof KeySupplier) { //already wrapped, don't wrap again
-            return priv;
-        }
-        // We only need to wrap if:
-        // 1. The private key is not already an ECKey. If it is, we can validate normally
-        // 2. The public key is an ECKey - this must be true to represent EC params for the private key
-        // 3. The private key indicates via its algorithm that it is intended to be used as an EC key.
-        String privAlg = Strings.clean(priv.getAlgorithm());
-        if (!(priv instanceof ECKey) && pub instanceof ECKey &&
-                (("EC".equalsIgnoreCase(privAlg) || "ECDSA".equalsIgnoreCase(privAlg)) ||
-                        EcSignatureAlgorithm.findByKey(priv) != null /* match by OID just in case for PKCS11 keys */)) {
-            return new PrivateECKey(priv, ((ECKey) pub).getParams());
-        }
+    public static SecretKeyBuilder builder(SecretKey key) {
+        return new ProvidedSecretKeyBuilder(key);
+    }
 
-        // otherwise, no need to wrap, return unchanged
-        return priv;
+    public static PrivateKeyBuilder builder(PrivateKey key) {
+        return new ProvidedPrivateKeyBuilder(key);
+    }
+
+    /**
+     * If the specified {@code key} is a {@link KeySupplier}, the 'root' (lowest level) key that may exist in
+     * a {@code KeySupplier} chain is returned, otherwise the {@code key} is returned.
+     *
+     * @param key the key to check if it is a {@code KeySupplier}
+     * @param <K> the key type
+     * @return the lowest-level/root key available.
+     */
+    @SuppressWarnings("unchecked")
+    public static <K extends Key> K root(K key) {
+        return (key instanceof KeySupplier<?>) ? (K) root((KeySupplier<?>) key) : key;
+    }
+
+    public static <K extends Key> K root(KeySupplier<K> supplier) {
+        Assert.notNull(supplier, "KeySupplier canot be null.");
+        return Assert.notNull(root(supplier.getKey()), "KeySupplier key cannot be null.");
     }
 
     public static String findAlgorithm(Key key) {

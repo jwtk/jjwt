@@ -20,6 +20,7 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.UnsupportedKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -29,7 +30,7 @@ import java.security.PublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-import static org.easymock.EasyMock.*
+import static org.easymock.EasyMock.createMock
 import static org.junit.Assert.*
 
 class RsaSignatureAlgorithmTest {
@@ -51,14 +52,37 @@ class RsaSignatureAlgorithmTest {
     }
 
     @Test
-    void testValidateKeyWithoutRsaKey() {
-        PublicKey key = createMock(PublicKey)
-        replay key
+    void testValidateKeyWithoutRSAorRSASSAPSSAlgorithmName() {
+        PublicKey key = new TestPublicKey(algorithm: 'foo')
         algs.each {
-            it.validateKey(key, false)
-            //no exception - can't check for RSAKey fields (e.g. PKCS11 or HSM key)
+            try {
+                it.validateKey(key, false)
+            } catch (Exception e) {
+                String msg = 'Unsupported RSA or RSASSA-PSS key algorithm name.'
+                assertEquals msg, e.getMessage()
+            }
         }
-        verify key
+    }
+
+    @Test
+    void testValidateRSAAlgorithmKeyThatDoesntUseRSAKeyInterface() {
+        PublicKey key = new TestPublicKey(algorithm: 'RSA')
+        algs.each {
+            it.validateKey(key, false) //no exception - can't check for RSAKey length
+        }
+    }
+
+    @Test
+    void testValidateKeyWithoutRsaKey() {
+        PublicKey key = TestKeys.ES256.pair.public // not an RSA key
+        algs.each {
+            try {
+                it.validateKey(key, false)
+            } catch (UnsupportedKeyException e) {
+                String msg = 'Unsupported RSA or RSASSA-PSS key algorithm name.'
+                assertEquals msg, e.getMessage()
+            }
+        }
     }
 
     @Test
@@ -99,8 +123,9 @@ class RsaSignatureAlgorithmTest {
             } catch (WeakKeyException expected) {
                 String id = it.getId()
                 String section = id.startsWith('PS') ? '3.5' : '3.3'
-                String msg = "The signing key's size is 1024 bits which is not secure enough for the ${it.getId()} " +
-                        "algorithm.  The JWT JWA Specification (RFC 7518, Section ${section}) states that RSA keys " +
+                String msg = "The RSA signing key size (aka modulus bit length) is 1024 bits which is not secure " +
+                        "enough for the ${it.getId()} algorithm.  The JWT JWA Specification (RFC 7518, Section " +
+                        "${section}) states that RSA keys " +
                         "MUST have a size >= 2048 bits.  Consider using the Jwts.SIG.${id}.keyPair() " +
                         "builder to create a KeyPair guaranteed to be secure enough for ${id}.  See " +
                         "https://tools.ietf.org/html/rfc7518#section-${section} for more information."

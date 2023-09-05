@@ -22,6 +22,7 @@ import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -29,7 +30,6 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.interfaces.RSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
@@ -56,6 +56,9 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     private static final String RS512_OID = "1.2.840.113549.1.1.13"; // RFC 8017's "sha512WithRSAEncryption"
 
     private static final Set<String> PSS_ALG_NAMES = Collections.setOf(PSS_JCA_NAME, PSS_OID);
+
+    private static final Set<String> KEY_ALG_NAMES =
+            Collections.setOf("RSA", PSS_JCA_NAME, PSS_OID, RS256_OID, RS384_OID, RS512_OID);
 
     private static final int MIN_KEY_BIT_LENGTH = 2048;
 
@@ -153,6 +156,11 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
         return PSS_ALG_NAMES.contains(alg);
     }
 
+    static boolean isRsaAlgorithmName(Key key) {
+        String alg = KeysBridge.findAlgorithm(key);
+        return KEY_ALG_NAMES.contains(alg);
+    }
+
     @Override
     public KeyPairBuilder keyPair() {
         final String jcaName = this.algorithmParameterSpec != null ? PSS_JCA_NAME : "RSA";
@@ -170,23 +178,21 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
-        // https://github.com/jwtk/jjwt/issues/68 :
-        // Some PKCS11 providers and HSMs won't expose the RSAKey interface, so we have to check to see if we can cast
-        // If so, we can provide additional safety checks:
-        if (key instanceof RSAKey) {
-            RSAKey rsaKey = (RSAKey) key;
-            int size = rsaKey.getModulus().bitLength();
-            if (size < MIN_KEY_BIT_LENGTH) {
-                String id = getId();
-                String section = id.startsWith("PS") ? "3.5" : "3.3";
-                String msg = "The " + keyType(signing) + " key's size is " + size + " bits which is not secure " +
-                        "enough for the " + id + " algorithm.  The JWT JWA Specification (RFC 7518, Section " +
-                        section + ") states that RSA keys MUST have a size >= " + MIN_KEY_BIT_LENGTH + " bits.  " +
-                        "Consider using the Jwts.SIG." + id + ".keyPair() builder to create a " +
-                        "KeyPair guaranteed to be secure enough for " + id + ".  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
-                throw new WeakKeyException(msg);
-            }
+        if (!isRsaAlgorithmName(key)) {
+            throw new UnsupportedKeyException("Unsupported RSA or RSASSA-PSS key algorithm name.");
+        }
+        int size = KeysBridge.findBitLength(key);
+        if (size < 0) return; // https://github.com/jwtk/jjwt/issues/68
+        if (size < MIN_KEY_BIT_LENGTH) {
+            String id = getId();
+            String section = id.startsWith("PS") ? "3.5" : "3.3";
+            String msg = "The RSA " + keyType(signing) + " key size (aka modulus bit length) is " + size + " bits " +
+                    "which is not secure enough for the " + id + " algorithm.  The JWT JWA Specification " +
+                    "(RFC 7518, Section " + section + ") states that RSA keys MUST have a size >= " +
+                    MIN_KEY_BIT_LENGTH + " bits.  Consider using the Jwts.SIG." + id +
+                    ".keyPair() builder to create a KeyPair guaranteed to be secure enough for " + id + ".  See " +
+                    "https://tools.ietf.org/html/rfc7518#section-" + section + " for more information.";
+            throw new WeakKeyException(msg);
         }
     }
 

@@ -22,6 +22,7 @@ import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Arrays
+import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
@@ -89,7 +90,7 @@ class AesGcmKeyAlgorithmTest {
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
             SecretKeyBuilder key() {
-                return new FixedSecretKeyBuilder(cek)
+                return Keys.builder(cek)
             }
         }
 
@@ -127,7 +128,7 @@ class AesGcmKeyAlgorithmTest {
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
             SecretKeyBuilder key() {
-                return new FixedSecretKeyBuilder(cek)
+                return Keys.builder(cek)
             }
         }
         def delegate = new DefaultMutableJweHeader(headerBuilder)

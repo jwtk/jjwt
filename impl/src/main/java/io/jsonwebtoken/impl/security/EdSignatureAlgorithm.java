@@ -47,18 +47,13 @@ final class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     protected String getJcaName(Request<?> request) {
         SecureRequest<?, ?> req = Assert.isInstanceOf(SecureRequest.class, request, "SecureRequests are required.");
-        Key key = req.getKey();
-
+        Key key = Assert.notNull(req.getKey(), "Request key cannot be null.");
         // If we're signing, and this instance's algorithm name is the default/generic 'EdDSA', then prefer the
         // signing key's curve algorithm ID.  This ensures the most specific JCA algorithm is used for signing,
         // (while generic 'EdDSA' is fine for validation)
         String jcaName = getJcaName(); //default for JCA interaction
-        boolean signing = !(request instanceof VerifyDigestRequest);
-        if (ID.equals(jcaName) && signing) { // see if we can get a more-specific curve algorithm identifier:
-            EdwardsCurve curve = EdwardsCurve.findByKey(key);
-            if (curve != null) {
-                jcaName = curve.getJcaName(); // prefer the key's specific curve algorithm identifier during signing
-            }
+        if (!(request instanceof VerifyDigestRequest)) { // then we're signing, not verifying
+            jcaName = EdwardsCurve.forKey(key).getJcaName();
         }
         return jcaName;
     }
@@ -71,8 +66,9 @@ final class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
-        EdwardsCurve curve = EdwardsCurve.findByKey(key);
-        if (curve != null && !curve.isSignatureCurve()) {
+        // should always be non-null due to algorithm name lookup, even without encoded key bytes:
+        EdwardsCurve curve = EdwardsCurve.forKey(key);
+        if (!curve.isSignatureCurve()) {
             String msg = curve.getId() + " keys may not be used with " + getId() + " digital signatures per " +
                     "https://www.rfc-editor.org/rfc/rfc8037.html#section-3.2";
             throw new UnsupportedKeyException(msg);

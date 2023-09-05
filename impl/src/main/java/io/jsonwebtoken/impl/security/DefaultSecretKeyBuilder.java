@@ -19,18 +19,15 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 
 import javax.crypto.SecretKey;
-import java.security.Provider;
-import java.security.SecureRandom;
 
 /**
  * @since JJWT_RELEASE_VERSION
  */
-public class DefaultSecretKeyBuilder implements SecretKeyBuilder {
+public class DefaultSecretKeyBuilder extends AbstractSecurityBuilder<SecretKey, SecretKeyBuilder>
+        implements SecretKeyBuilder {
 
     protected final String JCA_NAME;
     protected final int BIT_LENGTH;
-    protected Provider provider;
-    protected SecureRandom random;
 
     public DefaultSecretKeyBuilder(String jcaName, int bitLength) {
         this.JCA_NAME = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
@@ -40,18 +37,6 @@ public class DefaultSecretKeyBuilder implements SecretKeyBuilder {
         }
         this.BIT_LENGTH = Assert.gt(bitLength, 0, "bitLength must be > 0");
         random(Randoms.secureRandom());
-    }
-
-    @Override
-    public SecretKeyBuilder provider(Provider provider) {
-        this.provider = provider;
-        return this;
-    }
-
-    @Override
-    public SecretKeyBuilder random(SecureRandom random) {
-        this.random = random != null ? random : Randoms.secureRandom();
-        return this;
     }
 
     @Override

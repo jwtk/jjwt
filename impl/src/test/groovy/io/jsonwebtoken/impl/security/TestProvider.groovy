@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,15 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.SecretKeyBuilder
-
-import javax.crypto.SecretKey
 import java.security.Provider
-import java.security.SecureRandom
 
-class FixedSecretKeyBuilder implements SecretKeyBuilder {
+class TestProvider extends Provider {
 
-    final SecretKey key
-
-    FixedSecretKeyBuilder(SecretKey key) {
-        this.key = key
+    TestProvider() {
+        this('test')
     }
 
-    @Override
-    SecretKey build() {
-        return this.key
-    }
-
-    @Override
-    SecretKeyBuilder provider(Provider provider) {
-        return this
-    }
-
-    @Override
-    SecretKeyBuilder random(SecureRandom random) {
-        return this
+    TestProvider(String name) {
+        super(name, 1.0d, 'info')
     }
 }

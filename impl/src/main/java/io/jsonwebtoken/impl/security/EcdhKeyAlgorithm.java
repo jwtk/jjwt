@@ -34,7 +34,6 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.KeySupplier;
 import io.jsonwebtoken.security.OctetPublicJwk;
 import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.Request;
@@ -95,7 +94,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         return jca(request).withKeyAgreement(new CheckedFunction<KeyAgreement, byte[]>() {
             @Override
             public byte[] apply(KeyAgreement keyAgreement) throws Exception {
-                keyAgreement.init(priv, ensureSecureRandom(request));
+                keyAgreement.init(KeysBridge.root(priv), ensureSecureRandom(request));
                 keyAgreement.doPhase(pub, true);
                 return keyAgreement.generateSecret();
             }
@@ -182,9 +181,8 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         // Generate our ephemeral key pair:
         final SecureRandom random = ensureSecureRandom(request);
-        final Provider provider = nonPkcs11Provider(request); // PKCS11 / HSM check
-        DynamicJwkBuilder<?, ?> jwkBuilder = Jwks.builder().random(random).provider(provider);
-        KeyPair pair = generateKeyPair(curve, provider, random);
+        DynamicJwkBuilder<?, ?> jwkBuilder = Jwks.builder().random(random);
+        KeyPair pair = generateKeyPair(curve, null, random);
 
         Assert.stateNotNull(pair, "Internal implementation state: KeyPair cannot be null.");
 
@@ -223,14 +221,6 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
             String msg = "JWE Header " + DefaultJweHeader.EPK + " value does not represent " +
                     "a point on the expected curve. Value: " + epk;
             throw new InvalidKeyException(msg);
-        }
-
-        // PKCS11 unwrap if necessary:
-        if (privateKey instanceof KeySupplier) {
-            Key key = ((KeySupplier<?>) privateKey).getKey();
-            // wrapped keys are only produced within JJWT internal implementations (not by app devs)
-            // so the wrapped key should always be a PrivateKey:
-            privateKey = Assert.isInstanceOf(PrivateKey.class, key, "Wrapped key is not a PrivateKey.");
         }
 
         final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);

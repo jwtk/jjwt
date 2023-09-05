@@ -44,6 +44,7 @@ import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
+import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.DecodingException;
@@ -310,8 +311,11 @@ public class DefaultJwtParser implements JwtParser {
         byte[] signature = decode(tokenized.getDigest(), "JWS signature");
 
         try {
+            Provider provider = ProviderKey.getProvider(key, this.provider); // extract if necessary
+            key = ProviderKey.getKey(key); // unwrap if necessary, MUST be called after ProviderKey.getProvider
+            Assert.stateNotNull(key, "ProviderKey cannot be null."); //ProviderKey impl doesn't allow null
             VerifySecureDigestRequest<Key> request =
-                    new DefaultVerifySecureDigestRequest<>(data, this.provider, null, key, signature);
+                    new DefaultVerifySecureDigestRequest<>(data, provider, null, key, signature);
             if (!algorithm.verify(request)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
                         "asserted and should not be trusted.";
@@ -445,14 +449,17 @@ public class DefaultJwtParser implements JwtParser {
             @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgFn.apply(jweHeader);
             Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
-            final Key key = this.keyLocator.locate(jweHeader);
+            Key key = this.keyLocator.locate(jweHeader);
             if (key == null) {
                 String msg = "Cannot decrypt JWE payload: unable to locate key for JWE with header: " + jweHeader;
                 throw new UnsupportedJwtException(msg);
             }
 
+            // extract key-specific provider if necessary;
+            Provider provider = ProviderKey.getProvider(key, this.provider);
+            key = ProviderKey.getKey(key); // this must be called after ProviderKey.getProvider
             DecryptionKeyRequest<Key> request =
-                    new DefaultDecryptionKeyRequest<>(cekBytes, this.provider, null, jweHeader, encAlg, key);
+                    new DefaultDecryptionKeyRequest<>(cekBytes, provider, null, jweHeader, encAlg, key);
             final SecretKey cek = keyAlg.getDecryptionKey(request);
             if (cek == null) {
                 String msg = "The '" + keyAlg.getId() + "' JWE key algorithm did not return a decryption key. " +
@@ -460,15 +467,12 @@ public class DefaultJwtParser implements JwtParser {
                 throw new IllegalStateException(msg);
             }
 
-            // During decryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
+            // During decryption, the available Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
             // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
-            // As such, the need for a configured Provider is much more likely necessary for the KeyAlgorithm,
-            // especially when using a HSM/PKCS11 Provider. However, if the `dir`ect key algorithm was chosen _and_
-            // a Provider was configured, then the provider is likely necessary for that key, so we represent that
-            // here:
-            final Provider aeadProvider = keyAlg.getId().equalsIgnoreCase(Jwts.KEY.DIRECT.getId()) ? this.provider : null;
+            // As such, the provider here is intentionally omitted (null):
+            // TODO: add encProvider(Provider) builder method that applies to this request only?
             DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(aeadProvider, null, payload, cek, aad, tag, iv);
+                    new DefaultAeadResult(null, null, payload, cek, aad, tag, iv);
             Message<byte[]> result = encAlg.decrypt(decryptRequest);
             payload = result.getPayload();
 

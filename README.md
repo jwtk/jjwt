@@ -65,6 +65,7 @@ enforcement.
     * [Custom Key Locator](#key-locator-custom)
     * [Key Locator Strategy](#key-locator-strategy)
     * [Key Locator Return Values](#key-locator-retvals)
+    * [Provider-constrained Keys (PKCS11, HSM, etc)](#key-locator-provider)
   * [Claim Assertions](#jwt-read-claims)
   * [Accounting for Clock Skew](#jwt-read-clock)
     * [Custom Clock Support](#jwt-read-clock-custom)
@@ -1059,8 +1060,8 @@ try {
     jwt = Jwts.parser()     // (1)
         
     .keyLocator(keyLocator) // (2) dynamically locate signing or encryption keys    
-    //.verifyWith(key)      //     or a static key used to verify all signed JWTs
-    //.decryptWith(key)     //     or a static key used to decrypt all encrypted JWTs
+    //.verifyWith(key)      //     or a constant key used to verify all signed JWTs
+    //.decryptWith(key)     //     or a constant key used to decrypt all encrypted JWTs
         
     .build()                // (3)
         
@@ -1084,7 +1085,7 @@ catch (JwtException ex) {   // (5)
 > instead of a generic `Jwt<?,?>` instance.
 
 <a name="jwt-read-key"></a>
-### Static Parsing Key
+### Constant Parsing Key
 
 If the JWT parsed is a JWS or JWE, a key will be necessary to verify the signature or decrypt it.  If a JWS and 
 signature verification fails, or if a JWE and decryption fails, the JWT cannot be safely trusted and should be 
@@ -1284,6 +1285,46 @@ on the type of JWS or JWE algorithm used.  That is:
       `io.jsonwebtoken.security.Password`.  You can create a `Password` instance by calling 
       `Keys.password(char[] passwordCharacters)`.
     * For asymmetric key management algorithms, the returned decryption key should be a `PrivateKey` (not a `PublicKey`).
+
+<a name="key-locator-provider"></a>
+#### Provider-constrained Keys
+
+If any verification or decryption key returned from a Key `Locator` must be used with a specific security `Provider`
+(such as for PKCS11 or Hardware Security Module (HSM) keys), you must make that `Provider` available for JWT parsing
+in one of 3 ways, listed in order of recommendation and simplicity:
+
+1. [Configure the Provider in the JVM](https://docs.oracle.com/en/java/javase/17/security/howtoimplaprovider.html#GUID-831AA25F-F702-442D-A2E4-8DA6DEA16F33),
+   either by modifying the `java.security` file or by registering the `Provider` dynamically via
+   [Security.addProvider(Provider)](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/Security.html#addProvider(java.security.Provider)).
+   This is the recommended approach so you do not need to modify code anywhere that may need to parse JWTs.
+
+
+2. Set the `Provider` as the parser default by calling `JwtParserBuilder#provider(Provider)`.  This will
+   ensure the provider is used by default with _all_ located keys unless overridden by a key-specific Provider. This
+   is only recommended when you are confident that all JWTs encountered by the parser instance will use keys
+   attributed to the same `Provider`, unless overridden by a specific key.
+
+
+3. Associate the `Provider` with a specific key using `Keys.builder` so it is used for that key only.  This option is 
+   useful if some located keys require a specific provider, while other located keys can assume a default provider. For
+   example:
+   
+   ```java
+   public Key locate(Header<?> header) {
+       
+       PrivateKey /* or SecretKey */ key = findKey(header); // implement me
+       
+       Provider keySpecificProvider = findKeyProvider(key); // implement me
+       if (keySpecificProvider != null) {
+           // Ensure the key-specific provider (e.g. for PKCS11 or HSM) will be used 
+           // during decryption with the KeyAlgorithm in the JWE 'alg' header
+           return Keys.builder(key).provider(keySpecificProvider).build();
+       }
+       
+       // otherwise default provider is fine:
+       return key;
+   }
+   ```
 
 <a name="jwt-read-claims"></a><a name="jws-read-claims"></a> <!-- legacy anchor for old links -->
 ### Claim Assertions
@@ -1636,13 +1677,15 @@ If your secret key is:
   ```
 * A raw (non-encoded) string (e.g. a password String):
   ```java
-  SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+  Password key = Keys.password(secretString.toCharArray());
   ```
-  It is always incorrect to call `secretString.getBytes()` (without providing a charset).
-  
-  However, raw password strings like this, e.g. `correcthorsebatterystaple` should be avoided whenever possible 
-  because they can inevitably result in weak or susceptible keys. Secure-random keys are almost always stronger. 
-  If you are able, prefer creating a [new secure-random secret key](#jws-key-create-secret) instead.
+
+> **Warning**
+>
+> It is almost always incorrect to call any variant of `secretString.getBytes` in any cryptographic context.  
+> Safe cryptographic keys are never represented as direct (unencoded) strings.  If you have a password that should 
+> be represented as a `Key` for `HMAC-SHA` algorithms, it is _strongly_ recommended to use a key derivation 
+> algorithm to derive a cryptographically-strong `Key` from the password, and never use the password directly.
 
 <a name="jws-create-key-algoverride"></a>
 ##### SignatureAlgorithm Override
@@ -2266,18 +2309,17 @@ However, if your decryption `PrivateKey`s are stored in a Hardware Security Modu
 it is likely that your `PrivateKey` instances _do not_ implement `ECKey`.
 
 In these cases, you need to provide both the PKCS11 `PrivateKey` and it's companion `PublicKey` during decryption
-by using the `Keys.wrap` method. For example: 
-for example:
+by using the `Keys.builder` method. For example:
 
 ```java
 KeyPair pair = getMyPkcs11KeyPair();
-PrivateKey priv = pair.getPrivate();
-PublicKey pub = pair.getPublic(); // must implement ECKey or EdECKey or BouncyCastle equivalent
-PrivateKey decryptionKey = Keys.wrap(priv, pub);
+PrivateKey jwtParserDecryptionKey = Keys.builder(pair.getPrivate())
+    .publicKey(pair.getPublic()) // PublicKey must implement ECKey or EdECKey or BouncyCastle equivalent
+    .build();
 ```
 
-You then use the resulting `decryptionKey` (not `priv`) with the `JwtParserBuilder` or as the return value from 
-a custom [Key Locator](#key-locator) implementation.  For example:
+You then use the resulting `jwtParserDecryptionKey` (not `pair.getPrivate()`) with the `JwtParserBuilder` or as 
+the return value from a custom [Key Locator](#key-locator) implementation.  For example:
 
 ```java
 PrivateKey decryptionKey = Keys.wrap(pkcs11PrivateKey, pkcs11PublicKey);
@@ -2292,10 +2334,13 @@ Or as the return value from your key locator:
 
 ```java
 Jwts.parser()
-    .keyLocator(keyLocator) // your keyLocator.locate(header) would return Keys.wrap(privateKey, publicKey)
+    .keyLocator(keyLocator) // your keyLocator.locate(header) would return Keys.builder...
     .build()
     .parseClaimsJwe(jweString);
 ```
+
+Please see the [Provider-constrained Keys](#key-locator-provider) section for more information, as well as 
+code examples of how to implement a Key `Locator` using the `Keys.builder` technique.
 
 <a name="jwe-read-decompression"></a>
 #### JWE Decompression
@@ -2474,7 +2519,7 @@ The resulting `JwkThumbprint` instance provides some useful methods:
 * `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the raw output from the hash algorithm
 * `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
 * `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint. Many standard IANA
-                                      hash algorithms are available as constants in the `Jwts.HASH` utility class.
+                                      hash algorithms are available as constants in the `Jwks.HASH` utility class.
 * `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the [JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) specification
 
 <a name="jwk-thumbprint-kid"></a>
@@ -2589,10 +2634,10 @@ This is true for all secret or private key members in `SecretJwk` and `PrivateJw
 
 > **Warning**
 >
-> **The JWT specifications tandardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
+> **The JWT specification standardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
 > (Signed JWTs) as well**.
 > 
-> If you are positive that a JWT you create with JJWT will _also_ be parsed with JJWT, 
+> If you are positive that a JWS you create with JJWT will _also_ be parsed with JJWT, 
 > you can use this feature with both JWEs and JWSs, otherwise it is best to only use it for JWEs.
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
@@ -3185,9 +3230,9 @@ This is an example showing how to digitally sign and verify a JWT using the
 The `EdDSA` signature algorithm is defined for JWS in [RFC 8037, Section 3.1](https://www.rfc-editor.org/rfc/rfc8037#section-3.1)
 using keys for two Edwards curves:
 
-* `Ed25519`: `EdDSA` using curve `Ed25519`. `Ed25519` algorithm keys must be 256 bits (32 bytes) long and produce 
+* `Ed25519`: `EdDSA` using curve `Ed25519`. `Ed25519` algorithm keys must be 255 bits long and produce 
              signatures 512 bits (64 bytes) long.
-* `Ed448`: `EdDSA` using curve `Ed448`. `Ed448` algorithm keys must be 456 bits (57 bytes) long and produce signatures 
+* `Ed448`: `EdDSA` using curve `Ed448`. `Ed448` algorithm keys must be 448 bits long and produce signatures 
            912 bits (114 bytes) long.
 
 In this example, Bob will sign a JWT using his Edwards Curve private key, and Alice can verify it came from Bob 

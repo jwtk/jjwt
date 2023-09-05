@@ -27,11 +27,9 @@ import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import java.math.BigInteger;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
@@ -58,28 +56,27 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
 
     protected void validate(Key key, boolean encryption) { // true = encryption, false = decryption
 
+        if (!RsaSignatureAlgorithm.isRsaAlgorithmName(key)) {
+            throw new UnsupportedKeyException("Unsupported RSA key algorithm name.");
+        }
+
         if (RsaSignatureAlgorithm.isPss(key)) {
             String msg = "RSASSA-PSS keys may not be used for " + keyType(encryption) +
                     ", only digital signature algorithms.";
             throw new UnsupportedKeyException(msg);
         }
 
-        // Some PKCS11 providers and HSMs won't expose the RSAKey interface, so we have to check to see if we can cast
-        // If so, we can provide additional safety checks:
-        if (key instanceof RSAKey) {
-            RSAKey rsaKey = (RSAKey) key;
-            BigInteger modulus = Assert.notNull(rsaKey.getModulus(), "RSAKey modulus cannot be null.");
-            int size = modulus.bitLength();
-            if (size < MIN_KEY_BIT_LENGTH) {
-                String id = getId();
-                String section = id.startsWith("RSA1") ? "4.2" : "4.3";
-                String msg = "The RSA " + keyType(encryption) + " key's size (modulus) is " + size +
-                        " bits which is not secure enough for the " + id + " algorithm. " +
-                        "The JWT JWA Specification (RFC 7518, Section " + section + ") states that RSA keys MUST " +
-                        "have a size >= " + MIN_KEY_BIT_LENGTH + " bits. See " +
-                        "https://www.rfc-editor.org/rfc/rfc7518.html#section-" + section + " for more information.";
-                throw new WeakKeyException(msg);
-            }
+        int size = KeysBridge.findBitLength(key);
+        if (size < 0) return; // can't validate size: material or length not available (e.g. PKCS11 or HSM)
+        if (size < MIN_KEY_BIT_LENGTH) {
+            String id = getId();
+            String section = id.startsWith("RSA1") ? "4.2" : "4.3";
+            String msg = "The RSA " + keyType(encryption) + " key size (aka modulus bit length) is " + size +
+                    " bits which is not secure enough for the " + id + " algorithm. " +
+                    "The JWT JWA Specification (RFC 7518, Section " + section + ") states that RSA keys MUST " +
+                    "have a size >= " + MIN_KEY_BIT_LENGTH + " bits. See " +
+                    "https://www.rfc-editor.org/rfc/rfc7518.html#section-" + section + " for more information.";
+            throw new WeakKeyException(msg);
         }
     }
 

@@ -209,7 +209,7 @@ class KeysTest {
     void testKeyPairBuilder() {
 
         Collection<SignatureAlgorithm> algs = Jwts.SIG.get().values()
-                .findAll({it instanceof KeyPairBuilderSupplier}) as Collection<SignatureAlgorithm>
+                .findAll({ it instanceof KeyPairBuilderSupplier }) as Collection<SignatureAlgorithm>
 
         for (SignatureAlgorithm alg : algs) {
 
@@ -288,15 +288,19 @@ class KeysTest {
     }
 
     @Test
-    void testAssociateWithKeySupplier() {
-        def pair = TestKeys.ES256.pair
-        def key = new PrivateECKey(pair.private, pair.public.getParams())
-        assertSame key, Keys.wrap(key, pair.public)
+    void testAssociateWithECKey() {
+        def priv = new TestPrivateKey(algorithm: 'EC')
+        def pub = TestKeys.ES256.pair.public as ECPublicKey
+        def result = Keys.builder(priv).publicKey(pub).build()
+        assertTrue result instanceof PrivateECKey
+        def key = result as PrivateECKey
+        assertSame priv, key.getKey()
+        assertSame pub.getParams(), key.getParams()
     }
 
     @Test
     void testAssociateWithKeyThatDoesntNeedToBeWrapped() {
         def pair = TestKeys.RS256.pair
-        assertSame pair.private, Keys.wrap(pair.private, pair.public)
+        assertSame pair.private, Keys.builder(pair.private).publicKey(pair.public).build()
     }
 }
