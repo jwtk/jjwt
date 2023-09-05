@@ -1677,13 +1677,15 @@ If your secret key is:
   ```
 * A raw (non-encoded) string (e.g. a password String):
   ```java
-  SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+  Password key = Keys.password(secretString.toCharArray());
   ```
-  It is always incorrect to call `secretString.getBytes()` (without providing a charset).
-  
-  However, raw password strings like this, e.g. `correcthorsebatterystaple` should be avoided whenever possible 
-  because they can inevitably result in weak or susceptible keys. Secure-random keys are almost always stronger. 
-  If you are able, prefer creating a [new secure-random secret key](#jws-key-create-secret) instead.
+
+> **Warning**
+>
+> It is almost always incorrect to call any variant of `secretString.getBytes` in any cryptographic context.  
+> Safe cryptographic keys are never represented as direct (unencoded) strings.  If you have a password that should 
+> be represented as a `Key` for `HMAC-SHA` algorithms, it is _strongly_ recommended to use a key derivation 
+> algorithm to derive a cryptographically-strong `Key` from the password, and never use the password directly.
 
 <a name="jws-create-key-algoverride"></a>
 ##### SignatureAlgorithm Override
@@ -2316,7 +2318,7 @@ PrivateKey jwtParserDecryptionKey = Keys.builder(pair.getPrivate())
     .build();
 ```
 
-You then use the resulting `jwtParserDecryptionKe` (not `pair.getPrivate()`) with the `JwtParserBuilder` or as 
+You then use the resulting `jwtParserDecryptionKey` (not `pair.getPrivate()`) with the `JwtParserBuilder` or as 
 the return value from a custom [Key Locator](#key-locator) implementation.  For example:
 
 ```java
@@ -2336,6 +2338,9 @@ Jwts.parser()
     .build()
     .parseClaimsJwe(jweString);
 ```
+
+Please see the [Provider-constrained Keys](#key-locator-provider) section for more information, as well as 
+code examples of how to implement a Key `Locator` using the `Keys.builder` technique.
 
 <a name="jwe-read-decompression"></a>
 #### JWE Decompression
@@ -2629,10 +2634,10 @@ This is true for all secret or private key members in `SecretJwk` and `PrivateJw
 
 > **Warning**
 >
-> **The JWT specifications tandardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
+> **The JWT specification standardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
 > (Signed JWTs) as well**.
 > 
-> If you are positive that a JWT you create with JJWT will _also_ be parsed with JJWT, 
+> If you are positive that a JWS you create with JJWT will _also_ be parsed with JJWT, 
 > you can use this feature with both JWEs and JWSs, otherwise it is best to only use it for JWEs.
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of 
