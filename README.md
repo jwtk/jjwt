@@ -65,6 +65,7 @@ enforcement.
     * [Custom Key Locator](#key-locator-custom)
     * [Key Locator Strategy](#key-locator-strategy)
     * [Key Locator Return Values](#key-locator-retvals)
+    * [Provider-constrained Keys (PKCS11, HSM, etc)](#key-locator-provider)
   * [Claim Assertions](#jwt-read-claims)
   * [Accounting for Clock Skew](#jwt-read-clock)
     * [Custom Clock Support](#jwt-read-clock-custom)
