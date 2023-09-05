@@ -21,6 +21,7 @@ import io.jsonwebtoken.impl.security.TestKeys
 import org.junit.Test
 
 /**
+ * https://github.com/jwtk/jjwt/issues/438
  */
 class Issue438Test {
 
