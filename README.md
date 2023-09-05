@@ -555,8 +555,8 @@ If you're building a (non-Android) JDK project, you will want to define the foll
      It is unnecessary for these algorithms on JDK 15 or later.
 <dependency>
     <groupId>org.bouncycastle</groupId>
-    <artifactId>bcprov-jdk15on</artifactId>
-    <version>1.70</version>
+    <artifactId>bcprov-jdk18on</artifactId> or bcprov-jdk15to18 on JDK 7
+    <version>1.76</version>
     <scope>runtime</scope>
 </dependency>
 -->
@@ -578,7 +578,7 @@ dependencies {
        - JDK 14 or earlier, and you want to use EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.
       It is unnecessary for these algorithms on JDK 15 or later.
     */
-    // runtimeOnly 'org.bouncycastle:bcprov-jdk15on:1.70'
+    // runtimeOnly 'org.bouncycastle:bcprov-jdk18on:1.76' // or bcprov-jdk15to18 on JDK 7
 }
 ```
 
@@ -607,7 +607,7 @@ dependencies {
        - EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.
       ** AND ALSO ensure you enable the BouncyCastle provider as shown below **
     */
-    //implementation('org.bouncycastle:bcprov-jdk15on:1.70')
+    //implementation('org.bouncycastle:bcprov-jdk18on:1.76') // or bcprov-jdk15to18 for JDK 7
 }
 ```
 
