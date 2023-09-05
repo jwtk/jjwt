@@ -200,8 +200,11 @@ class Pkcs11Test {
         return findPkcs11(alg as Identifiable)?.pair
     }
 
-    @Test
-    void testJws() {
+    /**
+     * @param keyProvider the explicit provider to use with JwtBuilder/Parser calls or {@code null} to use the JVM default
+     * provider(s).
+     */
+    static void testJws(Provider keyProvider) {
 
         def algs = [] as List<Identifiable>
         algs.addAll(Jwts.SIG.get().values().findAll({ it != Jwts.SIG.EdDSA })) // EdDSA accounted for by next two:
@@ -221,15 +224,15 @@ class Pkcs11Test {
 
             alg = alg instanceof Curve ? Jwts.SIG.EdDSA : alg as SecureDigestAlgorithm
 
-            // We need to specify the PKCS11 provider since we can't access the private key material:
-            def jws = Jwts.builder().provider(PKCS11).issuer('me').signWith(signKey, alg).compact()
+            // We might need to specify the PKCS11 provider since we can't access the private key material:
+            def jws = Jwts.builder().provider(keyProvider).issuer('me').signWith(signKey, alg).compact()
 
             def builder = Jwts.parser()
             if (verifyKey instanceof SecretKey) {
                 // We only need to specify a provider during parsing for MAC HSM keys: SignatureAlgorithm verification
                 // only needs the PublicKey, and a recipient doesn't need/won't have an HSM for public material anyway.
-                verifyKey = Keys.builder(verifyKey).provider(PKCS11).build()
-                builder.verifyWith(verifyKey)
+                verifyKey = Keys.builder(verifyKey).provider(keyProvider).build()
+                builder.verifyWith(verifyKey as SecretKey)
             } else {
                 builder.verifyWith(verifyKey as PublicKey)
             }
@@ -239,8 +242,13 @@ class Pkcs11Test {
         }
     }
 
+    @Test
+    void testJws() {
+        testJws(PKCS11)
+    }
+
     // create a jwe and then decrypt it
-    static void encRoundtrip(TestKeys.Bundle bundle, def keyalg) {
+    static void encRoundtrip(TestKeys.Bundle bundle, def keyalg, Provider provider /* may be null */) {
         def pair = bundle.pair
         def pub = pair.public
         def priv = pair.private
@@ -265,17 +273,15 @@ class Pkcs11Test {
         // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the
         // public key.  So we can only decrypt if SunPKCS11 supports the private key, so check for non-null:
         if (priv) {
-            // Decryption needs the private key, and that is inside the HSM, so the PKCS11 provider is required:
-            priv = Keys.builder(pair.private).publicKey(pub).provider(PKCS11).build()
+            // Decryption may need private material inside the HSM:
+            priv = Keys.builder(pair.private).publicKey(pub).provider(provider).build()
 
             String iss = Jwts.parser().decryptWith(priv).build().parseClaimsJwe(jwe).getPayload().getIssuer()
             assertEquals 'me', iss
         }
     }
 
-    @Test
-    void testJwe() {
-
+    static void testJwe(Provider provider) {
         def algs = []
         algs.addAll(Jwts.SIG.get().values().findAll({
             it.id.startsWith('RS') || it.id.startsWith('ES')
@@ -297,16 +303,37 @@ class Pkcs11Test {
                 if (name == 'RSA') {
                     // SunPKCS11 doesn't support RSA-OAEP* ciphers :(
                     // So we can only try with RSA1_5 and we have to skip RSA_OAEP and RSA_OAEP_256:
-                    encRoundtrip(bundle, Jwts.KEY.RSA1_5)
+                    encRoundtrip(bundle, Jwts.KEY.RSA1_5, provider)
                 } else if (StandardCurves.findByKey(bundle.pair.public) != null) { // EC or Ed key
                     // try all ECDH key algorithms:
                     Jwts.KEY.get().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
-                        encRoundtrip(bundle, it)
+                        encRoundtrip(bundle, it, provider)
                     }
                 } else {
                     throw new IllegalStateException("Unexpected key algorithm: $name")
                 }
             }
+        }
+    }
+
+    @Test
+    void testJwe() {
+        testJwe(PKCS11)
+    }
+
+    /**
+     * Ensures that for all JWE and JWS algorithms, when the PKCS11 provider is installed as a JVM provider, 
+     * no calls to JwtBuilder/Parser .provider are needed, and no ProviderKeys (Keys.builder) calls are needed
+     * anywhere in application code.
+     */
+    @Test
+    void testPkcs11JvmProviderDoesNotRequireProviderKeys() {
+        Security.addProvider(PKCS11)
+        try {
+            testJws(null)
+            testJwe(null)
+        } finally {
+            Security.removeProvider(PKCS11.getName())
         }
     }
 }

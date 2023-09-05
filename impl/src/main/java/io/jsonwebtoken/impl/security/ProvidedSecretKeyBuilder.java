@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 
@@ -32,10 +31,6 @@ class ProvidedSecretKeyBuilder extends ProvidedKeyBuilder<SecretKey, SecretKeyBu
         if (this.key instanceof Password) {
             return this.key; // provider never needed for Password instances.
         }
-        if (this.provider != null || Bytes.isEmpty(KeysBridge.findEncoded(this.key))) {
-            // provider is required to work with this key
-            return new ProviderSecretKey(this.provider, this.key);
-        }
-        return this.key;
+        return provider != null ? new ProviderSecretKey(this.provider, this.key) : this.key;
     }
 }
