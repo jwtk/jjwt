@@ -35,9 +35,25 @@ class DefaultRsaKeyAlgorithmTest {
     void testValidateNonRSAKey() {
         SecretKey key = Jwts.KEY.A128KW.key().build()
         for (DefaultRsaKeyAlgorithm alg : algs) {
+            try {
+                alg.validate(key, true)
+            } catch (UnsupportedKeyException e) {
+                assertEquals 'Unsupported RSA key algorithm name.', e.getMessage()
+            }
+            try {
+                alg.validate(key, false)
+            } catch (UnsupportedKeyException e) {
+                assertEquals 'Unsupported RSA key algorithm name.', e.getMessage()
+            }
+        }
+    }
+
+    @Test
+    void testValidateRsaKeyWithoutKeySize() {
+        for (def alg : algs) {
             // if RSAKey interface isn't exposed (e.g. PKCS11 or HSM), don't error:
-            alg.validate(key, true)
-            alg.validate(key, false)
+            alg.validate(new TestPublicKey(algorithm: 'RSA'), true)
+            alg.validate(new TestPrivateKey(algorithm: 'RSA'), false)
         }
     }
 
@@ -45,7 +61,7 @@ class DefaultRsaKeyAlgorithmTest {
     void testPssKey() {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             RSAPublicKey key = createMock(RSAPublicKey)
-            expect(key.getAlgorithm()).andReturn(RsaSignatureAlgorithm.PSS_JCA_NAME)
+            expect(key.getAlgorithm()).andStubReturn(RsaSignatureAlgorithm.PSS_JCA_NAME)
             replay(key)
             try {
                 alg.validate(key, true)
@@ -61,7 +77,7 @@ class DefaultRsaKeyAlgorithmTest {
     void testPssOidKey() {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             RSAPublicKey key = createMock(RSAPublicKey)
-            expect(key.getAlgorithm()).andReturn(RsaSignatureAlgorithm.PSS_OID)
+            expect(key.getAlgorithm()).andStubReturn(RsaSignatureAlgorithm.PSS_OID)
             replay(key)
             try {
                 alg.validate(key, true)
@@ -77,7 +93,7 @@ class DefaultRsaKeyAlgorithmTest {
     void testWeakEncryptionKey() {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             RSAPublicKey key = createMock(RSAPublicKey)
-            expect(key.getAlgorithm()).andReturn("RSA")
+            expect(key.getAlgorithm()).andStubReturn("RSA")
             expect(key.getModulus()).andReturn(BigInteger.ONE)
             replay(key)
             try {
@@ -85,9 +101,9 @@ class DefaultRsaKeyAlgorithmTest {
             } catch (WeakKeyException e) {
                 String id = alg.getId()
                 String section = id.equals("RSA1_5") ? "4.2" : "4.3"
-                String msg = "The RSA encryption key's size (modulus) is 1 bits which is not secure enough for " +
-                        "the $id algorithm. The JWT JWA Specification (RFC 7518, Section $section) states that " +
-                        "RSA keys MUST have a size >= 2048 bits. " +
+                String msg = "The RSA encryption key size (aka modulus bit length) is 1 bits which is not secure " +
+                        "enough for the $id algorithm. The JWT JWA Specification (RFC 7518, Section $section) " +
+                        "states that RSA keys MUST have a size >= 2048 bits. " +
                         "See https://www.rfc-editor.org/rfc/rfc7518.html#section-$section for more information."
                 assertEquals(msg, e.getMessage())
             }
@@ -99,7 +115,7 @@ class DefaultRsaKeyAlgorithmTest {
     void testWeakDecryptionKey() {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             RSAPrivateKey key = createMock(RSAPrivateKey)
-            expect(key.getAlgorithm()).andReturn("RSA")
+            expect(key.getAlgorithm()).andStubReturn("RSA")
             expect(key.getModulus()).andReturn(BigInteger.ONE)
             replay(key)
             try {
@@ -107,9 +123,9 @@ class DefaultRsaKeyAlgorithmTest {
             } catch (WeakKeyException e) {
                 String id = alg.getId()
                 String section = id.equals("RSA1_5") ? "4.2" : "4.3"
-                String msg = "The RSA decryption key's size (modulus) is 1 bits which is not secure enough for " +
-                        "the $id algorithm. The JWT JWA Specification (RFC 7518, Section $section) states that " +
-                        "RSA keys MUST have a size >= 2048 bits. " +
+                String msg = "The RSA decryption key size (aka modulus bit length) is 1 bits which is not secure " +
+                        "enough for the $id algorithm. The JWT JWA Specification (RFC 7518, Section $section) " +
+                        "states that RSA keys MUST have a size >= 2048 bits. " +
                         "See https://www.rfc-editor.org/rfc/rfc7518.html#section-$section for more information."
                 assertEquals(msg, e.getMessage())
             }

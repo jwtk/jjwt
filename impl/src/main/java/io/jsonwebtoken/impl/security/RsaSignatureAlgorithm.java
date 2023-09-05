@@ -156,6 +156,11 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
         return PSS_ALG_NAMES.contains(alg);
     }
 
+    static boolean isRsaAlgorithmName(Key key) {
+        String alg = KeysBridge.findAlgorithm(key);
+        return KEY_ALG_NAMES.contains(alg);
+    }
+
     @Override
     public KeyPairBuilder keyPair() {
         final String jcaName = this.algorithmParameterSpec != null ? PSS_JCA_NAME : "RSA";
@@ -173,8 +178,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
-        String algName = KeysBridge.findAlgorithm(key);
-        if (!KEY_ALG_NAMES.contains(algName)) {
+        if (!isRsaAlgorithmName(key)) {
             throw new UnsupportedKeyException("Unsupported RSA or RSASSA-PSS key algorithm name.");
         }
         int size = KeysBridge.findBitLength(key);
