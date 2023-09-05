@@ -327,7 +327,7 @@
                                     <exclude>**/lombok.config</exclude>
                                     <exclude>.gitattributes</exclude>
                                     <exclude>**/genkeys</exclude>
-                                    <exclude>**/softhsmimport</exclude>
+                                    <exclude>**/softhsm</exclude>
                                 </excludes>
                             </licenseSet>
                         </licenseSets>
