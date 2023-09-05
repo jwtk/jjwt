@@ -26,10 +26,7 @@ import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.Provider
-import java.security.Security
+import java.security.*
 import java.security.cert.X509Certificate
 
 import static org.junit.Assert.assertEquals
@@ -227,11 +224,16 @@ class Pkcs11Test {
             // We need to specify the PKCS11 provider since we can't access the private key material:
             def jws = Jwts.builder().provider(PKCS11).issuer('me').signWith(signKey, alg).compact()
 
-            // We only need to specify a provider during parsing for MAC HSM keys: SignatureAlgorithm verification only
-            // needs the PublicKey, and a recipient doesn't need/won't have an HSM for public material anyway.
-            Provider provider = verifyKey instanceof SecretKey ? PKCS11 : null
-            String iss = Jwts.parser().provider(provider).verifyWith(verifyKey).build()
-                    .parseClaimsJws(jws).getPayload().getIssuer()
+            def builder = Jwts.parser()
+            if (verifyKey instanceof SecretKey) {
+                // We only need to specify a provider during parsing for MAC HSM keys: SignatureAlgorithm verification
+                // only needs the PublicKey, and a recipient doesn't need/won't have an HSM for public material anyway.
+                verifyKey = Keys.builder(verifyKey).provider(PKCS11).build()
+                builder.verifyWith(verifyKey)
+            } else {
+                builder.verifyWith(verifyKey as PublicKey)
+            }
+            String iss = builder.build().parseClaimsJws(jws).getPayload().getIssuer()
 
             assertEquals 'me', iss
         }
@@ -241,6 +243,7 @@ class Pkcs11Test {
     static void encRoundtrip(TestKeys.Bundle bundle, def keyalg) {
         def pair = bundle.pair
         def pub = pair.public
+        def priv = pair.private
         if (pub.getAlgorithm().startsWith(EdwardsCurve.OID_PREFIX)) {
             // If < JDK 11, the PKCS11 KeyStore doesn't understand X25519 and X448 algorithms, and just returns
             // a generic X509Key from the X.509 certificate, but that can't be used for encryption.  So we'll
@@ -251,10 +254,9 @@ class Pkcs11Test {
             def cert = new JcaTemplate("X.509", TestKeys.BC).generateX509Certificate(bundle.cert.getEncoded())
             bundle.cert = cert
             bundle.chain = [cert]
-            bundle.pair = new java.security.KeyPair(cert.getPublicKey(), bundle.pair.private)
+            bundle.pair = new java.security.KeyPair(cert.getPublicKey(), priv)
             pub = bundle.pair.public
         }
-        def priv = pair.private != null ? Keys.wrap(pair.private, pub) : null
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
         String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact()
@@ -264,7 +266,9 @@ class Pkcs11Test {
         // public key.  So we can only decrypt if SunPKCS11 supports the private key, so check for non-null:
         if (priv) {
             // Decryption needs the private key, and that is inside the HSM, so the PKCS11 provider is required:
-            String iss = Jwts.parser().provider(PKCS11).decryptWith(priv).build().parseClaimsJwe(jwe).getPayload().getIssuer()
+            priv = Keys.builder(pair.private).publicKey(pub).provider(PKCS11).build()
+
+            String iss = Jwts.parser().decryptWith(priv).build().parseClaimsJwe(jwe).getPayload().getIssuer()
             assertEquals 'me', iss
         }
     }

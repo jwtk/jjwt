@@ -27,6 +27,7 @@ import io.jsonwebtoken.impl.security.DefaultAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
+import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -473,14 +474,16 @@ public class DefaultJwtBuilder implements JwtBuilder {
             this.headerBuilder.add(DefaultHeader.COMPRESSION_ALGORITHM.getId(), compressionAlgorithm.getId());
         }
 
+        Provider keyProvider = ProviderKey.getProvider(this.key, this.provider);
+        Key key = ProviderKey.getKey(this.key);
         if (jwe) {
-            return encrypt(payload);
+            return encrypt(payload, key, keyProvider);
         } else {
-            return compact(payload);
+            return compact(payload, key, keyProvider);
         }
     }
 
-    private String compact(byte[] payload) {
+    private String compact(byte[] payload, Key key, Provider provider) {
 
         Assert.stateNotNull(sigAlg, "SignatureAlgorithm is required."); // invariant
 
@@ -494,7 +497,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         String jwt = base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedBody;
 
-        if (this.key != null) { //jwt must be signed:
+        if (key != null) { //jwt must be signed:
             Assert.stateNotNull(key, "Signing key cannot be null.");
             Assert.stateNotNull(signFunction, "signFunction cannot be null.");
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
@@ -511,7 +514,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return jwt;
     }
 
-    private String encrypt(byte[] payload) {
+    private String encrypt(byte[] payload, Key key, Provider keyProvider) {
 
         Assert.stateNotNull(key, "Key is required."); // set by encryptWith*
         Assert.stateNotNull(enc, "Encryption algorithm is required."); // set by encryptWith*
@@ -523,7 +526,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
         JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
-        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(this.key, this.provider, this.secureRandom, delegate, enc);
+        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(key, keyProvider, this.secureRandom, delegate, enc);
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
 
@@ -541,12 +544,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         // During encryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
-        // As such, the need for a configured Provider is much more likely necessary for the KeyAlgorithm,
-        // especially when using a HSM/PKCS11 Provider. However, if the `dir`ect key algorithm was chosen _and_
-        // a Provider was configured, then the provider is likely necessary for that key, so we represent that
-        // here:
-        Provider aeadProvider = this.keyAlg.getId().equals(Jwts.KEY.DIRECT.getId()) ? this.provider : null;
-        AeadRequest encRequest = new DefaultAeadRequest(payload, aeadProvider, secureRandom, cek, aad);
+        // As such, the provider here is intentionally omitted (null):
+        // TODO: add encProvider(Provider) builder method that applies to this request only?
+        AeadRequest encRequest = new DefaultAeadRequest(payload, null, secureRandom, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");

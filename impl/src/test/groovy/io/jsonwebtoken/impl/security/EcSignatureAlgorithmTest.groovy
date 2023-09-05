@@ -62,7 +62,7 @@ class EcSignatureAlgorithmTest {
 
     @Test
     void testFindOidKeys() {
-        for(def alg : EcSignatureAlgorithm.BY_OID.values()) {
+        for (def alg : EcSignatureAlgorithm.BY_OID.values()) {
             String name = "${alg.getId()}_OID"
             String oid = EcSignatureAlgorithm.metaClass.getAttribute(EcSignatureAlgorithm, name) as String
             assertEquals oid, alg.OID
@@ -84,14 +84,24 @@ class EcSignatureAlgorithmTest {
     }
 
     @Test
-    void testValidateKeyWithoutEcKey() {
-        PublicKey key = createMock(PublicKey)
-        replay key
+    void testValidateKeyWithoutECOrECDSAAlgorithmName() {
+        PublicKey key = new TestPublicKey(algorithm: 'foo')
         algs().each {
-            it.validateKey(key, false)
-            //no exception - can't check for ECKey fields (e.g. PKCS11 or HSM key)
+            try {
+                it.validateKey(key, false)
+            } catch (Exception e) {
+                String msg = 'Unsupported EC key algorithm name.'
+                assertEquals msg, e.getMessage()
+            }
         }
-        verify key
+    }
+
+    @Test
+    void testValidateECAlgorithmKeyThatDoesntUseECKeyInterface() {
+        PublicKey key = new TestPublicKey(algorithm: 'EC')
+        algs().each {
+            it.validateKey(key, false) //no exception - can't check for ECKey fields (e.g. PKCS11 or HSM key)
+        }
     }
 
     @Test
@@ -124,12 +134,12 @@ class EcSignatureAlgorithmTest {
         algs().each {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
-            ECPrivateKey priv = new TestECPrivateKey(params: spec)
+            ECPrivateKey priv = new TestECPrivateKey(algorithm: 'EC', params: spec)
             def request = new DefaultSecureRequest(new byte[1], null, null, priv)
             try {
                 it.digest(request)
             } catch (InvalidKeyException expected) {
-                String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
+                String msg = "The provided Elliptic Curve signing key size (aka order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
                         "${Bytes.bitsMsg(it.orderBitLength)} per " +
                         "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)." as String
@@ -146,7 +156,7 @@ class EcSignatureAlgorithmTest {
         try {
             Jwts.SIG.ES384.digest(req)
         } catch (InvalidKeyException expected) {
-            String msg = "The provided Elliptic Curve signing key's size (aka Order bit length) is " +
+            String msg = "The provided Elliptic Curve signing key size (aka order bit length) is " +
                     "256 bits (32 bytes), but the 'ES384' algorithm requires EC Keys with " +
                     "384 bits (48 bytes) per " +
                     "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)."
@@ -178,12 +188,12 @@ class EcSignatureAlgorithmTest {
         algs().each {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
-            ECPublicKey pub = new TestECPublicKey(params: spec)
+            ECPublicKey pub = new TestECPublicKey(algorithm: 'EC', params: spec)
             def request = new DefaultVerifySecureDigestRequest(new byte[1], null, null, pub, new byte[1])
             try {
                 it.verify(request)
             } catch (InvalidKeyException expected) {
-                String msg = "The provided Elliptic Curve verification key's size (aka Order bit length) is " +
+                String msg = "The provided Elliptic Curve verification key size (aka order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
                         "${Bytes.bitsMsg(it.orderBitLength)} per " +
                         "[RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4)." as String

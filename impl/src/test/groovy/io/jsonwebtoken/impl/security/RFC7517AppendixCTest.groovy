@@ -285,7 +285,7 @@ class RFC7517AppendixCTest {
         def enc = new HmacAesAeadAlgorithm(128) {
             @Override
             SecretKeyBuilder key() {
-                return new FixedSecretKeyBuilder(RFC_CEK)
+                return Keys.builder(RFC_CEK)
             }
 
             @Override

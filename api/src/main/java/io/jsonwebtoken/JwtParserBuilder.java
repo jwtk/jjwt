@@ -95,7 +95,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     JwtParserBuilder enableUnsecuredDecompression();
 
     /**
-     * Sets the JCA Provider to use during cryptographic signature and decryption operations, or {@code null} if the
+     * Sets the JCA Provider to use during cryptographic signature and key decryption operations, or {@code null} if the
      * JCA subsystem preferred provider should be used.
      *
      * @param provider the JCA Provider to use during cryptographic signature and decryption operations, or {@code null}
@@ -432,7 +432,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *     <li>If the parsed String is a JWE, it will be called to find the appropriate decryption key.</li>
      * </ul>
      *
-     * <p>Specifying a key {@code Locator} is necessary when the signature verification or decryption key is not
+     * <p>A key {@code Locator} is necessary when the signature verification or decryption key is not
      * already known before parsing the JWT and the JWT header must be inspected first to determine how to
      * look up the verification or decryption key.  Once returned by the locator, the JwtParser will then either
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
@@ -452,6 +452,38 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * </pre>
      *
      * <p>A Key {@code Locator} is invoked once during parsing before performing decryption or signature verification.</p>
+     *
+     * <p><b>Provider-constrained Keys</b></p>
+     *
+     * <p>If any verification or decryption key returned from a Key {@code Locator} must be used with a specific
+     * security {@link Provider} (such as for PKCS11 or Hardware Security Module (HSM) keys), you must make that
+     * Provider available for JWT parsing in one of 3 ways, listed in order of recommendation and simplicity:</p>
+     *
+     * <ol>
+     *     <li><a href="https://docs.oracle.com/en/java/javase/17/security/howtoimplaprovider.html#GUID-831AA25F-F702-442D-A2E4-8DA6DEA16F33">
+     *         Configure the Provider in the JVM</a>, either by modifying the {@code java.security} file or by
+     *         registering the Provider dynamically via
+     *         {@link java.security.Security#addProvider(Provider) Security.addProvider(Provider)}.  This is the
+     *         recommended approach so you do not need to modify code anywhere that may need to parse JWTs.</li>
+     *      <li>Specify the {@code Provider} as the {@code JwtParser} default via {@link #provider(Provider)}. This will
+     *          ensure the provider is used by default with <em>all</em> located keys unless overridden by a
+     *          key-specific Provider. This is only recommended when you are confident that all JWTs encountered by the
+     *          parser instance will use keys attributed to the same {@code Provider}, unless overridden by a specific
+     *          key.</li>
+     *      <li>Associate the {@code Provider} with a specific key so it is used for that key only.  This option
+     *          is useful if some located keys require a specific provider, while other located keys can assume a
+     *          default provider.</li>
+     * </ol>
+     *
+     * <p>If you need to use option &#35;3, you associate a key for the {@code JwtParser}'s needs by using a
+     * key builder before returning the key as the {@code Locator} return value.  For example:</p>
+     * <blockquote><pre>
+     *     public Key locate(Header&lt;?&gt; header) {
+     *         PrivateKey key = findKey(header); // or SecretKey
+     *         Provider keySpecificProvider = getKeyProvider(key); // implement me
+     *         // associate the key with its required provider:
+     *         return Keys.builder(key).provider(keySpecificProvider).build();
+     *     }</pre></blockquote>
      *
      * @param keyLocator the locator used to retrieve decryption or signature verification keys.
      * @return the parser builder for method chaining.

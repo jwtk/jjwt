@@ -81,8 +81,7 @@ class CryptoAlgorithmTest {
 
     @Test
     void testNonPkcs11ProviderEmptyRequestProviderName() {
-        String name = null
-        Provider provider = new TestProvider(name)
+        Provider provider = new TestProvider()
         def request = new DefaultRequest('foo', provider, null)
         assertSame provider, CryptoAlgorithm.nonPkcs11Provider(request)
     }
@@ -103,11 +102,4 @@ class CryptoAlgorithmTest {
             super(id, jcaName)
         }
     }
-
-    static class TestProvider extends Provider {
-        public TestProvider(String name) {
-            super(name, 1.0d, 'info')
-        }
-    }
-
 }

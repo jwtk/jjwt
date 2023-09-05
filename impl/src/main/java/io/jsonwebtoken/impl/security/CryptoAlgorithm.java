@@ -52,7 +52,7 @@ abstract class CryptoAlgorithm implements Identifiable {
         return this.jcaName;
     }
 
-    SecureRandom ensureSecureRandom(Request<?> request) {
+    static SecureRandom ensureSecureRandom(Request<?> request) {
         SecureRandom random = request != null ? request.getSecureRandom() : null;
         return random != null ? random : Randoms.secureRandom();
     }
@@ -67,10 +67,13 @@ abstract class CryptoAlgorithm implements Identifiable {
      * PCKS11 provider
      */
     static Provider nonPkcs11Provider(Request<?> request) {
-        Provider provider = request != null ? request.getProvider() : null;
-        String name = provider != null ? Strings.clean(provider.getName()) : null;
-        if (provider != null && name != null && name.startsWith("SunPKCS11")) {
-            provider = null; // don't use PKCS11 provider
+        if (request == null) return null;
+        Provider provider = request.getProvider();
+        if (provider != null) {
+            String name = Strings.clean(provider.getName());
+            if (name != null && name.startsWith("SunPKCS11")) {
+                provider = null; // don't use PKCS11 provider
+            }
         }
         return provider;
     }

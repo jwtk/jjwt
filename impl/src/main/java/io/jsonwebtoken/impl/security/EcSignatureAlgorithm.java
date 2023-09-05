@@ -26,6 +26,7 @@ import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
 import java.math.BigInteger;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 // @since JJWT_RELEASE_VERSION
 final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
@@ -50,6 +52,8 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     private static final String ES256_OID = "1.2.840.10045.4.3.2";
     private static final String ES384_OID = "1.2.840.10045.4.3.3";
     private static final String ES512_OID = "1.2.840.10045.4.3.4";
+
+    private static final Set<String> KEY_ALG_NAMES = Collections.setOf("EC", "ECDSA", ES256_OID, ES384_OID, ES512_OID);
 
     private final ECGenParameterSpec KEY_PAIR_GEN_PARAMS;
 
@@ -85,7 +89,6 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     static final EcSignatureAlgorithm ES512 = new EcSignatureAlgorithm(521, ES512_OID);
 
     private static final Map<String, SignatureAlgorithm> BY_OID = new LinkedHashMap<>(3);
-
     static {
         for (EcSignatureAlgorithm alg : Collections.of(ES256, ES384, ES512)) {
             BY_OID.put(alg.OID, alg);
@@ -140,23 +143,19 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     @Override
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
-        // Some PKCS11 providers and HSMs won't expose the ECKey interface, so we have to check to see if we can cast
-        // If so, we can provide the additional safety checks:
-        if (key instanceof ECKey) {
-            final String name = getId();
-            ECKey ecKey = (ECKey) key;
-            BigInteger order = ecKey.getParams().getOrder();
-            int orderBitLength = order.bitLength();
-            int sigFieldByteLength = Bytes.length(orderBitLength);
-            int concatByteLength = sigFieldByteLength * 2;
-
-            if (concatByteLength != this.signatureByteLength) {
-                String msg = "The provided Elliptic Curve " + keyType(signing) +
-                        " key's size (aka Order bit length) is " + Bytes.bitsMsg(orderBitLength) + ", but the '" +
-                        name + "' algorithm requires EC Keys with " + Bytes.bitsMsg(this.orderBitLength) +
-                        " per [RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
-                throw new InvalidKeyException(msg);
-            }
+        if (!KEY_ALG_NAMES.contains(KeysBridge.findAlgorithm(key))) {
+            throw new UnsupportedKeyException("Unsupported EC key algorithm name.");
+        }
+        int size = KeysBridge.findBitLength(key);
+        if (size < 0) return; // likely PKCS11 or HSM key, can't get the data we need
+        int sigFieldByteLength = Bytes.length(size);
+        int concatByteLength = sigFieldByteLength * 2;
+        if (concatByteLength != this.signatureByteLength) {
+            String msg = "The provided Elliptic Curve " + keyType(signing) +
+                    " key size (aka order bit length) is " + Bytes.bitsMsg(size) + ", but the '" +
+                    getId() + "' algorithm requires EC Keys with " + Bytes.bitsMsg(this.orderBitLength) +
+                    " per [RFC 7518, Section 3.4](https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4).";
+            throw new InvalidKeyException(msg);
         }
     }
 
@@ -165,7 +164,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
         return jca(request).withSignature(new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
-                sig.initSign(request.getKey());
+                sig.initSign(KeysBridge.root(request));
                 sig.update(request.getPayload());
                 byte[] signature = sig.sign();
                 return transcodeDERToConcat(signature, signatureByteLength);

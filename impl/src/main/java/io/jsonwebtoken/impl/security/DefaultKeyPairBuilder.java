@@ -19,17 +19,13 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.KeyPairBuilder;
 
 import java.security.KeyPair;
-import java.security.Provider;
-import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
-public class DefaultKeyPairBuilder implements KeyPairBuilder {
+public class DefaultKeyPairBuilder extends AbstractSecurityBuilder<KeyPair, KeyPairBuilder> implements KeyPairBuilder {
 
     private final String jcaName;
     private final int bitLength;
     private final AlgorithmParameterSpec params;
-    private Provider provider;
-    private SecureRandom random;
 
     public DefaultKeyPairBuilder(String jcaName) {
         this.jcaName = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
@@ -47,18 +43,6 @@ public class DefaultKeyPairBuilder implements KeyPairBuilder {
         this.jcaName = Assert.hasText(jcaName, "jcaName cannot be null or empty.");
         this.params = Assert.notNull(params, "AlgorithmParameterSpec params cannot be null.");
         this.bitLength = 0;
-    }
-
-    @Override
-    public KeyPairBuilder provider(Provider provider) {
-        this.provider = provider;
-        return this;
-    }
-
-    @Override
-    public KeyPairBuilder random(SecureRandom random) {
-        this.random = random;
-        return this;
     }
 
     @Override
