@@ -24,7 +24,6 @@ import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
 import java.security.Key;
-import java.security.MessageDigest;
 
 abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> extends CryptoAlgorithm implements SecureDigestAlgorithm<S, V> {
 
@@ -75,14 +74,5 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
         }
     }
 
-    protected boolean messageDigest(VerifySecureDigestRequest<V> request) {
-        byte[] providedSignature = request.getDigest();
-        Assert.notEmpty(providedSignature, "Request signature byte array cannot be null or empty.");
-        @SuppressWarnings({"unchecked", "rawtypes"}) byte[] computedSignature = digest((SecureRequest) request);
-        return MessageDigest.isEqual(providedSignature, computedSignature);
-    }
-
-    protected boolean doVerify(VerifySecureDigestRequest<V> request) throws Exception {
-        return messageDigest(request);
-    }
+    protected abstract boolean doVerify(VerifySecureDigestRequest<V> request);
 }

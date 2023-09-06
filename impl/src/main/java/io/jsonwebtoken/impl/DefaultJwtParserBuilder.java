@@ -251,6 +251,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     private JwtParserBuilder verifyWith(Key key) {
+        if (key instanceof PrivateKey) {
+            throw new IllegalArgumentException(DefaultJwtParser.PRIV_KEY_VERIFY_MSG);
+        }
         this.signatureVerificationKey = Assert.notNull(key, "signature verification key cannot be null.");
         return this;
     }
@@ -266,6 +269,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     private JwtParserBuilder decryptWith(final Key key) {
+        if (key instanceof PublicKey) {
+            throw new IllegalArgumentException(DefaultJwtParser.PUB_KEY_DECRYPT_MSG);
+        }
         this.decryptionKey = Assert.notNull(key, "decryption key cannot be null.");
         return this;
     }

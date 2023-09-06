@@ -57,6 +57,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -65,9 +66,12 @@ import java.util.Map;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    public static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
-            "Only PrivateKeys may be used to create digital signatures, and PublicKeys are used to verify " +
-            "digital signatures.";
+    private static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
+            "PrivateKeys are used to sign, and PublicKeys are used to verify.";
+
+    private static final String PRIV_KEY_ENC_MSG = "PrivateKeys may not be used to encrypt data. PublicKeys are " +
+            "used to encrypt, and PrivateKeys are used to decrypt.";
+
 
     protected Provider provider;
     protected SecureRandom secureRandom;
@@ -295,12 +299,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
             }
         }, "%s encryption failed.", encId);
 
-        this.key = Assert.notNull(key, "Key cannot be null.");
-
-        //noinspection unchecked
-        this.keyAlg = (KeyAlgorithm<Key, ?>) Assert.notNull(keyAlg, "KeyAlgorithm cannot be null.");
+        Assert.notNull(key, "Encryption key cannot be null.");
+        if (key instanceof PrivateKey) {
+            throw new IllegalArgumentException(PRIV_KEY_ENC_MSG);
+        }
+        Assert.notNull(keyAlg, "KeyAlgorithm cannot be null.");
         final String algId = Assert.hasText(keyAlg.getId(), "KeyAlgorithm id cannot be null or empty.");
+
+        this.key = key;
+        //noinspection unchecked
+        this.keyAlg = (KeyAlgorithm<Key, ?>) keyAlg;
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
+
         final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
         this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
             @Override

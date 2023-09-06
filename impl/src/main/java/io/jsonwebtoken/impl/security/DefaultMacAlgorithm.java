@@ -25,11 +25,13 @@ import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.UnsupportedKeyException;
+import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.security.MessageDigest;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -206,5 +208,12 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
                 return mac.doFinal(request.getPayload());
             }
         });
+    }
+
+    protected boolean doVerify(VerifySecureDigestRequest<SecretKey> request) {
+        byte[] providedSignature = request.getDigest();
+        Assert.notEmpty(providedSignature, "Request signature byte array cannot be null or empty.");
+        byte[] computedSignature = digest(request);
+        return MessageDigest.isEqual(providedSignature, computedSignature);
     }
 }

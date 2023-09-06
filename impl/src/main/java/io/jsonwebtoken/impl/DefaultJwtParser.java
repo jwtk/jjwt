@@ -68,7 +68,9 @@ import io.jsonwebtoken.security.WeakKeyException;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -79,6 +81,12 @@ public class DefaultJwtParser implements JwtParser {
     static final char SEPARATOR_CHAR = '.';
 
     private static final JwtTokenizer jwtTokenizer = new JwtTokenizer();
+
+    static final String PRIV_KEY_VERIFY_MSG = "PrivateKeys may not be used to verify digital signatures. " +
+            "PrivateKeys are used to sign, and PublicKeys are used to verify.";
+
+    static final String PUB_KEY_DECRYPT_MSG = "PublicKeys may not be used to decrypt data. PublicKeys are " +
+            "used to encrypt, and PrivateKeys are used to decrypt.";
 
     public static final String INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was: %s.";
     public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not " +
@@ -303,6 +311,12 @@ public class DefaultJwtParser implements JwtParser {
             String msg = "Cannot verify JWS signature: unable to locate signature verification key for JWS with header: " + jwsHeader;
             throw new UnsupportedJwtException(msg);
         }
+        Provider provider = ProviderKey.getProvider(key, this.provider); // extract if necessary
+        key = ProviderKey.getKey(key); // unwrap if necessary, MUST be called after ProviderKey.getProvider
+        Assert.stateNotNull(key, "ProviderKey cannot be null."); //ProviderKey impl doesn't allow null
+        if (key instanceof PrivateKey) {
+            throw new InvalidKeyException(PRIV_KEY_VERIFY_MSG);
+        }
 
         //re-create the jwt part without the signature.  This is what is needed for signature verification:
         String jwtWithoutSignature = tokenized.getProtected() + SEPARATOR_CHAR + tokenized.getPayload();
@@ -311,9 +325,6 @@ public class DefaultJwtParser implements JwtParser {
         byte[] signature = decode(tokenized.getDigest(), "JWS signature");
 
         try {
-            Provider provider = ProviderKey.getProvider(key, this.provider); // extract if necessary
-            key = ProviderKey.getKey(key); // unwrap if necessary, MUST be called after ProviderKey.getProvider
-            Assert.stateNotNull(key, "ProviderKey cannot be null."); //ProviderKey impl doesn't allow null
             VerifySecureDigestRequest<Key> request =
                     new DefaultVerifySecureDigestRequest<>(data, provider, null, key, signature);
             if (!algorithm.verify(request)) {
@@ -453,6 +464,9 @@ public class DefaultJwtParser implements JwtParser {
             if (key == null) {
                 String msg = "Cannot decrypt JWE payload: unable to locate key for JWE with header: " + jweHeader;
                 throw new UnsupportedJwtException(msg);
+            }
+            if (key instanceof PublicKey) {
+                throw new InvalidKeyException(PUB_KEY_DECRYPT_MSG);
             }
 
             // extract key-specific provider if necessary;

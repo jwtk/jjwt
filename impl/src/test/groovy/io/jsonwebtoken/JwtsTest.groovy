@@ -652,10 +652,8 @@ class JwtsTest {
         try {
             testEC(alg, true)
             fail("EC private keys cannot be used to validate EC signatures.")
-        } catch (UnsupportedJwtException e) {
-            String msg = "${alg.getId()} verification keys must be PublicKeys (implement java.security.PublicKey). " +
-                    "Provided key type: sun.security.ec.ECPrivateKeyImpl."
-            assertEquals msg, e.cause.message
+        } catch (IllegalArgumentException e) {
+            assertEquals DefaultJwtParser.PRIV_KEY_VERIFY_MSG, e.getMessage()
         }
     }
 
@@ -1211,7 +1209,7 @@ class JwtsTest {
 
         // Assert that the server does not recognized the forged token:
         try {
-            Jwts.parser().verifyWith(privateKey).build().parse(forged)
+            Jwts.parser().verifyWith(publicKey).build().parse(forged)
             fail("Forged token must not be successfully parsed.")
         } catch (UnsupportedJwtException expected) {
             assertTrue expected.getMessage().startsWith('The parsed JWT indicates it was signed with the')
