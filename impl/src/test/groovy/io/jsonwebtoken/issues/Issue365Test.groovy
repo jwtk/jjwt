@@ -37,11 +37,11 @@ import static org.junit.Assert.fail
 
 class Issue365Test {
 
-    static def sigalgs = Jwts.SIG.get().values()
-            .findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
+    static Collection<SignatureAlgorithm> sigalgs =
+            Jwts.SIG.get().values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
-    static def asymKeyAlgs = Jwts.KEY.get().values()
-            .findAll({ it.id.startsWith('R') || it.id.startsWith('E') }) as Collection<KeyAlgorithm<PublicKey, PrivateKey>>
+    static Collection<KeyAlgorithm<PublicKey, PrivateKey>> asymKeyAlgs =
+            Jwts.KEY.get().values().findAll({ it.id.startsWith('R') || it.id.startsWith('E') }) as Collection<KeyAlgorithm<PublicKey, PrivateKey>>
 
     @Test
     void testSignWithPublicKey() {
@@ -125,7 +125,7 @@ class Issue365Test {
                     return pub
                 }
             })
-            .build().parseClaimsJwe(jwe)
+                    .build().parseClaimsJwe(jwe)
             fail()
         } catch (InvalidKeyException expected) {
             assertEquals DefaultJwtParser.PUB_KEY_DECRYPT_MSG, expected.getMessage()
