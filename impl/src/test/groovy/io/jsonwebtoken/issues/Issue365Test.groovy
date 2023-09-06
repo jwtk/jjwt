@@ -37,14 +37,27 @@ import static org.junit.Assert.fail
 
 class Issue365Test {
 
-    static Collection<SignatureAlgorithm> sigalgs =
-            Jwts.SIG.get().values().findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
-    static Collection<KeyAlgorithm<PublicKey, PrivateKey>> asymKeyAlgs =
-            Jwts.KEY.get().values().findAll({ it.id.startsWith('R') || it.id.startsWith('E') }) as Collection<KeyAlgorithm<PublicKey, PrivateKey>>
+    private static final Collection<SignatureAlgorithm> sigalgs() {
+        def algs = Jwts.SIG.get().values()
+                .findAll({ it -> it instanceof SignatureAlgorithm })
+        return algs as Collection<SignatureAlgorithm>
+    }
+
+    private static final Collection<KeyAlgorithm<PublicKey, PrivateKey>> asymKeyAlgs() {
+        def algs = Jwts.KEY.get().values()
+                .findAll({ it -> it.id.startsWith('R') || it.id.startsWith('E') })
+        return algs as Collection<KeyAlgorithm<PublicKey, PrivateKey>>
+    }
+
+    private static final Collection<SignatureAlgorithm> sigalgs = sigalgs()
+
+    private static final Collection<KeyAlgorithm<PublicKey, PrivateKey>> asymKeyAlgs = asymKeyAlgs()
 
     @Test
     void testSignWithPublicKey() {
+
+
         for (def alg : sigalgs) {
             def pair = TestKeys.forAlgorithm(alg).pair
             try {
