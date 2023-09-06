@@ -92,5 +92,10 @@ class AbstractSecureDigestAlgorithmTest {
         protected byte[] doDigest(SecureRequest request) throws Exception {
             return new byte[1]
         }
+
+        @Override
+        protected boolean doVerify(VerifySecureDigestRequest request) {
+            return false
+        }
     }
 }

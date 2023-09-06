@@ -156,6 +156,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
         return PSS_ALG_NAMES.contains(alg);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     static boolean isRsaAlgorithmName(Key key) {
         String alg = KeysBridge.findAlgorithm(key);
         return KEY_ALG_NAMES.contains(alg);
