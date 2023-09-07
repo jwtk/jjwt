@@ -21,12 +21,15 @@ import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.HashAlgorithm;
+import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.KeyOperation;
 
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -177,12 +180,12 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
-    public Set<String> getOperations() {
+    public Set<KeyOperation> getOperations() {
         return get(AbstractJwk.KEY_OPS);
     }
 
     @Override
-    public JwkContext<K> setOperations(Set<String> ops) {
+    public JwkContext<K> setOperations(Collection<KeyOperation> ops) {
         put(AbstractJwk.KEY_OPS, ops);
         return this;
     }
@@ -216,11 +219,11 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
         if ("sig".equals(getPublicKeyUse())) {
             return true;
         }
-        Set<String> ops = getOperations();
+        Set<KeyOperation> ops = getOperations();
         if (Collections.isEmpty(ops)) {
             return false;
         }
-        return ops.contains("sign") || ops.contains("verify");
+        return ops.contains(Jwks.OP.SIGN) || ops.contains(Jwks.OP.VERIFY);
     }
 
     @Override

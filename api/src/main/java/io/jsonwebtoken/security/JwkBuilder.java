@@ -18,7 +18,7 @@ package io.jsonwebtoken.security;
 import io.jsonwebtoken.lang.MapMutator;
 
 import java.security.Key;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * A {@link SecurityBuilder} that produces a JWK.  A JWK is an immutable set of name/value pairs that represent a
@@ -111,68 +111,23 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * intended to be used.  The {@code key_ops} parameter is intended for use cases in which public,
      * private, or symmetric keys may be present.</p>
      *
-     * <p>The JWK specification <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">defines</a> the
-     * following values:</p>
+     * <p>All JWK standard Key Operations are available via the {@link Jwks.OP} registry, but other (custom) values
+     * <em>MAY</em> be specified using a {@link Jwks#operation()} builder. For best interoperability with other
+     * applications however, it is recommended to use only the {@link Jwks.OP} constants.</p>
      *
-     * <table>
-     * <caption>JWK Key Operations</caption>
-     * <thead>
-     * <tr>
-     * <th>Value</th>
-     * <th>Operation</th>
-     * </tr>
-     * </thead>
-     * <tbody>
-     * <tr>
-     * <td><b>{@code sign}</b></td>
-     * <td>compute digital signatures or MAC</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code verify}</b></td>
-     * <td>verify digital signatures or MAC</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code encrypt}</b></td>
-     * <td>encrypt content</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code decrypt}</b></td>
-     * <td>decrypt content and validate decryption, if applicable</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code wrapKey}</b></td>
-     * <td>encrypt key</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code unwrapKey}</b></td>
-     * <td>decrypt key and validate decryption, if applicable</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code deriveKey}</b></td>
-     * <td>derive key</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code deriveBits}</b></td>
-     * <td>derive bits not to be used as a key</td>
-     * </tr>
-     * </tbody>
-     * </table>
-     *
-     * <p>(Note that {@code key_ops} values intentionally match the {@code KeyUsage} values defined in the
-     * <a href="https://www.w3.org/TR/WebCryptoAPI/">Web Cryptography API</a> specification.)</p>
-     *
-     * <p>Other values <em>MAY</em> be used.  For best interoperability with other applications however, it is
-     * recommended to use only the values above. Each value is a CaSe-SeNsItIvE string.  Use of the
-     * {@code key_ops} member is <em>OPTIONAL</em>, unless the application requires its presence.</p>
+     * <p><b>Security Vulnerability Notice</b></p>
      *
      * <p>Multiple unrelated key operations <em>SHOULD NOT</em> be specified for a key because of the potential
      * vulnerabilities associated with using the same key with multiple algorithms.  Thus, the combinations
-     * {@code sign} with {@code verify}, {@code encrypt} with {@code decrypt}, and {@code wrapKey} with
-     * {@code unwrapKey} are permitted, but other combinations <em>SHOULD NOT</em> be used.</p>
+     * {@link Jwks.OP#SIGN sign} with {@link Jwks.OP#VERIFY verify},
+     * {@link Jwks.OP#ENCRYPT encrypt} with {@link Jwks.OP#DECRYPT decrypt}, and
+     * {@link Jwks.OP#WRAP wrapKey} with {@link Jwks.OP#UNWRAP unwrapKey} are permitted, but other combinations
+     * <em>SHOULD NOT</em> be used.</p>
      *
-     * @param ops the JWK {@code key_ops} value set.
+     * @param ops the JWK {@code key_ops} value set, or {@code null} if not present.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if {@code ops} is {@code null} or empty.
+     * @see Jwks.OP
      */
-    T operations(Set<String> ops) throws IllegalArgumentException;
+    T operations(Collection<KeyOperation> ops) throws IllegalArgumentException;
 }

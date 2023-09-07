@@ -58,4 +58,27 @@ public interface JwkParserBuilder extends Builder<JwkParser> {
      */
     JwkParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
+//    /**
+//     * Adds the specified key operations to the parser's total set of supported key operations,
+//     * replacing any existing operations with the same exact (CaSe-SeNsItIvE) {@link KeyOperation#getId() id}s.
+//     *
+//     * <p>There may be only one registered {@code KeyOperation} per {@code id}, and the {@code keyOps} collection is
+//     * added in iteration order; if a duplicate id is found when iterating the {@code keyOps} collection, the later
+//     * {@code KeyOperation} will evict any existing {@code KeyOperation} with the same {@code id}.</p>
+//     *
+//     * <p><b>Standard Key Operations and Overrides</b></p>
+//     *
+//     * <p>All JWK standard key operations in {@link Jwks.OP} are supported by default and do not need
+//     * to be added via this method, but beware: <b>any {@code KeyOperation} in the {@code keyOps} collection with a
+//     * JWK standard {@link Identifiable#getId() id} will replace the JJWT standard {@code KeyOperation} implementation</b>.
+//     * This is to allow application developers to favor their own implementations over JJWT's default implementations
+//     * if necessary (for example, to support legacy or custom behavior).
+//     *
+//     * @param keyOps collection of key operations to add to the parser's total set of supported
+//     *               key operations, replacing any existing operations with the same
+//     *               {@link KeyOperation#getId() id}s.
+//     * @return the builder for method chaining.
+//     */
+//    JwkParserBuilder addOperations(Collection<KeyOperation> keyOps);
+
 }

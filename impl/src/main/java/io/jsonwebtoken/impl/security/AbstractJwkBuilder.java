@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.KeyOperation;
 import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
 import io.jsonwebtoken.security.SecretJwkBuilder;
@@ -29,7 +30,7 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
-import java.util.Set;
+import java.util.Collection;
 
 abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
         extends DelegatingMapMutator<String, Object, JwkContext<K>, T>
@@ -95,7 +96,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
-    public T operations(Set<String> ops) {
+    public T operations(Collection<KeyOperation> ops) {
         Assert.notEmpty(ops, "Operations cannot be null or empty.");
         this.DELEGATE.setOperations(ops);
         return self();

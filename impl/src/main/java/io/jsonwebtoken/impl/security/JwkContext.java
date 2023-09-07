@@ -20,11 +20,13 @@ import io.jsonwebtoken.impl.X509Context;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.security.HashAlgorithm;
+import io.jsonwebtoken.security.KeyOperation;
 
 import java.security.Key;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,9 +43,9 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String, Obj
 
     JwkContext<K> setType(String type);
 
-    Set<String> getOperations();
+    Set<KeyOperation> getOperations();
 
-    JwkContext<K> setOperations(Set<String> operations);
+    JwkContext<K> setOperations(Collection<KeyOperation> operations);
 
     String getAlgorithm();
 

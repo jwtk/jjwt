@@ -29,6 +29,7 @@ import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkThumbprint;
 import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.KeyOperation;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -42,7 +43,9 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
 
     static final Field<String> ALG = Fields.string("alg", "Algorithm");
     public static final Field<String> KID = Fields.string("kid", "Key ID");
-    static final Field<Set<String>> KEY_OPS = Fields.stringSet("key_ops", "Key Operations");
+    static final Field<Set<KeyOperation>> KEY_OPS =
+            Fields.builder(KeyOperation.class).setConverter(KeyOperationConverter.DEFAULT)
+                    .set().setId("key_ops").setName("Key Operations").build();
     static final Field<String> KTY = Fields.string("kty", "Key Type");
     static final Set<Field<?>> FIELDS = Collections.setOf(ALG, KID, KEY_OPS, KTY);
 
@@ -124,7 +127,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
     }
 
     @Override
-    public Set<String> getOperations() {
+    public Set<KeyOperation> getOperations() {
         return Collections.immutable(this.context.getOperations());
     }
 

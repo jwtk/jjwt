@@ -47,7 +47,11 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         extends AbstractJwkBuilder<K, J, DynamicJwkBuilder<K, J>> implements DynamicJwkBuilder<K, J> {
 
     public DefaultDynamicJwkBuilder() {
-        super(new DefaultJwkContext<K>());
+        this(new DefaultJwkContext<K>());
+    }
+
+    public DefaultDynamicJwkBuilder(JwkContext<K> ctx) {
+        super(ctx);
     }
 
     @Override

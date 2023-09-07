@@ -19,16 +19,21 @@ import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.security.JwkParser;
 import io.jsonwebtoken.security.JwkParserBuilder;
+import io.jsonwebtoken.security.KeyOperation;
 
 import java.security.Provider;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unused") //used via reflection by Jwks.parser()
 public class DefaultJwkParserBuilder implements JwkParserBuilder {
 
     private Provider provider;
 
-    private Deserializer<Map<String,?>> deserializer;
+    private Deserializer<Map<String, ?>> deserializer;
+
+    private Set<KeyOperation> extraOps = new LinkedHashSet<>();
 
     @Override
     public JwkParserBuilder provider(Provider provider) {

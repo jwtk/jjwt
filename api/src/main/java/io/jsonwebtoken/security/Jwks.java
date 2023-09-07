@@ -44,13 +44,16 @@ public final class Jwks {
 
     private static final String PARSERBUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
 
+    private static final String KEYOP_BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder";
+
     /**
-     * Constants for all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
-     * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6</a>
-     * (for Weierstrass Elliptic Curves) and
-     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
-     * Each standard algorithm is available as a
-     * ({@code public static final}) constant for direct type-safe reference in application code. For example:
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1">crv (Curve)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">JSON Web Key Elliptic
+     * Curve Registry</a> (including its
+     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">Edwards Elliptic Curve additions</a>).
+     * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
+     * reference in application code. For example:
      * <blockquote><pre>
      * Jwks.CRV.P256.keyPair().build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
@@ -260,6 +263,122 @@ public final class Jwks {
         //prevent instantiation
         private HASH() {
         }
+    }
+
+    /**
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key_ops (Key Operations)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">JSON Web Key Operations
+     * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
+     * direct type-safe reference in application code. For example:
+     * <blockquote><pre>
+     * Jwks.builder()
+     *     .operations(Jwks.OP.SIGN)
+     *     // ... etc ...
+     *     .build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
+     *
+     * @see #get()
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static final class OP {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
+        private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        /**
+         * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
+         *
+         * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
+         */
+        public static Registry<String, KeyOperation> get() {
+            return REGISTRY;
+        }
+
+        /**
+         * {@code sign} operation indicating a key is intended to be used to compute digital signatures or
+         * MACs. It's related operation is {@link #VERIFY}.
+         *
+         * @see #VERIFY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation SIGN = get().forKey("sign");
+
+        /**
+         * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
+         * MACs. It's related operation is {@link #SIGN}.
+         *
+         * @see #SIGN
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation VERIFY = get().forKey("verify");
+
+        /**
+         * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It's
+         * related operation is {@link #DECRYPT}.
+         *
+         * @see #DECRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation ENCRYPT = get().forKey("encrypt");
+
+        /**
+         * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It's
+         * related operation is {@link #ENCRYPT}.
+         *
+         * @see #ENCRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DECRYPT = get().forKey("decrypt");
+
+        /**
+         * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
+         * related operation is {@link #UNWRAP}.
+         *
+         * @see #UNWRAP
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation WRAP = get().forKey("wrapKey");
+
+        /**
+         * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
+         * decryption, if applicable. It's related operation is
+         * {@link #WRAP}.
+         *
+         * @see #WRAP
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation UNWRAP = get().forKey("unwrapKey");
+
+        /**
+         * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
+         * a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DERIVE_KEY = get().forKey("deriveKey");
+
+        /**
+         * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
+         * used as key. It does not have a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DERIVE_BITS = get().forKey("deriveBits");
+
+        //prevent instantiation
+        private OP() {
+        }
+    }
+
+    /**
+     * Creates a new {@link KeyOperationBuilder} for creating new {@link KeyOperation} instances.
+     *
+     * @return a new {@link KeyOperationBuilder} for creating new {@link KeyOperation} instances.
+     */
+    public static KeyOperationBuilder operation() {
+        return Classes.newInstance(KEYOP_BUILDER_CLASSNAME);
     }
 
     /**

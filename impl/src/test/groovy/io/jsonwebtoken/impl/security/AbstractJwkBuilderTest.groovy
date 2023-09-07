@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
@@ -116,30 +116,33 @@ class AbstractJwkBuilderTest {
     void testOperations() {
         def a = UUID.randomUUID().toString()
         def b = UUID.randomUUID().toString()
-        def set = [a, b] as Set<String>
-        def jwk = builder().operations(set).build()
-        assertEquals set, jwk.getOperations()
-        assertEquals set, jwk.key_ops
+        def canonical = Collections.setOf(a, b)
+        def idiomatic = Collections.setOf(Jwks.operation().id(a).build(), Jwks.operation().id(b).build())
+        def jwk = builder().operations(idiomatic).build()
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
     }
 
     @Test
     void testOperationsByPut() {
         def a = UUID.randomUUID().toString()
         def b = UUID.randomUUID().toString()
-        def set = [a, b] as Set<String>
-        def jwk = builder().add('key_ops', set).build()
-        assertEquals set, jwk.getOperations()
-        assertEquals set, jwk.key_ops
+        def canonical = Collections.setOf(a, b)
+        def idiomatic = Collections.setOf(Jwks.operation().id(a).build(), Jwks.operation().id(b).build())
+        def jwk = builder().add('key_ops', canonical).build()
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
     }
 
     @Test
     //ensures that even if a raw single value is present it is represented as a Set per the JWA spec (string array)
     void testOperationsByPutSingleValue() {
         def a = UUID.randomUUID().toString()
-        def set = [a] as Set<String>
+        def canonical = Collections.setOf(a)
+        def idiomatic = Collections.setOf(Jwks.operation().id(a).build())
         def jwk = builder().add('key_ops', a).build() // <-- put uses single raw value, not a set
-        assertEquals set, jwk.getOperations() // <-- still get a set
-        assertEquals set, jwk.key_ops         // <-- still get a set
+        assertEquals idiomatic, jwk.getOperations() // <-- still get a set
+        assertEquals canonical, jwk.key_ops         // <-- still get a set
     }
 
     @Test
