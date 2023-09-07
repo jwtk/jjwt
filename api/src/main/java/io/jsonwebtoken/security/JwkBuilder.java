@@ -121,7 +121,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * vulnerabilities associated with using the same key with multiple algorithms.  Thus, the combinations
      * {@link Jwks.OP#SIGN sign} with {@link Jwks.OP#VERIFY verify},
      * {@link Jwks.OP#ENCRYPT encrypt} with {@link Jwks.OP#DECRYPT decrypt}, and
-     * {@link Jwks.OP#WRAP wrapKey} with {@link Jwks.OP#UNWRAP unwrapKey} are permitted, but other combinations
+     * {@link Jwks.OP#WRAP_KEY wrapKey} with {@link Jwks.OP#UNWRAP_KEY unwrapKey} are permitted, but other combinations
      * <em>SHOULD NOT</em> be used.</p>
      *
      * @param ops the JWK {@code key_ops} value set, or {@code null} if not present.

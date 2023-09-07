@@ -334,22 +334,22 @@ public final class Jwks {
 
         /**
          * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
-         * related operation is {@link #UNWRAP}.
+         * related operation is {@link #UNWRAP_KEY}.
          *
-         * @see #UNWRAP
+         * @see #UNWRAP_KEY
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
          */
-        public static final KeyOperation WRAP = get().forKey("wrapKey");
+        public static final KeyOperation WRAP_KEY = get().forKey("wrapKey");
 
         /**
          * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
          * decryption, if applicable. It's related operation is
-         * {@link #WRAP}.
+         * {@link #WRAP_KEY}.
          *
-         * @see #WRAP
+         * @see #WRAP_KEY
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
          */
-        public static final KeyOperation UNWRAP = get().forKey("unwrapKey");
+        public static final KeyOperation UNWRAP_KEY = get().forKey("unwrapKey");
 
         /**
          * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have

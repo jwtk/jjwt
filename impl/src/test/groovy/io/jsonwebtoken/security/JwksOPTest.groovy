@@ -48,8 +48,8 @@ class JwksOPTest {
         testInstance(Jwks.OP.VERIFY, 'verify', 'Verify digital signature or MAC', Jwks.OP.SIGN)
         testInstance(Jwks.OP.ENCRYPT, 'encrypt', 'Encrypt content', Jwks.OP.DECRYPT)
         testInstance(Jwks.OP.DECRYPT, 'decrypt', 'Decrypt content and validate decryption, if applicable', Jwks.OP.ENCRYPT)
-        testInstance(Jwks.OP.WRAP, 'wrapKey', 'Encrypt key', Jwks.OP.UNWRAP)
-        testInstance(Jwks.OP.UNWRAP, 'unwrapKey', 'Decrypt key and validate decryption, if applicable', Jwks.OP.WRAP)
+        testInstance(Jwks.OP.WRAP_KEY, 'wrapKey', 'Encrypt key', Jwks.OP.UNWRAP_KEY)
+        testInstance(Jwks.OP.UNWRAP_KEY, 'unwrapKey', 'Decrypt key and validate decryption, if applicable', Jwks.OP.WRAP_KEY)
 
         testInstance(Jwks.OP.DERIVE_KEY, 'deriveKey', 'Derive key', null)
         assertTrue Jwks.OP.DERIVE_KEY.isUnrelated(Jwks.OP.DERIVE_BITS)
