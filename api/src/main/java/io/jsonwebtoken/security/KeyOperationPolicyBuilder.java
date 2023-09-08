@@ -28,7 +28,7 @@ import java.util.Collection;
  * methods.
  *
  * @see Jwks.OP#policy()
- * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
+ * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
  * @see Jwks.OP#builder()
  * @since JJWT_RELEASE_VERSION
  */
@@ -75,7 +75,7 @@ public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
      * @return the builder for method chaining.
      * @see Jwks.OP
      * @see Jwks.OP#builder()
-     * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
+     * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
      * @see JwkBuilder#operations(Collection)
      */
     KeyOperationPolicyBuilder add(KeyOperation op);
@@ -104,7 +104,7 @@ public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
      * @return the builder for method chaining.
      * @see Jwks.OP
      * @see Jwks.OP#builder()
-     * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
+     * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
      * @see JwkBuilder#operations(Collection)
      */
     KeyOperationPolicyBuilder add(Collection<KeyOperation> ops);

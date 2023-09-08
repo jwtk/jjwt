@@ -62,7 +62,7 @@ public class DefaultJwkParser implements JwkParser {
             throw new MalformedKeyException(msg);
         }
 
-        JwkBuilder<?, ?, ?> builder = Jwks.builder().operationsPolicy(this.opsPolicy);
+        JwkBuilder<?, ?, ?> builder = Jwks.builder().operationPolicy(this.opsPolicy);
 
         if (this.provider != null) {
             builder.provider(this.provider);

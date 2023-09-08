@@ -80,6 +80,6 @@ public interface JwkParserBuilder extends Builder<JwkParser> {
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if {@code policy} is null
      */
-    JwkParserBuilder operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
+    JwkParserBuilder operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
 
 }

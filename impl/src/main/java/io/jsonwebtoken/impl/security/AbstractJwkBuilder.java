@@ -127,7 +127,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
-    public T operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
+    public T operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
         Assert.notNull(policy, "Policy cannot be null.");
         Collection<KeyOperation> ops = policy.getOperations();
         Assert.notEmpty(ops, "Policy operations cannot be null or empty.");

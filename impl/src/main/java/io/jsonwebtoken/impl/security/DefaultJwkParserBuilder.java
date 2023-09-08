@@ -46,7 +46,7 @@ public class DefaultJwkParserBuilder implements JwkParserBuilder {
     }
 
     @Override
-    public JwkParserBuilder operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
+    public JwkParserBuilder operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
         this.opsPolicy = Assert.notNull(policy, "KeyOperationPolicy may not be null.");
         Assert.notEmpty(policy.getOperations(), "KeyOperationPolicy's operations may not be null or empty.");
         this.opsPolicy = policy;

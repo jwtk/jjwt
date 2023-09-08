@@ -27,7 +27,7 @@ import java.util.Collection;
  *
  * @see Jwks.OP#builder()
  * @see Jwks.OP#policy()
- * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
+ * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
  * @since JJWT_RELEASE_VERSION
  */
 public interface KeyOperationBuilder extends Builder<KeyOperation> {
@@ -60,7 +60,7 @@ public interface KeyOperationBuilder extends Builder<KeyOperation> {
      *     KeyOperation other = getKeyOperation(otherId);
      *     assert built.isRelated(other);</pre></blockquote>
      *
-     * <p>A {@link JwkBuilder}'s key operation {@link JwkBuilder#operationsPolicy(KeyOperationPolicy) policy} is likely
+     * <p>A {@link JwkBuilder}'s key operation {@link JwkBuilder#operationPolicy(KeyOperationPolicy) policy} is likely
      * to {@link KeyOperationPolicyBuilder#allowUnrelated(boolean) reject} any <em>un</em>related operations specified
      * together due to the potential security vulnerabilities that could occur.</p>
      *
@@ -69,7 +69,7 @@ public interface KeyOperationBuilder extends Builder<KeyOperation> {
      *
      * @param id the id of a KeyOperation that will be considered cryptographically related to this one.
      * @return the builder for method chaining.
-     * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
+     * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
      */
     KeyOperationBuilder related(String id);
 }

@@ -240,7 +240,7 @@ class AbstractJwkBuilderTest {
     void testCustomOperationOverridesDefault() {
         def op = Jwks.OP.builder().id('sign').description('Different Description')
                 .related(Jwks.OP.VERIFY.id).build()
-        def builder = builder().operationsPolicy(Jwks.OP.policy().add(op).build())
+        def builder = builder().operationPolicy(Jwks.OP.policy().add(op).build())
         def jwk = builder.operations(Collections.setOf(op, Jwks.OP.VERIFY)).build()
         println jwk
     }

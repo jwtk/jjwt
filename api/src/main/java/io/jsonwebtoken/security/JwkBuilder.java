@@ -120,16 +120,16 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * {@link Jwks.OP#ENCRYPT encrypt} with {@link Jwks.OP#DECRYPT decrypt}, and
      * {@link Jwks.OP#WRAP_KEY wrapKey} with {@link Jwks.OP#UNWRAP_KEY unwrapKey} are permitted, but other combinations
      * <em>SHOULD NOT</em> be used.  This is enforced by the builder's key operation
-     * {@link #operationsPolicy(KeyOperationPolicy) policy}.</p>
+     * {@link #operationPolicy(KeyOperationPolicy) policy}.</p>
      *
      * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
      *
      * <p>All RFC-standard JWK Key Operations in the {@link Jwks.OP} registry are supported via the builder's default
-     * operations {@link #operationsPolicy(KeyOperationPolicy) policy}, but other (custom) values
+     * operations {@link #operationPolicy(KeyOperationPolicy) policy}, but other (custom) values
      * <em>MAY</em> be specified (for example, using a {@link Jwks.OP#builder()}).</p>
      *
      * <p>If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
-     * should be enabled for the {@code JwkBuilder} by {@link #operationsPolicy(KeyOperationPolicy) specifying}
+     * should be enabled for the {@code JwkBuilder} by {@link #operationPolicy(KeyOperationPolicy) specifying}
      * an operations policy that includes the custom values (e.g. via
      * {@link Jwks.OP#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
      *
@@ -139,7 +139,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * @param operation the value to add to the JWK {@code key_ops} value set
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if {@code op} is {@code null} or if the operation is not permitted
-     *                                  by the operations {@link #operationsPolicy(KeyOperationPolicy) policy}.
+     *                                  by the operations {@link #operationPolicy(KeyOperationPolicy) policy}.
      * @see Jwks.OP
      */
     T operation(KeyOperation operation) throws IllegalArgumentException;
@@ -160,16 +160,16 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * {@link Jwks.OP#ENCRYPT encrypt} with {@link Jwks.OP#DECRYPT decrypt}, and
      * {@link Jwks.OP#WRAP_KEY wrapKey} with {@link Jwks.OP#UNWRAP_KEY unwrapKey} are permitted, but other combinations
      * <em>SHOULD NOT</em> be used.  This is enforced by the builder's default
-     * operation {@link #operationsPolicy(KeyOperationPolicy) policy}.</p>
+     * operation {@link #operationPolicy(KeyOperationPolicy) policy}.</p>
      *
      * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
      *
      * <p>All RFC-standard JWK Key Operations in the {@link Jwks.OP} registry are supported via the builder's default
-     * operations {@link #operationsPolicy(KeyOperationPolicy) policy}, but other (custom) values
+     * operations {@link #operationPolicy(KeyOperationPolicy) policy}, but other (custom) values
      * <em>MAY</em> be specified (for example, using a {@link Jwks.OP#builder()}).</p>
      *
      * <p>If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
-     * should be enabled for the {@code JwkBuilder} by {@link #operationsPolicy(KeyOperationPolicy) specifying}
+     * should be enabled for the {@code JwkBuilder} by {@link #operationPolicy(KeyOperationPolicy) specifying}
      * an operations policy that includes the custom values (e.g. via
      * {@link Jwks.OP#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
      *
@@ -179,7 +179,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * @param ops the JWK {@code key_ops} value set, or {@code null} if not present.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException {@code ops} is {@code null} or empty, or if any of the operations are not
-     *                                  permitted by the operations {@link #operationsPolicy(KeyOperationPolicy) policy}.
+     *                                  permitted by the operations {@link #operationPolicy(KeyOperationPolicy) policy}.
      * @see Jwks.OP
      */
     T operations(Collection<KeyOperation> ops) throws IllegalArgumentException;
@@ -210,5 +210,5 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      *                                  empty.
      * @see Jwks.OP#policy()
      */
-    T operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
+    T operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
 }

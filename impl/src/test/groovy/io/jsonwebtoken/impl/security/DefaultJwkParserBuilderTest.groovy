@@ -70,7 +70,7 @@ class DefaultJwkParserBuilderTest {
     }
 
     @Test
-    void testOperationsPolicy() {
+    void testOperationPolicy() {
         def parser = Jwks.parser().build() as DefaultJwkParser
 
         try {
@@ -85,9 +85,9 @@ class DefaultJwkParserBuilderTest {
     }
 
     @Test
-    void testOperationsPolicyOverride() {
+    void testOperationPolicyOverride() {
         def policy = Jwks.OP.policy().allowUnrelated(true).build()
-        def parser = Jwks.parser().operationsPolicy(policy).build() as DefaultJwkParser
+        def parser = Jwks.parser().operationPolicy(policy).build() as DefaultJwkParser
         assertNotNull parser.parse(UNRELATED_OPS_JSON) // no exception because policy allows it
     }
 }
