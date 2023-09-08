@@ -46,9 +46,9 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     protected final JwkFactory<K, J> jwkFactory;
 
-    private static final KeyOperationPolicy OPERATION_POLICY = Jwks.OP.policy().build();
+    static final KeyOperationPolicy DEFAULT_OPERATION_POLICY = Jwks.OP.policy().build();
 
-    protected KeyOperationPolicy opsPolicy = OPERATION_POLICY; // default
+    protected KeyOperationPolicy opsPolicy = DEFAULT_OPERATION_POLICY; // default
 
     @SuppressWarnings("unchecked")
     protected AbstractJwkBuilder(JwkContext<K> jwkContext) {

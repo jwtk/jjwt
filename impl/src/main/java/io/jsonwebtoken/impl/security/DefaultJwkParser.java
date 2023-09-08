@@ -22,6 +22,7 @@ import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.JwkParser;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyException;
+import io.jsonwebtoken.security.KeyOperationPolicy;
 import io.jsonwebtoken.security.MalformedKeyException;
 
 import java.nio.charset.StandardCharsets;
@@ -34,9 +35,14 @@ public class DefaultJwkParser implements JwkParser {
 
     private final Deserializer<Map<String, ?>> deserializer;
 
-    public DefaultJwkParser(Provider provider, Deserializer<Map<String, ?>> deserializer) {
+    private final KeyOperationPolicy opsPolicy;
+
+    public DefaultJwkParser(Provider provider, Deserializer<Map<String, ?>> deserializer, KeyOperationPolicy policy) {
         this.provider = provider;
         this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
+        Assert.notNull(policy, "KeyOperationPolicy cannot be null.");
+        Assert.notEmpty(policy.getOperations(), "KeyOperationPolicy's operations cannot be null or empty.");
+        this.opsPolicy = policy;
     }
 
     // visible for testing
@@ -56,7 +62,7 @@ public class DefaultJwkParser implements JwkParser {
             throw new MalformedKeyException(msg);
         }
 
-        JwkBuilder<?, ?, ?> builder = Jwks.builder();
+        JwkBuilder<?, ?, ?> builder = Jwks.builder().operationsPolicy(this.opsPolicy);
 
         if (this.provider != null) {
             builder.provider(this.provider);

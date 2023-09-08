@@ -58,27 +58,28 @@ public interface JwkParserBuilder extends Builder<JwkParser> {
      */
     JwkParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
-//    /**
-//     * Adds the specified key operations to the parser's total set of supported key operations,
-//     * replacing any existing operations with the same exact (CaSe-SeNsItIvE) {@link KeyOperation#getId() id}s.
-//     *
-//     * <p>There may be only one registered {@code KeyOperation} per {@code id}, and the {@code keyOps} collection is
-//     * added in iteration order; if a duplicate id is found when iterating the {@code keyOps} collection, the later
-//     * {@code KeyOperation} will evict any existing {@code KeyOperation} with the same {@code id}.</p>
-//     *
-//     * <p><b>Standard Key Operations and Overrides</b></p>
-//     *
-//     * <p>All JWK standard key operations in {@link Jwks.OP} are supported by default and do not need
-//     * to be added via this method, but beware: <b>any {@code KeyOperation} in the {@code keyOps} collection with a
-//     * JWK standard {@link Identifiable#getId() id} will replace the JJWT standard {@code KeyOperation} implementation</b>.
-//     * This is to allow application developers to favor their own implementations over JJWT's default implementations
-//     * if necessary (for example, to support legacy or custom behavior).
-//     *
-//     * @param keyOps collection of key operations to add to the parser's total set of supported
-//     *               key operations, replacing any existing operations with the same
-//     *               {@link KeyOperation#getId() id}s.
-//     * @return the builder for method chaining.
-//     */
-//    JwkParserBuilder addOperations(Collection<KeyOperation> keyOps);
+    /**
+     * Sets the parser's key operation policy that determines which {@link KeyOperation}s may be assigned to parsed
+     * JWKs. Unless overridden by this method, the parser uses the default RFC-recommended policy where:
+     * <ul>
+     *     <li>All {@link Jwks.OP RFC-standard key operations} are supported.</li>
+     *     <li>Multiple unrelated operations may <b>not</b> be assigned to the JWK per the
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
+     * <blockquote><pre>
+     * Multiple unrelated key operations SHOULD NOT be specified for a key
+     * because of the potential vulnerabilities associated with using the
+     * same key with multiple algorithms.
+     * </pre></blockquote></li>
+     * </ul>
+     *
+     * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
+     * one can be created by using the {@link Jwks.OP#policy()} builder, or by implementing the
+     * {@link KeyOperationPolicy} interface directly.</p>
+     *
+     * @param policy the policy to use to determine which {@link KeyOperation}s may be assigned to parsed JWKs.
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if {@code policy} is null
+     */
+    JwkParserBuilder operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
 
 }
