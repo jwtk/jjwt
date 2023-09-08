@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
@@ -113,33 +113,136 @@ class AbstractJwkBuilderTest {
     }
 
     @Test
+    //ensures that even if a raw single String value is present, it is represented as a Set per the JWA spec (string array)
+    void testOperationsByPutSingleStringValue() {
+        def s = 'wrapKey'
+        def op = Jwks.OP.get().get(s)
+        def canonical = Collections.setOf(s)
+        def idiomatic = Collections.setOf(op)
+        def jwk = builder().add('key_ops', s).build() // <-- put uses single raw String value, not a set
+        assertEquals idiomatic, jwk.getOperations() // <-- still get an idiomatic set
+        assertEquals canonical, jwk.key_ops         // <-- still get a canonical set
+    }
+
+    @Test
+    //ensures that even if a raw single KeyOperation value is present, it is represented as a Set per the JWA spec (string array)
+    void testOperationsByPutSingleIdiomaticValue() {
+        def s = 'wrapKey'
+        def op = Jwks.OP.get().get(s)
+        def canonical = Collections.setOf(s)
+        def idiomatic = Collections.setOf(op)
+        def jwk = builder().add('key_ops', op).build() // <-- put uses single raw KeyOperation value, not a set
+        assertEquals idiomatic, jwk.getOperations() // <-- still get an idiomatic set
+        assertEquals canonical, jwk.key_ops         // <-- still get a canonical set
+    }
+
+    @Test
+    void testOperation() {
+        def s = 'wrapKey'
+        def op = Jwks.OP.get().get(s)
+        def canonical = Collections.setOf(s)
+        def idiomatic = Collections.setOf(op)
+        def jwk = builder().operation(op).build()
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
+    }
+
+    @Test
+    void testOperationCustom() {
+        def s = UUID.randomUUID().toString()
+        def op = Jwks.OP.builder().id(s).build()
+        def canonical = Collections.setOf(s)
+        def idiomatic = Collections.setOf(op)
+        def jwk = builder().operation(op).build()
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
+    }
+
+    @Test
+    void testOperationCustomOverridesDefault() {
+        def s = 'sign'
+        def op = Jwks.OP.builder().id(s).related('verify').build()
+        def canonical = Collections.setOf(s)
+        def idiomatic = Collections.setOf(op)
+        def jwk = builder().operation(op).build()
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
+        assertSame op, jwk.getOperations().iterator().next()
+
+        //now assert that the standard VERIFY operation treats this as related since it has the same ID:
+        canonical = Collections.setOf(s, 'verify')
+        idiomatic = Collections.setOf(op, Jwks.OP.VERIFY)
+        jwk = builder().operation(op).operation(Jwks.OP.VERIFY).build() as Jwk
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
+    }
+
+    @Test
     void testOperations() {
-        def a = UUID.randomUUID().toString()
-        def b = UUID.randomUUID().toString()
-        def set = [a, b] as Set<String>
-        def jwk = builder().operations(set).build()
-        assertEquals set, jwk.getOperations()
-        assertEquals set, jwk.key_ops
+        def a = 'sign'
+        def b = 'verify'
+        def canonical = Collections.setOf(a, b)
+        def idiomatic = Collections.setOf(Jwks.OP.SIGN, Jwks.OP.VERIFY)
+        def jwk = builder().operations(idiomatic).build()
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
     }
 
     @Test
-    void testOperationsByPut() {
-        def a = UUID.randomUUID().toString()
-        def b = UUID.randomUUID().toString()
-        def set = [a, b] as Set<String>
-        def jwk = builder().add('key_ops', set).build()
-        assertEquals set, jwk.getOperations()
-        assertEquals set, jwk.key_ops
+    void testOperationsUnrelated() {
+        try {
+            // exception thrown on setter, before calling build:
+            builder().operations(Collections.setOf(Jwks.OP.SIGN, Jwks.OP.ENCRYPT))
+            fail()
+        } catch (IllegalArgumentException e) {
+            String msg = 'Unrelated key operations are not allowed. KeyOperation [\'encrypt\' (Encrypt content)] is ' +
+                    'unrelated to [\'sign\' (Compute digital signature or MAC)].'
+            assertEquals msg, e.getMessage()
+        }
     }
 
     @Test
-    //ensures that even if a raw single value is present it is represented as a Set per the JWA spec (string array)
-    void testOperationsByPutSingleValue() {
-        def a = UUID.randomUUID().toString()
-        def set = [a] as Set<String>
-        def jwk = builder().add('key_ops', a).build() // <-- put uses single raw value, not a set
-        assertEquals set, jwk.getOperations() // <-- still get a set
-        assertEquals set, jwk.key_ops         // <-- still get a set
+    void testOperationsPutUnrelatedStrings() {
+        try {
+            builder().add('key_ops', ['sign', 'encrypt']).build()
+            fail()
+        } catch (MalformedKeyException e) {
+            String msg = 'Unable to create JWK: Unrelated key operations are not allowed. KeyOperation ' +
+                    '[\'encrypt\' (Encrypt content)] is unrelated to [\'sign\' (Compute digital signature or MAC)].'
+            assertEquals msg, e.getMessage()
+        }
+    }
+
+    @Test
+    void testOperationsByCanonicalPut() {
+        def a = 'encrypt'
+        def b = 'decrypt'
+        def canonical = Collections.setOf(a, b)
+        def idiomatic = Collections.setOf(Jwks.OP.ENCRYPT, Jwks.OP.DECRYPT)
+        def jwk = builder().add('key_ops', canonical).build() // Set of String values, not KeyOperation objects
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
+    }
+
+    @Test
+    void testOperationsByIdiomaticPut() {
+        def a = 'encrypt'
+        def b = 'decrypt'
+        def canonical = Collections.setOf(a, b)
+        def idiomatic = Collections.setOf(Jwks.OP.ENCRYPT, Jwks.OP.DECRYPT)
+        def jwk = builder().add('key_ops', idiomatic).build() // Set of KeyOperation values, not strings
+        assertEquals idiomatic, jwk.getOperations()
+        assertEquals canonical, jwk.key_ops
+    }
+
+
+    @Test
+    void testCustomOperationOverridesDefault() {
+        def op = Jwks.OP.builder().id('sign').description('Different Description')
+                .related(Jwks.OP.VERIFY.id).build()
+        def builder = builder().operationPolicy(Jwks.OP.policy().add(op).build())
+        def jwk = builder.operations(Collections.setOf(op, Jwks.OP.VERIFY)).build()
+        println jwk
     }
 
     @Test
@@ -159,6 +262,7 @@ class AbstractJwkBuilderTest {
             JwkContext newContext(JwkContext src, Key key) {
                 return null
             }
+
             @Override
             Jwk createJwk(JwkContext jwkContext) {
                 throw new IllegalArgumentException("foo")

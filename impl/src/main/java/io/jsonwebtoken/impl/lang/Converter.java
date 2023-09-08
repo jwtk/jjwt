@@ -15,9 +15,21 @@
  */
 package io.jsonwebtoken.impl.lang;
 
-public interface Converter<A,B> {
+public interface Converter<A, B> {
 
+    /**
+     * Converts the specified (Java idiomatic type) value to the canonical RFC-required data type.
+     *
+     * @param a the preferred idiomatic value
+     * @return the canonical RFC-required data type value.
+     */
     B applyTo(A a);
 
+    /**
+     * Converts the specified canonical (RFC-compliant data type) value to the preferred Java idiomatic type.
+     *
+     * @param b the canonical value to convert
+     * @return the preferred Java idiomatic type value.
+     */
     A applyFrom(B b);
 }

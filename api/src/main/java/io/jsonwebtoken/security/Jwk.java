@@ -95,69 +95,15 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
     String getAlgorithm();
 
     /**
-     * Returns the JWK
-     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops} (Key Operations)
-     * parameter</a> values or {@code null} if not present.  Any values within the returned {@code Set} are
-     * CaSe-SeNsItIvE.
-     *
-     * <p>The JWK specification <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">defines</a> the
-     * following values:</p>
-     *
-     * <table>
-     * <caption>JWK Key Operations</caption>
-     * <thead>
-     * <tr>
-     * <th>Value</th>
-     * <th>Operation</th>
-     * </tr>
-     * </thead>
-     * <tbody>
-     * <tr>
-     * <td><b>{@code sign}</b></td>
-     * <td>compute digital signatures or MAC</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code verify}</b></td>
-     * <td>verify digital signatures or MAC</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code encrypt}</b></td>
-     * <td>encrypt content</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code decrypt}</b></td>
-     * <td>decrypt content and validate decryption, if applicable</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code wrapKey}</b></td>
-     * <td>encrypt key</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code unwrapKey}</b></td>
-     * <td>decrypt key and validate decryption, if applicable</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code deriveKey}</b></td>
-     * <td>derive key</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code deriveBits}</b></td>
-     * <td>derive bits not to be used as a key</td>
-     * </tr>
-     * </tbody>
-     * </table>
-     *
-     * <p>Other values <em>MAY</em> be used.  For best interoperability with other applications however, it is
-     * recommended to use only the values above.</p>
-     *
-     * <p>Multiple unrelated key operations <em>SHOULD NOT</em> be specified for a key because of the potential
-     * vulnerabilities associated with using the same key with multiple algorithms.  Thus, the combinations
-     * {@code sign} with {@code verify}, {@code encrypt} with {@code decrypt}, and {@code wrapKey} with
-     * {@code unwrapKey} are permitted, but other combinations <em>SHOULD NOT</em> be used.</p>
+     * Returns the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
+     * (Key Operations) parameter</a> values or {@code null} if not present.  All JWK standard Key Operations are
+     * available via the {@link Jwks.OP} registry, but other (custom) values <em>MAY</em> be present in the returned
+     * set.
      *
      * @return the JWK {@code key_ops} value or {@code null} if not present.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3"><code>key_ops</code>(Key Operations) Parameter</a>
      */
-    Set<String> getOperations();
+    Set<KeyOperation> getOperations();
 
     /**
      * Returns the required JWK
@@ -187,6 +133,11 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * <tr>
      * <td><b>{@code oct}</b></td>
      * <td>Octet sequence (used to represent symmetric keys)</td>
+     * </tr>
+     * <tr>
+     * <td><b>{@code OKP}</b></td>
+     * <td><a href="https://www.rfc-editor.org/rfc/rfc8037#section-2">Octet Key Pair</a> (used to represent Edwards
+     * Elliptic Curve keys)</td>
      * </tr>
      * </tbody>
      * </table>

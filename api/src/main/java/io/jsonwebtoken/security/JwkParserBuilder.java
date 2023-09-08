@@ -58,4 +58,28 @@ public interface JwkParserBuilder extends Builder<JwkParser> {
      */
     JwkParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
+    /**
+     * Sets the parser's key operation policy that determines which {@link KeyOperation}s may be assigned to parsed
+     * JWKs. Unless overridden by this method, the parser uses the default RFC-recommended policy where:
+     * <ul>
+     *     <li>All {@link Jwks.OP RFC-standard key operations} are supported.</li>
+     *     <li>Multiple unrelated operations may <b>not</b> be assigned to the JWK per the
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
+     * <blockquote><pre>
+     * Multiple unrelated key operations SHOULD NOT be specified for a key
+     * because of the potential vulnerabilities associated with using the
+     * same key with multiple algorithms.
+     * </pre></blockquote></li>
+     * </ul>
+     *
+     * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
+     * one can be created by using the {@link Jwks.OP#policy()} builder, or by implementing the
+     * {@link KeyOperationPolicy} interface directly.</p>
+     *
+     * @param policy the policy to use to determine which {@link KeyOperation}s may be assigned to parsed JWKs.
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if {@code policy} is null
+     */
+    JwkParserBuilder operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
+
 }

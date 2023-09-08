@@ -17,18 +17,21 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.JwkParser;
 import io.jsonwebtoken.security.JwkParserBuilder;
+import io.jsonwebtoken.security.KeyOperationPolicy;
 
 import java.security.Provider;
 import java.util.Map;
 
-@SuppressWarnings("unused") //used via reflection by Jwks.parser()
 public class DefaultJwkParserBuilder implements JwkParserBuilder {
 
     private Provider provider;
 
-    private Deserializer<Map<String,?>> deserializer;
+    private Deserializer<Map<String, ?>> deserializer;
+
+    private KeyOperationPolicy opsPolicy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY;
 
     @Override
     public JwkParserBuilder provider(Provider provider) {
@@ -43,6 +46,14 @@ public class DefaultJwkParserBuilder implements JwkParserBuilder {
     }
 
     @Override
+    public JwkParserBuilder operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
+        this.opsPolicy = Assert.notNull(policy, "KeyOperationPolicy may not be null.");
+        Assert.notEmpty(policy.getOperations(), "KeyOperationPolicy's operations may not be null or empty.");
+        this.opsPolicy = policy;
+        return this;
+    }
+
+    @Override
     public JwkParser build() {
         if (this.deserializer == null) {
             // try to find one based on the services available:
@@ -50,6 +61,6 @@ public class DefaultJwkParserBuilder implements JwkParserBuilder {
             this.deserializer = Services.loadFirst(Deserializer.class);
         }
 
-        return new DefaultJwkParser(this.provider, this.deserializer);
+        return new DefaultJwkParser(this.provider, this.deserializer, this.opsPolicy);
     }
 }

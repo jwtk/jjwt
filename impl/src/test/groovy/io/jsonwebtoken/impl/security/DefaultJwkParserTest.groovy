@@ -78,7 +78,7 @@ class DefaultJwkParserTest {
 
     @Test
     void testDeserializationFailure() {
-        def parser = new DefaultJwkParser(null, Services.loadFirst(Deserializer)) {
+        def parser = new DefaultJwkParser(null, Services.loadFirst(Deserializer), AbstractJwkBuilder.DEFAULT_OPERATION_POLICY) {
             @Override
             protected Map<String, ?> deserialize(String json) {
                 throw new DeserializationException("test")

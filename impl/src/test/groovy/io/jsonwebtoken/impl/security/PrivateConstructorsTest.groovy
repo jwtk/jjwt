@@ -34,5 +34,6 @@ class PrivateConstructorsTest {
         new Jwts.ZIP()
         new Jwks.CRV()
         new Jwks.HASH()
+        new Jwks.OP()
     }
 }

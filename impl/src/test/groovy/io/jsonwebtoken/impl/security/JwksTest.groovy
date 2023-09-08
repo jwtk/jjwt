@@ -19,6 +19,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -143,7 +144,9 @@ class JwksTest {
 
     @Test
     void testOperations() {
-        testProperty('operations', 'key_ops', ['foo', 'bar'] as Set<String>)
+        def val = [Jwks.OP.SIGN, Jwks.OP.VERIFY] as Set<KeyOperation>
+        def canonical = Collections.setOf('sign', 'verify')
+        testProperty('operations', 'key_ops', val, canonical)
     }
 
     @Test

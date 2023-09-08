@@ -13,32 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken
+package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.security.ECCurve
-import io.jsonwebtoken.impl.security.EdwardsCurve
-import io.jsonwebtoken.impl.security.StandardCurves
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
+import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertSame
-import static org.junit.Assert.assertTrue
 
-class JwksCRVTest {
+class KeyOperationConverterTest {
 
     @Test
-    void testRegistry() {
-        assertTrue Jwks.CRV.get() instanceof StandardCurves
+    void testApplyFromStandardId() {
+        Jwks.OP.get().values().each {
+            def id = it.id
+            def op = KeyOperationConverter.DEFAULT.applyFrom(id)
+            assertSame it, op
+        }
     }
 
     @Test
-    void testInstances() {
-        assertSame ECCurve.P256, Jwks.CRV.P256
-        assertSame ECCurve.P384, Jwks.CRV.P384
-        assertSame ECCurve.P521, Jwks.CRV.P521
-        assertSame EdwardsCurve.X25519, Jwks.CRV.X25519
-        assertSame EdwardsCurve.X448, Jwks.CRV.X448
-        assertSame EdwardsCurve.Ed25519, Jwks.CRV.Ed25519
-        assertSame EdwardsCurve.Ed448, Jwks.CRV.Ed448
+    void testApplyFromCustomId() {
+        def id = 'custom'
+        def op = KeyOperationConverter.DEFAULT.applyFrom(id)
+        assertEquals id, op.id
+        assertEquals DefaultKeyOperation.CUSTOM_DESCRIPTION, op.description
     }
 }
