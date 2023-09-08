@@ -44,8 +44,6 @@ public final class Jwks {
 
     private static final String PARSERBUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
 
-    private static final String KEYOP_BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder";
-
     /**
      * Constants for all standard JWK
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1">crv (Curve)</a> parameter values
@@ -286,6 +284,30 @@ public final class Jwks {
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
         private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
+        private static final String BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder";
+
+
+        private static final String POLICY_BUILDER_CLASSNAME =
+                "io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder";
+
+        /**
+         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         *
+         * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         */
+        public static KeyOperationBuilder builder() {
+            return Classes.newInstance(BUILDER_CLASSNAME);
+        }
+
+        /**
+         * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         *
+         * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         */
+        public static KeyOperationPolicyBuilder policy() {
+            return Classes.newInstance(POLICY_BUILDER_CLASSNAME);
+        }
+
         /**
          * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
          * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
@@ -370,15 +392,6 @@ public final class Jwks {
         //prevent instantiation
         private OP() {
         }
-    }
-
-    /**
-     * Creates a new {@link KeyOperationBuilder} for creating new {@link KeyOperation} instances.
-     *
-     * @return a new {@link KeyOperationBuilder} for creating new {@link KeyOperation} instances.
-     */
-    public static KeyOperationBuilder operation() {
-        return Classes.newInstance(KEYOP_BUILDER_CLASSNAME);
     }
 
     /**

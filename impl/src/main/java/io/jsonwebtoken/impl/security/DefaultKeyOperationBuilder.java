@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.KeyOperation;
 import io.jsonwebtoken.security.KeyOperationBuilder;
 
@@ -39,21 +40,13 @@ public class DefaultKeyOperationBuilder implements KeyOperationBuilder {
         return this;
     }
 
-//    //@Override
-//    public KeyOperationBuilder related(String related) {
-//        if (Strings.hasText(related)) {
-//            this.related.add(related);
-//        }
-//        return this;
-//    }
-//
-//    //@Override
-//    public KeyOperationBuilder related(Collection<String> related) {
-//        if (related != null) {
-//            this.related.addAll(related);
-//        }
-//        return this;
-//    }
+    @Override
+    public KeyOperationBuilder related(String related) {
+        if (Strings.hasText(related)) {
+            this.related.add(related);
+        }
+        return this;
+    }
 
     @Override
     public KeyOperation build() {

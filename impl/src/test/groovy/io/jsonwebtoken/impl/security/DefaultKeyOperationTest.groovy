@@ -31,30 +31,30 @@ class DefaultKeyOperationTest {
     }
 
     @Test
-    void testConflictsNull() {
-        assertFalse new DefaultKeyOperation('foo').isUnrelated(null)
+    void testUnrelated() {
+        assertFalse new DefaultKeyOperation('foo').isRelated(Jwks.OP.SIGN)
     }
 
     @Test
-    void testConflictsWithNoRelated() {
-        assertFalse new DefaultKeyOperation('foo').isUnrelated(Jwks.OP.SIGN)
+    void testRelatedNull() {
+        assertFalse Jwks.OP.SIGN.isRelated(null)
     }
 
     @Test
-    void testConflictsEquals() {
+    void testRelatedEquals() {
         def op = Jwks.OP.SIGN as DefaultKeyOperation
-        assertFalse op.isUnrelated(op)
+        assertTrue op.isRelated(op)
     }
 
     @Test
-    void testConflictsRelated() {
+    void testRelatedTrue() {
         def op = Jwks.OP.SIGN as DefaultKeyOperation
-        assertFalse op.isUnrelated(Jwks.OP.VERIFY)
+        assertTrue op.isRelated(Jwks.OP.VERIFY)
     }
 
     @Test
-    void testConflictsUnrelated() {
+    void testRelatedFalse() {
         def op = Jwks.OP.SIGN as DefaultKeyOperation
-        assertTrue op.isUnrelated(Jwks.OP.ENCRYPT)
+        assertFalse op.isRelated(Jwks.OP.ENCRYPT)
     }
 }

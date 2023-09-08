@@ -27,7 +27,7 @@ final class KeyOperationConverter implements Converter<KeyOperation, Object> {
 
     private final Registry<String, KeyOperation> registry;
 
-    private KeyOperationConverter(Registry<String, KeyOperation> registry) {
+    KeyOperationConverter(Registry<String, KeyOperation> registry) {
         this.registry = Assert.notEmpty(registry, "KeyOperation registry cannot be null or empty.");
     }
 
@@ -45,6 +45,6 @@ final class KeyOperationConverter implements Converter<KeyOperation, Object> {
         String id = Assert.isInstanceOf(String.class, o, "Argument must be a KeyOperation or String.");
         Assert.hasText(id, "KeyOperation string value cannot be null or empty.");
         KeyOperation keyOp = this.registry.get(id);
-        return keyOp != null ? keyOp : Jwks.operation().id(id).build(); // custom operations are allowed
+        return keyOp != null ? keyOp : Jwks.OP.builder().id(id).build(); // custom operations are allowed
     }
 }

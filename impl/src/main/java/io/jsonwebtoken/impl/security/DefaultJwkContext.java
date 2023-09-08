@@ -30,6 +30,7 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -119,6 +120,18 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
                 }
             }
         }
+    }
+
+    @Override
+    public JwkContext<K> field(Field<?> field) {
+        Assert.notNull(field, "Field cannot be null.");
+        Map<String, Field<?>> newFields = new LinkedHashMap<>(this.FIELDS);
+        newFields.remove(field.getId()); // remove old/default
+        newFields.put(field.getId(), field); // add new one
+        Set<Field<?>> fieldSet = new LinkedHashSet<>(newFields.values());
+        return this.key != null ?
+                new DefaultJwkContext<>(fieldSet, this, key) :
+                new DefaultJwkContext<K>(fieldSet, this, false);
     }
 
     @Override

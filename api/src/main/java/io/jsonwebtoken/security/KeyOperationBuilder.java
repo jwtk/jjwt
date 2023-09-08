@@ -22,9 +22,12 @@ import java.util.Collection;
 /**
  * A {@code KeyOperationBuilder} produces {@link KeyOperation} instances that may be added to a JWK's
  * {@link JwkBuilder#operations(Collection) key operations} parameter. This is primarily only useful for creating
- * custom (non-standard) {@code KeyOperation}s, as all standard ones are available already via the
- * {@link Jwks.OP} registry singleton.
+ * custom (non-standard) {@code KeyOperation}s for use with a custom {@link KeyOperationPolicy}, as all standard ones
+ * are available already via the {@link Jwks.OP} registry singleton.
  *
+ * @see Jwks.OP#builder()
+ * @see Jwks.OP#policy()
+ * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
  * @since JJWT_RELEASE_VERSION
  */
 public interface KeyOperationBuilder extends Builder<KeyOperation> {
@@ -46,7 +49,27 @@ public interface KeyOperationBuilder extends Builder<KeyOperation> {
      */
     KeyOperationBuilder description(String description);
 
-//    KeyOperationBuilder related(String related);
-//
-//    KeyOperationBuilder related(Collection<String> related);
+    /**
+     * Indicates that the {@code KeyOperation} with the given {@link KeyOperation#getId() id} is cryptographically
+     * related (and complementary) to this one, and may be specified together in a JWK's
+     * {@link Jwk#getOperations() operations} set.
+     *
+     * <p>More concretely, calling this method will ensure the following:</p>
+     * <blockquote><pre>
+     *     KeyOperation built = Jwks.operation()&#47;*...*&#47;.related(otherId).build();
+     *     KeyOperation other = getKeyOperation(otherId);
+     *     assert built.isRelated(other);</pre></blockquote>
+     *
+     * <p>A {@link JwkBuilder}'s key operation {@link JwkBuilder#operationsPolicy(KeyOperationPolicy) policy} is likely
+     * to {@link KeyOperationPolicyBuilder#allowUnrelated(boolean) reject} any <em>un</em>related operations specified
+     * together due to the potential security vulnerabilities that could occur.</p>
+     *
+     * <p>This method may be called multiple times to add/append a related {@code id} to the constructed
+     * {@code KeyOperation}'s total set of related ids.</p>
+     *
+     * @param id the id of a KeyOperation that will be considered cryptographically related to this one.
+     * @return the builder for method chaining.
+     * @see JwkBuilder#operationsPolicy(KeyOperationPolicy)
+     */
+    KeyOperationBuilder related(String id);
 }

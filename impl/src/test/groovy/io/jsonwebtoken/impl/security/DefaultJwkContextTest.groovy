@@ -16,11 +16,12 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.lang.Field
+import io.jsonwebtoken.impl.lang.Fields
 import io.jsonwebtoken.io.Encoders
 import org.junit.Test
 
-import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.assertEquals
+import static org.junit.Assert.*
 
 class DefaultJwkContextTest {
 
@@ -119,5 +120,25 @@ class DefaultJwkContextTest {
         ctx.put('k', 'test')
         String s = '{kty=oct, k=<redacted>}'
         assertEquals "$s", "${ctx.toString()}"
+    }
+
+    @Test
+    void testFieldWithoutKey() {
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        Field field = Fields.string('kid', 'My Key ID')
+        def newCtx = ctx.field(field)
+        assertSame field, newCtx.@FIELDS.get('kid')
+        assertNull newCtx.getKey()
+    }
+
+    @Test
+    void testFieldWithKey() {
+        def key = TestKeys.HS256
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        ctx.setKey(key)
+        Field field = Fields.string('kid', 'My Key ID')
+        def newCtx = ctx.field(field)
+        assertSame field, newCtx.@FIELDS.get('kid') // registry created with custom field instead of default
+        assertSame key, newCtx.getKey() // copied over correctly
     }
 }

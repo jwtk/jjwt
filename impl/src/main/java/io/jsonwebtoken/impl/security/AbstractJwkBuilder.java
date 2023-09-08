@@ -16,12 +16,18 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
+import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyOperation;
+import io.jsonwebtoken.security.KeyOperationPolicy;
 import io.jsonwebtoken.security.MalformedKeyException;
 import io.jsonwebtoken.security.SecretJwk;
 import io.jsonwebtoken.security.SecretJwkBuilder;
@@ -31,12 +37,18 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
         extends DelegatingMapMutator<String, Object, JwkContext<K>, T>
         implements JwkBuilder<K, J, T> {
 
     protected final JwkFactory<K, J> jwkFactory;
+
+    private static final KeyOperationPolicy OPERATION_POLICY = Jwks.OP.policy().build();
+
+    protected KeyOperationPolicy opsPolicy = OPERATION_POLICY; // default
 
     @SuppressWarnings("unchecked")
     protected AbstractJwkBuilder(JwkContext<K> jwkContext) {
@@ -96,9 +108,39 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
+    public T operation(KeyOperation operation) throws IllegalArgumentException {
+        Assert.notNull(operation, "KeyOperation cannot be null.");
+        return operations(Collections.setOf(operation));
+    }
+
+    @Override
     public T operations(Collection<KeyOperation> ops) {
-        Assert.notEmpty(ops, "Operations cannot be null or empty.");
-        this.DELEGATE.setOperations(ops);
+        Assert.notEmpty(ops, "KeyOperations collection argument cannot be null or empty.");
+        Set<KeyOperation> set = new LinkedHashSet<>(ops); // new ones override existing ones
+        Set<KeyOperation> existing = this.DELEGATE.getOperations();
+        if (!Collections.isEmpty(existing)) {
+            set.addAll(existing);
+        }
+        this.opsPolicy.validate(set);
+        this.DELEGATE.setOperations(set);
+        return self();
+    }
+
+    @Override
+    public T operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
+        Assert.notNull(policy, "Policy cannot be null.");
+        Collection<KeyOperation> ops = policy.getOperations();
+        Assert.notEmpty(ops, "Policy operations cannot be null or empty.");
+        this.opsPolicy = policy;
+
+        // update the JWK internal field to enable the policy's values:
+        Registry<String, KeyOperation> registry = new IdRegistry<>("JSON Web Key Operation", ops);
+        Field<Set<KeyOperation>> field = Fields.builder(KeyOperation.class)
+                .setConverter(new KeyOperationConverter(registry)).set()
+                .setId(AbstractJwk.KEY_OPS.getId())
+                .setName(AbstractJwk.KEY_OPS.getName())
+                .build();
+        setDelegate(this.DELEGATE.field(field));
         return self();
     }
 
@@ -113,7 +155,9 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
             String msg = "A " + Key.class.getName() + " or one or more name/value pairs must be provided to create a JWK.";
             throw new IllegalStateException(msg);
         }
+
         try {
+            this.opsPolicy.validate(this.DELEGATE.get(AbstractJwk.KEY_OPS));
             return jwkFactory.createJwk(this.DELEGATE);
         } catch (IllegalArgumentException iae) {
             //if we get an IAE, it means the builder state wasn't configured enough in order to create

@@ -66,11 +66,9 @@ final class DefaultKeyOperation implements KeyOperation {
         return this.description;
     }
 
-    public boolean isUnrelated(KeyOperation operation) {
-        if (equals(operation)) return false;
-        return operation != null &&
-                this.related.size() != 0 &&
-                !this.related.contains(operation.getId());
+    @Override
+    public boolean isRelated(KeyOperation operation) {
+        return equals(operation) || (operation != null && this.related.contains(operation.getId()));
     }
 
     @Override

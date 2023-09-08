@@ -31,7 +31,7 @@ class JwksOPTest {
         assertEquals id, op.getId()
         assertEquals description, op.getDescription()
         if (related) {
-            assertFalse(op.isUnrelated(related))
+            assertTrue op.isRelated(related)
         }
         assertEquals id.hashCode(), op.hashCode()
         assertEquals "'$id' ($description)" as String, op.toString()
@@ -52,9 +52,9 @@ class JwksOPTest {
         testInstance(Jwks.OP.UNWRAP_KEY, 'unwrapKey', 'Decrypt key and validate decryption, if applicable', Jwks.OP.WRAP_KEY)
 
         testInstance(Jwks.OP.DERIVE_KEY, 'deriveKey', 'Derive key', null)
-        assertTrue Jwks.OP.DERIVE_KEY.isUnrelated(Jwks.OP.DERIVE_BITS)
+        assertFalse Jwks.OP.DERIVE_KEY.isRelated(Jwks.OP.DERIVE_BITS)
 
         testInstance(Jwks.OP.DERIVE_BITS, 'deriveBits', 'Derive bits not to be used as a key', null)
-        assertTrue Jwks.OP.DERIVE_BITS.isUnrelated(Jwks.OP.DERIVE_KEY)
+        assertFalse Jwks.OP.DERIVE_BITS.isRelated(Jwks.OP.DERIVE_KEY)
     }
 }

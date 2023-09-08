@@ -40,16 +40,16 @@ public interface KeyOperation extends Identifiable {
      */
     String getDescription();
 
-//    /**
-//     * Returns {@code true} if the specified {@code operation} is an acceptable use case for the key already assigned
-//     * this operation, {@code false} otherwise. As described in the
-//     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">JWK key_ops (Key Operations) Parameter</a>
-//     * specification, Key validation algorithms will likely reject keys with inconsistent or unrelated operations
-//     * because of the security vulnerabilities that could occur otherwise.
-//     *
-//     * @param operation the key operation to check if it is related to (consistent or compatible with) this operation.
-//     * @return {@code true} if the specified {@code operation} is an acceptable use case for the key already assigned
-//     * this operation, {@code false} otherwise.
-//     */
-//    boolean isRelated(KeyOperation operation);
+    /**
+     * Returns {@code true} if the specified {@code operation} is an acceptable use case for the key already assigned
+     * this operation, {@code false} otherwise. As described in the
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">JWK key_ops (Key Operations) Parameter</a>
+     * specification, Key validation algorithms will likely reject keys with inconsistent or unrelated operations
+     * because of the security vulnerabilities that could occur otherwise.
+     *
+     * @param operation the key operation to check if it is related to (consistent or compatible with) this operation.
+     * @return {@code true} if the specified {@code operation} is an acceptable use case for the key already assigned
+     * this operation, {@code false} otherwise.
+     */
+    boolean isRelated(KeyOperation operation);
 }

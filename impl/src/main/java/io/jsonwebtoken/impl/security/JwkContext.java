@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.X509Context;
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.security.HashAlgorithm;
@@ -32,6 +33,8 @@ import java.util.Set;
 
 public interface JwkContext<K extends Key> extends Identifiable, Map<String, Object>, FieldReadable, Nameable,
         X509Context<JwkContext<K>> {
+
+    JwkContext<K> field(Field<?> field);
 
     JwkContext<K> setId(String id);
 

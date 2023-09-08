@@ -19,8 +19,7 @@ import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertFalse
+import static org.junit.Assert.*
 
 class DefaultKeyOperationBuilderTest {
 
@@ -37,7 +36,7 @@ class DefaultKeyOperationBuilderTest {
         def op = builder.id(id).build() as DefaultKeyOperation
         assertEquals id, op.id
         assertEquals DefaultKeyOperation.CUSTOM_DESCRIPTION, op.description
-        assertFalse op.isUnrelated(Jwks.OP.SIGN)
+        assertFalse op.isRelated(Jwks.OP.SIGN)
     }
 
     @Test
@@ -47,5 +46,31 @@ class DefaultKeyOperationBuilderTest {
         def op = builder.id(id).description(description).build()
         assertEquals id, op.id
         assertEquals 'test', op.description
+    }
+
+    @Test
+    void testRelated() {
+        def id = 'foo'
+        def related = 'related'
+        def opA = builder.id(id).related(related).build()
+        def opB = builder.id(related).related(id).build()
+        assertEquals id, opA.id
+        assertEquals related, opB.id
+        assertTrue opA.isRelated(opB)
+        assertTrue opB.isRelated(opA)
+        assertFalse opA.isRelated(Jwks.OP.SIGN)
+        assertFalse opA.isRelated(Jwks.OP.SIGN)
+    }
+
+    @Test
+    void testRelatedNull() {
+        def op = builder.id('foo').related(null).build()
+        assertTrue op.related.isEmpty()
+    }
+
+    @Test
+    void testRelatedEmpty() {
+        def op = builder.id('foo').related('  ').build()
+        assertTrue op.related.isEmpty()
     }
 }

@@ -104,16 +104,13 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     T idFromThumbprint(HashAlgorithm alg);
 
     /**
-     * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
-     * (Key Operations) Parameter</a> values.
+     * Specifies an operation for which the key may be used by adding it to the
+     * JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops} (Key Operations)
+     * Parameter</a> values. This method may be called multiple times.
      *
      * <p>The {@code key_ops} (key operations) parameter identifies the operation(s) for which the key is
      * intended to be used.  The {@code key_ops} parameter is intended for use cases in which public,
      * private, or symmetric keys may be present.</p>
-     *
-     * <p>All JWK standard Key Operations are available via the {@link Jwks.OP} registry, but other (custom) values
-     * <em>MAY</em> be specified using a {@link Jwks#operation()} builder. For best interoperability with other
-     * applications however, it is recommended to use only the {@link Jwks.OP} constants.</p>
      *
      * <p><b>Security Vulnerability Notice</b></p>
      *
@@ -122,12 +119,96 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * {@link Jwks.OP#SIGN sign} with {@link Jwks.OP#VERIFY verify},
      * {@link Jwks.OP#ENCRYPT encrypt} with {@link Jwks.OP#DECRYPT decrypt}, and
      * {@link Jwks.OP#WRAP_KEY wrapKey} with {@link Jwks.OP#UNWRAP_KEY unwrapKey} are permitted, but other combinations
-     * <em>SHOULD NOT</em> be used.</p>
+     * <em>SHOULD NOT</em> be used.  This is enforced by the builder's key operation
+     * {@link #operationsPolicy(KeyOperationPolicy) policy}.</p>
+     *
+     * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
+     *
+     * <p>All RFC-standard JWK Key Operations in the {@link Jwks.OP} registry are supported via the builder's default
+     * operations {@link #operationsPolicy(KeyOperationPolicy) policy}, but other (custom) values
+     * <em>MAY</em> be specified (for example, using a {@link Jwks.OP#builder()}).</p>
+     *
+     * <p>If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
+     * should be enabled for the {@code JwkBuilder} by {@link #operationsPolicy(KeyOperationPolicy) specifying}
+     * an operations policy that includes the custom values (e.g. via
+     * {@link Jwks.OP#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
+     *
+     * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwks.OP}
+     * constants.</p>
+     *
+     * @param operation the value to add to the JWK {@code key_ops} value set
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if {@code op} is {@code null} or if the operation is not permitted
+     *                                  by the operations {@link #operationsPolicy(KeyOperationPolicy) policy}.
+     * @see Jwks.OP
+     */
+    T operation(KeyOperation operation) throws IllegalArgumentException;
+
+    /**
+     * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
+     * (Key Operations) Parameter</a> values.
+     *
+     * <p>The {@code key_ops} (key operations) parameter identifies the operation(s) for which the key is
+     * intended to be used.  The {@code key_ops} parameter is intended for use cases in which public,
+     * private, or symmetric keys may be present.</p>
+     *
+     * <p><b>Security Vulnerability Notice</b></p>
+     *
+     * <p>Multiple unrelated key operations <em>SHOULD NOT</em> be specified for a key because of the potential
+     * vulnerabilities associated with using the same key with multiple algorithms.  Thus, the combinations
+     * {@link Jwks.OP#SIGN sign} with {@link Jwks.OP#VERIFY verify},
+     * {@link Jwks.OP#ENCRYPT encrypt} with {@link Jwks.OP#DECRYPT decrypt}, and
+     * {@link Jwks.OP#WRAP_KEY wrapKey} with {@link Jwks.OP#UNWRAP_KEY unwrapKey} are permitted, but other combinations
+     * <em>SHOULD NOT</em> be used.  This is enforced by the builder's default
+     * operation {@link #operationsPolicy(KeyOperationPolicy) policy}.</p>
+     *
+     * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
+     *
+     * <p>All RFC-standard JWK Key Operations in the {@link Jwks.OP} registry are supported via the builder's default
+     * operations {@link #operationsPolicy(KeyOperationPolicy) policy}, but other (custom) values
+     * <em>MAY</em> be specified (for example, using a {@link Jwks.OP#builder()}).</p>
+     *
+     * <p>If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
+     * should be enabled for the {@code JwkBuilder} by {@link #operationsPolicy(KeyOperationPolicy) specifying}
+     * an operations policy that includes the custom values (e.g. via
+     * {@link Jwks.OP#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
+     *
+     * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwks.OP}
+     * constants.</p>
      *
      * @param ops the JWK {@code key_ops} value set, or {@code null} if not present.
      * @return the builder for method chaining.
-     * @throws IllegalArgumentException if {@code ops} is {@code null} or empty.
+     * @throws IllegalArgumentException {@code ops} is {@code null} or empty, or if any of the operations are not
+     *                                  permitted by the operations {@link #operationsPolicy(KeyOperationPolicy) policy}.
      * @see Jwks.OP
      */
     T operations(Collection<KeyOperation> ops) throws IllegalArgumentException;
+
+    /**
+     * Sets the builder's {@link KeyOperationPolicy} that determines which key
+     * {@link #operations(Collection) operations} may be assigned to the JWK. Unless overridden by this method, the
+     * builder uses the default RFC-recommended policy where:
+     * <ul>
+     *     <li>All {@link Jwks.OP RFC-standard key operations} are supported.</li>
+     *     <li>Multiple unrelated operations may not be assigned to the JWK per the
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
+     * <blockquote><pre>
+     * Multiple unrelated key operations SHOULD NOT be specified for a key
+     * because of the potential vulnerabilities associated with using the
+     * same key with multiple algorithms.
+     * </pre></blockquote></li>
+     * </ul>
+     *
+     * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
+     * one can be created by using the {@link Jwks.OP#policy()} builder, or by implementing the
+     * {@link KeyOperationPolicy} interface directly.</p>
+     *
+     * @param policy the policy to apply during JWK construction
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if the specified policy is null, or the policy's
+     *                                  {@link KeyOperationPolicy#getOperations() operations} collection is null or
+     *                                  empty.
+     * @see Jwks.OP#policy()
+     */
+    T operationsPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
 }
