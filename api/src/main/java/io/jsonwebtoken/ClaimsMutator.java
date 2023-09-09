@@ -100,7 +100,11 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *            {@code null} to remove the property from the JSON map.
      * @return the instance for method chaining
      * @since JJWT_RELEASE_VERSION
+     * @deprecated This is technically not deprecated because the JWT RFC mandates support for single string values,
+     * but it is marked as deprecated to discourage its use when possible.
      */
+    // DO NOT REMOVE EVER. This is a required RFC feature, but marked as deprecated to discourage its use
+    @Deprecated
     T audienceSingle(String aud);
 
     /**
