@@ -351,7 +351,7 @@ class JwtsTest {
     void testConvenienceAudience() {
         String compact = Jwts.builder().setAudience("You").compact()
         Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
-        assertEquals 'You', claims.getAudience()
+        assertEquals 'You', claims.getAudience().iterator().next()
 
         compact = Jwts.builder().setIssuer("Me")
                 .setAudience("You") //set it
@@ -437,17 +437,17 @@ class JwtsTest {
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
+        String compact = Jwts.builder().id(id).issuer("an issuer").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compact()
 
-        def jws = Jwts.parser().setSigningKey(key).build().parseClaimsJws(compact)
+        def jws = Jwts.parser().verifyWith(key).build().parseClaimsJws(compact)
 
         Claims claims = jws.payload
 
         assertNull jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an issuer", claims.getIssuer()
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -459,17 +459,17 @@ class JwtsTest {
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
+        String compact = Jwts.builder().id(id).issuer("an issuer").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.DEF).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).build().parseClaimsJws(compact)
+        def jws = Jwts.parser().verifyWith(key).build().parseClaimsJws(compact)
 
         Claims claims = jws.payload
 
         assertEquals "DEF", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an issuer", claims.getIssuer()
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -481,17 +481,17 @@ class JwtsTest {
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
+        String compact = Jwts.builder().id(id).issuer("an issuer").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.GZIP).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).build().parseClaimsJws(compact)
+        def jws = Jwts.parser().verifyWith(key).build().parseClaimsJws(compact)
 
         Claims claims = jws.payload
 
         assertEquals "GZIP", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an issuer", claims.getIssuer()
         assertEquals "hello this is an amazing jwt", claims.state
     }
 
@@ -503,7 +503,7 @@ class JwtsTest {
 
         String id = UUID.randomUUID().toString()
 
-        String compact = Jwts.builder().setId(id).setAudience("an audience").signWith(key, alg)
+        String compact = Jwts.builder().id(id).issuer("an issuer").signWith(key, alg)
                 .claim("state", "hello this is an amazing jwt").compressWith(new GzipCompressionAlgorithm() {
             @Override
             String getId() {
@@ -511,7 +511,7 @@ class JwtsTest {
             }
         }).compact()
 
-        def jws = Jwts.parser().setSigningKey(key).setCompressionCodecResolver(new CompressionCodecResolver() {
+        def jws = Jwts.parser().verifyWith(key).setCompressionCodecResolver(new CompressionCodecResolver() {
             @Override
             CompressionCodec resolveCompressionCodec(Header header) throws CompressionException {
                 String algorithm = header.getCompressionAlgorithm()
@@ -529,7 +529,7 @@ class JwtsTest {
         assertEquals "CUSTOM", jws.header.getCompressionAlgorithm()
 
         assertEquals id, claims.getId()
-        assertEquals "an audience", claims.getAudience()
+        assertEquals "an issuer", claims.getIssuer()
         assertEquals "hello this is an amazing jwt", claims.state
 
     }

@@ -131,7 +131,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Ensures that the specified {@code aud} exists in the parsed JWT.  If missing or if the parsed
-     * value does not equal the specified value, an exception will be thrown indicating that the
+     * value does not contain the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
      * @param audience the required value of the {@code aud} header parameter.

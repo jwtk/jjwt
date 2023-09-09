@@ -17,6 +17,7 @@ package io.jsonwebtoken;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4">Claims set</a>.
@@ -38,25 +39,39 @@ import java.util.Map;
  */
 public interface Claims extends Map<String, Object>, Identifiable {
 
-    /** JWT {@code Issuer} claims parameter name: <code>"iss"</code> */
+    /**
+     * JWT {@code Issuer} claims parameter name: <code>"iss"</code>
+     */
     String ISSUER = "iss";
 
-    /** JWT {@code Subject} claims parameter name: <code>"sub"</code> */
+    /**
+     * JWT {@code Subject} claims parameter name: <code>"sub"</code>
+     */
     String SUBJECT = "sub";
 
-    /** JWT {@code Audience} claims parameter name: <code>"aud"</code> */
+    /**
+     * JWT {@code Audience} claims parameter name: <code>"aud"</code>
+     */
     String AUDIENCE = "aud";
 
-    /** JWT {@code Expiration} claims parameter name: <code>"exp"</code> */
+    /**
+     * JWT {@code Expiration} claims parameter name: <code>"exp"</code>
+     */
     String EXPIRATION = "exp";
 
-    /** JWT {@code Not Before} claims parameter name: <code>"nbf"</code> */
+    /**
+     * JWT {@code Not Before} claims parameter name: <code>"nbf"</code>
+     */
     String NOT_BEFORE = "nbf";
 
-    /** JWT {@code Issued At} claims parameter name: <code>"iat"</code> */
+    /**
+     * JWT {@code Issued At} claims parameter name: <code>"iat"</code>
+     */
     String ISSUED_AT = "iat";
 
-    /** JWT {@code JWT ID} claims parameter name: <code>"jti"</code> */
+    /**
+     * JWT {@code JWT ID} claims parameter name: <code>"jti"</code>
+     */
     String ID = "jti";
 
     /**
@@ -81,7 +96,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      *
      * @return the JWT {@code aud} value or {@code null} if not present.
      */
-    String getAudience();
+    Set<String> getAudience();
 
     /**
      * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
@@ -124,7 +139,8 @@ public interface Claims extends Map<String, Object>, Identifiable {
      *
      * @return the JWT {@code jti} value or {@code null} if not present.
      */
-    @Override // just for JavaDoc specific to the JWT spec
+    @Override
+    // just for JavaDoc specific to the JWT spec
     String getId();
 
     /**
@@ -133,14 +149,15 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * <p>JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
      * complex is expected to be already converted to your desired type by the JSON
      * {@link io.jsonwebtoken.io.Deserializer Deserializer} implementation. You may specify a custom Deserializer for a
-     * JwtParser with the desired conversion configuration via the {@link JwtParserBuilder#deserializeJsonWith} method.
+     * JwtParser with the desired conversion configuration via the
+     * {@link JwtParserBuilder#deserializer deserializer} method.
      * See <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a> for more
      * information. If using Jackson, you can specify custom claim POJO types as described in
      * <a href="https://github.com/jwtk/jjwt#json-jackson-custom-types">custom claim types</a>.
      *
-     * @param claimName name of claim
+     * @param claimName    name of claim
      * @param requiredType the type of the value expected to be returned
-     * @param <T> the type of the value expected to be returned
+     * @param <T>          the type of the value expected to be returned
      * @return the JWT {@code claimName} value or {@code null} if not present.
      * @throws RequiredTypeException throw if the claim value is not null and not of type {@code requiredType}
      */

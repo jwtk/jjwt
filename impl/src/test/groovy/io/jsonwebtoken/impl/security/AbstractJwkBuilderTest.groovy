@@ -235,14 +235,13 @@ class AbstractJwkBuilderTest {
         assertEquals canonical, jwk.key_ops
     }
 
-
     @Test
     void testCustomOperationOverridesDefault() {
         def op = Jwks.OP.builder().id('sign').description('Different Description')
                 .related(Jwks.OP.VERIFY.id).build()
         def builder = builder().operationPolicy(Jwks.OP.policy().add(op).build())
-        def jwk = builder.operations(Collections.setOf(op, Jwks.OP.VERIFY)).build()
-        println jwk
+        def jwk = builder.operations(Collections.setOf(op, Jwks.OP.VERIFY)).build() as Jwk
+        assertSame op, jwk.getOperations().find({it.id == 'sign'})
     }
 
     @Test

@@ -25,6 +25,7 @@ import io.jsonwebtoken.lang.Registry;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 public class DefaultClaims extends FieldMap implements Claims {
 
@@ -38,7 +39,7 @@ public class DefaultClaims extends FieldMap implements Claims {
 
     static final Field<String> ISSUER = Fields.string(Claims.ISSUER, "Issuer");
     static final Field<String> SUBJECT = Fields.string(Claims.SUBJECT, "Subject");
-    static final Field<String> AUDIENCE = Fields.string(Claims.AUDIENCE, "Audience");
+    static final Field<Set<String>> AUDIENCE = Fields.stringSet(Claims.AUDIENCE, "Audience");
     static final Field<Date> EXPIRATION = Fields.rfcDate(Claims.EXPIRATION, "Expiration Time");
     static final Field<Date> NOT_BEFORE = Fields.rfcDate(Claims.NOT_BEFORE, "Not Before");
     static final Field<Date> ISSUED_AT = Fields.rfcDate(Claims.ISSUED_AT, "Issued At");
@@ -49,6 +50,10 @@ public class DefaultClaims extends FieldMap implements Claims {
 
     protected DefaultClaims() { // visibility for testing
         super(FIELDS);
+    }
+
+    public DefaultClaims(FieldMap m) {
+        super(m.FIELDS, m);
     }
 
     public DefaultClaims(Map<String, ?> map) {
@@ -71,7 +76,7 @@ public class DefaultClaims extends FieldMap implements Claims {
     }
 
     @Override
-    public String getAudience() {
+    public Set<String> getAudience() {
         return get(AUDIENCE);
     }
 

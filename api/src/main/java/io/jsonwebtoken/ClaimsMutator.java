@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -72,8 +73,12 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
     T subject(String sub);
 
     /**
-     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
-     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the JSON map.
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience)
+     * Claim as <em>a single String, <b>NOT</b></em> a String array</em>.  This method exists only for producing
+     * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
+     * strongly recommended to avoid calling this method whenever possible and favor the
+     * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
+     * data type for recipients.
      *
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
@@ -84,14 +89,41 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
     T setAudience(String aud);
 
     /**
-     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
-     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the JSON map.
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience)
+     * Claim as <em>a single String, <b>NOT</b></em> a String array</em>.  This method exists only for producing
+     * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
+     * strongly recommended to avoid calling this method whenever possible and favor the
+     * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
+     * data type for recipients.
      *
-     * @param aud the JWT {@code aud} value or {@code null} to remove the property from the JSON map.
-     * @return the {@code Claims} instance for method chaining.
+     * @param aud the value to use as the {@code aud} Claim single-String value (and not an array of Strings), or
+     *            {@code null} to remove the property from the JSON map.
+     * @return the instance for method chaining
      * @since JJWT_RELEASE_VERSION
      */
-    T audience(String aud);
+    T audienceSingle(String aud);
+
+    /**
+     * Adds the specified {@code aud} value to the {@link #audience(Collection) audience} Claim set (JSON Array). This
+     * method may be called multiple times.
+     *
+     * @param aud a JWT {@code aud} value to add to the {@link #audience(Collection) audience} Claim set.
+     * @return the {@code Claims} instance for method chaining.
+     * @throws IllegalArgumentException if the {@code aud} argument is null or empty.
+     * @since JJWT_RELEASE_VERSION
+     */
+    T audience(String aud) throws IllegalArgumentException;
+
+    /**
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience)
+     * Claim set, replacing any previous value(s).
+     *
+     * @param aud the values to set as the {@code aud} Claim set (JSON Array), or {@code null}/empty to remove the
+     *            {@code aud} claim from the JSON map entirely.
+     * @return the instance for method chaining
+     * @since JJWT_RELEASE_VERSION
+     */
+    T audience(Collection<String> aud);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">

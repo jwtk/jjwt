@@ -24,6 +24,7 @@ import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKey
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.*
+import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import io.jsonwebtoken.security.*
 import org.junit.Before
 import org.junit.Test
@@ -559,4 +560,171 @@ class DefaultJwtBuilderTest {
             assertEquals msg, expected.getMessage()
         }
     }
+
+    @Test
+    void testAudienceSingle() {
+        def key = TestKeys.HS256
+        String audienceSingleString = 'test'
+        def jwt = builder.audienceSingle(audienceSingleString).compact()
+        // can't use the parser here to validate because it coerces the string value into an array automatically,
+        // so we need to check the raw payload:
+        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        byte[] bytes = Decoders.BASE64URL.decode(encoded)
+        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+
+        assertEquals audienceSingleString, claims.aud
+    }
+
+    /**
+     * Asserts that an additional call to audienceSingle is a full replacement operation and fully replaces the
+     * previous audienceSingle value
+     */
+    @Test
+    void testAudienceSingleMultiple() {
+        def first = 'first'
+        def second = 'second'
+        def jwt = builder.audienceSingle(first).audienceSingle(second).compact()
+        // can't use the parser here to validate because it coerces the string value into an array automatically,
+        // so we need to check the raw payload:
+        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        byte[] bytes = Decoders.BASE64URL.decode(encoded)
+        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+
+        assertEquals second, claims.aud // second audienceSingle call replaces first value
+    }
+
+    /**
+     * Asserts that an additional call to audienceSingle is a full replacement operation and fully replaces the
+     * previous audienceSingle value
+     */
+    @Test
+    void testAudienceSingleThenNull() {
+        def jwt = builder.id('test')
+                .audienceSingle('single') // set one
+                .audienceSingle(null) // remove it entirely
+                .compact()
+
+        // shouldn't be an audience at all:
+        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+    }
+
+    /**
+     * Asserts that, even if audienceSingle is called and then the value removed, a final call to audience(Collection)
+     * still represents a collection without any value errors
+     */
+    @Test
+    void testAudienceSingleThenNullThenCollection() {
+        def first = 'first'
+        def second = 'second'
+        def expected = [first, second] as Set<String>
+        def jwt = builder.audienceSingle(first) // sets single value
+                .audienceSingle(null) // removes entirely
+                .audience([first, second]) // sets collection
+                .compact()
+
+        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertEquals expected, aud
+    }
+
+    /**
+     * Test to ensure that if we receive a JWT with a single string value, that the parser coerces it to a String array
+     * so we don't have to worry about different data types:
+     */
+    @Test
+    void testParseAudienceSingle() {
+        def key = TestKeys.HS256
+        String audienceSingleString = 'test'
+        def jwt = builder.audienceSingle(audienceSingleString).compact()
+
+        assertEquals audienceSingleString, Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload
+                .getAudience().iterator().next() // a collection, not a single string
+    }
+
+    @Test
+    void testAudience() {
+        def aud = 'fubar'
+        def jwt = Jwts.builder().audience(aud).compact()
+        assertEquals aud, Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience().iterator().next()
+    }
+
+    @Test
+    void testAudienceMultipleTimes() {
+        def one = 'one'
+        def two = 'two'
+        def jwt = Jwts.builder().audience(one).audience(two).compact()
+        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertTrue aud.contains(one)
+        assertTrue aud.contains(two)
+    }
+
+    /**
+     * Asserts that if someone calls builder.audienceSingle and then audience(String), that the audience value
+     * will automatically be coerced from a String to a Set<String> and contain both elements.
+     */
+    @Test
+    void testAudienceSingleThenAudience() {
+        def one = 'one'
+        def two = 'two'
+        def jwt = Jwts.builder().audienceSingle(one).audience(two).compact()
+        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertTrue aud.contains(one)
+        assertTrue aud.contains(two)
+    }
+
+    /**
+     * Asserts that if someone calls builder.audience and then audienceSingle, that the audience value
+     * will automatically be coerced to a single String contain only the single value since audienceSingle is a
+     * full-replacement operation.
+     */
+    @Test
+    void testAudienceThenAudienceSingle() {
+        def one = 'one'
+        def two = 'two'
+        def jwt = Jwts.builder().audience(one).audienceSingle(two).compact()
+
+        // can't use the parser here to validate because it coerces the string value into an array automatically,
+        // so we need to check the raw payload:
+        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        byte[] bytes = Decoders.BASE64URL.decode(encoded)
+        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+
+        assertEquals two, claims.aud
+    }
+
+    /**
+     * Asserts that if someone calls builder.audienceSingle and then audience(Collection), the builder coerces the
+     * aud to a Set<String> and only the elements in the Collection will be applied since audience(Collection) is a
+     * full-replacement operation.
+     */
+    @Test
+    void testAudienceSingleThenAudienceCollection() {
+        def single = 'one'
+        def collection = ['two', 'three'] as Set<String>
+        def jwt = Jwts.builder().audienceSingle(single).audience(collection).compact()
+        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertEquals collection.size(), aud.size()
+        assertTrue aud.containsAll(collection)
+    }
+
+    /**
+     * Asserts that if someone calls builder.audience(Collection) and then audienceSingle, that the audience value
+     * will automatically be coerced to a single String contain only the single value since audienceSingle is a
+     * full-replacement operation.
+     */
+    @Test
+    void testAudienceCollectionThenAudienceSingle() {
+        def one = 'one'
+        def two = 'two'
+        def three = 'three'
+        def jwt = Jwts.builder().audience([one, two]).audienceSingle(three).compact()
+
+        // can't use the parser here to validate because it coerces the string value into an array automatically,
+        // so we need to check the raw payload:
+        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        byte[] bytes = Decoders.BASE64URL.decode(encoded)
+        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+
+        assertEquals three, claims.aud
+    }
+
 }

@@ -45,6 +45,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Set;
 
 import static io.jsonwebtoken.security.Jwks.builder;
 
@@ -183,11 +184,11 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and decrypts the compact JWE:
-        String audience = Jwts.parser()
+        Set<String> audience = Jwts.parser()
                 .decryptWith(pair.getPrivate()) // <-- Alice's RSA private key
                 .build().parseClaimsJwe(jwe).getPayload().getAudience();
 
-        assert "Alice".equals(audience);
+        assert audience.contains("Alice");
     }
 
     /**
@@ -231,11 +232,11 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and decrypts the compact JWE:
-        String audience = Jwts.parser()
+        Set<String> audience = Jwts.parser()
                 .decryptWith(pair.getPrivate()) // <-- Alice's EC private key
                 .build().parseClaimsJwe(jwe).getPayload().getAudience();
 
-        assert "Alice".equals(audience);
+        assert audience.contains("Alice");
     }
 
     /**

@@ -52,7 +52,7 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     // MapMutator methods
     // =============================================================
 
-    private T put(Field<?> field, Object value) {
+    private <F> T put(Field<F> field, F value) {
         this.DELEGATE.put(field, value);
         return self();
     }

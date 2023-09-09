@@ -3322,11 +3322,11 @@ String jwe = Jwts.builder().audience("Alice")
     .compact();
 
 // Alice receives and decrypts the compact JWE:
-String audience = Jwts.parser()
+Set<String> audience = Jwts.parser()
     .decryptWith(pair.getPrivate()) // <-- Alice's RSA private key
     .build().parseClaimsJwe(jwe).getPayload().getAudience();
 
-assert "Alice".equals(audience);
+assert audience.contains("Alice");
 ```
 
 <a name="example-jwe-aeskw"></a>
@@ -3390,11 +3390,11 @@ String jwe = Jwts.builder().audience("Alice")
     .compact();
 
 // Alice receives and decrypts the compact JWE:
-String audience = Jwts.parser()
+Set<String> audience = Jwts.parser()
     .decryptWith(pair.getPrivate()) // <-- Alice's EC private key
     .build().parseClaimsJwe(jwe).getPayload().getAudience();
 
-assert "Alice".equals(audience);
+assert audience.contains("Alice");
 ```
 
 <a name="example-jwe-password"></a>

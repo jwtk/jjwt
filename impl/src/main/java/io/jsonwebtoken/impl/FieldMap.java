@@ -82,6 +82,11 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         }
     }
 
+    protected FieldMap replace(Field<?> field) {
+        Registry<String, ? extends Field<?>> registry = Fields.replace(this.FIELDS, field);
+        return new FieldMap(registry, this, this.mutable);
+    }
+
     @Override
     public String getName() {
         return "Map";
@@ -128,37 +133,39 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         return values.get(o);
     }
 
+    private static Object clean(Object o) {
+        if (o instanceof String) {
+            o = Strings.clean((String) o);
+        }
+        return o;
+    }
+
     /**
-     * Convenience method to put a value for a canonical field.
+     * Convenience method to put a value for an idiomatic field.
      *
      * @param field the field representing the property name to set
      * @param value the value to set
-     * @return the previous value for the field name, or {@code null} if there was no previous value
+     * @return the previous value for the field, or {@code null} if there was no previous value
      * @since JJWT_RELEASE_VERSION
      */
-    protected Object put(Field<?> field, Object value) {
-        return put(field.getId(), value);
+    protected final <T> Object put(Field<T> field, Object value) {
+        assertMutable();
+        Assert.notNull(field, "Field cannot be null.");
+        Assert.hasText(field.getId(), "Field id cannot be null or empty.");
+        return apply(field, clean(value));
     }
 
     @Override
-    public Object put(String name, Object value) {
+    public final Object put(String name, Object value) {
         assertMutable();
         name = Assert.notNull(Strings.clean(name), "Member name cannot be null or empty.");
-        if (value instanceof String) {
-            value = Strings.clean((String) value);
-        }
-        return idiomaticPut(name, value);
-    }
-
-    // ensures that if a property name matches an RFC-specified name, that value can be represented
-    // as an idiomatic type-safe Java value in addition to the canonical RFC/encoded value.
-    private Object idiomaticPut(String name, Object value) {
-        Assert.stateNotNull(name, "Name cannot be null."); // asserted by caller
         Field<?> field = FIELDS.get(name);
-        if (field != null) { //Setting a JWA-standard property - let's ensure we can represent it idiomatically:
-            return apply(field, value);
-        } else { //non-standard/custom property:
-            return nullSafePut(name, value);
+        if (field != null) {
+            // standard property, represent it idiomatically:
+            return put(field, value);
+        } else {
+            // non-standard or custom property, just apply directly:
+            return nullSafePut(name, clean(value));
         }
     }
 

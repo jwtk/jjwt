@@ -31,7 +31,7 @@ import java.security.SecureRandom
 
 import static io.jsonwebtoken.DateTestUtils.truncateMillis
 import static io.jsonwebtoken.impl.DefaultJwtParser.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
-import static io.jsonwebtoken.impl.DefaultJwtParser.MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE
+import static io.jsonwebtoken.impl.DefaultJwtParser.MISSING_EXPECTED_CLAIM_VALUE_MESSAGE_TEMPLATE
 import static org.junit.Assert.*
 
 @SuppressWarnings('GrDeprecatedAPIUsage')
@@ -958,10 +958,8 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
-            assertEquals(
-                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, claimName, claimValue),
-                    e.getMessage()
-            )
+            String msg = "Missing '$claimName' claim. Expected value: $claimValue"
+            assertEquals msg, e.getMessage()
         }
     }
 
@@ -1077,10 +1075,8 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
-            assertEquals(
-                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ISSUER, issuer),
-                    e.getMessage()
-            )
+            String msg = "Missing 'iss' claim. Expected value: $issuer"
+            assertEquals msg, e.message
         }
     }
 
@@ -1099,7 +1095,60 @@ class JwtParserTest {
                 build().
                 parseClaimsJws(compact)
 
-        assertEquals jwt.getPayload().getAudience(), audience
+        assertEquals audience, jwt.getPayload().getAudience().iterator().next()
+    }
+
+    @Test
+    void testParseExpectedEqualAudiences() {
+        def one = 'one'
+        def two = 'two'
+        def expected = [one, two]
+        String jwt = Jwts.builder().audience(one).audience(two).compact()
+        def aud = Jwts.parser().enableUnsecured().requireAudience(one).requireAudience(two).build()
+                .parseClaimsJwt(jwt).getPayload().getAudience()
+        assertEquals expected.size(), aud.size()
+        assertTrue aud.containsAll(expected)
+    }
+
+    @Test
+    void testParseAtLeastOneAudiences() {
+        def one = 'one'
+
+        String jwt = Jwts.builder().audience(one).audience('two').compact() // more audiences than required
+
+        def aud = Jwts.parser().enableUnsecured().requireAudience(one) // require only one
+                .build().parseClaimsJwt(jwt).getPayload().getAudience()
+
+        assertNotNull aud
+        assertTrue aud.contains(one)
+    }
+
+    @Test
+    void testParseMissingAudiences() {
+        def one = 'one'
+        def two = 'two'
+        String jwt = Jwts.builder().id('foo').compact()
+        try {
+            Jwts.parser().enableUnsecured().requireAudience(one).requireAudience(two).build().parseClaimsJwt(jwt)
+            fail()
+        } catch (MissingClaimException expected) {
+            String msg = "Missing 'aud' claim. Expected values: [$one, $two]"
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testParseSingleValueClaimExpectingMultipleValues() {
+        def one = 'one'
+        def two = 'two'
+        def expected = [one, two]
+        String jwt = Jwts.builder().claim('custom', one).compact()
+        try {
+            Jwts.parser().enableUnsecured().require('custom', expected).build().parseClaimsJwt(jwt)
+        } catch (IncorrectClaimException e) {
+            String msg = "Missing expected '$two' value in 'custom' claim [$one]."
+            assertEquals msg, e.message
+        }
     }
 
     @Test
@@ -1120,10 +1169,9 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (IncorrectClaimException e) {
-            assertEquals(
-                    String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, goodAudience, badAudience),
-                    e.getMessage()
-            )
+            String msg = String.format(MISSING_EXPECTED_CLAIM_VALUE_MESSAGE_TEMPLATE, goodAudience,
+                    Claims.AUDIENCE, [badAudience])
+            assertEquals msg, e.getMessage()
         }
     }
 
@@ -1144,10 +1192,8 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
-            assertEquals(
-                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.AUDIENCE, audience),
-                    e.getMessage()
-            )
+            String msg = "Missing 'aud' claim. Expected values: [$audience]"
+            assertEquals msg, e.message
         }
     }
 
@@ -1211,10 +1257,8 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
-            assertEquals(
-                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.SUBJECT, subject),
-                    e.getMessage()
-            )
+            String msg = "Missing 'sub' claim. Expected value: $subject"
+            assertEquals msg, e.getMessage()
         }
     }
 
@@ -1278,10 +1322,8 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
-            assertEquals(
-                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, Claims.ID, id),
-                    e.getMessage()
-            )
+            String msg = "Missing 'jti' claim. Expected value: $id"
+            assertEquals msg, e.getMessage()
         }
     }
 
@@ -1477,10 +1519,8 @@ class JwtParserTest {
                     parseClaimsJws(compact)
             fail()
         } catch (MissingClaimException e) {
-            assertEquals(
-                    String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE, "aDate", aDate),
-                    e.getMessage()
-            )
+            String msg = "Missing 'aDate' claim. Expected value: $aDate"
+            assertEquals msg, e.getMessage()
         }
     }
 

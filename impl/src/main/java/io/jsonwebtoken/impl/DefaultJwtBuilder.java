@@ -61,6 +61,7 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -393,11 +394,24 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        return audience(aud);
+        this.claimsBuilder.setAudience(aud);
+        return this;
+    }
+
+    @Override
+    public JwtBuilder audienceSingle(String aud) {
+        this.claimsBuilder.audienceSingle(aud);
+        return this;
     }
 
     @Override
     public JwtBuilder audience(String aud) {
+        this.claimsBuilder.audience(aud);
+        return this;
+    }
+
+    @Override
+    public JwtBuilder audience(Collection<String> aud) {
         this.claimsBuilder.audience(aud);
         return this;
     }

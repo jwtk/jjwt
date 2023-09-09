@@ -128,6 +128,6 @@ class EdSignatureAlgorithmTest {
         def token = Jwts.parser().verifyWith(verification).build().parseClaimsJws(jwt)
         assertEquals([alg: alg.getId()], token.header)
         assertEquals 'me', token.getPayload().getIssuer()
-        assertEquals 'you', token.getPayload().getAudience()
+        assertEquals 'you', token.getPayload().getAudience().iterator().next()
     }
 }
