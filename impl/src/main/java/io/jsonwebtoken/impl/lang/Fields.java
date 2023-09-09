@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Registry;
 
 import java.math.BigInteger;
@@ -23,8 +24,10 @@ import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class Fields {
@@ -83,5 +86,15 @@ public final class Fields {
         set.addAll(parent.values());
         set.addAll(Arrays.asList(fields));
         return new IdRegistry<>("Field", set, true);
+    }
+
+    public static Registry<String, ? extends Field<?>> replace(Registry<String, ? extends Field<?>> registry, Field<?> field) {
+        Assert.notEmpty(registry, "Registry cannot be null or empty.");
+        Assert.notNull(field, "Field cannot be null.");
+        String id = Assert.hasText(field.getId(), "Field id cannot be null or empty.");
+        Map<String, Field<?>> newFields = new LinkedHashMap<>(registry);
+        newFields.remove(id); // remove old/default
+        newFields.put(id, field); // add new one
+        return registry(newFields.values());
     }
 }

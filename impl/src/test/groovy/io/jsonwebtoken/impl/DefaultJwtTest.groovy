@@ -31,7 +31,7 @@ class DefaultJwtTest {
     void testToString() {
         String compact = Jwts.builder().header().add('foo', 'bar').and().audience('jsmith').compact()
         Jwt jwt = Jwts.parser().enableUnsecured().build().parseClaimsJwt(compact)
-        assertEquals 'header={foo=bar, alg=none},payload={aud=jsmith}', jwt.toString()
+        assertEquals 'header={foo=bar, alg=none},payload={aud=[jsmith]}', jwt.toString()
     }
 
     @Test

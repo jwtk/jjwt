@@ -27,7 +27,7 @@ class Issue438Test {
 
     @Test(expected = UnsupportedJwtException /* not IllegalArgumentException */)
     void testIssue438() {
-        String jws = Jwts.builder().audience('test').signWith(TestKeys.RS256.pair.private).compact()
+        String jws = Jwts.builder().issuer('test').signWith(TestKeys.RS256.pair.private).compact()
         Jwts.parser().verifyWith(TestKeys.HS256).build().parseClaimsJws(jws)
     }
 }

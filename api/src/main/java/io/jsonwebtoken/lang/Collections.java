@@ -84,6 +84,24 @@ public final class Collections {
     }
 
     /**
+     * Returns the specified collection as a {@link Set} instance.
+     *
+     * @param c   the collection to represent as a set
+     * @param <T> collection element type
+     * @return a type-safe immutable {@code Set} containing the specified collection elements.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static <T> Set<T> asSet(Collection<T> c) {
+        if (c instanceof Set) {
+            return (Set<T>) c;
+        }
+        if (isEmpty(c)) {
+            return java.util.Collections.emptySet();
+        }
+        return java.util.Collections.unmodifiableSet(new LinkedHashSet<>(c));
+    }
+
+    /**
      * Returns a type-safe immutable {@code Set} containing the specified array elements.
      *
      * @param elements array elements to include in the set

@@ -20,6 +20,7 @@ import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyOperation;
@@ -30,7 +31,6 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -124,14 +124,11 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
 
     @Override
     public JwkContext<K> field(Field<?> field) {
-        Assert.notNull(field, "Field cannot be null.");
-        Map<String, Field<?>> newFields = new LinkedHashMap<>(this.FIELDS);
-        newFields.remove(field.getId()); // remove old/default
-        newFields.put(field.getId(), field); // add new one
-        Set<Field<?>> fieldSet = new LinkedHashSet<>(newFields.values());
+        Registry<String, ? extends Field<?>> registry = Fields.replace(this.FIELDS, field);
+        Set<Field<?>> fields = new LinkedHashSet<>(registry.values());
         return this.key != null ?
-                new DefaultJwkContext<>(fieldSet, this, key) :
-                new DefaultJwkContext<K>(fieldSet, this, false);
+                new DefaultJwkContext<>(fields, this, key) :
+                new DefaultJwkContext<K>(fields, this, false);
     }
 
     @Override

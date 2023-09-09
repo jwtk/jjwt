@@ -52,6 +52,7 @@ import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -89,6 +90,9 @@ public class DefaultJwtParser implements JwtParser {
             "used to encrypt, and PrivateKeys are used to decrypt.";
 
     public static final String INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was: %s.";
+
+    public static final String MISSING_EXPECTED_CLAIM_VALUE_MESSAGE_TEMPLATE =
+            "Missing expected '%s' value in '%s' claim %s.";
     public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not " +
             "present in the JWT claims.";
 
@@ -627,9 +631,25 @@ public class DefaultJwtParser implements JwtParser {
             }
 
             if (actualClaimValue == null) {
-                String msg = String.format(MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
-                        expectedClaimName, expectedClaimValue);
+                boolean collection = expectedClaimValue instanceof Collection;
+                String msg = "Missing '" + expectedClaimName + "' claim. Expected value";
+                if (collection) {
+                    msg += "s: " + expectedClaimValue;
+                } else {
+                    msg += ": " + expectedClaimValue;
+                }
                 throw new MissingClaimException(header, claims, expectedClaimName, expectedClaimValue, msg);
+            } else if (expectedClaimValue instanceof Collection) {
+                Collection<?> expectedValues = (Collection<?>) expectedClaimValue;
+                Collection<?> actualValues = actualClaimValue instanceof Collection ? (Collection<?>) actualClaimValue :
+                        Collections.setOf(actualClaimValue);
+                for (Object expectedValue : expectedValues) {
+                    if (!Collections.contains(actualValues.iterator(), expectedValue)) {
+                        String msg = String.format(MISSING_EXPECTED_CLAIM_VALUE_MESSAGE_TEMPLATE,
+                                expectedValue, expectedClaimName, actualValues);
+                        throw new IncorrectClaimException(header, claims, expectedClaimName, expectedClaimValue, msg);
+                    }
+                }
             } else if (!expectedClaimValue.equals(actualClaimValue)) {
                 String msg = String.format(INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE,
                         expectedClaimName, expectedClaimValue, actualClaimValue);

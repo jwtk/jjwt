@@ -18,9 +18,16 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.ClaimsMutator;
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.MapMutator;
+import io.jsonwebtoken.lang.Strings;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * @param <T> subclass type
@@ -30,13 +37,20 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
         extends DelegatingMapMutator<String, Object, FieldMap, T>
         implements ClaimsMutator<T> {
 
+    private static final Field<String> AUDIENCE_STRING =
+            Fields.string(DefaultClaims.AUDIENCE.getId(), DefaultClaims.AUDIENCE.getName());
+
     protected DelegatingClaimsMutator() {
         super(new FieldMap(DefaultClaims.FIELDS));
     }
 
-    <F> T put(Field<F> field, Object value) {
+    <F> T put(Field<F> field, F value) {
         this.DELEGATE.put(field, value);
         return self();
+    }
+
+    <F> F get(Field<F> field) {
+        return this.DELEGATE.get(field);
     }
 
     @Override
@@ -61,12 +75,49 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
 
     @Override
     public T setAudience(String aud) {
-        return audience(aud);
+        return audienceSingle(aud);
+    }
+
+    private Set<String> getAudience() {
+        // caller expects that we're working with a String<Set> so ensure that:
+        if (!this.DELEGATE.FIELDS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) {
+            String existing = get(AUDIENCE_STRING);
+            remove(AUDIENCE_STRING.getId()); // clear out any canonical/idiomatic values since we're replacing
+            setDelegate(this.DELEGATE.replace(DefaultClaims.AUDIENCE));
+            if (Strings.hasText(existing)) {
+                put(DefaultClaims.AUDIENCE, Collections.setOf(existing)); // replace as Set
+            }
+        }
+        Set<String> aud = get(DefaultClaims.AUDIENCE);
+        return aud != null ? aud : Collections.<String>emptySet();
+    }
+
+    @Override
+    public T audienceSingle(String aud) {
+        if (!Strings.hasText(aud)) {
+            return put(DefaultClaims.AUDIENCE, null);
+        }
+        // otherwise it's an actual single string, we need to ensure that we can represent it as a single
+        // string by swapping out the AUDIENCE field if necessary:
+        if (this.DELEGATE.FIELDS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) { // need to swap:
+            remove(AUDIENCE_STRING.getId()); //remove any existing value, as conversion will throw an exception
+            setDelegate(this.DELEGATE.replace(AUDIENCE_STRING));
+        }
+        return put(AUDIENCE_STRING, aud);
     }
 
     @Override
     public T audience(String aud) {
-        return put(DefaultClaims.AUDIENCE, aud);
+        aud = Assert.hasText(Strings.clean(aud), "Audience string value cannot be null or empty.");
+        Set<String> set = new LinkedHashSet<>(getAudience());
+        set.add(aud);
+        return audience(set);
+    }
+
+    @Override
+    public T audience(Collection<String> aud) {
+        getAudience(); //coerce to Set<String> if necessary
+        return put(DefaultClaims.AUDIENCE, Collections.asSet(aud));
     }
 
     @Override

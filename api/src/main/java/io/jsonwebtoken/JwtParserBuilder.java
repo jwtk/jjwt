@@ -131,7 +131,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Ensures that the specified {@code aud} exists in the parsed JWT.  If missing or if the parsed
-     * value does not equal the specified value, an exception will be thrown indicating that the
+     * value does not contain the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
      * @param audience the required value of the {@code aud} header parameter.
@@ -328,7 +328,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * {@link #verifyWith(SecretKey)} for type safety, to reflect accurate naming of the concept, and for name
      * congruence with the {@link #decryptWith(SecretKey)} method.</p>
      *
-     * <p>This method merely delegates directly to {@link #verifyWith(SecretKey) or {@link #verifyWith(PublicKey)}}.</p>
+     * <p>This method merely delegates directly to {@link #verifyWith(SecretKey)} or {@link #verifyWith(PublicKey)}}.</p>
      *
      * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
      *            signatures.
