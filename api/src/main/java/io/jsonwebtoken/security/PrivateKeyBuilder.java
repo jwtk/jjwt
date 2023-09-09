@@ -16,8 +16,23 @@
 package io.jsonwebtoken.security;
 
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 
+/**
+ * A builder that allows a {@code PrivateKey} to be transparently associated with a {@link #provider(Provider)} or
+ * {@link #publicKey(PublicKey)} if necessary for algorithms that require them.
+ *
+ * @since JJWT_RELEASE_VERSION
+ */
 public interface PrivateKeyBuilder extends KeyBuilder<PrivateKey, PrivateKeyBuilder> {
+
+    /**
+     * Sets the private key's corresponding {@code PublicKey} so that its public key material will be available to
+     * algorithms that require it.
+     *
+     * @param publicKey the private key's corresponding {@code PublicKey}
+     * @return the builder for method chaining.
+     */
     PrivateKeyBuilder publicKey(PublicKey publicKey);
 }

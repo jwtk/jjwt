@@ -73,8 +73,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
     T subject(String sub);
 
     /**
-     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience)
-     * Claim as <em>a single String, <b>NOT</b></em> a String array</em>.  This method exists only for producing
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code> (audience)
+     * Claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
      * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
      * strongly recommended to avoid calling this method whenever possible and favor the
      * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
@@ -89,8 +89,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
     T setAudience(String aud);
 
     /**
-     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience)
-     * Claim as <em>a single String, <b>NOT</b></em> a String array</em>.  This method exists only for producing
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code> (audience)
+     * Claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
      * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
      * strongly recommended to avoid calling this method whenever possible and favor the
      * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
