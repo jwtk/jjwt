@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.JwkParser;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyException;
@@ -62,12 +61,6 @@ public class DefaultJwkParser implements JwkParser {
             throw new MalformedKeyException(msg);
         }
 
-        JwkBuilder<?, ?, ?> builder = Jwks.builder().operationPolicy(this.opsPolicy);
-
-        if (this.provider != null) {
-            builder.provider(this.provider);
-        }
-
-        return builder.add(data).build();
+        return Jwks.builder().provider(this.provider).operationPolicy(this.opsPolicy).add(data).build();
     }
 }

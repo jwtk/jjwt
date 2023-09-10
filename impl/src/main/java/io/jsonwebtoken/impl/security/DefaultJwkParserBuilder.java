@@ -40,7 +40,7 @@ public class DefaultJwkParserBuilder implements JwkParserBuilder {
     }
 
     @Override
-    public JwkParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
+    public JwkParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer) {
         this.deserializer = deserializer;
         return this;
     }

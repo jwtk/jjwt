@@ -65,7 +65,7 @@ class DefaultJwkParserBuilderTest {
     @Test
     void testDeserializer() {
         def deserializer = createMock(Deserializer)
-        def parser = Jwks.parser().deserializeJsonWith(deserializer).build() as DefaultJwkParser
+        def parser = Jwks.parser().deserializer(deserializer).build() as DefaultJwkParser
         assertSame deserializer, parser.deserializer
     }
 

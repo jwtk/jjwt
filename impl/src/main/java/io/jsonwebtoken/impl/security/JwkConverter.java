@@ -18,10 +18,12 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.JwkBuilder;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.OctetPrivateJwk;
 import io.jsonwebtoken.security.OctetPublicJwk;
@@ -37,13 +39,29 @@ import static io.jsonwebtoken.lang.Strings.nespace;
 
 public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object> {
 
+    public static final Supplier<DynamicJwkBuilder<?, ?>> DEFAULT_SUPPLIER = new Supplier<DynamicJwkBuilder<?, ?>>() {
+        @Override
+        public DynamicJwkBuilder<?, ?> get() {
+            return Jwks.builder();
+        }
+    };
+    @SuppressWarnings("unchecked")
+    public static final JwkConverter<Jwk<?>> ANY = new JwkConverter<>((Class<Jwk<?>>) (Class<?>) Jwk.class);
+
     @SuppressWarnings("unchecked")
     public static final JwkConverter<PublicJwk<?>> PUBLIC_JWK = new JwkConverter<>((Class<PublicJwk<?>>) (Class<?>) PublicJwk.class);
 
     private final Class<T> desiredType;
 
+    private final Supplier<DynamicJwkBuilder<?, ?>> supplier;
+
     public JwkConverter(Class<T> desiredType) {
+        this(desiredType, DEFAULT_SUPPLIER);
+    }
+
+    public JwkConverter(Class<T> desiredType, Supplier<DynamicJwkBuilder<?, ?>> supplier) {
         this.desiredType = Assert.notNull(desiredType, "desiredType cannot be null.");
+        this.supplier = Assert.notNull(supplier, "supplier cannot be null.");
     }
 
     @Override
@@ -63,7 +81,7 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
 
     private static String typeString(Jwk<?> jwk) {
         Assert.isInstanceOf(Nameable.class, jwk, "All JWK implementations must implement Nameable.");
-        return ((Nameable)jwk).getName();
+        return ((Nameable) jwk).getName();
     }
 
     private static String typeString(Class<?> clazz) {
@@ -111,7 +129,7 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
             throw new IllegalArgumentException(msg);
         }
         Map<?, ?> map = (Map<?, ?>) o;
-        JwkBuilder<?, ?, ?> builder = Jwks.builder();
+        DynamicJwkBuilder<?, ?> builder = this.supplier.get();
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             Object key = entry.getKey();
             Assert.notNull(key, "JWK map key cannot be null.");
@@ -124,6 +142,16 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
             builder.add(skey, entry.getValue());
         }
 
+        // mandatory for all JWKs: https://datatracker.ietf.org/doc/html/rfc7517#section-4.1
+        Object kty = map.get(AbstractJwk.KTY.getId());
+        if (kty instanceof String) {
+            kty = Strings.clean((String) kty);
+        }
+        if (kty == null) {
+            String msg = "JWK is missing required " + AbstractJwk.KTY + " parameter.";
+            throw new IllegalArgumentException(msg);
+        }
+        // don't need to check value type or value - builder will catch the rest:
         Jwk<?> jwk = builder.build();
         if (desiredType.isInstance(jwk)) {
             return desiredType.cast(jwk);
