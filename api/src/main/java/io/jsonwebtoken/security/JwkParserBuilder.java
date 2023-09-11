@@ -15,48 +15,23 @@
  */
 package io.jsonwebtoken.security;
 
-import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Builder;
-
-import java.security.Provider;
-import java.util.Map;
+import io.jsonwebtoken.io.Parser;
+import io.jsonwebtoken.io.ParserBuilder;
 
 /**
- * A builder to construct a {@link JwkParser}.  Example usage:
+ * A builder to construct a {@link Parser} that can parse {@link Jwk}s.
+ * Example usage:
  * <blockquote><pre>
  * Jwk&lt;?&gt; jwk = Jwks.parser()
  *         .provider(aJcaProvider)     // optional
  *         .deserializer(deserializer) // optional
+ *         .operationPolicy(policy)    // optional
  *         .build()
  *         .parse(jwkString);</pre></blockquote>
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwkParserBuilder extends Builder<JwkParser> {
-
-    /**
-     * Sets the JCA Provider to use during cryptographic key factory operations, or {@code null} if the
-     * JCA subsystem preferred provider should be used.
-     *
-     * @param provider the JCA Provider to use during cryptographic key factory operations, or {@code null}
-     *                 if the JCA subsystem preferred provider should be used.
-     * @return the builder for method chaining.
-     */
-    JwkParserBuilder provider(Provider provider);
-
-    /**
-     * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  The
-     * resulting Maps are then used to construct {@link Jwk} instances.
-     *
-     * <p>If this method is not called, JJWT will use whatever deserializer it can find at runtime, checking for the
-     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
-     * in the runtime classpath, an exception will be thrown when the resulting {@link JwkParser}'s
-     * {@link JwkParser#parse(String) parse(json)} method is called.
-     *
-     * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
-     * @return the builder for method chaining.
-     */
-    JwkParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer);
+public interface JwkParserBuilder<T, B extends JwkParserBuilder<T, B>> extends ParserBuilder<T, B> {
 
     /**
      * Sets the parser's key operation policy that determines which {@link KeyOperation}s may be assigned to parsed
@@ -80,6 +55,6 @@ public interface JwkParserBuilder extends Builder<JwkParser> {
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if {@code policy} is null
      */
-    JwkParserBuilder operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
+    B operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
 
 }

@@ -1,6 +1,6 @@
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.AbstractParser;
+import io.jsonwebtoken.impl.io.AbstractParser;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.KeyOperationPolicy;

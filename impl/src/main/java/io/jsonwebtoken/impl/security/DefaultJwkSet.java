@@ -13,12 +13,11 @@ import java.util.Set;
 
 public class DefaultJwkSet extends FieldMap implements JwkSet {
 
-    @SuppressWarnings("unchecked")
-    static <T extends Jwk<?>> Field<Set<T>> field(Converter<T, Object> converter) {
-        //noinspection RedundantCast
-        return Fields.builder((Class<T>) (Class<?>) Jwk.class)
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    static <T extends Jwk<?>> Field<Set<T>> field(Converter<T, ?> converter) {
+        return Fields.builder((Class<T>)(Class<?>)Jwk.class)
                 .setConverter(converter).set()
-                .setId("keys").setName("Keys")
+                .setId("keys").setName("JSON Web Keys")
                 .build();
     }
 

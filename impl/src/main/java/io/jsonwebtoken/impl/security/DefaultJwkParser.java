@@ -16,51 +16,38 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.JwkParser;
 import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.KeyOperationPolicy;
-import io.jsonwebtoken.security.MalformedKeyException;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.util.Map;
 
-public class DefaultJwkParser implements JwkParser {
+public class DefaultJwkParser extends AbstractJwkParser<Jwk<?>> {
 
-    private final Provider provider;
+    protected final JwkConverter<Jwk<?>> CONVERTER;
 
-    private final Deserializer<Map<String, ?>> deserializer;
-
-    private final KeyOperationPolicy opsPolicy;
-
-    public DefaultJwkParser(Provider provider, Deserializer<Map<String, ?>> deserializer, KeyOperationPolicy policy) {
-        this.provider = provider;
-        this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
-        Assert.notNull(policy, "KeyOperationPolicy cannot be null.");
-        Assert.notEmpty(policy.getOperations(), "KeyOperationPolicy's operations cannot be null or empty.");
-        this.opsPolicy = policy;
-    }
-
-    // visible for testing
-    protected Map<String, ?> deserialize(String json) {
-        byte[] data = json.getBytes(StandardCharsets.UTF_8);
-        return this.deserializer.deserialize(data);
+    @SuppressWarnings("unchecked")
+    public DefaultJwkParser(final Provider provider, Deserializer<Map<String, ?>> deserializer,
+                            final KeyOperationPolicy policy) {
+        super(provider, deserializer, policy);
+        Supplier<DynamicJwkBuilder<?, ?>> supplier = new Supplier<DynamicJwkBuilder<?, ?>>() {
+            @Override
+            public DynamicJwkBuilder<?, ?> get() {
+                return Jwks.builder().provider(provider).operationPolicy(policy);
+            }
+        };
+        CONVERTER = new JwkConverter<>((Class<Jwk<?>>) (Class<?>) Jwk.class, supplier);
     }
 
     @Override
-    public Jwk<?> parse(String json) throws KeyException {
-        Assert.hasText(json, "JSON string argument cannot be null or empty.");
-        Map<String, ?> data;
-        try {
-            data = deserialize(json);
-        } catch (Exception e) {
-            String msg = "Unable to deserialize JSON string argument: " + e.getMessage();
-            throw new MalformedKeyException(msg);
-        }
+    protected Jwk<?> convert(Map<String, ?> m) {
+        return applyFrom(m);
+    }
 
-        return Jwks.builder().provider(this.provider).operationPolicy(this.opsPolicy).add(data).build();
+    protected Jwk<?> applyFrom(Object o) {
+        return CONVERTER.applyFrom(o);
     }
 }

@@ -1,16 +1,16 @@
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Parser;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.util.Map;
 
-public abstract class AbstractParser<T> implements Parser<String, T> {
+public abstract class AbstractParser<T> implements Parser<T> {
 
     protected final Provider provider;
 
@@ -29,7 +29,7 @@ public abstract class AbstractParser<T> implements Parser<String, T> {
         } catch (JwtException j) {
             throw j; // propagate
         } catch (Throwable t) {
-            String msg = "Unable to deserialize JSON data: " + t.getMessage();
+            String msg = "Unable to deserialize JSON: " + t.getMessage();
             throw new DeserializationException(msg, t);
         }
     }

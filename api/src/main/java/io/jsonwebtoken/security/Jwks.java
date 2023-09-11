@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 
@@ -395,20 +396,29 @@ public final class Jwks {
     }
 
     /**
-     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
+     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
      *
-     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a provided key or key pair.
+     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
      */
     public static DynamicJwkBuilder<?, ?> builder() {
         return Classes.newInstance(BUILDER_CLASSNAME);
     }
 
     /**
-     * Return a new thread-safe {@link JwkParserBuilder} to parse JSON strings into {@link Jwk} instances.
+     * Return a new thread-safe builder used to create {@link Parser Parser}s that parse JSON
+     * into {@link Jwk} instances.  For example:
+     * <blockquote><pre>
+     * Jwk&lt;?&gt; jwk = Jwks.parser()
+     *         .provider(aJcaProvider)     // optional
+     *         .deserializer(deserializer) // optional
+     *         .operationPolicy(policy)    // optional
+     *         .build()
+     *         .parse(jwkString);</pre></blockquote>
      *
-     * @return a new thread-safe {@link JwkParserBuilder} to parse JSON strings into {@link Jwk} instances.
+     * @return a new thread-safe builder used to create {@link Parser Parser}s that parse JSON
+     * into {@link Jwk} instances.
      */
-    public static JwkParserBuilder parser() {
+    public static JwkParserBuilder<Jwk<?>, ?> parser() {
         return Classes.newInstance(PARSERBUILDER_CLASSNAME);
     }
 

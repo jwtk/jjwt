@@ -16,8 +16,10 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converter;
+import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
@@ -118,17 +120,40 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
 
     @Override
     public T applyFrom(Object o) {
-        Assert.notNull(o, "JWK argument cannot be null.");
+        Assert.notNull(o, "Value cannot be null.");
         if (desiredType.isInstance(o)) {
             return desiredType.cast(o);
         } else if (o instanceof Jwk<?>) {
             throw unexpectedIAE((Jwk<?>) o);
         }
         if (!(o instanceof Map)) {
-            String msg = "Value must be a Jwk<?> or Map<String,?>. Type found: " + o.getClass().getName() + ".";
+            String msg = "Value must be a Map<String,?> (JSON Object). Type found: " + o.getClass().getName() + ".";
             throw new IllegalArgumentException(msg);
         }
-        Map<?, ?> map = (Map<?, ?>) o;
+        final Map<?, ?> map = Collections.immutable((Map<?, ?>) o);
+
+        Field<String> field = AbstractJwk.KTY;
+        // mandatory for all JWKs: https://datatracker.ietf.org/doc/html/rfc7517#section-4.1
+        // no need for builder field type conversion overhead if this isn't present:
+        if (Collections.isEmpty(map) || !map.containsKey(field.getId())) {
+            String msg = "Missing required " + field + " parameter.";
+            throw new IllegalArgumentException(msg);
+        }
+        Object val = map.get(field.getId());
+        if (val == null) {
+            String msg = "JWK " + field + " value cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (!(val instanceof String)) {
+            String msg = "JWK " + field + " value must be a String. Type found: " + val.getClass().getName();
+            throw new IllegalArgumentException(msg);
+        }
+        String kty = (String) val;
+        if (!Strings.hasText(kty)) {
+            String msg = "JWK " + field + " value cannot be empty.";
+            throw new IllegalArgumentException(msg);
+        }
+
         DynamicJwkBuilder<?, ?> builder = this.supplier.get();
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             Object key = entry.getKey();
@@ -141,18 +166,8 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
             String skey = (String) key;
             builder.add(skey, entry.getValue());
         }
-
-        // mandatory for all JWKs: https://datatracker.ietf.org/doc/html/rfc7517#section-4.1
-        Object kty = map.get(AbstractJwk.KTY.getId());
-        if (kty instanceof String) {
-            kty = Strings.clean((String) kty);
-        }
-        if (kty == null) {
-            String msg = "JWK is missing required " + AbstractJwk.KTY + " parameter.";
-            throw new IllegalArgumentException(msg);
-        }
-        // don't need to check value type or value - builder will catch the rest:
         Jwk<?> jwk = builder.build();
+
         if (desiredType.isInstance(jwk)) {
             return desiredType.cast(jwk);
         }
