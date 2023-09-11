@@ -15,8 +15,20 @@
  */
 package io.jsonwebtoken.io;
 
+/**
+ * A Parser converts character input into a Java object.
+ *
+ * @param <T> the instance type returned.
+ * @since JJWT_RELEASE_VERSION
+ */
 public interface Parser<T> {
 
+    /**
+     * Parse the specified character data input into a Java object.
+     *
+     * @param input the string to parse into a Java object.
+     * @return the Java object represented by the specified {@code input} stream.
+     */
     T parse(String input);
 
 }
