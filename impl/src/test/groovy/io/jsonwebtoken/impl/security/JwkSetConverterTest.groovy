@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2023 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
@@ -8,13 +23,13 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class DefaultJwkSetConverterTest {
+class JwkSetConverterTest {
 
     private JwkSetConverter converter
 
     @Before
     void setUp() {
-        converter = new JwkSetConverter(JwkConverter.ANY)
+        converter = new JwkSetConverter()
     }
 
     private void assertIllegal(Object input, String msg) {
@@ -112,14 +127,14 @@ class DefaultJwkSetConverterTest {
     @Test
     void testJwkNull() {
         def m = [keys: [null]]
-        assertMalformed m, "JWK Set keys[0]: Value cannot be null."
+        assertMalformed m, "JWK Set keys[0]: JWK cannot be null."
     }
 
     @Test
     void testJwkNotAJSONObject() {
         def val = 42
         def m = [keys: [val]]
-        String msg = "JWK Set keys[0]: Value must be a Map<String,?> (JSON Object). Type found: ${val.class.name}."
+        String msg = "JWK Set keys[0]: JWK must be a Map<String,?> (JSON Object). Type found: ${val.class.name}."
         assertMalformed m, msg
     }
 
@@ -127,7 +142,7 @@ class DefaultJwkSetConverterTest {
     void testJwkEmpty() {
         def val = [:]
         def m = [keys: [val]]
-        String msg = "JWK Set keys[0]: Missing required ${AbstractJwk.KTY} parameter."
+        String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
         assertMalformed m, msg
     }
 
@@ -183,5 +198,14 @@ class DefaultJwkSetConverterTest {
         assertNotNull jwkSet.getKeys()
         assertEquals 1, jwkSet.getKeys().size()
         assertTrue jwkSet.getKeys().iterator().next() instanceof SecretJwk
+    }
+
+    @Test
+    void testApplyFromExistingJwkSet() {
+        def k = Encoders.BASE64URL.encode(TestKeys.HS256.getEncoded())
+        def good = [kty: 'oct', k: k]
+        def m = [keys: [good]]
+        def jwkSet = converter.applyFrom(m)
+        assertSame jwkSet, converter.applyFrom(jwkSet)
     }
 }

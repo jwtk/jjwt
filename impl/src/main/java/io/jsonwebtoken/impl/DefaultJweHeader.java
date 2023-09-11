@@ -39,8 +39,7 @@ public class DefaultJweHeader extends DefaultProtectedHeader implements JweHeade
 
     static final Field<String> ENCRYPTION_ALGORITHM = Fields.string("enc", "Encryption Algorithm");
 
-    @SuppressWarnings("unchecked")
-    public static final Field<PublicJwk<?>> EPK = Fields.builder((Class<PublicJwk<?>>) (Class<?>) PublicJwk.class)
+    public static final Field<PublicJwk<?>> EPK = Fields.builder(JwkConverter.PUBLIC_JWK_CLASS)
             .setId("epk").setName("Ephemeral Public Key")
             .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<byte[]> APU = Fields.bytes("apu", "Agreement PartyUInfo").build();

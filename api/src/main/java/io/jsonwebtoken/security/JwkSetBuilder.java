@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.security;
 
-public interface Parser<T> {
+import io.jsonwebtoken.lang.MapMutator;
 
-    T parse(String input);
+import java.util.Collection;
+
+public interface JwkSetBuilder extends MapMutator<String, Object, JwkSetBuilder>,
+        SecurityBuilder<JwkSet, JwkSetBuilder>, KeyOperationPolicied<JwkSetBuilder> {
+
+    JwkSetBuilder add(Jwk<?> jwk);
+
+    JwkSetBuilder add(Collection<Jwk<?>> c);
+
+    JwkSetBuilder keys(Collection<Jwk<?>> c);
 
 }

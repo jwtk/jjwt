@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.io.ParserBuilder;
 
 /**
- * A builder to construct a {@link Parser} that can parse {@link Jwk}s.
+ * A builder to construct a {@link Parser} that can parse {@link JwkSet}s.
  * Example usage:
  * <blockquote><pre>
- * Jwk&lt;?&gt; jwk = Jwks.parser()
+ * JwkSet jwkSet = Jwks.setParser()
  *         .provider(aJcaProvider)     // optional
  *         .deserializer(deserializer) // optional
  *         .operationPolicy(policy)    // optional
  *         .build()
- *         .parse(jwkString);</pre></blockquote>
+ *         .parse(jwkSetString);</pre></blockquote>
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface JwkParserBuilder extends ParserBuilder<Jwk<?>, JwkParserBuilder>, KeyOperationPolicied<JwkParserBuilder> {
+public interface JwkSetParserBuilder extends ParserBuilder<JwkSet, JwkSetParserBuilder>, KeyOperationPolicied<JwkSetParserBuilder> {
 }

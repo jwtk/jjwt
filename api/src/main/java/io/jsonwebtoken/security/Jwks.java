@@ -41,9 +41,69 @@ public final class Jwks {
     private Jwks() {
     } //prevent instantiation
 
-    private static final String BUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder";
+    private static final String BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder";
+    private static final String PARSER_BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
+    private static final String SET_BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultJwkSetBuilder";
+    private static final String SET_PARSER_BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder";
 
-    private static final String PARSERBUILDER_CLASSNAME = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
+    /**
+     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     *
+     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     */
+    public static DynamicJwkBuilder<?, ?> builder() {
+        return Classes.newInstance(BUILDER_FQCN);
+    }
+
+    /**
+     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
+     * <blockquote><pre>
+     * Jwk&lt;?&gt; jwk = Jwks.parser()
+     *         //.provider(aJcaProvider)     // optional
+     *         //.deserializer(deserializer) // optional
+     *         //.operationPolicy(policy)    // optional
+     *         .build()
+     *         .parse(jwkString);</pre></blockquote>
+     *
+     * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+     */
+    public static JwkParserBuilder parser() {
+        return Classes.newInstance(PARSER_BUILDER_FQCN);
+    }
+
+    /**
+     * Return a new builder used to create {@link JwkSet}s.  For example:
+     * <blockquote><pre>
+     * JwkSet jwkSet = Jwks.set()
+     *     //.provider(aJcaProvider)     // optional
+     *     //.operationPolicy(policy)    // optional
+     *     .add(aJwk)                    // appends a key
+     *     .add(aCollection)             // appends multiple keys
+     *     //.keys(allJwks)              // sets/replaces all keys
+     *     .build()
+     * </pre></blockquote>
+     *
+     * @return a new builder used to create {@link JwkSet}s
+     */
+    public static JwkSetBuilder set() {
+        return Classes.newInstance(SET_BUILDER_FQCN);
+    }
+
+    /**
+     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances. For example:
+     * <blockquote><pre>
+     * JwkSet jwkSet = Jwks.setParser()
+     *         //.provider(aJcaProvider)     // optional
+     *         //.deserializer(deserializer) // optional
+     *         //.operationPolicy(policy)    // optional
+     *         .build()
+     *         .parse(jwkSetString);</pre></blockquote>
+     *
+     * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
+     */
+    public static JwkSetParserBuilder setParser() {
+        return Classes.newInstance(SET_PARSER_BUILDER_FQCN);
+    }
 
     /**
      * Constants for all standard JWK
@@ -394,32 +454,4 @@ public final class Jwks {
         private OP() {
         }
     }
-
-    /**
-     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
-     *
-     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
-     */
-    public static DynamicJwkBuilder<?, ?> builder() {
-        return Classes.newInstance(BUILDER_CLASSNAME);
-    }
-
-    /**
-     * Return a new thread-safe builder used to create {@link Parser Parser}s that parse JSON
-     * into {@link Jwk} instances.  For example:
-     * <blockquote><pre>
-     * Jwk&lt;?&gt; jwk = Jwks.parser()
-     *         .provider(aJcaProvider)     // optional
-     *         .deserializer(deserializer) // optional
-     *         .operationPolicy(policy)    // optional
-     *         .build()
-     *         .parse(jwkString);</pre></blockquote>
-     *
-     * @return a new thread-safe builder used to create {@link Parser Parser}s that parse JSON
-     * into {@link Jwk} instances.
-     */
-    public static JwkParserBuilder<Jwk<?>, ?> parser() {
-        return Classes.newInstance(PARSERBUILDER_CLASSNAME);
-    }
-
 }

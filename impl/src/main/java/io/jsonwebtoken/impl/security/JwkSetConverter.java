@@ -1,9 +1,26 @@
+/*
+ * Copyright © 2023 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkSet;
 import io.jsonwebtoken.security.MalformedKeyException;
@@ -20,6 +37,14 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
     private final Converter<Jwk<?>, Object> JWK_CONVERTER;
     private final Field<Set<Jwk<?>>> FIELD;
 
+    public JwkSetConverter() {
+        this(JwkBuilderSupplier.DEFAULT);
+    }
+
+    public JwkSetConverter(Supplier<DynamicJwkBuilder<?, ?>> supplier) {
+        this(new JwkConverter<>(supplier));
+    }
+
     public JwkSetConverter(Converter<Jwk<?>, Object> jwkConverter) {
         this.JWK_CONVERTER = Assert.notNull(jwkConverter, "JWK converter cannot be null.");
         this.FIELD = DefaultJwkSet.field(jwkConverter);
@@ -33,6 +58,9 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
     @Override
     public JwkSet applyFrom(Object o) {
         Assert.notNull(o, "Value cannot be null.");
+        if (o instanceof JwkSet) {
+            return (JwkSet) o;
+        }
         if (!(o instanceof Map)) {
             String msg = "Value must be a Map<String,?> (JSON Object). Type found: " + o.getClass().getName() + ".";
             throw new IllegalArgumentException(msg);
@@ -49,6 +77,9 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
         if (val == null) {
             String msg = "JWK Set " + FIELD + " value cannot be null.";
             throw new MalformedKeySetException(msg);
+        }
+        if (val instanceof Supplier<?>) {
+            val = ((Supplier<?>) val).get();
         }
         if (!(val instanceof Collection)) {
             String msg = "JWK Set " + FIELD + " value must be a Collection (JSON Array). Type found: " +

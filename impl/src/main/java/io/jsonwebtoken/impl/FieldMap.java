@@ -26,7 +26,6 @@ import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
-import java.lang.reflect.Array;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
@@ -62,7 +61,7 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         this(fields, Assert.notNull(values, "Map argument cannot be null."), false);
     }
 
-    protected FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values, boolean mutable) {
+    public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values, boolean mutable) {
         Assert.notNull(fields, "Field registry cannot be null.");
         Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
         this.FIELDS = fields;
@@ -90,14 +89,6 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
     @Override
     public String getName() {
         return "Map";
-    }
-
-    public static boolean isReducibleToNull(Object v) {
-        return v == null ||
-                (v instanceof String && !Strings.hasText((String) v)) ||
-                (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
-                (v instanceof Map && Collections.isEmpty((Map<?, ?>) v)) ||
-                (v.getClass().isArray() && Array.getLength(v) == 0);
     }
 
     @Override
@@ -170,7 +161,7 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
     }
 
     private Object nullSafePut(String name, Object value) {
-        if (isReducibleToNull(value)) {
+        if (Objects.isEmpty(value)) {
             return remove(name);
         } else {
             this.idiomaticValues.put(name, value);
@@ -182,7 +173,7 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
 
         final String id = field.getId();
 
-        if (isReducibleToNull(rawValue)) {
+        if (Objects.isEmpty(rawValue)) {
             return remove(id);
         }
 

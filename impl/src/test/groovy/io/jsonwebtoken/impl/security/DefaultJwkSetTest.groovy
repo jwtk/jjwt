@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.impl.security
 
-public interface Parser<T> {
+import org.junit.Test
 
-    T parse(String input);
+import static org.junit.Assert.assertEquals
 
+class DefaultJwkSetTest {
+
+    @Test
+    void testName() {
+        assertEquals "JWK Set", new DefaultJwkSet(DefaultJwkSet.KEYS, [:]).getName()
+    }
 }

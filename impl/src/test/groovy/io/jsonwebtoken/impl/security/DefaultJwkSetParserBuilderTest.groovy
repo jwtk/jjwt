@@ -1,24 +1,46 @@
+/*
+ * Copyright © 2023 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.Parser
 import io.jsonwebtoken.jackson.io.JacksonDeserializer
-import io.jsonwebtoken.security.KeyOperationPolicy
+import io.jsonwebtoken.security.JwkSet
+import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeySetException
 import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
-class DefaultJwkSetParserTest {
+class DefaultJwkSetParserBuilderTest {
 
     static Deserializer<Map<String, ?>> DESERIALIZER = new JacksonDeserializer<>()
-    static KeyOperationPolicy POLICY = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY
-    private DefaultJwkSetParser parser
+    private Parser<JwkSet> parser
 
     @Before
     void setUp() {
-        parser = new DefaultJwkSetParser(null, DESERIALIZER, POLICY);
+        parser = new DefaultJwkSetParserBuilder().deserializer(DESERIALIZER).build()
+    }
+
+    @Test
+    void testStaticFactoryMethod() {
+        assertTrue Jwks.setParser() instanceof DefaultJwkSetParserBuilder
     }
 
     /**
@@ -32,12 +54,12 @@ class DefaultJwkSetParserTest {
                 throw new DeserializationException("foo")
             }
         }
-        parser = new DefaultJwkSetParser(null, deserializer, POLICY)
+        parser = new DefaultJwkSetParserBuilder().deserializer(deserializer).build()
 
         try {
             parser.parse('foo')
         } catch (MalformedKeySetException expected) {
-            String msg = "Unable to deserialize content to a JWK Set: foo"
+            String msg = "Unable to deserialize JWK Set: foo"
             assertEquals msg, expected.message
         }
     }
@@ -62,7 +84,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{}')
         } catch (MalformedKeySetException expected) {
-            String msg = "Missing required JWK Set 'keys' member.";
+            String msg = "Missing required ${DefaultJwkSet.KEYS} parameter."
             assertEquals msg, expected.message
         }
     }
@@ -72,7 +94,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"answerToLife":42}')
         } catch (MalformedKeySetException expected) {
-            String msg = "Missing required JWK Set 'keys' member.";
+            String msg = "Missing required ${DefaultJwkSet.KEYS} parameter."
             assertEquals msg, expected.message
         }
     }
@@ -82,7 +104,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":null}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set 'keys' value cannot be null.";
+            String msg = "JWK Set ${DefaultJwkSet.KEYS} value cannot be null."
             assertEquals msg, expected.message
         }
     }
@@ -92,8 +114,8 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":42}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set 'keys' value must be a Collection (JSON Array). Type found: " +
-                    "java.lang.Integer";
+            String msg = "JWK Set ${DefaultJwkSet.KEYS} value must be a Collection (JSON Array). Type found: " +
+                    "java.lang.Integer"
             assertEquals msg, expected.message
         }
     }
@@ -103,7 +125,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set 'keys' value is empty.";
+            String msg = "JWK Set ${DefaultJwkSet.KEYS} collection cannot be empty."
             assertEquals msg, expected.message
         }
     }
@@ -113,7 +135,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[null]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0] element is null.";
+            String msg = "JWK Set keys[0]: JWK cannot be null."
             assertEquals msg, expected.message
         }
     }
@@ -123,7 +145,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[42]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0] element is not a JSON Object. Type found: java.lang.Integer";
+            String msg = "JWK Set keys[0]: JWK must be a Map<String,?> (JSON Object). Type found: java.lang.Integer."
             assertEquals msg, expected.message
         }
     }
@@ -133,7 +155,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[{}]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0] element is an empty JSON Object.";
+            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
             assertEquals msg, expected.message
         }
     }
@@ -143,7 +165,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[{"hello":42}]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter.";
+            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
             assertEquals msg, expected.message
         }
     }
@@ -153,7 +175,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[{"kty":null}]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter.";
+            String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be null."
             assertEquals msg, expected.message
         }
     }
@@ -163,7 +185,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[{"kty":""}]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter.";
+            String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be empty."
             assertEquals msg, expected.message
         }
     }
@@ -173,7 +195,7 @@ class DefaultJwkSetParserTest {
         try {
             parser.parse('{"keys":[{"kty":"oct"}]}')
         } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: Secret JWK is missing required ${DefaultSecretJwk.K} value.";
+            String msg = "JWK Set keys[0]: Secret JWK is missing required ${DefaultSecretJwk.K} value."
             assertEquals msg, expected.message
         }
     }

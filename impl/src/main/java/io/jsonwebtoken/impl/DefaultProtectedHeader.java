@@ -44,8 +44,7 @@ public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHe
 
     static final Field<URI> JKU = Fields.uri("jku", "JWK Set URL");
 
-    @SuppressWarnings("unchecked")
-    static final Field<PublicJwk<?>> JWK = Fields.builder((Class<PublicJwk<?>>) (Class<?>) PublicJwk.class)
+    static final Field<PublicJwk<?>> JWK = Fields.builder(JwkConverter.PUBLIC_JWK_CLASS)
             .setId("jwk").setName("JSON Web Key")
             .setConverter(JwkConverter.PUBLIC_JWK).build();
     static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
