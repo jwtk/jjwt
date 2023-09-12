@@ -15,52 +15,25 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Services;
-import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.JwkParser;
+import io.jsonwebtoken.impl.io.ConvertingParser;
+import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.io.Parser;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkParserBuilder;
-import io.jsonwebtoken.security.KeyOperationPolicy;
+import io.jsonwebtoken.security.MalformedKeyException;
 
-import java.security.Provider;
-import java.util.Map;
-
-public class DefaultJwkParserBuilder implements JwkParserBuilder {
-
-    private Provider provider;
-
-    private Deserializer<Map<String, ?>> deserializer;
-
-    private KeyOperationPolicy opsPolicy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY;
-
+public class DefaultJwkParserBuilder extends AbstractJwkParserBuilder<Jwk<?>, JwkParserBuilder>
+        implements JwkParserBuilder {
     @Override
-    public JwkParserBuilder provider(Provider provider) {
-        this.provider = provider;
-        return this;
-    }
-
-    @Override
-    public JwkParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
-        this.deserializer = deserializer;
-        return this;
-    }
-
-    @Override
-    public JwkParserBuilder operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException {
-        this.opsPolicy = Assert.notNull(policy, "KeyOperationPolicy may not be null.");
-        Assert.notEmpty(policy.getOperations(), "KeyOperationPolicy's operations may not be null or empty.");
-        this.opsPolicy = policy;
-        return this;
-    }
-
-    @Override
-    public JwkParser build() {
-        if (this.deserializer == null) {
-            // try to find one based on the services available:
-            //noinspection unchecked
-            this.deserializer = Services.loadFirst(Deserializer.class);
-        }
-
-        return new DefaultJwkParser(this.provider, this.deserializer, this.opsPolicy);
+    public Parser<Jwk<?>> doBuild() {
+        return new ConvertingParser<>(this.deserializer,
+                new JwkConverter<>(new JwkBuilderSupplier(this.provider, this.operationPolicy)),
+                new Function<Throwable, RuntimeException>() {
+                    @Override
+                    public RuntimeException apply(Throwable t) {
+                        String msg = "Unable to deserialize JWK: " + t.getMessage();
+                        return new MalformedKeyException(msg, t);
+                    }
+                });
     }
 }

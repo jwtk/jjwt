@@ -101,8 +101,8 @@ class AbstractProtectedHeaderTest {
             h([jwk: 42])
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: 42. " +
-                    "Value must be a Jwk<?> or Map<String,?>. Type found: java.lang.Integer."
+            String msg = "Invalid JWT header ${DefaultProtectedHeader.JWK} value: 42. " +
+                    "JWK must be a Map<String,?> (JSON Object). Type found: java.lang.Integer."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -126,13 +126,13 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithBadMapKeys() {
-        def m = [42: "hello"]
+        def m = [kty: 'oct', 42: "hello"]
         try {
             h([jwk: m])
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {42=hello}. JWK map keys must be Strings. " +
-                    "Encountered key '42' of type java.lang.Integer."
+            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {kty=oct, 42=hello}. JWK map keys " +
+                    "must be Strings. Encountered key '42' of type java.lang.Integer."
             assertEquals msg, expected.getMessage()
         }
     }

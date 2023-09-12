@@ -33,7 +33,7 @@ public class DefaultClaims extends FieldMap implements Claims {
             "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
             "Anything more complex is expected to be already converted to your desired type by the JSON Deserializer " +
             "implementation. You may specify a custom Deserializer for a JwtParser with the desired conversion " +
-            "configuration via the JwtParserBuilder.deserializeJsonWith() method. " +
+            "configuration via the JwtParserBuilder.deserializer() method. " +
             "See https://github.com/jwtk/jjwt#custom-json-processor for more information. If using Jackson, you can " +
             "specify custom claim POJO types as described in https://github.com/jwtk/jjwt#json-jackson-custom-types";
 

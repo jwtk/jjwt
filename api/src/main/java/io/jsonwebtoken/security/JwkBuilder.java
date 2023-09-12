@@ -41,7 +41,7 @@ import java.util.Collection;
  * @since JJWT_RELEASE_VERSION
  */
 public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
-        extends MapMutator<String, Object, T>, SecurityBuilder<J, T> {
+        extends MapMutator<String, Object, T>, SecurityBuilder<J, T>, KeyOperationPolicied<T> {
 
     /**
      * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)
@@ -183,32 +183,4 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * @see Jwks.OP
      */
     T operations(Collection<KeyOperation> ops) throws IllegalArgumentException;
-
-    /**
-     * Sets the builder's {@link KeyOperationPolicy} that determines which key
-     * {@link #operations(Collection) operations} may be assigned to the JWK. Unless overridden by this method, the
-     * builder uses the default RFC-recommended policy where:
-     * <ul>
-     *     <li>All {@link Jwks.OP RFC-standard key operations} are supported.</li>
-     *     <li>Multiple unrelated operations may not be assigned to the JWK per the
-     *     <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
-     * <blockquote><pre>
-     * Multiple unrelated key operations SHOULD NOT be specified for a key
-     * because of the potential vulnerabilities associated with using the
-     * same key with multiple algorithms.
-     * </pre></blockquote></li>
-     * </ul>
-     *
-     * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
-     * one can be created by using the {@link Jwks.OP#policy()} builder, or by implementing the
-     * {@link KeyOperationPolicy} interface directly.</p>
-     *
-     * @param policy the policy to apply during JWK construction
-     * @return the builder for method chaining.
-     * @throws IllegalArgumentException if the specified policy is null, or the policy's
-     *                                  {@link KeyOperationPolicy#getOperations() operations} collection is null or
-     *                                  empty.
-     * @see Jwks.OP#policy()
-     */
-    T operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
 }
