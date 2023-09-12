@@ -19,10 +19,11 @@ import io.jsonwebtoken.impl.FieldMap;
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkSet;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +51,16 @@ public class DefaultJwkSet extends FieldMap implements JwkSet {
     }
 
     @Override
-    public Collection<? extends Jwk<?>> getKeys() {
-        return get(KEYS);
+    public Set<Jwk<?>> getKeys() {
+        Set<Jwk<?>> jwks = get(KEYS);
+        if (Collections.isEmpty(jwks)) {
+            return Collections.emptySet();
+        }
+        return Collections.immutable(jwks);
+    }
+
+    @Override
+    public Iterator<Jwk<?>> iterator() {
+        return getKeys().iterator(); // immutable because of getKeys() return value
     }
 }

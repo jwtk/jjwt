@@ -111,7 +111,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
     public JwkThumbprint thumbprint(final HashAlgorithm alg) {
         String json = toThumbprintJson();
         Assert.hasText(json, "Canonical JWK Thumbprint JSON cannot be null or empty.");
-        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8); // https://www.rfc-editor.org/rfc/rfc7638#section-3 #2
         byte[] digest = alg.digest(new DefaultRequest<>(bytes, this.context.getProvider(), this.context.getRandom()));
         return new DefaultJwkThumbprint(digest, alg);
     }

@@ -100,7 +100,7 @@ public final class Objects {
      * <p>or {@code false} otherwise.</p>
      *
      * @param v object to check
-     * @return {@code true} if the specified argument is empty, {@code false otherwise.
+     * @return {@code true} if the specified argument is empty, {@code false} otherwise.
      * @since JJWT_RELEASE_VERSION
      */
     public static boolean isEmpty(Object v) {

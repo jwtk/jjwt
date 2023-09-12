@@ -15,14 +15,66 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.lang.RedactedSupplier
+import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
+import static org.junit.Assert.*
 
 class DefaultJwkSetTest {
 
     @Test
     void testName() {
         assertEquals "JWK Set", new DefaultJwkSet(DefaultJwkSet.KEYS, [:]).getName()
+    }
+
+    private static void unsupported(Closure<?> c) {
+        try {
+            c()
+            fail()
+        } catch (UnsupportedOperationException expected) {
+            String msg = 'JWK Set instance is immutable and may not be modified.'
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testImmutable() {
+        def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [a: 'b'])
+        unsupported { set.put('foo', 'bar') }
+        unsupported { set.putAll([c: 'd', e: 'f']) }
+        unsupported { set.remove('a') }
+        unsupported { set.clear() }
+    }
+
+    @Test(expected = UnsupportedOperationException)
+    void testGetKeysImmutable() {
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
+        def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
+        def result = set.getKeys()
+        result.remove(jwk) // shouldn't be able
+        fail()
+    }
+
+    @Test(expected = UnsupportedOperationException)
+    void testIteratorImmutable() {
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
+        def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
+        def i = set.iterator()
+        assertEquals jwk, i.next()
+        i.remove() // shouldn't be able to do this
+        fail()
+    }
+
+    /**
+     * Asserts that the raw keys value is a RedactedSupplier and not a raw value due to potential sensitivity if
+     * the JwkSet contains secret or private JWKs.
+     */
+    @Test
+    void testKeysFromGetIsRedactedSupplier() {
+        def jwk = Jwks.builder().key(TestKeys.HS256).build()
+        def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
+        def result = set.get('keys')
+        assertTrue result instanceof RedactedSupplier
     }
 }

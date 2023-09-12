@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.KeyOperationPolicy
 import io.jsonwebtoken.security.MalformedKeySetException
 import org.junit.Before
 import org.junit.Test
@@ -305,5 +306,26 @@ class DefaultJwkSetBuilderTest {
         // ensure default has been applied instead of null:
         assertSame defaultPolicy, builder.operationPolicy
         assertSame defaultPolicy, builder.converter.JWK_CONVERTER.supplier.operationPolicy
+    }
+
+    @Test
+    void testPolicyChangeValidatesExistingJwks() {
+        def key = TestKeys.HS256
+        def badMap = [
+                kty    : 'oct',
+                k      : Encoders.BASE64URL.encode(key.getEncoded()),
+                key_ops: ['sign', 'encrypt'] // unrelated, but we'll allow next:
+        ]
+        KeyOperationPolicy policy = Jwks.OP.policy().allowUnrelated(true).build()
+        def jwk = Jwks.builder().operationPolicy(policy).add(badMap).build()
+
+        builder.operationPolicy(policy)
+        builder.add(jwk) // allowed due to less restrictive policy
+
+        //now enable new more restrictive policy:
+        policy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY
+        String msg = "Unrelated key operations are not allowed. KeyOperation " +
+                "[${Jwks.OP.ENCRYPT}] is unrelated to [${Jwks.OP.SIGN}]."
+        assertIllegal msg, { builder.operationPolicy(policy) }
     }
 }

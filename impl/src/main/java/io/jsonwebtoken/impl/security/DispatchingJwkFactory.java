@@ -106,7 +106,7 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
                 "key of type " + key.getClass().getName() :
                 "kty value '" + kty + "'";
         String msg = "Unable to create JWK for unrecognized " + reason +
-                ": there is " + "no known JWK Factory capable of creating JWKs for this key type.";
+                ": there is no known JWK Factory capable of creating JWKs for this key type.";
         return new UnsupportedKeyException(msg);
     }
 }

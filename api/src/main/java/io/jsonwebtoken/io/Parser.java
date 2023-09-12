@@ -18,13 +18,25 @@ package io.jsonwebtoken.io;
 /**
  * A Parser converts character input into a Java object.
  *
- * @param <T> the instance type returned.
+ * <p>Semantically, this interface might have been more accurately named
+ * <a href="https://en.wikipedia.org/wiki/Marshalling_(computer_science)">Unmarshaller</a> because it technically
+ * converts a content stream into a Java object. However, the {@code Parser} name was chosen for consistency with the
+ * {@link io.jsonwebtoken.JwtParser JwtParser} concept (which is a 'real' parser that scans text for tokens).  This
+ * helps avoid confusion when trying to find similar concepts in the JJWT API by using the same taxonomy, for
+ * example:</p>
+ * <ul>
+ *     <li>{@link io.jsonwebtoken.Jwts#parser() Jwts.parser()}</li>
+ *     <li>{@link io.jsonwebtoken.security.Jwks#parser() Jwks.parser()}</li>
+ *     <li>{@link io.jsonwebtoken.security.Jwks#setParser() Jwks.setParser()}</li>
+ * </ul>
+ *
+ * @param <T> the instance type created after parsing/unmarshalling
  * @since JJWT_RELEASE_VERSION
  */
 public interface Parser<T> {
 
     /**
-     * Parse the specified character data input into a Java object.
+     * Parse the specified input into a Java object.
      *
      * @param input the string to parse into a Java object.
      * @return the Java object represented by the specified {@code input} stream.

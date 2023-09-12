@@ -16,8 +16,10 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.security.JwkSet
 import io.jsonwebtoken.security.MalformedKeySetException
 import io.jsonwebtoken.security.SecretJwk
+import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Before
 import org.junit.Test
 
@@ -48,6 +50,14 @@ class JwkSetConverterTest {
         } catch (MalformedKeySetException expected) {
             assertEquals msg, expected.message
         }
+    }
+
+    static void assertEmpty(JwkSet result) {
+        // bad input ignored by default per https://www.rfc-editor.org/rfc/rfc7517.html#section-5 :
+        assertEquals 0, result.size()
+        assertEquals 0, result.getKeys().size()
+        assertFalse result.getKeys().iterator().hasNext()
+        assertFalse result.iterator().hasNext()
     }
 
     @Test
@@ -127,11 +137,26 @@ class JwkSetConverterTest {
     @Test
     void testJwkNull() {
         def m = [keys: [null]]
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testJwkNullNotIgnored() {
+        converter = new JwkSetConverter(false)
+        def m = [keys: [null]]
         assertMalformed m, "JWK Set keys[0]: JWK cannot be null."
     }
 
     @Test
     void testJwkNotAJSONObject() {
+        def val = 42
+        def m = [keys: [val]]
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testJwkNotAJSONObjectNotIgnored() {
+        converter = new JwkSetConverter(false)
         def val = 42
         def m = [keys: [val]]
         String msg = "JWK Set keys[0]: JWK must be a Map<String,?> (JSON Object). Type found: ${val.class.name}."
@@ -142,12 +167,30 @@ class JwkSetConverterTest {
     void testJwkEmpty() {
         def val = [:]
         def m = [keys: [val]]
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testJwkEmptyNotIgnored() {
+        converter = new JwkSetConverter(false)
+        def val = [:]
+        def m = [keys: [val]]
         String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
         assertMalformed m, msg
     }
 
     @Test
     void testJwkKtyNonString() {
+        def val = 42
+        def jwk = [kty: val]
+        def m = [keys: [jwk]]
+        // bad input ignored by default per https://www.rfc-editor.org/rfc/rfc7517.html#section-5 :
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testJwkKtyNonStringNotIgnored() {
+        converter = new JwkSetConverter(false)
         def val = 42
         def jwk = [kty: val]
         def m = [keys: [jwk]]
@@ -160,12 +203,29 @@ class JwkSetConverterTest {
         def val = ''
         def jwk = [kty: val]
         def m = [keys: [jwk]]
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testJwkKtyEmptyNotIgnored() {
+        converter = new JwkSetConverter(false)
+        def val = ''
+        def jwk = [kty: val]
+        def m = [keys: [jwk]]
         String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be empty."
         assertMalformed m, msg
     }
 
     @Test
     void testJwkMissingKeyMaterial() {
+        def jwk = [kty: 'oct'] // missing 'k' parameter
+        def m = [keys: [jwk]]
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testJwkMissingKeyMaterialNotIgnored() {
+        converter = new JwkSetConverter(false)
         def jwk = [kty: 'oct'] // missing 'k' parameter
         def m = [keys: [jwk]]
         String msg = "JWK Set keys[0]: Secret JWK is missing required ${DefaultSecretJwk.K} value."
@@ -177,12 +237,33 @@ class JwkSetConverterTest {
      */
     @Test
     void testExceptionMessageIncrements() {
+        converter = new JwkSetConverter(false)
         def k = Encoders.BASE64URL.encode(TestKeys.HS256.getEncoded())
         def good = [kty: 'oct', k: k]
         def bad = [kty: 'oct']
         def m = [keys: [good, bad]]
         String msg = "JWK Set keys[1]: Secret JWK is missing required ${DefaultSecretJwk.K} value."
         assertMalformed m, msg
+    }
+
+    @Test
+    void testUnsupportedJwk() {
+        def m = [keys: [[kty: 'foo']]]
+        assertEmpty converter.applyFrom(m)
+    }
+
+    @Test
+    void testUnsupportedNotIgnored() {
+        converter = new JwkSetConverter(false)
+        def m = [keys: [[kty: 'foo']]]
+        try {
+            converter.applyFrom(m)
+            fail()
+        } catch (UnsupportedKeyException expected) {
+            String msg = "JWK Set keys[0]: Unable to create JWK for unrecognized kty value 'foo': there is no known " +
+                    "JWK Factory capable of creating JWKs for this key type."
+            assertEquals msg, expected.message
+        }
     }
 
     /**

@@ -23,8 +23,9 @@ import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkSet;
-import io.jsonwebtoken.security.MalformedKeyException;
+import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.MalformedKeySetException;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -37,17 +38,29 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
     private final Converter<Jwk<?>, Object> JWK_CONVERTER;
     private final Field<Set<Jwk<?>>> FIELD;
 
+    private final boolean ignoreUnsupported;
+
     public JwkSetConverter() {
-        this(JwkBuilderSupplier.DEFAULT);
+        // ignore is true by default per https://www.rfc-editor.org/rfc/rfc7517.html#section-5:
+        this(JwkBuilderSupplier.DEFAULT, true);
     }
 
-    public JwkSetConverter(Supplier<DynamicJwkBuilder<?, ?>> supplier) {
-        this(new JwkConverter<>(supplier));
+    public JwkSetConverter(boolean ignoreUnsupported) {
+        this(JwkBuilderSupplier.DEFAULT, ignoreUnsupported);
     }
 
-    public JwkSetConverter(Converter<Jwk<?>, Object> jwkConverter) {
+    public JwkSetConverter(Supplier<DynamicJwkBuilder<?, ?>> supplier, boolean ignoreUnsupported) {
+        this(new JwkConverter<>(supplier), ignoreUnsupported);
+    }
+
+    public JwkSetConverter(Converter<Jwk<?>, Object> jwkConverter, boolean ignoreUnsupported) {
         this.JWK_CONVERTER = Assert.notNull(jwkConverter, "JWK converter cannot be null.");
         this.FIELD = DefaultJwkSet.field(jwkConverter);
+        this.ignoreUnsupported = ignoreUnsupported;
+    }
+
+    public boolean isIgnoreUnsupported() {
+        return ignoreUnsupported;
     }
 
     @Override
@@ -111,16 +124,23 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
             try {
                 Jwk<?> jwk = JWK_CONVERTER.applyFrom(candidate);
                 jwks.add(jwk);
-            } catch (IllegalArgumentException | MalformedKeyException e) {
-                String msg = "JWK Set keys[" + i + "]: " + e.getMessage();
-                throw new MalformedKeySetException(msg, e);
+            } catch (UnsupportedKeyException e) {
+                if (!ignoreUnsupported) {
+                    String msg = "JWK Set keys[" + i + "]: " + e.getMessage();
+                    throw new UnsupportedKeyException(msg, e);
+                }
+            } catch (IllegalArgumentException | KeyException e) {
+                if (!ignoreUnsupported) {
+                    String msg = "JWK Set keys[" + i + "]: " + e.getMessage();
+                    throw new MalformedKeySetException(msg, e);
+                }
             }
             i++;
         }
 
-        // Replace the `keys` value with (immutable) validated entries:
+        // Replace the `keys` value with validated entries:
         src.remove(FIELD.getId());
-        src.put(FIELD.getId(), Collections.immutable(jwks));
+        src.put(FIELD.getId(), jwks);
         return new DefaultJwkSet(FIELD, src);
     }
 }

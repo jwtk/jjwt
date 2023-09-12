@@ -15,11 +15,33 @@
  */
 package io.jsonwebtoken.security;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
-public interface JwkSet extends Map<String, Object> {
+/**
+ * A JWK Set is an immutable JSON Object that represents a Set of {@link Jwk}s as defined by
+ * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-5">RFC 7517 JWK Set Format</a>. Per that specification,
+ * any number of name/value pairs may be present in a {@code JwkSet}, but only a non-empty {@link #getKeys() keys}
+ * set <em>MUST</em> be present.
+ *
+ * <p><b>Immutability</b></p>
+ *
+ * <p>JWK Sets are immutable and cannot be changed after they are created.  {@code JwkSet} extends the
+ * {@link Map} interface purely out of convenience: to allow easy marshalling to JSON as well as name/value
+ * pair access and key/value iteration, and other conveniences provided by the Map interface.  Attempting to call any of
+ * the {@link Map} interface's mutation methods however (such as {@link Map#put(Object, Object) put},
+ * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
+ * {@link UnsupportedOperationException}.</p>
+ *
+ * @since JJWT_RELEASE_VERSION
+ */
+public interface JwkSet extends Map<String, Object>, Iterable<Jwk<?>> {
 
-    Collection<? extends Jwk<?>> getKeys();
+    /**
+     * Returns the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
+     *
+     * @return the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
+     */
+    Set<Jwk<?>> getKeys();
 
 }

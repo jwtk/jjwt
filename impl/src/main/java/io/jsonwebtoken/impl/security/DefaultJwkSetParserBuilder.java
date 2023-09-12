@@ -24,9 +24,19 @@ import io.jsonwebtoken.security.MalformedKeySetException;
 
 public class DefaultJwkSetParserBuilder extends AbstractJwkParserBuilder<JwkSet, JwkSetParserBuilder>
         implements JwkSetParserBuilder {
+
+    private boolean ignoreUnsupported = true;
+
+    @Override
+    public JwkSetParserBuilder ignoreUnsupported(boolean ignore) {
+        this.ignoreUnsupported = ignore;
+        return this;
+    }
+
     @Override
     public Parser<JwkSet> doBuild() {
-        JwkSetConverter converter = new JwkSetConverter(new JwkBuilderSupplier(this.provider, this.operationPolicy));
+        JwkBuilderSupplier supplier = new JwkBuilderSupplier(this.provider, this.operationPolicy);
+        JwkSetConverter converter = new JwkSetConverter(supplier, this.ignoreUnsupported);
         return new ConvertingParser<>(this.deserializer, converter,
                 new Function<Throwable, RuntimeException>() {
                     @Override

@@ -18,24 +18,42 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Parser
-import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import io.jsonwebtoken.security.JwkSet
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeySetException
 import org.junit.Before
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 class DefaultJwkSetParserBuilderTest {
 
-    static Deserializer<Map<String, ?>> DESERIALIZER = new JacksonDeserializer<>()
     private Parser<JwkSet> parser
+
+    private static void assertMalformed(String msg, Closure<?> c) {
+        try {
+            c()
+            fail()
+        } catch (MalformedKeySetException expected) {
+            assertEquals msg, expected.message
+        }
+    }
+
+    private void assertMalformed(String input, String msg) {
+        assertMalformed(msg, { parser.parse(input) })
+    }
+
+    private static void assertEmpty(JwkSet result) {
+        JwkSetConverterTest.assertEmpty(result)
+    }
+
+    private static DefaultJwkSetParserBuilder builder() {
+        return new DefaultJwkSetParserBuilder()
+    }
 
     @Before
     void setUp() {
-        parser = new DefaultJwkSetParserBuilder().deserializer(DESERIALIZER).build()
+        parser = builder().build()
     }
 
     @Test
@@ -81,122 +99,111 @@ class DefaultJwkSetParserBuilderTest {
 
     @Test
     void testEmptyJsonObject() {
-        try {
-            parser.parse('{}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "Missing required ${DefaultJwkSet.KEYS} parameter."
-            assertEquals msg, expected.message
-        }
+        assertMalformed '{}', "Missing required ${DefaultJwkSet.KEYS} parameter."
     }
 
     @Test
     void testJsonObjectWithoutKeysMember() {
-        try {
-            parser.parse('{"answerToLife":42}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "Missing required ${DefaultJwkSet.KEYS} parameter."
-            assertEquals msg, expected.message
-        }
+        assertMalformed '{"answerToLife":42}', "Missing required ${DefaultJwkSet.KEYS} parameter."
     }
 
     @Test
     void testKeysMemberNull() {
-        try {
-            parser.parse('{"keys":null}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set ${DefaultJwkSet.KEYS} value cannot be null."
-            assertEquals msg, expected.message
-        }
+        assertMalformed '{"keys":null}', "JWK Set ${DefaultJwkSet.KEYS} value cannot be null."
     }
 
     @Test
     void testKeysMemberNonCollection() {
-        try {
-            parser.parse('{"keys":42}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set ${DefaultJwkSet.KEYS} value must be a Collection (JSON Array). Type found: " +
-                    "java.lang.Integer"
-            assertEquals msg, expected.message
-        }
+        String msg = "JWK Set ${DefaultJwkSet.KEYS} value must be a Collection (JSON Array). Type found: " +
+                "java.lang.Integer"
+        assertMalformed '{"keys":42}', msg
     }
 
     @Test
     void testKeysMemberEmptyCollection() {
-        try {
-            parser.parse('{"keys":[]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set ${DefaultJwkSet.KEYS} collection cannot be empty."
-            assertEquals msg, expected.message
-        }
+        assertMalformed '{"keys":[]}', "JWK Set ${DefaultJwkSet.KEYS} collection cannot be empty."
     }
 
     @Test
     void testKeysMemberCollectionWithNullElement() {
-        try {
-            parser.parse('{"keys":[null]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK cannot be null."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[null]}')
+    }
+
+    @Test
+    void testKeysMemberCollectionWithNullElementNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        assertMalformed '{"keys":[null]}', "JWK Set keys[0]: JWK cannot be null."
     }
 
     @Test
     void testKeysMemberCollectionWithNonObjectElement() {
-        try {
-            parser.parse('{"keys":[42]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK must be a Map<String,?> (JSON Object). Type found: java.lang.Integer."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[42]}')
+    }
+
+    @Test
+    void testKeysMemberCollectionWithNonObjectElementNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        String msg = "JWK Set keys[0]: JWK must be a Map<String,?> (JSON Object). Type found: java.lang.Integer."
+        assertMalformed '{"keys":[42]}', msg
     }
 
     @Test
     void testKeysMemberCollectionWithEmptyObjectElement() {
-        try {
-            parser.parse('{"keys":[{}]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[{}]}')
+    }
+
+    @Test
+    void testKeysMemberCollectionWithEmptyObjectElementNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
+        assertMalformed '{"keys":[{}]}', msg
     }
 
     @Test
     void testJwkWithMissingKty() {
-        try {
-            parser.parse('{"keys":[{"hello":42}]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[{"hello":42}]}')
+    }
+
+    @Test
+    void testJwkWithMissingKtyNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        String msg = "JWK Set keys[0]: JWK is missing required ${AbstractJwk.KTY} parameter."
+        assertMalformed '{"keys":[{"hello":42}]}', msg
     }
 
     @Test
     void testJwkWithNullKty() {
-        try {
-            parser.parse('{"keys":[{"kty":null}]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be null."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[{"kty":null}]}')
+    }
+
+    @Test
+    void testJwkWithNullKtyNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be null."
+        assertMalformed '{"keys":[{"kty":null}]}', msg
     }
 
     @Test
     void testJwkWithEmptyKty() {
-        try {
-            parser.parse('{"keys":[{"kty":""}]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be empty."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[{"kty":""}]}')
+    }
+
+    @Test
+    void testJwkWithEmptyKtyNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        String msg = "JWK Set keys[0]: JWK ${AbstractJwk.KTY} value cannot be empty."
+        assertMalformed '{"keys":[{"kty":""}]}', msg
     }
 
     @Test
     void testKeysElementWithMissingKeyMaterial() {
-        try {
-            parser.parse('{"keys":[{"kty":"oct"}]}')
-        } catch (MalformedKeySetException expected) {
-            String msg = "JWK Set keys[0]: Secret JWK is missing required ${DefaultSecretJwk.K} value."
-            assertEquals msg, expected.message
-        }
+        assertEmpty parser.parse('{"keys":[{"kty":"oct"}]}')
+    }
+
+    @Test
+    void testKeysElementWithMissingKeyMaterialNotIgnored() {
+        parser = builder().ignoreUnsupported(false).build()
+        String msg = "JWK Set keys[0]: Secret JWK is missing required ${DefaultSecretJwk.K} value."
+        assertMalformed '{"keys":[{"kty":"oct"}]}', msg
     }
 }

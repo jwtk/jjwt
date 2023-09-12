@@ -69,9 +69,16 @@ public class DefaultJwkSetBuilder extends AbstractSecurityBuilder<JwkSet, JwkSet
 
     private JwkSetBuilder refresh() {
         JwkConverter<Jwk<?>> jwkConverter = new JwkConverter<>(new JwkBuilderSupplier(this.provider, this.operationPolicy));
-        this.converter = new JwkSetConverter(jwkConverter);
+        this.converter = new JwkSetConverter(jwkConverter, this.converter.isIgnoreUnsupported());
         Field<Set<Jwk<?>>> field = DefaultJwkSet.field(jwkConverter);
         this.map = new FieldMap(Fields.registry(field), this.map, true);
+        // a new policy could have been applied, ensure that any existing keys match that policy:
+        Set<Jwk<?>> jwks = this.map.get(field);
+        if (!Collections.isEmpty(jwks)) {
+            for (Jwk<?> jwk : jwks) {
+                this.operationPolicy.validate(jwk.getOperations());
+            }
+        }
         return this;
     }
 
@@ -95,6 +102,7 @@ public class DefaultJwkSetBuilder extends AbstractSecurityBuilder<JwkSet, JwkSet
     @Override
     public JwkSetBuilder add(Jwk<?> jwk) {
         if (jwk != null) {
+            this.operationPolicy.validate(jwk.getOperations());
             Collection<Jwk<?>> keys = ensureKeys();
             keys.add(jwk);
             keys(keys);
