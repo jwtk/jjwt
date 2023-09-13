@@ -189,7 +189,7 @@ class RsaPrivateJwkFactoryTest {
         RSAPublicKey pub = pair.public as RSAPublicKey
         RSAPrivateKey priv = new TestRSAPrivateKey(pair.private as RSAPrivateKey)
         def jwk = Jwks.builder().key(priv).publicKey(pub).build()
-        //minimal values: kty, modulus, public exponent, private exponent = 4 fields:
+        //minimal values: kty, modulus, public exponent, private exponent = 4 params:
         assertEquals 4, jwk.size()
         def map = new LinkedHashMap(jwk)
         assertEquals 4, map.size()

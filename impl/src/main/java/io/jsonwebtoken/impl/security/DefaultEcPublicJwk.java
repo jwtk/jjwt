@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.PublicJwk;
@@ -30,22 +30,22 @@ import java.util.Set;
 class DefaultEcPublicJwk extends AbstractPublicJwk<ECPublicKey> implements EcPublicJwk {
 
     static final String TYPE_VALUE = "EC";
-    static final Field<String> CRV = Fields.string("crv", "Curve");
-    static final Field<BigInteger> X = Fields.bigInt("x", "X Coordinate").build();
-    static final Field<BigInteger> Y = Fields.bigInt("y", "Y Coordinate").build();
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, CRV, X, Y);
+    static final Parameter<String> CRV = Parameters.string("crv", "Curve");
+    static final Parameter<BigInteger> X = Parameters.bigInt("x", "X Coordinate").build();
+    static final Parameter<BigInteger> Y = Parameters.bigInt("y", "Y Coordinate").build();
+    static final Set<Parameter<?>> PARAMS = Collections.concat(AbstractAsymmetricJwk.PARAMS, CRV, X, Y);
 
     // https://www.rfc-editor.org/rfc/rfc7638#section-3.2
-    static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(CRV, KTY, X, Y);
+    static final List<Parameter<?>> THUMBPRINT_PARAMS = Collections.<Parameter<?>>of(CRV, KTY, X, Y);
 
     DefaultEcPublicJwk(JwkContext<ECPublicKey> ctx) {
-        super(ctx, THUMBPRINT_FIELDS);
+        super(ctx, THUMBPRINT_PARAMS);
     }
 
-    static boolean equalsPublic(FieldReadable self, Object candidate) {
-        return Fields.equals(self, candidate, CRV) &&
-                Fields.equals(self, candidate, X) &&
-                Fields.equals(self, candidate, Y);
+    static boolean equalsPublic(ParameterReadable self, Object candidate) {
+        return Parameters.equals(self, candidate, CRV) &&
+                Parameters.equals(self, candidate, X) &&
+                Parameters.equals(self, candidate, Y);
     }
 
     @Override

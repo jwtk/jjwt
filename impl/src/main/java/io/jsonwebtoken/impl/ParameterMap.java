@@ -15,10 +15,10 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.Nameable;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -33,9 +33,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
+public class ParameterMap implements Map<String, Object>, ParameterReadable, Nameable {
 
-    protected final Registry<String, ? extends Field<?>> FIELDS;
+    protected final Registry<String, ? extends Parameter<?>> PARAMS;
     protected final Map<String, Object> values; // canonical values formatted per RFC requirements
     protected final Map<String, Object> idiomaticValues; // the values map with any RFC values converted to Java type-safe values where possible
 
@@ -43,28 +43,28 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
 
     private final boolean mutable;
 
-    public FieldMap(Set<Field<?>> fields) {
-        this(Fields.registry(fields));
+    public ParameterMap(Set<Parameter<?>> params) {
+        this(Parameters.registry(params));
     }
 
-    public FieldMap(Registry<String, ? extends Field<?>> fields) { // mutable constructor
-        this(fields, null, true);
+    public ParameterMap(Registry<String, ? extends Parameter<?>> registry) { // mutable constructor
+        this(registry, null, true);
     }
 
     /**
      * Copy constructor producing an immutable instance.
      *
-     * @param fields registry fields
-     * @param values field values
+     * @param registry registry of idiomatic parameters relevant for the map values
+     * @param values   map values
      */
-    public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values) {
-        this(fields, Assert.notNull(values, "Map argument cannot be null."), false);
+    public ParameterMap(Registry<String, ? extends Parameter<?>> registry, Map<String, ?> values) {
+        this(registry, Assert.notNull(values, "Map argument cannot be null."), false);
     }
 
-    public FieldMap(Registry<String, ? extends Field<?>> fields, Map<String, ?> values, boolean mutable) {
-        Assert.notNull(fields, "Field registry cannot be null.");
-        Assert.notEmpty(fields.values(), "Field registry cannot be empty.");
-        this.FIELDS = fields;
+    public ParameterMap(Registry<String, ? extends Parameter<?>> registry, Map<String, ?> values, boolean mutable) {
+        Assert.notNull(registry, "Parameter registry cannot be null.");
+        Assert.notEmpty(registry.values(), "Parameter registry cannot be empty.");
+        this.PARAMS = registry;
         this.values = new LinkedHashMap<>();
         this.idiomaticValues = new LinkedHashMap<>();
         if (!Collections.isEmpty(values)) {
@@ -81,9 +81,9 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         }
     }
 
-    protected FieldMap replace(Field<?> field) {
-        Registry<String, ? extends Field<?>> registry = Fields.replace(this.FIELDS, field);
-        return new FieldMap(registry, this, this.mutable);
+    protected ParameterMap replace(Parameter<?> param) {
+        Registry<String, ? extends Parameter<?>> registry = Parameters.replace(this.PARAMS, param);
+        return new ParameterMap(registry, this, this.mutable);
     }
 
     @Override
@@ -92,11 +92,11 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
     }
 
     @Override
-    public <T> T get(Field<T> field) {
-        Assert.notNull(field, "Field cannot be null.");
-        final String id = Assert.hasText(field.getId(), "Field id cannot be null or empty.");
+    public <T> T get(Parameter<T> param) {
+        Assert.notNull(param, "Parameter cannot be null.");
+        final String id = Assert.hasText(param.getId(), "Parameter id cannot be null or empty.");
         Object value = idiomaticValues.get(id);
-        return field.cast(value);
+        return param.cast(value);
     }
 
     @Override
@@ -132,28 +132,28 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
     }
 
     /**
-     * Convenience method to put a value for an idiomatic field.
+     * Convenience method to put a value for an idiomatic param.
      *
-     * @param field the field representing the property name to set
+     * @param param the param representing the property name to set
      * @param value the value to set
-     * @return the previous value for the field, or {@code null} if there was no previous value
+     * @return the previous value for the param, or {@code null} if there was no previous value
      * @since JJWT_RELEASE_VERSION
      */
-    protected final <T> Object put(Field<T> field, Object value) {
+    protected final <T> Object put(Parameter<T> param, Object value) {
         assertMutable();
-        Assert.notNull(field, "Field cannot be null.");
-        Assert.hasText(field.getId(), "Field id cannot be null or empty.");
-        return apply(field, clean(value));
+        Assert.notNull(param, "Parameter cannot be null.");
+        Assert.hasText(param.getId(), "Parameter id cannot be null or empty.");
+        return apply(param, clean(value));
     }
 
     @Override
     public final Object put(String name, Object value) {
         assertMutable();
         name = Assert.notNull(Strings.clean(name), "Member name cannot be null or empty.");
-        Field<?> field = FIELDS.get(name);
-        if (field != null) {
+        Parameter<?> param = PARAMS.get(name);
+        if (param != null) {
             // standard property, represent it idiomatically:
-            return put(field, value);
+            return put(param, value);
         } else {
             // non-standard or custom property, just apply directly:
             return nullSafePut(name, clean(value));
@@ -169,9 +169,9 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         }
     }
 
-    private <T> Object apply(Field<T> field, Object rawValue) {
+    private <T> Object apply(Parameter<T> param, Object rawValue) {
 
-        final String id = field.getId();
+        final String id = param.getId();
 
         if (Objects.isEmpty(rawValue)) {
             return remove(id);
@@ -180,14 +180,14 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         T idiomaticValue; // preferred Java format
         Object canonicalValue; // as required by the RFC
         try {
-            idiomaticValue = field.applyFrom(rawValue);
-            Assert.notNull(idiomaticValue, "Field's resulting idiomaticValue cannot be null.");
-            canonicalValue = field.applyTo(idiomaticValue);
-            Assert.notNull(canonicalValue, "Field's resulting canonicalValue cannot be null.");
+            idiomaticValue = param.applyFrom(rawValue);
+            Assert.notNull(idiomaticValue, "Parameter's resulting idiomaticValue cannot be null.");
+            canonicalValue = param.applyTo(idiomaticValue);
+            Assert.notNull(canonicalValue, "Parameter's resulting canonicalValue cannot be null.");
         } catch (Exception e) {
             StringBuilder sb = new StringBuilder(100);
-            sb.append("Invalid ").append(getName()).append(" ").append(field).append(" value");
-            if (field.isSecret()) {
+            sb.append("Invalid ").append(getName()).append(" ").append(param).append(" value");
+            if (param.isSecret()) {
                 sb.append(": ").append(RedactedSupplier.REDACTED_VALUE);
             } else if (!(rawValue instanceof byte[])) {
                 // don't print raw byte array gibberish.  We can't base64[url] encode it either because that could
@@ -260,43 +260,43 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
         return values.equals(obj);
     }
 
-    private abstract class FieldMapSet<T> extends AbstractSet<T> {
+    private abstract class ParameterMapSet<T> extends AbstractSet<T> {
 
         @Override
         public int size() {
-            return FieldMap.this.size();
+            return ParameterMap.this.size();
         }
     }
 
-    private class KeySet extends FieldMapSet<String> {
+    private class KeySet extends ParameterMapSet<String> {
         @Override
         public Iterator<String> iterator() {
             return new KeyIterator();
         }
     }
 
-    private class ValueSet extends FieldMapSet<Object> {
+    private class ValueSet extends ParameterMapSet<Object> {
         @Override
         public Iterator<Object> iterator() {
             return new ValueIterator();
         }
     }
 
-    private class EntrySet extends FieldMapSet<Map.Entry<String, Object>> {
+    private class EntrySet extends ParameterMapSet<Entry<String, Object>> {
         @Override
         public Iterator<Entry<String, Object>> iterator() {
             return new EntryIterator();
         }
     }
 
-    private abstract class FieldMapIterator<T> implements Iterator<T> {
+    private abstract class ParameterMapIterator<T> implements Iterator<T> {
 
         final Iterator<Map.Entry<String, Object>> i;
 
         transient Map.Entry<String, Object> current;
 
-        FieldMapIterator() {
-            this.i = FieldMap.this.values.entrySet().iterator();
+        ParameterMapIterator() {
+            this.i = ParameterMap.this.values.entrySet().iterator();
             this.current = null;
         }
 
@@ -316,25 +316,25 @@ public class FieldMap implements Map<String, Object>, FieldReadable, Nameable {
                 throw new IllegalStateException();
             }
             String key = current.getKey();
-            FieldMap.this.remove(key);
+            ParameterMap.this.remove(key);
         }
     }
 
-    private class ValueIterator extends FieldMapIterator<Object> {
+    private class ValueIterator extends ParameterMapIterator<Object> {
         @Override
         public Object next() {
             return nextEntry().getValue();
         }
     }
 
-    private class KeyIterator extends FieldMapIterator<String> {
+    private class KeyIterator extends ParameterMapIterator<String> {
         @Override
         public String next() {
             return nextEntry().getKey();
         }
     }
 
-    private class EntryIterator extends FieldMapIterator<Map.Entry<String, Object>> {
+    private class EntryIterator extends ParameterMapIterator<Entry<String, Object>> {
         @Override
         public Entry<String, Object> next() {
             return nextEntry();

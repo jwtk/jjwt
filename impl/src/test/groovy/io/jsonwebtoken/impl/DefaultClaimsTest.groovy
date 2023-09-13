@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.RequiredTypeException
-import io.jsonwebtoken.impl.lang.Field
+import io.jsonwebtoken.impl.lang.Parameter
 import io.jsonwebtoken.lang.DateFormats
 import org.junit.Before
 import org.junit.Test
@@ -338,13 +338,13 @@ class DefaultClaimsTest {
         assertEquals d, claims.getExpiration()
     }
 
-    void trySpecDateNonDate(Field<?> field) {
+    void trySpecDateNonDate(Parameter<?> param) {
         def val = new Object() { @Override String toString() {return 'hi'} }
         try {
-            claims.put(field.getId(), val)
+            claims.put(param.getId(), val)
             fail()
         } catch (IllegalArgumentException iae) {
-            String msg = "Invalid JWT Claim $field value: hi. Cannot create Date from object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1."
+            String msg = "Invalid JWT Claim $param value: hi. Cannot create Date from object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1."
             assertEquals msg, iae.getMessage()
         }
     }

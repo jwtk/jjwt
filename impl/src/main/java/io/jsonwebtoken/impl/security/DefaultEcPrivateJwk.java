@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
@@ -31,19 +31,19 @@ import static io.jsonwebtoken.impl.security.DefaultEcPublicJwk.equalsPublic;
 
 class DefaultEcPrivateJwk extends AbstractPrivateJwk<ECPrivateKey, ECPublicKey, EcPublicJwk> implements EcPrivateJwk {
 
-    static final Field<BigInteger> D = Fields.secretBigInt("d", "ECC Private Key");
-    static final Set<Field<?>> FIELDS = Collections.concat(DefaultEcPublicJwk.FIELDS, D);
+    static final Parameter<BigInteger> D = Parameters.secretBigInt("d", "ECC Private Key");
+    static final Set<Parameter<?>> PARAMS = Collections.concat(DefaultEcPublicJwk.PARAMS, D);
 
     DefaultEcPrivateJwk(JwkContext<ECPrivateKey> ctx, EcPublicJwk pubJwk) {
         super(ctx,
                 // only public members are included in Private JWK Thumbprints per
                 // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
-                DefaultEcPublicJwk.THUMBPRINT_FIELDS,
+                DefaultEcPublicJwk.THUMBPRINT_PARAMS,
                 pubJwk);
     }
 
     @Override
     protected boolean equals(PrivateJwk<?, ?, ?> jwk) {
-        return jwk instanceof EcPrivateJwk && equalsPublic(this, jwk) && Fields.equals(this, jwk, D);
+        return jwk instanceof EcPrivateJwk && equalsPublic(this, jwk) && Parameters.equals(this, jwk, D);
     }
 }

@@ -17,9 +17,9 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.RequiredTypeException;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.JwtDateConverter;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Registry;
 
@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultClaims extends FieldMap implements Claims {
+public class DefaultClaims extends ParameterMap implements Claims {
 
     private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
             "'%s'. JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. " +
@@ -37,27 +37,27 @@ public class DefaultClaims extends FieldMap implements Claims {
             "See https://github.com/jwtk/jjwt#custom-json-processor for more information. If using Jackson, you can " +
             "specify custom claim POJO types as described in https://github.com/jwtk/jjwt#json-jackson-custom-types";
 
-    static final Field<String> ISSUER = Fields.string(Claims.ISSUER, "Issuer");
-    static final Field<String> SUBJECT = Fields.string(Claims.SUBJECT, "Subject");
-    static final Field<Set<String>> AUDIENCE = Fields.stringSet(Claims.AUDIENCE, "Audience");
-    static final Field<Date> EXPIRATION = Fields.rfcDate(Claims.EXPIRATION, "Expiration Time");
-    static final Field<Date> NOT_BEFORE = Fields.rfcDate(Claims.NOT_BEFORE, "Not Before");
-    static final Field<Date> ISSUED_AT = Fields.rfcDate(Claims.ISSUED_AT, "Issued At");
-    static final Field<String> JTI = Fields.string(Claims.ID, "JWT ID");
+    static final Parameter<String> ISSUER = Parameters.string(Claims.ISSUER, "Issuer");
+    static final Parameter<String> SUBJECT = Parameters.string(Claims.SUBJECT, "Subject");
+    static final Parameter<Set<String>> AUDIENCE = Parameters.stringSet(Claims.AUDIENCE, "Audience");
+    static final Parameter<Date> EXPIRATION = Parameters.rfcDate(Claims.EXPIRATION, "Expiration Time");
+    static final Parameter<Date> NOT_BEFORE = Parameters.rfcDate(Claims.NOT_BEFORE, "Not Before");
+    static final Parameter<Date> ISSUED_AT = Parameters.rfcDate(Claims.ISSUED_AT, "Issued At");
+    static final Parameter<String> JTI = Parameters.string(Claims.ID, "JWT ID");
 
-    static final Registry<String, Field<?>> FIELDS =
-            Fields.registry(ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI);
+    static final Registry<String, Parameter<?>> PARAMS =
+            Parameters.registry(ISSUER, SUBJECT, AUDIENCE, EXPIRATION, NOT_BEFORE, ISSUED_AT, JTI);
 
     protected DefaultClaims() { // visibility for testing
-        super(FIELDS);
+        super(PARAMS);
     }
 
-    public DefaultClaims(FieldMap m) {
-        super(m.FIELDS, m);
+    public DefaultClaims(ParameterMap m) {
+        super(m.PARAMS, m);
     }
 
     public DefaultClaims(Map<String, ?> map) {
-        super(FIELDS, map);
+        super(PARAMS, map);
     }
 
     @Override

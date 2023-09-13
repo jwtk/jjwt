@@ -203,8 +203,8 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
     public J build() {
         if (Strings.hasText(this.DELEGATE.get(AbstractJwk.KTY))) {
             // Ensure we have a context that represents the configured kty value.  Converting the existing context to
-            // the type-specific context will also perform any necessary field value type conversion / error checking
-            // this will also perform any necessary field value type conversions / error checking
+            // the type-specific context will also perform any necessary parameter value type conversion / error checking
+            // this will also perform any necessary parameter value type conversions / error checking
             setDelegate(this.jwkFactory.newContext(this.DELEGATE, this.DELEGATE.getKey()));
         }
         return super.build();

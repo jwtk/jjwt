@@ -16,9 +16,9 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -46,8 +46,8 @@ import java.util.Set;
 
 class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPrivateJwk> {
 
-    //All RSA Private fields _except_ for PRIVATE_EXPONENT.  That is always required:
-    private static final Set<Field<BigInteger>> OPTIONAL_PRIVATE_FIELDS = Collections.setOf(
+    //All RSA Private params _except_ for PRIVATE_EXPONENT.  That is always required:
+    private static final Set<Parameter<BigInteger>> OPTIONAL_PRIVATE_PARAMS = Collections.setOf(
             DefaultRsaPrivateJwk.FIRST_PRIME, DefaultRsaPrivateJwk.SECOND_PRIME,
             DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT, DefaultRsaPrivateJwk.SECOND_CRT_EXPONENT,
             DefaultRsaPrivateJwk.FIRST_CRT_COEFFICIENT
@@ -63,7 +63,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                     "requires public values to be present in private RSA JWKs.";
 
     RsaPrivateJwkFactory() {
-        super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPrivateKey.class, DefaultRsaPrivateJwk.FIELDS);
+        super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPrivateKey.class, DefaultRsaPrivateJwk.PARAMS);
     }
 
     @Override
@@ -157,13 +157,13 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
     @Override
     protected RsaPrivateJwk createJwkFromValues(JwkContext<RSAPrivateKey> ctx) {
 
-        final FieldReadable reader = new RequiredFieldReader(ctx);
+        final ParameterReadable reader = new RequiredParameterReader(ctx);
 
         final BigInteger privateExponent = reader.get(DefaultRsaPrivateJwk.PRIVATE_EXPONENT);
 
         //The [JWA Spec, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) requires
         //RSA Private Keys to also encode the public key values, so we assert that we can acquire it successfully:
-        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.FIELDS, ctx);
+        JwkContext<RSAPublicKey> pubCtx = new DefaultJwkContext<>(DefaultRsaPublicJwk.PARAMS, ctx);
         RsaPublicJwk pubJwk = RsaPublicJwkFactory.INSTANCE.createJwkFromValues(pubCtx);
         RSAPublicKey pubKey = pubJwk.toKey();
         final BigInteger modulus = pubKey.getModulus();
@@ -177,8 +177,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
         //     factors were used
         //
         boolean containsOptional = false;
-        for (Field<?> field : OPTIONAL_PRIVATE_FIELDS) {
-            if (ctx.containsKey(field.getId())) {
+        for (Parameter<?> param : OPTIONAL_PRIVATE_PARAMS) {
+            if (ctx.containsKey(param.getId())) {
                 containsOptional = true;
                 break;
             }
@@ -186,7 +186,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
 
         KeySpec spec;
 
-        if (containsOptional) { //if any one optional field exists, they are all required per JWA Section 6.3.2:
+        if (containsOptional) { //if any one optional parameter exists, they are all required per JWA Section 6.3.2:
             BigInteger firstPrime = reader.get(DefaultRsaPrivateJwk.FIRST_PRIME);
             BigInteger secondPrime = reader.get(DefaultRsaPrivateJwk.SECOND_PRIME);
             BigInteger firstCrtExponent = reader.get(DefaultRsaPrivateJwk.FIRST_CRT_EXPONENT);

@@ -17,9 +17,9 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.impl.X509Context;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Nameable;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.KeyOperation;
 
@@ -31,10 +31,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public interface JwkContext<K extends Key> extends Identifiable, Map<String, Object>, FieldReadable, Nameable,
+public interface JwkContext<K extends Key> extends Identifiable, Map<String, Object>, ParameterReadable, Nameable,
         X509Context<JwkContext<K>> {
 
-    JwkContext<K> field(Field<?> field);
+    JwkContext<K> parameter(Parameter<?> param);
 
     JwkContext<K> setId(String id);
 

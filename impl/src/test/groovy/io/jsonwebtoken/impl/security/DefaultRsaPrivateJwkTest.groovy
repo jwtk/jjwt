@@ -15,8 +15,9 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.FieldReadable
-import io.jsonwebtoken.impl.lang.TestFieldReadable
+
+import io.jsonwebtoken.impl.lang.ParameterReadable
+import io.jsonwebtoken.impl.lang.TestParameterReadable
 import org.junit.Test
 
 import java.security.spec.RSAOtherPrimeInfo
@@ -30,8 +31,8 @@ class DefaultRsaPrivateJwkTest {
     void testEqualsOtherPrimesDifferentSizes() {
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
         def info2 = new RSAOtherPrimeInfo(BigInteger.TEN, BigInteger.TEN, BigInteger.TEN)
-        FieldReadable a = new TestFieldReadable(value: [info1, info2])
-        FieldReadable b = new TestFieldReadable(value: [info1]) // different sizes
+        ParameterReadable a = new TestParameterReadable(value: [info1, info2])
+        ParameterReadable b = new TestParameterReadable(value: [info1]) // different sizes
         assertFalse DefaultRsaPrivateJwk.equalsOtherPrimes(a, b)
     }
 
@@ -39,16 +40,16 @@ class DefaultRsaPrivateJwkTest {
     void testEqualsOtherPrimes() {
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
         def info2 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
-        FieldReadable a = new TestFieldReadable(value: [info1])
-        FieldReadable b = new TestFieldReadable(value: [info2])
+        ParameterReadable a = new TestParameterReadable(value: [info1])
+        ParameterReadable b = new TestParameterReadable(value: [info2])
         assertTrue DefaultRsaPrivateJwk.equalsOtherPrimes(a, b)
     }
 
     @Test
     void testEqualsOtherPrimesIdentity() {
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
-        FieldReadable a = new TestFieldReadable(value: [info1])
-        FieldReadable b = new TestFieldReadable(value: [info1])
+        ParameterReadable a = new TestParameterReadable(value: [info1])
+        ParameterReadable b = new TestParameterReadable(value: [info1])
         assertTrue DefaultRsaPrivateJwk.equalsOtherPrimes(a, b)
     }
 
@@ -56,8 +57,8 @@ class DefaultRsaPrivateJwkTest {
     void testEqualsOtherPrimesNullElement() {
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
         // sizes are the same, but one element is null:
-        FieldReadable a = new TestFieldReadable(value: [null])
-        FieldReadable b = new TestFieldReadable(value: [info1])
+        ParameterReadable a = new TestParameterReadable(value: [null])
+        ParameterReadable b = new TestParameterReadable(value: [info1])
         assertFalse DefaultRsaPrivateJwk.equalsOtherPrimes(a, b)
     }
 
@@ -65,8 +66,8 @@ class DefaultRsaPrivateJwkTest {
     void testEqualsOtherPrimesInfoNotEqual() {
         def info1 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)
         def info2 = new RSAOtherPrimeInfo(BigInteger.ONE, BigInteger.ONE, BigInteger.TEN) // different
-        FieldReadable a = new TestFieldReadable(value: [info1])
-        FieldReadable b = new TestFieldReadable(value: [info2])
+        ParameterReadable a = new TestParameterReadable(value: [info1])
+        ParameterReadable b = new TestParameterReadable(value: [info2])
         assertFalse DefaultRsaPrivateJwk.equalsOtherPrimes(a, b)
     }
 

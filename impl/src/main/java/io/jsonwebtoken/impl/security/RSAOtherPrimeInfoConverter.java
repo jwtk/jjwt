@@ -16,10 +16,10 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.MalformedKeyException;
 
@@ -33,10 +33,10 @@ class RSAOtherPrimeInfoConverter implements Converter<RSAOtherPrimeInfo, Object>
 
     static final RSAOtherPrimeInfoConverter INSTANCE = new RSAOtherPrimeInfoConverter();
 
-    static final Field<BigInteger> PRIME_FACTOR = Fields.secretBigInt("r", "Prime Factor");
-    static final Field<BigInteger> FACTOR_CRT_EXPONENT = Fields.secretBigInt("d", "Factor CRT Exponent");
-    static final Field<BigInteger> FACTOR_CRT_COEFFICIENT = Fields.secretBigInt("t", "Factor CRT Coefficient");
-    static final Set<Field<?>> FIELDS = Collections.<Field<?>>setOf(PRIME_FACTOR, FACTOR_CRT_EXPONENT, FACTOR_CRT_COEFFICIENT);
+    static final Parameter<BigInteger> PRIME_FACTOR = Parameters.secretBigInt("r", "Prime Factor");
+    static final Parameter<BigInteger> FACTOR_CRT_EXPONENT = Parameters.secretBigInt("d", "Factor CRT Exponent");
+    static final Parameter<BigInteger> FACTOR_CRT_COEFFICIENT = Parameters.secretBigInt("t", "Factor CRT Coefficient");
+    static final Set<Parameter<?>> PARAMS = Collections.<Parameter<?>>setOf(PRIME_FACTOR, FACTOR_CRT_EXPONENT, FACTOR_CRT_COEFFICIENT);
 
     @Override
     public Object applyTo(RSAOtherPrimeInfo info) {
@@ -63,7 +63,7 @@ class RSAOtherPrimeInfoConverter implements Converter<RSAOtherPrimeInfo, Object>
         }
 
         // Need a Context instance to satisfy the API contract of the reader.get* methods below.
-        JwkContext<?> ctx = new DefaultJwkContext<>(FIELDS);
+        JwkContext<?> ctx = new DefaultJwkContext<>(PARAMS);
         try {
             for (Map.Entry<?, ?> entry : m.entrySet()) {
                 String name = String.valueOf(entry.getKey());
@@ -73,7 +73,7 @@ class RSAOtherPrimeInfoConverter implements Converter<RSAOtherPrimeInfo, Object>
             throw new MalformedKeyException(e.getMessage(), e);
         }
 
-        FieldReadable reader = new RequiredFieldReader(ctx);
+        ParameterReadable reader = new RequiredParameterReader(ctx);
         BigInteger prime = reader.get(PRIME_FACTOR);
         BigInteger primeExponent = reader.get(FACTOR_CRT_EXPONENT);
         BigInteger crtCoefficient = reader.get(FACTOR_CRT_COEFFICIENT);

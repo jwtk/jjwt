@@ -31,7 +31,7 @@ import static org.junit.Assert.*
 class AbstractProtectedHeaderTest {
 
     private static DefaultProtectedHeader h(Map<String, ?> m) {
-        return new DefaultProtectedHeader(DefaultProtectedHeader.FIELDS, m)
+        return new DefaultProtectedHeader(DefaultProtectedHeader.PARAMS, m)
     }
 
     @Test

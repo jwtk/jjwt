@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
@@ -30,19 +30,19 @@ import java.util.Set;
 class DefaultRsaPublicJwk extends AbstractPublicJwk<RSAPublicKey> implements RsaPublicJwk {
 
     static final String TYPE_VALUE = "RSA";
-    static final Field<BigInteger> MODULUS = Fields.bigInt("n", "Modulus").build();
-    static final Field<BigInteger> PUBLIC_EXPONENT = Fields.bigInt("e", "Public Exponent").build();
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, MODULUS, PUBLIC_EXPONENT);
+    static final Parameter<BigInteger> MODULUS = Parameters.bigInt("n", "Modulus").build();
+    static final Parameter<BigInteger> PUBLIC_EXPONENT = Parameters.bigInt("e", "Public Exponent").build();
+    static final Set<Parameter<?>> PARAMS = Collections.concat(AbstractAsymmetricJwk.PARAMS, MODULUS, PUBLIC_EXPONENT);
 
     // https://www.rfc-editor.org/rfc/rfc7638#section-3.2
-    static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(PUBLIC_EXPONENT, KTY, MODULUS);
+    static final List<Parameter<?>> THUMBPRINT_PARAMS = Collections.<Parameter<?>>of(PUBLIC_EXPONENT, KTY, MODULUS);
 
     DefaultRsaPublicJwk(JwkContext<RSAPublicKey> ctx) {
-        super(ctx, THUMBPRINT_FIELDS);
+        super(ctx, THUMBPRINT_PARAMS);
     }
 
-    static boolean equalsPublic(FieldReadable self, Object candidate) {
-        return Fields.equals(self, candidate, MODULUS) && Fields.equals(self, candidate, PUBLIC_EXPONENT);
+    static boolean equalsPublic(ParameterReadable self, Object candidate) {
+        return Parameters.equals(self, candidate, MODULUS) && Parameters.equals(self, candidate, PUBLIC_EXPONENT);
     }
 
     @Override

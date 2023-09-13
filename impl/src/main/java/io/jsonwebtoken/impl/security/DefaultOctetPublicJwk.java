@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.OctetPublicJwk;
 import io.jsonwebtoken.security.PublicJwk;
@@ -29,19 +29,19 @@ import java.util.Set;
 public class DefaultOctetPublicJwk<T extends PublicKey> extends AbstractPublicJwk<T> implements OctetPublicJwk<T> {
 
     static final String TYPE_VALUE = "OKP";
-    static final Field<String> CRV = DefaultEcPublicJwk.CRV;
-    static final Field<byte[]> X = Fields.bytes("x", "The public key").build();
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractAsymmetricJwk.FIELDS, CRV, X);
+    static final Parameter<String> CRV = DefaultEcPublicJwk.CRV;
+    static final Parameter<byte[]> X = Parameters.bytes("x", "The public key").build();
+    static final Set<Parameter<?>> PARAMS = Collections.concat(AbstractAsymmetricJwk.PARAMS, CRV, X);
 
     // https://www.rfc-editor.org/rfc/rfc8037#section-2 (last paragraph):
-    static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(CRV, KTY, X);
+    static final List<Parameter<?>> THUMBPRINT_PARAMS = Collections.<Parameter<?>>of(CRV, KTY, X);
 
     DefaultOctetPublicJwk(JwkContext<T> ctx) {
-        super(ctx, THUMBPRINT_FIELDS);
+        super(ctx, THUMBPRINT_PARAMS);
     }
 
-    static boolean equalsPublic(FieldReadable self, Object candidate) {
-        return Fields.equals(self, candidate, CRV) && Fields.equals(self, candidate, X);
+    static boolean equalsPublic(ParameterReadable self, Object candidate) {
+        return Parameters.equals(self, candidate, CRV) && Parameters.equals(self, candidate, X);
     }
 
     @Override

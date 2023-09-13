@@ -16,17 +16,17 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Registry;
 
 import java.util.Map;
 
 public class DefaultJwsHeader extends DefaultProtectedHeader implements JwsHeader {
 
-    static final Registry<String, Field<?>> FIELDS = DefaultProtectedHeader.FIELDS; //same
+    static final Registry<String, Parameter<?>> PARAMS = DefaultProtectedHeader.PARAMS; //same
 
     public DefaultJwsHeader(Map<String, ?> map) {
-        super(FIELDS, map);
+        super(PARAMS, map);
     }
 
     @Override

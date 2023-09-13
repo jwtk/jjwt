@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Nameable;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -135,25 +135,25 @@ public final class JwkConverter<T extends Jwk<?>> implements Converter<T, Object
         }
         final Map<?, ?> map = Collections.immutable((Map<?, ?>) o);
 
-        Field<String> field = AbstractJwk.KTY;
+        Parameter<String> param = AbstractJwk.KTY;
         // mandatory for all JWKs: https://datatracker.ietf.org/doc/html/rfc7517#section-4.1
-        // no need for builder field type conversion overhead if this isn't present:
-        if (Collections.isEmpty(map) || !map.containsKey(field.getId())) {
-            String msg = "JWK is missing required " + field + " parameter.";
+        // no need for builder param type conversion overhead if this isn't present:
+        if (Collections.isEmpty(map) || !map.containsKey(param.getId())) {
+            String msg = "JWK is missing required " + param + " parameter.";
             throw new MalformedKeyException(msg);
         }
-        Object val = map.get(field.getId());
+        Object val = map.get(param.getId());
         if (val == null) {
-            String msg = "JWK " + field + " value cannot be null.";
+            String msg = "JWK " + param + " value cannot be null.";
             throw new MalformedKeyException(msg);
         }
         if (!(val instanceof String)) {
-            String msg = "JWK " + field + " value must be a String. Type found: " + val.getClass().getName();
+            String msg = "JWK " + param + " value must be a String. Type found: " + val.getClass().getName();
             throw new MalformedKeyException(msg);
         }
         String kty = (String) val;
         if (!Strings.hasText(kty)) {
-            String msg = "JWK " + field + " value cannot be empty.";
+            String msg = "JWK " + param + " value cannot be empty.";
             throw new MalformedKeyException(msg);
         }
 

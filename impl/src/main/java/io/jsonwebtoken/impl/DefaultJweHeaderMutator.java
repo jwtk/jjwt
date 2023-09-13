@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeaderMutator;
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.security.X509BuilderSupport;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
@@ -32,14 +32,14 @@ import java.util.Set;
  * @since JJWT_RELEASE_VERSION
  */
 public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
-        extends DelegatingMapMutator<String, Object, FieldMap, T> implements JweHeaderMutator<T> {
+        extends DelegatingMapMutator<String, Object, ParameterMap, T> implements JweHeaderMutator<T> {
 
     protected X509BuilderSupport x509;
 
     public DefaultJweHeaderMutator() {
-        // Any type of header can be created, but JWE fields reflect all potential standard ones, so we use those fields
-        // to catch any value being set, especially through generic 'put' or 'putAll' methods:
-        super(new FieldMap(DefaultJweHeader.FIELDS));
+        // Any type of header can be created, but JWE parameters reflect all potential standard ones, so we use those
+        // params to catch any value being set, especially through generic 'put' or 'putAll' methods:
+        super(new ParameterMap(DefaultJweHeader.PARAMS));
         clear(); // initialize new X509Builder
     }
 
@@ -52,8 +52,8 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     // MapMutator methods
     // =============================================================
 
-    private <F> T put(Field<F> field, F value) {
-        this.DELEGATE.put(field, value);
+    private <F> T put(Parameter<F> param, F value) {
+        this.DELEGATE.put(param, value);
         return self();
     }
 

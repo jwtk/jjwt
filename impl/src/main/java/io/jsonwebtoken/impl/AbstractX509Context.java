@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
 import io.jsonwebtoken.security.X509Mutator;
 
@@ -24,10 +24,10 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
 
-public class AbstractX509Context<T extends X509Mutator<T>> extends FieldMap implements X509Context<T> {
+public class AbstractX509Context<T extends X509Mutator<T>> extends ParameterMap implements X509Context<T> {
 
-    public AbstractX509Context(Set<Field<?>> fieldSet) {
-        super(fieldSet);
+    public AbstractX509Context(Set<Parameter<?>> params) {
+        super(params);
     }
 
     @SuppressWarnings("unchecked")

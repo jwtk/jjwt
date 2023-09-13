@@ -1,5 +1,5 @@
 /*
- * Copyright © 2023 jsonwebtoken.io
+ * Copyright © 2021 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang
+package io.jsonwebtoken.impl.lang;
 
-class TestFieldReadable implements FieldReadable {
+import io.jsonwebtoken.lang.Builder;
 
-    def value = null
+import java.util.List;
+import java.util.Set;
 
-    @Override
-    Object get(Field field) {
-        return value
-    }
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
+public interface ParameterBuilder<T> extends Builder<Parameter<T>> {
+
+    ParameterBuilder<T> setId(String id);
+
+    ParameterBuilder<T> setName(String name);
+
+    ParameterBuilder<T> setSecret(boolean secret);
+
+    ParameterBuilder<List<T>> list();
+
+    ParameterBuilder<Set<T>> set();
+
+    ParameterBuilder<T> setConverter(Converter<T, ?> converter);
 }

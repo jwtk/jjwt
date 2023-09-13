@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.OctetPublicJwk;
 
@@ -27,7 +27,7 @@ public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, OctetPubli
     static final OctetPublicJwkFactory INSTANCE = new OctetPublicJwkFactory();
 
     OctetPublicJwkFactory() {
-        super(PublicKey.class, DefaultOctetPublicJwk.FIELDS);
+        super(PublicKey.class, DefaultOctetPublicJwk.PARAMS);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class OctetPublicJwkFactory extends OctetJwkFactory<PublicKey, OctetPubli
 
     @Override
     protected OctetPublicJwk<PublicKey> createJwkFromValues(JwkContext<PublicKey> ctx) {
-        FieldReadable reader = new RequiredFieldReader(ctx);
+        ParameterReadable reader = new RequiredParameterReader(ctx);
         EdwardsCurve curve = getCurve(reader);
         byte[] x = reader.get(DefaultOctetPublicJwk.X);
         //TODO: assert that the curve contains the specified key

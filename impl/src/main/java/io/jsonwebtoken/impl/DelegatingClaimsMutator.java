@@ -17,8 +17,8 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.ClaimsMutator;
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.MapMutator;
@@ -34,23 +34,23 @@ import java.util.Set;
  * @since JJWT_RELEASE_VERSION
  */
 public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & ClaimsMutator<T>>
-        extends DelegatingMapMutator<String, Object, FieldMap, T>
+        extends DelegatingMapMutator<String, Object, ParameterMap, T>
         implements ClaimsMutator<T> {
 
-    private static final Field<String> AUDIENCE_STRING =
-            Fields.string(DefaultClaims.AUDIENCE.getId(), DefaultClaims.AUDIENCE.getName());
+    private static final Parameter<String> AUDIENCE_STRING =
+            Parameters.string(DefaultClaims.AUDIENCE.getId(), DefaultClaims.AUDIENCE.getName());
 
     protected DelegatingClaimsMutator() {
-        super(new FieldMap(DefaultClaims.FIELDS));
+        super(new ParameterMap(DefaultClaims.PARAMS));
     }
 
-    <F> T put(Field<F> field, F value) {
-        this.DELEGATE.put(field, value);
+    <F> T put(Parameter<F> param, F value) {
+        this.DELEGATE.put(param, value);
         return self();
     }
 
-    <F> F get(Field<F> field) {
-        return this.DELEGATE.get(field);
+    <F> F get(Parameter<F> param) {
+        return this.DELEGATE.get(param);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
 
     private Set<String> getAudience() {
         // caller expects that we're working with a String<Set> so ensure that:
-        if (!this.DELEGATE.FIELDS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) {
+        if (!this.DELEGATE.PARAMS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) {
             String existing = get(AUDIENCE_STRING);
             remove(AUDIENCE_STRING.getId()); // clear out any canonical/idiomatic values since we're replacing
             setDelegate(this.DELEGATE.replace(DefaultClaims.AUDIENCE));
@@ -98,8 +98,8 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
             return put(DefaultClaims.AUDIENCE, null);
         }
         // otherwise it's an actual single string, we need to ensure that we can represent it as a single
-        // string by swapping out the AUDIENCE field if necessary:
-        if (this.DELEGATE.FIELDS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) { // need to swap:
+        // string by swapping out the AUDIENCE param if necessary:
+        if (this.DELEGATE.PARAMS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) { // need to swap:
             remove(AUDIENCE_STRING.getId()); //remove any existing value, as conversion will throw an exception
             setDelegate(this.DELEGATE.replace(AUDIENCE_STRING));
         }

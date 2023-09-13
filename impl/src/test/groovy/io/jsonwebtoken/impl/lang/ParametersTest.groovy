@@ -19,15 +19,15 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class FieldsTest {
+class ParametersTest {
 
-    static final Field<String> STRING = Fields.builder(String.class).setId('foo').setName('FooName').build()
-    static final Field<Set<String>> STRSET = Fields.builder(String.class).setId('fooSet').setName('FooSet').set().build()
-    static final Field<List<String>> STRLIST = Fields.builder(String.class).setId('fooList').setName('FooList').list().build()
+    static final Parameter<String> STRING = Parameters.builder(String.class).setId('foo').setName('FooName').build()
+    static final Parameter<Set<String>> STRSET = Parameters.builder(String.class).setId('fooSet').setName('FooSet').set().build()
+    static final Parameter<List<String>> STRLIST = Parameters.builder(String.class).setId('fooList').setName('FooList').list().build()
 
     @Test
     void testPrivateCtor() { // for code coverage only
-        new Fields()
+        new Parameters()
     }
 
     @Test
@@ -94,9 +94,9 @@ class FieldsTest {
 
     @Test
     void testSupportsFailsForDifferentType() {
-        def field = Fields.builder(String.class).setId('foo').setName('fooName').build()
+        def param = Parameters.builder(String.class).setId('foo').setName('fooName').build()
         Object val = 42
-        assertFalse field.supports(val)
+        assertFalse param.supports(val)
     }
 
     @Test
@@ -197,94 +197,94 @@ class FieldsTest {
 
     @Test
     void testEquals() {
-        def a = Fields.string('foo', "NameA")
-        def b = Fields.builder(Object.class).setId('foo').setName("NameB").build()
+        def a = Parameters.string('foo', "NameA")
+        def b = Parameters.builder(Object.class).setId('foo').setName("NameB").build()
         //ensure equality only based on id:
         assertEquals a, b
     }
 
     @Test
     void testHashCode() {
-        def a = Fields.string('foo', "NameA")
-        def b = Fields.builder(Object.class).setId('foo').setName("NameB").build()
+        def a = Parameters.string('foo', "NameA")
+        def b = Parameters.builder(Object.class).setId('foo').setName("NameB").build()
         //ensure only based on id:
         assertEquals a.hashCode(), b.hashCode()
     }
 
     @Test
     void testToString() {
-        assertEquals "'foo' (FooName)", Fields.string('foo', 'FooName').toString()
+        assertEquals "'foo' (FooName)", Parameters.string('foo', 'FooName').toString()
     }
 
     @Test
     void testEqualsNonField() {
-        def field = Fields.builder(String.class).setId('foo').setName("FooName").build()
-        assertFalse field.equals(new Object())
+        def param = Parameters.builder(String.class).setId('foo').setName("FooName").build()
+        assertFalse param.equals(new Object())
     }
 
     @Test
     void testBigIntegerBytesNull() {
-        assertNull Fields.bytes(null)
+        assertNull Parameters.bytes(null)
     }
 
     @Test
     void testBytesEqualsWhenBothAreNull() {
-        assertTrue Fields.bytesEquals(null, null)
+        assertTrue Parameters.bytesEquals(null, null)
     }
 
     @Test
     void testBytesEqualsIdentity() {
-        assertTrue Fields.bytesEquals(BigInteger.ONE, BigInteger.ONE)
+        assertTrue Parameters.bytesEquals(BigInteger.ONE, BigInteger.ONE)
     }
 
     @Test
     void testBytesEqualsWhenAIsNull() {
-        assertFalse Fields.bytesEquals(null, BigInteger.ONE)
+        assertFalse Parameters.bytesEquals(null, BigInteger.ONE)
     }
 
     @Test
     void testBytesEqualsWhenBIsNull() {
-        assertFalse Fields.bytesEquals(BigInteger.ONE, null)
+        assertFalse Parameters.bytesEquals(BigInteger.ONE, null)
     }
 
     @Test
     void testFieldValueEqualsWhenAIsNull() {
         BigInteger a = null
         BigInteger b = BigInteger.ONE
-        Field<BigInteger> field = Fields.bigInt('foo', 'bar').build()
-        assertFalse Fields.equals(a, b, field)
+        Parameter<BigInteger> param = Parameters.bigInt('foo', 'bar').build()
+        assertFalse Parameters.equals(a, b, param)
     }
 
     @Test
     void testFieldValueEqualsWhenBIsNull() {
         BigInteger a = BigInteger.ONE
         BigInteger b = null
-        Field<BigInteger> field = Fields.bigInt('foo', 'bar').build()
-        assertFalse Fields.equals(a, b, field)
+        Parameter<BigInteger> param = Parameters.bigInt('foo', 'bar').build()
+        assertFalse Parameters.equals(a, b, param)
     }
 
     @Test
     void testFieldValueEqualsSecretString() {
         String a = 'hello'
         String b = new String('hello'.toCharArray()) // new instance not in the string table (Groovy side effect)
-        Field<String> field = Fields.builder(String.class).setId('foo').setName('bar').setSecret(true).build()
-        assertTrue Fields.equals(a, b, field)
+        Parameter<String> param = Parameters.builder(String.class).setId('foo').setName('bar').setSecret(true).build()
+        assertTrue Parameters.equals(a, b, param)
     }
 
     @Test
     void testEqualsIdentity() {
-        FieldReadable r = new TestFieldReadable()
-        assertTrue Fields.equals(r, r, Fields.string('foo', 'bar'))
+        ParameterReadable r = new TestParameterReadable()
+        assertTrue Parameters.equals(r, r, Parameters.string('foo', 'bar'))
     }
 
     @Test
     void testEqualsWhenAIsNull() {
-        assertFalse Fields.equals(null, "hello", Fields.string('foo', 'bar'))
+        assertFalse Parameters.equals(null, "hello", Parameters.string('foo', 'bar'))
     }
 
     @Test
     void testEqualsWhenAIsFieldReadableButBIsNot() {
-        FieldReadable r = new TestFieldReadable()
-        assertFalse Fields.equals(r, "hello", Fields.string('foo', 'bar'))
+        ParameterReadable r = new TestParameterReadable()
+        assertFalse Parameters.equals(r, "hello", Parameters.string('foo', 'bar'))
     }
 }

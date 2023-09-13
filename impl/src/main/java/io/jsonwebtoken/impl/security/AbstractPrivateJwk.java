@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyPair;
@@ -31,8 +31,8 @@ abstract class AbstractPrivateJwk<K extends PrivateKey, L extends PublicKey, M e
     private final M publicJwk;
     private final KeyPair<L, K> keyPair;
 
-    AbstractPrivateJwk(JwkContext<K> ctx, List<Field<?>> thumbprintFields, M pubJwk) {
-        super(ctx, thumbprintFields);
+    AbstractPrivateJwk(JwkContext<K> ctx, List<Parameter<?>> thumbprintParams, M pubJwk) {
+        super(ctx, thumbprintParams);
         this.publicJwk = Assert.notNull(pubJwk, "PublicJwk instance cannot be null.");
         L publicKey = Assert.notNull(pubJwk.toKey(), "PublicJwk key instance cannot be null.");
         this.context.setPublicKey(publicKey);

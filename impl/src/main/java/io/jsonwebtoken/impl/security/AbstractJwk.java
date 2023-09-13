@@ -15,10 +15,10 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.Nameable;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -42,33 +42,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadable, Nameable {
+public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterReadable, Nameable {
 
-    static final Field<String> ALG = Fields.string("alg", "Algorithm");
-    public static final Field<String> KID = Fields.string("kid", "Key ID");
-    static final Field<Set<KeyOperation>> KEY_OPS =
-            Fields.builder(KeyOperation.class).setConverter(KeyOperationConverter.DEFAULT)
+    static final Parameter<String> ALG = Parameters.string("alg", "Algorithm");
+    public static final Parameter<String> KID = Parameters.string("kid", "Key ID");
+    static final Parameter<Set<KeyOperation>> KEY_OPS =
+            Parameters.builder(KeyOperation.class).setConverter(KeyOperationConverter.DEFAULT)
                     .set().setId("key_ops").setName("Key Operations").build();
-    static final Field<String> KTY = Fields.string("kty", "Key Type");
-    static final Set<Field<?>> FIELDS = Collections.setOf(ALG, KID, KEY_OPS, KTY);
+    static final Parameter<String> KTY = Parameters.string("kty", "Key Type");
+    static final Set<Parameter<?>> PARAMS = Collections.setOf(ALG, KID, KEY_OPS, KTY);
     public static final String IMMUTABLE_MSG = "JWKs are immutable and may not be modified.";
 
     protected final JwkContext<K> context;
-    private final List<Field<?>> THUMBPRINT_FIELDS;
+    private final List<Parameter<?>> THUMBPRINT_PARAMS;
     private final int hashCode;
 
     /**
-     * @param ctx              the backing JwkContext containing the JWK field values.
-     * @param thumbprintFields the required fields to include in the JWK Thumbprint canonical JSON representation,
+     * @param ctx              the backing JwkContext containing the JWK parameter values.
+     * @param thumbprintParams the required parameters to include in the JWK Thumbprint canonical JSON representation,
      *                         sorted in lexicographic order as defined by
      *                         <a href="https://www.rfc-editor.org/rfc/rfc7638#section-3.2">RFC 7638, Section 3.2</a>.
      */
-    AbstractJwk(JwkContext<K> ctx, List<Field<?>> thumbprintFields) {
+    AbstractJwk(JwkContext<K> ctx, List<Parameter<?>> thumbprintParams) {
         this.context = Assert.notNull(ctx, "JwkContext cannot be null.");
         Assert.isTrue(!ctx.isEmpty(), "JwkContext cannot be empty.");
         Assert.hasText(ctx.getType(), "JwkContext type cannot be null or empty.");
         Assert.notNull(ctx.getKey(), "JwkContext key cannot be null.");
-        this.THUMBPRINT_FIELDS = Assert.notEmpty(thumbprintFields, "JWK Thumbprint fields cannot be null or empty.");
+        this.THUMBPRINT_PARAMS = Assert.notEmpty(thumbprintParams, "JWK Thumbprint parameters cannot be null or empty.");
         HashAlgorithm idThumbprintAlg = ctx.getIdThumbprintAlgorithm();
         if (!Strings.hasText(getId()) && idThumbprintAlg != null) {
             JwkThumbprint thumbprint = thumbprint(idThumbprintAlg);
@@ -80,18 +80,18 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
 
     /**
      * Compute and return the JWK hashCode.  As JWKs are immutable, this value will be cached as a final constant
-     * upon JWK instantiation. This uses the JWK's thumbprint fields during computation, but differs from JwkThumbprint
-     * calculation in two ways:
+     * upon JWK instantiation. This uses the JWK's thumbprint parameters during computation, but differs from
+     * JwkThumbprint calculation in two ways:
      * <ol>
      *     <li>JwkThumbprints use a MessageDigest calculation, which is unnecessary overhead for a hashcode</li>
-     *     <li>The hashCode calculation uses each field's idiomatic (Java) object value instead of the
+     *     <li>The hashCode calculation uses each parameter's idiomatic (Java) object value instead of the
      *     JwkThumbprint-required canonical (String) value.</li>
      * </ol>
      *
      * @return the JWK hashcode
      */
     private int computeHashCode() {
-        List<Object> list = new ArrayList<>(this.THUMBPRINT_FIELDS.size() + 1 /* possible discriminator */);
+        List<Object> list = new ArrayList<>(this.THUMBPRINT_PARAMS.size() + 1 /* possible discriminator */);
         // So we don't leak information about the private key value, we need a discriminator to ensure that
         // public and private key hashCodes are not identical (in case both JWKs need to be in the same hash set).
         // So we add a discriminator String to the list of values that are used during hashCode calculation
@@ -101,22 +101,22 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
         } else if (key instanceof PrivateKey) {
             list.add("Private");
         }
-        for (Field<?> field : this.THUMBPRINT_FIELDS) {
+        for (Parameter<?> param : this.THUMBPRINT_PARAMS) {
             // Unlike thumbprint calculation, we get the idiomatic (Java) value, not canonical (String) value
             // (We could have used either actually, but the idiomatic value hashCode calculation is probably
             // faster).
-            Object val = Assert.notNull(get(field), "computeHashCode: Field idiomatic value cannot be null.");
+            Object val = Assert.notNull(get(param), "computeHashCode: Parameter idiomatic value cannot be null.");
             list.add(val);
         }
         return Objects.nullSafeHashCode(list.toArray());
     }
 
-    private String getRequiredThumbprintValue(Field<?> field) {
-        Object value = get(field.getId());
+    private String getRequiredThumbprintValue(Parameter<?> param) {
+        Object value = get(param.getId());
         if (value instanceof Supplier) {
             value = ((Supplier<?>) value).get();
         }
-        return Assert.isInstanceOf(String.class, value, "Field canonical value is not a String.");
+        return Assert.isInstanceOf(String.class, value, "Parameter canonical value is not a String.");
     }
 
     /**
@@ -127,11 +127,11 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
      */
     private String toThumbprintJson() {
         StringBuilder sb = new StringBuilder().append('{');
-        Iterator<Field<?>> i = this.THUMBPRINT_FIELDS.iterator();
+        Iterator<Parameter<?>> i = this.THUMBPRINT_PARAMS.iterator();
         while (i.hasNext()) {
-            Field<?> field = i.next();
-            String value = getRequiredThumbprintValue(field);
-            sb.append('"').append(field.getId()).append("\":\"").append(value).append('"');
+            Parameter<?> param = i.next();
+            String value = getRequiredThumbprintValue(param);
+            sb.append('"').append(param.getId()).append("\":\"").append(value).append('"');
             if (i.hasNext()) {
                 sb.append(",");
             }
@@ -219,8 +219,8 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
     }
 
     @Override
-    public <T> T get(Field<T> field) {
-        return this.context.get(field);
+    public <T> T get(Parameter<T> param) {
+        return this.context.get(param);
     }
 
     @Override

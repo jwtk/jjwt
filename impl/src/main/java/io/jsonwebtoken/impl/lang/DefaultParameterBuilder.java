@@ -21,62 +21,62 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-public class DefaultFieldBuilder<T> implements FieldBuilder<T> {
+public class DefaultParameterBuilder<T> implements ParameterBuilder<T> {
 
     private String id;
     private String name;
     private boolean secret;
     private final Class<T> type;
     private Converter<T, ?> converter;
-    private Class<? extends Collection<T>> collectionType; // will be null if field doesn't represent a collection (list or set)
+    private Class<? extends Collection<T>> collectionType; // will be null if parameter doesn't represent a collection (list or set)
 
-    public DefaultFieldBuilder(Class<T> type) {
+    public DefaultParameterBuilder(Class<T> type) {
         this.type = Assert.notNull(type, "Type cannot be null.");
     }
 
     @Override
-    public FieldBuilder<T> setId(String id) {
+    public ParameterBuilder<T> setId(String id) {
         this.id = id;
         return this;
     }
 
     @Override
-    public FieldBuilder<T> setName(String name) {
+    public ParameterBuilder<T> setName(String name) {
         this.name = name;
         return this;
     }
 
     @Override
-    public FieldBuilder<T> setSecret(boolean secret) {
+    public ParameterBuilder<T> setSecret(boolean secret) {
         this.secret = secret;
         return this;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public FieldBuilder<List<T>> list() {
+    public ParameterBuilder<List<T>> list() {
         Class<?> clazz = List.class;
         this.collectionType = (Class<? extends Collection<T>>) clazz;
-        return (FieldBuilder<List<T>>) this;
+        return (ParameterBuilder<List<T>>) this;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public FieldBuilder<Set<T>> set() {
+    public ParameterBuilder<Set<T>> set() {
         Class<?> clazz = Set.class;
         this.collectionType = (Class<? extends Collection<T>>) clazz;
-        return (FieldBuilder<Set<T>>) this;
+        return (ParameterBuilder<Set<T>>) this;
     }
 
     @Override
-    public FieldBuilder<T> setConverter(Converter<T, ?> converter) {
+    public ParameterBuilder<T> setConverter(Converter<T, ?> converter) {
         this.converter = converter;
         return this;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public Field<T> build() {
+    public Parameter<T> build() {
         Assert.notNull(this.type, "Type must be set.");
         Converter conv = this.converter;
         if (conv == null) {
@@ -88,6 +88,6 @@ public class DefaultFieldBuilder<T> implements FieldBuilder<T> {
         if (this.secret) {
             conv = new RedactedValueConverter(conv);
         }
-        return new DefaultField<>(this.id, this.name, this.secret, this.type, this.collectionType, conv);
+        return new DefaultParameter<>(this.id, this.name, this.secret, this.type, this.collectionType, conv);
     }
 }

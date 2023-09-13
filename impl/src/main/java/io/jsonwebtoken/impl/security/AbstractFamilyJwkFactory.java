@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -29,18 +29,18 @@ import java.util.Set;
 
 abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> implements FamilyJwkFactory<K, J> {
 
-    protected static <T> void put(JwkContext<?> ctx, Field<T> field, T value) {
-        ctx.put(field.getId(), field.applyTo(value));
+    protected static <T> void put(JwkContext<?> ctx, Parameter<T> param, T value) {
+        ctx.put(param.getId(), param.applyTo(value));
     }
 
     private final String ktyValue;
     private final Class<K> keyType;
-    private final Set<Field<?>> fields;
+    private final Set<Parameter<?>> params;
 
-    AbstractFamilyJwkFactory(String ktyValue, Class<K> keyType, Set<Field<?>> fields) {
+    AbstractFamilyJwkFactory(String ktyValue, Class<K> keyType, Set<Parameter<?>> params) {
         this.ktyValue = Assert.hasText(ktyValue, "keyType argument cannot be null or empty.");
         this.keyType = Assert.notNull(keyType, "keyType class cannot be null.");
-        this.fields = Assert.notEmpty(fields, "Fields collection cannot be null or empty.");
+        this.params = Assert.notEmpty(params, "Parameters collection cannot be null or empty.");
     }
 
     @Override
@@ -57,8 +57,8 @@ abstract class AbstractFamilyJwkFactory<K extends Key, J extends Jwk<K>> impleme
     public JwkContext<K> newContext(JwkContext<?> src, K key) {
         Assert.notNull(src, "Source JwkContext cannot be null.");
         return key != null ?
-                new DefaultJwkContext<>(this.fields, src, key) :
-                new DefaultJwkContext<K>(this.fields, src, false);
+                new DefaultJwkContext<>(this.params, src, key) :
+                new DefaultJwkContext<K>(this.params, src, false);
     }
 
     @Override

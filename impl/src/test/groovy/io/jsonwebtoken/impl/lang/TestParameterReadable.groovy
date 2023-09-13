@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.Identifiable;
+class TestParameterReadable implements ParameterReadable {
 
-public interface Field<T> extends Identifiable, Converter<T, Object> {
+    def value = null
 
-    String getName();
-
-    boolean supports(Object value);
-
-    T cast(Object value);
-
-    boolean isSecret();
+    @Override
+    Object get(Parameter param) {
+        return value
+    }
 }

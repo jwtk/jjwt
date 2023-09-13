@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
-import io.jsonwebtoken.impl.lang.Field
-import io.jsonwebtoken.impl.lang.Fields
+import io.jsonwebtoken.impl.lang.Parameter
+import io.jsonwebtoken.impl.lang.Parameters
 import io.jsonwebtoken.io.Encoders
 import org.junit.Test
 
@@ -68,7 +68,7 @@ class DefaultJwkContextTest {
 
     @Test
     void testGetNameWhenSecretJwk() {
-        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.PARAMS)
         ctx.put('kty', 'oct')
         assertEquals 'Secret JWK', ctx.getName()
     }
@@ -106,7 +106,7 @@ class DefaultJwkContextTest {
     @Test
     void testGStringPrintsRedactedValues() {
         // DO NOT REMOVE THIS METHOD: IT IS CRITICAL TO ENSURE GROOVY STRINGS DO NOT LEAK SECRET/PRIVATE KEY MATERIAL
-        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.PARAMS)
         ctx.put('kty', 'oct')
         ctx.put('k', 'test')
         String s = '[kty:oct, k:<redacted>]'
@@ -115,7 +115,7 @@ class DefaultJwkContextTest {
 
     @Test
     void testGStringToStringPrintsRedactedValues() {
-        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.PARAMS)
         ctx.put('kty', 'oct')
         ctx.put('k', 'test')
         String s = '{kty=oct, k=<redacted>}'
@@ -124,21 +124,21 @@ class DefaultJwkContextTest {
 
     @Test
     void testFieldWithoutKey() {
-        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
-        Field field = Fields.string('kid', 'My Key ID')
-        def newCtx = ctx.field(field)
-        assertSame field, newCtx.@FIELDS.get('kid')
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.PARAMS)
+        Parameter param = Parameters.string('kid', 'My Key ID')
+        def newCtx = ctx.parameter(param)
+        assertSame param, newCtx.@PARAMS.get('kid')
         assertNull newCtx.getKey()
     }
 
     @Test
     void testFieldWithKey() {
         def key = TestKeys.HS256
-        def ctx = new DefaultJwkContext(DefaultSecretJwk.FIELDS)
+        def ctx = new DefaultJwkContext(DefaultSecretJwk.PARAMS)
         ctx.setKey(key)
-        Field field = Fields.string('kid', 'My Key ID')
-        def newCtx = ctx.field(field)
-        assertSame field, newCtx.@FIELDS.get('kid') // registry created with custom field instead of default
+        Parameter param = Parameters.string('kid', 'My Key ID')
+        def newCtx = ctx.parameter(param)
+        assertSame param, newCtx.@PARAMS.get('kid') // registry created with custom param instead of default
         assertSame key, newCtx.getKey() // copied over correctly
     }
 }

@@ -17,33 +17,36 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Map;
 
-public class DefaultHeader extends FieldMap implements Header {
+public class DefaultHeader extends ParameterMap implements Header {
 
-    static final Field<String> TYPE = Fields.string(Header.TYPE, "Type");
-    static final Field<String> CONTENT_TYPE = Fields.builder(String.class)
+    static final Parameter<String> TYPE = Parameters.string(Header.TYPE, "Type");
+    static final Parameter<String> CONTENT_TYPE = Parameters.builder(String.class)
             .setId(Header.CONTENT_TYPE).setName("Content Type")
             .setConverter(CompactMediaTypeIdConverter.INSTANCE).build();
-    static final Field<String> ALGORITHM = Fields.string(Header.ALGORITHM, "Algorithm");
-    static final Field<String> COMPRESSION_ALGORITHM = Fields.string(Header.COMPRESSION_ALGORITHM, "Compression Algorithm");
+    static final Parameter<String> ALGORITHM = Parameters.string(Header.ALGORITHM, "Algorithm");
+    static final Parameter<String> COMPRESSION_ALGORITHM =
+            Parameters.string(Header.COMPRESSION_ALGORITHM, "Compression Algorithm");
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated // TODO: remove for 1.0.0:
-    static final Field<String> DEPRECATED_COMPRESSION_ALGORITHM = Fields.string(Header.DEPRECATED_COMPRESSION_ALGORITHM, "Deprecated Compression Algorithm");
+    static final Parameter<String> DEPRECATED_COMPRESSION_ALGORITHM =
+            Parameters.string(Header.DEPRECATED_COMPRESSION_ALGORITHM, "Deprecated Compression Algorithm");
 
-    static final Registry<String, Field<?>> FIELDS = Fields.registry(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
+    static final Registry<String, Parameter<?>> PARAMS =
+            Parameters.registry(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
 
     public DefaultHeader(Map<String, ?> values) {
-        super(FIELDS, values);
+        super(PARAMS, values);
     }
 
-    protected DefaultHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
-        super(fields, values);
+    protected DefaultHeader(Registry<String, Parameter<?>> registry, Map<String, ?> values) {
+        super(registry, values);
     }
 
     @Override

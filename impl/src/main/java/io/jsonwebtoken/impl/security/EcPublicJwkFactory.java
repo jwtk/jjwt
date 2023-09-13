@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -38,7 +38,7 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
     static final EcPublicJwkFactory INSTANCE = new EcPublicJwkFactory();
 
     EcPublicJwkFactory() {
-        super(ECPublicKey.class, DefaultEcPublicJwk.FIELDS);
+        super(ECPublicKey.class, DefaultEcPublicJwk.PARAMS);
     }
 
     protected static String keyContainsErrorMessage(String curveId) {
@@ -94,7 +94,7 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
     @Override
     protected EcPublicJwk createJwkFromValues(final JwkContext<ECPublicKey> ctx) {
 
-        FieldReadable reader = new RequiredFieldReader(ctx);
+        ParameterReadable reader = new RequiredParameterReader(ctx);
         String curveId = reader.get(DefaultEcPublicJwk.CRV);
         BigInteger x = reader.get(DefaultEcPublicJwk.X);
         BigInteger y = reader.get(DefaultEcPublicJwk.Y);

@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.EcPrivateJwk;
@@ -40,7 +40,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
     private static final EcPublicJwkFactory PUB_FACTORY = EcPublicJwkFactory.INSTANCE;
 
     EcPrivateJwkFactory() {
-        super(ECPrivateKey.class, DefaultEcPrivateJwk.FIELDS);
+        super(ECPrivateKey.class, DefaultEcPrivateJwk.PARAMS);
     }
 
     @Override
@@ -106,14 +106,14 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
     @Override
     protected EcPrivateJwk createJwkFromValues(final JwkContext<ECPrivateKey> ctx) {
 
-        FieldReadable reader = new RequiredFieldReader(ctx);
+        ParameterReadable reader = new RequiredParameterReader(ctx);
         String curveId = reader.get(DefaultEcPublicJwk.CRV);
         BigInteger d = reader.get(DefaultEcPrivateJwk.D);
 
         // We don't actually need the public x,y point coordinates for JVM lookup, but the
         // [JWA spec](https://tools.ietf.org/html/rfc7518#section-6.2.2)
         // requires them to be present and valid for the private key as well, so we assert that here:
-        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.FIELDS, ctx);
+        JwkContext<ECPublicKey> pubCtx = new DefaultJwkContext<>(DefaultEcPublicJwk.PARAMS, ctx);
         EcPublicJwk pubJwk = EcPublicJwkFactory.INSTANCE.createJwk(pubCtx);
 
         ECCurve curve = getCurveByJwaId(curveId);
