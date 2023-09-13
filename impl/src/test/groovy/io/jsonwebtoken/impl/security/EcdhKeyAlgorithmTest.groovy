@@ -23,7 +23,6 @@ import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
 import java.security.PrivateKey
@@ -125,9 +124,8 @@ class EcdhKeyAlgorithmTest {
         try {
             alg.getEncryptionKey(request)
             fail()
-        } catch (UnsupportedKeyException expected) {
-            String msg = "Unable to determine JWA-standard Elliptic Curve for encryption key " +
-                    "[${KeysBridge.toString(encKey)}]"
+        } catch (InvalidKeyException expected) {
+            String msg = "Unable to determine JWA-standard Elliptic Curve for encryption key [${KeysBridge.toString(encKey)}]"
             assertEquals msg, expected.getMessage()
         }
     }
@@ -142,7 +140,7 @@ class EcdhKeyAlgorithmTest {
         try {
             alg.getDecryptionKey(request)
             fail()
-        } catch (UnsupportedKeyException expected) {
+        } catch (InvalidKeyException expected) {
             String msg = "Unable to determine JWA-standard Elliptic Curve for decryption key [${KeysBridge.toString(key)}]"
             assertEquals msg, expected.getMessage()
         }
@@ -173,12 +171,8 @@ class EcdhKeyAlgorithmTest {
         try {
             alg.getDecryptionKey(request)
             fail()
-        } catch (UnsupportedKeyException expected) {
-            String msg = 'JWE Header \'epk\' (Ephemeral Public Key) value is not a supported Elliptic Curve Public ' +
-                    'JWK. Value: {kty=RSA, n=vPYf1VSy58i6ic93goenzF5UO9oLxyiTSF64lGFUJ6_MBDydAvY9PS76ymvhUcSrsDUHgb' +
-                    '0arsp6MDXOfZxYHn2C7o39n8-bQ7yS4hQm6kkl8KB5OiOkJFkFjEHrwnqykXygx1VFpcVpbBvxDn640ODEScWyoUUPd4sO' +
-                    'K-esTt4D9-q0PXsXzfRT4eOrnpXHJTan_KK_a-UYmfWPr-xIEPUxnLPCD68mIHoSPAaJiv37SkAWHJ9-fm_DfnYTwTi0rx' +
-                    'e2FRQ1-vkOxe6C2-n1ebsqCZPKr0J_2MfwqP0raxLfyGicxM5ee5RSTTRMCA4UyX5dubZvh2pLoaS8PCZajw, e=AQAB}'
+        } catch (InvalidKeyException expected) {
+            String msg = "JWE Header ${DefaultJweHeader.EPK} value is not an Elliptic Curve Public JWK. Value: ${jwk.toString()}"
             assertEquals msg, expected.getMessage()
         }
     }
@@ -193,12 +187,8 @@ class EcdhKeyAlgorithmTest {
         try {
             alg.getDecryptionKey(request)
             fail()
-        } catch (UnsupportedKeyException expected) {
-            String msg = 'JWE Header \'epk\' (Ephemeral Public Key) value is not a supported Elliptic Curve Public ' +
-                    'JWK. Value: {kty=RSA, n=vPYf1VSy58i6ic93goenzF5UO9oLxyiTSF64lGFUJ6_MBDydAvY9PS76ymvhUcSrsDUHgb' +
-                    '0arsp6MDXOfZxYHn2C7o39n8-bQ7yS4hQm6kkl8KB5OiOkJFkFjEHrwnqykXygx1VFpcVpbBvxDn640ODEScWyoUUPd4sO' +
-                    'K-esTt4D9-q0PXsXzfRT4eOrnpXHJTan_KK_a-UYmfWPr-xIEPUxnLPCD68mIHoSPAaJiv37SkAWHJ9-fm_DfnYTwTi0rx' +
-                    'e2FRQ1-vkOxe6C2-n1ebsqCZPKr0J_2MfwqP0raxLfyGicxM5ee5RSTTRMCA4UyX5dubZvh2pLoaS8PCZajw, e=AQAB}'
+        } catch (InvalidKeyException expected) {
+            String msg = "JWE Header ${DefaultJweHeader.EPK} value is not an Elliptic Curve Public JWK. Value: ${jwk.toString()}"
             assertEquals msg, expected.getMessage()
         }
     }
@@ -227,7 +217,7 @@ class EcdhKeyAlgorithmTest {
         try {
             EcdhKeyAlgorithm.assertCurve(key)
             fail()
-        } catch (UnsupportedKeyException expected) {
+        } catch (InvalidKeyException expected) {
             String msg = "Unable to determine JWA-standard Elliptic Curve for decryption key [${KeysBridge.toString(key)}]"
             assertEquals msg, expected.getMessage()
         }

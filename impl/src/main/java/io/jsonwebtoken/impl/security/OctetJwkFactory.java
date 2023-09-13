@@ -34,7 +34,7 @@ public abstract class OctetJwkFactory<K extends Key, J extends Jwk<K>> extends A
         return super.supports(key) && EdwardsCurve.isEdwards(key);
     }
 
-    protected EdwardsCurve getCurve(final FieldReadable reader) throws UnsupportedKeyException {
+    protected static EdwardsCurve getCurve(final FieldReadable reader) throws UnsupportedKeyException {
         Field<String> field = DefaultOctetPublicJwk.CRV;
         String crvId = reader.get(field);
         EdwardsCurve curve = EdwardsCurve.findById(crvId);

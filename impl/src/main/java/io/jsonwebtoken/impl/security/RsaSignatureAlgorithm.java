@@ -19,10 +19,10 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -180,7 +180,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
         if (!isRsaAlgorithmName(key)) {
-            throw new UnsupportedKeyException("Unsupported RSA or RSASSA-PSS key algorithm name.");
+            throw new InvalidKeyException("Unrecognized RSA or RSASSA-PSS key algorithm name.");
         }
         int size = KeysBridge.findBitLength(key);
         if (size < 0) return; // https://github.com/jwtk/jjwt/issues/68

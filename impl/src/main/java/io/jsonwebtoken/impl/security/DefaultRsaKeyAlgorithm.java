@@ -18,11 +18,11 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Cipher;
@@ -57,13 +57,13 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
     protected void validate(Key key, boolean encryption) { // true = encryption, false = decryption
 
         if (!RsaSignatureAlgorithm.isRsaAlgorithmName(key)) {
-            throw new UnsupportedKeyException("Unsupported RSA key algorithm name.");
+            throw new InvalidKeyException("Invalid RSA key algorithm name.");
         }
 
         if (RsaSignatureAlgorithm.isPss(key)) {
             String msg = "RSASSA-PSS keys may not be used for " + keyType(encryption) +
                     ", only digital signature algorithms.";
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
 
         int size = KeysBridge.findBitLength(key);

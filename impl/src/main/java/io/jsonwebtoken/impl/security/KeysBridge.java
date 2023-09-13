@@ -19,11 +19,11 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.OptionalMethodInvoker;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeySupplier;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.PrivateKeyBuilder;
 import io.jsonwebtoken.security.SecretKeyBuilder;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -136,10 +136,17 @@ public final class KeysBridge {
 
     public static byte[] getEncoded(Key key) {
         Assert.notNull(key, "Key cannot be null.");
-        byte[] encoded = findEncoded(key);
+        byte[] encoded;
+        try {
+            encoded = key.getEncoded();
+        } catch (Throwable t) {
+            String msg = "Cannot obtain required encoded bytes from key [" + KeysBridge.toString(key) + "]: " +
+                    t.getMessage();
+            throw new InvalidKeyException(msg, t);
+        }
         if (Bytes.isEmpty(encoded)) {
-            String msg = key.getClass().getName() + " encoded bytes cannot be null or empty.";
-            throw new UnsupportedKeyException(msg);
+            String msg = "Missing required encoded bytes for key [" + toString(key) + "].";
+            throw new InvalidKeyException(msg);
         }
         return encoded;
     }

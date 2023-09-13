@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
-import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
 import java.security.spec.EllipticCurve
@@ -82,7 +81,7 @@ class EcPublicJwkFactoryTest {
         try {
             EcPublicJwkFactory.getJwaIdByCurve(curve)
             fail()
-        } catch (UnsupportedKeyException e) {
+        } catch (InvalidKeyException e) {
             assertEquals EcPublicJwkFactory.UNSUPPORTED_CURVE_MSG, e.getMessage()
         }
     }

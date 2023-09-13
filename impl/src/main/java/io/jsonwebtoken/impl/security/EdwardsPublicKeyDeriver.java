@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.UnsupportedKeyException;
+import io.jsonwebtoken.security.InvalidKeyException;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -41,7 +41,7 @@ final class EdwardsPublicKeyDeriver implements Function<PrivateKey, PublicKey> {
         EdwardsCurve curve = EdwardsCurve.findByKey(privateKey);
         if (curve == null) {
             String msg = "Unable to derive Edwards-curve PublicKey for specified PrivateKey: " + KeysBridge.toString(privateKey);
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
 
         byte[] pkBytes = curve.getKeyMaterial(privateKey);

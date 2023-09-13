@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.MalformedKeyException
-import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
 import java.security.KeyFactory
@@ -66,7 +66,7 @@ class EcPrivateJwkFactoryTest {
         try {
             factory.derivePublic(context)
             fail()
-        } catch (UnsupportedKeyException expected) {
+        } catch (InvalidKeyException expected) {
             String msg = 'Unable to derive ECPublicKey from ECPrivateKey: invalid'
             assertEquals msg, expected.getMessage()
         }

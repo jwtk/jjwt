@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Converters
+import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.RsaPrivateJwk
 import io.jsonwebtoken.security.UnsupportedKeyException
@@ -47,14 +48,7 @@ class RsaPrivateJwkFactoryTest {
             Jwks.builder().key(key).build()
             fail()
         } catch (UnsupportedKeyException expected) {
-            String msg = 'Unable to derive RSAPublicKey from RSAPrivateKey implementation ' +
-                    '[io.jsonwebtoken.impl.security.RsaPrivateJwkFactoryTest$1].  Supported keys implement the ' +
-                    'java.security.interfaces.RSAPrivateCrtKey or ' +
-                    'java.security.interfaces.RSAMultiPrimePrivateCrtKey interfaces.  If the specified RSAPrivateKey ' +
-                    'cannot be one of these two, you must explicitly provide an RSAPublicKey in addition to the ' +
-                    'RSAPrivateKey, as the [JWA RFC, Section 6.3.2]' +
-                    '(https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) requires public values to be ' +
-                    'present in private RSA JWKs.'
+            String msg = String.format(RsaPrivateJwkFactory.PUB_EXPONENT_EX_MSG, KeysBridge.toString(key))
             assertEquals msg, expected.getMessage()
         }
     }
@@ -121,7 +115,7 @@ class RsaPrivateJwkFactoryTest {
         try {
             Jwks.builder().key(key).build()
             fail()
-        } catch (UnsupportedKeyException expected) {
+        } catch (InvalidKeyException expected) {
             String prefix = 'Unable to derive RSAPublicKey from RSAPrivateKey {kty=RSA}. Cause: '
             assertTrue expected.getMessage().startsWith(prefix)
         }

@@ -225,11 +225,12 @@ class JwksTest {
         try {
             Jwks.builder().key(key).build()
             fail()
-        } catch (UnsupportedKeyException expected) {
-            String expectedMsg = 'Unable to encode SecretKey to JWK: ' + SecretJwkFactory.ENCODED_UNAVAILABLE_MSG
-            assertEquals expectedMsg, expected.getMessage()
-            assertTrue expected.getCause() instanceof IllegalArgumentException
-            assertEquals SecretJwkFactory.ENCODED_UNAVAILABLE_MSG, expected.getCause().getMessage()
+        } catch (InvalidKeyException expected) {
+            String causeMsg = "Missing required encoded bytes for key [${KeysBridge.toString(key)}]."
+            String msg = "Unable to encode SecretKey to JWK: $causeMsg"
+            assertEquals msg, expected.message
+            assertTrue expected.getCause() instanceof InvalidKeyException
+            assertEquals causeMsg, expected.getCause().getMessage()
         }
     }
 
@@ -246,11 +247,12 @@ class JwksTest {
         try {
             Jwks.builder().key(key).build()
             fail()
-        } catch (UnsupportedKeyException expected) {
-            String expectedMsg = 'Unable to encode SecretKey to JWK: ' + SecretJwkFactory.ENCODED_UNAVAILABLE_MSG
-            assertEquals expectedMsg, expected.getMessage()
-            assertTrue expected.getCause() instanceof IllegalArgumentException
-            assertEquals SecretJwkFactory.ENCODED_UNAVAILABLE_MSG, expected.getCause().getMessage()
+        } catch (InvalidKeyException expected) {
+            String causeMsg = "Cannot obtain required encoded bytes from key [${KeysBridge.toString(key)}]: $encodedMsg"
+            String msg = "Unable to encode SecretKey to JWK: $causeMsg"
+            assertEquals msg, expected.message
+            assertTrue expected.getCause() instanceof InvalidKeyException
+            assertEquals causeMsg, expected.cause.message
             assertSame encodedEx, expected.getCause().getCause()
         }
     }
@@ -372,7 +374,7 @@ class JwksTest {
         try {
             Jwks.builder().key((PublicKey) key)
         } catch (UnsupportedKeyException expected) {
-            String msg = 'There is no builder that supports specified key of type io.jsonwebtoken.impl.security.TestPublicKey with algorithm \'null\'.'
+            String msg = "There is no builder that supports specified key [${KeysBridge.toString(key)}]."
             assertEquals(msg, expected.getMessage())
             assertNotNull expected.getCause() // ensure we always retain a cause
         }
@@ -402,7 +404,7 @@ class JwksTest {
         try {
             Jwks.builder().key((PrivateKey) key)
         } catch (UnsupportedKeyException expected) {
-            String msg = 'There is no builder that supports specified key of type io.jsonwebtoken.impl.security.TestPrivateKey with algorithm \'null\'.'
+            String msg = "There is no builder that supports specified key [${KeysBridge.toString(key)}]."
             assertEquals(msg, expected.getMessage())
             assertNotNull expected.getCause() // ensure we always retain a cause
         }

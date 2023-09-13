@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.RsaPrivateJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -53,6 +54,13 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
     );
 
     private static final String PUBKEY_ERR_MSG = "JwkContext publicKey must be an " + RSAPublicKey.class.getName() + " instance.";
+    private static final String PUB_EXPONENT_EX_MSG =
+            "Unable to derive RSAPublicKey from RSAPrivateKey [%s]. Supported keys implement the " +
+                    RSAPrivateCrtKey.class.getName() + " or " + RSAMultiPrimePrivateCrtKey.class.getName() +
+                    " interfaces.  If the specified RSAPrivateKey cannot be one of these two, you must explicitly " +
+                    "provide an RSAPublicKey in addition to the RSAPrivateKey, as the " +
+                    "[JWA RFC, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) " +
+                    "requires public values to be present in private RSA JWKs.";
 
     RsaPrivateJwkFactory() {
         super(DefaultRsaPublicJwk.TYPE_VALUE, RSAPrivateKey.class, DefaultRsaPrivateJwk.FIELDS);
@@ -70,13 +78,7 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
             return ((RSAMultiPrimePrivateCrtKey) key).getPublicExponent();
         }
 
-        String msg = "Unable to derive RSAPublicKey from RSAPrivateKey implementation [" +
-                key.getClass().getName() + "].  Supported keys implement the " +
-                RSAPrivateCrtKey.class.getName() + " or " + RSAMultiPrimePrivateCrtKey.class.getName() +
-                " interfaces.  If the specified RSAPrivateKey cannot be one of these two, you must explicitly " +
-                "provide an RSAPublicKey in addition to the RSAPrivateKey, as the " +
-                "[JWA RFC, Section 6.3.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-6.3.2) " +
-                "requires public values to be present in private RSA JWKs.";
+        String msg = String.format(PUB_EXPONENT_EX_MSG, KeysBridge.toString(key));
         throw new UnsupportedKeyException(msg);
     }
 
@@ -91,9 +93,8 @@ class RsaPrivateJwkFactory extends AbstractFamilyJwkFactory<RSAPrivateKey, RsaPr
                 try {
                     return (RSAPublicKey) kf.generatePublic(spec);
                 } catch (Exception e) {
-                    String msg = "Unable to derive RSAPublicKey from RSAPrivateKey " + ctx +
-                            ". Cause: " + e.getMessage();
-                    throw new UnsupportedKeyException(msg);
+                    String msg = "Unable to derive RSAPublicKey from RSAPrivateKey " + ctx + ". Cause: " + e.getMessage();
+                    throw new InvalidKeyException(msg);
                 }
             }
         });

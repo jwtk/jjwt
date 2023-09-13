@@ -24,7 +24,6 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyException;
 import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeyPairBuilder;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.security.Key;
 import java.security.PrivateKey;
@@ -365,9 +364,8 @@ public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
         Assert.notNull(key, "Key cannot be null.");
         EdwardsCurve curve = findByKey(key);
         if (curve == null) {
-            String msg = key.getClass().getName() + " with algorithm '" + key.getAlgorithm() +
-                    "' is not a recognized Edwards Curve key.";
-            throw new UnsupportedKeyException(msg);
+            String msg = "Unrecognized Edwards Curve key: [" + KeysBridge.toString(key) + "]";
+            throw new InvalidKeyException(msg);
         }
         //TODO: assert key exists on discovered curve via equation
         return curve;

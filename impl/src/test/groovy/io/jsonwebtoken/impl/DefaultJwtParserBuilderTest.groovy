@@ -362,7 +362,7 @@ class DefaultJwtParserBuilderTest {
         try {
             builder.setSigningKey(TestKeys.RS256.pair.private)
             fail()
-        } catch (UnsupportedKeyException e) {
+        } catch (InvalidKeyException e) {
             String msg = 'JWS verification key must be either a SecretKey (for MAC algorithms) or a PublicKey (for Signature algorithms).'
             assertEquals msg, e.getMessage()
         }

@@ -89,8 +89,8 @@ class EcSignatureAlgorithmTest {
         algs().each {
             try {
                 it.validateKey(key, false)
-            } catch (Exception e) {
-                String msg = 'Unsupported EC key algorithm name.'
+            } catch (InvalidKeyException e) {
+                String msg = 'Unrecognized EC key algorithm name.'
                 assertEquals msg, e.getMessage()
             }
         }

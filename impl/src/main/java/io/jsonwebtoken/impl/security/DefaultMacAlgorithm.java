@@ -20,11 +20,11 @@ import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecureRequest;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
@@ -131,7 +131,7 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         String name = key.getAlgorithm();
         if (!Strings.hasText(name)) {
             String msg = "The " + keyType(signing) + " key's algorithm cannot be null or empty.";
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
 
         // We can ignore PKCS11 key name assertions for two reasons:
@@ -141,7 +141,7 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
 
         //assert key's jca name is valid if it's a JWA standard algorithm:
         if (!pkcs11Key && isJwaStandard() && !isJwaStandardJcaName(name)) {
-            throw new UnsupportedKeyException("The " + keyType(signing) + " key's algorithm '" + name +
+            throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + name +
                     "' does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with " +
                     getId() + ".");
         }
@@ -151,7 +151,6 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
     protected void validateKey(Key k, boolean signing) {
 
         final String keyType = keyType(signing);
-
         if (k == null) {
             throw new IllegalArgumentException("MAC " + keyType + " key cannot be null.");
         }
@@ -159,12 +158,12 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         if (!(k instanceof SecretKey)) {
             String msg = "MAC " + keyType + " keys must be SecretKey instances.  Specified key is of type " +
                     k.getClass().getName();
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
 
         if (k instanceof Password) {
             String msg = "Passwords are intended for use with key derivation algorithms only.";
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
 
         final SecretKey key = (SecretKey) k;

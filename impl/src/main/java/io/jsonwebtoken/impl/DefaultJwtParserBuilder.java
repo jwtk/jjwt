@@ -32,10 +32,10 @@ import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -237,7 +237,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         }
         String msg = "JWS verification key must be either a SecretKey (for MAC algorithms) or a PublicKey " +
                 "(for Signature algorithms).";
-        throw new UnsupportedKeyException(msg);
+        throw new InvalidKeyException(msg);
     }
 
     @Override

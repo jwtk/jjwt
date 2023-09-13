@@ -1196,7 +1196,7 @@ class JwtsTest {
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
         Mac mac = Mac.getInstance('HmacSHA256')
-        byte[] raw = ((RSAPublicKey)publicKey).getModulus().toByteArray()
+        byte[] raw = ((RSAPublicKey) publicKey).getModulus().toByteArray()
         if (raw.length > 256) {
             raw = Arrays.copyOfRange(raw, 1, raw.length)
         }
@@ -1232,7 +1232,7 @@ class JwtsTest {
         // Now for the forgery: simulate an attacker using the RSA public key to sign a token, but
         // using it as an HMAC signing key instead of RSA:
         Mac mac = Mac.getInstance('HmacSHA256')
-        byte[] raw = ((RSAPublicKey)publicKey).getModulus().toByteArray()
+        byte[] raw = ((RSAPublicKey) publicKey).getModulus().toByteArray()
         if (raw.length > 256) {
             raw = Arrays.copyOfRange(raw, 1, raw.length)
         }
@@ -1268,7 +1268,7 @@ class JwtsTest {
         // Now for the forgery: simulate an attacker using the Elliptic Curve public key to sign a token, but
         // using it as an HMAC signing key instead of Elliptic Curve:
         Mac mac = Mac.getInstance('HmacSHA256')
-        byte[] raw = ((ECPublicKey)publicKey).getParams().getOrder().toByteArray()
+        byte[] raw = ((ECPublicKey) publicKey).getParams().getOrder().toByteArray()
         if (raw.length > 32) {
             raw = Arrays.copyOfRange(raw, 1, raw.length)
         }
@@ -1509,10 +1509,10 @@ class JwtsTest {
                     try {
                         encrypt(pubKey, alg, enc)
                         fail()
-                    } catch (UnsupportedKeyException expected) {
+                    } catch (InvalidKeyException expected) {
                         String id = EdwardsCurve.forKey(pubKey).getId()
                         String msg = id + " keys may not be used with ECDH-ES key " +
-                                "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1"
+                                "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1."
                         assertEquals msg, expected.getMessage()
                     }
                 }
@@ -1544,10 +1544,10 @@ class JwtsTest {
                     try {
                         decrypt(jwe, key) // invalid signing key
                         fail()
-                    } catch (UnsupportedKeyException expected) {
+                    } catch (InvalidKeyException expected) {
                         String id = EdwardsCurve.forKey(key).getId()
                         String msg = id + " keys may not be used with ECDH-ES key " +
-                                "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1"
+                                "agreement algorithms per https://www.rfc-editor.org/rfc/rfc8037#section-3.1."
                         assertEquals msg, expected.getMessage()
                     }
                 }

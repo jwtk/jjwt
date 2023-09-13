@@ -22,7 +22,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
-import io.jsonwebtoken.security.UnsupportedKeyException;
+import io.jsonwebtoken.security.InvalidKeyException;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -63,7 +63,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
                     return derivePublic(kf, spec);
                 } catch (Exception e) {
                     String msg = "Unable to derive ECPublicKey from ECPrivateKey: " + e.getMessage();
-                    throw new UnsupportedKeyException(msg, e);
+                    throw new InvalidKeyException(msg, e);
                 }
             }
         });
