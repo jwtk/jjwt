@@ -17,10 +17,12 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Registry;
 
 import java.math.BigInteger;
 import java.net.URI;
+import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
@@ -96,5 +98,47 @@ public final class Fields {
         newFields.remove(id); // remove old/default
         newFields.put(id, field); // add new one
         return registry(newFields.values());
+    }
+
+    private static byte[] bytes(BigInteger i) {
+        return i != null ? i.toByteArray() : null;
+    }
+
+    public static boolean bytesEquals(BigInteger a, BigInteger b) {
+        //noinspection NumberEquality
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+        byte[] aBytes = bytes(a);
+        byte[] bBytes = bytes(b);
+        try {
+            return MessageDigest.isEqual(aBytes, bBytes);
+        } finally {
+            Bytes.clear(aBytes);
+            Bytes.clear(bBytes);
+        }
+    }
+
+    private static <T> boolean equals(T a, T b, Field<T> field) {
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+        if (field.isSecret()) {
+            // byte[] and BigInteger are the only types of secret Fields in the JJWT codebase
+            // (i.e. Field.isSecret() == true). If a Field is ever marked as secret, and it's not one of these two
+            // data types, we need to know about it.  So we use the 'assertSecret' helper above to ensure we do:
+            if (a instanceof byte[]) {
+                return b instanceof byte[] && MessageDigest.isEqual((byte[]) a, (byte[]) b);
+            } else if (a instanceof BigInteger) {
+                return b instanceof BigInteger && bytesEquals((BigInteger) a, (BigInteger) b);
+            }
+        }
+        // default to a standard null-safe comparison:
+        return Objects.nullSafeEquals(a, b);
+    }
+
+    public static <T> boolean equals(FieldReadable a, Object o, Field<T> field) {
+        if (a == o) return true;
+        if (a == null || !(o instanceof FieldReadable)) return false;
+        FieldReadable b = (FieldReadable) o;
+        return equals(a.get(field), b.get(field), field);
     }
 }

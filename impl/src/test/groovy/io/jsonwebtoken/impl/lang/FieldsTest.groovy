@@ -221,4 +221,70 @@ class FieldsTest {
         def field = Fields.builder(String.class).setId('foo').setName("FooName").build()
         assertFalse field.equals(new Object())
     }
+
+    @Test
+    void testBigIntegerBytesNull() {
+        assertNull Fields.bytes(null)
+    }
+
+    @Test
+    void testBytesEqualsWhenBothAreNull() {
+        assertTrue Fields.bytesEquals(null, null)
+    }
+
+    @Test
+    void testBytesEqualsIdentity() {
+        assertTrue Fields.bytesEquals(BigInteger.ONE, BigInteger.ONE)
+    }
+
+    @Test
+    void testBytesEqualsWhenAIsNull() {
+        assertFalse Fields.bytesEquals(null, BigInteger.ONE)
+    }
+
+    @Test
+    void testBytesEqualsWhenBIsNull() {
+        assertFalse Fields.bytesEquals(BigInteger.ONE, null)
+    }
+
+    @Test
+    void testFieldValueEqualsWhenAIsNull() {
+        BigInteger a = null
+        BigInteger b = BigInteger.ONE
+        Field<BigInteger> field = Fields.bigInt('foo', 'bar').build()
+        assertFalse Fields.equals(a, b, field)
+    }
+
+    @Test
+    void testFieldValueEqualsWhenBIsNull() {
+        BigInteger a = BigInteger.ONE
+        BigInteger b = null
+        Field<BigInteger> field = Fields.bigInt('foo', 'bar').build()
+        assertFalse Fields.equals(a, b, field)
+    }
+
+    @Test
+    void testFieldValueEqualsSecretString() {
+        String a = 'hello'
+        String b = new String('hello'.toCharArray()) // new instance not in the string table (Groovy side effect)
+        Field<String> field = Fields.builder(String.class).setId('foo').setName('bar').setSecret(true).build()
+        assertTrue Fields.equals(a, b, field)
+    }
+
+    @Test
+    void testEqualsIdentity() {
+        FieldReadable r = new TestFieldReadable()
+        assertTrue Fields.equals(r, r, Fields.string('foo', 'bar'))
+    }
+
+    @Test
+    void testEqualsWhenAIsNull() {
+        assertFalse Fields.equals(null, "hello", Fields.string('foo', 'bar'))
+    }
+
+    @Test
+    void testEqualsWhenAIsFieldReadableButBIsNot() {
+        FieldReadable r = new TestFieldReadable()
+        assertFalse Fields.equals(r, "hello", Fields.string('foo', 'bar'))
+    }
 }

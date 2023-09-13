@@ -16,8 +16,10 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.RsaPublicJwk;
 
 import java.math.BigInteger;
@@ -37,5 +39,14 @@ class DefaultRsaPublicJwk extends AbstractPublicJwk<RSAPublicKey> implements Rsa
 
     DefaultRsaPublicJwk(JwkContext<RSAPublicKey> ctx) {
         super(ctx, THUMBPRINT_FIELDS);
+    }
+
+    static boolean equalsPublic(FieldReadable self, Object candidate) {
+        return Fields.equals(self, candidate, MODULUS) && Fields.equals(self, candidate, PUBLIC_EXPONENT);
+    }
+
+    @Override
+    protected boolean equals(PublicJwk<?> jwk) {
+        return jwk instanceof RsaPublicJwk && equalsPublic(this, jwk);
     }
 }

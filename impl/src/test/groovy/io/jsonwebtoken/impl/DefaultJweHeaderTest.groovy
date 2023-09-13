@@ -63,7 +63,7 @@ class DefaultJweHeaderTest {
             h([epk: values])
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {kty=oct, k=<redacted>}. " +
+            String msg = "Invalid JWE header 'epk' (Ephemeral Public Key) value: {alg=HS256, kty=oct, k=<redacted>}. " +
                     "Value must be a Public JWK, not a Secret JWK."
             assertEquals msg, expected.getMessage()
         }

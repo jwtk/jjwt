@@ -55,14 +55,14 @@ class JwksTest {
 
         //test non-null value:
         //noinspection GroovyAssignabilityCheck
-        def builder = Jwks.builder().key(key)
+        def builder = Jwks.builder().key(key).delete('alg') // delete alg put there by SecretKeyBuilder
         builder."$name"(val)
         def jwk = builder.build()
         assertEquals val, jwk."get${cap}"()
         assertEquals expectedFieldValue, jwk."${id}"
 
         //test null value:
-        builder = Jwks.builder().key(key)
+        builder = Jwks.builder().key(key).delete('alg')
         try {
             builder."$name"(null)
             fail("IAE should have been thrown")
@@ -74,7 +74,7 @@ class JwksTest {
         assertFalse jwk.containsKey(id)
 
         //test empty string value
-        builder = Jwks.builder().key(key)
+        builder = Jwks.builder().key(key).delete('alg')
         if (val instanceof String) {
             try {
                 builder."$name"('   ' as String)

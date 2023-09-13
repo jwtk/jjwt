@@ -20,11 +20,14 @@ import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
+import io.jsonwebtoken.security.PrivateJwk;
 
 import java.math.BigInteger;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.Set;
+
+import static io.jsonwebtoken.impl.security.DefaultEcPublicJwk.equalsPublic;
 
 class DefaultEcPrivateJwk extends AbstractPrivateJwk<ECPrivateKey, ECPublicKey, EcPublicJwk> implements EcPrivateJwk {
 
@@ -37,5 +40,10 @@ class DefaultEcPrivateJwk extends AbstractPrivateJwk<ECPrivateKey, ECPublicKey, 
                 // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
                 DefaultEcPublicJwk.THUMBPRINT_FIELDS,
                 pubJwk);
+    }
+
+    @Override
+    protected boolean equals(PrivateJwk<?, ?, ?> jwk) {
+        return jwk instanceof EcPrivateJwk && equalsPublic(this, jwk) && Fields.equals(this, jwk, D);
     }
 }

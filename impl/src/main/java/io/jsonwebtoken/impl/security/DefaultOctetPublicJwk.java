@@ -16,9 +16,11 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.OctetPublicJwk;
+import io.jsonwebtoken.security.PublicJwk;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -36,5 +38,14 @@ public class DefaultOctetPublicJwk<T extends PublicKey> extends AbstractPublicJw
 
     DefaultOctetPublicJwk(JwkContext<T> ctx) {
         super(ctx, THUMBPRINT_FIELDS);
+    }
+
+    static boolean equalsPublic(FieldReadable self, Object candidate) {
+        return Fields.equals(self, candidate, CRV) && Fields.equals(self, candidate, X);
+    }
+
+    @Override
+    protected boolean equals(PublicJwk<?> jwk) {
+        return jwk instanceof OctetPublicJwk && equalsPublic(this, jwk);
     }
 }

@@ -144,7 +144,7 @@ class AbstractProtectedHeaderTest {
             h([jwk: jwk])
             fail()
         } catch (IllegalArgumentException expected) {
-            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {kty=oct, k=<redacted>}. " +
+            String msg = "Invalid JWT header 'jwk' (JSON Web Key) value: {alg=HS256, kty=oct, k=<redacted>}. " +
                     "Value must be a Public JWK, not a Secret JWK."
             assertEquals msg, expected.getMessage()
         }
