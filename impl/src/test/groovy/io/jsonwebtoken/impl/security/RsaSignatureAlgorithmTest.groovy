@@ -20,7 +20,6 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.UnsupportedKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -57,8 +56,8 @@ class RsaSignatureAlgorithmTest {
         algs.each {
             try {
                 it.validateKey(key, false)
-            } catch (Exception e) {
-                String msg = 'Unsupported RSA or RSASSA-PSS key algorithm name.'
+            } catch (InvalidKeyException e) {
+                String msg = 'Unrecognized RSA or RSASSA-PSS key algorithm name.'
                 assertEquals msg, e.getMessage()
             }
         }
@@ -78,8 +77,8 @@ class RsaSignatureAlgorithmTest {
         algs.each {
             try {
                 it.validateKey(key, false)
-            } catch (UnsupportedKeyException e) {
-                String msg = 'Unsupported RSA or RSASSA-PSS key algorithm name.'
+            } catch (InvalidKeyException e) {
+                String msg = 'Unrecognized RSA or RSASSA-PSS key algorithm name.'
                 assertEquals msg, e.getMessage()
             }
         }

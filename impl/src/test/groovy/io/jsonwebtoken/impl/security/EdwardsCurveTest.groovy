@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
 import java.security.spec.PKCS8EncodedKeySpec
@@ -78,8 +77,8 @@ class EdwardsCurveTest {
         def key = new TestKey(algorithm: alg)
         try {
             EdwardsCurve.forKey(key)
-        } catch (UnsupportedKeyException uke) {
-            String msg = "${key.getClass().getName()} with algorithm '${alg}' is not a recognized Edwards Curve key."
+        } catch (InvalidKeyException uke) {
+            String msg = "Unrecognized Edwards Curve key: [${KeysBridge.toString(key)}]"
             assertEquals msg, uke.getMessage()
         }
     }
@@ -251,9 +250,9 @@ class EdwardsCurveTest {
             try {
                 it.getKeyMaterial(key)
                 fail()
-            } catch (UnsupportedKeyException uke) {
-                String msg = "${key.getClass().getName()} encoded bytes cannot be null or empty."
-                assertEquals msg, uke.getMessage()
+            } catch (InvalidKeyException e) {
+                String msg = "Missing required encoded bytes for key [${KeysBridge.toString(key)}]."
+                assertEquals msg, e.getMessage()
             }
         }
     }

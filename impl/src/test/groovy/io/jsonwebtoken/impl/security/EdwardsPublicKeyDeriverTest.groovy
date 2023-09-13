@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.UnsupportedKeyException
+import io.jsonwebtoken.security.InvalidKeyException
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -30,7 +30,7 @@ class EdwardsPublicKeyDeriverTest {
         try {
             EdwardsPublicKeyDeriver.INSTANCE.apply(rsaPrivKey)
             fail()
-        } catch (UnsupportedKeyException uke) {
+        } catch (InvalidKeyException uke) {
             String expectedMsg = "Unable to derive Edwards-curve PublicKey for specified PrivateKey: ${KeysBridge.toString(rsaPrivKey)}"
             assertEquals(expectedMsg, uke.getMessage())
         }

@@ -80,8 +80,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
     }
 
     private static UnsupportedKeyException unsupportedKey(Key key, Exception e) {
-        String msg = "There is no builder that supports specified key of type " +
-                key.getClass().getName() + " with algorithm '" + key.getAlgorithm() + "'.";
+        String msg = "There is no builder that supports specified key [" + KeysBridge.toString(key) + "].";
         return new UnsupportedKeyException(msg, e);
     }
 
@@ -135,7 +134,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         Assert.notEmpty(chain, "chain cannot be null or empty.");
         X509Certificate cert = Assert.notNull(chain.get(0), "The first X509Certificate cannot be null.");
         PublicKey key = Assert.notNull(cert.getPublicKey(), "The first X509Certificate's PublicKey cannot be null.");
-        return this.<A,B>key((A)key).x509CertificateChain(chain);
+        return this.<A, B>key((A) key).x509CertificateChain(chain);
     }
 
     @Override
@@ -195,9 +194,9 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
     @Override
     public <A extends PublicKey, B extends PrivateKey> PrivateJwkBuilder<B, A, ?, ?, ?> keyPair(KeyPair keyPair)
             throws UnsupportedKeyException {
-        A pub = (A)KeyPairs.getKey(keyPair, PublicKey.class);
-        B priv = (B)KeyPairs.getKey(keyPair, PrivateKey.class);
-        return this.<A,B>key(priv).publicKey(pub);
+        A pub = (A) KeyPairs.getKey(keyPair, PublicKey.class);
+        B priv = (B) KeyPairs.getKey(keyPair, PrivateKey.class);
+        return this.<A, B>key(priv).publicKey(pub);
     }
 
     @Override

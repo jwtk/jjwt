@@ -39,7 +39,6 @@ import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
@@ -158,12 +157,12 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
             String type = key instanceof PublicKey ? "encryption " : "decryption ";
             String msg = "Unable to determine JWA-standard Elliptic Curve for " + type + "key [" +
                     KeysBridge.toString(key) + "]";
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
         if (curve instanceof EdwardsCurve && ((EdwardsCurve) curve).isSignatureCurve()) {
             String msg = curve.getId() + " keys may not be used with ECDH-ES key agreement algorithms per " +
-                    "https://www.rfc-editor.org/rfc/rfc8037#section-3.1";
-            throw new UnsupportedKeyException(msg);
+                    "https://www.rfc-editor.org/rfc/rfc8037#section-3.1.";
+            throw new InvalidKeyException(msg);
         }
         return Assert.isInstanceOf(AbstractCurve.class, curve, "AbstractCurve instance expected.");
     }
@@ -213,9 +212,9 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
         Class<?> epkClass = curve instanceof ECCurve ? EcPublicJwk.class : OctetPublicJwk.class;
         if (!epkClass.isInstance(epk)) {
-            String msg = "JWE Header " + DefaultJweHeader.EPK + " value is not a supported Elliptic Curve " +
+            String msg = "JWE Header " + DefaultJweHeader.EPK + " value is not an Elliptic Curve " +
                     "Public JWK. Value: " + epk;
-            throw new UnsupportedKeyException(msg);
+            throw new InvalidKeyException(msg);
         }
         if (!curve.contains(epk.toKey())) {
             String msg = "JWE Header " + DefaultJweHeader.EPK + " value does not represent " +

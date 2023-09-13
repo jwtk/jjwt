@@ -20,7 +20,7 @@ package io.jsonwebtoken.security;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public class UnsupportedKeyException extends InvalidKeyException {
+public class UnsupportedKeyException extends KeyException {
 
     /**
      * Creates a new instance with the specified explanation message.

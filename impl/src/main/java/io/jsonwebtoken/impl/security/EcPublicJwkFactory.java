@@ -21,7 +21,6 @@ import io.jsonwebtoken.impl.lang.RequiredFieldReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -60,7 +59,7 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
     protected static String getJwaIdByCurve(EllipticCurve curve) {
         ECCurve c = ECCurve.findByJcaCurve(curve);
         if (c == null) {
-            throw new UnsupportedKeyException(UNSUPPORTED_CURVE_MSG);
+            throw new InvalidKeyException(UNSUPPORTED_CURVE_MSG);
         }
         return c.getId();
     }

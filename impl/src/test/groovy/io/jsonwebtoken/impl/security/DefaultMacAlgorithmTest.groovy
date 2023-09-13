@@ -64,7 +64,7 @@ class DefaultMacAlgorithmTest {
         }
         try {
             newAlg().digest(request(password))
-        } catch (UnsupportedKeyException expected) {
+        } catch (InvalidKeyException expected) {
             String msg = 'Passwords are intended for use with key derivation algorithms only.'
             assertEquals msg, expected.getMessage()
         }
@@ -89,7 +89,7 @@ class DefaultMacAlgorithmTest {
 
         try {
             newAlg().digest(request(password))
-        } catch (UnsupportedKeyException expected) {
+        } catch (InvalidKeyException expected) {
             String msg = 'Passwords are intended for use with key derivation algorithms only.'
             assertEquals msg, expected.getMessage()
         }

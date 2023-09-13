@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.UnsupportedKeyException
+import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -37,13 +37,13 @@ class DefaultRsaKeyAlgorithmTest {
         for (DefaultRsaKeyAlgorithm alg : algs) {
             try {
                 alg.validate(key, true)
-            } catch (UnsupportedKeyException e) {
-                assertEquals 'Unsupported RSA key algorithm name.', e.getMessage()
+            } catch (InvalidKeyException e) {
+                assertEquals 'Invalid RSA key algorithm name.', e.getMessage()
             }
             try {
                 alg.validate(key, false)
-            } catch (UnsupportedKeyException e) {
-                assertEquals 'Unsupported RSA key algorithm name.', e.getMessage()
+            } catch (InvalidKeyException e) {
+                assertEquals 'Invalid RSA key algorithm name.', e.getMessage()
             }
         }
     }
@@ -65,7 +65,7 @@ class DefaultRsaKeyAlgorithmTest {
             replay(key)
             try {
                 alg.validate(key, true)
-            } catch (UnsupportedKeyException expected) {
+            } catch (InvalidKeyException expected) {
                 String msg = 'RSASSA-PSS keys may not be used for encryption, only digital signature algorithms.'
                 assertEquals msg, expected.getMessage()
             }
@@ -81,7 +81,7 @@ class DefaultRsaKeyAlgorithmTest {
             replay(key)
             try {
                 alg.validate(key, true)
-            } catch (UnsupportedKeyException expected) {
+            } catch (InvalidKeyException expected) {
                 String msg = 'RSASSA-PSS keys may not be used for encryption, only digital signature algorithms.'
                 assertEquals msg, expected.getMessage()
             }

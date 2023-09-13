@@ -26,7 +26,6 @@ import io.jsonwebtoken.security.KeyPairBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.security.UnsupportedKeyException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
 import java.math.BigInteger;
@@ -144,7 +143,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     protected void validateKey(Key key, boolean signing) {
         super.validateKey(key, signing);
         if (!KEY_ALG_NAMES.contains(KeysBridge.findAlgorithm(key))) {
-            throw new UnsupportedKeyException("Unsupported EC key algorithm name.");
+            throw new InvalidKeyException("Unrecognized EC key algorithm name.");
         }
         int size = KeysBridge.findBitLength(key);
         if (size < 0) return; // likely PKCS11 or HSM key, can't get the data we need
