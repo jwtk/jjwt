@@ -16,9 +16,11 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.FieldReadable;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.EcPublicJwk;
+import io.jsonwebtoken.security.PublicJwk;
 
 import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
@@ -38,5 +40,16 @@ class DefaultEcPublicJwk extends AbstractPublicJwk<ECPublicKey> implements EcPub
 
     DefaultEcPublicJwk(JwkContext<ECPublicKey> ctx) {
         super(ctx, THUMBPRINT_FIELDS);
+    }
+
+    static boolean equalsPublic(FieldReadable self, Object candidate) {
+        return Fields.equals(self, candidate, CRV) &&
+                Fields.equals(self, candidate, X) &&
+                Fields.equals(self, candidate, Y);
+    }
+
+    @Override
+    protected boolean equals(PublicJwk<?> jwk) {
+        return jwk instanceof EcPublicJwk && equalsPublic(this, jwk);
     }
 }

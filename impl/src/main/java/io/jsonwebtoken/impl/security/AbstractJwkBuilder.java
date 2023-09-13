@@ -170,6 +170,12 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
             implements SecretJwkBuilder {
         public DefaultSecretJwkBuilder(JwkContext<SecretKey> ctx) {
             super(ctx);
+            // assign a standard algorithm if possible:
+            Key key = Assert.notNull(ctx.getKey(), "SecretKey cannot be null.");
+            DefaultMacAlgorithm mac = DefaultMacAlgorithm.findByKey(key);
+            if (mac != null) {
+                algorithm(mac.getId());
+            }
         }
     }
 }

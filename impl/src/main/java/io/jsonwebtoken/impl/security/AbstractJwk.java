@@ -33,6 +33,9 @@ import io.jsonwebtoken.security.KeyOperation;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -48,10 +51,11 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
                     .set().setId("key_ops").setName("Key Operations").build();
     static final Field<String> KTY = Fields.string("kty", "Key Type");
     static final Set<Field<?>> FIELDS = Collections.setOf(ALG, KID, KEY_OPS, KTY);
-
     public static final String IMMUTABLE_MSG = "JWKs are immutable and may not be modified.";
+
     protected final JwkContext<K> context;
     private final List<Field<?>> THUMBPRINT_FIELDS;
+    private final int hashCode;
 
     /**
      * @param ctx              the backing JwkContext containing the JWK field values.
@@ -71,6 +75,40 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
             String kid = thumbprint.toString();
             ctx.setId(kid);
         }
+        this.hashCode = computeHashCode();
+    }
+
+    /**
+     * Compute and return the JWK hashCode.  As JWKs are immutable, this value will be cached as a final constant
+     * upon JWK instantiation. This uses the JWK's thumbprint fields during computation, but differs from JwkThumbprint
+     * calculation in two ways:
+     * <ol>
+     *     <li>JwkThumbprints use a MessageDigest calculation, which is unnecessary overhead for a hashcode</li>
+     *     <li>The hashCode calculation uses each field's idiomatic (Java) object value instead of the
+     *     JwkThumbprint-required canonical (String) value.</li>
+     * </ol>
+     *
+     * @return the JWK hashcode
+     */
+    private int computeHashCode() {
+        List<Object> list = new ArrayList<>(this.THUMBPRINT_FIELDS.size() + 1 /* possible discriminator */);
+        // So we don't leak information about the private key value, we need a discriminator to ensure that
+        // public and private key hashCodes are not identical (in case both JWKs need to be in the same hash set).
+        // So we add a discriminator String to the list of values that are used during hashCode calculation
+        Key key = Assert.notNull(toKey(), "JWK toKey() value cannot be null.");
+        if (key instanceof PublicKey) {
+            list.add("Public");
+        } else if (key instanceof PrivateKey) {
+            list.add("Private");
+        }
+        for (Field<?> field : this.THUMBPRINT_FIELDS) {
+            // Unlike thumbprint calculation, we get the idiomatic (Java) value, not canonical (String) value
+            // (We could have used either actually, but the idiomatic value hashCode calculation is probably
+            // faster).
+            Object val = Assert.notNull(get(field), "computeHashCode: Field idiomatic value cannot be null.");
+            list.add(val);
+        }
+        return Objects.nullSafeHashCode(list.toArray());
     }
 
     private String getRequiredThumbprintValue(Field<?> field) {
@@ -230,13 +268,20 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, FieldReadabl
     }
 
     @Override
-    public int hashCode() {
-        return this.context.hashCode();
+    public final int hashCode() {
+        return this.hashCode;
     }
 
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
-    public boolean equals(Object obj) {
-        return this.context.equals(obj);
+    public final boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof Jwk<?>) {
+            Jwk<?> other = (Jwk<?>) obj;
+            // this.getType() guaranteed non-null in constructor:
+            return getType().equals(other.getType()) && equals(other);
+        }
+        return false;
     }
+
+    protected abstract boolean equals(Jwk<?> jwk);
 }

@@ -176,6 +176,16 @@ public final class Bytes {
         return output;
     }
 
+    /**
+     * Clears the array by filling it with all zeros. Does nothing with a null or empty argument.
+     *
+     * @param bytes the (possibly null or empty) byte array to clear
+     */
+    public static void clear(byte[] bytes) {
+        if (isEmpty(bytes)) return;
+        java.util.Arrays.fill(bytes, (byte) 0);
+    }
+
     public static boolean isEmpty(byte[] bytes) {
         return length(bytes) == 0;
     }

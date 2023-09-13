@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyPair;
 import io.jsonwebtoken.security.PrivateJwk;
 import io.jsonwebtoken.security.PublicJwk;
@@ -47,4 +48,11 @@ abstract class AbstractPrivateJwk<K extends PrivateKey, L extends PublicKey, M e
     public KeyPair<L, K> toKeyPair() {
         return this.keyPair;
     }
+
+    @Override
+    protected final boolean equals(Jwk<?> jwk) {
+        return jwk instanceof PrivateJwk && equals((PrivateJwk<?, ?, ?>) jwk);
+    }
+
+    protected abstract boolean equals(PrivateJwk<?, ?, ?> jwk);
 }

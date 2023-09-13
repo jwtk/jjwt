@@ -290,4 +290,39 @@ class BytesTest {
         Bytes.length(-1)
     }
 
+    @Test
+    void testClearNull() {
+        Bytes.clear(null) // no exception
+    }
+
+    @Test
+    void testClearEmpty() {
+        Bytes.clear(Bytes.EMPTY) // no exception
+    }
+
+    @Test
+    void testClear() {
+        int len = 16
+        byte[] bytes = Bytes.random(len)
+        boolean allZero = true
+        for(int i = 0; i < len; i++) {
+            if (bytes[i] != (byte)0) {
+                allZero = false
+                break
+            }
+        }
+        assertFalse allZero // guarantee that we start with random bytes
+
+        Bytes.clear(bytes)
+
+        allZero = true
+        for(int i = 0; i < len; i++) {
+            if (bytes[i] != (byte)0) {
+                allZero = false
+                break
+            }
+        }
+        assertTrue allZero // asserts zeroed out entirely
+    }
+
 }

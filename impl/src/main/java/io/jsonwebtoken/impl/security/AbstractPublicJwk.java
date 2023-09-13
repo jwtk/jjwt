@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.PublicJwk;
 
 import java.security.PublicKey;
@@ -25,4 +26,11 @@ abstract class AbstractPublicJwk<K extends PublicKey> extends AbstractAsymmetric
     AbstractPublicJwk(JwkContext<K> ctx, List<Field<?>> thumbprintFields) {
         super(ctx, thumbprintFields);
     }
+
+    @Override
+    protected final boolean equals(Jwk<?> jwk) {
+        return jwk instanceof PublicJwk && equals((PublicJwk<?>) jwk);
+    }
+
+    protected abstract boolean equals(PublicJwk<?> jwk);
 }

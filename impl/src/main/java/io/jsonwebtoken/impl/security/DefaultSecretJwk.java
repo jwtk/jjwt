@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.SecretJwk;
 
 import javax.crypto.SecretKey;
@@ -35,5 +36,10 @@ class DefaultSecretJwk extends AbstractJwk<SecretKey> implements SecretJwk {
 
     DefaultSecretJwk(JwkContext<SecretKey> ctx) {
         super(ctx, THUMBPRINT_FIELDS);
+    }
+
+    @Override
+    protected boolean equals(Jwk<?> jwk) {
+        return jwk instanceof SecretJwk && Fields.equals(this, jwk, K);
     }
 }

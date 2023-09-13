@@ -16,7 +16,9 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.lang.Collections
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.SecretJwk
 import org.junit.Before
 import org.junit.Test
 
@@ -44,7 +46,12 @@ class AbstractJwkTest {
     }
 
     static AbstractJwk<SecretKey> newJwk(JwkContext<SecretKey> ctx) {
-        return new AbstractJwk(ctx, Collections.of(AbstractJwk.KTY)) {}
+        return new AbstractJwk(ctx, Collections.of(AbstractJwk.KTY)) {
+            @Override
+            protected boolean equals(Jwk jwk) {
+                return this.@context.equals(jwk.@context)
+            }
+        }
     }
 
     @Before
@@ -144,24 +151,22 @@ class AbstractJwkTest {
 
     @Test
     void testPrivateJwkHashCode() {
-        assertEquals jwk.hashCode(), jwk.@context.hashCode()
-
         def secretJwk1 = Jwks.builder().key(TestKeys.HS256).add('hello', 'world').build()
         def secretJwk2 = Jwks.builder().key(TestKeys.HS256).add('hello', 'world').build()
-        assertEquals secretJwk1.hashCode(), secretJwk1.@context.hashCode()
-        assertEquals secretJwk2.hashCode(), secretJwk2.@context.hashCode()
         assertEquals secretJwk1.hashCode(), secretJwk2.hashCode()
 
         def ecPrivJwk1 = Jwks.builder().key(TestKeys.ES256.pair.private).add('hello', 'ecworld').build()
         def ecPrivJwk2 = Jwks.builder().key(TestKeys.ES256.pair.private).add('hello', 'ecworld').build()
         assertEquals ecPrivJwk1.hashCode(), ecPrivJwk2.hashCode()
-        assertEquals ecPrivJwk1.hashCode(), ecPrivJwk1.@context.hashCode()
-        assertEquals ecPrivJwk2.hashCode(), ecPrivJwk2.@context.hashCode()
 
         def rsaPrivJwk1 = Jwks.builder().key(TestKeys.RS256.pair.private).add('hello', 'rsaworld').build()
         def rsaPrivJwk2 = Jwks.builder().key(TestKeys.RS256.pair.private).add('hello', 'rsaworld').build()
         assertEquals rsaPrivJwk1.hashCode(), rsaPrivJwk2.hashCode()
-        assertEquals rsaPrivJwk1.hashCode(), rsaPrivJwk1.@context.hashCode()
-        assertEquals rsaPrivJwk2.hashCode(), rsaPrivJwk2.@context.hashCode()
+    }
+
+    @Test
+    void testEqualsWithNonJwk() {
+        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
+        assertFalse jwk.equals(42)
     }
 }

@@ -53,7 +53,7 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
     static final DefaultMacAlgorithm HS384 = new DefaultMacAlgorithm(384);
     static final DefaultMacAlgorithm HS512 = new DefaultMacAlgorithm(512);
 
-    private static final Map<String, MacAlgorithm> JCA_NAME_MAP;
+    private static final Map<String, DefaultMacAlgorithm> JCA_NAME_MAP;
 
     static {
         JCA_NAME_MAP = new LinkedHashMap<>(6);
@@ -96,7 +96,7 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         return JCA_NAME_MAP.containsKey(key);
     }
 
-    static MacAlgorithm findByKey(Key key) {
+    static DefaultMacAlgorithm findByKey(Key key) {
 
         String alg = KeysBridge.findAlgorithm(key);
         if (!Strings.hasText(alg)) {
@@ -104,7 +104,7 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         }
 
         String upper = alg.toUpperCase(Locale.ENGLISH);
-        MacAlgorithm mac = JCA_NAME_MAP.get(upper);
+        DefaultMacAlgorithm mac = JCA_NAME_MAP.get(upper);
         if (mac == null) {
             return null;
         }

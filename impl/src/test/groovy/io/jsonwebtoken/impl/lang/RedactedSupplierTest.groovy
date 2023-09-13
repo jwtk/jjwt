@@ -17,8 +17,7 @@ package io.jsonwebtoken.impl.lang
 
 import org.junit.Test
 
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 class RedactedSupplierTest {
 
@@ -41,6 +40,18 @@ class RedactedSupplierTest {
     @Test
     void testEqualsSameTypeDifferentValue() {
         assertFalse new RedactedSupplier<>(42).equals(new RedactedSupplier(30))
+    }
+
+    @Test
+    void testEqualsIdentity() {
+        def supplier = new RedactedSupplier('hello')
+        assertEquals supplier, supplier
+    }
+
+    @Test
+    void testHashCode() {
+        int hashCode = 42.hashCode()
+        assertEquals hashCode, new RedactedSupplier(42).hashCode()
     }
 
 }
