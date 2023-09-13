@@ -49,7 +49,7 @@ import java.util.Set;
  *
  * <p>JWKs often represent secret or private key data which should never be exposed publicly, nor mistakenly printed
  * to application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
- * private or secret field values are 'wrapped' in a {@link io.jsonwebtoken.lang.Supplier Supplier} instance to ensure
+ * private or secret values are 'wrapped' in a {@link io.jsonwebtoken.lang.Supplier Supplier} instance to ensure
  * any attempt to call {@link String#toString() toString()} on the value will print a redacted value instead of an
  * actual private or secret value.</p>
  *
@@ -70,7 +70,7 @@ import java.util.Set;
  * k=&lt;redacted&gt;</pre></blockquote>
  * <p>instead of the actual/raw {@code k} value.</p>
  *
- * <p>Finally, because all private or secret field values are wrapped as {@link io.jsonwebtoken.lang.Supplier}
+ * <p>Finally, because all private or secret values are wrapped as {@link io.jsonwebtoken.lang.Supplier}
  * instances, if you really wanted the <em>real</em> internal value, you could just call the supplier's
  * {@link Supplier#get() get()} method:</p>
  * <blockquote><pre>
@@ -78,7 +78,7 @@ import java.util.Set;
  * <p>but <b><em>BE CAREFUL</em></b>: obtaining the raw value in your application code exposes greater security
  * risk - you must ensure to keep that value safe and out of console or log output.  It is almost always better to
  * interact with the JWK's {@link #toKey() toKey()} instance directly instead of accessing
- * JWK internal serialization fields.</p>
+ * JWK internal serialization parameters.</p>
  *
  * @param <K> The type of Java {@link Key} represented by this JWK
  * @since JJWT_RELEASE_VERSION

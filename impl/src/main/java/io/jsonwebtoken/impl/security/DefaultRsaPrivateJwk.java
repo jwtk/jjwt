@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.PrivateJwk;
 import io.jsonwebtoken.security.RsaPrivateJwk;
@@ -34,19 +34,19 @@ import static io.jsonwebtoken.impl.security.DefaultRsaPublicJwk.equalsPublic;
 
 class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKey, RsaPublicJwk> implements RsaPrivateJwk {
 
-    static final Field<BigInteger> PRIVATE_EXPONENT = Fields.secretBigInt("d", "Private Exponent");
-    static final Field<BigInteger> FIRST_PRIME = Fields.secretBigInt("p", "First Prime Factor");
-    static final Field<BigInteger> SECOND_PRIME = Fields.secretBigInt("q", "Second Prime Factor");
-    static final Field<BigInteger> FIRST_CRT_EXPONENT = Fields.secretBigInt("dp", "First Factor CRT Exponent");
-    static final Field<BigInteger> SECOND_CRT_EXPONENT = Fields.secretBigInt("dq", "Second Factor CRT Exponent");
-    static final Field<BigInteger> FIRST_CRT_COEFFICIENT = Fields.secretBigInt("qi", "First CRT Coefficient");
-    static final Field<List<RSAOtherPrimeInfo>> OTHER_PRIMES_INFO =
-            Fields.builder(RSAOtherPrimeInfo.class)
+    static final Parameter<BigInteger> PRIVATE_EXPONENT = Parameters.secretBigInt("d", "Private Exponent");
+    static final Parameter<BigInteger> FIRST_PRIME = Parameters.secretBigInt("p", "First Prime Factor");
+    static final Parameter<BigInteger> SECOND_PRIME = Parameters.secretBigInt("q", "Second Prime Factor");
+    static final Parameter<BigInteger> FIRST_CRT_EXPONENT = Parameters.secretBigInt("dp", "First Factor CRT Exponent");
+    static final Parameter<BigInteger> SECOND_CRT_EXPONENT = Parameters.secretBigInt("dq", "Second Factor CRT Exponent");
+    static final Parameter<BigInteger> FIRST_CRT_COEFFICIENT = Parameters.secretBigInt("qi", "First CRT Coefficient");
+    static final Parameter<List<RSAOtherPrimeInfo>> OTHER_PRIMES_INFO =
+            Parameters.builder(RSAOtherPrimeInfo.class)
                     .setId("oth").setName("Other Primes Info")
                     .setConverter(RSAOtherPrimeInfoConverter.INSTANCE).list()
                     .build();
 
-    static final Set<Field<?>> FIELDS = Collections.concat(DefaultRsaPublicJwk.FIELDS,
+    static final Set<Parameter<?>> PARAMS = Collections.concat(DefaultRsaPublicJwk.PARAMS,
             PRIVATE_EXPONENT, FIRST_PRIME, SECOND_PRIME, FIRST_CRT_EXPONENT,
             SECOND_CRT_EXPONENT, FIRST_CRT_COEFFICIENT, OTHER_PRIMES_INFO
     );
@@ -55,19 +55,19 @@ class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKe
         super(ctx,
                 // only public members are included in Private JWK Thumbprints per
                 // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
-                DefaultRsaPublicJwk.THUMBPRINT_FIELDS,
+                DefaultRsaPublicJwk.THUMBPRINT_PARAMS,
                 pubJwk);
     }
 
     private static boolean equals(RSAOtherPrimeInfo a, RSAOtherPrimeInfo b) {
         if (a == b) return true;
         if (a == null || b == null) return false;
-        return Fields.bytesEquals(a.getPrime(), b.getPrime()) &&
-                Fields.bytesEquals(a.getExponent(), b.getExponent()) &&
-                Fields.bytesEquals(a.getCrtCoefficient(), b.getCrtCoefficient());
+        return Parameters.bytesEquals(a.getPrime(), b.getPrime()) &&
+                Parameters.bytesEquals(a.getExponent(), b.getExponent()) &&
+                Parameters.bytesEquals(a.getCrtCoefficient(), b.getCrtCoefficient());
     }
 
-    private static boolean equalsOtherPrimes(FieldReadable a, FieldReadable b) {
+    private static boolean equalsOtherPrimes(ParameterReadable a, ParameterReadable b) {
         List<RSAOtherPrimeInfo> aOthers = a.get(OTHER_PRIMES_INFO);
         List<RSAOtherPrimeInfo> bOthers = b.get(OTHER_PRIMES_INFO);
         int aSize = Collections.size(aOthers);
@@ -85,12 +85,12 @@ class DefaultRsaPrivateJwk extends AbstractPrivateJwk<RSAPrivateKey, RSAPublicKe
     @Override
     protected boolean equals(PrivateJwk<?, ?, ?> jwk) {
         return jwk instanceof RsaPrivateJwk && equalsPublic(this, jwk) &&
-                Fields.equals(this, jwk, PRIVATE_EXPONENT) &&
-                Fields.equals(this, jwk, FIRST_PRIME) &&
-                Fields.equals(this, jwk, SECOND_PRIME) &&
-                Fields.equals(this, jwk, FIRST_CRT_EXPONENT) &&
-                Fields.equals(this, jwk, SECOND_CRT_EXPONENT) &&
-                Fields.equals(this, jwk, FIRST_CRT_COEFFICIENT) &&
-                equalsOtherPrimes(this, (FieldReadable) jwk);
+                Parameters.equals(this, jwk, PRIVATE_EXPONENT) &&
+                Parameters.equals(this, jwk, FIRST_PRIME) &&
+                Parameters.equals(this, jwk, SECOND_PRIME) &&
+                Parameters.equals(this, jwk, FIRST_CRT_EXPONENT) &&
+                Parameters.equals(this, jwk, SECOND_CRT_EXPONENT) &&
+                Parameters.equals(this, jwk, FIRST_CRT_COEFFICIENT) &&
+                equalsOtherPrimes(this, (ParameterReadable) jwk);
     }
 }

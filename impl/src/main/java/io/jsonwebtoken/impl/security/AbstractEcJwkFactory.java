@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converters;
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -57,7 +57,7 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
         return Encoders.BASE64URL.encode(bytes);
     }
 
-    AbstractEcJwkFactory(Class<K> keyType, Set<Field<?>> fields) {
-        super(DefaultEcPublicJwk.TYPE_VALUE, keyType, fields);
+    AbstractEcJwkFactory(Class<K> keyType, Set<Parameter<?>> params) {
+        super(DefaultEcPublicJwk.TYPE_VALUE, keyType, params);
     }
 }

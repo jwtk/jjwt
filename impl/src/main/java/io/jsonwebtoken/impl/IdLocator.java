@@ -22,9 +22,9 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.impl.lang.Field;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
@@ -35,14 +35,14 @@ import java.util.LinkedHashSet;
 
 public class IdLocator<H extends Header, R extends Identifiable> implements Locator<R>, Function<H, R> {
 
-    private final Field<String> field;
+    private final Parameter<String> param;
     private final String requiredMsg;
     private final boolean valueRequired;
 
     private final Registry<String, R> registry;
 
-    public IdLocator(Field<String> field, Registry<String, R> registry, Collection<R> extras, String requiredExceptionMessage) {
-        this.field = Assert.notNull(field, "Header field cannot be null.");
+    public IdLocator(Parameter<String> param, Registry<String, R> registry, Collection<R> extras, String requiredExceptionMessage) {
+        this.param = Assert.notNull(param, "Header param cannot be null.");
         this.requiredMsg = Strings.clean(requiredExceptionMessage);
         this.valueRequired = Strings.hasText(this.requiredMsg);
         Assert.notEmpty(registry, "Registry cannot be null or empty.");
@@ -62,7 +62,7 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
         // - JWE zip 'Compression Algorithm Value': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1
         // - JWK '"kty" Parameter Value': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.4.1
 
-        this.registry = new IdRegistry<>(field.getName(), all); // do not use the caseSensitive ctor argument - must be false
+        this.registry = new IdRegistry<>(param.getName(), all); // do not use the caseSensitive ctor argument - must be false
     }
 
     private static String type(Header header) {
@@ -79,7 +79,7 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
     public R locate(Header header) {
         Assert.notNull(header, "Header argument cannot be null.");
 
-        Object val = header.get(this.field.getId());
+        Object val = header.get(this.param.getId());
         String id = val != null ? val.toString() : null;
 
         if (!Strings.hasText(id)) {
@@ -92,7 +92,7 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
         try {
             return registry.forKey(id);
         } catch (Exception e) {
-            String msg = "Unrecognized " + type(header) + " " + this.field + " header value: " + id;
+            String msg = "Unrecognized " + type(header) + " " + this.param + " header value: " + id;
             throw new UnsupportedJwtException(msg, e);
         }
     }

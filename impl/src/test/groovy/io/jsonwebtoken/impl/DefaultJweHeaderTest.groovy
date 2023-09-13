@@ -103,7 +103,7 @@ class DefaultJweHeaderTest {
     @Test
     void testEpkWithInvalidEcPublicJwk() {
         def jwk = Jwks.builder().key(TestKeys.ES256.pair.public as ECPublicKey).build()
-        def values = new LinkedHashMap(jwk) // copy fields so we can mutate
+        def values = new LinkedHashMap(jwk) // copy params so we can mutate
         // We have a public JWK for a point on the curve, now swap out the x coordinate for something invalid:
         values.put('x', 'Kg')
         try {

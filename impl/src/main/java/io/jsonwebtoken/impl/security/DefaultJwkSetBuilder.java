@@ -15,9 +15,9 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.FieldMap;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.ParameterMap;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkSet;
@@ -35,12 +35,12 @@ public class DefaultJwkSetBuilder extends AbstractSecurityBuilder<JwkSet, JwkSet
 
     private KeyOperationPolicy operationPolicy;
     private JwkSetConverter converter;
-    private FieldMap map;
+    private ParameterMap map;
 
     public DefaultJwkSetBuilder() {
         this.operationPolicy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY;
         this.converter = new JwkSetConverter();
-        this.map = new FieldMap(Fields.registry(DefaultJwkSet.KEYS));
+        this.map = new ParameterMap(Parameters.registry(DefaultJwkSet.KEYS));
     }
 
     @Override
@@ -70,10 +70,10 @@ public class DefaultJwkSetBuilder extends AbstractSecurityBuilder<JwkSet, JwkSet
     private JwkSetBuilder refresh() {
         JwkConverter<Jwk<?>> jwkConverter = new JwkConverter<>(new JwkBuilderSupplier(this.provider, this.operationPolicy));
         this.converter = new JwkSetConverter(jwkConverter, this.converter.isIgnoreUnsupported());
-        Field<Set<Jwk<?>>> field = DefaultJwkSet.field(jwkConverter);
-        this.map = new FieldMap(Fields.registry(field), this.map, true);
+        Parameter<Set<Jwk<?>>> param = DefaultJwkSet.param(jwkConverter);
+        this.map = new ParameterMap(Parameters.registry(param), this.map, true);
         // a new policy could have been applied, ensure that any existing keys match that policy:
-        Set<Jwk<?>> jwks = this.map.get(field);
+        Set<Jwk<?>> jwks = this.map.get(param);
         if (!Collections.isEmpty(jwks)) {
             for (Jwk<?> jwk : jwks) {
                 this.operationPolicy.validate(jwk.getOperations());

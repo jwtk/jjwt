@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.security.PublicJwk;
 
 import java.net.URI;
@@ -30,8 +30,8 @@ public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<DefaultMuta
         super(src);
     }
 
-    private <T> T get(Field<T> field) {
-        return this.DELEGATE.get(field);
+    private <T> T get(Parameter<T> param) {
+        return this.DELEGATE.get(param);
     }
 
     // =============================================================

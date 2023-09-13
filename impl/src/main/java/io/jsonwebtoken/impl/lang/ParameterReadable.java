@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 jsonwebtoken.io
+ * Copyright © 2022 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,7 @@
  */
 package io.jsonwebtoken.impl.lang;
 
-import io.jsonwebtoken.lang.Builder;
+public interface ParameterReadable {
 
-import java.util.List;
-import java.util.Set;
-
-/**
- * @since JJWT_RELEASE_VERSION
- */
-public interface FieldBuilder<T> extends Builder<Field<T>> {
-
-    FieldBuilder<T> setId(String id);
-
-    FieldBuilder<T> setName(String name);
-
-    FieldBuilder<T> setSecret(boolean secret);
-
-    FieldBuilder<List<T>> list();
-
-    FieldBuilder<Set<T>> set();
-
-    FieldBuilder<T> setConverter(Converter<T, ?> converter);
+    <T> T get(Parameter<T> param);
 }

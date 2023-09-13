@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -29,7 +29,7 @@ import java.security.PublicKey;
 public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPrivateJwk<PrivateKey, PublicKey>> {
 
     public OctetPrivateJwkFactory() {
-        super(PrivateKey.class, DefaultOctetPrivateJwk.FIELDS);
+        super(PrivateKey.class, DefaultOctetPrivateJwk.PARAMS);
     }
 
     @Override
@@ -73,12 +73,12 @@ public class OctetPrivateJwkFactory extends OctetJwkFactory<PrivateKey, OctetPri
 
     @Override
     protected OctetPrivateJwk<PrivateKey, PublicKey> createJwkFromValues(JwkContext<PrivateKey> ctx) {
-        FieldReadable reader = new RequiredFieldReader(ctx);
+        ParameterReadable reader = new RequiredParameterReader(ctx);
         EdwardsCurve curve = getCurve(reader);
         //TODO: assert that the curve contains the specified key
 
         // public values are required, so assert them:
-        JwkContext<PublicKey> pubCtx = new DefaultJwkContext<>(DefaultOctetPublicJwk.FIELDS, ctx);
+        JwkContext<PublicKey> pubCtx = new DefaultJwkContext<>(DefaultOctetPublicJwk.PARAMS, ctx);
         OctetPublicJwk<PublicKey> pubJwk = OctetPublicJwkFactory.INSTANCE.createJwkFromValues(pubCtx);
 
         byte[] d = reader.get(DefaultOctetPrivateJwk.D);

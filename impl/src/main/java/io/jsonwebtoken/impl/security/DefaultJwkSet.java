@@ -15,10 +15,10 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.FieldMap;
+import io.jsonwebtoken.impl.ParameterMap;
 import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkSet;
@@ -27,22 +27,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultJwkSet extends FieldMap implements JwkSet {
+public class DefaultJwkSet extends ParameterMap implements JwkSet {
 
     private static final String NAME = "JWK Set";
 
-    static Field<Set<Jwk<?>>> field(Converter<Jwk<?>, ?> converter) {
-        return Fields.builder(JwkConverter.JWK_CLASS)
+    static Parameter<Set<Jwk<?>>> param(Converter<Jwk<?>, ?> converter) {
+        return Parameters.builder(JwkConverter.JWK_CLASS)
                 .setConverter(converter).set()
                 .setId("keys").setName("JSON Web Keys")
                 .setSecret(true)
                 .build();
     }
 
-    static final Field<Set<Jwk<?>>> KEYS = field(JwkConverter.ANY);
+    static final Parameter<Set<Jwk<?>>> KEYS = param(JwkConverter.ANY);
 
-    public DefaultJwkSet(Field<Set<Jwk<?>>> field, Map<String, ?> src) {
-        super(Fields.registry(field), src);
+    public DefaultJwkSet(Parameter<Set<Jwk<?>>> param, Map<String, ?> src) {
+        super(Parameters.registry(param), src);
     }
 
     @Override

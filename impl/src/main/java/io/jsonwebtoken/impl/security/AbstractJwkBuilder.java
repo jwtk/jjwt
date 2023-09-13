@@ -16,9 +16,9 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
 import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
@@ -133,14 +133,14 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
         Assert.notEmpty(ops, "Policy operations cannot be null or empty.");
         this.opsPolicy = policy;
 
-        // update the JWK internal field to enable the policy's values:
+        // update the JWK internal param to enable the policy's values:
         Registry<String, KeyOperation> registry = new IdRegistry<>("JSON Web Key Operation", ops);
-        Field<Set<KeyOperation>> field = Fields.builder(KeyOperation.class)
+        Parameter<Set<KeyOperation>> param = Parameters.builder(KeyOperation.class)
                 .setConverter(new KeyOperationConverter(registry)).set()
                 .setId(AbstractJwk.KEY_OPS.getId())
                 .setName(AbstractJwk.KEY_OPS.getName())
                 .build();
-        setDelegate(this.DELEGATE.field(field));
+        setDelegate(this.DELEGATE.parameter(param));
         return self();
     }
 

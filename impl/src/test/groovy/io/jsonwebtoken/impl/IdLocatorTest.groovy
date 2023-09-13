@@ -19,9 +19,9 @@ import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
-import io.jsonwebtoken.impl.lang.Field
-import io.jsonwebtoken.impl.lang.Fields
 import io.jsonwebtoken.impl.lang.IdRegistry
+import io.jsonwebtoken.impl.lang.Parameter
+import io.jsonwebtoken.impl.lang.Parameters
 import org.junit.Before
 import org.junit.Test
 
@@ -30,7 +30,7 @@ import static org.junit.Assert.*
 class IdLocatorTest {
 
     private static final String exMsg = 'foo is required'
-    private static final Field<String> TEST_FIELD = Fields.string('foo', 'Foo')
+    private static final Parameter<String> TEST_PARAM = Parameters.string('foo', 'Foo')
 
     private static IdRegistry registry
     private static IdLocator locator
@@ -40,12 +40,12 @@ class IdLocatorTest {
         def a = new StringIdentifiable(value: 'A')
         def b = new StringIdentifiable(value: 'B')
         registry = new IdRegistry('Foo', [a, b], false)
-        locator = new IdLocator(TEST_FIELD, registry, Collections.emptyList(), exMsg)
+        locator = new IdLocator(TEST_PARAM, registry, Collections.emptyList(), exMsg)
     }
 
     @Test
     void unrequiredHeaderValueTest() {
-        locator = new IdLocator(TEST_FIELD, registry, Collections.emptyList(), null)
+        locator = new IdLocator(TEST_PARAM, registry, Collections.emptyList(), null)
         def header = Jwts.header().add('a', 'b').build()
         assertNull locator.apply(header)
     }
@@ -67,7 +67,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unrecognized JWT ${TEST_FIELD} header value: foo"
+            String msg = "Unrecognized JWT ${TEST_PARAM} header value: foo"
             assertEquals msg, expected.getMessage()
         }
     }
@@ -78,7 +78,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unrecognized JWS ${TEST_FIELD} header value: foo"
+            String msg = "Unrecognized JWS ${TEST_PARAM} header value: foo"
             assertEquals msg, expected.getMessage()
         }
     }
@@ -89,7 +89,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unrecognized JWE ${TEST_FIELD} header value: foo"
+            String msg = "Unrecognized JWE ${TEST_PARAM} header value: foo"
             assertEquals msg, expected.getMessage()
         }
     }

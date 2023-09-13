@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 jsonwebtoken.io
+ * Copyright © 2021 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,15 @@
  */
 package io.jsonwebtoken.impl.lang;
 
-public interface FieldReadable {
+import io.jsonwebtoken.Identifiable;
 
-    <T> T get(Field<T> field);
+public interface Parameter<T> extends Identifiable, Converter<T, Object> {
+
+    String getName();
+
+    boolean supports(Object value);
+
+    T cast(Object value);
+
+    boolean isSecret();
 }

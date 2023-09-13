@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.SecretJwk;
@@ -28,18 +28,18 @@ import java.util.Set;
 class DefaultSecretJwk extends AbstractJwk<SecretKey> implements SecretJwk {
 
     static final String TYPE_VALUE = "oct";
-    static final Field<byte[]> K = Fields.bytes("k", "Key Value").setSecret(true).build();
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractJwk.FIELDS, K);
+    static final Parameter<byte[]> K = Parameters.bytes("k", "Key Value").setSecret(true).build();
+    static final Set<Parameter<?>> PARAMS = Collections.concat(AbstractJwk.PARAMS, K);
 
     // https://www.rfc-editor.org/rfc/rfc7638#section-3.2
-    static final List<Field<?>> THUMBPRINT_FIELDS = Collections.<Field<?>>of(K, KTY);
+    static final List<Parameter<?>> THUMBPRINT_PARAMS = Collections.<Parameter<?>>of(K, KTY);
 
     DefaultSecretJwk(JwkContext<SecretKey> ctx) {
-        super(ctx, THUMBPRINT_FIELDS);
+        super(ctx, THUMBPRINT_PARAMS);
     }
 
     @Override
     protected boolean equals(Jwk<?> jwk) {
-        return jwk instanceof SecretJwk && Fields.equals(this, jwk, K);
+        return jwk instanceof SecretJwk && Parameters.equals(this, jwk, K);
     }
 }

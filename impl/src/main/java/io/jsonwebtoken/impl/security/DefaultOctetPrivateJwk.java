@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.OctetPrivateJwk;
 import io.jsonwebtoken.security.OctetPublicJwk;
@@ -31,19 +31,19 @@ import static io.jsonwebtoken.impl.security.DefaultOctetPublicJwk.equalsPublic;
 public class DefaultOctetPrivateJwk<T extends PrivateKey, P extends PublicKey>
         extends AbstractPrivateJwk<T, P, OctetPublicJwk<P>> implements OctetPrivateJwk<T, P> {
 
-    static final Field<byte[]> D = Fields.bytes("d", "The private key").setSecret(true).build();
+    static final Parameter<byte[]> D = Parameters.bytes("d", "The private key").setSecret(true).build();
 
-    static final Set<Field<?>> FIELDS = Collections.concat(DefaultOctetPublicJwk.FIELDS, D);
+    static final Set<Parameter<?>> PARAMS = Collections.concat(DefaultOctetPublicJwk.PARAMS, D);
 
     DefaultOctetPrivateJwk(JwkContext<T> ctx, OctetPublicJwk<P> pubJwk) {
         super(ctx,
                 // only public members are included in Private JWK Thumbprints per
                 // https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
-                DefaultOctetPublicJwk.THUMBPRINT_FIELDS, pubJwk);
+                DefaultOctetPublicJwk.THUMBPRINT_PARAMS, pubJwk);
     }
 
     @Override
     protected boolean equals(PrivateJwk<?, ?, ?> jwk) {
-        return jwk instanceof OctetPrivateJwk && equalsPublic(this, jwk) && Fields.equals(this, jwk, D);
+        return jwk instanceof OctetPrivateJwk && equalsPublic(this, jwk) && Parameters.equals(this, jwk, D);
     }
 }

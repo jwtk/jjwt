@@ -614,7 +614,7 @@ otherwise you may not trust the token.  You can do that by using one of the `req
 try {
     Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
-    // the sub field was missing or did not have a 'jsmith' value
+    // the sub claim was missing or did not have a 'jsmith' value
 }
 ```
 
@@ -624,19 +624,19 @@ If it is important to react to a missing vs an incorrect value, instead of catch
 try {
     Jwts.parser().requireSubject("jsmith").setSigningKey(key).parseClaimsJws(s);
 } catch(MissingClaimException mce) {
-    // the parsed JWT did not have the sub field
+    // the parsed JWT did not have the sub claim
 } catch(IncorrectClaimException ice) {
-    // the parsed JWT had a sub field, but its value was not equal to 'jsmith'
+    // the parsed JWT had a sub claim, but its value was not equal to 'jsmith'
 }
 ```
 
-You can also require custom fields by using the `require(fieldName, requiredFieldValue)` method - for example:
+You can also require custom claims by using the `require(claimName, requiredValue)` method - for example:
 
 ```java
 try {
-    Jwts.parser().require("myfield", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
+    Jwts.parser().require("myClaim", "myRequiredValue").setSigningKey(key).parseClaimsJws(s);
 } catch(InvalidClaimException ice) {
-    // the 'myfield' field was missing or did not have a 'myRequiredValue' value
+    // the 'myClaim' claim was missing or did not have a 'myRequiredValue' value
 }
 ```
 (or, again, you could catch either MissingClaimException or IncorrectClaimException instead)
@@ -716,24 +716,31 @@ SigningKeyResolver resolver = new MySigningKeyResolver();
 Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(resolver).parseClaimsJws(compact);
 ```
 
-The signature is still validated, and the JWT instance will still not be returned if the jwt string is invalid, as expected.  You just get to 'see' the JWT data for key discovery before the parser validates.  Nice.
+The signature is still validated, and the JWT instance will still not be returned if the jwt string is invalid, as 
+expected.  You just get to 'see' the JWT data for key discovery before the parser validates.  Nice.
 
-This of course requires that you put some sort of information in the JWS when you create it so that your `SigningKeyResolver` implementation can look at it later and look up the key.  The *standard* way to do this is to use the JWS `kid` ('key id') field, for example:
+This of course requires that you put some sort of information in the JWS when you create it so that your 
+`SigningKeyResolver` implementation can look at it later and look up the key.  The *standard* way to do this is to 
+use the JWS `kid` ('key id') header parameter, for example:
 
 ```java
 Jwts.builder().setHeaderParam("kid", your_signing_key_id_NOT_THE_SECRET).build();
 ```
 
-You could of course set any other header parameter or claims parameter instead of setting `kid` if you want - that's just the default field reserved for signing key identification.  If you can locate the signing key based on other information in the header or claims, you don't need to set the `kid` field - just make sure your resolver implementation knows how to look up the key.
+You could of course set any other header parameter or claims instead of setting `kid` if you want - 
+that's just the default parameter reserved for signing key identification.  If you can locate the signing key based 
+on other information in the header or claims, you don't need to set the `kid` parameter - just make sure your 
+resolver implementation knows how to look up the key.
 
-Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick and simple subclasses or anonymous classes instead of having to implement the `SigningKeyResolver` interface directly.  For example:
+Finally, a nice `SigningKeyResolverAdapter` is provided to allow you to write quick and simple subclasses or 
+anonymous classes instead of having to implement the `SigningKeyResolver` interface directly.  For example:
 
 ```java
 Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
         @Override
         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
             //inspect the header or claims, lookup and return the signing key
-            String keyId = header.getKeyId(); //or any other field that you need to inspect
+            String keyId = header.getKeyId(); //or any other parameter that you need to inspect
             return getSigningKey(keyId); //implement me
         }})
     .parseClaimsJws(compact);
@@ -741,8 +748,10 @@ Jws<Claims> jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdap
 
 ### 0.3
 
-- [Issue 6](https://github.com/jwtk/jjwt/issues/6): Parsing an expired Claims JWT or JWS (as determined by the `exp` claims field) will now throw an `ExpiredJwtException`.
-- [Issue 7](https://github.com/jwtk/jjwt/issues/7): Parsing a premature Claims JWT or JWS (as determined by the `nbf` claims field) will now throw a `PrematureJwtException`.
+- [Issue 6](https://github.com/jwtk/jjwt/issues/6): Parsing an expired Claims JWT or JWS (as determined by the `exp` 
+  claim) will now throw an `ExpiredJwtException`.
+- [Issue 7](https://github.com/jwtk/jjwt/issues/7): Parsing a premature Claims JWT or JWS (as determined by the `nbf`
+  claim) will now throw a `PrematureJwtException`.
 
 ### 0.2
 

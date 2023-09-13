@@ -100,7 +100,7 @@ class EcSignatureAlgorithmTest {
     void testValidateECAlgorithmKeyThatDoesntUseECKeyInterface() {
         PublicKey key = new TestPublicKey(algorithm: 'EC')
         algs().each {
-            it.validateKey(key, false) //no exception - can't check for ECKey fields (e.g. PKCS11 or HSM key)
+            it.validateKey(key, false) //no exception - can't check for ECKey params (e.g. PKCS11 or HSM key)
         }
     }
 
@@ -110,7 +110,7 @@ class EcSignatureAlgorithmTest {
         replay key
         algs().each {
             it.isValidRAndS(key, Bytes.EMPTY)
-            //no exception - can't check for ECKey fields (e.g. PKCS11 or HSM key)
+            //no exception - can't check for ECKey params (e.g. PKCS11 or HSM key)
         }
         verify key
     }

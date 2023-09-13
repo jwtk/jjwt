@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AsymmetricJwk;
@@ -29,15 +29,15 @@ import java.util.Set;
 
 public abstract class AbstractAsymmetricJwk<K extends Key> extends AbstractJwk<K> implements AsymmetricJwk<K> {
 
-    static final Field<String> USE = Fields.string("use", "Public Key Use");
-    public static final Field<List<X509Certificate>> X5C = Fields.x509Chain("x5c", "X.509 Certificate Chain");
-    public static final Field<byte[]> X5T = Fields.bytes("x5t", "X.509 Certificate SHA-1 Thumbprint").build();
-    public static final Field<byte[]> X5T_S256 = Fields.bytes("x5t#S256", "X.509 Certificate SHA-256 Thumbprint").build();
-    public static final Field<URI> X5U = Fields.uri("x5u", "X.509 URL");
-    static final Set<Field<?>> FIELDS = Collections.concat(AbstractJwk.FIELDS, USE, X5C, X5T, X5T_S256, X5U);
+    static final Parameter<String> USE = Parameters.string("use", "Public Key Use");
+    public static final Parameter<List<X509Certificate>> X5C = Parameters.x509Chain("x5c", "X.509 Certificate Chain");
+    public static final Parameter<byte[]> X5T = Parameters.bytes("x5t", "X.509 Certificate SHA-1 Thumbprint").build();
+    public static final Parameter<byte[]> X5T_S256 = Parameters.bytes("x5t#S256", "X.509 Certificate SHA-256 Thumbprint").build();
+    public static final Parameter<URI> X5U = Parameters.uri("x5u", "X.509 URL");
+    static final Set<Parameter<?>> PARAMS = Collections.concat(AbstractJwk.PARAMS, USE, X5C, X5T, X5T_S256, X5U);
 
-    AbstractAsymmetricJwk(JwkContext<K> ctx, List<Field<?>> thumbprintFields) {
-        super(ctx, thumbprintFields);
+    AbstractAsymmetricJwk(JwkContext<K> ctx, List<Parameter<?>> thumbprintParams) {
+        super(ctx, thumbprintParams);
     }
 
     @Override

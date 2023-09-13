@@ -23,17 +23,17 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.MalformedKeyException;
 
-public class RequiredFieldReader implements FieldReadable {
+public class RequiredParameterReader implements ParameterReadable {
 
-    private final FieldReadable src;
+    private final ParameterReadable src;
 
-    public RequiredFieldReader(Header header) {
-        this(Assert.isInstanceOf(FieldReadable.class, header, "Header implementations must implement FieldReadable."));
+    public RequiredParameterReader(Header header) {
+        this(Assert.isInstanceOf(ParameterReadable.class, header, "Header implementations must implement ParameterReadable."));
     }
 
-    public RequiredFieldReader(FieldReadable src) {
-        this.src = Assert.notNull(src, "Source FieldReadable cannot be null.");
-        Assert.isInstanceOf(Nameable.class, src, "FieldReadable implementations must implement Nameable.");
+    public RequiredParameterReader(ParameterReadable src) {
+        this.src = Assert.notNull(src, "Source ParameterReadable cannot be null.");
+        Assert.isInstanceOf(Nameable.class, src, "ParameterReadable implementations must implement Nameable.");
     }
 
     private String name() {
@@ -49,10 +49,10 @@ public class RequiredFieldReader implements FieldReadable {
     }
 
     @Override
-    public <T> T get(Field<T> field) {
-        T value = this.src.get(field);
+    public <T> T get(Parameter<T> param) {
+        T value = this.src.get(param);
         if (value == null) {
-            String msg = name() + " is missing required " + field + " value.";
+            String msg = name() + " is missing required " + param + " value.";
             throw malformed(msg);
         }
         return value;

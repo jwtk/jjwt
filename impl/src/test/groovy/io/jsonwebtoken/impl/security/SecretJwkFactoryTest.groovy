@@ -31,7 +31,7 @@ import static org.junit.Assert.*
 class SecretJwkFactoryTest {
 
     @Test
-    // if a jwk does not have an 'alg' or 'use' field, we default to an AES key
+    // if a jwk does not have an 'alg' or 'use' param, we default to an AES key
     void testNoAlgNoSigJcaName() {
         SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).delete('alg').build()
         SecretJwk result = Jwks.builder().add(jwk).build() as SecretJwk

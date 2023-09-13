@@ -157,7 +157,7 @@ enforcement.
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with over 1,200+ tests and enforced 100% test code coverage.  Every single method, statement 
+ * Stable implementation with over 1,300+ tests and enforced 100% test code coverage.  Every single method, statement 
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
@@ -1230,7 +1230,7 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
     public Key locate(ProtectedHeader<?> header) { // both JwsHeader and JweHeader extend ProtectedHeader
         
         //inspect the header, lookup and return the verification key
-        String keyId = header.getKeyId(); //or any other field that you need to inspect
+        String keyId = header.getKeyId(); //or any other parameter that you need to inspect
 
         Key key = lookupKey(keyId); //implement me
 
@@ -1239,9 +1239,9 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
 }
 ```
 
-Note that inspecting the `header.getKeyId()` is just the most common approach to look up a key - you could
-inspect any number of header fields to determine how to lookup the verification or decryption key.  It is all based on
-how the JWT was created.
+Note that inspecting the `header.getKeyId()` is just the most common approach to look up a key - you could inspect any 
+number of header parameters to determine how to lookup the verification or decryption key.  It is all based on how 
+the JWT was created.
 
 If you extend `LocatorAdapter<Key>` as shown above, but for some reason have different lookup strategies for
 signature verification keys versus decryption keys, you can forego overriding the `locate(ProtectedHeader<?>)` method
@@ -1252,13 +1252,13 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
     
     @Override
     public Key locate(JwsHeader header) {
-        String keyId = header.getKeyId(); //or any other field that you need to inspect
+        String keyId = header.getKeyId(); //or any other parameter that you need to inspect
         return lookupSignatureVerificationKey(keyId); //implement me
     }
     
     @Override
     public Key locate(JweHeader header) {
-        String keyId = header.getKeyId(); //or any other field that you need to inspect
+        String keyId = header.getKeyId(); //or any other parameter// that you need to inspect
         return lookupDecryptionKey(keyId); //implement me
     }
 }
@@ -1340,7 +1340,7 @@ otherwise you may not trust the token.  You can do that by using one of the vari
 try {
     Jwts.parser().requireSubject("jsmith")/* etc... */.build().parse(s);
 } catch (InvalidClaimException ice) {
-    // the sub field was missing or did not have a 'jsmith' value
+    // the sub claim was missing or did not have a 'jsmith' value
 }
 ```
 
@@ -1351,19 +1351,19 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 try {
     Jwts.parser().requireSubject("jsmith")/* etc... */.build().parse(s);
 } catch(MissingClaimException mce) {
-    // the parsed JWT did not have the sub field
+    // the parsed JWT did not have the sub claim
 } catch(IncorrectClaimException ice) {
-    // the parsed JWT had a sub field, but its value was not equal to 'jsmith'
+    // the parsed JWT had a sub claim, but its value was not equal to 'jsmith'
 }
 ```
 
-You can also require custom fields by using the `require(fieldName, requiredFieldValue)` method - for example:
+You can also require custom claims by using the `require(claimName, requiredValue)` method - for example:
 
 ```java
 try {
-    Jwts.parser().require("myfield", "myRequiredValue")/* etc... */.build().parse(s);
+    Jwts.parser().require("myClaim", "myRequiredValue")/* etc... */.build().parse(s);
 } catch(InvalidClaimException ice) {
-    // the 'myfield' field was missing or did not have a 'myRequiredValue' value
+    // the 'myClaim' claim was missing or did not have a 'myRequiredValue' value
 }
 ```
 (or, again, you could catch either `MissingClaimException` or `IncorrectClaimException` instead).
@@ -1694,7 +1694,7 @@ In some specific cases, you might want to override JJWT's default selected signa
 
 For example, if you have an RSA `PrivateKey` that is 2048 bits, JJWT would automatically choose the `RS256` algorithm.
 If you wanted to use `RS384` or `RS512` instead, you could manually specify it with the overloaded `signWith` method
-that accepts the `SignatureAlgorithm` as an additional parameter:
+that accepts the `SignatureAlgorithm` as an additional argument:
 
 ```java
 
@@ -2377,7 +2377,7 @@ You create a JWK as follows:
 
 1. Use the `Jwks.builder()` method to create a `JwkBuilder` instance.
 2. Call the `key` method with the Java key you wish to represent as a JWK.
-3. Call builder methods to set any additional key fields or metadata, such as a `kid` (Key ID), X509 Certificates, 
+3. Call builder methods to set any additional key parameters or metadata, such as a `kid` (Key ID), X509 Certificates, 
    etc as desired.
 4. Call the `build()` method to produce the resulting JWK.
 
@@ -2499,7 +2499,7 @@ java.security.KeyPair jdkPair = pair.toJavaKeyPair(); // does not retain pub/pri
 A [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html) is a digest (aka hash) of a canonical JSON 
 representation of a JWK's public properties. 'Canonical' in this case means that only RFC-specified values in any JWK
 are used in an exact order thumbprint calculation.  This ensures that anyone can calculate a JWK's same exact 
-thumbprint, regardless of custom fields or JSON key/value ordering differences in a JWK.
+thumbprint, regardless of custom parameters or JSON key/value ordering differences in a JWK.
 
 All `Jwk` instances support [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html)s via the
 `thumbprint()` and `thumbprint(HashAlgorithm)` methods:
@@ -2611,7 +2611,7 @@ The `k` value (`AyAyM1SysPpby...`) reflects secure key material and should never
 exposed.
 
 If you were to parse this JSON as a `Jwk`, calling `toString()` will _NOT_ print this value.  It will 
-instead print the string literal `<redacted>` for any secret or private key data field.  For example:
+instead print the string literal `<redacted>` for any secret or private key data value.  For example:
 
 ```java
 String json = getExampleSecretKeyJson();

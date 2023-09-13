@@ -19,8 +19,8 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -205,7 +205,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         Assert.notNull(request, "Request cannot be null.");
         JweHeader header = Assert.notNull(request.getHeader(), "Request JweHeader cannot be null.");
         PrivateKey privateKey = Assert.notNull(request.getKey(), "Decryption PrivateKey cannot be null.");
-        FieldReadable reader = new RequiredFieldReader(header);
+        ParameterReadable reader = new RequiredParameterReader(header);
         PublicJwk<?> epk = reader.get(DefaultJweHeader.EPK);
 
         AbstractCurve curve = assertCurve(privateKey);

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.FieldMap;
+import io.jsonwebtoken.impl.ParameterMap;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AsymmetricJwk;
 import io.jsonwebtoken.security.AsymmetricJwkBuilder;
@@ -58,7 +58,7 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
 
     public AbstractAsymmetricJwkBuilder(JwkContext<K> ctx) {
         super(ctx);
-        FieldMap map = Assert.isInstanceOf(FieldMap.class, this.DELEGATE);
+        ParameterMap map = Assert.isInstanceOf(ParameterMap.class, this.DELEGATE);
         this.x509 = new X509BuilderSupport(map, MalformedKeyException.class);
     }
 

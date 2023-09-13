@@ -35,7 +35,7 @@ class EcPrivateJwkFactoryTest {
     void testDMissing() {
         def values = ['kty': 'EC', 'crv': 'P-256', 'x': BigInteger.ONE, 'y': BigInteger.ONE]
         try {
-            def ctx = new DefaultJwkContext(DefaultEcPrivateJwk.FIELDS)
+            def ctx = new DefaultJwkContext(DefaultEcPrivateJwk.PARAMS)
             ctx.putAll(values)
             new EcPrivateJwkFactory().createJwkFromValues(ctx)
             fail()
@@ -51,7 +51,7 @@ class EcPrivateJwkFactoryTest {
         def pair = Jwts.SIG.ES256.keyPair().build()
         def priv = pair.getPrivate() as ECPrivateKey
 
-        final def context = new DefaultJwkContext(DefaultEcPrivateJwk.FIELDS)
+        final def context = new DefaultJwkContext(DefaultEcPrivateJwk.PARAMS)
         context.setKey(priv)
 
         def ex = new InvalidKeySpecException("invalid")

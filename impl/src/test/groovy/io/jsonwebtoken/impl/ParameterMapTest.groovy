@@ -15,8 +15,9 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.impl.lang.Field
-import io.jsonwebtoken.impl.lang.Fields
+
+import io.jsonwebtoken.impl.lang.Parameter
+import io.jsonwebtoken.impl.lang.Parameters
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.Registry
@@ -25,18 +26,18 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class FieldMapTest {
+class ParameterMapTest {
 
-    private static final Field<String> DUMMY = Fields.string('' + Randoms.secureRandom().nextInt(), "RANDOM")
-    private static final Field<BigInteger> SECRET = Fields.secretBigInt('foo', 'foo')
-    private static final Set<Field<?>> FIELD_SET = Collections.setOf(DUMMY)
-    private static final Registry<String, Field<?>> FIELDS = Fields.registry(FIELD_SET)
-    FieldMap jwtMap
+    private static final Parameter<String> DUMMY = Parameters.string('' + Randoms.secureRandom().nextInt(), "RANDOM")
+    private static final Parameter<BigInteger> SECRET = Parameters.secretBigInt('foo', 'foo')
+    private static final Set<Parameter<?>> PARAM_SET = Collections.setOf(DUMMY)
+    private static final Registry<String, Parameter<?>> PARAMS = Parameters.registry(PARAM_SET)
+    ParameterMap jwtMap
 
     @Before
     void setup() {
-        // dummy field to satisfy constructor:
-        jwtMap = new FieldMap(FIELDS)
+        // dummy param to satisfy constructor:
+        jwtMap = new ParameterMap(PARAMS)
     }
 
     void unsupported(Closure<?> c) {
@@ -53,7 +54,7 @@ class FieldMapTest {
     void testImmutable() {
         Map mutable = jwtMap
         mutable.put('foo', 'bar')
-        Map immutable = new FieldMap(FIELDS, mutable) // make immutable
+        Map immutable = new ParameterMap(PARAMS, mutable) // make immutable
 
         unsupported { immutable.put('whatever', 'value') }
         unsupported { immutable.putAll([a: 'b']) }
@@ -123,10 +124,10 @@ class FieldMapTest {
 
     @Test
     void testEquals() throws Exception {
-        def m1 = new FieldMap(FIELDS)
+        def m1 = new ParameterMap(PARAMS)
         m1.put("a", "a")
 
-        def m2 = new FieldMap(FIELDS)
+        def m2 = new ParameterMap(PARAMS)
         m2.put("a", "a")
 
         assertEquals(m1, m2)
@@ -146,13 +147,13 @@ class FieldMapTest {
 
     @Test
     void testGetName() {
-        def map = new FieldMap(FIELDS)
+        def map = new ParameterMap(PARAMS)
         assertEquals 'Map', map.getName()
     }
 
     @Test
     void testSetSecretFieldWithInvalidTypeValue() {
-        def map = new FieldMap(Fields.registry(SECRET))
+        def map = new ParameterMap(Parameters.registry(SECRET))
         def invalidValue = URI.create('https://whatever.com')
         try {
             map.put('foo', invalidValue)

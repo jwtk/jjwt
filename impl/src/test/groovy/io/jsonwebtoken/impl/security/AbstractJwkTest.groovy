@@ -36,7 +36,7 @@ class AbstractJwkTest {
     }
 
     static JwkContext<SecretKey> newCtx(Map<String, ?> map) {
-        def ctx = new DefaultJwkContext(AbstractJwk.FIELDS)
+        def ctx = new DefaultJwkContext(AbstractJwk.PARAMS)
         ctx.put('kty', 'test')
         if (!Collections.isEmpty(map as Map)) {
             ctx.putAll(map)

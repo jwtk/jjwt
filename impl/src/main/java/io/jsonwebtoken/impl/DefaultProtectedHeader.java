@@ -18,8 +18,8 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
 import io.jsonwebtoken.impl.security.AbstractJwk;
 import io.jsonwebtoken.impl.security.JwkConverter;
@@ -42,41 +42,41 @@ import java.util.Set;
  */
 public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHeader {
 
-    static final Field<URI> JKU = Fields.uri("jku", "JWK Set URL");
+    static final Parameter<URI> JKU = Parameters.uri("jku", "JWK Set URL");
 
-    static final Field<PublicJwk<?>> JWK = Fields.builder(JwkConverter.PUBLIC_JWK_CLASS)
+    static final Parameter<PublicJwk<?>> JWK = Parameters.builder(JwkConverter.PUBLIC_JWK_CLASS)
             .setId("jwk").setName("JSON Web Key")
             .setConverter(JwkConverter.PUBLIC_JWK).build();
-    static final Field<Set<String>> CRIT = Fields.stringSet("crit", "Critical");
+    static final Parameter<Set<String>> CRIT = Parameters.stringSet("crit", "Critical");
 
-    static final Field<String> KID = AbstractJwk.KID;
+    static final Parameter<String> KID = AbstractJwk.KID;
 
-    static final Field<URI> X5U = AbstractAsymmetricJwk.X5U;
+    static final Parameter<URI> X5U = AbstractAsymmetricJwk.X5U;
 
-    static final Field<List<X509Certificate>> X5C = AbstractAsymmetricJwk.X5C;
+    static final Parameter<List<X509Certificate>> X5C = AbstractAsymmetricJwk.X5C;
 
-    static final Field<byte[]> X5T = AbstractAsymmetricJwk.X5T;
+    static final Parameter<byte[]> X5T = AbstractAsymmetricJwk.X5T;
 
-    static final Field<byte[]> X5T_S256 = AbstractAsymmetricJwk.X5T_S256;
+    static final Parameter<byte[]> X5T_S256 = AbstractAsymmetricJwk.X5T_S256;
 
-    static final Registry<String, Field<?>> FIELDS =
-            Fields.registry(DefaultHeader.FIELDS, CRIT, JKU, JWK, KID, X5U, X5C, X5T, X5T_S256);
+    static final Registry<String, Parameter<?>> PARAMS =
+            Parameters.registry(DefaultHeader.PARAMS, CRIT, JKU, JWK, KID, X5U, X5C, X5T, X5T_S256);
 
-    static boolean isCandidate(FieldMap fields) {
-        String id = fields.get(DefaultHeader.ALGORITHM);
+    static boolean isCandidate(ParameterMap map) {
+        String id = map.get(DefaultHeader.ALGORITHM);
         return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.get().get(id))) ||
-                fields.get(JKU) != null ||
-                fields.get(JWK) != null ||
-                !Collections.isEmpty(fields.get(CRIT)) ||
-                Strings.hasText(fields.get(KID)) ||
-                fields.get(X5U) != null ||
-                !Collections.isEmpty(fields.get(X5C)) ||
-                !Bytes.isEmpty(fields.get(X5T)) ||
-                !Bytes.isEmpty(fields.get(X5T_S256));
+                map.get(JKU) != null ||
+                map.get(JWK) != null ||
+                !Collections.isEmpty(map.get(CRIT)) ||
+                Strings.hasText(map.get(KID)) ||
+                map.get(X5U) != null ||
+                !Collections.isEmpty(map.get(X5C)) ||
+                !Bytes.isEmpty(map.get(X5T)) ||
+                !Bytes.isEmpty(map.get(X5T_S256));
     }
 
-    protected DefaultProtectedHeader(Registry<String, Field<?>> fields, Map<String, ?> values) {
-        super(fields, values);
+    protected DefaultProtectedHeader(Registry<String, Parameter<?>> registry, Map<String, ?> values) {
+        super(registry, values);
     }
 
     @Override

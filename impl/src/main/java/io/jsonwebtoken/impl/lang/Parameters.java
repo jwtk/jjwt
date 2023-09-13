@@ -32,72 +32,72 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class Fields {
+public final class Parameters {
 
-    private Fields() { // prevent instantiation
+    private Parameters() { // prevent instantiation
     }
 
-    public static Field<String> string(String id, String name) {
+    public static Parameter<String> string(String id, String name) {
         return builder(String.class).setId(id).setName(name).build();
     }
 
-    public static Field<Date> rfcDate(String id, String name) {
+    public static Parameter<Date> rfcDate(String id, String name) {
         return builder(Date.class).setConverter(JwtDateConverter.INSTANCE).setId(id).setName(name).build();
     }
 
-    public static Field<List<X509Certificate>> x509Chain(String id, String name) {
+    public static Parameter<List<X509Certificate>> x509Chain(String id, String name) {
         return builder(X509Certificate.class)
                 .setConverter(Converters.X509_CERTIFICATE).list()
                 .setId(id).setName(name).build();
     }
 
-    public static <T> FieldBuilder<T> builder(Class<T> type) {
-        return new DefaultFieldBuilder<>(type);
+    public static <T> ParameterBuilder<T> builder(Class<T> type) {
+        return new DefaultParameterBuilder<>(type);
     }
 
-    public static Field<Set<String>> stringSet(String id, String name) {
+    public static Parameter<Set<String>> stringSet(String id, String name) {
         return builder(String.class).set().setId(id).setName(name).build();
     }
 
-    public static Field<URI> uri(String id, String name) {
+    public static Parameter<URI> uri(String id, String name) {
         return builder(URI.class).setConverter(Converters.URI).setId(id).setName(name).build();
     }
 
-    public static FieldBuilder<byte[]> bytes(String id, String name) {
+    public static ParameterBuilder<byte[]> bytes(String id, String name) {
         return builder(byte[].class).setConverter(Converters.BASE64URL_BYTES).setId(id).setName(name);
     }
 
-    public static FieldBuilder<BigInteger> bigInt(String id, String name) {
+    public static ParameterBuilder<BigInteger> bigInt(String id, String name) {
         return builder(BigInteger.class).setConverter(Converters.BIGINT).setId(id).setName(name);
     }
 
-    public static Field<BigInteger> secretBigInt(String id, String name) {
+    public static Parameter<BigInteger> secretBigInt(String id, String name) {
         return bigInt(id, name).setSecret(true).build();
     }
 
-    public static Registry<String, Field<?>> registry(Field<?>... fields) {
-        return registry(Arrays.asList(fields));
+    public static Registry<String, Parameter<?>> registry(Parameter<?>... params) {
+        return registry(Arrays.asList(params));
     }
 
-    public static Registry<String, Field<?>> registry(Collection<Field<?>> fields) {
-        return new IdRegistry<>("Field", fields, true);
+    public static Registry<String, Parameter<?>> registry(Collection<Parameter<?>> params) {
+        return new IdRegistry<>("Parameter", params, true);
     }
 
-    public static Registry<String, Field<?>> registry(Registry<String, Field<?>> parent, Field<?>... fields) {
-        Set<Field<?>> set = new LinkedHashSet<>(parent.size() + fields.length);
+    public static Registry<String, Parameter<?>> registry(Registry<String, Parameter<?>> parent, Parameter<?>... params) {
+        Set<Parameter<?>> set = new LinkedHashSet<>(parent.size() + params.length);
         set.addAll(parent.values());
-        set.addAll(Arrays.asList(fields));
-        return new IdRegistry<>("Field", set, true);
+        set.addAll(Arrays.asList(params));
+        return new IdRegistry<>("Parameter", set, true);
     }
 
-    public static Registry<String, ? extends Field<?>> replace(Registry<String, ? extends Field<?>> registry, Field<?> field) {
+    public static Registry<String, ? extends Parameter<?>> replace(Registry<String, ? extends Parameter<?>> registry, Parameter<?> param) {
         Assert.notEmpty(registry, "Registry cannot be null or empty.");
-        Assert.notNull(field, "Field cannot be null.");
-        String id = Assert.hasText(field.getId(), "Field id cannot be null or empty.");
-        Map<String, Field<?>> newFields = new LinkedHashMap<>(registry);
-        newFields.remove(id); // remove old/default
-        newFields.put(id, field); // add new one
-        return registry(newFields.values());
+        Assert.notNull(param, "Parameter cannot be null.");
+        String id = Assert.hasText(param.getId(), "Parameter id cannot be null or empty.");
+        Map<String, Parameter<?>> newParams = new LinkedHashMap<>(registry);
+        newParams.remove(id); // remove old/default
+        newParams.put(id, param); // add new one
+        return registry(newParams.values());
     }
 
     private static byte[] bytes(BigInteger i) {
@@ -118,12 +118,12 @@ public final class Fields {
         }
     }
 
-    private static <T> boolean equals(T a, T b, Field<T> field) {
+    private static <T> boolean equals(T a, T b, Parameter<T> param) {
         if (a == b) return true;
         if (a == null || b == null) return false;
-        if (field.isSecret()) {
-            // byte[] and BigInteger are the only types of secret Fields in the JJWT codebase
-            // (i.e. Field.isSecret() == true). If a Field is ever marked as secret, and it's not one of these two
+        if (param.isSecret()) {
+            // byte[] and BigInteger are the only types of secret Parameters in the JJWT codebase
+            // (i.e. Parameter.isSecret() == true). If a Parameter is ever marked as secret, and it's not one of these two
             // data types, we need to know about it.  So we use the 'assertSecret' helper above to ensure we do:
             if (a instanceof byte[]) {
                 return b instanceof byte[] && MessageDigest.isEqual((byte[]) a, (byte[]) b);
@@ -135,10 +135,10 @@ public final class Fields {
         return Objects.nullSafeEquals(a, b);
     }
 
-    public static <T> boolean equals(FieldReadable a, Object o, Field<T> field) {
+    public static <T> boolean equals(ParameterReadable a, Object o, Parameter<T> param) {
         if (a == o) return true;
-        if (a == null || !(o instanceof FieldReadable)) return false;
-        FieldReadable b = (FieldReadable) o;
-        return equals(a.get(field), b.get(field), field);
+        if (a == null || !(o instanceof ParameterReadable)) return false;
+        ParameterReadable b = (ParameterReadable) o;
+        return equals(a.get(param), b.get(param), param);
     }
 }

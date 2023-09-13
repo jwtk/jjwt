@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Field;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Supplier;
@@ -36,7 +36,7 @@ import java.util.Set;
 public class JwkSetConverter implements Converter<JwkSet, Object> {
 
     private final Converter<Jwk<?>, Object> JWK_CONVERTER;
-    private final Field<Set<Jwk<?>>> FIELD;
+    private final Parameter<Set<Jwk<?>>> PARAM;
 
     private final boolean ignoreUnsupported;
 
@@ -55,7 +55,7 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
 
     public JwkSetConverter(Converter<Jwk<?>, Object> jwkConverter, boolean ignoreUnsupported) {
         this.JWK_CONVERTER = Assert.notNull(jwkConverter, "JWK converter cannot be null.");
-        this.FIELD = DefaultJwkSet.field(jwkConverter);
+        this.PARAM = DefaultJwkSet.param(jwkConverter);
         this.ignoreUnsupported = ignoreUnsupported;
     }
 
@@ -81,27 +81,27 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
         final Map<?, ?> m = Collections.immutable((Map<?, ?>) o);
 
         // mandatory for all JWK Sets: https://datatracker.ietf.org/doc/html/rfc7517#section-5
-        // no need for builder field type conversion overhead if this isn't present:
-        if (Collections.isEmpty(m) || !m.containsKey(FIELD.getId())) {
-            String msg = "Missing required " + FIELD + " parameter.";
+        // no need for builder parameter type conversion overhead if this isn't present:
+        if (Collections.isEmpty(m) || !m.containsKey(PARAM.getId())) {
+            String msg = "Missing required " + PARAM + " parameter.";
             throw new MalformedKeySetException(msg);
         }
-        Object val = m.get(FIELD.getId());
+        Object val = m.get(PARAM.getId());
         if (val == null) {
-            String msg = "JWK Set " + FIELD + " value cannot be null.";
+            String msg = "JWK Set " + PARAM + " value cannot be null.";
             throw new MalformedKeySetException(msg);
         }
         if (val instanceof Supplier<?>) {
             val = ((Supplier<?>) val).get();
         }
         if (!(val instanceof Collection)) {
-            String msg = "JWK Set " + FIELD + " value must be a Collection (JSON Array). Type found: " +
+            String msg = "JWK Set " + PARAM + " value must be a Collection (JSON Array). Type found: " +
                     val.getClass().getName();
             throw new MalformedKeySetException(msg);
         }
         int size = Collections.size((Collection<?>) val);
         if (size == 0) {
-            String msg = "JWK Set " + FIELD + " collection cannot be empty.";
+            String msg = "JWK Set " + PARAM + " collection cannot be empty.";
             throw new MalformedKeySetException(msg);
         }
 
@@ -139,8 +139,8 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
         }
 
         // Replace the `keys` value with validated entries:
-        src.remove(FIELD.getId());
-        src.put(FIELD.getId(), jwks);
-        return new DefaultJwkSet(FIELD, src);
+        src.remove(PARAM.getId());
+        src.put(PARAM.getId(), jwks);
+        return new DefaultJwkSet(PARAM, src);
     }
 }

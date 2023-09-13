@@ -17,8 +17,8 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.FieldReadable;
-import io.jsonwebtoken.impl.lang.RequiredFieldReader;
+import io.jsonwebtoken.impl.lang.ParameterReadable;
+import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
@@ -37,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
     SecretJwkFactory() {
-        super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class, DefaultSecretJwk.FIELDS);
+        super(DefaultSecretJwk.TYPE_VALUE, SecretKey.class, DefaultSecretJwk.PARAMS);
     }
 
     @Override
@@ -76,7 +76,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
     @Override
     protected SecretJwk createJwkFromValues(JwkContext<SecretKey> ctx) {
-        FieldReadable reader = new RequiredFieldReader(ctx);
+        ParameterReadable reader = new RequiredParameterReader(ctx);
         byte[] bytes = reader.get(DefaultSecretJwk.K);
         String jcaName = null;
 

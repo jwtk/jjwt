@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.AbstractX509Context;
-import io.jsonwebtoken.impl.lang.Field;
-import io.jsonwebtoken.impl.lang.Fields;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
@@ -39,27 +39,27 @@ import static io.jsonwebtoken.lang.Strings.nespace;
 
 public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkContext<K>> implements JwkContext<K> {
 
-    private static final Set<Field<?>> DEFAULT_FIELDS;
+    private static final Set<Parameter<?>> DEFAULT_PARAMS;
 
-    static { // assume all JWA fields:
-        Set<Field<?>> set = new LinkedHashSet<>();
-        set.addAll(DefaultSecretJwk.FIELDS); // Private/Secret JWKs has both public and private fields
-        set.addAll(DefaultEcPrivateJwk.FIELDS); // Private JWKs have both public and private fields
-        set.addAll(DefaultRsaPrivateJwk.FIELDS); // Private JWKs have both public and private fields
-        set.addAll(DefaultOctetPrivateJwk.FIELDS); // Private JWKs have both public and private fields
+    static { // assume all JWA params:
+        Set<Parameter<?>> set = new LinkedHashSet<>();
+        set.addAll(DefaultSecretJwk.PARAMS); // Private/Secret JWKs has both public and private params
+        set.addAll(DefaultEcPrivateJwk.PARAMS); // Private JWKs have both public and private params
+        set.addAll(DefaultRsaPrivateJwk.PARAMS); // Private JWKs have both public and private params
+        set.addAll(DefaultOctetPrivateJwk.PARAMS); // Private JWKs have both public and private params
 
-        // EC JWKs and Octet JWKs have two fields that are named identically, but have different type requirements.  So
-        // we swap out those fields with placeholders that allow either.  When the JwkContext is converted to its
+        // EC JWKs and Octet JWKs have two params that are named identically, but have different type requirements.  So
+        // we swap out those params with placeholders that allow either.  When the JwkContext is converted to its
         // type-specific context by the ProtoBuilder, the values will be correctly converted to their required types
-        // at that time.  It is also important to retain toString security (via field.setSecret(true)) to ensure
+        // at that time.  It is also important to retain toString security (via parameter.setSecret(true)) to ensure
         // any printing of the builder or its internal context does not print secure data.
         set.remove(DefaultEcPublicJwk.X);
         set.remove(DefaultEcPrivateJwk.D);
-        set.add(Fields.string(DefaultEcPublicJwk.X.getId(), "Elliptic Curve public key X coordinate"));
-        set.add(Fields.builder(String.class).setSecret(true)
+        set.add(Parameters.string(DefaultEcPublicJwk.X.getId(), "Elliptic Curve public key X coordinate"));
+        set.add(Parameters.builder(String.class).setSecret(true)
                 .setId(DefaultEcPrivateJwk.D.getId()).setName("Elliptic Curve private key").build());
 
-        DEFAULT_FIELDS = Collections.immutable(set);
+        DEFAULT_PARAMS = Collections.immutable(set);
     }
 
     private K key;
@@ -73,27 +73,27 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     public DefaultJwkContext() {
         // For the default constructor case, we don't know how it will be used or what values will be populated,
         // so we can't know ahead of time what the sensitive data is.  As such, for security reasons, we assume all
-        // the known fields for all supported keys/algorithms in case it is used for any of them:
-        this(DEFAULT_FIELDS);
+        // the known params for all supported keys/algorithms in case it is used for any of them:
+        this(DEFAULT_PARAMS);
     }
 
-    public DefaultJwkContext(Set<Field<?>> fields) {
-        super(fields);
+    public DefaultJwkContext(Set<Parameter<?>> params) {
+        super(params);
     }
 
-    public DefaultJwkContext(Set<Field<?>> fields, JwkContext<?> other) {
-        this(fields, other, true);
+    public DefaultJwkContext(Set<Parameter<?>> params, JwkContext<?> other) {
+        this(params, other, true);
     }
 
-    public DefaultJwkContext(Set<Field<?>> fields, JwkContext<?> other, K key) {
+    public DefaultJwkContext(Set<Parameter<?>> params, JwkContext<?> other, K key) {
         //if the key is null or a PublicKey, we don't want to redact - we want to fully remove the items that are
-        //private names (public JWKs should never contain any private key fields, even if redacted):
-        this(fields, other, (key == null || key instanceof PublicKey));
+        //private names (public JWKs should never contain any private key params, even if redacted):
+        this(params, other, (key == null || key instanceof PublicKey));
         this.key = Assert.notNull(key, "Key cannot be null.");
     }
 
-    public DefaultJwkContext(Set<Field<?>> fields, JwkContext<?> other, boolean removePrivate) {
-        super(Assert.notEmpty(fields, "Fields cannot be null or empty."));
+    public DefaultJwkContext(Set<Parameter<?>> params, JwkContext<?> other, boolean removePrivate) {
+        super(Assert.notEmpty(params, "Parameters cannot be null or empty."));
         Assert.notNull(other, "JwkContext cannot be null.");
         Assert.isInstanceOf(DefaultJwkContext.class, other, "JwkContext must be a DefaultJwkContext instance.");
         DefaultJwkContext<?> src = (DefaultJwkContext<?>) other;
@@ -105,30 +105,30 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
         for (Map.Entry<String, Object> entry : src.idiomaticValues.entrySet()) {
             String id = entry.getKey();
             Object value = entry.getValue();
-            Field<?> field = this.FIELDS.get(id);
-            if (field != null && !field.supports(value)) { // src idiomatic value is not what is expected, so convert:
-                value = this.values.get(field.getId());
-                put(field, value); // perform idiomatic conversion with original/raw src value
+            Parameter<?> param = this.PARAMS.get(id);
+            if (param != null && !param.supports(value)) { // src idiomatic value is not what is expected, so convert:
+                value = this.values.get(param.getId());
+                put(param, value); // perform idiomatic conversion with original/raw src value
             } else {
                 this.idiomaticValues.put(id, value);
             }
         }
         if (removePrivate) {
-            for (Field<?> field : src.FIELDS.values()) {
-                if (field.isSecret()) {
-                    remove(field.getId());
+            for (Parameter<?> param : src.PARAMS.values()) {
+                if (param.isSecret()) {
+                    remove(param.getId());
                 }
             }
         }
     }
 
     @Override
-    public JwkContext<K> field(Field<?> field) {
-        Registry<String, ? extends Field<?>> registry = Fields.replace(this.FIELDS, field);
-        Set<Field<?>> fields = new LinkedHashSet<>(registry.values());
+    public JwkContext<K> parameter(Parameter<?> param) {
+        Registry<String, ? extends Parameter<?>> registry = Parameters.replace(this.PARAMS, param);
+        Set<Parameter<?>> params = new LinkedHashSet<>(registry.values());
         return this.key != null ?
-                new DefaultJwkContext<>(fields, this, key) :
-                new DefaultJwkContext<K>(fields, this, false);
+                new DefaultJwkContext<>(params, this, key) :
+                new DefaultJwkContext<K>(params, this, false);
     }
 
     @Override
