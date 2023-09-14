@@ -17,13 +17,11 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.ProtectedHeader;
-import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
 import io.jsonwebtoken.impl.security.AbstractJwk;
 import io.jsonwebtoken.impl.security.JwkConverter;
-import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
@@ -64,15 +62,16 @@ public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHe
 
     static boolean isCandidate(ParameterMap map) {
         String id = map.get(DefaultHeader.ALGORITHM);
-        return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.get().get(id))) ||
-                map.get(JKU) != null ||
-                map.get(JWK) != null ||
-                !Collections.isEmpty(map.get(CRIT)) ||
-                Strings.hasText(map.get(KID)) ||
-                map.get(X5U) != null ||
-                !Collections.isEmpty(map.get(X5C)) ||
-                !Bytes.isEmpty(map.get(X5T)) ||
-                !Bytes.isEmpty(map.get(X5T_S256));
+        return Strings.hasText(id) && !id.equalsIgnoreCase(Jwts.SIG.NONE.getId()); // alg cannot be empty or 'none'
+//        return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.get().get(id))) ||
+//                map.get(JKU) != null ||
+//                map.get(JWK) != null ||
+//                !Collections.isEmpty(map.get(CRIT)) ||
+//                Strings.hasText(map.get(KID)) ||
+//                map.get(X5U) != null ||
+//                !Collections.isEmpty(map.get(X5C)) ||
+//                !Bytes.isEmpty(map.get(X5T)) ||
+//                !Bytes.isEmpty(map.get(X5T_S256));
     }
 
     protected DefaultProtectedHeader(Registry<String, Parameter<?>> registry, Map<String, ?> values) {

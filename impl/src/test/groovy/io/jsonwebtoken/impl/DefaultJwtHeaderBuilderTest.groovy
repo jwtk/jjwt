@@ -18,11 +18,13 @@ package io.jsonwebtoken.impl
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.ProtectedHeader
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
 import io.jsonwebtoken.impl.security.DefaultRequest
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.Request
@@ -41,7 +43,15 @@ class DefaultJwtHeaderBuilderTest {
     @Before
     void setUp() {
         header = null
-        builder = Jwts.header() as DefaultJwtHeaderBuilder
+        builder = new DefaultJwtHeaderBuilder()
+    }
+
+    private DefaultJwtHeaderBuilder jws() {
+        return builder.add('alg', 'foo') as DefaultJwtHeaderBuilder
+    }
+
+    private DefaultJwtHeaderBuilder jwe() {
+        return jws().add('enc', 'bar') as DefaultJwtHeaderBuilder
     }
 
     @SuppressWarnings('GroovyAssignabilityCheck')
@@ -60,16 +70,9 @@ class DefaultJwtHeaderBuilderTest {
         }
     }
 
-    private static void assertJws(String propName, def val) {
-        assertSymmetry(propName, val)
-        assertTrue header instanceof JwsHeader
-        assertFalse header instanceof JweHeader
-    }
-
-    private static void assertJwe(String propName, def val) {
-        assertSymmetry(propName, val)
-        assertTrue header instanceof JweHeader
-        assertFalse header instanceof JwsHeader
+    @Test
+    void testStaticFactoryMethod() {
+        assertTrue Jwts.header() instanceof DefaultJwtHeaderBuilder
     }
 
     @Test
@@ -271,8 +274,8 @@ class DefaultJwtHeaderBuilderTest {
         assertEquals 'application/foo', builder.build().getContentType()     // normalized form
 
         assertEquals 'foo', builder.setCompressionAlgorithm('foo').build().getCompressionAlgorithm()
-        assertEquals 'foo', builder.setKeyId('foo').build().getKeyId()
-        assertEquals 'foo', builder.setAlgorithm('foo').build().getAlgorithm()
+        assertEquals 'foo', jws().setKeyId('foo').build().getKeyId()
+        assertEquals 'foo', jws().setAlgorithm('foo').build().getAlgorithm()
     }
 
     // ====================== Protected Header Methods =======================
@@ -284,7 +287,8 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testJwkSetUrl() {
         URI uri = URI.create('https://github.com/jwtk/jjwt')
-        assertJws('jwkSetUrl', uri)
+        header = jws().jwkSetUrl(uri).build() as JwsHeader
+        assertEquals uri, header.getJwkSetUrl()
     }
 
     /**
@@ -294,7 +298,8 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testJwk() {
         def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
-        assertJws('jwk', jwk)
+        header = jws().jwk(jwk).build() as JwsHeader
+        assertEquals jwk, header.getJwk()
     }
 
     /**
@@ -303,7 +308,9 @@ class DefaultJwtHeaderBuilderTest {
      */
     @Test
     void testKeyId() {
-        assertJws('keyId', 'hello')
+        def kid = 'whatever'
+        header = jws().keyId(kid).build() as JwsHeader
+        assertEquals kid, header.getKeyId()
     }
 
     /**
@@ -312,8 +319,11 @@ class DefaultJwtHeaderBuilderTest {
      */
     @Test
     void testCritical() {
-        def crit = ['exp', 'sub'] as Set<String>
-        assertJws('critical', crit)
+        def crit = ['foo'] as Set<String>
+        header = jws().add('foo', 'bar').critical(crit).build() as JwsHeader
+        assertTrue header instanceof JwsHeader
+        assertFalse header instanceof JweHeader
+        assertEquals crit, header.getCritical()
     }
 
     // ====================== X.509 Methods =======================
@@ -325,7 +335,8 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX09Url() {
         def uri = URI.create('https://github.com/jwtk/jjwt')
-        assertJws('x509Url', uri)
+        header = jws().x509Url(uri).build() as JwsHeader
+        assertEquals uri, header.getX509Url()
     }
 
     /**
@@ -335,7 +346,8 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX509CertificateChain() {
         def chain = TestKeys.RS256.chain
-        assertJws('x509CertificateChain', chain)
+        header = jws().x509CertificateChain(chain).build() as JwsHeader
+        assertEquals chain, header.getX509CertificateChain()
     }
 
     /**
@@ -348,9 +360,7 @@ class DefaultJwtHeaderBuilderTest {
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
 
-        builder.x509CertificateSha1Thumbprint(x5t)
-        header = builder.build() as JwsHeader
-        assertTrue header instanceof JwsHeader
+        header = jws().x509CertificateSha1Thumbprint(x5t).build() as JwsHeader
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
@@ -361,8 +371,7 @@ class DefaultJwtHeaderBuilderTest {
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
-        def header = builder.x509CertificateChain(chain).withX509Sha1Thumbprint(true).build() as JwsHeader
-        assertTrue header instanceof JwsHeader
+        header = jws().x509CertificateChain(chain).withX509Sha1Thumbprint(true).build() as JwsHeader
         assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
@@ -376,10 +385,7 @@ class DefaultJwtHeaderBuilderTest {
         Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
         def x5tS256 = Jwks.HASH.@SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
-
-        builder.x509CertificateSha256Thumbprint(x5tS256)
-        header = builder.build() as JwsHeader
-        assertTrue header instanceof JwsHeader
+        header = jws().x509CertificateSha256Thumbprint(x5tS256).build() as JwsHeader
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
@@ -390,8 +396,7 @@ class DefaultJwtHeaderBuilderTest {
         Request<byte[]> request = new DefaultRequest(chain[0].getEncoded(), null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
-        def header = builder.x509CertificateChain(chain).withX509Sha256Thumbprint(true).build() as JwsHeader
-        assertTrue header instanceof JwsHeader
+        header = jws().x509CertificateChain(chain).withX509Sha256Thumbprint(true).build() as JwsHeader
         assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
@@ -401,8 +406,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testEncryptionAlgorithm() {
         def enc = Jwts.ENC.A256GCM.getId()
-        builder.put('enc', enc)
-        header = builder.build() as JweHeader
+        header = builder.add('alg', Jwts.KEY.A192KW.getId()).add('enc', enc).build() as JweHeader
         assertEquals enc, header.getEncryptionAlgorithm()
     }
 
@@ -410,68 +414,65 @@ class DefaultJwtHeaderBuilderTest {
     void testEphemeralPublicKey() {
         def key = TestKeys.ES256.pair.public
         def jwk = Jwks.builder().key(key).build()
-        builder.put('epk', jwk)
-        header = builder.build() as JweHeader
+        header = jwe().add('epk', jwk).build() as JweHeader
         assertEquals jwk, header.getEphemeralPublicKey()
     }
 
     @Test
     void testAgreementPartyUInfo() {
         def info = Strings.utf8("UInfo")
-        assertJwe('agreementPartyUInfo', info)
+        def header = jwe().agreementPartyUInfo(info).build() as JweHeader
+        assertArrayEquals info, header.getAgreementPartyUInfo()
     }
 
     @Test
     void testAgreementPartyUInfoString() {
         def s = "UInfo"
         def info = Strings.utf8(s)
-        builder.agreementPartyUInfo(s).build()
-        header = builder.build() as JweHeader
+        def header = jwe().agreementPartyUInfo(s).build() as JweHeader
         assertArrayEquals info, header.getAgreementPartyUInfo()
     }
 
     @Test
     void testAgreementPartyVInfo() {
         def info = Strings.utf8("VInfo")
-        assertJwe('agreementPartyVInfo', info)
+        def header = jwe().agreementPartyVInfo(info).build() as JweHeader
+        assertArrayEquals info, header.getAgreementPartyVInfo()
     }
 
     @Test
     void testAgreementPartyVInfoString() {
         def s = "VInfo"
         def info = Strings.utf8(s)
-        builder.agreementPartyVInfo(s)
-        header = builder.build() as JweHeader
+        def header = jwe().agreementPartyVInfo(s).build() as JweHeader
         assertArrayEquals info, header.getAgreementPartyVInfo()
     }
 
     @Test
     void testPbes2Salt() {
         byte[] salt = Bytes.randomBits(256)
-        builder.put('p2s', salt)
-        header = builder.build() as JweHeader
+        def header = jwe().add('p2s', salt).build() as JweHeader
         assertArrayEquals salt, header.getPbes2Salt()
     }
 
     @Test
     void testPbes2Count() {
         int count = 4096
-        assertJwe('pbes2Count', count)
+        def header = jwe().pbes2Count(count).build() as JweHeader
+        assertEquals count, header.getPbes2Count()
     }
 
     @Test
     void testInitializationVector() {
-        byte[] val = Bytes.randomBits(96)
-        builder.put('iv', val)
-        header = builder.build() as JweHeader
-        assertArrayEquals val, header.getInitializationVector()
+        byte[] iv = Bytes.randomBits(96)
+        def header = jwe().add('iv', iv).build() as JweHeader
+        assertArrayEquals iv, header.getInitializationVector()
     }
 
     @Test
     void testAuthenticationTag() {
         byte[] val = Bytes.randomBits(128)
-        builder.put('tag', val)
-        header = builder.build() as JweHeader
+        def header = jwe().add('tag', val).build() as JweHeader
         assertArrayEquals val, header.getAuthenticationTag()
     }
 
@@ -487,5 +488,56 @@ class DefaultJwtHeaderBuilderTest {
         // add JWE required property:
         builder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), Jwts.ENC.A256GCM.getId())
         assertEquals new DefaultJweHeader([foo: 'bar', alg: 'HS256', enc: 'A256GCM']), builder.build()
+    }
+
+    @Test
+    void testCritNullRemovesValues() {
+        def crit = ['test'] as Set<String>
+        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        assertEquals crit, header.getCritical()
+        header = builder.critical(null).build()
+        assertFalse header.containsKey('crit') // removed
+    }
+
+    @Test
+    void testCritEmptyRemovesValues() {
+        def crit = ['test'] as Set<String>
+        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        assertEquals crit, header.getCritical()
+        header = builder.critical([] as Set<String>).build()
+        assertFalse header.containsKey('crit') // removed
+    }
+
+    /**
+     * Asserts that per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11, a {@code crit} header is not
+     * allowed in non-protected headers.
+     */
+    @Test
+    void testCritRemovedForUnprotectedHeader() {
+        def crit = Collections.setOf('foo', 'bar')
+        // no JWS or JWE params specified:
+        def header = builder.add('test', 'value').critical(crit).build()
+        assertFalse header.containsKey(DefaultProtectedHeader.CRIT.getId())
+    }
+
+    /**
+     * Asserts that per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11, a value in the {@code crit} set
+     * is removed if the corresponding header parameter is missing.
+     */
+    @Test
+    void testCritNamesSanitizedWhenHeaderMissingCorrespondingParameter() {
+        def critGiven = ['foo', 'bar'] as Set<String>
+        def critExpected = ['foo'] as Set<String>
+        def header = jws().add('foo', 'fooVal').critical(critGiven).build() as ProtectedHeader
+        // header didn't set the 'bar' parameter, so 'bar' should not be in the crit values:
+        assertEquals critExpected, header.getCritical()
+    }
+
+    @Test
+    void testCritNamesRemovedWhenHeaderMissingCorrespondingParameter() {
+        def critGiven = ['foo'] as Set<String>
+        def header = jws().critical(critGiven).build() as ProtectedHeader
+        // header didn't set the 'foo' parameter, so crit would have been empty, and then removed from the header:
+        assertNull header.getCritical()
     }
 }

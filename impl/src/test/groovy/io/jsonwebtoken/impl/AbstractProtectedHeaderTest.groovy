@@ -57,7 +57,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testJku() {
         URI uri = URI.create('https://github.com')
-        def header = Jwts.header().jwkSetUrl(uri).build() as DefaultProtectedHeader
+        def header = Jwts.header().add('alg', 'foo').jwkSetUrl(uri).build() as DefaultProtectedHeader
         assertEquals uri.toString(), header.get('jku')
         assertEquals uri, header.getJwkSetUrl()
     }
@@ -213,7 +213,8 @@ class AbstractProtectedHeaderTest {
     @Test
     void testCritical() {
         Set<String> crits = Collections.setOf('foo', 'bar')
-        def header = Jwts.header().critical(crits).build() as DefaultProtectedHeader
+        def header = Jwts.header().add('alg', 'HS256').add('foo', 'value1').add('bar', 'value2')
+                .critical(crits).build() as DefaultProtectedHeader
         assertEquals crits, header.getCritical()
     }
 

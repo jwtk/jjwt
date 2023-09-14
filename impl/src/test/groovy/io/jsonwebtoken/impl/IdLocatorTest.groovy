@@ -85,7 +85,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJweHeaderInstanceTest() {
-        def header = Jwts.header().add('enc', 'A256GCM').add('foo', 'foo').build()
+        def header = Jwts.header().add('alg', 'foo').add('enc', 'A256GCM').add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {

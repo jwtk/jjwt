@@ -16,14 +16,13 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.impl.lang.PositiveIntegerConverter;
 import io.jsonwebtoken.impl.lang.RequiredBitLengthConverter;
 import io.jsonwebtoken.impl.security.JwkConverter;
-import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
@@ -63,14 +62,18 @@ public class DefaultJweHeader extends DefaultProtectedHeader implements JweHeade
             Parameters.registry(DefaultProtectedHeader.PARAMS, ENCRYPTION_ALGORITHM, EPK, APU, APV, IV, TAG, P2S, P2C);
 
     static boolean isCandidate(ParameterMap map) {
-        return Strings.hasText(map.get(ENCRYPTION_ALGORITHM)) || // MUST have at least an `enc` header
-                !Collections.isEmpty(map.get(EPK)) ||
-                !Bytes.isEmpty(map.get(APU)) ||
-                !Bytes.isEmpty(map.get(APV)) ||
-                !Bytes.isEmpty(map.get(IV)) ||
-                !Bytes.isEmpty(map.get(TAG)) ||
-                !Bytes.isEmpty(map.get(P2S)) ||
-                (map.get(P2C) != null && map.get(P2C) > 0);
+        String id = map.get(DefaultHeader.ALGORITHM);
+        return Strings.hasText(id) && !id.equalsIgnoreCase(Jwts.SIG.NONE.getId()) && // alg cannot be empty or 'none'
+                Strings.hasText(map.get(ENCRYPTION_ALGORITHM)); // enc cannot be empty
+//        return Strings.hasText(map.get(ENCRYPTION_ALGORITHM)) || // MUST have at least an `enc` header
+//                !Collections.isEmpty(map.get(EPK)) ||
+//                !Bytes.isEmpty(map.get(APU)) ||
+//                !Bytes.isEmpty(map.get(APV)) ||
+//                !Bytes.isEmpty(map.get(IV)) ||
+//                !Bytes.isEmpty(map.get(TAG)) ||
+//                !Bytes.isEmpty(map.get(P2S)) ||
+//                (map.get(P2C) != null && map.get(P2C) > 0);
+
     }
 
     public DefaultJweHeader(Map<String, ?> map) {
