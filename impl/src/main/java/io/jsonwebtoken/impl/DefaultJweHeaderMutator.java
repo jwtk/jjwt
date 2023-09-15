@@ -19,11 +19,14 @@ import io.jsonwebtoken.JweHeaderMutator;
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.security.X509BuilderSupport;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PublicJwk;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -102,8 +105,29 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     // =============================================================
 
     @Override
-    public T critical(Set<String> crit) {
-        return put(DefaultProtectedHeader.CRIT, crit);
+    public T critical(String crit) {
+        crit = Strings.clean(crit);
+        if (Strings.hasText(crit)) {
+            critical(Collections.setOf(crit));
+        }
+        return self();
+    }
+
+    @Override
+    public T critical(Collection<String> crit) {
+        if (!Collections.isEmpty(crit)) {
+            Set<String> existing = Collections.nullSafe(this.DELEGATE.get(DefaultProtectedHeader.CRIT));
+            Set<String> set = new LinkedHashSet<>(existing.size() + crit.size());
+            set.addAll(existing);
+            for (String s : crit) {
+                s = Strings.clean(s);
+                if (s != null) {
+                    set.add(s);
+                }
+            }
+            put(DefaultProtectedHeader.CRIT, set);
+        }
+        return self();
     }
 
     @Override

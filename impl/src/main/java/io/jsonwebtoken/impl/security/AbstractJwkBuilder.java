@@ -109,18 +109,14 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T operation(KeyOperation operation) throws IllegalArgumentException {
-        Assert.notNull(operation, "KeyOperation cannot be null.");
-        return operations(Collections.setOf(operation));
+        return operation != null ? operations(Collections.setOf(operation)) : self();
     }
 
     @Override
     public T operations(Collection<KeyOperation> ops) {
-        Assert.notEmpty(ops, "KeyOperations collection argument cannot be null or empty.");
-        Set<KeyOperation> set = new LinkedHashSet<>(ops); // new ones override existing ones
-        Set<KeyOperation> existing = this.DELEGATE.getOperations();
-        if (!Collections.isEmpty(existing)) {
-            set.addAll(existing);
-        }
+        Set<KeyOperation> set = new LinkedHashSet<>(Collections.nullSafe(ops)); // new ones override existing ones
+        Set<KeyOperation> existing = Collections.nullSafe(this.DELEGATE.getOperations());
+        set.addAll(existing);
         this.opsPolicy.validate(set);
         this.DELEGATE.setOperations(set);
         return self();

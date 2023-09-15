@@ -102,8 +102,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Extension Behavior</b></p>
      *
-     * <p>The {@code crit} set only identifies header parameter names that are used in extensions supported by the
-     * application. <b>Application developers, <em>not JJWT</em>, MUST perform the associated extension behavior
+     * <p>The {@code crit} set argument only identifies header parameter names that are used in extensions supported
+     * by the application. <b>Application developers, <em>not JJWT</em>, MUST perform the associated extension behavior
      * using the parsed JWT</b>.</p>
      *
      * @param crit the header parameter names used in JWT extensions supported by the application.

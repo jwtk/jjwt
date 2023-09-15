@@ -648,6 +648,18 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testAudienceNullString() {
+        def jwt = Jwts.builder().subject('me').audience(null).compact()
+        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+    }
+
+    @Test
+    void testAudienceEmptyString() {
+        def jwt = Jwts.builder().subject('me').audience('  ').compact()
+        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+    }
+
+    @Test
     void testAudienceMultipleTimes() {
         def one = 'one'
         def two = 'two'
@@ -655,6 +667,28 @@ class DefaultJwtBuilderTest {
         def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
         assertTrue aud.contains(one)
         assertTrue aud.contains(two)
+    }
+
+    @Test
+    void testAudienceNullCollection() {
+        Collection c = null
+        def jwt = Jwts.builder().subject('me').audience(c).compact()
+        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+    }
+
+    @Test
+    void testAudienceEmptyCollection() {
+        Collection c = new ArrayList()
+        def jwt = Jwts.builder().subject('me').audience(c).compact()
+        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+    }
+
+    @Test
+    void testAudienceCollectionWithNullElement() {
+        Collection c = new ArrayList()
+        c.add(null)
+        def jwt = Jwts.builder().subject('me').audience(c).compact()
+        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     /**
@@ -693,17 +727,17 @@ class DefaultJwtBuilderTest {
 
     /**
      * Asserts that if someone calls builder.audienceSingle and then audience(Collection), the builder coerces the
-     * aud to a Set<String> and only the elements in the Collection will be applied since audience(Collection) is a
-     * full-replacement operation.
+     * aud to a Set<String> and all elements will be applied since audience(Collection).
      */
     @Test
     void testAudienceSingleThenAudienceCollection() {
         def single = 'one'
         def collection = ['two', 'three'] as Set<String>
+        def expected = ['one', 'two', 'three'] as Set<String>
         def jwt = Jwts.builder().audienceSingle(single).audience(collection).compact()
         def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
-        assertEquals collection.size(), aud.size()
-        assertTrue aud.containsAll(collection)
+        assertEquals expected.size(), aud.size()
+        assertTrue aud.contains(single) && aud.containsAll(collection)
     }
 
     /**

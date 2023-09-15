@@ -52,7 +52,7 @@ class CollectionsTest {
 
     @Test
     void testNullSafeSetWithNullArgument() {
-        def set = Collections.nullSafe(null)
+        def set = Collections.nullSafe((Set)null)
         assertNotNull set
         assertTrue set.isEmpty()
     }
@@ -67,6 +67,27 @@ class CollectionsTest {
     @Test
     void testNullSafeSetWithNonEmptyArgument() {
         def a = ["hello"] as Set<String>
+        def b = Collections.nullSafe(a)
+        assertSame a, b
+    }
+
+    @Test
+    void testNullSafeCollectionWithNullArgument() {
+        Collection c = Collections.nullSafe((Collection)null)
+        assertNotNull c
+        assertTrue c.isEmpty()
+    }
+
+    @Test
+    void testNullSafeCollectionWithEmptyArgument() {
+        Collection a = new LinkedHashSet() as Collection
+        def b = Collections.nullSafe(a)
+        assertSame a, b
+    }
+
+    @Test
+    void testNullSafeCollectionWithNonEmptyArgument() {
+        Collection a = ["hello"] as Collection<String>
         def b = Collections.nullSafe(a)
         assertSame a, b
     }

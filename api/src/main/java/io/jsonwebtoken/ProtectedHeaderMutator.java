@@ -19,7 +19,7 @@ import io.jsonwebtoken.security.PublicJwk;
 import io.jsonwebtoken.security.X509Mutator;
 
 import java.net.URI;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Mutation (modifications) to a {@link ProtectedHeader Header} instance.
@@ -30,17 +30,29 @@ import java.util.Set;
 public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> extends HeaderMutator<T>, X509Mutator<T> {
 
     /**
-     * Sets the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
-     * be understood and supported by the JWT recipient. A {@code null} value will remove the
-     * property from the JSON map.
+     * Adds the name of a header parameter used by a JWT or JWA specification extension that <em>MUST</em> be understood
+     * and supported by the JWT recipient.  A {@code null}, empty, whitespace-only or already existing value is ignored.
      *
-     * @param crit the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
-     *             be understood and supported by the JWT recipient.
+     * @param crit the name of a header parameter used by a JWT or JWA specification extension that <em>MUST</em> be
+     *             understood and supported by the JWT recipient.
      * @return the header for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS <code>crit</code> (Critical) Header Parameter</a>
      */
-    T critical(Set<String> crit);
+    T critical(String crit);
+
+    /**
+     * Adds names of header parameters used by JWT or JWA specification extensions that <em>MUST</em> be
+     * understood and supported by the JWT recipient. {@code null}, empty, whitespace-only or already existing
+     * values are ignored.
+     *
+     * @param crit names of header parameters used by JWT or JWA specification extensions that <em>MUST</em> be
+     *             understood and supported by the JWT recipient
+     * @return the header for method chaining.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS <code>crit</code> (Critical) Header Parameter</a>
+     */
+    T critical(Collection<String> crit);
 
     /**
      * Sets the {@code jwk} (JSON Web Key) associated with the JWT.  When set for a {@link JwsHeader}, the
