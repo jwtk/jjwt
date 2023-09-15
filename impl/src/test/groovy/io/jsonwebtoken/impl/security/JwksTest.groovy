@@ -143,10 +143,49 @@ class JwksTest {
     }
 
     @Test
+    void testSingleOperation() {
+        def op = Jwks.OP.ENCRYPT
+        def expected = [op] as Set<KeyOperation>
+        def canonical = [op.getId()] as Set<String>
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operation(op).build()
+        assertEquals expected, jwk.getOperations()
+        assertEquals canonical, jwk.get(AbstractJwk.KEY_OPS.id)
+    }
+
+    @Test
+    void testSingleOperationNull() {
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operation(null).build() //ignored null
+        assertNull jwk.getOperations() //nothing added
+        assertFalse jwk.containsKey(AbstractJwk.KEY_OPS.id)
+    }
+
+    @Test
+    void testSingleOperationAppends() {
+        def expected = [Jwks.OP.ENCRYPT, Jwks.OP.DECRYPT] as Set<KeyOperation>
+        def jwk = Jwks.builder().key(TestKeys.A128GCM)
+                .operation(Jwks.OP.ENCRYPT).operation(Jwks.OP.DECRYPT)
+                .build()
+        assertEquals expected, jwk.getOperations()
+    }
+
+    @Test
     void testOperations() {
         def val = [Jwks.OP.SIGN, Jwks.OP.VERIFY] as Set<KeyOperation>
-        def canonical = Collections.setOf('sign', 'verify')
-        testProperty('operations', 'key_ops', val, canonical)
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations(val).build()
+        assertEquals val, jwk.getOperations()
+    }
+
+    @Test
+    void testOperationsNull() {
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations(null).build()
+        assertNull jwk.getOperations()
+        assertFalse jwk.containsKey(AbstractJwk.KEY_OPS.id)
+    }
+
+    @Test
+    void testOperationsEmpty() {
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations(Collections.emptyList()).build()
+        assertNull jwk.getOperations()
     }
 
     @Test

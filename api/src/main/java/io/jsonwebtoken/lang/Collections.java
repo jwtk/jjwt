@@ -180,7 +180,6 @@ public final class Collections {
 
     /**
      * Returns a non-null set, either {@code s} if it is not null, or {@link #emptySet()} otherwise.
-     * Returns the specified set if not null or {@link #emptySet()} otherwise.
      *
      * @param s   the set to check for null
      * @param <T> type of elements in the set
@@ -189,6 +188,18 @@ public final class Collections {
      */
     public static <T> Set<T> nullSafe(Set<T> s) {
         return s == null ? Collections.<T>emptySet() : s;
+    }
+
+    /**
+     * Returns a non-null collection, either {@code c} if it is not null, or {@link #emptyList()} otherwise.
+     *
+     * @param c   the collection to check for null
+     * @param <T> type of elements in the collection
+     * @return a non-null collection, either {@code c} if it is not null, or {@link #emptyList()} otherwise.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static <T> Collection<T> nullSafe(Collection<T> c) {
+        return c == null ? Collections.<T>emptyList() : c;
     }
 
     /**

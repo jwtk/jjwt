@@ -496,21 +496,46 @@ class DefaultJwtHeaderBuilderTest {
     }
 
     @Test
-    void testCritNullRemovesValues() {
-        def crit = ['test'] as Set<String>
-        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
-        assertEquals crit, header.getCritical()
-        header = builder.critical(null).build()
-        assertFalse header.containsKey('crit') // removed
+    void testCritSingle() {
+        def crit = 'test'
+        def header = jws().add(crit, 'foo').critical(crit).build() as ProtectedHeader
+        def expected = [crit] as Set<String>
+        assertEquals expected, header.getCritical()
     }
 
     @Test
-    void testCritEmptyRemovesValues() {
+    void testCritSingleNullIgnored() {
+        def crit = 'test'
+        def expected = [crit] as Set<String>
+        def header = jws().add(crit, 'foo').critical(crit).build() as ProtectedHeader
+        assertEquals expected, header.getCritical()
+        header = builder.critical((String) null).build() as ProtectedHeader // ignored
+        assertEquals expected, header.getCritical() // nothing changed
+    }
+
+    @Test
+    void testCritNullCollectionIgnored() {
+        def crit = ['test'] as Set<String>
+        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        assertEquals crit, header.getCritical()
+        header = builder.critical((Collection) null).build() as ProtectedHeader
+        assertEquals crit, header.getCritical() // nothing changed
+    }
+
+    @Test
+    void testCritCollectionWithNullElement() {
+        def crit = [null] as Set<String>
+        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        assertNull header.getCritical()
+    }
+
+    @Test
+    void testCritEmptyIgnored() {
         def crit = ['test'] as Set<String>
         def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
         assertEquals crit, header.getCritical()
         header = builder.critical([] as Set<String>).build()
-        assertFalse header.containsKey('crit') // removed
+        assertEquals crit, header.getCritical() // ignored
     }
 
     /**

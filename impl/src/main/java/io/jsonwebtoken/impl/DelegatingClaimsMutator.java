@@ -19,7 +19,6 @@ import io.jsonwebtoken.ClaimsMutator;
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
-import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.lang.Strings;
@@ -88,8 +87,7 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
                 put(DefaultClaims.AUDIENCE, Collections.setOf(existing)); // replace as Set
             }
         }
-        Set<String> aud = get(DefaultClaims.AUDIENCE);
-        return aud != null ? aud : Collections.<String>emptySet();
+        return get(DefaultClaims.AUDIENCE);
     }
 
     @Override
@@ -108,16 +106,28 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
 
     @Override
     public T audience(String aud) {
-        aud = Assert.hasText(Strings.clean(aud), "Audience string value cannot be null or empty.");
-        Set<String> set = new LinkedHashSet<>(getAudience());
-        set.add(aud);
-        return audience(set);
+        aud = Strings.clean(aud);
+        if (Strings.hasText(aud)) {
+            audience(java.util.Collections.singleton(aud));
+        }
+        return self();
     }
 
     @Override
     public T audience(Collection<String> aud) {
-        getAudience(); //coerce to Set<String> if necessary
-        return put(DefaultClaims.AUDIENCE, Collections.asSet(aud));
+        if (!Collections.isEmpty(aud)) {
+            Set<String> existing = Collections.nullSafe(getAudience());
+            Set<String> set = new LinkedHashSet<>(existing.size() + aud.size());
+            set.addAll(existing);
+            for (String s : aud) {
+                s = Strings.clean(s);
+                if (s != null) {
+                    set.add(s);
+                }
+            }
+            put(DefaultClaims.AUDIENCE, set);
+        }
+        return self();
     }
 
     @Override

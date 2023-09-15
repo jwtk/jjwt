@@ -138,14 +138,14 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      *
      * @param operation the value to add to the JWK {@code key_ops} value set
      * @return the builder for method chaining.
-     * @throws IllegalArgumentException if {@code op} is {@code null} or if the operation is not permitted
-     *                                  by the operations {@link #operationPolicy(KeyOperationPolicy) policy}.
+     * @throws IllegalArgumentException if the {@code op} is not permitted by the operations
+     *                                  {@link #operationPolicy(KeyOperationPolicy) policy}.
      * @see Jwks.OP
      */
     T operation(KeyOperation operation) throws IllegalArgumentException;
 
     /**
-     * Sets the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
+     * Adds {@code ops} to the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
      * (Key Operations) Parameter</a> values.
      *
      * <p>The {@code key_ops} (key operations) parameter identifies the operation(s) for which the key is
@@ -176,10 +176,10 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwks.OP}
      * constants.</p>
      *
-     * @param ops the JWK {@code key_ops} value set, or {@code null} if not present.
+     * @param ops the {@code KeyOperation} values to add to the JWK {@code key_ops} value set
      * @return the builder for method chaining.
-     * @throws IllegalArgumentException {@code ops} is {@code null} or empty, or if any of the operations are not
-     *                                  permitted by the operations {@link #operationPolicy(KeyOperationPolicy) policy}.
+     * @throws IllegalArgumentException if any of the operations are not permitted by the operations
+     *                                  {@link #operationPolicy(KeyOperationPolicy) policy}.
      * @see Jwks.OP
      */
     T operations(Collection<KeyOperation> ops) throws IllegalArgumentException;
