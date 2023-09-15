@@ -31,6 +31,7 @@ import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A builder to construct a {@link JwtParser}. Example usage:
@@ -93,6 +94,24 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @since JJWT_RELEASE_VERSION
      */
     JwtParserBuilder enableUnsecuredDecompression();
+
+    /**
+     * Specifies the {@link ProtectedHeader} parameter names used in JWT extensions supported by the application. If
+     * the parser encounters a Protected JWT that {@link ProtectedHeader#getCritical() requires} extensions, and
+     * those extensions' header names are not specified via this method, the parser will reject that JWT.
+     *
+     * <p><b>Extension Behavior</b></p>
+     *
+     * <p>The {@code crit} set only identifies header parameter names that are used in extensions supported by the
+     * application. <b>Application developers, <em>not JJWT</em>, MUST perform the associated extension behavior
+     * using the parsed JWT</b>.</p>
+     *
+     * @param crit the header parameter names used in JWT extensions supported by the application.
+     * @return the builder for method chaining.
+     * @see ProtectedHeader#getCritical()
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtParserBuilder critical(Set<String> crit);
 
     /**
      * Sets the JCA Provider to use during cryptographic signature and key decryption operations, or {@code null} if the

@@ -49,4 +49,25 @@ class CollectionsTest {
         } catch (UnsupportedOperationException ignored) { // expected, asSet returns immutable instances
         }
     }
+
+    @Test
+    void testNullSafeSetWithNullArgument() {
+        def set = Collections.nullSafe(null)
+        assertNotNull set
+        assertTrue set.isEmpty()
+    }
+
+    @Test
+    void testNullSafeSetWithEmptyArgument() {
+        def a = new LinkedHashSet()
+        def b = Collections.nullSafe(a)
+        assertSame a, b
+    }
+
+    @Test
+    void testNullSafeSetWithNonEmptyArgument() {
+        def a = ["hello"] as Set<String>
+        def b = Collections.nullSafe(a)
+        assertSame a, b
+    }
 }

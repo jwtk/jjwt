@@ -19,12 +19,18 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
+import org.junit.Before
 import org.junit.Test
 
 import javax.crypto.Mac
@@ -44,13 +50,21 @@ class DefaultJwtParserTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private DefaultJwtParser newParser() {
-        return Jwts.parser().build() as DefaultJwtParser
+    private DefaultJwtParser parser
+
+    private static String b64Url(def val) {
+        if (val instanceof String) val = Strings.utf8(val)
+        return Encoders.BASE64URL.encode(val)
+    }
+
+    @Before
+    void setUp() {
+        parser = Jwts.parser().build() as DefaultJwtParser
     }
 
     @Test(expected = MalformedJwtException)
     void testBase64UrlDecodeWithInvalidInput() {
-        newParser().decode('20:SLDKJF;3993;----', 'test')
+        parser.decode('20:SLDKJF;3993;----', 'test')
     }
 
     @Test
@@ -63,7 +77,7 @@ class DefaultJwtParserTest {
         }
         def pb = Jwts.parser().deserializeJsonWith(deserializer)
         def p = pb.build() as DefaultJwtParser
-        assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer )
+        assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer)
         assertSame deserializer, p.deserializer.deserializer
 
         def key = Jwts.SIG.HS256.key().build()
@@ -176,5 +190,65 @@ class DefaultJwtParserTest {
         // all whitespace chars as defined by Character.isWhitespace:
         String claimsJson = '{"sub":"joe"} x'
         assertFalse DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testUnprotectedCritRejected() {
+        def map = [alg: "none", crit: ["whatever"]]
+        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        String compact = header + '.doesntMatter.'
+        try {
+            Jwts.parser().enableUnsecured().build().parse(compact)
+            fail()
+        } catch (MalformedJwtException expected) {
+            String msg = String.format(DefaultJwtParser.CRIT_UNSECURED_MSG, map)
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testProtectedCritWithoutAssociatedHeader() {
+        def map = [alg: "HS256", crit: ["whatever"]]
+        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        String compact = header + '.a.b'
+        try {
+            Jwts.parser().enableUnsecured().build().parse(compact)
+            fail()
+        } catch (MalformedJwtException expected) {
+            String msg = String.format(DefaultJwtParser.CRIT_MISSING_MSG, 'whatever', 'whatever', map)
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testProtectedCritWithUnsupportedHeader() {
+        def map = [alg: "HS256", crit: ["whatever"], whatever: 42]
+        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        String compact = header + '.a.b'
+        try {
+            Jwts.parser().enableUnsecured().build().parse(compact)
+            fail()
+        } catch (UnsupportedJwtException expected) {
+            String msg = String.format(DefaultJwtParser.CRIT_UNSUPPORTED_MSG, 'whatever', 'whatever', map)
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testProtectedCritWithSupportedHeader() {
+        def key = TestKeys.HS256
+        def crit = Collections.setOf('whatever')
+        String jws = Jwts.builder()
+                .header().critical(crit).add('whatever', 42).and()
+                .subject('me')
+                .signWith(key).compact()
+
+        def jwt = Jwts.parser().critical(crit).verifyWith(key).build().parseClaimsJws(jws)
+
+        // no exception thrown, as expected, check the header values:
+        def parsedCrit = jwt.getHeader().getCritical()
+        assertEquals 1, parsedCrit.size()
+        assertEquals 'whatever', parsedCrit.iterator().next()
+        assertEquals 42, jwt.getHeader().get('whatever')
     }
 }

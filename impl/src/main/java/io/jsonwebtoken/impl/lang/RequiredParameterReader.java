@@ -28,7 +28,7 @@ public class RequiredParameterReader implements ParameterReadable {
     private final ParameterReadable src;
 
     public RequiredParameterReader(Header header) {
-        this(Assert.isInstanceOf(ParameterReadable.class, header, "Header implementations must implement ParameterReadable."));
+        this(Assert.isInstanceOf(ParameterReadable.class, header, "Header implementations must implement ParameterReadable: "));
     }
 
     public RequiredParameterReader(ParameterReadable src) {

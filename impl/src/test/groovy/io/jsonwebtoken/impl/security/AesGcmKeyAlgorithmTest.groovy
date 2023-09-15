@@ -84,7 +84,7 @@ class AesGcmKeyAlgorithmTest {
 
         def template = new JcaTemplate('AES')
 
-        def header = Jwts.header()
+        def header = Jwts.header().add('alg', alg.id).add('enc', 'foo')
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
@@ -104,7 +104,8 @@ class AesGcmKeyAlgorithmTest {
 
         def jweHeader = header.build() as JweHeader
 
-        def dcek = alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, jweHeader, enc, kek))
+        def req = new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, jweHeader, enc, kek)
+        def dcek = alg.getDecryptionKey(req)
 
         //Assert the decrypted key matches the original cek
         assertEquals cek.algorithm, dcek.algorithm
@@ -122,7 +123,7 @@ class AesGcmKeyAlgorithmTest {
         int keyLength = 128
         def alg = new AesGcmKeyAlgorithm(keyLength)
         def template = new JcaTemplate('AES')
-        def headerBuilder = Jwts.header()
+        def headerBuilder = Jwts.header().add('alg', alg.id).add('enc', 'foo')
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {

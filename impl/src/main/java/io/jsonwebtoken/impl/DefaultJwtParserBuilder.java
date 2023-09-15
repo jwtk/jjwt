@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @since 0.11.0
@@ -93,6 +94,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private final ClaimsBuilder expectedClaims = Jwts.claims();
 
     private Clock clock = DefaultClock.INSTANCE;
+
+    private Set<String> critical = Collections.emptySet();
 
     private long allowedClockSkewMillis = 0;
 
@@ -200,6 +203,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public JwtParserBuilder clock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder critical(Set<String> crit) {
+        this.critical = Collections.immutable(new LinkedHashSet<>(Collections.nullSafe(crit)));
         return this;
     }
 
@@ -383,6 +392,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 enableUnsecuredDecompression,
                 keyLocator,
                 clock,
+                critical,
                 allowedClockSkewMillis,
                 expClaims,
                 decoder,

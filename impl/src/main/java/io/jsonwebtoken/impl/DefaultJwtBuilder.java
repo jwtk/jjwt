@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
@@ -524,6 +525,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (key != null) { //jwt must be signed:
             Assert.stateNotNull(key, "Signing key cannot be null.");
             Assert.stateNotNull(signFunction, "signFunction cannot be null.");
+            Assert.isInstanceOf(JwsHeader.class, header, "Invalid header created: ");
             byte[] data = jwt.getBytes(StandardCharsets.US_ASCII);
             SecureRequest<byte[], Key> request = new DefaultSecureRequest<>(data, provider, secureRandom, key);
             byte[] signature = signFunction.apply(request);
@@ -560,7 +562,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
         this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
-        final Header header = this.headerBuilder.build();
+        final JweHeader header =
+                Assert.isInstanceOf(JweHeader.class, this.headerBuilder.build(), "Invalid header created: ");
 
         byte[] headerBytes = this.headerSerializer.apply(header);
         final String base64UrlEncodedHeader = encoder.encode(headerBytes);

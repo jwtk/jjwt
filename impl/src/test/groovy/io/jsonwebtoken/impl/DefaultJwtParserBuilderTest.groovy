@@ -208,8 +208,8 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testCaseSensitiveEncryptionAlgorithm() {
         def alg = Jwts.ENC.A256GCM
-        def standard = Jwts.header().add('enc', alg.id).build()
-        def nonStandard = Jwts.header().add('enc', alg.id.toLowerCase()).build()
+        def standard = Jwts.header().add('alg', 'foo').add('enc', alg.id).build()
+        def nonStandard = Jwts.header().add('alg', 'foo').add('enc', alg.id.toLowerCase()).build()
         def parser = builder.build()
         assertSame alg, parser.encAlgFn.apply(standard) // standard id
         try {

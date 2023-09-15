@@ -36,6 +36,7 @@ import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.PrematureJwtException;
+import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.lang.Bytes;
@@ -75,6 +76,7 @@ import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser implements JwtParser {
@@ -93,8 +95,6 @@ public class DefaultJwtParser implements JwtParser {
 
     public static final String MISSING_EXPECTED_CLAIM_VALUE_MESSAGE_TEMPLATE =
             "Missing expected '%s' value in '%s' claim %s.";
-    public static final String MISSING_EXPECTED_CLAIM_MESSAGE_TEMPLATE = "Expected %s claim to be: %s, but was not " +
-            "present in the JWT claims.";
 
     public static final String MISSING_JWS_ALG_MSG = "JWS header does not contain a required 'alg' (Algorithm) " +
             "header parameter.  This header parameter is mandatory per the JWS Specification, Section 4.1.1. See " +
@@ -119,6 +119,22 @@ public class DefaultJwtParser implements JwtParser {
             "default as mandated by https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to " +
             "allow them to be parsed, call the JwtParserBuilder.enableUnsecured() method, but please read the " +
             "security considerations covered in that method's JavaDoc before doing so. Header: ";
+
+    private static final String CRIT_UNSECURED_MSG = "Unsecured JWSs (those with an " + DefaultHeader.ALGORITHM +
+            " header value of '" + Jwts.SIG.NONE.getId() + "') may not use the " + DefaultProtectedHeader.CRIT +
+            " header parameter per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11 (\"the [crit] Header " +
+            "Parameter MUST be integrity protected; therefore, it MUST occur only within [a] JWS Protected Header)\"." +
+            " Header: %s";
+
+    private static final String CRIT_MISSING_MSG = "Protected Header " +
+            DefaultProtectedHeader.CRIT + " set references header name '%s', but the header does not contain an " +
+            "associated '%s' header parameter as required by " +
+            "https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11. Header: %s";
+
+    private static final String CRIT_UNSUPPORTED_MSG = "Protected Header " + DefaultProtectedHeader.CRIT +
+            " set references unsupported header name '%s'. Application developers expecting to support a JWT " +
+            "extension using header '%s' in their application code must indicate it " +
+            "is supported by using the JwtParserBuilder.critical method. Header: %s";
 
     private static final String JWE_NONE_MSG = "JWEs do not support key management " + DefaultHeader.ALGORITHM +
             " header value '" + Jwts.SIG.NONE.getId() + "' per " +
@@ -163,6 +179,8 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Clock clock;
 
+    private final Set<String> critical;
+
     private final long allowedClockSkewMillis;
 
     //SigningKeyResolver will be removed for 1.0:
@@ -173,6 +191,7 @@ public class DefaultJwtParser implements JwtParser {
                      boolean enableUnsecuredDecompression,
                      Locator<? extends Key> keyLocator,
                      Clock clock,
+                     Set<String> critical,
                      long allowedClockSkewMillis,
                      DefaultClaims expectedClaims,
                      Decoder<String, byte[]> base64UrlDecoder,
@@ -188,6 +207,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = Assert.notNull(clock, "Clock cannot be null.");
+        this.critical = Assert.notNull(critical, "Critical set cannot be null (but it can be empty).");
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
@@ -401,10 +421,28 @@ public class DefaultJwtParser implements JwtParser {
             if (hasDigest) {
                 throw new MalformedJwtException(JWS_NONE_SIG_MISMATCH_MSG);
             }
+            if (header.containsKey(DefaultProtectedHeader.CRIT.getId())) {
+                String msg = String.format(CRIT_UNSECURED_MSG, header);
+                throw new MalformedJwtException(msg);
+            }
         } else if (!hasDigest) { // something other than 'none'.  Must have a digest component:
             String fmt = tokenized instanceof TokenizedJwe ? MISSING_JWE_DIGEST_MSG_FMT : MISSING_JWS_DIGEST_MSG_FMT;
             String msg = String.format(fmt, alg);
             throw new MalformedJwtException(msg);
+        }
+        if (header instanceof ProtectedHeader) {
+            Set<String> crit = Collections.nullSafe(((ProtectedHeader) header).getCritical());
+            // assert any values per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11:
+            for (String name : crit) {
+                if (!header.containsKey(name)) {
+                    String msg = String.format(CRIT_MISSING_MSG, name, name, header);
+                    throw new MalformedJwtException(msg);
+                }
+                if (!this.critical.contains(name)) {
+                    String msg = String.format(CRIT_UNSUPPORTED_MSG, name, name, header);
+                    throw new UnsupportedJwtException(msg);
+                }
+            }
         }
 
         // =============== Payload =================
