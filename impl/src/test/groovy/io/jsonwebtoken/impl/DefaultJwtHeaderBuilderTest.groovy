@@ -40,18 +40,23 @@ class DefaultJwtHeaderBuilderTest {
     static DefaultJwtHeaderBuilder builder
     static def header
 
+    static DefaultJwtHeaderBuilder jws() {
+        // assignment and return must be on different lines when testing on JDK 7:
+        builder = new DefaultJwtHeaderBuilder().add('alg', 'foo') as DefaultJwtHeaderBuilder
+        return builder
+    }
+
+    static DefaultJwtHeaderBuilder jwe() {
+        // assignment and return must be on different lines when testing on JDK 7 otherwise we get
+        // (class: io/jsonwebtoken/impl/DefaultJwtHeaderBuilderTest, method: jwe signature: ()Lio/jsonwebtoken/impl/DefaultJwtHeaderBuilder;) Illegal target of jump or branch
+        builder = jws().add('enc', 'bar') as DefaultJwtHeaderBuilder
+        return builder
+    }
+
     @Before
     void setUp() {
         header = null
         builder = new DefaultJwtHeaderBuilder()
-    }
-
-    private DefaultJwtHeaderBuilder jws() {
-        return builder.add('alg', 'foo') as DefaultJwtHeaderBuilder
-    }
-
-    private DefaultJwtHeaderBuilder jwe() {
-        return jws().add('enc', 'bar') as DefaultJwtHeaderBuilder
     }
 
     @SuppressWarnings('GroovyAssignabilityCheck')
