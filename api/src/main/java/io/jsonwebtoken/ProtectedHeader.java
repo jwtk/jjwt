@@ -73,10 +73,10 @@ public interface ProtectedHeader extends Header, X509Accessor {
     String getKeyId();
 
     /**
-     * Returns the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
+     * Returns the header parameter names that use extensions to the JWT or JWA specification(s) that <em>MUST</em>
      * be understood and supported by the JWT recipient, or {@code null} if not present.
      *
-     * @return the header parameter names that use extensions to the JWT or JWA specification that <em>MUST</em>
+     * @return the header parameter names that use extensions to the JWT or JWA specification(s) that <em>MUST</em>
      * be understood and supported by the JWT recipient, or {@code null} if not present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS {@code crit} (Critical) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS {@code crit} (Critical) Header Parameter</a>
