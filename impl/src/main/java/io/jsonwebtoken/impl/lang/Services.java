@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static io.jsonwebtoken.lang.Collections.arrayToList;
 
@@ -29,6 +31,8 @@ import static io.jsonwebtoken.lang.Collections.arrayToList;
  * better separation of concerns and testability.
  */
 public final class Services {
+
+    private static ConcurrentMap<Class<?>, ServiceLoader<?>> SERVICE_CACHE = new ConcurrentHashMap<>();
 
     private static final List<ClassLoaderAccessor> CLASS_LOADER_ACCESSORS = arrayToList(new ClassLoaderAccessor[] {
             new ClassLoaderAccessor() {
@@ -64,23 +68,17 @@ public final class Services {
     public static <T> List<T> loadAll(Class<T> spi) {
         Assert.notNull(spi, "Parameter 'spi' must not be null.");
 
-        for (ClassLoaderAccessor classLoaderAccessor : CLASS_LOADER_ACCESSORS) {
-            List<T> implementations = loadAll(spi, classLoaderAccessor.getClassLoader());
-            if (!implementations.isEmpty()) {
-                return Collections.unmodifiableList(implementations);
+        ServiceLoader<T> serviceLoader = serviceLoader(spi);
+        if (serviceLoader != null) {
+
+            List<T> implementations = new ArrayList<>();
+            for (T implementation : serviceLoader) {
+                implementations.add(implementation);
             }
+            return implementations;
         }
 
         throw new UnavailableImplementationException(spi);
-    }
-
-    private static <T> List<T> loadAll(Class<T> spi, ClassLoader classLoader) {
-        ServiceLoader<T> serviceLoader = ServiceLoader.load(spi, classLoader);
-        List<T> implementations = new ArrayList<>();
-        for (T implementation : serviceLoader) {
-            implementations.add(implementation);
-        }
-        return implementations;
     }
 
     /**
@@ -96,21 +94,47 @@ public final class Services {
     public static <T> T loadFirst(Class<T> spi) {
         Assert.notNull(spi, "Parameter 'spi' must not be null.");
 
-        for (ClassLoaderAccessor classLoaderAccessor : CLASS_LOADER_ACCESSORS) {
-            T result = loadFirst(spi, classLoaderAccessor.getClassLoader());
-            if (result != null) {
-                return result;
-            }
+        ServiceLoader<T> serviceLoader = serviceLoader(spi);
+        if (serviceLoader != null) {
+            return serviceLoader.iterator().next();
         }
+
         throw new UnavailableImplementationException(spi);
     }
 
-    private static <T> T loadFirst(Class<T> spi, ClassLoader classLoader) {
-        ServiceLoader<T> serviceLoader = ServiceLoader.load(spi, classLoader);
-        if (serviceLoader.iterator().hasNext()) {
-            return serviceLoader.iterator().next();
+    /**
+     * Returns a ServiceLoader for <code>spi</code> class, checking multiple classloaders. The ServiceLoader
+     * will be cached if it contains at least one implementation of the <code>spi</code> class.<BR>
+     *
+     * <b>NOTE:</b> Only the first Serviceloader will be cached.
+     * @param spi The interface or abstract class representing the service loader.
+     * @return A service loader, or null if no implementations are found
+     * @param <T> The type of the SPI.
+     */
+    private static  <T> ServiceLoader<T> serviceLoader(Class<T> spi) {
+        // TODO: JDK8, replace this get/putIfAbsent logic with ConcurrentMap.computeIfAbsent
+        ServiceLoader<T> serviceLoader = (ServiceLoader<T>) SERVICE_CACHE.get(spi);
+        if (serviceLoader != null) {
+            return serviceLoader;
         }
+
+        for (ClassLoaderAccessor classLoaderAccessor : CLASS_LOADER_ACCESSORS) {
+            serviceLoader = ServiceLoader.load(spi, classLoaderAccessor.getClassLoader());
+            if (serviceLoader.iterator().hasNext()) {
+                SERVICE_CACHE.putIfAbsent(spi, serviceLoader);
+                return serviceLoader;
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * Clears internal cache of ServiceLoaders. This is useful when testing, or for applications that dynamically
+     * change classloaders.
+     */
+    public static void reload() {
+        SERVICE_CACHE.clear();
     }
 
     private interface ClassLoaderAccessor {
