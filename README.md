@@ -91,7 +91,9 @@ JJWT is open source under the terms of the [Apache 2.0 License](http://www.apach
     * [Verification Key](#jws-read-key)
     * [Verification Key Locator](#jws-read-key-locator)
     * [Decompression](#jws-read-decompression)
-    <!-- * [Error Handling](#jws-read-errors) -->
+  * [Unencoded Payload Option](#jws-unencoded)
+    * [Detached Payload Example](#jws-unencoded-detached)
+    * [Non-Detached Payload Example](#jws-unencoded-nondetached)
 * [Encrypted JWTs](#jwe)
   * [JWE Encryption Algorithms](#jwe-enc)
     * [JWE Symmetric Encryption](#jwe-enc-symmetric)
