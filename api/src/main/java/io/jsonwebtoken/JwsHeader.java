@@ -93,4 +93,15 @@ public interface JwsHeader extends ProtectedHeader {
      */
     @Deprecated
     String CRITICAL = "crit";
+
+    /**
+     * Returns {@code true} if the payload is Base64Url-encoded per standard JWS rules, or {@code false} if the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS) Unencoded Payload
+     * Option</a> has been specified.
+     *
+     * @return {@code true} if the payload is Base64Url-encoded per standard JWS rules, or {@code false} if the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS) Unencoded Payload
+     * Option</a> has been specified.
+     */
+    boolean isPayloadEncoded();
 }

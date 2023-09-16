@@ -31,6 +31,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -101,6 +102,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Key signatureVerificationKey;
     private Key decryptionKey;
+
+    private Payload unencodedPayload = new Payload(null, null, null);
 
     @Override
     public JwtParserBuilder enableUnsecured() {
@@ -203,6 +206,17 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public JwtParserBuilder clock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder critical(String crit) {
+        if (Strings.hasText(crit)) {
+            Set<String> existing = Collections.nullSafe(this.critical);
+            Set<String> newSet = new LinkedHashSet<>(existing);
+            newSet.add(crit);
+            critical(newSet);
+        }
         return this;
     }
 
@@ -382,6 +396,16 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
         // Invariants.  If these are ever violated, it's an error in this class implementation:
         Assert.stateNotNull(keyLocator, "Key locator should never be null.");
+
+        if (!unencodedPayload.isEmpty()) {
+            // An unencoded payload has been configured, 'b64' in the supported crit values is expected:
+            String id = DefaultJwsHeader.B64.getId();
+            if (!this.critical.contains(id)) {
+                Set<String> set = new LinkedHashSet<>(this.critical);
+                set.add(id);
+                this.critical = set;
+            }
+        }
 
         final DefaultClaims expClaims = (DefaultClaims) this.expectedClaims.build();
 

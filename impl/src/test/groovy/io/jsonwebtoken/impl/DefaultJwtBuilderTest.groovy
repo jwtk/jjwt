@@ -257,7 +257,7 @@ class DefaultJwtBuilderTest {
             builder.setPayload('foo').claim('a', 'b').compact()
             fail()
         } catch (IllegalStateException ise) {
-            assertEquals ise.message, "Both 'content' and 'claims' cannot both be specified. Choose either one."
+            assertEquals ise.message, "Both 'content' and 'claims' cannot be specified. Choose either one."
         }
     }
 
@@ -544,7 +544,7 @@ class DefaultJwtBuilderTest {
             builder.signWith(key).encryptWith(key, Jwts.ENC.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
-            String msg = "Both 'signWith' and 'encryptWith' cannot be specified - choose either."
+            String msg = "Both 'signWith' and 'encryptWith' cannot be specified. Choose either one."
             assertEquals msg, expected.getMessage()
         }
     }

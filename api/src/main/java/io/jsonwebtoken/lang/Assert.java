@@ -388,6 +388,32 @@ public final class Assert {
     }
 
     /**
+     * Asserts that the provided object is an instance of the provided class, throwing an
+     * {@link IllegalStateException} otherwise.
+     * <pre class="code">Assert.stateIsInstance(Foo.class, foo);</pre>
+     *
+     * @param type    the type to check against
+     * @param <T>     the object's expected type
+     * @param obj     the object to check
+     * @param message a message which will be prepended to the message produced by
+     *                the function itself, and which may be used to provide context. It should
+     *                normally end in a ": " or ". " so that the function generate message looks
+     *                ok when prepended to it.
+     * @return the non-null object IFF it is an instance of the specified {@code type}.
+     * @throws IllegalStateException if the object is not an instance of clazz
+     * @see Class#isInstance
+     */
+    public static <T> T stateIsInstance(Class<T> type, Object obj, String message) {
+        notNull(type, "Type to check cannot be null.");
+        if (!type.isInstance(obj)) {
+            String msg = message + "Object of class [" + Objects.nullSafeClassName(obj) +
+                    "] must be an instance of " + type;
+            throw new IllegalStateException(msg);
+        }
+        return type.cast(obj);
+    }
+
+    /**
      * Assert that <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
      * <pre class="code">Assert.isAssignable(Number.class, myClass);</pre>
      *

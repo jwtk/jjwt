@@ -95,6 +95,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      */
     JwtParserBuilder enableUnsecuredDecompression();
 
+    JwtParserBuilder critical(String crit);
+
     /**
      * Specifies the {@link ProtectedHeader} parameter names used in JWT extensions supported by the application. If
      * the parser encounters a Protected JWT that {@link ProtectedHeader#getCritical() requires} extensions, and

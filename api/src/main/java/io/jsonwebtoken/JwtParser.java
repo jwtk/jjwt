@@ -217,6 +217,10 @@ public interface JwtParser {
     Jws<byte[]> parseContentJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException,
             SecurityException, IllegalArgumentException;
 
+    Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload);
+
+    Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload);
+
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
      * returns the resulting Claims JWS instance.
