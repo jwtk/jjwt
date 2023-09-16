@@ -15,41 +15,63 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.Header
+
 import org.junit.Test
-import static org.junit.Assert.*
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNull
 
 class DefaultHeaderTest {
+    
+    private DefaultHeader header
 
+    private static DefaultHeader h(Map<String, ?> m) {
+        return new DefaultHeader(m)
+    }
+    
     @Test
     void testType() {
-
-        def h = new DefaultHeader()
-
-        h.setType('foo')
-        assertEquals h.getType(), 'foo'
+        header = h([typ: 'foo'])
+        assertEquals 'foo', header.getType()
+        assertEquals 'foo', header.get('typ')
     }
 
     @Test
     void testContentType() {
+        header = h([cty: 'bar'])
+        // Per per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10, the raw header should have a
+        // compact form, but application developers shouldn't have to check for that all the time, so our getter has
+        // the normalized form:
+        assertEquals 'bar', header.get('cty') // raw compact form
+        assertEquals 'application/bar', header.getContentType() // getter normalized form
+    }
 
-        def h = new DefaultHeader()
-
-        h.setContentType('bar')
-        assertEquals h.getContentType(), 'bar'
+    @Test
+    void testAlgorithm() {
+        header = h([alg: 'foo'])
+        assertEquals 'foo', header.getAlgorithm()
+        assertEquals 'foo', header.get('alg')
     }
 
     @Test
     void testSetCompressionAlgorithm() {
-        def h = new DefaultHeader()
-        h.setCompressionAlgorithm("DEF")
-        assertEquals "DEF", h.getCompressionAlgorithm()
+        header = h([zip: 'DEF'])
+        assertEquals "DEF", header.getCompressionAlgorithm()
+        assertEquals 'DEF', header.get('zip')
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testBackwardsCompatibleCompressionHeader() {
+        header = h([calg: 'DEF'])
+        assertEquals "DEF", header.getCompressionAlgorithm()
+        assertEquals 'DEF', header.get('calg')
+        assertNull header.get('zip')
     }
 
     @Test
-    void testBackwardsCompatibleCompressionHeader() {
-        def h = new DefaultHeader()
-        h.put(Header.DEPRECATED_COMPRESSION_ALGORITHM, "DEF")
-        assertEquals "DEF", h.getCompressionAlgorithm()
+    void testGetName() {
+        def header = new DefaultHeader([:])
+        assertEquals 'JWT header', header.getName()
     }
 }

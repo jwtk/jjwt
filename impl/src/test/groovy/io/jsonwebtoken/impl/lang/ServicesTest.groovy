@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.impl.DefaultStubService
 import io.jsonwebtoken.StubService
+import io.jsonwebtoken.impl.DefaultStubService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.api.easymock.PowerMock
@@ -25,8 +25,7 @@ import org.powermock.modules.junit4.PowerMockRunner
 
 import java.lang.reflect.Field
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.*
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest([Services])
@@ -44,6 +43,13 @@ class ServicesTest {
         NoServicesClassLoader.runWith {
             Services.loadFirst(StubService.class)
         }
+    }
+
+    @Test
+    void testLoadAllAvailable() {
+        def list = Services.loadAll(StubService.class)
+        assertEquals 1, list.size()
+        assertTrue list[0] instanceof StubService
     }
 
     @Test(expected = UnavailableImplementationException)
@@ -75,7 +81,7 @@ class ServicesTest {
         @Override
         Enumeration<URL> getResources(String name) throws IOException {
             if (name.startsWith("META-INF/services/")) {
-                return java.util.Collections.emptyEnumeration()
+                return Collections.emptyEnumeration()
             } else {
                 return super.getResources(name)
             }

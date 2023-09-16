@@ -17,35 +17,45 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
+import static org.junit.Assert.*
 
 class DefaultJwsTest {
 
     @Test
     void testConstructor() {
-
-        JwsHeader header = Jwts.jwsHeader()
+        JwsHeader header = new DefaultJwsHeader([:])
         def jws = new DefaultJws<String>(header, 'foo', 'sig')
-
         assertSame jws.getHeader(), header
-        assertEquals jws.getBody(), 'foo'
+        assertEquals jws.getPayload(), 'foo'
         assertEquals jws.getSignature(), 'sig'
     }
 
     @Test
     void testToString() {
         //create random signing key for testing:
-        SignatureAlgorithm alg = SignatureAlgorithm.HS256
-        byte[] key = Keys.secretKeyFor(alg).encoded
-        String compact = Jwts.builder().claim('foo', 'bar').signWith(alg, key).compact();
+        def alg = Jwts.SIG.HS256
+        def key = alg.key().build()
+        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         int i = compact.lastIndexOf('.')
         String signature = compact.substring(i + 1)
-        def jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(compact)
-        assertEquals 'header={alg=HS256},body={foo=bar},signature=' + signature, jws.toString()
+        def jws = Jwts.parser().verifyWith(key).build().parseClaimsJws(compact)
+        assertEquals 'header={alg=HS256},payload={foo=bar},signature=' + signature, jws.toString()
+    }
+
+    @Test
+    void testEqualsAndHashCode() {
+        def alg = Jwts.SIG.HS256
+        def key = alg.key().build()
+        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
+        def parser = Jwts.parser().verifyWith(key).build()
+        def jws1 = parser.parseClaimsJws(compact)
+        def jws2 = parser.parseClaimsJws(compact)
+        assertNotEquals jws1, 'hello' as String
+        assertEquals jws1, jws1
+        assertEquals jws2, jws2
+        assertEquals jws1, jws2
+        assertEquals jws1.hashCode(), jws2.hashCode()
     }
 }

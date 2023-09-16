@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2014 jsonwebtoken.io
+  ~ Copyright (C) 2014-2023 jsonwebtoken.io
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jsonwebtoken</groupId>
@@ -85,55 +86,40 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!-- temporary fix until official release of coverall-maven-plugin with clover support: -->
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-jwtk-coveralls-maven-plugin</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
-        </repository>
     </repositories>
-    <pluginRepositories>
-        <!-- temporary fix until official release of coverall-maven-plugin with clover support: -->
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-jwtk-coveralls-maven-plugin</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/jwtk/coveralls-maven-plugin</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments />
+        <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
-        <jjwt.previousVersion>0.10.7</jjwt.previousVersion>
+        <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
         <maven.jar.version>3.2.2</maven.jar.version>
         <maven.compiler.version>3.8.1</maven.compiler.version> <!-- max version allowed for JDK 7 builds -->
         <maven.javadoc.version>3.1.1</maven.javadoc.version> <!-- max version allowed for JDK 7 builds -->
         <maven.source.version>3.2.1</maven.source.version>
+        <maven.resources.version>3.1.0</maven.resources.version>
         <maven.gpg.version>1.6</maven.gpg.version> <!-- max version allowed for JDK 7 builds -->
         <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
         <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
+        <maven.license.version>4.2.rc3</maven.license.version>
+        <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
         <jdk.version>1.7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.12.6.1</jackson.version>
-        <orgjson.version>20220320</orgjson.version>
+        <jackson.version>2.12.7.1</jackson.version>
+        <orgjson.version>20230618</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
-        <maven.javadoc.additionalOptions />
+        <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.76</bouncycastle.version>
+        <bcprov.artifactId>bcprov-jdk18on</bcprov.artifactId>
+        <bcpkix.artifactId>bcpkix-jdk18on</bcpkix.artifactId>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <groovy.version>2.5.16</groovy.version> <!-- higher version used in jdk8AndLater profile below -->
@@ -144,7 +130,32 @@
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine />
+        <surefire.argLine/>
+        <test.addOpens>
+            --add-opens java.base/java.time.zone=ALL-UNNAMED,
+            --add-opens java.base/java.lang.ref=ALL-UNNAMED,
+            --add-opens java.base/java.lang=ALL-UNNAMED,
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED,
+            --add-opens java.base/java.net=ALL-UNNAMED,
+            --add-opens java.base/java.nio.charset=ALL-UNNAMED,
+            --add-opens java.base/java.nio.file=ALL-UNNAMED,
+            --add-opens java.base/java.security.cert=ALL-UNNAMED,
+            --add-opens java.base/java.text=ALL-UNNAMED,
+            --add-opens java.base/java.util.regex=ALL-UNNAMED,
+            --add-opens java.base/java.util.stream=ALL-UNNAMED,
+            --add-opens java.base/java.util.concurrent=ALL-UNNAMED,
+            --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED,
+            --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED,
+            --add-opens java.base/java.time=ALL-UNNAMED,
+            --add-opens java.base/java.util=ALL-UNNAMED,
+            --add-opens java.base/java.io=ALL-UNNAMED,
+            --add-opens java.base/java.security=ALL-UNNAMED,
+            --add-opens java.base/jdk.internal.loader=ALL-UNNAMED,
+            --add-opens java.base/sun.nio.fs=ALL-UNNAMED,
+            --add-opens java.base/sun.security.x509=ALL-UNNAMED,
+            --add-opens java.base/sun.security.util=ALL-UNNAMED,
+            --add-opens java.logging/java.util.logging=ALL-UNNAMED
+        </test.addOpens>
 
     </properties>
 
@@ -152,6 +163,7 @@
         <module>api</module>
         <module>impl</module>
         <module>extensions</module>
+        <module>tdjar</module>
     </modules>
 
     <dependencyManagement>
@@ -159,6 +171,11 @@
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -195,13 +212,13 @@
             <!-- Used only during testing for PS256, PS384 and PS512 since JDK <= 10 doesn't support them: -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
+                <artifactId>${bcprov.artifactId}</artifactId>
                 <version>${bouncycastle.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
+                <artifactId>${bcpkix.artifactId}</artifactId>
                 <version>${bouncycastle.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -280,6 +297,7 @@
                         <historyDir>${user.home}/.clover/${project.groupId}/jjwt</historyDir> -->
                         <excludes>
                             <exclude>io/jsonwebtoken/lang/*</exclude>
+                            <exclude>io/jsonwebtoken/all/JavaReadmeTest.java</exclude>
                         </excludes>
                         <methodPercentage>100.000000%</methodPercentage>
                         <statementPercentage>100.000000%</statementPercentage>
@@ -290,26 +308,46 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>3.0</version>
+                    <version>${maven.license.version}</version>
                     <configuration>
-                        <aggregate>true</aggregate>
-                        <skipExistingHeaders>true</skipExistingHeaders>
-                        <header>${jjwt.root}/src/license/header.txt</header>
-                        <headerDefinitions>
-                            <headerDefinition>${jjwt.root}/src/license/header_format.xml</headerDefinition>
-                        </headerDefinitions>
-                        <properties>
-                            <organization.name>${project.organization.name}</organization.name>
-                            <year>2019</year>
-                        </properties>
-                        <excludes>
-                            <exclude>**/*.txt</exclude>
-                            <exclude>LICENSE</exclude>
-                            <exclude>**/lombok.config</exclude>
-                            <exclude>**/mvnw</exclude>
-                            <exclude>.gitattributes</exclude>
-                        </excludes>
+                        <skipExistingHeaders>${maven.license.skipExistingHeaders}</skipExistingHeaders>
+                        <mapping>
+                            <toml>SCRIPT_STYLE</toml> <!-- yaml -->
+                            <pem>SCRIPT_STYLE</pem> <!-- any will do -->
+                        </mapping>
+                        <licenseSets>
+                            <licenseSet>
+                                <header>${jjwt.root}/src/license/header.txt</header>
+                                <excludes>
+                                    <exclude>**/license/header.txt</exclude>
+                                    <exclude>**/*.test.orgjson</exclude>
+                                    <exclude>**/*.test.gson</exclude>
+                                    <exclude>**/*.test.override</exclude>
+                                    <exclude>**/*.bnd</exclude>
+                                    <exclude>LICENSE</exclude>
+                                    <exclude>**/mvnw</exclude>
+                                    <exclude>**/lombok.config</exclude>
+                                    <exclude>.gitattributes</exclude>
+                                    <exclude>**/genkeys</exclude>
+                                    <exclude>**/softhsm</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.mycila</groupId>
+                            <artifactId>license-maven-plugin-git</artifactId>
+                            <version>${maven.license.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -353,6 +391,11 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>${maven.gpg.version}</version>
                     <executions>
@@ -382,10 +425,18 @@
                         </oldVersion>
                         <parameter>
                             <onlyModified>true</onlyModified>
-                            <breakBuildOnBinaryIncompatibleModifications>true
-                            </breakBuildOnBinaryIncompatibleModifications>
+                            <!-- <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications> -->
                             <!-- TODO: enable after 1.0 -->
-                            <!-- <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>-->
+                            <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
+
+                            <!-- All of the following can be removed after 0.11.1 is released: -->
+                            <!-- <excludes>
+                                <exclude>io.jsonwebtoken.Header#getAlgorithm()</exclude>
+                                <exclude>io.jsonwebtoken.Header#setAlgorithm(java.lang.String)</exclude>
+                                <exclude>io.jsonwebtoken.JwsHeader#getAlgorithm()</exclude>
+                                <exclude>io.jsonwebtoken.JwsHeader#setAlgorithm(java.lang.String)</exclude>
+                                <exclude>io.jsonwebtoken.lang.Assert#notNull(java.lang.Object,java.lang.String)</exclude>
+                            </excludes> -->
                         </parameter>
                     </configuration>
                     <executions>
@@ -416,7 +467,8 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         </transformers>
                     </configuration>
                     <executions>
@@ -580,7 +632,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- Temporarily host coveralls SNAPSHOT with clover support locally:  -->
                 <groupId>io.jsonwebtoken.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.4.1</version>
@@ -588,6 +639,16 @@
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <id>jdk7</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <properties>
+                <bcprov.artifactId>bcprov-jdk15to18</bcprov.artifactId>
+                <bcpkix.artifactId>bcpkix-jdk15to18</bcpkix.artifactId>
+            </properties>
+        </profile>
         <profile>
             <id>jdk8AndLater</id>
             <activation>
@@ -597,7 +658,7 @@
                 <gmavenplus.version>1.13.1</gmavenplus.version>
                 <groovy.version>3.0.10</groovy.version>
                 <easymock.version>4.2</easymock.version>
-                <powermock.version>2.0.2</powermock.version>
+                <powermock.version>2.0.7</powermock.version>
                 <maven.japicmp.version>0.15.6</maven.japicmp.version>
             </properties>
         </profile>
@@ -609,21 +670,17 @@
             </activation>
             <properties>
                 <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
-                <surefire.argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED</surefire.argLine>
+                <surefire.argLine>${test.addOpens}, --illegal-access=debug</surefire.argLine>
             </properties>
         </profile>
         <profile>
-            <id>jdk16AndLater</id>
+            <id>jdk17AndLater</id>
             <activation>
-                <jdk>[16,)</jdk>
+                <jdk>[17,)</jdk>
             </activation>
             <properties>
-                <surefire.argLine>
-                    --add-opens java.base/java.lang=ALL-UNNAMED
-                    --add-opens java.base/java.lang.ref=ALL-UNNAMED
-                    --add-opens java.base/java.util=ALL-UNNAMED
-                    --add-opens java.base/sun.security.util=ALL-UNNAMED
-                </surefire.argLine>
+                <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
+                <surefire.argLine>${test.addOpens}</surefire.argLine>
             </properties>
         </profile>
         <profile>

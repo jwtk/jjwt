@@ -15,41 +15,35 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.CompressionAlgorithm;
+
 /**
  * Compresses and decompresses byte arrays according to a compression algorithm.
  *
- * @see CompressionCodecs#DEFLATE
- * @see CompressionCodecs#GZIP
+ * <p><b>&quot;zip&quot; identifier</b></p>
+ *
+ * <p>{@code CompressionCodec} extends {@code Identifiable}; the value returned from
+ * {@link Identifiable#getId() getId()} will be used as the JWT
+ * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.</p>
+ *
+ * @see Jwts.ZIP#DEF
+ * @see Jwts.ZIP#GZIP
  * @since 0.6.0
+ * @deprecated since JJWT_RELEASE_VERSION in favor of {@link io.jsonwebtoken.io.CompressionAlgorithm} to equal the RFC name for this concept.
  */
-public interface CompressionCodec {
+@Deprecated
+public interface CompressionCodec extends CompressionAlgorithm {
 
     /**
-     * The compression algorithm name to use as the JWT's {@code zip} header value.
+     * The algorithm name to use as the JWT
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
      *
-     * @return the compression algorithm name to use as the JWT's {@code zip} header value.
+     * @return the algorithm name to use as the JWT
+     * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getId()} to ensure congruence with
+     * all other identifiable algorithms.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     String getAlgorithmName();
-
-    /**
-     * Compresses the specified byte array according to the compression {@link #getAlgorithmName() algorithm}.
-     *
-     * @param payload bytes to compress
-     * @return compressed bytes
-     * @throws CompressionException if the specified byte array cannot be compressed according to the compression
-     *                              {@link #getAlgorithmName() algorithm}.
-     */
-    byte[] compress(byte[] payload) throws CompressionException;
-
-    /**
-     * Decompresses the specified compressed byte array according to the compression
-     * {@link #getAlgorithmName() algorithm}.  The specified byte array must already be in compressed form
-     * according to the {@link #getAlgorithmName() algorithm}.
-     *
-     * @param compressed compressed bytes
-     * @return decompressed bytes
-     * @throws CompressionException if the specified byte array cannot be decompressed according to the compression
-     *                              {@link #getAlgorithmName() algorithm}.
-     */
-    byte[] decompress(byte[] compressed) throws CompressionException;
 }

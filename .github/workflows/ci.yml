@@ -6,14 +6,40 @@ on:
     branches:
       - master
 
+env:
+  MVN_CMD: ./mvnw --no-transfer-progress -B
+
 jobs:
+  oracle:
+    strategy:
+      matrix:
+        java: [ '17' ]
+    runs-on: 'ubuntu-latest'
+    name: jdk-${{ matrix.java }}-oracle
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: oracle-actions/setup-java@v1
+        with:
+          release: ${{ matrix.java }}
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
+      - name: Build
+        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
+        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
+
   temurin:
     strategy:
       matrix:
         java: [ '8', '11', '17', '18' ]
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
     name: jdk-${{ matrix.java }}-temurin
     steps:
       - uses: actions/checkout@v3
@@ -24,6 +50,14 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           check-latest: true
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -32,10 +66,9 @@ jobs:
   zulu:
     strategy:
       matrix:
-        java: [ '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18' ]
+        java: [ '7', '8', '9', '11', '12', '13', '14', '15', '16', '17', '18' ]
     runs-on: 'ubuntu-latest'
     env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
       JDK_MAJOR_VERSION: ${{ matrix.java }}
     name: jdk-${{ matrix.java }}-zulu
     steps:
@@ -47,6 +80,14 @@ jobs:
           distribution: 'zulu'
           cache: 'maven'
           check-latest: true
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
@@ -54,41 +95,30 @@ jobs:
           if [ "$JDK_MAJOR_VERSION" == "7" ]; then export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"; fi
           ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
 
-  jdk-7-oracle:
+  # ensure all of our files have the correct/updated license header
+  license-check:
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
-      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Xmx512m -XX:MaxPermSize=128m"
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          download_url="https://238dj3282as03k369.s3-us-west-1.amazonaws.com/jdk-7u80-linux-x64.tar.gz"
-          wget -O $RUNNER_TEMP/java_package.tar.gz $download_url
+        with:
+          fetch-depth: 0 # avoid license plugin history warnings (plus it needs full history)
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'jdkfile'
-          jdkFile: ${{ runner.temp }}/java_package.tar.gz
-          java-version: '7'
-          architecture: x64
+          distribution: 'zulu'
+          java-version: '8'
           cache: 'maven'
-      - name: "Download and install JCE Unlimited Strength Crypto policies for Oracle JDK 7"
+          check-latest: true
+      - name: License Check
+        # This adds about 1 minute to any build, which is why we don't want to do it on every other build:
         run: |
-          curl -q -L -C - https://238dj3282as03k369.s3-us-west-1.amazonaws.com/UnlimitedJCEPolicyJDK7.zip -o $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip
-          unzip -oj -d "$JAVA_HOME/jre/lib/security" $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip \*/\*.jar
-          rm $RUNNER_TEMP/UnlimitedJCEPolicyJDK7.zip
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
+          ${{env.MVN_CMD}} license:check
 
   code-coverage:
     # (commented out for now - see the comments in 'Wait to start' below for why.  Keeping this here as a placeholder
     # as it may be better to use instead of an artificial delay once we no longer need to build on JDK 7):
     #needs: zulu # wait until others finish so a coverage failure doesn't cancel others accidentally
     runs-on: 'ubuntu-latest'
-    env:
-      MVN_CMD: ./mvnw --no-transfer-progress -B
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
@@ -98,6 +128,14 @@ jobs:
           java-version: '8'
           cache: 'maven'
           check-latest: true
+      - name: Install softhsm2
+        run: sudo apt-get install -y softhsm2
+      - name: Install opensc
+        run: sudo apt-get install -y opensc
+      - name: Ensure SoftHSM user configuration
+        run: impl/src/test/scripts/softhsm configure
+      - name: Populate SoftHSM with JJWT test keys
+        run: impl/src/test/scripts/softhsm import
       - name: Wait to start
         # wait a little to start: code coverage usually only takes about 1 1/2 minutes.  If coverage fails, it will
         # cancel the other running builds, and we don't want that (because we want to see if jobs fail due to

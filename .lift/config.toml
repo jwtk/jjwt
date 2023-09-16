@@ -1,4 +1,0 @@
-ignoreRules = ["MissingOverride"]
-ignoreFiles = '''
-**/test/**
-'''

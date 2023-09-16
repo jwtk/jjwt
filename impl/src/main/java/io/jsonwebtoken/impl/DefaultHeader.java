@@ -16,57 +16,65 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
-public class DefaultHeader<T extends Header<T>> extends JwtMap implements Header<T> {
+public class DefaultHeader extends ParameterMap implements Header {
 
-    public DefaultHeader() {
-        super();
+    static final Parameter<String> TYPE = Parameters.string(Header.TYPE, "Type");
+    static final Parameter<String> CONTENT_TYPE = Parameters.builder(String.class)
+            .setId(Header.CONTENT_TYPE).setName("Content Type")
+            .setConverter(CompactMediaTypeIdConverter.INSTANCE).build();
+    static final Parameter<String> ALGORITHM = Parameters.string(Header.ALGORITHM, "Algorithm");
+    static final Parameter<String> COMPRESSION_ALGORITHM =
+            Parameters.string(Header.COMPRESSION_ALGORITHM, "Compression Algorithm");
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated // TODO: remove for 1.0.0:
+    static final Parameter<String> DEPRECATED_COMPRESSION_ALGORITHM =
+            Parameters.string(Header.DEPRECATED_COMPRESSION_ALGORITHM, "Deprecated Compression Algorithm");
+
+    static final Registry<String, Parameter<?>> PARAMS =
+            Parameters.registry(TYPE, CONTENT_TYPE, ALGORITHM, COMPRESSION_ALGORITHM, DEPRECATED_COMPRESSION_ALGORITHM);
+
+    public DefaultHeader(Map<String, ?> values) {
+        super(PARAMS, values);
     }
 
-    public DefaultHeader(Map<String, Object> map) {
-        super(map);
+    protected DefaultHeader(Registry<String, Parameter<?>> registry, Map<String, ?> values) {
+        super(registry, values);
+    }
+
+    @Override
+    public String getName() {
+        return "JWT header";
     }
 
     @Override
     public String getType() {
-        return getString(TYPE);
-    }
-
-    @Override
-    public T setType(String typ) {
-        setValue(TYPE, typ);
-        return (T)this;
+        return get(TYPE);
     }
 
     @Override
     public String getContentType() {
-        return getString(CONTENT_TYPE);
+        return get(CONTENT_TYPE);
     }
 
     @Override
-    public T setContentType(String cty) {
-        setValue(CONTENT_TYPE, cty);
-        return (T)this;
+    public String getAlgorithm() {
+        return get(ALGORITHM);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public String getCompressionAlgorithm() {
-        String alg = getString(COMPRESSION_ALGORITHM);
-        if (!Strings.hasText(alg)) {
-            alg = getString(DEPRECATED_COMPRESSION_ALGORITHM);
+        String s = get(COMPRESSION_ALGORITHM);
+        if (!Strings.hasText(s)) {
+            s = get(DEPRECATED_COMPRESSION_ALGORITHM);
         }
-        return alg;
+        return s;
     }
-
-    @Override
-    public T setCompressionAlgorithm(String compressionAlgorithm) {
-        setValue(COMPRESSION_ALGORITHM, compressionAlgorithm);
-        return (T) this;
-    }
-
 }

@@ -15,23 +15,23 @@
  */
 package io.jsonwebtoken.gson.io
 
-import io.jsonwebtoken.io.Deserializer
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.lang.Supplier
 import org.junit.Test
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
-import static org.hamcrest.CoreMatchers.instanceOf
-import com.google.gson.Gson
-import io.jsonwebtoken.io.SerializationException
 
 class GsonSerializerTest {
 
     @Test
     void loadService() {
         def serializer = ServiceLoader.load(Serializer).iterator().next()
-        assertThat(serializer, instanceOf(GsonSerializer))
+        assertTrue serializer instanceof GsonSerializer
     }
 
     @Test
@@ -41,14 +41,32 @@ class GsonSerializerTest {
     }
 
     @Test
-    void testObjectMapperConstructor() {
-        def customGSON = new Gson()
+    void testGsonConstructor() {
+        def customGSON = new GsonBuilder()
+                .registerTypeHierarchyAdapter(Supplier.class, GsonSupplierSerializer.INSTANCE)
+                .disableHtmlEscaping().create()
         def serializer = new GsonSerializer<>(customGSON)
         assertSame customGSON, serializer.gson
     }
 
+    @Test
+    void testGsonConstructorWithIncorrectlyConfiguredGson() {
+        try {
+            //noinspection GroovyResultOfObjectAllocationIgnored
+            new GsonSerializer<>(new Gson())
+            fail()
+        } catch (IllegalArgumentException expected) {
+            String msg = 'Invalid Gson instance - it has not been registered with the necessary ' +
+                    'io.jsonwebtoken.lang.Supplier type adapter.  When using the GsonBuilder, ensure this type ' +
+                    'adapter is registered by calling ' +
+                    'gsonBuilder.registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, ' +
+                    'io.jsonwebtoken.gson.io.GsonSupplierSerializer.INSTANCE) before calling gsonBuilder.create()'
+            assertEquals msg, expected.message
+        }
+    }
+
     @Test(expected = IllegalArgumentException)
-    void testObjectMapperConstructorWithNullArgument() {
+    void testConstructorWithNullArgument() {
         new GsonSerializer<>(null)
     }
 
@@ -94,7 +112,7 @@ class GsonSerializerTest {
         assertTrue Arrays.equals(expected, result)
     }
 
-  
+
     @Test
     void testSerializeFailsWithJsonProcessingException() {
 

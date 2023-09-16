@@ -19,17 +19,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.io.*
+import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.impl.security.TestKeys
+import io.jsonwebtoken.io.DeserializationException
+import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
+import org.junit.Before
 import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.SecretKey
+import java.nio.charset.StandardCharsets
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParser
 // implementation is tested to 100% coverage.  The vast majority of its tests are in the JwtsTest class.  This class
@@ -37,28 +45,26 @@ import static org.junit.Assert.assertTrue
 
 class DefaultJwtParserTest {
 
+    // all whitespace chars as defined by Character.isWhitespace:
+    static final String WHITESPACE_STR = ' \u0020 \u2028 \u2029 \t \n \u000B \f \r \u001C \u001D \u001E \u001F '
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @Test(expected = IllegalArgumentException)
-    void testBase64UrlDecodeWithNullArgument() {
-        new DefaultJwtParser().base64UrlDecodeWith(null)
+    private DefaultJwtParser parser
+
+    private static String b64Url(def val) {
+        if (val instanceof String) val = Strings.utf8(val)
+        return Encoders.BASE64URL.encode(val)
     }
 
-    @Test
-    void testBase64UrlEncodeWithCustomDecoder() {
-        def decoder = new Decoder() {
-            @Override
-            Object decode(Object o) throws DecodingException {
-                return null
-            }
-        }
-        def b = new DefaultJwtParser().base64UrlDecodeWith(decoder)
-        assertSame decoder, b.base64UrlDecoder
+    @Before
+    void setUp() {
+        parser = Jwts.parser().build() as DefaultJwtParser
     }
 
-    @Test(expected = IllegalArgumentException)
-    void testDeserializeJsonWithNullArgument() {
-        new DefaultJwtParser().deserializeJsonWith(null)
+    @Test(expected = MalformedJwtException)
+    void testBase64UrlDecodeWithInvalidInput() {
+        parser.decode('20:SLDKJF;3993;----', 'test')
     }
 
     @Test
@@ -69,15 +75,16 @@ class DefaultJwtParserTest {
                 return OBJECT_MAPPER.readValue(bytes, Map.class)
             }
         }
-        def p = new DefaultJwtParser().deserializeJsonWith(deserializer)
-        assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer )
+        def pb = Jwts.parser().deserializeJsonWith(deserializer)
+        def p = pb.build() as DefaultJwtParser
+        assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer)
         assertSame deserializer, p.deserializer.deserializer
 
-        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        def key = Jwts.SIG.HS256.key().build()
 
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, SignatureAlgorithm.HS256).compact()
+        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
 
-        assertEquals 'bar', p.setSigningKey(key).parseClaimsJws(jws).getBody().get('foo')
+        assertEquals 'bar', pb.verifyWith(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
     @Test(expected = MalformedJwtException)
@@ -95,7 +102,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        new DefaultJwtParser().setSigningKey(key).parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -113,7 +120,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        new DefaultJwtParser().setSigningKey(key).parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseClaimsJwe(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -131,23 +138,117 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        new DefaultJwtParser().setSigningKey(key).parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
     }
 
     @Test
-    void testMaxAllowedClockSkewSeconds() {
-        long max = Long.MAX_VALUE / 1000 as long
-        new DefaultJwtParser().setAllowedClockSkewSeconds(max) // no exception should be thrown
+    void testIsLikelyJsonWithEmptyString() {
+        assertFalse DefaultJwtParser.isLikelyJson(''.getBytes(StandardCharsets.UTF_8))
     }
 
     @Test
-    void testExceededAllowedClockSkewSeconds() {
-        long value = Long.MAX_VALUE / 1000 as long
-        value = value + 1L
+    void testIsLikelyJsonWithEmptyBytes() {
+        assertFalse DefaultJwtParser.isLikelyJson(Bytes.EMPTY)
+    }
+
+    @Test
+    void testIsLikelyJsonWithWhitespaceString() {
+        assertFalse DefaultJwtParser.isLikelyJson(WHITESPACE_STR.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithOnlyOpeningBracket() {
+        assertFalse DefaultJwtParser.isLikelyJson(' {... '.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithOnlyClosingBracket() {
+        assertFalse DefaultJwtParser.isLikelyJson(' } '.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonMinimalJsonObject() {
+        assertTrue DefaultJwtParser.isLikelyJson("{}".getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithLeadingAndTrailingWhitespace() {
+        // all whitespace chars as defined by Character.isWhitespace:
+        String claimsJson = WHITESPACE_STR + '{"sub":"joe"}' + WHITESPACE_STR
+        assertTrue DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithLeadingTextBeforeJsonObject() {
+        // all whitespace chars as defined by Character.isWhitespace:
+        String claimsJson = ' x {"sub":"joe"}'
+        assertFalse DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testIsLikelyJsonWithTrailingTextAfterJsonObject() {
+        // all whitespace chars as defined by Character.isWhitespace:
+        String claimsJson = '{"sub":"joe"} x'
+        assertFalse DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
+    }
+
+    @Test
+    void testUnprotectedCritRejected() {
+        def map = [alg: "none", crit: ["whatever"]]
+        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        String compact = header + '.doesntMatter.'
         try {
-            new DefaultJwtParser().setAllowedClockSkewSeconds(value)
-        } catch (IllegalArgumentException expected) {
-            assertEquals DefaultJwtParserBuilder.MAX_CLOCK_SKEW_ILLEGAL_MSG, expected.message
+            Jwts.parser().enableUnsecured().build().parse(compact)
+            fail()
+        } catch (MalformedJwtException expected) {
+            String msg = String.format(DefaultJwtParser.CRIT_UNSECURED_MSG, map)
+            assertEquals msg, expected.message
         }
+    }
+
+    @Test
+    void testProtectedCritWithoutAssociatedHeader() {
+        def map = [alg: "HS256", crit: ["whatever"]]
+        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        String compact = header + '.a.b'
+        try {
+            Jwts.parser().enableUnsecured().build().parse(compact)
+            fail()
+        } catch (MalformedJwtException expected) {
+            String msg = String.format(DefaultJwtParser.CRIT_MISSING_MSG, 'whatever', 'whatever', map)
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testProtectedCritWithUnsupportedHeader() {
+        def map = [alg: "HS256", crit: ["whatever"], whatever: 42]
+        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        String compact = header + '.a.b'
+        try {
+            Jwts.parser().enableUnsecured().build().parse(compact)
+            fail()
+        } catch (UnsupportedJwtException expected) {
+            String msg = String.format(DefaultJwtParser.CRIT_UNSUPPORTED_MSG, 'whatever', 'whatever', map)
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testProtectedCritWithSupportedHeader() {
+        def key = TestKeys.HS256
+        def crit = Collections.setOf('whatever')
+        String jws = Jwts.builder()
+                .header().critical(crit).add('whatever', 42).and()
+                .subject('me')
+                .signWith(key).compact()
+
+        def jwt = Jwts.parser().critical(crit).verifyWith(key).build().parseClaimsJws(jws)
+
+        // no exception thrown, as expected, check the header values:
+        def parsedCrit = jwt.getHeader().getCritical()
+        assertEquals 1, parsedCrit.size()
+        assertEquals 'whatever', parsedCrit.iterator().next()
+        assertEquals 42, jwt.getHeader().get('whatever')
     }
 }

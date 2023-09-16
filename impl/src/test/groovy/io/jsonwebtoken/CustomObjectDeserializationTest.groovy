@@ -19,10 +19,8 @@ import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import org.junit.Test
 
-import static org.hamcrest.CoreMatchers.is
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertThat
 
 class CustomObjectDeserializationTest {
 
@@ -39,16 +37,16 @@ class CustomObjectDeserializationTest {
         String jwtString = Jwts.builder().claim("cust", customBean).compact()
 
         // no custom deserialization, object is a map
-        Jwt<Header, Claims> jwt = Jwts.parser().parseClaimsJwt(jwtString)
+        Jwt<Header, Claims> jwt = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwtString)
         assertNotNull jwt
-        assertEquals jwt.getBody().get('cust'), [key1: 'value1', key2: 42]
+        assertEquals jwt.getPayload().get('cust'), [key1: 'value1', key2: 42]
 
         // custom type for 'cust' claim
         Deserializer deserializer = new JacksonDeserializer([cust: CustomBean])
-        jwt = Jwts.parser().deserializeJsonWith(deserializer).parseClaimsJwt(jwtString)
+        jwt = Jwts.parser().enableUnsecured().deserializeJsonWith(deserializer).build().parseClaimsJwt(jwtString)
         assertNotNull jwt
-        CustomBean result = jwt.getBody().get("cust", CustomBean)
-        assertThat result, is(customBean)
+        CustomBean result = jwt.getPayload().get("cust", CustomBean)
+        assertEquals customBean, result
     }
 
     static class CustomBean {

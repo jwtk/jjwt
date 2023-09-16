@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+#
+# Copyright © 2023 jsonwebtoken.io
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+
+function main() {
+
+  local names=
+  local name=
+
+  if ! command -v openssl >/dev/null 2>&1; then
+    echo "openssl is not available"
+    return 1
+  fi
+
+  names=('RS256' 'RS384' 'RS512' 'PS256' 'PS384' 'PS512' 'ES256' 'ES384' 'ES512' 'Ed25519' 'Ed448' 'X25519' 'X448' )
+
+  for name in "${names[@]}"; do
+
+    local args=()
+    local x509args=()
+    local privfile="${name}.pkcs8.pem"
+    local pubfile="${name}.pub.pem"
+    local certfile="${name}.crt.pem"
+    local size="${name:2:3}"
+    local keysize="${size}"
+    local algorithm="${name}"
+
+    if [[ "${name}" = RS* || "${name}" = PS* ]]; then
+      algorithm='RSA'
+      keysize=$((size * 8)) # 256 -> 2048, 384-> 3072, 512 -> 4096
+      args+=( '-pkeyopt' "rsa_keygen_bits:${keysize}" )
+    fi
+    if [[ "${name}" = PS* ]]; then
+      algorithm='RSA-PSS'
+      local saltlen=$((size / 8))
+      args+=( '-pkeyopt' "rsa_pss_keygen_md:sha${size}" '-pkeyopt' "rsa_pss_keygen_mgf1_md:sha${size}" '-pkeyopt' "rsa_pss_keygen_saltlen:${saltlen}" )
+      x509args+=( '-sigopt' 'rsa_padding_mode:pss' '-sigopt' "rsa_pss_saltlen:${saltlen}" '-sigopt' "rsa_mgf1_md:sha${size}" "-sha${size}" )
+    elif [[ "${name}" = ES* ]]; then
+      algorithm='EC'
+      if [[ "${size}" == '512' ]]; then size=521; fi
+      args+=( '-pkeyopt' "ec_paramgen_curve:P-${size}" )
+    fi
+
+    # generate the private key:
+    openssl genpkey -algorithm "${algorithm}" "${args[@]}" -out "${privfile}" 2>/dev/null
+
+    # derive the public key from the private key:
+    openssl pkey -in "${privfile}" -out "${pubfile}" -pubout
+
+    # create a self-signed certificate:
+    if [[ "${name}" = X* ]]; then
+      # X25519 and X448 can't be self-signed (they can't be used for signatures, only key agreement), so we'll force
+      # creating a cert ('using the -force_pubkey option), signing with the Ed* keys instead:
+      local edname="Ed${name:1}" # strip X, replace with Ed
+      openssl req -new -key "${edname}.pkcs8.pem" -out "${edname}.csr" -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt'
+      openssl x509 -req -in "${edname}.csr" -CAkey "${edname}.pkcs8.pem" -CA "${edname}.crt.pem" -force_pubkey "${pubfile}" -out "${certfile}" -CAcreateserial -days 365250 2>/dev/null
+      # cleanup intermediate files:
+      rm -rf "${edname}.csr"
+      rm -rf "${edname}.crt.srl"
+    else # create a normal self signed certificate:
+      openssl req -new -x509 -key "${privfile}" -out "${certfile}" -days 365250 -subj '/C=US/ST=California/L=San Francisco/O=jsonwebtoken.io/OU=jjwt' "${x509args[@]}"
+    fi
+
+  done # end name loop
+}
+main "$@"

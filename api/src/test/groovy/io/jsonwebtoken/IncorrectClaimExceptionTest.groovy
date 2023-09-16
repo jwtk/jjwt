@@ -34,9 +34,7 @@ class IncorrectClaimExceptionTest {
 
         replay header, claims
 
-        def ex = new IncorrectClaimException(header, claims, msg)
-        ex.setClaimName(claimName)
-        ex.setClaimValue(claimValue)
+        def ex = new IncorrectClaimException(header, claims, claimName, claimValue, msg)
 
         verify header, claims
 
@@ -59,9 +57,7 @@ class IncorrectClaimExceptionTest {
 
         replay header, claims
 
-        def ex = new IncorrectClaimException(header, claims, msg, cause)
-        ex.setClaimName(claimName)
-        ex.setClaimValue(claimValue)
+        def ex = new IncorrectClaimException(header, claims, claimName, claimValue, msg, cause)
 
         verify header, claims
 

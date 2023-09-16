@@ -16,39 +16,35 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
+import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Registry;
 
 import java.util.Map;
+import java.util.Set;
 
-public class DefaultJwsHeader extends DefaultHeader implements JwsHeader {
+public class DefaultJwsHeader extends DefaultProtectedHeader implements JwsHeader {
 
-    public DefaultJwsHeader() {
-        super();
-    }
+    // https://datatracker.ietf.org/doc/html/rfc7797#section-3 :
+    static final Parameter<Boolean> B64 = Parameters.builder(Boolean.class)
+            .setId("b64").setName("Base64url-Encode Payload").build();
 
-    public DefaultJwsHeader(Map<String, Object> map) {
-        super(map);
-    }
+    static final Registry<String, Parameter<?>> PARAMS = Parameters.registry(DefaultProtectedHeader.PARAMS, B64);
 
-    @Override
-    public String getAlgorithm() {
-        return getString(ALGORITHM);
-    }
-
-    @Override
-    public JwsHeader setAlgorithm(String alg) {
-        setValue(ALGORITHM, alg);
-        return this;
+    public DefaultJwsHeader(Map<String, ?> map) {
+        super(PARAMS, map);
     }
 
     @Override
-    public String getKeyId() {
-        return getString(KEY_ID);
+    public String getName() {
+        return "JWS header";
     }
 
     @Override
-    public JwsHeader setKeyId(String kid) {
-        setValue(KEY_ID, kid);
-        return this;
+    public boolean isPayloadEncoded() {
+        Set<String> crit = Collections.nullSafe(getCritical());
+        Boolean b64 = get(B64);
+        return b64 == null || b64 || !crit.contains(B64.getId());
     }
-
 }

@@ -34,9 +34,7 @@ class MissingClaimExceptionTest {
 
         replay header, claims
 
-        def ex = new MissingClaimException(header, claims, msg)
-        ex.setClaimName(claimName)
-        ex.setClaimValue(claimValue)
+        def ex = new MissingClaimException(header, claims, claimName, claimValue, msg)
 
         verify header, claims
 
@@ -59,9 +57,7 @@ class MissingClaimExceptionTest {
 
         replay header, claims
 
-        def ex = new MissingClaimException(header, claims, msg, cause)
-        ex.setClaimName(claimName)
-        ex.setClaimValue(claimValue)
+        def ex = new MissingClaimException(header, claims, claimName, claimValue, msg, cause)
 
         verify header, claims
 
