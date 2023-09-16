@@ -27,9 +27,8 @@ import static org.junit.Assert.*
  */
 class RFC7797Test {
 
-
     @Test
-    void testJwtDisabledEncoding() {
+    void testJwe() {
         try {
             Jwts.builder().content('hello').encryptWith(TestKeys.A128GCM, Jwts.ENC.A128GCM)
                     .encodePayload(false) // not allowed with JWE
@@ -42,7 +41,7 @@ class RFC7797Test {
     }
 
     @Test
-    void testUnprotectedJwtDisabledEncoding() {
+    void testUnprotectedJwt() {
         try {
             Jwts.builder().content('hello')
                     .encodePayload(false) // not allowed with JWT
@@ -55,7 +54,7 @@ class RFC7797Test {
     }
 
     @Test
-    void testJwsDisabledEncodingWithBytesPayload() {
+    void testBytesPayload() {
 
         def key = TestKeys.HS256
 
@@ -67,5 +66,21 @@ class RFC7797Test {
                 .build().parseContentJws(s, payload)
 
         assertArrayEquals payload, jws.getPayload()
+    }
+
+    @Test
+    void testStringPayload() {
+
+        def key = TestKeys.HS256
+
+        String payload = 'foo'
+        byte[] utf8 = Strings.utf8(payload)
+
+        String s = Jwts.builder().signWith(key).content(payload).encodePayload(false).compact()
+
+        def jws = Jwts.parser().verifyWith(key).critical(DefaultJwsHeader.B64.id)
+                .build().parseContentJws(s, utf8)
+
+        assertArrayEquals utf8, jws.getPayload()
     }
 }
