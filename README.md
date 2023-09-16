@@ -1,25 +1,28 @@
 [![Build Status](https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/github/jwtk/jjwt?branch=master)
-[![Gitter](https://badges.gitter.im/jwtk/jjwt.svg)](https://gitter.im/jwtk/jjwt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # Java JWT: JSON Web Token for Java and Android
 
-JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) on the JVM
-and Android.
+JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) and 
+JSON Web Keys (JWKs) on the JVM and Android.
 
-JJWT is a pure Java implementation based exclusively on the [JWT](https://tools.ietf.org/html/rfc7519), 
-[JWS](https://tools.ietf.org/html/rfc7515), [JWE](https://tools.ietf.org/html/rfc7516), 
-[JWA](https://tools.ietf.org/html/rfc7518), [JWK](https://tools.ietf.org/html/rfc7517), 
-[Octet JWK](https://www.rfc-editor.org/rfc/rfc8037),
-[JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html), and 
-[JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) RFC specifications and 
-open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
+JJWT is a pure Java implementation based exclusively on the
+[JOSE Working Group](https://datatracker.ietf.org/wg/jose/documents/) RFC specifications:
 
-The library was created by [Les Hazlewood](https://github.com/lhazlewood)
+* [RFC 7519: JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519)
+* [RFC 7515: JSON Web Signature (JWS)](https://tools.ietf.org/html/rfc7515)
+* [RFC 7516: JSON Web Encryption (JWE)](https://tools.ietf.org/html/rfc7516)
+* [RFC 7517: JSON Web Key (JWK)](https://tools.ietf.org/html/rfc7517)
+* [RFC 7518: JSON Web Algorithms (JWA)](https://tools.ietf.org/html/rfc7518)
+* [RFC 7638: JSON Web Key Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html)
+* [RFC 9278: JSON Web Key Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html)
+* [RFC 7797: JWS Unencoded Payload Option](https://www.rfc-editor.org/rfc/rfc7797.html)
+* [RFC 8037: Edwards Curve algorithms and JWKs](https://www.rfc-editor.org/rfc/rfc8037)
+
+It was created by [Les Hazlewood](https://github.com/lhazlewood)
 and is supported and maintained by a [community](https://github.com/jwtk/jjwt/graphs/contributors) of contributors.
 
-We've also added some convenience extensions that are not part of the specification, such as JWS compression and claim 
-enforcement.
+JJWT is open source under the terms of the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Table of Contents
 
@@ -157,7 +160,7 @@ enforcement.
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with over 1,400+ tests and enforced 100% test code coverage.  Every single method, statement 
+ * Stable implementation with over 1,500+ tests and enforced 100% test code coverage.  Every single method, statement 
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    
@@ -1816,6 +1819,162 @@ If you used JJWT to compress a JWS and you used a custom compression algorithm, 
 `JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
+
+<a name="jws-unencoded"></a>
+### Unencoded Payload Option
+
+In some cases, especially if a JWS payload is large, it could be desirable to _not_ Base64URL-encode the JWS payload,
+or even exclude the payload from the compact JWS string entirely.  The JWT RFC specifications provide support
+for these use cases via the 
+[JSON Web Signature (JWS) Unencoded Payload Option](https://www.rfc-editor.org/rfc/rfc7797.html) specification, 
+which JJWT supports.
+
+This option comes with both benefits and disadvantages:
+
+#### Benefits
+
+A JWS producer can still create a JWS string to use for payload integrity verification without having to either:
+
+1. Base64URL-encode the (potentially very large) payload, saving the time that could take.
+
+
+2. Include the payload in the compact JWS string at all. Omitting the payload from the JWS compact string
+   entirely produces smaller JWSs that can be more efficient to transfer.
+
+#### Disadvantages
+
+1. Your application, and not JJWT, incurs the responsibility to ensure the payload is not modified during transmission
+   so the recipient can verify the JWS signature. For example, by using a sufficiently strong TLS (https) cipher 
+   suite as well as any additional care before and after transmission, since 
+   [TLS does not guarantee end-to-end security](https://tozny.com/blog/end-to-end-encryption-vs-https/).
+
+
+2. If you choose to include the unencoded payload in the JWS compact string, your application
+   [MUST](https://www.rfc-editor.org/rfc/rfc7797.html#section-5.2) ensure that the payload does not contain a 
+   period (`.`) character anywhere in the payload.  The JWS recipient will experience parsing errors otherwise.
+
+
+Before attempting to use this option, one should be aware of the RFC's 
+[security considerations](https://www.rfc-editor.org/rfc/rfc7797.html#section-8) first.
+
+> **Note**
+>
+> **Protected JWS Only**
+>
+> The RFC specification defines the Unencoded Payload option for use only with JWSs. It may not be used with
+> with unprotected JWTs or encrypted JWEs.
+
+<a name="jws-unencoded-detached"></a>
+#### Detached Payload Example
+
+This example shows creating and parsing a compact JWS using an unencoded payload that is detached, i.e. where the 
+payload is not embedded in the compact JWS string at all.
+
+We need to do three things during creation:
+
+1. Specify the JWS signing key; it's a JWS and still needs to be signed.
+2. Specify the raw payload bytes via the `JwtBuilder`'s `content` method.
+3. Indicate that the payload should _not_ be Base64Url-encoded using the `JwtBuilder`'s `encodePayload(false)` method.
+ 
+```java
+// create a test key for this example:
+SecretKey testKey = Jwts.SIG.HS512.key().build();
+
+String message = "Hello World. It's a Beautiful Day!";
+byte[] content = message.getBytes(StandardCharsets.UTF_8);
+
+String jws = Jwts.builder().signWith(testKey) // #1
+        .content(content)                     // #2
+        .encodePayload(false)                 // #3
+        .compact();
+```
+
+To parse the resulting `jws` string, we need to do three things when creating the `JwtParser`:
+
+1. Specify the signature verification key.
+2. Indicate that we want to support Unencoded Payload Option JWSs by enabling the `b64` `crit` header parameter.
+3. Specify the externally-transmitted unencoded payload bytes, required for signature verification.
+
+```java
+Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
+        .critical("b64")                               // 2
+        .build()
+        .parseContentJws(jws, content);                // 3
+        
+assertArrayEquals(content, parsed.getPayload());
+```
+
+> **Note**
+>
+> **Disabled by Default**: Because of the aforementioned 
+> [security considerations](https://www.rfc-editor.org/rfc/rfc7797.html#section-8), Unencoded Payload Option
+> JWSs are rejected by the parser by default. Simply enabling the `b64` `crit`ical header as shown above (#2) enables
+> the feature, with the presumption that the application developer understands the security considerations when doing
+> so.
+
+<a name="jws-unencoded-nondetached"></a>
+#### Non-Detached Payload Example
+
+This example shows creating and parsing a compact JWS with what the RFC calls a 'non-detached' unencoded payload, i.e. 
+a raw string directly embedded as the payload in the compact JWS string.
+
+We need to do three things during creation:
+
+1. Specify the JWS signing key; it's a JWS and still needs to be signed.
+2. Specify the raw payload string via the `JwtBuilder`'s `content` method.  Per 
+   [the RFC](https://www.rfc-editor.org/rfc/rfc7797.html#section-5.2), the payload string **_MUST NOT contain any 
+   period (`.`) characters_**.
+3. Indicate that the payload should _not_ be Base64Url-encoded using the `JwtBuilder`'s `encodePayload(false)` method.
+
+```java
+// create a test key for this example:
+SecretKey testKey = Jwts.SIG.HS512.key().build();
+
+String claimsString = "{\"sub\":\"joe\",\"iss\":\"me\"}";
+
+String jws = Jwts.builder().signWith(testKey) // #1
+        .content(claimsString)                // #2
+        .encodePayload(false)                 // #3
+        .compact();
+```
+
+If you were to print the `jws` string, you'd see something like this:
+
+```
+eyJhbGciOiJIUzUxMiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19.{"sub":"joe","iss":"me"}.wkoxYEd//...etc...
+```
+
+See how the `claimsString` is embedded directly as the center `payload` token instead of a standard Base64URL value?
+This is why no period (`.`) characters can exist in the payload.  If they did, any standard JWT parser would see more
+than two periods total, which is required for parsing standard JWSs.
+
+
+To parse the resulting `jws` string, we need to do two things when creating the `JwtParser`:
+
+1. Specify the signature verification key.
+2. Indicate that we want to support Unencoded Payload Option JWSs by enabling the `b64` `crit` header parameter.
+
+```java
+Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
+        .critical("b64")                               // 2
+        .build()
+        .parseClaimsJws(jws);                          
+
+assert "joe".equals(parsed.getPayload().getSubject());
+assert "me".equals(parsed.getPayload().getIssuer());
+```
+
+Did you notice we used the `.parseClaimsJws(String)` method instead of `.parseClaimsJws(String, byte[])`? This is 
+because the non-detached payload is already present and JJWT has what it needs for signature verification.
+
+Even so, you could call `.parseClaimsJws(String, byte[])` if you wanted by using the string's UTF-8 bytes:
+
+```java
+parsed = Jwts.parser().verifyWith(testKey)
+        .critical("b64")
+        .build()
+        .parseClaimsJws(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
+```
 
 <a name="jwe"></a>
 ## Encrypted JWTs

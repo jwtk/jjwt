@@ -31,6 +31,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -203,6 +204,17 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public JwtParserBuilder clock(Clock clock) {
         Assert.notNull(clock, "Clock instance cannot be null.");
         this.clock = clock;
+        return this;
+    }
+
+    @Override
+    public JwtParserBuilder critical(String crit) {
+        if (Strings.hasText(crit)) {
+            Set<String> existing = Collections.nullSafe(this.critical);
+            Set<String> newSet = new LinkedHashSet<>(existing);
+            newSet.add(crit);
+            critical(newSet);
+        }
         return this;
     }
 

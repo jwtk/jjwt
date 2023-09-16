@@ -2,7 +2,7 @@
 
 ### JJWT_RELEASE_VERSION
 
-This is a big release! JJWT now fully supports Encrypted JSON Web Tokens (JWE) and JSON Web Keys (JWK)!  See the 
+This is a big release! JJWT now fully supports Encrypted JSON Web Tokens (JWE), JSON Web Keys (JWK) and more!  See the 
 sections below enumerating all new features as well as important notes on breaking changes or backwards-incompatible 
 changes made in preparation for the upcoming 1.0 release.
 
@@ -69,6 +69,17 @@ assert key.equals(parsedJwk.toKey());
 Many JJWT users won't need to use JWKs explicitly, but some JWA Key Management Algorithms (and lots of RFC test 
 vectors) utilize JWKs when transmitting JWEs.  As this was required by JWE, it is now implemented in full for 
 JWE use as well as general-purpose JWK support.
+
+#### JWK Thumbprint and JWK Thumbprint URI support
+
+The [JWK Thumbprint](https://www.rfc-editor.org/rfc/rfc7638.html) and 
+[JWK Thumbprint URI](https://www.rfc-editor.org/rfc/rfc9278.html) RFC specifications are now fully supported.  Please
+see the README.md file's corresponding named sections for both for full documentation and usage examples.
+
+#### JWS Unencoded Payload Option (`b64`) support
+
+The [JSON Web Signature (JWS) Unencoded Payload Option](https://www.rfc-editor.org/rfc/rfc7797.html) RFC specification
+is now fully supported.  Please see the README.md corresponding named section for documentation and usage examples.
 
 #### Better PKCS11 and Hardware Security Module (HSM) support
 

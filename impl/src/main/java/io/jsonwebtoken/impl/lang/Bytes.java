@@ -32,6 +32,10 @@ public final class Bytes {
     private Bytes() {
     }
 
+    public static byte[] nullSafe(byte[] bytes) {
+        return bytes != null ? bytes : Bytes.EMPTY;
+    }
+
     public static byte[] randomBits(int numBits) {
         return random(numBits / Byte.SIZE);
     }

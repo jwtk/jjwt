@@ -176,6 +176,29 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setPayload(String payload);
 
     /**
+     * Sets the JWT payload to be the specified string's UTF-8 bytes.
+     *
+     * <p><b>Content Type Recommendation</b></p>
+     *
+     * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use the string
+     * without additional metadata, it is strongly recommended to use the {@link #content(byte[], String)} method
+     * instead of this one.  That method ensures that a JWT recipient can inspect the {@code cty} header to know
+     * how to handle the content without ambiguity.</p>
+     *
+     * <p><b>Mutually Exclusive Claims and Content</b></p>
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods. Either {@code claims} or {@code content} method variants may be used, but not both. If you want the
+     * JWT payload to be JSON claims, use the {@link #claim(String, Object)} or {@link #claims()} methods instead.</p>
+     *
+     * @param content the content string to use for the JWT payload
+     * @return the builder for method chaining.
+     * @see #content(byte[], String)
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder content(String content);
+
+    /**
      * Sets the JWT payload to be the specified content byte array.
      *
      * <p><b>Content Type Recommendation</b></p>
@@ -240,7 +263,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param content the content byte array that will be the JWT payload.  Cannot be null or empty.
      * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
      * @return the builder for method chaining.
-     * @throws IllegalArgumentException if either {@code payload} or {@code cty} are null or empty.
+     * @throws IllegalArgumentException if either {@code content} or {@code cty} are null or empty.
      * @since JJWT_RELEASE_VERSION
      */
     JwtBuilder content(byte[] content, String cty) throws IllegalArgumentException;
@@ -836,6 +859,20 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since JJWT_RELEASE_VERSION
      */
     JwtBuilder encoder(Encoder<byte[], String> encoder);
+
+    /**
+     * Enables <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS)
+     * Unencoded Payload Option</a> if {@code false}, or standard JWT/JWS/JWE payload encoding otherwise.  The default
+     * value is {@code true} per standard RFC behavior rules.
+     *
+     * <p>This value may only be {@code false} for JWSs (signed JWTs).  It may not be used for standard
+     * (unprotected) JWTs or encrypted JWTs (JWEs).  The builder will throw an exception during {@link #compact()} if
+     * {@code false} and a JWS is not being created.</p>
+     *
+     * @param b64 whether to Base64URL-encode the JWS payload
+     * @return the builder for method chaining.
+     */
+    JwtBuilder encodePayload(boolean b64);
 
     /**
      * Performs Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert

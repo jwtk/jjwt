@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.all;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -48,6 +50,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
 
 import static io.jsonwebtoken.security.Jwks.builder;
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Test cases to ensure snippets in README.md work/compile as expected with the Java language (not Groovy):
@@ -55,6 +58,62 @@ import static io.jsonwebtoken.security.Jwks.builder;
  * @since JJWT_RELEASE_VERSION
  */
 public class JavaReadmeTest {
+
+    /**
+     * {@code README.md#jws-unencoded-detached}
+     */
+    @Test
+    public void testExampleDetachedUnencodedPayload() {
+        // create a test key for this example:
+        SecretKey testKey = Jwts.SIG.HS512.key().build();
+
+        String message = "Hello World. It's a Beautiful Day!";
+        byte[] content = message.getBytes(StandardCharsets.UTF_8);
+
+        String jws = Jwts.builder().signWith(testKey) // #1
+                .content(content)                     // #2
+                .encodePayload(false)            // #3
+                .compact();
+
+        Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
+                .critical("b64")                               // 2
+                .build()
+                .parseContentJws(jws, content);                // 3
+
+        assertArrayEquals(content, parsed.getPayload());
+    }
+
+    /**
+     * {@code README.md#jws-unencoded-nondetached}
+     */
+    @Test
+    public void testExampleNonDetachedUnencodedPayload() {
+        // create a test key for this example:
+        SecretKey testKey = Jwts.SIG.HS512.key().build();
+
+        String claimsString = "{\"sub\":\"joe\",\"iss\":\"me\"}";
+
+        String jws = Jwts.builder().signWith(testKey) // #1
+                .content(claimsString)                // #2
+                .encodePayload(false)            // #3
+                .compact();
+
+        Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
+                .critical("b64")                               // 2
+                .build()
+                .parseClaimsJws(jws);                          // 3
+
+        assert "joe".equals(parsed.getPayload().getSubject());
+        assert "me".equals(parsed.getPayload().getIssuer());
+
+        parsed = Jwts.parser().verifyWith(testKey)
+                .critical("b64")
+                .build()
+                .parseClaimsJws(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
+
+        assert "joe".equals(parsed.getPayload().getSubject());
+        assert "me".equals(parsed.getPayload().getIssuer());
+    }
 
     /**
      * {@code README.md#example-jws-hs}

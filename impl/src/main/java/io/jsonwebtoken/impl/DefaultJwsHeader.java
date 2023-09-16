@@ -17,13 +17,20 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
 
 import java.util.Map;
+import java.util.Set;
 
 public class DefaultJwsHeader extends DefaultProtectedHeader implements JwsHeader {
 
-    static final Registry<String, Parameter<?>> PARAMS = DefaultProtectedHeader.PARAMS; //same
+    // https://datatracker.ietf.org/doc/html/rfc7797#section-3 :
+    static final Parameter<Boolean> B64 = Parameters.builder(Boolean.class)
+            .setId("b64").setName("Base64url-Encode Payload").build();
+
+    static final Registry<String, Parameter<?>> PARAMS = Parameters.registry(DefaultProtectedHeader.PARAMS, B64);
 
     public DefaultJwsHeader(Map<String, ?> map) {
         super(PARAMS, map);
@@ -32,5 +39,12 @@ public class DefaultJwsHeader extends DefaultProtectedHeader implements JwsHeade
     @Override
     public String getName() {
         return "JWS header";
+    }
+
+    @Override
+    public boolean isPayloadEncoded() {
+        Set<String> crit = Collections.nullSafe(getCritical());
+        Boolean b64 = get(B64);
+        return b64 == null || b64 || !crit.contains(B64.getId());
     }
 }
