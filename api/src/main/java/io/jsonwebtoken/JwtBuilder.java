@@ -176,7 +176,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setPayload(String payload);
 
     /**
-     * Sets the JWT payload to be the specified string.
+     * Sets the JWT payload to be the specified string's UTF-8 bytes.
      *
      * <p><b>Content Type Recommendation</b></p>
      *

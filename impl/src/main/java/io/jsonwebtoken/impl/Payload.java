@@ -20,6 +20,8 @@ import io.jsonwebtoken.lang.Strings;
 
 class Payload {
 
+    static final Payload EMPTY = new Payload(null, null, null);
+
     private String string;
     private byte[] bytes;
     private String contentType;

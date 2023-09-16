@@ -51,6 +51,12 @@ class DefaultJwtParserBuilderTest {
     }
 
     @Test
+    void testCriticalEmtpy() {
+        builder.critical(' ') // shouldn't modify the set
+        assertTrue builder.@critical.isEmpty()
+    }
+
+    @Test
     void testSetProvider() {
         Provider provider = createMock(Provider)
         replay provider

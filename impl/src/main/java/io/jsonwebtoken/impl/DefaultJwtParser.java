@@ -144,6 +144,12 @@ public class DefaultJwtParser implements JwtParser {
             Jwts.SIG.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
             "per https://tools.ietf.org/html/rfc7518#section-3.6.";
 
+    private static final String B64_MISSING_PAYLOAD = "Unable to verify JWS signature: the parser has encountered an " +
+            "Unencoded Payload JWS with detached payload, but the detached payload value required for signature " +
+            "verification has not been provided. If you expect to receive and parse Unencoded Payload JWSs in your " +
+            "application, the JwtParser.parseContentJws(String, byte[]) or JwtParser.parseClaimsJws(String, byte[]) " +
+            "methods must be used for these kinds of JWSs. Header: %s";
+
     private static final String B64_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
             "'%s', but payload decompression for Unencoded JWSs (those with an " + DefaultJwsHeader.B64 +
             " header value of false) that rely on a SigningKeyResolver are disallowed " +
@@ -478,22 +484,20 @@ public class DefaultJwtParser implements JwtParser {
             payload = decode(tokenized.getPayload(), "payload");
         } else {
             // The JWT uses the b64 extension, and we already know the parser supports that extension at this point
-            // in the code execution path because of the ----- crit ----- assertions section above
+            // in the code execution path because of the ----- crit ----- assertions section above as well as the
+            // (JwsHeader).isPayloadEncoded() check
 
             if (Strings.hasText(payloadToken)) {
                 // we need to verify what was in the token, otherwise it'd be a security issue if we ignored it
-                // and assumed the (likely safe) 'unencodedPayload' value instead:
+                // and assumed the (likely safe) unencodedPayload value instead:
                 payload = Strings.utf8(payloadToken);
             } else {
-                //no payload token, so we need to ensure that they've configured the payload value:
-                //assert that the unencoded payload has been configured:
+                //no payload token (a detached payload), so we need to ensure that they've specified the payload value:
                 if (Bytes.isEmpty(unencodedPayload)) {
-                    String msg = "Encountered Unencoded JWS with an empty payload, but the " +
-                            "unencodedPayload value necessary for signature verification has not been provided. " +
-                            "Unable to verify JWS signature.";
+                    String msg = String.format(B64_MISSING_PAYLOAD, header);
                     throw new SignatureException(msg);
                 }
-                // otherwise, use the configured payload:
+                // otherwise, use the specified payload:
                 payload = unencodedPayload;
             }
         }
@@ -838,6 +842,7 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
             public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
@@ -848,6 +853,7 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {

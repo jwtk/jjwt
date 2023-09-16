@@ -103,8 +103,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private Key signatureVerificationKey;
     private Key decryptionKey;
 
-    private Payload unencodedPayload = new Payload(null, null, null);
-
     @Override
     public JwtParserBuilder enableUnsecured() {
         this.enableUnsecured = true;
@@ -396,16 +394,6 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
         // Invariants.  If these are ever violated, it's an error in this class implementation:
         Assert.stateNotNull(keyLocator, "Key locator should never be null.");
-
-        if (!unencodedPayload.isEmpty()) {
-            // An unencoded payload has been configured, 'b64' in the supported crit values is expected:
-            String id = DefaultJwsHeader.B64.getId();
-            if (!this.critical.contains(id)) {
-                Set<String> set = new LinkedHashSet<>(this.critical);
-                set.add(id);
-                this.critical = set;
-            }
-        }
 
         final DefaultClaims expClaims = (DefaultClaims) this.expectedClaims.build();
 

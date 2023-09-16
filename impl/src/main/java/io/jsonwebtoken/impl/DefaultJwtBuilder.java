@@ -82,7 +82,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private final DefaultBuilderHeader headerBuilder;
     private final DefaultBuilderClaims claimsBuilder;
 
-    private Payload payload = new Payload(null, null, null);
+    private Payload payload = Payload.EMPTY;
 
     private SecureDigestAlgorithm<Key, ?> sigAlg = Jwts.SIG.NONE;
     private Function<SecureRequest<byte[], Key>, byte[]> signFunction;
