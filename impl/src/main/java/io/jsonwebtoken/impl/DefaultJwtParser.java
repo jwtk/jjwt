@@ -658,42 +658,41 @@ public class DefaultJwtParser implements JwtParser {
             final Date now = this.clock.now();
             long nowTime = now.getTime();
 
-            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.4
-            //token MUST NOT be accepted on or after any specified exp time:
+            // https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4
+            // token MUST NOT be accepted on or after any specified exp time:
             Date exp = claims.getExpiration();
             if (exp != null) {
 
                 long maxTime = nowTime - this.allowedClockSkewMillis;
                 Date max = allowSkew ? new Date(maxTime) : now;
                 if (max.after(exp)) {
-                    String expVal = DateFormats.formatIso8601(exp, false);
-                    String nowVal = DateFormats.formatIso8601(now, false);
+                    String expVal = DateFormats.formatIso8601(exp, true);
+                    String nowVal = DateFormats.formatIso8601(now, true);
 
                     long differenceMillis = nowTime - exp.getTime();
 
-                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of " +
-                            differenceMillis + " milliseconds.  Allowed clock skew: " +
+                    String msg = "JWT expired " + differenceMillis + " milliseconds ago at " + expVal + ". " +
+                            "Current time: " + nowVal + ". Allowed clock skew: " +
                             this.allowedClockSkewMillis + " milliseconds.";
                     throw new ExpiredJwtException(header, claims, msg);
                 }
             }
 
-            //https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-30#section-4.1.5
-            //token MUST NOT be accepted before any specified nbf time:
+            // https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5
+            // token MUST NOT be accepted before any specified nbf time:
             Date nbf = claims.getNotBefore();
             if (nbf != null) {
 
                 long minTime = nowTime + this.allowedClockSkewMillis;
                 Date min = allowSkew ? new Date(minTime) : now;
                 if (min.before(nbf)) {
-                    String nbfVal = DateFormats.formatIso8601(nbf, false);
-                    String nowVal = DateFormats.formatIso8601(now, false);
+                    String nbfVal = DateFormats.formatIso8601(nbf, true);
+                    String nowVal = DateFormats.formatIso8601(now, true);
 
-                    long differenceMillis = nbf.getTime() - minTime;
+                    long differenceMillis = nbf.getTime() - nowTime;
 
-                    String msg = "JWT must not be accepted before " + nbfVal + ". Current time: " + nowVal +
-                            ", a difference of " +
-                            differenceMillis + " milliseconds.  Allowed clock skew: " +
+                    String msg = "JWT early by " + differenceMillis + " milliseconds before " + nbfVal +
+                            ". Current time: " + nowVal + ". Allowed clock skew: " +
                             this.allowedClockSkewMillis + " milliseconds.";
                     throw new PrematureJwtException(header, claims, msg);
                 }
