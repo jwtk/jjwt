@@ -671,11 +671,6 @@ public class DefaultJwtParser implements JwtParser {
 
                     long differenceMillis = nowTime - exp.getTime();
 
-                    /*
-                    String msg = "JWT expired at " + expVal + ". Current time: " + nowVal + ", a difference of " +
-                    differenceMillis + " milliseconds.  Allowed clock skew: " +
-                     */
-
                     String msg = "JWT expired " + differenceMillis + " milliseconds ago at " + expVal + ". " +
                             "Current time: " + nowVal + ". Allowed clock skew: " +
                             this.allowedClockSkewMillis + " milliseconds.";
