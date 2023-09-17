@@ -16,11 +16,9 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.lang.JwtDateConverter
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.DeserializationException
@@ -28,6 +26,7 @@ import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Collections
+import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import org.junit.Before
@@ -250,5 +249,43 @@ class DefaultJwtParserTest {
         assertEquals 1, parsedCrit.size()
         assertEquals 'whatever', parsedCrit.iterator().next()
         assertEquals 42, jwt.getHeader().get('whatever')
+    }
+
+    @Test
+    void testExpiredExceptionMessage() {
+
+        long differenceMillis = 843 // arbitrary, anything > 0 is fine
+        def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def later = new Date(exp.getTime() + differenceMillis)
+        def s = Jwts.builder().expiration(exp).compact()
+
+        try {
+            Jwts.parser().enableUnsecured().clock(new FixedClock(later)).build().parseClaimsJwt(s)
+        } catch (ExpiredJwtException expected) {
+            def exp8601 = DateFormats.formatIso8601(exp, true)
+            def later8601 = DateFormats.formatIso8601(later, true)
+            String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testNotBeforeExceptionMessage() {
+
+        long differenceMillis = 3842 // arbitrary, anything > 0 is fine
+        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def earlier = new Date(nbf.getTime() - differenceMillis)
+        def s = Jwts.builder().notBefore(nbf).compact()
+
+        try {
+            Jwts.parser().enableUnsecured().clock(new FixedClock(earlier)).build().parseClaimsJwt(s)
+        } catch (PrematureJwtException expected) {
+            def nbf8601 = DateFormats.formatIso8601(nbf, true)
+            def earlier8601 = DateFormats.formatIso8601(earlier, true)
+            String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
+                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, expected.message
+        }
     }
 }

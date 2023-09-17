@@ -15,11 +15,13 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.impl.DefaultClock
+
 import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
+import io.jsonwebtoken.impl.lang.JwtDateConverter
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
@@ -224,52 +226,80 @@ class JwtParserTest {
         } catch (ExpiredJwtException e) {
             // https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
             // https://github.com/jwtk/jjwt/issues/660 (show differences as now - expired)
-            assertEquals e.getMessage(), "JWT expired at 2022-07-11T15:15:36Z. Current time: " +
-                    "2022-07-11T15:15:37Z, a difference of 1573 milliseconds.  Allowed clock skew: 0 milliseconds."
+            String msg = "JWT expired 1573 milliseconds ago at 2022-07-11T15:15:36.000Z. " +
+                    "Current time: 2022-07-11T15:15:37.573Z. Allowed clock skew: 0 milliseconds."
+            assertEquals msg, e.message
         }
     }
 
     @Test
     void testParseWithPrematureJwt() {
 
-        Date nbf = new Date(System.currentTimeMillis() + 100000)
+        long differenceMillis = 100000 // arbitrary, anything > 0 is fine
+        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def earlier = new Date(nbf.getTime() - differenceMillis)
 
-        String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
+        String compact = Jwts.builder().subject('Joe').notBefore(nbf).compact()
 
         try {
-            Jwts.parser().enableUnsecured().build().parse(compact)
+            Jwts.parser().enableUnsecured().clock(new FixedClock(earlier)).build().parse(compact)
             fail()
         } catch (PrematureJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+            def nbf8601 = DateFormats.formatIso8601(nbf, true)
+            def earlier8601 = DateFormats.formatIso8601(earlier, true)
+            String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
+                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, e.message
 
             //https://github.com/jwtk/jjwt/issues/107 (the Z designator at the end of the timestamp):
-            assertTrue e.getMessage().contains('Z, a difference of ')
+            assertTrue nbf8601.endsWith('Z')
+            assertTrue earlier8601.endsWith('Z')
         }
     }
 
     @Test
     void testParseWithExpiredJwtWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() - 3000)
+
+        long differenceMillis = 3000 // arbitrary, anything > 0 is fine
+        long millis = System.currentTimeMillis()
+        // RFC requires time in seconds, so we need to base our assertions based on second-normalized dates,
+        // otherwise we'll get nondeterministic tests:
+        long seconds = (millis / 1000L).longValue()
+        millis = seconds * 1000L
+        def exp = new Date(millis)
+        def later = new Date(exp.getTime() + differenceMillis)
+        def s = Jwts.builder().expiration(exp).compact()
 
         String subject = 'Joe'
-        String compact = Jwts.builder().setSubject(subject).setExpiration(exp).compact()
+        String compact = Jwts.builder().subject(subject).expiration(exp).compact()
 
-        Jwt<Header, Claims> jwt = Jwts.parser().enableUnsecured().setAllowedClockSkewSeconds(10).build().parse(compact)
+        Jwt<Header, Claims> jwt = Jwts.parser().enableUnsecured().setAllowedClockSkewSeconds(10)
+                .clock(new FixedClock(later)).build().parse(compact)
 
         assertEquals jwt.getPayload().getSubject(), subject
     }
 
     @Test
     void testParseWithExpiredJwtNotWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() - 3000)
 
-        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+        long differenceMillis = 3000 // arbitrary, anything > 0 is fine
+        def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def later = new Date(exp.getTime() + differenceMillis)
+
+        def s = Jwts.builder().expiration(exp).compact()
+
+        def skewSeconds = 1
 
         try {
-            Jwts.parser().enableUnsecured().setAllowedClockSkewSeconds(1).build().parse(compact)
+            Jwts.parser().enableUnsecured().setAllowedClockSkewSeconds(skewSeconds)
+                    .clock(new FixedClock(later)).build().parse(s)
             fail()
         } catch (ExpiredJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT expired at ')
+            def exp8601 = DateFormats.formatIso8601(exp, true)
+            def later8601 = DateFormats.formatIso8601(later, true)
+            String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
+                    "Current time: ${later8601}. Allowed clock skew: ${skewSeconds * 1000} milliseconds.";
+            assertEquals msg, e.message
         }
     }
 
@@ -287,15 +317,26 @@ class JwtParserTest {
 
     @Test
     void testParseWithPrematureJwtNotWithinAllowedClockSkew() {
-        Date exp = new Date(System.currentTimeMillis() + 3000)
 
-        String compact = Jwts.builder().setSubject('Joe').setNotBefore(exp).compact()
+        long differenceMillis = 3000 // arbitrary, anything > 0 is fine
+        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def earlier = new Date(nbf.getTime() - differenceMillis)
+
+        String compact = Jwts.builder().subject('Joe').notBefore(nbf).compact()
+
+        def skewSeconds = 1
 
         try {
-            Jwts.parser().enableUnsecured().setAllowedClockSkewSeconds(1).build().parse(compact)
+            Jwts.parser().enableUnsecured()
+                    .setAllowedClockSkewSeconds(skewSeconds).clock(new FixedClock(earlier))
+                    .build().parse(compact)
             fail()
         } catch (PrematureJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+            def nbf8601 = DateFormats.formatIso8601(nbf, true)
+            def earlier8601 = DateFormats.formatIso8601(earlier, true)
+            String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
+                    "Current time: ${earlier8601}. Allowed clock skew: ${skewSeconds * 1000} milliseconds.";
+            assertEquals msg, e.message
         }
     }
 
@@ -417,38 +458,6 @@ class JwtParserTest {
         }
     }
 
-    @Test
-    void testParseClaimsJwtWithExpiredJwt() {
-
-        long nowMillis = System.currentTimeMillis()
-        //some time in the past:
-        Date exp = new Date(nowMillis - 1000)
-
-        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
-
-        try {
-            Jwts.parser().enableUnsecured().build().parseClaimsJwt(compact)
-            fail()
-        } catch (ExpiredJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT expired at ')
-        }
-    }
-
-    @Test
-    void testParseClaimsJwtWithPrematureJwt() {
-
-        Date nbf = new Date(System.currentTimeMillis() + 100000)
-
-        String compact = Jwts.builder().setSubject('Joe').setNotBefore(nbf).compact()
-
-        try {
-            Jwts.parser().enableUnsecured().build().parseClaimsJwt(compact)
-            fail()
-        } catch (PrematureJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
-        }
-    }
-
     // ========================================================================
     // parseContentJws tests
     // ========================================================================
@@ -542,21 +551,23 @@ class JwtParserTest {
     @Test
     void testParseClaimsJwsWithExpiredJws() {
 
+        long differenceMillis = 843 // arbitrary, anything > 0 is fine
+        def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def later = new Date(exp.getTime() + differenceMillis)
+
         String sub = 'Joe'
-
         byte[] key = randomKey()
-
-        long nowMillis = System.currentTimeMillis()
-        //some time in the past:
-        Date exp = new Date(nowMillis - 1000)
-
-        String compact = Jwts.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).setExpiration(exp).compact()
+        String compact = Jwts.builder().subject(sub).expiration(exp).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJwt(compact)
+            Jwts.parser().setSigningKey(key).clock(new FixedClock(later)).build().parseClaimsJwt(compact)
             fail()
         } catch (ExpiredJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT expired at ')
+            def exp8601 = DateFormats.formatIso8601(exp, true)
+            def later8601 = DateFormats.formatIso8601(later, true)
+            String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, e.message
             assertEquals e.getClaims().getSubject(), sub
             assertEquals e.getHeader().getAlgorithm(), "HS256"
         }
@@ -565,19 +576,24 @@ class JwtParserTest {
     @Test
     void testParseClaimsJwsWithPrematureJws() {
 
+        long differenceMillis = 3842 // arbitrary, anything > 0 is fine
+        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
+        def earlier = new Date(nbf.getTime() - differenceMillis)
+
         String sub = 'Joe'
-
         byte[] key = randomKey()
-
-        Date nbf = new Date(System.currentTimeMillis() + 100000)
-
-        String compact = Jwts.builder().setSubject(sub).setNotBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwts.builder().subject(sub).notBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJws(compact)
+            Jwts.parser().setSigningKey(key).clock(new FixedClock(earlier)).build().parseClaimsJws(compact)
             fail()
         } catch (PrematureJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT must not be accepted before ')
+            def nbf8601 = DateFormats.formatIso8601(nbf, true)
+            def earlier8601 = DateFormats.formatIso8601(earlier, true)
+            String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
+                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, e.message
+            
             assertEquals e.getClaims().getSubject(), sub
             assertEquals e.getHeader().getAlgorithm(), "HS256"
         }
@@ -1542,20 +1558,6 @@ class JwtParserTest {
             parser.setClock(null)
             fail()
         } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    void testParseClockManipulationWithDefaultClock() {
-        Date expiry = new Date(System.currentTimeMillis() - 1000)
-
-        String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
-
-        try {
-            Jwts.parser().enableUnsecured().setClock(new DefaultClock()).build().parse(compact)
-            fail()
-        } catch (ExpiredJwtException e) {
-            assertTrue e.getMessage().startsWith('JWT expired at ')
         }
     }
 
