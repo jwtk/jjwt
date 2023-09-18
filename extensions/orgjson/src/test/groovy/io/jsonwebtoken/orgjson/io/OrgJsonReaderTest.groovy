@@ -26,18 +26,19 @@ import static org.junit.Assert.*
 
 class OrgJsonReaderTest {
 
-    static def bytesReader(byte[] bytes) {
+    static InputStreamReader bytesReader(byte[] bytes) {
         return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8)
     }
 
     private Reader reader
 
-    private def read(byte[] data) {
-        return reader.read(bytesReader(data))
+    private Object fromBytes(byte[] data) {
+        InputStreamReader r = bytesReader(data)
+        return reader.read(r)
     }
 
-    private def read(String s) {
-        return read(Strings.utf8(s))
+    private Object read(String s) {
+        return fromBytes(Strings.utf8(s))
     }
 
     @Before
@@ -58,7 +59,7 @@ class OrgJsonReaderTest {
 
     @Test(expected = IOException)
     void testEmptyByteArray() {
-        read(new byte[0])
+        fromBytes(new byte[0])
     }
 
     @Test(expected = IOException)
