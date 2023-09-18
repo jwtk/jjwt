@@ -21,7 +21,9 @@ package io.jsonwebtoken.io;
  *
  * @param <T> The type of object to serialize.
  * @since 0.10.0
+ * @deprecated since JJWT_RELEASE_VERSION in favor of {@link io.jsonwebtoken.io.Writer}
  */
+@Deprecated
 public interface Serializer<T> {
 
     /**
@@ -30,7 +32,8 @@ public interface Serializer<T> {
      * @param t the object to serialize
      * @return the serialized byte array representing the specified object.
      * @throws SerializationException if there is a problem converting the object to a byte array.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Writer#write(java.io.Writer, Object)}
      */
+    @Deprecated
     byte[] serialize(T t) throws SerializationException;
-
 }

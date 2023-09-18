@@ -289,7 +289,7 @@ class DefaultJwtBuilderTest {
             b.setPayload('foo').compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Unable to serialize header to JSON. Cause: foo', expected.getMessage()
+            assertEquals 'Cannot serialize header to JSON. Cause: foo', expected.getMessage()
         }
     }
 
@@ -309,7 +309,7 @@ class DefaultJwtBuilderTest {
             b.compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Unable to serialize claims to JSON. Cause: dummy text', expected.message
+            assertEquals 'Cannot serialize claims to JSON. Cause: dummy text', expected.message
         }
     }
 
@@ -476,15 +476,16 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSerializeToJsonWithCustomSerializer() {
+        boolean invoked = false
         def serializer = new Serializer() {
             @Override
             byte[] serialize(Object o) throws SerializationException {
+                invoked = true
                 return objectMapper.writeValueAsBytes(o)
             }
         }
 
         def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
-        assertSame serializer, b.serializer
 
         def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
@@ -492,6 +493,7 @@ class DefaultJwtBuilderTest {
                 .claim('foo', 'bar')
                 .compact()
 
+        assertTrue invoked // ensure we call our custom one
         assertEquals 'bar', Jwts.parser().setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 

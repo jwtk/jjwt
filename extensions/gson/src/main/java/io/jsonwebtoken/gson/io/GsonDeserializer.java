@@ -18,44 +18,44 @@ package io.jsonwebtoken.gson.io;
 import com.google.gson.Gson;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.lang.Objects;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
-public class GsonDeserializer<T> implements Deserializer<T> {
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated
+public class GsonDeserializer<T> extends GsonReader<T> implements Deserializer<T> {
 
-    private final Class<T> returnType;
-    private final Gson gson;
-
-    @SuppressWarnings("unused") //used via reflection by RuntimeClasspathDeserializerLocator
     public GsonDeserializer() {
-        this(GsonSerializer.DEFAULT_GSON);
+        super();
     }
 
-    @SuppressWarnings({"unchecked", "WeakerAccess", "unused"}) // for end-users providing a custom gson
     public GsonDeserializer(Gson gson) {
-        this(gson, (Class<T>) Object.class);
+        super(gson);
     }
 
-    private GsonDeserializer(Gson gson, Class<T> returnType) {
-        Assert.notNull(gson, "gson cannot be null.");
-        Assert.notNull(returnType, "Return type cannot be null.");
-        this.gson = gson;
-        this.returnType = returnType;
-    }
-
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T deserialize(byte[] bytes) throws DeserializationException {
         try {
             return readValue(bytes);
-        } catch (IOException e) {
-            String msg = "Unable to deserialize bytes into a " + returnType.getName() + " instance: " + e.getMessage();
-            throw new DeserializationException(msg, e);
+        } catch (Throwable t) {
+            String msg = "Unable to deserialize JSON: " + t.getMessage();
+            throw new DeserializationException(msg, t);
         }
     }
 
+    @Deprecated
     protected T readValue(byte[] bytes) throws IOException {
-        return gson.fromJson(new String(bytes, Strings.UTF_8), returnType);
+        Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes));
+        try {
+            return read(reader);
+        } finally {
+            Objects.nullSafeClose(reader);
+        }
     }
 }

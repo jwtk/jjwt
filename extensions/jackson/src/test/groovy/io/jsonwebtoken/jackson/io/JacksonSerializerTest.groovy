@@ -20,13 +20,20 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
+import org.junit.Before
 import org.junit.Test
 
-import static org.easymock.EasyMock.*
 import static org.hamcrest.CoreMatchers.instanceOf
 import static org.junit.Assert.*
 
 class JacksonSerializerTest {
+
+    private JacksonSerializer serializer
+
+    @Before
+    void setUp() {
+         serializer = new JacksonSerializer()
+    }
 
     @Test
     void loadService() {
@@ -36,64 +43,19 @@ class JacksonSerializerTest {
 
     @Test
     void testDefaultConstructor() {
-        def serializer = new JacksonSerializer()
-        assertNotNull serializer.objectMapper
+        assertSame JacksonWriter.DEFAULT_OBJECT_MAPPER,  serializer.objectMapper
     }
 
     @Test
     void testObjectMapperConstructor() {
-        def customOM = new ObjectMapper()
-        def serializer = new JacksonSerializer<>(customOM)
+        ObjectMapper customOM = new ObjectMapper()
+        def serializer = new JacksonSerializer(customOM)
         assertSame customOM, serializer.objectMapper
     }
 
     @Test(expected = IllegalArgumentException)
     void testObjectMapperConstructorWithNullArgument() {
         new JacksonSerializer<>(null)
-    }
-
-    @Test
-    void testObjectMapperConstructorAutoRegistersModule() {
-        def om = createMock(ObjectMapper)
-        expect(om.registerModule(same(JacksonSerializer.MODULE))).andReturn(om)
-        replay om
-        def serializer = new JacksonSerializer<>(om)
-        verify om
-    }
-
-    @Test
-    void testByte() {
-        byte[] expected = "120".getBytes(Strings.UTF_8) //ascii("x") = 120
-        byte[] bytes = "x".getBytes(Strings.UTF_8)
-        byte[] result = new JacksonSerializer().serialize(bytes[0]) //single byte
-        assertTrue Arrays.equals(expected, result)
-    }
-
-    @Test
-    void testByteArray() { //expect Base64 string by default:
-        byte[] bytes = "hi".getBytes(Strings.UTF_8)
-        String expected = '"aGk="' as String //base64(hi) --> aGk=
-        byte[] result = new JacksonSerializer().serialize(bytes)
-        assertEquals expected, new String(result, Strings.UTF_8)
-    }
-
-    @Test
-    void testEmptyByteArray() { //expect Base64 string by default:
-        byte[] bytes = new byte[0]
-        byte[] result = new JacksonSerializer().serialize(bytes)
-        assertEquals '""', new String(result, Strings.UTF_8)
-    }
-
-    @Test
-    void testChar() { //expect Base64 string by default:
-        byte[] result = new JacksonSerializer().serialize('h' as char)
-        assertEquals "\"h\"", new String(result, Strings.UTF_8)
-    }
-
-    @Test
-    void testCharArray() { //expect Base64 string by default:
-        byte[] result = new JacksonSerializer().serialize("hi".toCharArray())
-        assertEquals "\"hi\"", new String(result, Strings.UTF_8)
     }
 
     @Test
@@ -106,27 +68,19 @@ class JacksonSerializerTest {
     @Test
     void testSerializeFailsWithJsonProcessingException() {
 
-        def ex = createMock(JsonProcessingException)
-
-        expect(ex.getMessage()).andReturn('foo')
-
+        def ex = new IOException('foo')
         def serializer = new JacksonSerializer() {
             @Override
-            protected byte[] writeValueAsBytes(Object o) throws JsonProcessingException {
+            protected void writeValue(Object o, Writer writer) throws IOException {
                 throw ex
             }
         }
-
-        replay ex
-
         try {
             serializer.serialize([hello: 'world'])
             fail()
         } catch (SerializationException se) {
-            assertEquals 'Unable to serialize object: foo', se.getMessage()
-            assertSame ex, se.getCause()
+            assertEquals 'Unable to serialize object: Unable to write value as bytes: foo', se.getMessage()
+            assertTrue se.cause instanceof JsonProcessingException
         }
-
-        verify ex
     }
 }

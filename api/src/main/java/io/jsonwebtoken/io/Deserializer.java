@@ -20,7 +20,9 @@ package io.jsonwebtoken.io;
  *
  * @param <T> the type of object to be returned as a result of deserialization.
  * @since 0.10.0
+ * @deprecated since JJWT_RELEASE_VERSION in favor of {@link io.jsonwebtoken.io.Reader}
  */
+@Deprecated
 public interface Deserializer<T> {
 
     /**
@@ -28,7 +30,9 @@ public interface Deserializer<T> {
      *
      * @param bytes the formatted data byte array to convert
      * @return the reconstituted Java object
-     * @throws DeserializationException if there is a problem converting the byte array to to an object.
+     * @throws DeserializationException if there is a problem converting the byte array to an object.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Reader#read(java.io.Reader)}
      */
+    @Deprecated
     T deserialize(byte[] bytes) throws DeserializationException;
 }

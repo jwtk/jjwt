@@ -15,10 +15,9 @@
  */
 package io.jsonwebtoken.jackson.io
 
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.lang.Supplier
 import org.junit.Test
-
-import java.nio.charset.StandardCharsets
 
 import static org.junit.Assert.assertEquals
 
@@ -33,7 +32,18 @@ class JacksonSupplierSerializerTest {
                 return null
             }
         }
-        byte[] bytes = serializer.serialize(supplier)
-        assertEquals 'null', new String(bytes, StandardCharsets.UTF_8)
+        assertEquals 'null', Strings.utf8(serializer.serialize(supplier))
+    }
+
+    @Test
+    void testSupplierStringValue() {
+        def serializer = new JacksonSerializer()
+        def supplier = new Supplier() {
+            @Override
+            Object get() {
+                return 'hello'
+            }
+        }
+        assertEquals '"hello"', Strings.utf8(serializer.serialize(supplier))
     }
 }

@@ -13,159 +13,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
+import org.junit.Before
 import org.junit.Test
 
-import static org.hamcrest.CoreMatchers.instanceOf
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.fail
 
 class OrgJsonDeserializerTest {
+
+    private OrgJsonDeserializer deserializer
+
+    @Before
+    void setUp() {
+        deserializer = new OrgJsonDeserializer()
+    }
 
     @Test
     void loadService() {
         def deserializer = ServiceLoader.load(Deserializer).iterator().next()
-        assertThat(deserializer, instanceOf(OrgJsonDeserializer))
+        assert deserializer instanceof OrgJsonDeserializer
     }
 
-    @Test(expected=IllegalArgumentException)
-    void testNullArgument() {
-        def d = new OrgJsonDeserializer()
-        d.deserialize(null)
+    @Test
+    void deserialize() {
+        def m = [hello: 42]
+        assertEquals m, deserializer.deserialize(Strings.utf8('{"hello":42}'))
     }
 
     @Test(expected = DeserializationException)
-    void testEmptyByteArray() {
-        def d = new OrgJsonDeserializer()
-        d.deserialize(new byte[0])
+    void deserializeNull() {
+        deserializer.deserialize(null)
     }
 
     @Test(expected = DeserializationException)
-    void testInvalidJson() {
-        def d = new OrgJsonDeserializer()
-        d.deserialize('"'.getBytes(Strings.UTF_8))
+    void deserializeEmpty() {
+        deserializer.deserialize(new byte[0])
     }
 
     @Test
-    void testLiteralNull() {
-        def d = new OrgJsonDeserializer();
-        def b = 'null'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assertNull value
+    void throwableConvertsToDeserializationException() {
+
+        def t = new Throwable("foo")
+
+        deserializer = new OrgJsonDeserializer() {
+            @Override
+            Object read(Reader reader) throws IOException {
+                throw t
+            }
+        }
+
+        try {
+            deserializer.deserialize(Strings.utf8('whatever'))
+            fail()
+        } catch (DeserializationException expected) {
+            String msg = 'Unable to deserialize JSON bytes: foo'
+            assertEquals msg, expected.message
+        }
     }
 
-    @Test
-    void testLiteralTrue() {
-        def d = new OrgJsonDeserializer();
-        def b = 'true'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assertEquals Boolean.TRUE, value
-    }
-
-    @Test
-    void testLiteralFalse() {
-        def d = new OrgJsonDeserializer();
-        def b = 'false'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assertEquals Boolean.FALSE, value
-    }
-
-    @Test
-    void testLiteralInteger() {
-        def d = new OrgJsonDeserializer();
-        def b = '1'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof Integer
-        assertEquals 1 as Integer, value
-    }
-
-    @Test
-    void testLiteralDecimal() {
-        def d = new OrgJsonDeserializer();
-        def b = '3.14159'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof BigDecimal
-        assertEquals 3.14159 as Double, value, 0d
-    }
-
-    @Test
-    void testEmptyArray() {
-        def d = new OrgJsonDeserializer();
-        def b = '[]'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof List
-        assertEquals 0, value.size()
-    }
-
-    @Test
-    void testSimpleArray() {
-        def d = new OrgJsonDeserializer();
-        def b = '[1, 2]'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof List
-        def expected = [1, 2]
-        assertEquals expected, value
-    }
-
-    @Test
-    void testArrayWithNullElements() {
-        def d = new OrgJsonDeserializer();
-        def b = '[1, null, 3]'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof List
-        def expected = [1, null, 3]
-        assertEquals expected, value
-    }
-
-    @Test
-    void testEmptyObject() {
-        def d = new OrgJsonDeserializer();
-        def b = '{}'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof Map
-        assertEquals 0, value.size()
-    }
-
-    @Test
-    void testSimpleObject() {
-        def d = new OrgJsonDeserializer();
-        def b = '{"hello": "世界"}'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof Map
-        def expected = [hello: '世界']
-        assertEquals expected, value
-    }
-
-    @Test
-    void testObjectWithKeyHavingNullValue() {
-        def d = new OrgJsonDeserializer();
-        def b = '{"hello": "世界", "test": null}'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof Map
-        def expected = [hello: '世界', test: null]
-        assertEquals expected, value
-    }
-
-    @Test
-    void testObjectWithKeyHavingArrayValue() {
-        def d = new OrgJsonDeserializer();
-        def b = '{"hello": "世界", "test": [1, 2]}'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof Map
-        def expected = [hello: '世界', test: [1, 2]]
-        assertEquals expected, value
-    }
-
-    @Test
-    void testObjectWithKeyHavingObjectValue() {
-        def d = new OrgJsonDeserializer();
-        def b = '{"hello": "世界", "test": {"foo": "bar"}}'.getBytes(Strings.UTF_8)
-        def value = d.deserialize(b)
-        assert value instanceof Map
-        def expected = [hello: '世界', test: [foo: 'bar']]
-        assertEquals expected, value
-    }
 }

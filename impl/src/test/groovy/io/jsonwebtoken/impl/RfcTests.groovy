@@ -15,17 +15,17 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.jackson.io.JacksonDeserializer
 
 import java.nio.charset.StandardCharsets
 
 class RfcTests {
 
-    static final Deserializer<Map<String, ?>> JSON_DESERIALIZER = new JacksonDeserializer<>()
+    static final Deserializer<Map<String, ?>> JSON_DESERIALIZER = Services.loadFirst(Deserializer)
 
     static String encode(byte[] b) {
         return Encoders.BASE64URL.encode(b)

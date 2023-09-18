@@ -15,34 +15,34 @@
  */
 package io.jsonwebtoken.jackson.io;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Objects;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Collections;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
  * Deserializer using a Jackson {@link ObjectMapper}.
  *
  * @since 0.10.0
+ * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JacksonReader}
  */
-public class JacksonDeserializer<T> implements Deserializer<T> {
-
-    private final Class<T> returnType;
-    private final ObjectMapper objectMapper;
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated
+public class JacksonDeserializer<T> extends JacksonReader<T> implements Deserializer<T> {
 
     /**
      * Constructor using JJWT's default {@link ObjectMapper} singleton for deserialization.
      */
     public JacksonDeserializer() {
-        this(JacksonSerializer.DEFAULT_OBJECT_MAPPER);
+        super();
     }
 
     /**
@@ -71,14 +71,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
      */
     public JacksonDeserializer(Map<String, Class<?>> claimTypeMap) {
-        // DO NOT reuse JacksonSerializer.DEFAULT_OBJECT_MAPPER as this could result in sharing the custom deserializer
-        // between instances
-        this(new ObjectMapper());
-        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
-        // register a new Deserializer
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
-        objectMapper.registerModule(module);
+        super(claimTypeMap);
     }
 
     /**
@@ -86,24 +79,17 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
      *
      * @param objectMapper the ObjectMapper to use for deserialization.
      */
-    @SuppressWarnings({"unchecked", "WeakerAccess", "unused"}) // for end-users providing a custom ObjectMapper
     public JacksonDeserializer(ObjectMapper objectMapper) {
-        this(objectMapper, (Class<T>) Object.class);
+        super(objectMapper);
     }
 
-    private JacksonDeserializer(ObjectMapper objectMapper, Class<T> returnType) {
-        Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
-        Assert.notNull(returnType, "Return type cannot be null.");
-        this.objectMapper = objectMapper;
-        this.returnType = returnType;
-    }
-
+    @SuppressWarnings("deprecation")
     @Override
     public T deserialize(byte[] bytes) throws DeserializationException {
         try {
             return readValue(bytes);
         } catch (IOException e) {
-            String msg = "Unable to deserialize bytes into a " + returnType.getName() + " instance: " + e.getMessage();
+            String msg = "Unable to deserialize JSON bytes: " + e.getMessage();
             throw new DeserializationException(msg, e);
         }
     }
@@ -116,32 +102,12 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
      * @throws IOException if there is a problem during reading or instance creation
      */
     protected T readValue(byte[] bytes) throws IOException {
-        return objectMapper.readValue(bytes, returnType);
-    }
-
-    /**
-     * A Jackson {@link com.fasterxml.jackson.databind.JsonDeserializer JsonDeserializer}, that will convert claim
-     * values to types based on {@code claimTypeMap}.
-     */
-    private static class MappedTypeDeserializer extends UntypedObjectDeserializer {
-
-        private final Map<String, Class<?>> claimTypeMap;
-
-        private MappedTypeDeserializer(Map<String, Class<?>> claimTypeMap) {
-            super(null, null);
-            this.claimTypeMap = claimTypeMap;
-        }
-
-        @Override
-        public Object deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            // check if the current claim key is mapped, if so traverse it's value
-            String name = parser.currentName();
-            if (claimTypeMap != null && name != null && claimTypeMap.containsKey(name)) {
-                Class<?> type = claimTypeMap.get(name);
-                return parser.readValueAsTree().traverse(parser.getCodec()).readValueAs(type);
-            }
-            // otherwise default to super
-            return super.deserialize(parser, context);
+        Assert.notNull(bytes, "byte array argument cannot be null.");
+        Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
+        try {
+            return read(reader);
+        } finally {
+            Objects.nullSafeClose(reader);
         }
     }
 }

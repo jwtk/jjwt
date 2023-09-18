@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * A {@link Deserializer} implementation that wraps another Deserializer implementation to add common JWT related
  * error handling.
+ *
  * @param <T> type of object to deserialize.
  * @since 0.11.3
  */

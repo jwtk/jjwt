@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,76 +13,80 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.jackson.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.io.IOException
+import io.jsonwebtoken.io.Reader
 import io.jsonwebtoken.jackson.io.stubs.CustomBean
 import io.jsonwebtoken.lang.Maps
 import io.jsonwebtoken.lang.Strings
 import org.junit.Before
 import org.junit.Test
 
-import static org.hamcrest.CoreMatchers.instanceOf
+import java.nio.charset.StandardCharsets
+
 import static org.junit.Assert.*
 
-class JacksonDeserializerTest {
+class JacksonReaderTest {
 
-    private JacksonDeserializer deserializer
+    static def bytesReader(byte[] bytes) {
+        return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8)
+    }
+
+    static def bytesReader(String s) {
+        return bytesReader(Strings.utf8(s))
+    }
+
+    private static String base64(String input) {
+        return Encoders.BASE64.encode(input.getBytes('UTF-8'))
+    }
+
+    private JacksonReader reader
 
     @Before
     void setUp() {
-        deserializer = new JacksonDeserializer()
+        reader = new JacksonReader()
     }
 
     @Test
     void loadService() {
-        def deserializer = ServiceLoader.load(Deserializer).iterator().next()
-        assertThat(deserializer, instanceOf(JacksonDeserializer))
+        def reader = ServiceLoader.load(Reader).iterator().next()
+        assertTrue reader instanceof JacksonReader
     }
 
     @Test
     void testDefaultConstructor() {
-        def fields = deserializer.getClass().superclass.declaredFields as List
-        def field = fields.find { it.type == ObjectMapper }
-        field.accessible = true
-        ObjectMapper found = field.get(deserializer) as ObjectMapper
-        assertSame JacksonWriter.DEFAULT_OBJECT_MAPPER, found
+        assertSame JacksonWriter.DEFAULT_OBJECT_MAPPER, reader.objectMapper
     }
 
     @Test
     void testObjectMapperConstructor() {
         def customOM = new ObjectMapper()
-        deserializer = new JacksonDeserializer(customOM)
-        def fields = deserializer.getClass().superclass.declaredFields as List
-        def field = fields.find { it.type == ObjectMapper }
-        field.accessible = true
-        ObjectMapper found = field.get(deserializer) as ObjectMapper
-        assertSame customOM, found
+        reader = new JacksonReader(customOM)
+        assertSame customOM, reader.objectMapper
     }
 
     @Test(expected = IllegalArgumentException)
     void testObjectMapperConstructorWithNullArgument() {
-        new JacksonDeserializer<>((ObjectMapper) null)
+        new JacksonReader((ObjectMapper) null)
     }
 
     @Test
-    void testDeserialize() {
-        byte[] serialized = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
+    void testRead() {
+        byte[] data = Strings.utf8('{"hello":"世界"}')
         def expected = [hello: '世界']
-        def result = new JacksonDeserializer().deserialize(serialized)
+        def result = reader.read(bytesReader(data))
         assertEquals expected, result
     }
 
     @Test
-    void testDeserializeWithCustomObject() {
+    void testReadWithCustomObject() {
 
         long currentTime = System.currentTimeMillis()
 
-        byte[] serialized = Strings.utf8("""{
+        byte[] jsonBytes = Strings.utf8("""{
                 "oneKey":"oneValue", 
                 "custom": {
                     "stringValue": "s-value",
@@ -124,7 +128,7 @@ class JacksonDeserializerTest {
                 )
 
         def expected = [oneKey: "oneValue", custom: expectedCustomBean]
-        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build()).deserialize(serialized)
+        def result = new JacksonReader(Maps.of("custom", CustomBean).build()).read(bytesReader(jsonBytes))
         assertEquals expected, result
     }
 
@@ -132,7 +136,7 @@ class JacksonDeserializerTest {
      * For: https://github.com/jwtk/jjwt/issues/564
      */
     @Test
-    void testMappedTypeDeserializerWithMapNullCheck() {
+    void testMappedTypeReaderWithMapNullCheck() {
 
         // mimic map implementations that do NOT allow for null keys, or containsKey(null)
         Map typeMap = new HashMap() {
@@ -158,38 +162,34 @@ class JacksonDeserializerTest {
 
         typeMap.put("custom", CustomBean)
 
-        def deserializer = new JacksonDeserializer(typeMap)
-        def result = deserializer.deserialize('{"alg":"HS256"}'.getBytes("UTF-8"))
+        def jr = new JacksonReader(typeMap)
+        String json = '{"alg":"HS256"}'
+        def result = jr.read(bytesReader(json))
         assertEquals(["alg": "HS256"], result)
     }
 
     @Test(expected = IllegalArgumentException)
     void testNullClaimTypeMap() {
-        new JacksonDeserializer((Map) null)
+        new JacksonReader((Map) null)
     }
 
     @Test
-    void testDeserializeFailsWithJsonProcessingException() {
+    void testReadFailsWithException() {
 
         def ex = new IOException('foo')
 
-        deserializer = new JacksonDeserializer() {
+        reader = new JacksonReader() {
             @Override
-            protected Object readValue(byte[] bytes) throws IOException {
+            Object read(java.io.Reader reader) throws IOException {
                 throw ex
             }
         }
-        try {
-            deserializer.deserialize(Strings.utf8('{"hello":"世界"}'))
-            fail()
-        } catch (DeserializationException se) {
-            String msg = 'Unable to deserialize JSON bytes: foo'
-            assertEquals msg, se.getMessage()
-            assertSame ex, se.getCause()
-        }
-    }
 
-    private static String base64(String input) {
-        return Encoders.BASE64.encode(input.getBytes('UTF-8'))
+        try {
+            reader.read(bytesReader('{"hello":"世界"}'))
+            fail()
+        } catch (IOException expected) {
+            assertSame ex, expected
+        }
     }
 }

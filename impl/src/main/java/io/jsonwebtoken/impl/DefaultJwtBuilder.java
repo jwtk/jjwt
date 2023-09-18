@@ -21,6 +21,9 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.io.MapSerializer;
+import io.jsonwebtoken.impl.io.SerializingMapWriter;
+import io.jsonwebtoken.impl.lang.BiConsumer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
@@ -36,10 +39,11 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.io.Writer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
@@ -57,6 +61,8 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -95,9 +101,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private Key key;
 
-    protected Serializer<Map<String, ?>> serializer;
-    protected Function<Map<String, ?>, byte[]> headerSerializer;
-    protected Function<Map<String, ?>, byte[]> claimsSerializer;
+    private Writer<Map<String, ?>> jsonWriter;
+
+    protected BiConsumer<java.io.Writer, Map<String, ?>> headerSerializer;
+    protected BiConsumer<java.io.Writer, Map<String, ?>> claimsSerializer;
 
     protected Encoder<byte[], String> encoder = Encoders.BASE64URL;
     private boolean encodePayload = true;
@@ -134,33 +141,39 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return Functions.wrap(fn, SecurityException.class, fmt, args);
     }
 
-    protected Function<Map<String, ?>, byte[]> wrap(final Serializer<Map<String, ?>> serializer, final String which) {
-        return new Function<Map<String, ?>, byte[]>() {
-            @Override
-            public byte[] apply(Map<String, ?> stringMap) {
-                try {
-                    return serializer.serialize(stringMap);
-                } catch (Exception e) {
-                    String fmt = String.format("Unable to serialize %s to JSON.", which);
-                    String msg = fmt + " Cause: " + e.getMessage();
-                    throw new SerializationException(msg);
-                }
-            }
-        };
-    }
-
     @Override
     public JwtBuilder serializeToJsonWith(final Serializer<Map<String, ?>> serializer) {
         return serializer(serializer);
     }
 
     @Override
+    public JwtBuilder jsonWriter(Writer<Map<String, ?>> writer) {
+        this.jsonWriter = Assert.notNull(writer, "JSON Writer cannot be null.");
+        this.headerSerializer = new MapSerializer(writer, "header");
+        this.claimsSerializer = new MapSerializer(writer, "claims");
+        return this;
+    }
+
+    private BiConsumer<java.io.Writer, Map<String, ?>> serializerFor(Map<String, ?> map) {
+        return map instanceof Claims ? this.claimsSerializer : this.headerSerializer;
+    }
+
+    private byte[] serialize(Map<String, ?> map) {
+        BiConsumer<java.io.Writer, Map<String, ?>> ser = serializerFor(map);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
+        java.io.Writer writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
+        try {
+            ser.accept(writer, map);
+        } finally {
+            Objects.nullSafeClose(writer);
+        }
+        return baos.toByteArray();
+    }
+
+    @Override
     public JwtBuilder serializer(Serializer<Map<String, ?>> serializer) {
         Assert.notNull(serializer, "Serializer cannot be null.");
-        this.serializer = serializer;
-        this.headerSerializer = wrap(serializer, "header");
-        this.claimsSerializer = wrap(serializer, "claims");
-        return this;
+        return jsonWriter(new SerializingMapWriter(serializer));
     }
 
     @Override
@@ -489,6 +502,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
     }
 
+//    @Override
+//    public void compactTo(java.io.Writer writer) {
+//        Assert.notNull(writer, "Writer argument cannot be null.");
+//        String s = compact();
+//        try {
+//            writer.write(s);
+//        } catch (Throwable t) {
+//            String msg = "Unable to write compact JWT: " + t.getMessage();
+//            throw new IOException(msg, t);
+//        }
+//    }
+
     @Override
     public String compact() {
 
@@ -514,13 +539,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException("Both 'content' and 'claims' cannot be specified. Choose either one.");
         }
 
-        if (this.serializer == null) { // try to find one based on the services available
+        if (this.jsonWriter == null) { // try to find one based on the services available
             //noinspection unchecked
-            serializer(Services.loadFirst(Serializer.class));
+            jsonWriter(Services.loadFirst(Writer.class));
         }
 
         if (!Collections.isEmpty(claims)) { // normalize so we have one object to deal with:
-            byte[] serialized = claimsSerializer.apply(claims);
+            byte[] serialized = serialize(claims);
             content = new Payload(null, serialized, null);
         }
         if (compressionAlgorithm != null && !content.isEmpty()) {
@@ -567,7 +592,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build(), "Invalid header created: ");
 
-        byte[] headerBytes = headerSerializer.apply(header);
+        byte[] headerBytes = serialize(header);
         String b64UrlHeader = encoder.encode(headerBytes);
 
         String jwt = b64UrlHeader + DefaultJwtParser.SEPARATOR_CHAR;
@@ -605,7 +630,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), Jwts.SIG.NONE.getId());
         final Header header = this.headerBuilder.build();
-        byte[] headerBytes = headerSerializer.apply(header);
+        byte[] headerBytes = serialize(header);
 
         String b64UrlHeader = encoder.encode(headerBytes);
         String b64UrlPayload = Strings.EMPTY;
@@ -644,7 +669,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         final JweHeader header = Assert.isInstanceOf(JweHeader.class, this.headerBuilder.build(), "Invalid header created: ");
 
-        byte[] headerBytes = this.headerSerializer.apply(header);
+        byte[] headerBytes = serialize(header);
         final String base64UrlEncodedHeader = encoder.encode(headerBytes);
         byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
 
