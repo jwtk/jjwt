@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.lang
 
 import io.jsonwebtoken.StubService
 import io.jsonwebtoken.impl.DefaultStubService
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.powermock.api.easymock.PowerMock
@@ -71,6 +72,11 @@ class ServicesTest {
         assertEquals(Thread.currentThread().getContextClassLoader(), accessorList.get(0).getClassLoader())
         assertEquals(Services.class.getClassLoader(), accessorList.get(1).getClassLoader())
         assertEquals(ClassLoader.getSystemClassLoader(), accessorList.get(2).getClassLoader())
+    }
+
+    @After
+    void resetCache() {
+        Services.reload();
     }
 
     static class NoServicesClassLoader extends ClassLoader {
