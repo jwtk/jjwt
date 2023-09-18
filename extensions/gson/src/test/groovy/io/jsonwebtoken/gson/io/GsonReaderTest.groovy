@@ -34,7 +34,8 @@ class GsonReaderTest {
     private GsonReader reader
 
     private def read(byte[] data) {
-        return reader.read(bytesReader(data))
+        def r = bytesReader(data)
+        return reader.read(r)
     }
 
     private def read(String s) {
