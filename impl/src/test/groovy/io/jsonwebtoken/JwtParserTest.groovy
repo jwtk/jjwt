@@ -74,7 +74,8 @@ class JwtParserTest {
             Jwts.parser().enableUnsecured().build().parse(bad)
             fail()
         } catch (MalformedJwtException expected) {
-            assertEquals 'Unable to read claims JSON: ' + junkPayload, expected.getMessage()
+            String prefix = 'Malformed claims JSON: '
+            assertTrue expected.getMessage().startsWith(prefix)
         }
     }
 

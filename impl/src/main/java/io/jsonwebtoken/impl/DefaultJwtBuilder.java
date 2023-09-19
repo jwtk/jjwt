@@ -23,10 +23,10 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.io.MapSerializer;
 import io.jsonwebtoken.impl.io.SerializingMapWriter;
-import io.jsonwebtoken.impl.lang.BiConsumer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
+import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
@@ -103,9 +103,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private Writer<Map<String, ?>> jsonWriter;
 
-    protected BiConsumer<java.io.Writer, Map<String, ?>> headerSerializer;
-    protected BiConsumer<java.io.Writer, Map<String, ?>> claimsSerializer;
-
     protected Encoder<byte[], String> encoder = Encoders.BASE64URL;
     private boolean encodePayload = true;
     protected CompressionAlgorithm compressionAlgorithm;
@@ -141,39 +138,30 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return Functions.wrap(fn, SecurityException.class, fmt, args);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public JwtBuilder serializeToJsonWith(final Serializer<Map<String, ?>> serializer) {
-        return serializer(serializer);
+        return jsonWriter(new SerializingMapWriter(serializer));
     }
 
     @Override
     public JwtBuilder jsonWriter(Writer<Map<String, ?>> writer) {
         this.jsonWriter = Assert.notNull(writer, "JSON Writer cannot be null.");
-        this.headerSerializer = new MapSerializer(writer, "header");
-        this.claimsSerializer = new MapSerializer(writer, "claims");
         return this;
     }
 
-    private BiConsumer<java.io.Writer, Map<String, ?>> serializerFor(Map<String, ?> map) {
-        return map instanceof Claims ? this.claimsSerializer : this.headerSerializer;
-    }
-
     private byte[] serialize(Map<String, ?> map) {
-        BiConsumer<java.io.Writer, Map<String, ?>> ser = serializerFor(map);
+        Nameable nameable = Assert.isInstanceOf(Nameable.class, map, "JWT internal maps implement Nameable.");
+        Writer<Map<String, ?>> jsonWriter = Assert.stateNotNull(this.jsonWriter, "JSON Writer cannot be null.");
+        MapSerializer serializer = new MapSerializer(jsonWriter, nameable.getName());
         ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
         java.io.Writer writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
         try {
-            ser.accept(writer, map);
+            serializer.accept(writer, map);
         } finally {
             Objects.nullSafeClose(writer);
         }
         return baos.toByteArray();
-    }
-
-    @Override
-    public JwtBuilder serializer(Serializer<Map<String, ?>> serializer) {
-        Assert.notNull(serializer, "Serializer cannot be null.");
-        return jsonWriter(new SerializingMapWriter(serializer));
     }
 
     @Override

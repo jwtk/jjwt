@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl;
 
 public interface TokenizedJwe extends TokenizedJwt {
 
-    String getEncryptedKey();
+    CharSequence getEncryptedKey();
 
-    String getIv();
+    CharSequence getIv();
 }

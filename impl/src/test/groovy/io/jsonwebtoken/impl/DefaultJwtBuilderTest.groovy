@@ -284,12 +284,12 @@ class DefaultJwtBuilderTest {
                 throw new SerializationException('foo', new Exception())
             }
         }
-        def b = new DefaultJwtBuilder().serializer(serializer)
+        def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
         try {
             b.setPayload('foo').compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Cannot serialize header to JSON. Cause: foo', expected.getMessage()
+            assertEquals 'Cannot serialize JWT header to JSON. Cause: foo', expected.getMessage()
         }
     }
 
@@ -309,7 +309,7 @@ class DefaultJwtBuilderTest {
             b.compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Cannot serialize claims to JSON. Cause: dummy text', expected.message
+            assertEquals 'Cannot serialize JWT Claims to JSON. Cause: dummy text', expected.message
         }
     }
 

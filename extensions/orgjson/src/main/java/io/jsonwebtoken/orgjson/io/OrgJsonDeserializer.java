@@ -38,14 +38,11 @@ public class OrgJsonDeserializer extends OrgJsonReader implements Deserializer<O
         if (Objects.isEmpty(bytes)) {
             throw new DeserializationException("Invalid JSON: null or zero length byte array.");
         }
-        Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
-        try {
+        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8)) {
             return read(reader);
         } catch (Throwable t) {
             String msg = "Unable to deserialize JSON bytes: " + t.getMessage();
             throw new DeserializationException(msg, t);
-        } finally {
-            Objects.nullSafeClose(reader);
         }
     }
 }

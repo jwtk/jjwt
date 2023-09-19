@@ -16,40 +16,61 @@
 package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.MalformedJwtException
+import org.junit.Before
 import org.junit.Test
+
+import java.nio.CharBuffer
 
 import static org.junit.Assert.*
 
 class JwtTokenizerTest {
 
-    @Test(expected= MalformedJwtException)
+    private JwtTokenizer tokenizer
+
+    @Before
+    void setUp() {
+        tokenizer = new JwtTokenizer()
+    }
+
+    @Test(expected = MalformedJwtException)
     void testParseWithWhitespaceInBase64UrlHeader() {
         def input = 'header .body.signature'
-        new JwtTokenizer().tokenize(input)
+        tokenizer.tokenize(input)
     }
 
-    @Test(expected= MalformedJwtException)
+    @Test(expected = MalformedJwtException)
     void testParseWithWhitespaceInBase64UrlBody() {
         def input = 'header. body.signature'
-        new JwtTokenizer().tokenize(input)
+        tokenizer.tokenize(input)
     }
 
-    @Test(expected= MalformedJwtException)
+    @Test(expected = MalformedJwtException)
     void testParseWithWhitespaceInBase64UrlSignature() {
         def input = 'header.body. signature'
-        new JwtTokenizer().tokenize(input)
+        tokenizer.tokenize(input)
     }
 
-    @Test(expected= MalformedJwtException)
+    @Test(expected = MalformedJwtException)
     void testParseWithWhitespaceInBase64UrlJweBody() {
         def input = 'header.encryptedKey.initializationVector. body.authenticationTag'
-        new JwtTokenizer().tokenize(input)
+        tokenizer.tokenize(input)
     }
 
-    @Test(expected= MalformedJwtException)
+    @Test(expected = MalformedJwtException)
     void testParseWithWhitespaceInBase64UrlJweTag() {
         def input = 'header.encryptedKey.initializationVector.body. authenticationTag'
-        new JwtTokenizer().tokenize(input)
+        tokenizer.tokenize(input)
+    }
+
+    @Test
+    void testEmptyJws() {
+        def input = CharBuffer.wrap('header..digest'.toCharArray())
+        def t = tokenizer.tokenize(input)
+        assertTrue t instanceof TokenizedJwt
+        assertFalse t instanceof TokenizedJwe
+        assertEquals 'header', t.getProtected().toString()
+        assertEquals '', t.getPayload().toString()
+        assertEquals 'digest', t.getDigest().toString()
     }
 
     @Test
@@ -57,11 +78,11 @@ class JwtTokenizerTest {
 
         def input = 'header.encryptedKey.initializationVector.body.authenticationTag'
 
-        def t = new JwtTokenizer().tokenize(input)
+        def t = tokenizer.tokenize(input)
 
         assertNotNull t
         assertTrue t instanceof TokenizedJwe
-        TokenizedJwe tjwe = (TokenizedJwe)t
+        TokenizedJwe tjwe = (TokenizedJwe) t
         assertEquals 'header', tjwe.getProtected()
         assertEquals 'encryptedKey', tjwe.getEncryptedKey()
         assertEquals 'initializationVector', tjwe.getIv()

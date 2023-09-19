@@ -110,7 +110,7 @@ class JacksonWriterTest {
 
     @Test
     void testWriteObject() {
-        byte[] expected = Strings.utf8('{"hello":"世界"}')
+        byte[] expected = Strings.utf8('{"hello":"世界"}' as String)
         byte[] result = write([hello: '世界'])
         assertArrayEquals expected, result
     }

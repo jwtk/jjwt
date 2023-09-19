@@ -82,7 +82,8 @@ class JacksonDeserializerTest {
 
         long currentTime = System.currentTimeMillis()
 
-        byte[] serialized = Strings.utf8("""{
+        String json = """
+             {
                 "oneKey":"oneValue", 
                 "custom": {
                     "stringValue": "s-value",
@@ -103,7 +104,9 @@ class JacksonDeserializerTest {
                     }
                 }
             }
-            """)
+            """
+
+        byte[] serialized = Strings.utf8(json)
 
         CustomBean expectedCustomBean = new CustomBean()
                 .setByteArrayValue("bytes".getBytes("UTF-8"))

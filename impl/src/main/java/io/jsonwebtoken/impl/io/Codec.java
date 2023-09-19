@@ -23,15 +23,15 @@ import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 
-public class Codec implements Converter<byte[], String> {
+public class Codec implements Converter<byte[], CharSequence> {
 
     public static final Codec BASE64 = new Codec(Encoders.BASE64, Decoders.BASE64);
     public static final Codec BASE64URL = new Codec(Encoders.BASE64URL, Decoders.BASE64URL);
 
     private final Encoder<byte[], String> encoder;
-    private final Decoder<String, byte[]> decoder;
+    private final Decoder<CharSequence, byte[]> decoder;
 
-    public Codec(Encoder<byte[], String> encoder, Decoder<String, byte[]> decoder) {
+    public Codec(Encoder<byte[], String> encoder, Decoder<CharSequence, byte[]> decoder) {
         this.encoder = Assert.notNull(encoder, "Encoder cannot be null.");
         this.decoder = Assert.notNull(decoder, "Decoder cannot be null.");
     }
@@ -42,7 +42,7 @@ public class Codec implements Converter<byte[], String> {
     }
 
     @Override
-    public byte[] applyFrom(String b) {
+    public byte[] applyFrom(CharSequence b) {
         try {
             return this.decoder.decode(b);
         } catch (DecodingException e) {

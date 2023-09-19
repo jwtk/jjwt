@@ -344,7 +344,7 @@ class DefaultClaimsTest {
             claims.put(param.getId(), val)
             fail()
         } catch (IllegalArgumentException iae) {
-            String msg = "Invalid JWT Claim $param value: hi. Cannot create Date from object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1."
+            String msg = "Invalid JWT Claims $param value: hi. Cannot create Date from object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1."
             assertEquals msg, iae.getMessage()
         }
     }

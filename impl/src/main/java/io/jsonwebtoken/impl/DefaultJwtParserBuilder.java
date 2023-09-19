@@ -23,12 +23,15 @@ import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.impl.io.DeserializingMapReader;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -88,9 +91,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
 
-    private Decoder<String, byte[]> decoder = Decoders.BASE64URL;
+    private Decoder<CharSequence, byte[]> decoder = Decoders.BASE64URL;
 
-    private Deserializer<Map<String, ?>> deserializer;
+    private Reader<Map<String, ?>> jsonReader;
 
     private final ClaimsBuilder expectedClaims = Jwts.claims();
 
@@ -123,23 +126,29 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
-        return deserializer(deserializer);
+        Assert.notNull(deserializer, "deserializer cannot be null.");
+        return jsonReader(new DeserializingMapReader(deserializer));
     }
 
     @Override
-    public JwtParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer) {
-        Assert.notNull(deserializer, "deserializer cannot be null.");
-        this.deserializer = deserializer;
+    public JwtParserBuilder jsonReader(Reader<Map<String, ?>> reader) {
+        this.jsonReader = Assert.notNull(reader, "JSON Reader cannot be null.");
         return this;
     }
 
     @Override
-    public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> decoder) {
-        return decoder(decoder);
+    public JwtParserBuilder base64UrlDecodeWith(final Decoder<String, byte[]> decoder) {
+        Assert.notNull(decoder, "decoder cannot be null.");
+        return decoder(new Decoder<CharSequence, byte[]>() {
+            @Override
+            public byte[] decode(CharSequence charSequence) throws DecodingException {
+                return decoder.decode(charSequence.toString());
+            }
+        });
     }
 
     @Override
-    public JwtParserBuilder decoder(Decoder<String, byte[]> decoder) {
+    public JwtParserBuilder decoder(Decoder<CharSequence, byte[]> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
         this.decoder = decoder;
         return this;
@@ -349,14 +358,10 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParser build() {
 
-        // Only lookup the deserializer IF it is null. It is possible a Deserializer implementation was set
-        // that is NOT exposed as a service and no other implementations are available for lookup.
-        if (this.deserializer == null) {
-            // try to find one based on the services available:
+        if (this.jsonReader == null) {
             //noinspection unchecked
-            this.deserializer = Services.loadFirst(Deserializer.class);
+            jsonReader(Services.loadFirst(Reader.class));
         }
-
         if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
             String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " +
                     "Choose either, or prefer `keyLocator` when possible.";
@@ -408,7 +413,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 allowedClockSkewMillis,
                 expClaims,
                 decoder,
-                new JwtDeserializer<>(deserializer),
+                jsonReader,
                 compressionCodecResolver,
                 extraZipAlgs,
                 extraSigAlgs,

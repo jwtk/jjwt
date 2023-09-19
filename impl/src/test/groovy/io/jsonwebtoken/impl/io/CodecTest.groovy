@@ -24,7 +24,7 @@ class CodecTest {
 
     @Test
     void testDecodingExceptionThrowsIAE() {
-        String s = 't#t'
+        CharSequence s = 't#t'
         try {
             Codec.BASE64URL.applyFrom(s)
             fail()

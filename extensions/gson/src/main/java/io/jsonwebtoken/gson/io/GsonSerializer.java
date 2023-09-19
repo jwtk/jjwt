@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -52,11 +51,8 @@ public class GsonSerializer<T> extends GsonWriter<T> implements Serializer<T> {
 
     protected byte[] writeValueAsBytes(T t) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
-        OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
-        try {
+        try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {
             write(writer, t);
-        } finally {
-            Objects.nullSafeClose(writer);
         }
         return baos.toByteArray();
     }

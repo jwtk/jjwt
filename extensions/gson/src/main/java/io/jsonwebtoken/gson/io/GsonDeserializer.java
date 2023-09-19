@@ -18,7 +18,6 @@ package io.jsonwebtoken.gson.io;
 import com.google.gson.Gson;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -51,11 +50,8 @@ public class GsonDeserializer<T> extends GsonReader<T> implements Deserializer<T
 
     @Deprecated
     protected T readValue(byte[] bytes) throws IOException {
-        Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes));
-        try {
+        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes))) {
             return read(reader);
-        } finally {
-            Objects.nullSafeClose(reader);
         }
     }
 }

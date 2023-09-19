@@ -19,8 +19,6 @@ import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.SerializationException
-import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -299,9 +297,9 @@ class RFC7517AppendixCTest {
                 return RFC_P2S
             }
         }
-        def serializer = new Serializer() {
+        def writer = new io.jsonwebtoken.io.Writer() {
             @Override
-            byte[] serialize(Object o) throws SerializationException {
+            void write(Writer out, Object o) throws IOException {
                 assertTrue o instanceof JweHeader
                 JweHeader header = (JweHeader) o
 
@@ -315,7 +313,7 @@ class RFC7517AppendixCTest {
 
                 //JSON serialization order isn't guaranteed, so now that we've asserted the values are correct,
                 //return the exact serialization order expected in the RFC test:
-                return RFC_JWE_PROTECTED_HEADER_JSON.getBytes(StandardCharsets.UTF_8)
+                out.write(RFC_JWE_PROTECTED_HEADER_JSON)
             }
         }
 
@@ -325,7 +323,7 @@ class RFC7517AppendixCTest {
                 .setPayload(RFC_JWK_JSON)
                 .header().contentType('jwk+json').pbes2Count(RFC_P2C).and()
                 .encryptWith(key, alg, enc)
-                .serializer(serializer) //ensure header created as expected with an assertion serializer
+                .jsonWriter(writer) //ensure header created as expected with an assertion serializer
                 .compact()
 
         assertEquals RFC_COMPACT_JWE, compact

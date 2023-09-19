@@ -39,8 +39,10 @@ import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.impl.io.JwtDeserializer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
@@ -48,13 +50,11 @@ import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
-import io.jsonwebtoken.io.DecodingException;
-import io.jsonwebtoken.io.DeserializationException;
-import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Arrays;
+import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptAeadRequest;
@@ -68,6 +68,10 @@ import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -187,9 +191,9 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Locator<? extends Key> keyLocator;
 
-    private final Decoder<String, byte[]> decoder;
+    private final Decoder<CharSequence, byte[]> decoder;
 
-    private final Deserializer<Map<String, ?>> deserializer;
+    private final Reader<Map<String, ?>> jsonReader;
 
     private final ClaimsBuilder expectedClaims;
 
@@ -210,8 +214,8 @@ public class DefaultJwtParser implements JwtParser {
                      Set<String> critical,
                      long allowedClockSkewMillis,
                      DefaultClaims expectedClaims,
-                     Decoder<String, byte[]> base64UrlDecoder,
-                     Deserializer<Map<String, ?>> deserializer,
+                     Decoder<CharSequence, byte[]> base64UrlDecoder,
+                     Reader<Map<String, ?>> jsonReader,
                      CompressionCodecResolver compressionCodecResolver,
                      Collection<CompressionAlgorithm> extraZipAlgs,
                      Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs,
@@ -227,7 +231,7 @@ public class DefaultJwtParser implements JwtParser {
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
-        this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
+        this.jsonReader = Assert.notNull(jsonReader, "jsonReader cannot be null.");
 
         this.sigAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extraSigAlgs, MISSING_JWS_ALG_MSG);
         this.keyAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extraKeyAlgs, MISSING_JWE_ALG_MSG);
@@ -361,13 +365,27 @@ public class DefaultJwtParser implements JwtParser {
 
         //re-create the jwt part without the signature.  This is what is needed for signature verification:
         byte[] verificationInput;
-        String jwtPrefix = tokenized.getProtected() + SEPARATOR_CHAR;
         if (jwsHeader.isPayloadEncoded()) {
-            jwtPrefix += tokenized.getPayload();
-            verificationInput = jwtPrefix.getBytes(StandardCharsets.US_ASCII);
+            int len = tokenized.getProtected().length() + 1 + tokenized.getPayload().length();
+            CharBuffer cb = CharBuffer.allocate(len);
+            cb.put(Strings.wrap(tokenized.getProtected()));
+            cb.put(SEPARATOR_CHAR);
+            cb.put(Strings.wrap(tokenized.getPayload()));
+            cb.rewind();
+            ByteBuffer bb = StandardCharsets.US_ASCII.encode(cb);
+            bb.rewind();
+            verificationInput = new byte[bb.remaining()];
+            bb.get(verificationInput);
         } else {
-            byte[] prefixBytes = jwtPrefix.getBytes(StandardCharsets.US_ASCII);
-            verificationInput = Bytes.concat(prefixBytes, payload);
+            ByteBuffer headerBuf = StandardCharsets.US_ASCII.encode(Strings.wrap(tokenized.getProtected()));
+            headerBuf.rewind();
+            ByteBuffer buf = ByteBuffer.allocate(headerBuf.remaining() + 1 + Bytes.length(payload));
+            buf.put(headerBuf);
+            buf.put((byte) SEPARATOR_CHAR);
+            buf.put(payload);
+            buf.rewind();
+            verificationInput = new byte[buf.remaining()];
+            buf.get(verificationInput);
         }
 
         try {
@@ -395,15 +413,16 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public Jwt<?, ?> parse(String compact) {
-        return parse(compact, Bytes.EMPTY);
+        CharBuffer buffer = Strings.wrap(compact); // so compact.subsequence calls don't add new Strings on the heap
+        return parse(buffer, Bytes.EMPTY);
     }
 
-    private Jwt<?, ?> parse(String compact, final byte[] unencodedPayload) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    private Jwt<?, ?> parse(CharSequence compact, final byte[] unencodedPayload) throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
         Assert.hasText(compact, "JWT String cannot be null or empty.");
 
         final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
-        final String base64UrlHeader = tokenized.getProtected();
+        final CharSequence base64UrlHeader = tokenized.getProtected();
         if (!Strings.hasText(base64UrlHeader)) {
             String msg = "Compact JWT strings MUST always have a Base64Url protected header per https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).";
             throw new MalformedJwtException(msg);
@@ -433,7 +452,7 @@ public class DefaultJwtParser implements JwtParser {
         }
         final boolean unsecured = Jwts.SIG.NONE.getId().equalsIgnoreCase(alg);
 
-        final String base64UrlDigest = tokenized.getDigest();
+        final CharSequence base64UrlDigest = tokenized.getDigest();
         final boolean hasDigest = Strings.hasText(base64UrlDigest);
         if (unsecured) {
             if (tokenized instanceof TokenizedJwe) {
@@ -473,7 +492,7 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Payload =================
-        final String payloadToken = tokenized.getPayload();
+        final CharSequence payloadToken = tokenized.getPayload();
         byte[] payload;
         boolean integrityVerified = false; // only true after successful signature verification or AEAD decryption
 
@@ -516,10 +535,10 @@ public class DefaultJwtParser implements JwtParser {
             JweHeader jweHeader = Assert.stateIsInstance(JweHeader.class, header, "Not a JweHeader. ");
 
             byte[] cekBytes = Bytes.EMPTY; //ignored unless using an encrypted key algorithm
-            String base64Url = tokenizedJwe.getEncryptedKey();
+            CharSequence base64Url = tokenizedJwe.getEncryptedKey();
             if (Strings.hasText(base64Url)) {
                 cekBytes = decode(base64Url, "JWE encrypted key");
-                if (Arrays.length(cekBytes) == 0) {
+                if (Bytes.isEmpty(cekBytes)) {
                     String msg = "Compact JWE string represents an encrypted key, but the key is empty.";
                     throw new MalformedJwtException(msg);
                 }
@@ -529,7 +548,7 @@ public class DefaultJwtParser implements JwtParser {
             if (Strings.hasText(base64Url)) {
                 iv = decode(base64Url, "JWE Initialization Vector");
             }
-            if (Arrays.length(iv) == 0) {
+            if (Bytes.isEmpty(iv)) {
                 String msg = "Compact JWE strings must always contain an Initialization Vector.";
                 throw new MalformedJwtException(msg);
             }
@@ -537,13 +556,15 @@ public class DefaultJwtParser implements JwtParser {
             // The AAD (Additional Authenticated Data) scheme for compact JWEs is to use the ASCII bytes of the
             // raw base64url text as the AAD, and NOT the base64url-decoded bytes per
             // https://www.rfc-editor.org/rfc/rfc7516.html#section-5.1, Step 14.
-            final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
+            ByteBuffer buf = StandardCharsets.US_ASCII.encode(Strings.wrap(base64UrlHeader));
+            final byte[] aad = new byte[buf.remaining()];
+            buf.get(aad);
 
             base64Url = base64UrlDigest;
             //guaranteed to be non-empty via the `alg` + digest check above:
             Assert.hasText(base64Url, "JWE AAD Authentication Tag cannot be null or empty.");
             tag = decode(base64Url, "JWE AAD Authentication Tag");
-            if (Arrays.length(tag) == 0) {
+            if (Bytes.isEmpty(tag)) {
                 String msg = "Compact JWE strings must always contain an AAD Authentication Tag.";
                 throw new MalformedJwtException(msg);
             }
@@ -636,7 +657,7 @@ public class DefaultJwtParser implements JwtParser {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else if (hasDigest) {
             JwsHeader jwsHeader = Assert.isInstanceOf(JwsHeader.class, header, "JwsHeader required.");
-            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest);
+            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest.toString());
         } else {
             //noinspection rawtypes
             jwt = new DefaultJwt(header, body);
@@ -881,21 +902,25 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
-    protected byte[] decode(String base64UrlEncoded, String name) {
+    protected byte[] decode(CharSequence base64UrlEncoded, String name) {
         try {
             return decoder.decode(base64UrlEncoded);
-        } catch (DecodingException e) {
-            String msg = "Invalid Base64Url " + name + ": " + base64UrlEncoded;
-            throw new MalformedJwtException(msg, e);
+        } catch (Throwable t) {
+            // Don't disclose potentially-sensitive information per https://github.com/jwtk/jjwt/issues/824:
+            String value = "payload".equals(name) ? RedactedSupplier.REDACTED_VALUE : base64UrlEncoded.toString();
+            String msg = "Invalid Base64Url " + name + ": " + value;
+            throw new MalformedJwtException(msg, t);
         }
     }
 
     protected Map<String, ?> deserialize(byte[] bytes, final String name) {
+        ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+        java.io.Reader r = new InputStreamReader(is);
         try {
-            return deserializer.deserialize(bytes);
-        } catch (MalformedJwtException | DeserializationException e) {
-            String s = new String(bytes, StandardCharsets.UTF_8);
-            throw new MalformedJwtException("Unable to read " + name + " JSON: " + s, e);
+            JwtDeserializer<Map<String, ?>> jwtd = new JwtDeserializer<>(jsonReader, name);
+            return jwtd.apply(r);
+        } finally {
+            Objects.nullSafeClose(r);
         }
     }
 }

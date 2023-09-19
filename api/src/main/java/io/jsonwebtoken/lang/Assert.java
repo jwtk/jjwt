@@ -145,7 +145,7 @@ public final class Assert {
      * @return the string if it has text
      * @see Strings#hasText
      */
-    public static String hasText(String text, String message) {
+    public static <T extends CharSequence> T hasText(T text, String message) {
         if (!Strings.hasText(text)) {
             throw new IllegalArgumentException(message);
         }

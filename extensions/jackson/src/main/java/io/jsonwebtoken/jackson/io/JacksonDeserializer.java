@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -103,11 +102,8 @@ public class JacksonDeserializer<T> extends JacksonReader<T> implements Deserial
      */
     protected T readValue(byte[] bytes) throws IOException {
         Assert.notNull(bytes, "byte array argument cannot be null.");
-        Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
-        try {
+        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8)) {
             return read(reader);
-        } finally {
-            Objects.nullSafeClose(reader);
         }
     }
 }

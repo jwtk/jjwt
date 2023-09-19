@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.Reader;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -147,10 +149,9 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * Returns the JWTs claim ({@code claimName}) value as a type {@code requiredType}, or {@code null} if not present.
      *
      * <p>JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
-     * complex is expected to be already converted to your desired type by the JSON
-     * {@link io.jsonwebtoken.io.Deserializer Deserializer} implementation. You may specify a custom Deserializer for a
-     * JwtParser with the desired conversion configuration via the
-     * {@link JwtParserBuilder#deserializer deserializer} method.
+     * complex is expected to be already converted to your desired type by the JSON parser. You may specify a custom
+     * JSON {@link io.jsonwebtoken.io.Reader Reader} with the desired configuration via the
+     * {@link JwtParserBuilder#jsonReader(Reader)} method.
      * See <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a> for more
      * information. If using Jackson, you can specify custom claim POJO types as described in
      * <a href="https://github.com/jwtk/jjwt#json-jackson-custom-types">custom claim types</a>.

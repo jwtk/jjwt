@@ -68,22 +68,23 @@ class DefaultJwtParserTest {
 
     @Test
     void testDesrializeJsonWithCustomSerializer() {
+        boolean invoked = false
         def deserializer = new Deserializer() {
             @Override
             Object deserialize(byte[] bytes) throws DeserializationException {
+                invoked = true
                 return OBJECT_MAPPER.readValue(bytes, Map.class)
             }
         }
         def pb = Jwts.parser().deserializeJsonWith(deserializer)
-        def p = pb.build() as DefaultJwtParser
-        assertTrue("Expected wrapping deserializer to be instance of JwtDeserializer", p.deserializer instanceof JwtDeserializer)
-        assertSame deserializer, p.deserializer.deserializer
+        assertFalse invoked
 
         def key = Jwts.SIG.HS256.key().build()
-
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
+        assertFalse invoked
 
         assertEquals 'bar', pb.verifyWith(key).build().parseClaimsJws(jws).getPayload().get('foo')
+        assertTrue invoked
     }
 
     @Test(expected = MalformedJwtException)
@@ -285,6 +286,19 @@ class DefaultJwtParserTest {
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
             String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
                     "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testInvalidB64UrlPayload() {
+        def jwt = Encoders.BASE64URL.encode(Strings.utf8('{"alg":"none"}'))
+        jwt += ".F!3!#." // <-- invalid Base64URL payload
+        try {
+            Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt)
+            fail()
+        } catch (MalformedJwtException expected) {
+            String msg = 'Invalid Base64Url payload: <redacted>'
             assertEquals msg, expected.message
         }
     }

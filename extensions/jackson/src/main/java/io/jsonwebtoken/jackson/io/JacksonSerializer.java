@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Objects;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -72,14 +71,11 @@ public class JacksonSerializer<T> extends JacksonWriter<T> implements Serializer
      */
     protected byte[] writeValueAsBytes(T t) throws com.fasterxml.jackson.core.JsonProcessingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
-        OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
-        try {
+        try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {
             write(writer, t);
         } catch (Throwable ex) {
             String msg = "Unable to write value as bytes: " + ex.getMessage();
             throw new JsonProcessingException(msg, ex);
-        } finally {
-            Objects.nullSafeClose(writer);
         }
         return baos.toByteArray();
     }

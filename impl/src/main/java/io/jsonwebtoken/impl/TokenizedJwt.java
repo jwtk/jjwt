@@ -26,21 +26,21 @@ public interface TokenizedJwt {
      *
      * @return protected header.
      */
-    String getProtected();
+    CharSequence getProtected();
 
     /**
      * Returns the Payload for a JWS or Ciphertext for a JWE.
      *
      * @return the Payload for a JWS or Ciphertext for a JWE.
      */
-    String getPayload();
+    CharSequence getPayload();
 
     /**
      * Returns the Signature for JWS or AAD Tag for JWE.
      *
      * @return the Signature for JWS or AAD Tag for JWE.
      */
-    String getDigest();
+    CharSequence getDigest();
 
     /**
      * Returns a new {@link Header} instance with the specified map state.
