@@ -77,10 +77,11 @@ import java.util.Set;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
-    private static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " + "PrivateKeys are used to sign, and PublicKeys are used to verify.";
+    private static final String PUB_KEY_SIGN_MSG = "PublicKeys may not be used to create digital signatures. " +
+            "PrivateKeys are used to sign, and PublicKeys are used to verify.";
 
-    private static final String PRIV_KEY_ENC_MSG = "PrivateKeys may not be used to encrypt data. PublicKeys are " + "used to encrypt, and PrivateKeys are used to decrypt.";
-
+    private static final String PRIV_KEY_ENC_MSG = "PrivateKeys may not be used to encrypt data. PublicKeys are " +
+            "used to encrypt, and PrivateKeys are used to decrypt.";
 
     protected Provider provider;
     protected SecureRandom secureRandom;
@@ -207,7 +208,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.notNull(key, "Key cannot be null.");
         SecureDigestAlgorithm<K, ?> alg = StandardSecureDigestAlgorithms.findBySigningKey(key);
         if (alg == null) {
-            String msg = "Unable to determine a suitable MAC or Signature algorithm for the specified key using " + "available heuristics: either the key size is too weak be used with available algorithms, or the " + "key size is unavailable (e.g. if using a PKCS11 or HSM (Hardware Security Module) key store). " + "If you are using a PKCS11 or HSM keystore, consider using the " + "JwtBuilder.signWith(Key, SecureDigestAlgorithm) method instead.";
+            String msg = "Unable to determine a suitable MAC or Signature algorithm for the specified key using " +
+                    "available heuristics: either the key size is too weak be used with available algorithms, or the " +
+                    "key size is unavailable (e.g. if using a PKCS11 or HSM (Hardware Security Module) key store). " +
+                    "If you are using a PKCS11 or HSM keystore, consider using the " +
+                    "JwtBuilder.signWith(Key, SecureDigestAlgorithm) method instead.";
             throw new UnsupportedKeyException(msg);
         }
         return alg;
@@ -221,7 +226,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public <K extends Key> JwtBuilder signWith(K key, final SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException {
+    public <K extends Key> JwtBuilder signWith(K key, final SecureDigestAlgorithm<? super K, ?> alg)
+            throws InvalidKeyException {
+
         Assert.notNull(key, "Key argument cannot be null.");
         if (key instanceof PublicKey) { // it's always wrong/insecure to try to create signatures with PublicKeys:
             throw new IllegalArgumentException(PUB_KEY_SIGN_MSG);
@@ -271,7 +278,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, byte[] secretKeyBytes) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         Assert.notEmpty(secretKeyBytes, "secret key byte array cannot be null or empty.");
-        Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  " + "If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
+        Assert.isTrue(alg.isHmac(), "Key bytes may only be specified for HMAC signatures.  " +
+                "If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         SecretKey key = new SecretKeySpec(secretKeyBytes, alg.getJcaName());
         return signWith(key, alg);
     }
@@ -280,7 +288,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder signWith(io.jsonwebtoken.SignatureAlgorithm alg, String base64EncodedSecretKey) throws InvalidKeyException {
         Assert.hasText(base64EncodedSecretKey, "base64-encoded secret key cannot be null or empty.");
-        Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  " + "If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
+        Assert.isTrue(alg.isHmac(), "Base64-encoded key bytes may only be specified for HMAC signatures.  " +
+                "If using RSA or Elliptic Curve, use the signWith(SignatureAlgorithm, Key) method instead.");
         byte[] bytes = Decoders.BASE64.decode(base64EncodedSecretKey);
         return signWith(alg, bytes);
     }
@@ -578,7 +587,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
             this.headerBuilder.critical(id).add(id, false);
         }
 
-        final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build(), "Invalid header created: ");
+        final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build(),
+                "Invalid header created: ");
 
         byte[] headerBytes = serialize(header);
         String b64UrlHeader = encoder.encode(headerBytes);
@@ -640,7 +650,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlg, "KeyAlgorithm is required."); //set by encryptWith*
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
-        final byte[] payload = Assert.notEmpty(content.toByteArray(), "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
+        final byte[] payload = Assert.notEmpty(content.toByteArray(),
+                "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
@@ -650,12 +661,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
 
         SecretKey cek = Assert.notNull(keyResult.getKey(), "KeyResult must return a content encryption key.");
-        byte[] encryptedCek = Assert.notNull(keyResult.getPayload(), "KeyResult must return an encrypted key byte array, even if empty.");
+        byte[] encryptedCek = Assert.notNull(keyResult.getPayload(),
+                "KeyResult must return an encrypted key byte array, even if empty.");
 
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), keyAlg.getId());
         this.headerBuilder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), enc.getId());
 
-        final JweHeader header = Assert.isInstanceOf(JweHeader.class, this.headerBuilder.build(), "Invalid header created: ");
+        final JweHeader header = Assert.isInstanceOf(JweHeader.class, this.headerBuilder.build(),
+                "Invalid header created: ");
 
         byte[] headerBytes = serialize(header);
         final String base64UrlEncodedHeader = encoder.encode(headerBytes);
@@ -668,16 +681,23 @@ public class DefaultJwtBuilder implements JwtBuilder {
         AeadRequest encRequest = new DefaultAeadRequest(payload, null, secureRandom, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
-        byte[] iv = Assert.notEmpty(encResult.getInitializationVector(), "Encryption result must have a non-empty initialization vector.");
-        byte[] ciphertext = Assert.notEmpty(encResult.getPayload(), "Encryption result must have non-empty ciphertext (result.getData()).");
-        byte[] tag = Assert.notEmpty(encResult.getDigest(), "Encryption result must have a non-empty authentication tag.");
+        byte[] iv = Assert.notEmpty(encResult.getInitializationVector(),
+                "Encryption result must have a non-empty initialization vector.");
+        byte[] ciphertext = Assert.notEmpty(encResult.getPayload(),
+                "Encryption result must have non-empty ciphertext (result.getData()).");
+        byte[] tag = Assert.notEmpty(encResult.getDigest(),
+                "Encryption result must have a non-empty authentication tag.");
 
         String base64UrlEncodedEncryptedCek = encoder.encode(encryptedCek);
         String base64UrlEncodedIv = encoder.encode(iv);
         String base64UrlEncodedCiphertext = encoder.encode(ciphertext);
         String base64UrlEncodedTag = encoder.encode(tag);
 
-        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR + base64UrlEncodedTag;
+        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
+                base64UrlEncodedTag;
     }
 
     private static class DefaultBuilderClaims extends DelegatingClaimsMutator<BuilderClaims> implements BuilderClaims {
