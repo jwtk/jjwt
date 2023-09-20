@@ -24,7 +24,7 @@ import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.io.Writer
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
@@ -54,6 +54,15 @@ class DefaultJwtParserTest {
     private static String b64Url(def val) {
         if (val instanceof String) val = Strings.utf8(val)
         return Encoders.BASE64URL.encode(val)
+    }
+
+    private static byte[] serialize(Map<String, ?> map) {
+        def writer = Services.loadFirst(Writer) as Writer<Map<String, ?>>
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(512)
+        OutputStreamWriter w = new OutputStreamWriter(baos, StandardCharsets.UTF_8)
+        writer.write(w, map)
+        w.close()
+        return baos.toByteArray()
     }
 
     @Before
@@ -195,7 +204,7 @@ class DefaultJwtParserTest {
     @Test
     void testUnprotectedCritRejected() {
         def map = [alg: "none", crit: ["whatever"]]
-        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        def header = b64Url(serialize(map))
         String compact = header + '.doesntMatter.'
         try {
             Jwts.parser().enableUnsecured().build().parse(compact)
@@ -209,7 +218,7 @@ class DefaultJwtParserTest {
     @Test
     void testProtectedCritWithoutAssociatedHeader() {
         def map = [alg: "HS256", crit: ["whatever"]]
-        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        def header = b64Url(serialize(map))
         String compact = header + '.a.b'
         try {
             Jwts.parser().enableUnsecured().build().parse(compact)
@@ -223,7 +232,7 @@ class DefaultJwtParserTest {
     @Test
     void testProtectedCritWithUnsupportedHeader() {
         def map = [alg: "HS256", crit: ["whatever"], whatever: 42]
-        def header = b64Url(Services.loadFirst(Serializer).serialize(map))
+        def header = b64Url(serialize(map))
         String compact = header + '.a.b'
         try {
             Jwts.parser().enableUnsecured().build().parse(compact)

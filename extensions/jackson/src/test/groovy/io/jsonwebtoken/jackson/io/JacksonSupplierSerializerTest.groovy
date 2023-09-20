@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.jackson.io
 
-import io.jsonwebtoken.lang.Strings
+
 import io.jsonwebtoken.lang.Supplier
 import org.junit.Test
 
@@ -25,25 +25,29 @@ class JacksonSupplierSerializerTest {
 
     @Test
     void testSupplierNullValue() {
-        def serializer = new JacksonSerializer()
+        def serializer = new JacksonWriter()
         def supplier = new Supplier() {
             @Override
             Object get() {
                 return null
             }
         }
-        assertEquals 'null', Strings.utf8(serializer.serialize(supplier))
+        StringWriter w = new StringWriter(4)
+        serializer.write(w, supplier)
+        assertEquals 'null', w.toString()
     }
 
     @Test
     void testSupplierStringValue() {
-        def serializer = new JacksonSerializer()
+        def serializer = new JacksonWriter()
         def supplier = new Supplier() {
             @Override
             Object get() {
                 return 'hello'
             }
         }
-        assertEquals '"hello"', Strings.utf8(serializer.serialize(supplier))
+        StringWriter w = new StringWriter(7)
+        serializer.write(w, supplier)
+        assertEquals '"hello"', w.toString()
     }
 }

@@ -22,7 +22,7 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.io.Writer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
@@ -71,9 +71,10 @@ class JwtsTest {
     }
 
     protected static String toJson(o) {
-        def serializer = Services.loadFirst(Serializer)
-        byte[] bytes = serializer.serialize(o)
-        return new String(bytes, Strings.UTF_8)
+        def writer = Services.loadFirst(Writer) as Writer<Map<String, ?>>
+        StringWriter w = new StringWriter(512)
+        writer.write(w, o)
+        return w.toString()
     }
 
     @Test

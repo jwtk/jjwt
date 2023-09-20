@@ -16,17 +16,14 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.io.ConvertingParser
-import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Reader
-import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
 import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.security.Provider
 
@@ -108,12 +105,10 @@ class DefaultJwkParserBuilderTest {
             keys.add(it.pair.private)
         }
 
-        def serializer = Services.loadFirst(Serializer)
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwks.builder().key(key).build()
-            def data = serializer.serialize(jwk)
-            String json = new String(data, StandardCharsets.UTF_8)
+            String json = Jwks.UNSAFE_JSON(jwk)
             def parsed = Jwks.parser().build().parse(json)
             assertEquals jwk, parsed
         }
@@ -129,14 +124,12 @@ class DefaultJwkParserBuilderTest {
             keys.add(it.pair.private)
         }
 
-        def serializer = Services.loadFirst(Serializer)
         def provider = TestKeys.BC //always used
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwks.builder().provider(provider).key(key).build()
-            def data = serializer.serialize(jwk)
-            String json = new String(data, StandardCharsets.UTF_8)
+            String json = Jwks.UNSAFE_JSON(jwk)
             def parsed = Jwks.parser().provider(provider).build().parse(json)
             assertEquals jwk, parsed
             assertSame provider, parsed.@context.@provider

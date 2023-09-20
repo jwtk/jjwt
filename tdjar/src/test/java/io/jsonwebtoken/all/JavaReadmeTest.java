@@ -18,7 +18,6 @@ package io.jsonwebtoken.all;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.EcPrivateJwk;
@@ -335,7 +334,6 @@ public class JavaReadmeTest {
         assert "me".equals(issuer);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleSecretJwk() {
         SecretKey key = Jwts.SIG.HS512.key().build(); // or HS384 or HS256
@@ -344,15 +342,13 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String unsafeJwkJson = Jwks.UNSAFE_JSON(jwk); // returns raw key material
+        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof SecretJwk;
         assert jwk.equals(parsed);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleRsaPublicJwk() {
         RSAPublicKey key = (RSAPublicKey) Jwts.SIG.RS512.keyPair().build().getPublic();
@@ -361,15 +357,13 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        String jwkJson = Jwks.json(jwk);
         Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
 
         assert parsed instanceof RsaPublicJwk;
         assert jwk.equals(parsed);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleRsaPrivateJwk() {
         KeyPair pair = Jwts.SIG.RS512.keyPair().build();
@@ -384,15 +378,13 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
+        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof RsaPrivateJwk;
         assert privJwk.equals(parsed);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEcPublicJwk() {
         ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPair().build().getPublic();
@@ -401,15 +393,13 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        String jwkJson = Jwks.json(jwk);
         Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
 
         assert parsed instanceof EcPublicJwk;
         assert jwk.equals(parsed);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEcPrivateJwk() {
         KeyPair pair = Jwts.SIG.ES512.keyPair().build();
@@ -424,15 +414,13 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
+        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof EcPrivateJwk;
         assert privJwk.equals(parsed);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEdEcPublicJwk() {
         PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
@@ -441,15 +429,13 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
+        String jwkJson = Jwks.json(jwk);
         Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
 
         assert parsed instanceof OctetPublicJwk;
         assert jwk.equals(parsed);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testExampleEdEcPrivateJwk() {
         KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
@@ -464,9 +450,8 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
-        String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
+        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof OctetPrivateJwk;
         assert privJwk.equals(parsed);

@@ -41,6 +41,7 @@ public final class Jwks {
     private Jwks() {
     } //prevent instantiation
 
+    private static final String JWKS_BRIDGE_FQCN = "io.jsonwebtoken.impl.security.JwksBridge";
     private static final String BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder";
     private static final String PARSER_BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder";
     private static final String SET_BUILDER_FQCN = "io.jsonwebtoken.impl.security.DefaultJwkSetBuilder";
@@ -103,6 +104,30 @@ public final class Jwks {
      */
     public static JwkSetParserBuilder setParser() {
         return Classes.newInstance(SET_PARSER_BUILDER_FQCN);
+    }
+
+    /**
+     * Converts the specified {@link PublicJwk} into JSON. Because {@link PublicJwk}s do not contain secret or private
+     * key material, they are safe to be printed to application logs or {@code System.out}.
+     *
+     * @param publicJwk the {@code PublicJwk} to convert to JSON
+     * @return the JWK's canonical JSON value
+     */
+    public static String json(PublicJwk<?> publicJwk) {
+        return UNSAFE_JSON(publicJwk); // safe by nature of it being a Public JWK
+    }
+
+    /**
+     * <b>WARNING - UNSAFE OPERATION - RETURN VALUES CONTAIN RAW KEY MATERIAL, DO NOT LOG OR PRINT TO SYSTEM.OUT.</b>
+     * Converts the specified JWK into JSON, including raw key material.  If the specified JWK
+     * is a {@link SecretJwk} or a {@link PrivateJwk}, be very careful with the return value, ensuring it is not
+     * printed to application logs or system.out.
+     *
+     * @param jwk the JWK to convert to JSON
+     * @return the JWK's canonical JSON value
+     */
+    public static String UNSAFE_JSON(Jwk<?> jwk) {
+        return Classes.invokeStatic(JWKS_BRIDGE_FQCN, "UNSAFE_JSON", new Class[]{Jwk.class}, jwk);
     }
 
     /**

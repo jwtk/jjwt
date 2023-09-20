@@ -18,14 +18,10 @@ package io.jsonwebtoken.impl
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
-
-import java.nio.charset.StandardCharsets
+import io.jsonwebtoken.io.Reader
 
 class RfcTests {
-
-    static final Deserializer<Map<String, ?>> JSON_DESERIALIZER = Services.loadFirst(Deserializer)
 
     static String encode(byte[] b) {
         return Encoders.BASE64URL.encode(b)
@@ -40,8 +36,7 @@ class RfcTests {
     }
 
     static final Map<String, ?> jsonToMap(String json) {
-        byte[] bytes = json.getBytes(StandardCharsets.UTF_8)
-        return JSON_DESERIALIZER.deserialize(bytes)
+        return Services.loadFirst(Reader).read(new StringReader(json)) as Map<String, ?>
     }
 
     /**
