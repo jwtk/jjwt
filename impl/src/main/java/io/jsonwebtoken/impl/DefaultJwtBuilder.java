@@ -21,8 +21,8 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.impl.io.MapSerializer;
 import io.jsonwebtoken.impl.io.SerializingMapWriter;
+import io.jsonwebtoken.impl.io.WritingSerializer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
@@ -153,7 +153,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private byte[] serialize(Map<String, ?> map) {
         Nameable nameable = Assert.isInstanceOf(Nameable.class, map, "JWT internal maps implement Nameable.");
         Writer<Map<String, ?>> jsonWriter = Assert.stateNotNull(this.jsonWriter, "JSON Writer cannot be null.");
-        MapSerializer serializer = new MapSerializer(jsonWriter, nameable.getName());
+        WritingSerializer<Map<String, ?>> serializer = new WritingSerializer<>(jsonWriter, nameable.getName());
         ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
         java.io.Writer writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
         try {

@@ -39,7 +39,7 @@ import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.impl.io.JwtDeserializer;
+import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
@@ -917,8 +917,8 @@ public class DefaultJwtParser implements JwtParser {
         ByteArrayInputStream is = new ByteArrayInputStream(bytes);
         java.io.Reader r = new InputStreamReader(is);
         try {
-            JwtDeserializer<Map<String, ?>> jwtd = new JwtDeserializer<>(jsonReader, name);
-            return jwtd.apply(r);
+            JsonObjectDeserializer deserializer = new JsonObjectDeserializer(jsonReader, name);
+            return deserializer.apply(r);
         } finally {
             Objects.nullSafeClose(r);
         }

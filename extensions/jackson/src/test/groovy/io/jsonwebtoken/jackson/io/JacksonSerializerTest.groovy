@@ -32,7 +32,7 @@ class JacksonSerializerTest {
 
     @Before
     void setUp() {
-         serializer = new JacksonSerializer()
+        serializer = new JacksonSerializer()
     }
 
     @Test
@@ -43,7 +43,7 @@ class JacksonSerializerTest {
 
     @Test
     void testDefaultConstructor() {
-        assertSame JacksonWriter.DEFAULT_OBJECT_MAPPER,  serializer.objectMapper
+        assertSame JacksonWriter.DEFAULT_OBJECT_MAPPER, serializer.objectMapper
     }
 
     @Test
@@ -67,11 +67,10 @@ class JacksonSerializerTest {
 
     @Test
     void testSerializeFailsWithJsonProcessingException() {
-
         def ex = new IOException('foo')
         def serializer = new JacksonSerializer() {
             @Override
-            protected void writeValue(Object o, Writer writer) throws IOException {
+            void write(Writer out, Object o) throws IOException {
                 throw ex
             }
         }

@@ -20,22 +20,20 @@ import io.jsonwebtoken.io.SerializationException;
 import io.jsonwebtoken.io.Writer;
 import io.jsonwebtoken.lang.Assert;
 
-import java.util.Map;
+public class WritingSerializer<T> implements BiConsumer<java.io.Writer, T> {
 
-public class MapSerializer implements BiConsumer<java.io.Writer, Map<String, ?>> {
-
-    private final Writer<Map<String, ?>> DELEGATE;
+    private final Writer<T> DELEGATE;
     private final String name;
 
-    public MapSerializer(Writer<Map<String, ?>> jsonWriter, String name) {
+    public WritingSerializer(Writer<T> jsonWriter, String name) {
         this.DELEGATE = Assert.notNull(jsonWriter, "JSON Writer cannot be null.");
         this.name = Assert.hasText(name, "Name cannot be null or empty.");
     }
 
     @Override
-    public void accept(java.io.Writer writer, Map<String, ?> map) {
+    public void accept(java.io.Writer writer, T object) {
         try {
-            this.DELEGATE.write(writer, map);
+            this.DELEGATE.write(writer, object);
         } catch (Throwable t) {
             String msg = String.format("Cannot serialize %s to JSON. Cause: %s", name, t.getMessage());
             throw new SerializationException(msg, t);

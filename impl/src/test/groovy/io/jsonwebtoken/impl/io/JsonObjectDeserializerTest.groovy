@@ -23,7 +23,7 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class JwtDeserializerTest {
+class JsonObjectDeserializerTest {
 
     /**
      * It's possible for JSON parsers to throw a StackOverflowError when body is deeply nested. Since it's possible
@@ -41,10 +41,10 @@ class JwtDeserializerTest {
         try {
             // doesn't matter for this test, just has to be non-null:
             def r = new InputStreamReader(new ByteArrayInputStream(Bytes.EMPTY))
-            new JwtDeserializer<>(reader, 'claims').apply(r)
+            new JsonObjectDeserializer(reader, 'claims').apply(r)
             fail()
         } catch (DeserializationException e) {
-            String msg = String.format(JwtDeserializer.MALFORMED_COMPLEX_ERROR, 'claims', 'foo')
+            String msg = String.format(JsonObjectDeserializer.MALFORMED_COMPLEX_ERROR, 'claims', 'claims', 'foo')
             assertEquals msg, e.message
         }
     }
@@ -64,10 +64,10 @@ class JwtDeserializerTest {
         try {
             // doesn't matter for this test, just has to be non-null:
             def r = new InputStreamReader(new ByteArrayInputStream(Bytes.EMPTY))
-            new JwtDeserializer<>(reader, 'claims').apply(r)
+            new JsonObjectDeserializer(reader, 'claims').apply(r)
             fail()
         } catch (MalformedJwtException e) {
-            String msg = String.format(JwtDeserializer.MALFORMED_ERROR, 'claims', 'foo')
+            String msg = String.format(JsonObjectDeserializer.MALFORMED_ERROR, 'claims', 'foo')
             assertEquals msg, e.message
             assertSame ex, e.cause
         }

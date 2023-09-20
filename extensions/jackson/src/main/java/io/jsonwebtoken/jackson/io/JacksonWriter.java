@@ -58,10 +58,6 @@ public class JacksonWriter<T> implements io.jsonwebtoken.io.Writer<T> {
     @Override
     public void write(Writer out, T t) throws IOException {
         Assert.notNull(out, "Writer cannot be null.");
-        writeValue(t, out);
-    }
-
-    protected void writeValue(T t, Writer writer) throws java.io.IOException {
-        this.objectMapper.writeValue(writer, t);
+        this.objectMapper.writeValue(out, t);
     }
 }

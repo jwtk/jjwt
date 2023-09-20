@@ -117,12 +117,10 @@ class JacksonWriterTest {
 
     @Test
     void testWriteFailsWithJsonProcessingException() {
-
         def ex = new IOException('foo')
-
         writer = new JacksonWriter() {
             @Override
-            protected void writeValue(Object o, java.io.Writer writer) throws java.io.IOException {
+            void write(java.io.Writer out, Object o) throws java.io.IOException {
                 throw ex
             }
         }
