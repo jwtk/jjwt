@@ -30,8 +30,8 @@ import static org.junit.Assert.fail
 
 class RFC7515AppendixETest {
 
-    static final writer = Services.loadFirst(Writer) as Writer<Map<String, ?>>
-    static final reader = Services.loadFirst(Reader) as Reader<Map<String, ?>>
+    static final Writer<Map<String,?>> writer = Services.loadFirst(Writer)
+    static final Reader<Map<String,?>> reader = Services.loadFirst(Reader)
 
     static byte[] ser(Writer writer, def value) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(512)

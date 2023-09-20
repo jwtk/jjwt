@@ -43,8 +43,15 @@ import static org.junit.Assert.*
 
 class JwtsTest {
 
+    private static Date dateWithOnlySecondPrecision(long millis) {
+        long seconds = (millis / 1000) as long
+        long secondOnlyPrecisionMillis = seconds * 1000
+        return new Date(secondOnlyPrecisionMillis)
+    }
+
     private static Date now() {
-        return dateWithOnlySecondPrecision(System.currentTimeMillis())
+        Date date = dateWithOnlySecondPrecision(System.currentTimeMillis())
+        return date
     }
 
     private static int later() {
@@ -59,19 +66,13 @@ class JwtsTest {
         return dateWithOnlySecondPrecision(time)
     }
 
-    private static Date dateWithOnlySecondPrecision(long millis) {
-        long seconds = (millis / 1000) as long
-        long secondOnlyPrecisionMillis = seconds * 1000
-        return new Date(secondOnlyPrecisionMillis)
-    }
-
     protected static String base64Url(String s) {
         byte[] bytes = s.getBytes(Strings.UTF_8)
         return Encoders.BASE64URL.encode(bytes)
     }
 
-    protected static String toJson(o) {
-        def writer = Services.loadFirst(Writer) as Writer<Map<String, ?>>
+    static def toJson(def o) {
+        def writer = Services.loadFirst(Writer)
         StringWriter w = new StringWriter(512)
         writer.write(w, o)
         return w.toString()

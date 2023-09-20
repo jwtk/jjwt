@@ -44,7 +44,7 @@ class DefaultJwtBuilderTest {
     private DefaultJwtBuilder builder
 
     private static byte[] serialize(Map<String, ?> map) {
-        def writer = Services.loadFirst(Writer) as Writer<Map<String, ?>>
+        def writer = Services.loadFirst(Writer)
         ByteArrayOutputStream baos = new ByteArrayOutputStream(512)
         OutputStreamWriter w = new OutputStreamWriter(baos, StandardCharsets.UTF_8)
         writer.write(w, map)
