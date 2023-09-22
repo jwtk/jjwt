@@ -15,21 +15,49 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.io.CompressionAlgorithm;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 class Payload {
 
-    static final Payload EMPTY = new Payload(null, null, null);
+    static final Payload EMPTY = new Payload(Bytes.EMPTY, null);
 
-    private String string;
-    private byte[] bytes;
-    private String contentType;
+    private final String string;
+    private final byte[] bytes;
+    private final Claims claims;
+    private final String contentType;
 
-    Payload(String string, byte[] bytes, String contentType) {
-        this.string = Strings.clean(string);
+    private CompressionAlgorithm zip;
+
+    Payload(String content, String contentType) {
+        this(null, content, null, contentType);
+    }
+
+    Payload(byte[] content, String contentType) {
+        this(null, null, content, contentType);
+    }
+
+    Payload(Claims claims, String contentType) {
+        this(claims, null, null, contentType);
+    }
+
+    private Payload(Claims claims, String string, byte[] bytes, String contentType) {
+        this.claims = claims;
         this.bytes = Bytes.nullSafe(bytes);
+        this.string = Strings.clean(string);
         this.contentType = Strings.clean(contentType);
+    }
+
+    Claims getRequiredClaims() {
+        return Assert.notEmpty(this.claims, "Claims cannot be null or empty when calling this method.");
     }
 
     String getString() {
@@ -40,17 +68,27 @@ class Payload {
         return this.contentType;
     }
 
-    boolean isEmpty() {
-        return !Strings.hasText(this.string) && Bytes.isEmpty(this.bytes);
+    public void setZip(CompressionAlgorithm zip) {
+        this.zip = zip;
     }
 
-    byte[] toByteArray() {
-        if (Bytes.isEmpty(this.bytes)) {
-            if (!Strings.hasText(this.string)) {
-                throw new IllegalStateException("Content is empty.");
-            }
-            this.bytes = Strings.utf8(this.string);
+    boolean isEmpty() {
+        return Collections.isEmpty(this.claims) && Bytes.isEmpty(this.bytes) && !Strings.hasText(this.string);
+    }
+
+    public OutputStream wrap(OutputStream out) {
+        return this.zip != null ? zip.wrap(out) : out;
+    }
+
+    boolean hasClaims() {
+        return !Collections.isEmpty(this.claims);
+    }
+
+    InputStream toInputStream() {
+        byte[] data = this.bytes;
+        if (Bytes.isEmpty(data) && Strings.hasText(this.string)) {
+            data = Strings.utf8(this.string);
         }
-        return this.bytes;
+        return new ByteArrayInputStream(Bytes.nullSafe(data));
     }
 }

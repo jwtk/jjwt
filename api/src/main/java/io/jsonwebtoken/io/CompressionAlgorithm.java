@@ -19,6 +19,8 @@ import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.Jwts;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 /**
@@ -43,6 +45,10 @@ import java.util.Collection;
  */
 public interface CompressionAlgorithm extends Identifiable {
 
+    OutputStream wrap(OutputStream out) throws CompressionException;
+
+    InputStream wrap(InputStream in) throws CompressionException;
+
     /**
      * Compresses the specified byte array, returning the compressed byte array result.
      *
@@ -50,6 +56,7 @@ public interface CompressionAlgorithm extends Identifiable {
      * @return compressed bytes
      * @throws CompressionException if the specified byte array cannot be compressed.
      */
+    @Deprecated
     byte[] compress(byte[] content) throws CompressionException;
 
     /**
@@ -60,5 +67,6 @@ public interface CompressionAlgorithm extends Identifiable {
      * @return decompressed bytes
      * @throws CompressionException if the specified byte array cannot be decompressed.
      */
+    @Deprecated
     byte[] decompress(byte[] compressed) throws CompressionException;
 }

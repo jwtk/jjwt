@@ -318,7 +318,7 @@ class DefaultJwtBuilderTest {
             b.compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Cannot serialize JWT Claims to JSON. Cause: dummy text', expected.message
+            assertEquals 'Cannot serialize JWT header to JSON. Cause: dummy text', expected.message
         }
     }
 
@@ -472,6 +472,10 @@ class DefaultJwtBuilderTest {
             @Override
             Object encode(Object o) throws EncodingException {
                 return null
+            }
+            @Override
+            OutputStream wrap(OutputStream out) {
+                return out
             }
         }
         def b = new DefaultJwtBuilder().encoder(encoder)

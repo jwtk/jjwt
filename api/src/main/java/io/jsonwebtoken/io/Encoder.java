@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.io;
 
+import java.io.OutputStream;
+
 /**
  * An encoder converts data of one type into another formatted data value.
  *
@@ -32,4 +34,12 @@ public interface Encoder<T, R> {
      * @throws EncodingException if there is a problem during encoding
      */
     R encode(T t) throws EncodingException;
+
+    /**
+     * Wraps the specified {@code OutputStream} to ensure any stream bytes are encoded.
+     *
+     * @param out the output stream to encode
+     * @return a new output stream that will encode stream content
+     */
+    OutputStream wrap(OutputStream out);
 }

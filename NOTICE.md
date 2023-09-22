@@ -1,6 +1,6 @@
 ## Base64 implementation
 
-JJWT's `io.jsonwebtoken.io.Base64` implementation is based on [MigBase64](https://github.com/brsanthu/migbase64) with 
+JJWT's `io.jsonwebtoken.impl.io.b64.Base64` implementation is based on [MigBase64](https://github.com/brsanthu/migbase64) with 
 continued modifications for Base64 URL support and additional test cases. The MigBase64 copyright and license notice 
 have been retained and are repeated here per that code's requirements:
 

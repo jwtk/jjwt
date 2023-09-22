@@ -68,11 +68,14 @@ final class Base64 { //final and package-protected on purpose
         this.IALPHABET = urlsafe ? BASE64URL_IALPHABET : BASE64_IALPHABET;
     }
 
+    public boolean isUrlsafe() {
+        return this.urlsafe;
+    }
+
     // ****************************************************************************************
     // *  char[] version
     // ****************************************************************************************
-
-    private String getName() {
+    String getName() {
         return urlsafe ? "base64url" : "base64"; // RFC 4648 codec names are all lowercase
     }
 

@@ -15,43 +15,46 @@
  */
 package io.jsonwebtoken.impl.compression
 
-import io.jsonwebtoken.CompressionCodec
 import io.jsonwebtoken.CompressionException
+import io.jsonwebtoken.impl.lang.Bytes
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertSame
 
 /**
  * @since 0.6.0
  */
 class AbstractCompressionAlgorithmTest {
-    static class ExceptionThrowingAlgorithm extends AbstractCompressionAlgorithm {
 
-        ExceptionThrowingAlgorithm() {
-            super("Test")
-        }
+    @Test
+    void testCompressNull() {
+        def alg = new ExceptionThrowingAlgorithm()
+        assertSame Bytes.EMPTY, alg.compress(null)
+    }
 
-        @Override
-        protected byte[] doCompress(byte[] payload) throws IOException {
-            throw new IOException("Test Exception")
-        }
-
-        @Override
-        protected byte[] doDecompress(byte[] payload) throws IOException {
-            throw new IOException("Test Decompress Exception")
-        }
+    @Test
+    void testCompressEmpty() {
+        def alg = new ExceptionThrowingAlgorithm()
+        assertSame Bytes.EMPTY, alg.compress(new byte[0])
     }
 
     @Test(expected = CompressionException.class)
     void testCompressWithException() {
-        CompressionCodec codecUT = new ExceptionThrowingAlgorithm()
-        codecUT.compress(new byte[0])
+        def alg = new ExceptionThrowingAlgorithm()
+        alg.compress(new byte[1])
+    }
+
+    @Test
+    void testDecompressEmpty() {
+        def alg = new ExceptionThrowingAlgorithm()
+        assertSame Bytes.EMPTY, alg.decompress(new byte[0])
     }
 
     @Test(expected = CompressionException.class)
     void testDecompressWithException() {
-        CompressionCodec codecUT = new ExceptionThrowingAlgorithm()
-        codecUT.decompress(new byte[0])
+        def alg = new ExceptionThrowingAlgorithm()
+        alg.decompress(new byte[1])
     }
 
     @Test
@@ -62,5 +65,27 @@ class AbstractCompressionAlgorithmTest {
     @Test
     void testAlgorithmName() {
         assertEquals "Test", new ExceptionThrowingAlgorithm().getAlgorithmName()
+    }
+
+    static class ExceptionThrowingAlgorithm extends AbstractCompressionAlgorithm {
+
+        ExceptionThrowingAlgorithm() {
+            super("Test")
+        }
+
+        @Override
+        protected OutputStream doWrap(OutputStream out) throws IOException {
+            throw new IOException("Test Wrap OutputStream Exception")
+        }
+
+        @Override
+        protected InputStream doWrap(InputStream is) throws IOException {
+            throw new IOException("Test Wrap InputStream Exception")
+        }
+
+        @Override
+        protected byte[] doDecompress(byte[] payload) throws IOException {
+            throw new IOException("Test Decompress Exception")
+        }
     }
 }

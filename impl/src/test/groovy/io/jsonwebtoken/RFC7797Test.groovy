@@ -215,8 +215,7 @@ class RFC7797Test {
         def zip = Jwts.ZIP.DEF
 
         // create a detached unencoded JWS that is compressed:
-        String s = Jwts.builder().content(payload).encodePayload(false)
-                .compressWith(zip).signWith(key).compact()
+        String s = Jwts.builder().content(payload).encodePayload(false).compressWith(zip).signWith(key).compact()
 
         def jws = Jwts.parser().critical('b64').verifyWith(key).build()
                 .parseContentJws(s, zip.compress(payload)) // <--- need to specify compressed unencoded payload bytes

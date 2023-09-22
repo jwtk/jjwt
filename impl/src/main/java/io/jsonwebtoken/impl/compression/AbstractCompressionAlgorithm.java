@@ -17,11 +17,16 @@ package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionException;
+import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.Function;
+import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,12 +37,54 @@ import java.io.OutputStream;
  *
  * @since 0.6.0
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractCompressionAlgorithm implements CompressionAlgorithm, CompressionCodec {
 
+    private static <T, R> Function<T, R> propagate(CheckedFunction<T, R> fn, String msg) {
+        return new PropagatingExceptionFunction<>(fn, CompressionException.class, msg);
+    }
+
+    private static <T, R> Function<T, R> forCompression(CheckedFunction<T, R> fn) {
+        return propagate(fn, "Compression failed.");
+    }
+
+    private static <T, R> Function<T, R> forDecompression(CheckedFunction<T, R> fn) {
+        return propagate(fn, "Decompression failed.");
+    }
+
     private final String id;
+    private final Function<OutputStream, OutputStream> OS_WRAP_FN;
+    private final Function<InputStream, InputStream> IS_WRAP_FN;
+    private final Function<byte[], byte[]> COMPRESS_FN;
+
+    private final Function<byte[], byte[]> DECOMPRESS_FN;
 
     protected AbstractCompressionAlgorithm(String id) {
         this.id = Assert.hasText(Strings.clean(id), "id argument cannot be null or empty.");
+        this.OS_WRAP_FN = forCompression(new CheckedFunction<OutputStream, OutputStream>() {
+            @Override
+            public OutputStream apply(OutputStream out) throws Exception {
+                return doWrap(out);
+            }
+        });
+        this.COMPRESS_FN = forCompression(new CheckedFunction<byte[], byte[]>() {
+            @Override
+            public byte[] apply(byte[] data) throws Exception {
+                return doCompress(data);
+            }
+        });
+        this.IS_WRAP_FN = forDecompression(new CheckedFunction<InputStream, InputStream>() {
+            @Override
+            public InputStream apply(InputStream is) throws Exception {
+                return doWrap(is);
+            }
+        });
+        this.DECOMPRESS_FN = forDecompression(new CheckedFunction<byte[], byte[]>() {
+            @Override
+            public byte[] apply(byte[] data) throws Exception {
+                return doDecompress(data);
+            }
+        });
     }
 
     @Override
@@ -50,70 +97,38 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
         return getId();
     }
 
-    //package-protected for a point release.  This can be made protected on a minor release (0.11.0, 0.12.0, 1.0, etc).
-    //TODO: make protected on a minor release
-    interface StreamWrapper {
-        OutputStream wrap(OutputStream out) throws IOException;
+    @Override
+    public final OutputStream wrap(final OutputStream out) throws CompressionException {
+        return OS_WRAP_FN.apply(out);
     }
 
-    //package-protected for a point release.  This can be made protected on a minor release (0.11.0, 0.12.0, 1.0, etc).
-    //TODO: make protected on a minor release
-    byte[] readAndClose(InputStream input) throws IOException {
-        byte[] buffer = new byte[512];
-        ByteArrayOutputStream out = new ByteArrayOutputStream(buffer.length);
-        int read;
+    protected abstract OutputStream doWrap(OutputStream out) throws IOException;
+
+    @Override
+    public final InputStream wrap(InputStream is) throws CompressionException {
+        return IS_WRAP_FN.apply(is);
+    }
+
+    protected abstract InputStream doWrap(InputStream is) throws IOException;
+
+    @Override
+    public final byte[] compress(byte[] content) {
+        if (Bytes.isEmpty(content)) return Bytes.EMPTY;
+        return this.COMPRESS_FN.apply(content);
+    }
+
+    private byte[] doCompress(byte[] data) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512);
+        OutputStream compression = wrap(out);
         try {
-            read = input.read(buffer); //assignment separate from loop invariant check for code coverage checks
-            while (read != -1) {
-                out.write(buffer, 0, read);
-                read = input.read(buffer);
-            }
+            compression.write(data);
+            compression.flush();
         } finally {
-            Objects.nullSafeClose(input);
+            Objects.nullSafeClose(compression);
         }
         return out.toByteArray();
     }
 
-    //package-protected for a point release.  This can be made protected on a minor release (0.11.0, 0.12.0, 1.0, etc).
-    //TODO: make protected on a minor release
-    byte[] writeAndClose(byte[] content, StreamWrapper wrapper) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(512);
-        OutputStream compressionStream = wrapper.wrap(outputStream);
-        try {
-            compressionStream.write(content);
-            compressionStream.flush();
-        } finally {
-            Objects.nullSafeClose(compressionStream);
-        }
-        return outputStream.toByteArray();
-    }
-
-    /**
-     * Implement this method to do the actual work of compressing the content
-     *
-     * @param content the bytes to compress
-     * @return the compressed bytes
-     * @throws IOException if the compression causes an IOException
-     */
-    protected abstract byte[] doCompress(byte[] content) throws IOException;
-
-    /**
-     * Asserts that content is not null and calls {@link #doCompress(byte[]) doCompress}
-     *
-     * @param content bytes to compress
-     * @return compressed bytes
-     * @throws CompressionException if {@link #doCompress(byte[]) doCompress} throws an IOException
-     */
-    @Override
-    public final byte[] compress(byte[] content) {
-        Assert.notNull(content, "content cannot be null.");
-
-        try {
-            return doCompress(content);
-        } catch (IOException e) {
-            throw new CompressionException("Unable to compress content.", e);
-        }
-    }
 
     /**
      * Asserts the compressed bytes is not null and calls {@link #doDecompress(byte[]) doDecompress}
@@ -124,13 +139,8 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
      */
     @Override
     public final byte[] decompress(byte[] compressed) {
-        Assert.notNull(compressed, "compressed bytes cannot be null.");
-
-        try {
-            return doDecompress(compressed);
-        } catch (IOException e) {
-            throw new CompressionException("Unable to decompress bytes.", e);
-        }
+        if (Bytes.isEmpty(compressed)) return Bytes.EMPTY;
+        return this.DECOMPRESS_FN.apply(compressed);
     }
 
     /**
@@ -140,5 +150,21 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
      * @return decompressed bytes
      * @throws IOException if the decompression runs into an IO problem
      */
-    protected abstract byte[] doDecompress(byte[] compressed) throws IOException;
+    protected byte[] doDecompress(byte[] compressed) throws IOException {
+        InputStream is = new ByteArrayInputStream(compressed);
+        InputStream decompress = wrap(is);
+        byte[] buffer = new byte[512];
+        ByteArrayOutputStream out = new ByteArrayOutputStream(buffer.length);
+        int read;
+        try {
+            read = decompress.read(buffer); //assignment separate from loop invariant check for code coverage checks
+            while (read != -1) {
+                out.write(buffer, 0, read);
+                read = decompress.read(buffer);
+            }
+        } finally {
+            Objects.nullSafeClose(decompress);
+        }
+        return out.toByteArray();
+    }
 }

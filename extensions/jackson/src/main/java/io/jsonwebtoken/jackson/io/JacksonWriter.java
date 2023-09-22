@@ -15,8 +15,10 @@
  */
 package io.jsonwebtoken.jackson.io;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jsonwebtoken.lang.Assert;
 
@@ -58,6 +60,11 @@ public class JacksonWriter<T> implements io.jsonwebtoken.io.Writer<T> {
     @Override
     public void write(Writer out, T t) throws IOException {
         Assert.notNull(out, "Writer cannot be null.");
-        this.objectMapper.writeValue(out, t);
+        ObjectWriter writer = this.objectMapper.writer().without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        writer.writeValue(out, t);
+//        out.close();
+//        byte[] array = writer.writeValueAsBytes(t);
+//        //this.objectMapper.writeValue(out, t);
+//        System.out.println("done");
     }
 }

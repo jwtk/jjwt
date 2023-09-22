@@ -265,6 +265,28 @@ public final class Strings {
     }
 
     /**
+     * Returns {@code new String(asciiBytes, StandardCharsets.US_ASCII)}.
+     *
+     * @param asciiBytes US_ASCII bytes to use with the {@code String} constructor.
+     * @return {@code new String(asciiBytes, StandardCharsets.US_ASCII)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static String ascii(byte[] asciiBytes) {
+        return new String(asciiBytes, StandardCharsets.US_ASCII);
+    }
+
+    public static byte[] ascii(CharSequence s) {
+        byte[] bytes = null;
+        if (s != null) {
+            CharBuffer cb = s instanceof CharBuffer ? (CharBuffer) s : CharBuffer.wrap(s);
+            ByteBuffer buf = StandardCharsets.US_ASCII.encode(cb);
+            bytes = new byte[buf.remaining()];
+            buf.get(bytes);
+        }
+        return bytes;
+    }
+
+    /**
      * Returns a {@code CharBuffer} that wraps {@code seq}, or an empty buffer if {@code seq} is null. If
      * {@code seq} is already a {@code CharBuffer}, it is returned unmodified.
      *

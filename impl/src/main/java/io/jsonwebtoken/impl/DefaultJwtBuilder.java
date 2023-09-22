@@ -22,6 +22,7 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.io.SerializingMapWriter;
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.WritingSerializer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
@@ -62,6 +63,7 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -151,19 +153,15 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this;
     }
 
-    private byte[] serialize(Map<String, ?> map) {
-        Nameable nameable = Assert.isInstanceOf(Nameable.class, map, "JWT internal maps implement Nameable.");
-        Writer<Map<String, ?>> jsonWriter = Assert.stateNotNull(this.jsonWriter, "JSON Writer cannot be null.");
-        WritingSerializer<Map<String, ?>> serializer = new WritingSerializer<>(jsonWriter, nameable.getName());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
-        java.io.Writer writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
-        try {
-            serializer.accept(writer, map);
-        } finally {
-            Objects.nullSafeClose(writer);
-        }
-        return baos.toByteArray();
-    }
+//    private byte[] serialize(Map<String, ?> map) {
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
+//        try {
+//            serialize(baos, map);
+//        } finally {
+//            Objects.nullSafeClose(baos);
+//        }
+//        return baos.toByteArray();
+//    }
 
     @Override
     public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> encoder) {
@@ -360,7 +358,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder content(String content) {
         if (Strings.hasText(content)) {
-            this.payload = new Payload(content, Bytes.EMPTY, null);
+            this.payload = new Payload(content, null);
         }
         return this;
     }
@@ -368,7 +366,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder content(byte[] content) {
         if (!Bytes.isEmpty(content)) {
-            this.payload = new Payload(null, content, null);
+            this.payload = new Payload(content, null);
         }
         return this;
     }
@@ -377,7 +375,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder content(byte[] content, String cty) {
         Assert.notEmpty(content, "content byte array cannot be null or empty.");
         Assert.hasText(cty, "Content Type String cannot be null or empty.");
-        this.payload = new Payload(null, content, cty);
+        this.payload = new Payload(content, cty);
         // clear out any previous value - it will be set appropriately during compact()
         return header().delete(DefaultHeader.CONTENT_TYPE.getId()).and();
     }
@@ -499,18 +497,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
     }
 
-//    @Override
-//    public void compactTo(java.io.Writer writer) {
-//        Assert.notNull(writer, "Writer argument cannot be null.");
-//        String s = compact();
-//        try {
-//            writer.write(s);
-//        } catch (Throwable t) {
-//            String msg = "Unable to write compact JWT: " + t.getMessage();
-//            throw new IOException(msg, t);
-//        }
-//    }
-
     @Override
     public String compact() {
 
@@ -524,14 +510,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Payload content = Assert.stateNotNull(this.payload, "content instance null, internal error");
         final Claims claims = this.claimsBuilder.build();
 
-        if (content.isEmpty() && Collections.isEmpty(claims)) {
-            if (jwe) { // JWE payload can never be empty:
-                String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'.";
-                throw new IllegalStateException(msg);
-            } else { //JWS or Unprotected JWT payloads can be empty
-                content = new Payload(null, Bytes.EMPTY, content.getContentType());
-            }
-        }
+        if (jwe && content.isEmpty() && Collections.isEmpty(claims)) { // JWE payload can never be empty:
+            String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'.";
+            throw new IllegalStateException(msg);
+        } // otherwise JWS and Unprotected JWT payloads can be empty
+
         if (!content.isEmpty() && !Collections.isEmpty(claims)) {
             throw new IllegalStateException("Both 'content' and 'claims' cannot be specified. Choose either one.");
         }
@@ -542,13 +525,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
 
         if (!Collections.isEmpty(claims)) { // normalize so we have one object to deal with:
-            byte[] serialized = serialize(claims);
-            content = new Payload(null, serialized, null);
+            content = new Payload(claims, content.getContentType());
         }
         if (compressionAlgorithm != null && !content.isEmpty()) {
-            byte[] data = content.toByteArray();
-            data = compressionAlgorithm.compress(data);
-            content = new Payload(null, data, content.getContentType());
+            content.setZip(compressionAlgorithm);
             this.headerBuilder.put(DefaultHeader.COMPRESSION_ALGORITHM.getId(), compressionAlgorithm.getId());
         }
 
@@ -569,6 +549,33 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
     }
 
+    // automatically closes the OutputStream
+    private void writeAndClose(OutputStream os, Map<String, ?> map) {
+        Nameable nameable = Assert.isInstanceOf(Nameable.class, map, "JWT internal maps implement Nameable.");
+        Writer<Map<String, ?>> jsonWriter = Assert.stateNotNull(this.jsonWriter, "JSON Writer cannot be null.");
+        WritingSerializer<Map<String, ?>> serializer = new WritingSerializer<>(jsonWriter, nameable.getName());
+        java.io.Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+        try {
+            serializer.accept(writer, map);
+        } finally {
+            Objects.nullSafeClose(writer);
+        }
+    }
+
+    private long writeAndClose(OutputStream out, final Payload payload) {
+        out = payload.wrap(out); // compression if necessary
+        if (payload.hasClaims()) {
+            writeAndClose(out, payload.getRequiredClaims());
+            return -1;
+        } else {
+            try {
+                return Streams.copy(payload.toInputStream(), out, new byte[4096], "Unable to write payload.");
+            } finally {
+                Objects.nullSafeClose(out);
+            }
+        }
+    }
+
     private String sign(final Payload content, final Key key, final Provider provider) {
 
         Assert.stateNotNull(key, "Key is required."); // set by signWithWith*
@@ -576,49 +583,59 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(signFunction, "Signature Algorithm function cannot be null.");
         Assert.stateNotNull(content, "Payload argument cannot be null.");
 
+        // ----- header -----
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
-
         if (!this.encodePayload) { // b64 extension:
-            if (content.isEmpty()) {
-                String msg = "'b64' Unencoded payload option has been specified, but payload is empty.";
-                throw new IllegalStateException(msg);
-            }
             String id = DefaultJwsHeader.B64.getId();
             this.headerBuilder.critical(id).add(id, false);
         }
+        final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build());
+        final ByteArrayOutputStream jws = new ByteArrayOutputStream(4096);
+        OutputStream out = this.encoder.wrap(jws);
+        writeAndClose(out, header);
 
-        final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build(),
-                "Invalid header created: ");
+        // ----- separator -----
+        jws.write(DefaultJwtParser.SEPARATOR_CHAR);
 
-        byte[] headerBytes = serialize(header);
-        String b64UrlHeader = encoder.encode(headerBytes);
-
-        String jwt = b64UrlHeader + DefaultJwtParser.SEPARATOR_CHAR;
-        String payloadString = Strings.EMPTY; // can be empty for JWS
-
+        // ----- payload -----
         // Logic defined by table in https://datatracker.ietf.org/doc/html/rfc7797#section-3 :
         byte[] signingInput;
         if (this.encodePayload) {
-            if (!content.isEmpty()) {
-                payloadString = encoder.encode(content.toByteArray());
+            out = this.encoder.wrap(jws);
+            writeAndClose(out, content);
+            signingInput = jws.toByteArray();
+        } else { // b64
+
+            // First, include the base64url header bytes + the SEPARATOR_CHAR byte:
+            ByteArrayOutputStream pos = new ByteArrayOutputStream(4096);
+            Streams.write(pos, jws.toByteArray(), "Unable to copy header bytes for signature verification.");
+
+            // Next, b64 extension requires the raw (non-encoded) payload to be included directly in the signing input:
+            long copied = writeAndClose(pos, content);
+            if (copied <= 0) {
+                String msg = "'b64' Unencoded payload option has been specified, but payload is empty.";
+                throw new IllegalStateException(msg);
             }
-            jwt += payloadString;
-            signingInput = jwt.getBytes(StandardCharsets.US_ASCII);
-        } else {
-            // b64 extension payload included directly in signing input:
-            signingInput = Bytes.concat(jwt.getBytes(StandardCharsets.US_ASCII), content.toByteArray());
+
+            signingInput = pos.toByteArray(); // base64url header bytes + separator char + raw payload bytes
+
             if (Strings.hasText(content.getString())) {
                 // 'unencoded non-detached' per https://datatracker.ietf.org/doc/html/rfc7797#section-5.2
-                jwt += content.getString();
+                byte[] utf8 = Strings.utf8(content.getString());
+                Streams.write(jws, utf8, "Unable to write non-detached String bytes.");
             }
         }
 
+        // ----- separator -----
+        jws.write(DefaultJwtParser.SEPARATOR_CHAR);
+
+        // ----- signature -----
         SecureRequest<byte[], Key> request = new DefaultSecureRequest<>(signingInput, provider, secureRandom, key);
         byte[] signature = signFunction.apply(request);
-        String base64UrlSignature = encoder.encode(signature);
-        jwt += DefaultJwtParser.SEPARATOR_CHAR + base64UrlSignature;
+        out = this.encoder.wrap(jws);
+        Streams.writeAndClose(out, signature, "Unable to write signature bytes");
 
-        return jwt;
+        return Strings.utf8(jws.toByteArray());
     }
 
     private String unprotected(final Payload content) {
@@ -627,18 +644,22 @@ public class DefaultJwtBuilder implements JwtBuilder {
         assertPayloadEncoding("unprotected JWT");
 
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), Jwts.SIG.NONE.getId());
+
+        // ----- header -----
         final Header header = this.headerBuilder.build();
-        byte[] headerBytes = serialize(header);
+        final ByteArrayOutputStream jwt = new ByteArrayOutputStream(512);
+        OutputStream out = this.encoder.wrap(jwt);
+        writeAndClose(out, header);
 
-        String b64UrlHeader = encoder.encode(headerBytes);
-        String b64UrlPayload = Strings.EMPTY;
-        if (!content.isEmpty()) {
-            b64UrlPayload = encoder.encode(content.toByteArray());
-        }
+        // ----- payload -----
+        jwt.write(DefaultJwtParser.SEPARATOR_CHAR);
+        out = this.encoder.wrap(jwt);
+        writeAndClose(out, content);
 
-        return b64UrlHeader + DefaultJwtParser.SEPARATOR_CHAR +
-                // Must terminate with a period per https://www.rfc-editor.org/rfc/rfc7519#section-6.1 :
-                b64UrlPayload + DefaultJwtParser.SEPARATOR_CHAR;
+        // ----- period terminator -----
+        jwt.write(DefaultJwtParser.SEPARATOR_CHAR); // https://www.rfc-editor.org/rfc/rfc7519#section-6.1
+
+        return Strings.ascii(jwt.toByteArray());
     }
 
     private String encrypt(final Payload content, final Key key, final Provider keyProvider) {
@@ -650,7 +671,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlg, "KeyAlgorithm is required."); //set by encryptWith*
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
-        final byte[] payload = Assert.notEmpty(content.toByteArray(),
+
+        ByteArrayOutputStream pos = new ByteArrayOutputStream(4096);
+        writeAndClose(pos, content);
+        final byte[] payload = Assert.notEmpty(pos.toByteArray(),
                 "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
@@ -670,9 +694,16 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final JweHeader header = Assert.isInstanceOf(JweHeader.class, this.headerBuilder.build(),
                 "Invalid header created: ");
 
-        byte[] headerBytes = serialize(header);
-        final String base64UrlEncodedHeader = encoder.encode(headerBytes);
-        byte[] aad = base64UrlEncodedHeader.getBytes(StandardCharsets.US_ASCII);
+        ByteArrayOutputStream jwe = new ByteArrayOutputStream(4096);
+        OutputStream out = this.encoder.wrap(jwe); // automatically base64url-encode as we write
+        writeAndClose(out, header);
+        Objects.nullSafeClose(out); // closes/flushes the 'out' (base64url-encoding) stream, not 'jwe' (since BAOSs don't close)
+
+        // JWE RFC requires AAD to be the ASCII bytes of the Base64URL-encoded header. Since the header bytes are
+        // already Base64URL-encoded at this point (via the encoder.wrap call just above), and Base64Url-encoding uses
+        // only ASCII characters, we don't need to use StandardCharsets.US_ASCII to explicitly convert here - just
+        // use the already-encoded (ascii) bytes:
+        byte[] aad = jwe.toByteArray();
 
         // During encryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
@@ -688,16 +719,19 @@ public class DefaultJwtBuilder implements JwtBuilder {
         byte[] tag = Assert.notEmpty(encResult.getDigest(),
                 "Encryption result must have a non-empty authentication tag.");
 
-        String base64UrlEncodedEncryptedCek = encoder.encode(encryptedCek);
-        String base64UrlEncodedIv = encoder.encode(iv);
-        String base64UrlEncodedCiphertext = encoder.encode(ciphertext);
-        String base64UrlEncodedTag = encoder.encode(tag);
+        jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
+        Streams.writeAndClose(this.encoder.wrap(jwe), encryptedCek, "Unable to write encrypted CEK.");
 
-        return base64UrlEncodedHeader + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedEncryptedCek + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedIv + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedCiphertext + DefaultJwtParser.SEPARATOR_CHAR +
-                base64UrlEncodedTag;
+        jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
+        Streams.writeAndClose(this.encoder.wrap(jwe), iv, "Unable to write initialization vector.");
+
+        jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
+        Streams.writeAndClose(this.encoder.wrap(jwe), ciphertext, "Unable to write ciphertext.");
+
+        jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
+        Streams.writeAndClose(this.encoder.wrap(jwe), tag, "Unable to write AAD tag.");
+
+        return Strings.utf8(jwe.toByteArray());
     }
 
     private static class DefaultBuilderClaims extends DelegatingClaimsMutator<BuilderClaims> implements BuilderClaims {

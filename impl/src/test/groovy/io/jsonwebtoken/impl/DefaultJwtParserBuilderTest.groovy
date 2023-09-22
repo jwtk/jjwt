@@ -400,6 +400,16 @@ class DefaultJwtParserBuilderTest {
         byte[] decompress(byte[] compressed) throws CompressionException {
             return new byte[0]
         }
+
+        @Override
+        OutputStream wrap(OutputStream out) throws CompressionException {
+            return out
+        }
+
+        @Override
+        InputStream wrap(InputStream inputStream) throws CompressionException {
+            return inputStream
+        }
     }
 
     static class TestAeadAlgorithm implements AeadAlgorithm {

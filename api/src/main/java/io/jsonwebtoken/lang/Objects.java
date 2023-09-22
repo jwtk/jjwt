@@ -16,6 +16,7 @@
 package io.jsonwebtoken.lang;
 
 import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -1004,6 +1005,25 @@ public final class Objects {
                     closeable.close();
                 } catch (IOException e) {
                     //Ignore the exception during close.
+                }
+            }
+        }
+    }
+
+    /**
+     * Iterate over the specified {@link Flushable} instances, invoking
+     * {@link Flushable#flush()} on each one, ignoring any potential {@link IOException}s.
+     *
+     * @param flushables the flushables to flush.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static void nullSafeFlush(Flushable... flushables) {
+        if (flushables == null) return;
+        for (Flushable flushable : flushables) {
+            if (flushable != null) {
+                try {
+                    flushable.flush();
+                } catch (IOException ignored) {
                 }
             }
         }

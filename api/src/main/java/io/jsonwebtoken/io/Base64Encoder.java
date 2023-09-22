@@ -17,6 +17,8 @@ package io.jsonwebtoken.io;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.io.OutputStream;
+
 /**
  * Very fast <a href="https://datatracker.ietf.org/doc/html/rfc4648#section-4">Base64</a> encoder guaranteed to
  * work in all &gt;= Java 7 JDK and Android environments.
@@ -26,7 +28,7 @@ import io.jsonwebtoken.lang.Assert;
 class Base64Encoder extends Base64Support implements Encoder<byte[], String> {
 
     Base64Encoder() {
-        super(Base64.DEFAULT);
+        this(Base64.DEFAULT);
     }
 
     Base64Encoder(Base64 base64) {
@@ -37,5 +39,10 @@ class Base64Encoder extends Base64Support implements Encoder<byte[], String> {
     public String encode(byte[] bytes) throws EncodingException {
         Assert.notNull(bytes, "byte array argument cannot be null");
         return this.base64.encodeToString(bytes, false);
+    }
+
+    @Override
+    public OutputStream wrap(OutputStream out) {
+        return new Base64OutputStream(out, true, base64.isUrlsafe());
     }
 }

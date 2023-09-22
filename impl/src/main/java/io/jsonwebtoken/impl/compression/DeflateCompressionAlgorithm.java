@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.lang.Objects;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,26 +34,24 @@ public class DeflateCompressionAlgorithm extends AbstractCompressionAlgorithm {
 
     private static final String ID = "DEF";
 
-    private static final StreamWrapper WRAPPER = new StreamWrapper() {
-        @Override
-        public OutputStream wrap(OutputStream out) {
-            return new DeflaterOutputStream(out);
-        }
-    };
-
     public DeflateCompressionAlgorithm() {
         super(ID);
     }
 
     @Override
-    protected byte[] doCompress(byte[] content) throws IOException {
-        return writeAndClose(content, WRAPPER);
+    protected OutputStream doWrap(OutputStream out) {
+        return new DeflaterOutputStream(out);
+    }
+
+    @Override
+    protected InputStream doWrap(InputStream is) {
+        return new InflaterInputStream(is);
     }
 
     @Override
     protected byte[] doDecompress(final byte[] compressed) throws IOException {
         try {
-            return readAndClose(new InflaterInputStream(new ByteArrayInputStream(compressed)));
+            return super.doDecompress(compressed);
         } catch (IOException e1) {
             try {
                 return doDecompressBackCompat(compressed);
@@ -66,7 +63,7 @@ public class DeflateCompressionAlgorithm extends AbstractCompressionAlgorithm {
 
     /**
      * This implementation was in 0.10.6 and earlier - it will be used as a fallback for backwards compatibility if
-     * {@link #readAndClose(InputStream)} fails per <a href="https://github.com/jwtk/jjwt/issues/536">Issue 536</a>.
+     * {@link #doDecompress(byte[])} fails per <a href="https://github.com/jwtk/jjwt/issues/536">Issue 536</a>.
      *
      * @param compressed the compressed byte array
      * @return decompressed bytes
