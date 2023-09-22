@@ -23,6 +23,7 @@ import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
+import java.io.InputStream;
 import java.security.Key;
 
 abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> extends CryptoAlgorithm implements SecureDigestAlgorithm<S, V> {
@@ -38,10 +39,10 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
     protected abstract void validateKey(Key key, boolean signing);
 
     @Override
-    public final byte[] digest(SecureRequest<byte[], S> request) throws SecurityException {
+    public final byte[] digest(SecureRequest<InputStream, S> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final S key = Assert.notNull(request.getKey(), "Signing key cannot be null.");
-        Assert.notEmpty(request.getPayload(), "Request content cannot be null or empty.");
+        Assert.notNull(request.getPayload(), "Request content cannot be null.");
         try {
             validateKey(key, true);
             return doDigest(request);
@@ -54,13 +55,13 @@ abstract class AbstractSecureDigestAlgorithm<S extends Key, V extends Key> exten
         }
     }
 
-    protected abstract byte[] doDigest(SecureRequest<byte[], S> request) throws Exception;
+    protected abstract byte[] doDigest(SecureRequest<InputStream, S> request) throws Exception;
 
     @Override
     public final boolean verify(VerifySecureDigestRequest<V> request) throws SecurityException {
         Assert.notNull(request, "Request cannot be null.");
         final V key = Assert.notNull(request.getKey(), "Verification key cannot be null.");
-        Assert.notEmpty(request.getPayload(), "Request content cannot be null or empty.");
+        Assert.notNull(request.getPayload(), "Request content cannot be null or empty.");
         Assert.notEmpty(request.getDigest(), "Request signature byte array cannot be null or empty.");
         try {
             validateKey(key, false);

@@ -30,6 +30,8 @@ import io.jsonwebtoken.security.SignatureException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Arrays;
@@ -127,8 +129,9 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         }
 
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());
-        SecureRequest<byte[], SecretKey> request =
-                new DefaultSecureRequest<>(toHash, null, null, key);
+        InputStream in = new ByteArrayInputStream(toHash);
+        SecureRequest<InputStream, SecretKey> request =
+                new DefaultSecureRequest<>(in, null, null, key);
         byte[] digest = SIGALG.digest(request);
 
         // https://tools.ietf.org/html/rfc7518#section-5.2.2.1 #5 requires truncating the signature

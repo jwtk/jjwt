@@ -31,6 +31,8 @@ import io.jsonwebtoken.security.JwkThumbprint;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyOperation;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -150,7 +152,8 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterRea
         String json = toThumbprintJson();
         Assert.hasText(json, "Canonical JWK Thumbprint JSON cannot be null or empty.");
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8); // https://www.rfc-editor.org/rfc/rfc7638#section-3 #2
-        byte[] digest = alg.digest(new DefaultRequest<>(bytes, this.context.getProvider(), this.context.getRandom()));
+        InputStream in = new ByteArrayInputStream(bytes);
+        byte[] digest = alg.digest(new DefaultRequest<>(in, this.context.getProvider(), this.context.getRandom()));
         return new DefaultJwkThumbprint(digest, alg);
     }
 

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.security;
 
+import java.io.InputStream;
+
 /**
  * A request to verify a previously-computed cryptographic digest (available via {@link #getDigest()}) against the
  * digest to be computed for the specified {@link #getPayload() payload}.
@@ -27,5 +29,5 @@ package io.jsonwebtoken.security;
  * @see VerifySecureDigestRequest
  * @since JJWT_RELEASE_VERSION
  */
-public interface VerifyDigestRequest extends Request<byte[]>, DigestSupplier {
+public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplier {
 }

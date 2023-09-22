@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
+import java.io.InputStream;
 import java.security.Key;
 
 final class NoneSignatureAlgorithm implements SecureDigestAlgorithm<Key, Key> {
@@ -38,7 +39,7 @@ final class NoneSignatureAlgorithm implements SecureDigestAlgorithm<Key, Key> {
     }
 
     @Override
-    public byte[] digest(SecureRequest<byte[], Key> request) throws SecurityException {
+    public byte[] digest(SecureRequest<InputStream, Key> request) throws SecurityException {
         throw new SignatureException("The 'none' algorithm cannot be used to create signatures.");
     }
 

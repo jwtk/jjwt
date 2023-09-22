@@ -62,7 +62,9 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -94,7 +96,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Payload payload = Payload.EMPTY;
 
     private SecureDigestAlgorithm<Key, ?> sigAlg = Jwts.SIG.NONE;
-    private Function<SecureRequest<byte[], Key>, byte[]> signFunction;
+    private Function<SecureRequest<InputStream, Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
     private Function<AeadRequest, AeadResult> encFunction;
@@ -254,9 +256,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.key = key;
         //noinspection unchecked
         this.sigAlg = (SecureDigestAlgorithm<Key, ?>) alg;
-        this.signFunction = Functions.wrap(new Function<SecureRequest<byte[], Key>, byte[]>() {
+        this.signFunction = Functions.wrap(new Function<SecureRequest<InputStream, Key>, byte[]>() {
             @Override
-            public byte[] apply(SecureRequest<byte[], Key> request) {
+            public byte[] apply(SecureRequest<InputStream, Key> request) {
                 return sigAlg.digest(request);
             }
         }, SignatureException.class, "Unable to compute %s signature.", id);
@@ -630,7 +632,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
         jws.write(DefaultJwtParser.SEPARATOR_CHAR);
 
         // ----- signature -----
-        SecureRequest<byte[], Key> request = new DefaultSecureRequest<>(signingInput, provider, secureRandom, key);
+        InputStream in = new ByteArrayInputStream(signingInput);
+        SecureRequest<InputStream, Key> request = new DefaultSecureRequest<>(in, provider, secureRandom, key);
         byte[] signature = signFunction.apply(request);
         out = this.encoder.wrap(jws);
         Streams.writeAndClose(out, signature, "Unable to write signature bytes");

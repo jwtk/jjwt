@@ -78,9 +78,10 @@ class HashAlgorithmsTest {
         assertNull reg.get('invalid')
     }
 
-    static DefaultRequest<byte[]> request(String msg) {
+    static DefaultRequest<InputStream> request(String msg) {
         byte[] data = msg.getBytes(StandardCharsets.UTF_8)
-        return new DefaultRequest<byte[]>(data, null, null)
+        InputStream payload = new ByteArrayInputStream(data)
+        return new DefaultRequest<InputStream>(payload, null, null)
     }
 
     static void testSha(HashAlgorithm alg) {

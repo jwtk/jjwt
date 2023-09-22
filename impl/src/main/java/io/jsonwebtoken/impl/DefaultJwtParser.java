@@ -69,6 +69,7 @@ import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -389,8 +390,9 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         try {
+            InputStream in = new ByteArrayInputStream(verificationInput);
             VerifySecureDigestRequest<Key> request =
-                    new DefaultVerifySecureDigestRequest<>(verificationInput, provider, null, key, signature);
+                    new DefaultVerifySecureDigestRequest<>(in, provider, null, key, signature);
             if (!algorithm.verify(request)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
                         "asserted and should not be trusted.";

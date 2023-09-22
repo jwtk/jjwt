@@ -27,6 +27,8 @@ import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.X509Builder;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -97,7 +99,8 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
 
     private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {
         byte[] encoded = GET_X509_BYTES.apply(cert);
-        Request<byte[]> request = new DefaultRequest<>(encoded, null, null);
+        InputStream in = new ByteArrayInputStream(encoded);
+        Request<InputStream> request = new DefaultRequest<>(in, null, null);
         return alg.digest(request);
     }
 

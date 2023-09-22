@@ -28,6 +28,7 @@ import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -88,6 +89,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     static final EcSignatureAlgorithm ES512 = new EcSignatureAlgorithm(521, ES512_OID);
 
     private static final Map<String, SignatureAlgorithm> BY_OID = new LinkedHashMap<>(3);
+
     static {
         for (EcSignatureAlgorithm alg : Collections.of(ES256, ES384, ES512)) {
             BY_OID.put(alg.OID, alg);
@@ -159,13 +161,12 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
     }
 
     @Override
-    protected byte[] doDigest(final SecureRequest<byte[], PrivateKey> request) {
+    protected byte[] doDigest(final SecureRequest<InputStream, PrivateKey> request) {
         return jca(request).withSignature(new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
                 sig.initSign(KeysBridge.root(request));
-                sig.update(request.getPayload());
-                byte[] signature = sig.sign();
+                byte[] signature = sign(sig, request.getPayload());
                 return transcodeDERToConcat(signature, signatureByteLength);
             }
         });
@@ -226,8 +227,7 @@ final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
                     }
 
                     sig.initVerify(key);
-                    sig.update(request.getPayload());
-                    return sig.verify(derSignature);
+                    return verify(sig, request.getPayload(), derSignature);
 
                 } catch (Exception e) {
                     String msg = "Unable to verify Elliptic Curve signature using provided ECPublicKey: " + e.getMessage();

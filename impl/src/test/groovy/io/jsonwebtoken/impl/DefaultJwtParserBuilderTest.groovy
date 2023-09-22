@@ -474,7 +474,7 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
-        byte[] digest(SecureRequest<byte[], SecretKey> request) throws SecurityException {
+        byte[] digest(SecureRequest<InputStream, SecretKey> request) throws SecurityException {
             return new byte[0]
         }
 

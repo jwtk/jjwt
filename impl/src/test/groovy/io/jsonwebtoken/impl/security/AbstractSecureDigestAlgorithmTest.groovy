@@ -16,13 +16,16 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.SignatureException
 import io.jsonwebtoken.security.VerifySecureDigestRequest
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
-import java.security.*
+import java.security.Key
+import java.security.Provider
+import java.security.PublicKey
+import java.security.Security
 
 import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
@@ -33,9 +36,11 @@ class AbstractSecureDigestAlgorithmTest {
     void testSignAndVerifyWithExplicitProvider() {
         Provider provider = Security.getProvider('BC')
         def pair = Jwts.SIG.RS256.keyPair().build()
-        byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
-        byte[] signature = Jwts.SIG.RS256.digest(new DefaultSecureRequest<byte[], PrivateKey>(data, provider, null, pair.getPrivate()))
-        assertTrue Jwts.SIG.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(data, provider, null, pair.getPublic(), signature))
+        byte[] data = Strings.utf8('foo')
+        def payload = new ByteArrayInputStream(data)
+        byte[] signature = Jwts.SIG.RS256.digest(new DefaultSecureRequest<>(payload, provider, null, pair.getPrivate()))
+        payload.reset()
+        assertTrue Jwts.SIG.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(payload, provider, null, pair.getPublic(), signature))
     }
 
     @Test
@@ -49,7 +54,8 @@ class AbstractSecureDigestAlgorithmTest {
             }
         }
         try {
-            alg.digest(new DefaultSecureRequest('foo'.getBytes(StandardCharsets.UTF_8), null, null, pair.getPrivate()))
+            def payload = new ByteArrayInputStream(Strings.utf8('foo'))
+            alg.digest(new DefaultSecureRequest(payload, null, null, pair.getPrivate()))
         } catch (SignatureException e) {
             assertTrue e.getMessage().startsWith('Unable to compute test signature with JCA algorithm \'test\' using key {')
             assertTrue e.getMessage().endsWith('}: foo')
@@ -67,10 +73,12 @@ class AbstractSecureDigestAlgorithmTest {
                 throw ise
             }
         }
-        def data = 'foo'.getBytes(StandardCharsets.UTF_8)
+        def data = Strings.utf8('foo')
+        def payload = new ByteArrayInputStream(data)
         try {
-            byte[] signature = alg.digest(new DefaultSecureRequest(data, null, null, pair.getPrivate()))
-            alg.verify(new DefaultVerifySecureDigestRequest(data, null, null, pair.getPublic(), signature))
+            byte[] signature = alg.digest(new DefaultSecureRequest(payload, null, null, pair.getPrivate()))
+            payload.reset()
+            alg.verify(new DefaultVerifySecureDigestRequest(payload, null, null, pair.getPublic(), signature))
         } catch (SignatureException e) {
             assertTrue e.getMessage().startsWith('Unable to verify test signature with JCA algorithm \'test\' using key {')
             assertTrue e.getMessage().endsWith('}: foo')

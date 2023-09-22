@@ -17,6 +17,8 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 
+import java.io.InputStream;
+
 /**
  * A {@link DigestAlgorithm} that computes and verifies digests without the use of a cryptographic key, such as for
  * thumbprints and <a href="https://en.wikipedia.org/wiki/Fingerprint_(computing)">digital fingerprint</a>s.
@@ -39,5 +41,5 @@ import io.jsonwebtoken.Identifiable;
  * @see Jwks.HASH
  * @since JJWT_RELEASE_VERSION
  */
-public interface HashAlgorithm extends DigestAlgorithm<Request<byte[]>, VerifyDigestRequest> {
+public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, VerifyDigestRequest> {
 }

@@ -15,11 +15,10 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
-
-import java.nio.charset.StandardCharsets
 
 import static org.junit.Assert.assertTrue
 
@@ -29,10 +28,13 @@ class DefaultHashAlgorithmTest {
 
     @Test
     void testDigestAndVerify() {
-        byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8)
+        byte[] data = Strings.utf8('Hello World')
+        InputStream payload = new ByteArrayInputStream(data)
         for (HashAlgorithm alg : algs) {
-            byte[] hash = alg.digest(new DefaultRequest<byte[]>(data, null, null))
-            assertTrue alg.verify(new DefaultVerifyDigestRequest(data, null, null, hash))
+            byte[] hash = alg.digest(new DefaultRequest<>(payload, null, null))
+            payload.reset()
+            assertTrue alg.verify(new DefaultVerifyDigestRequest(payload, null, null, hash))
+            payload.reset()
         }
     }
 }

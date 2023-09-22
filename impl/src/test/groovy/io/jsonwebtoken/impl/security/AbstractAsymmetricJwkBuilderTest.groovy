@@ -64,7 +64,8 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1Thumbprint() {
-        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
+        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().x509CertificateSha1Thumbprint(x5t).build()
@@ -74,7 +75,8 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1ThumbprintEnabled() {
-        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
+        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
         def jwk = builder().x509CertificateChain(CHAIN).withX509Sha1Thumbprint(true).build()
@@ -84,7 +86,8 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha256Thumbprint() {
-        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
+        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        Request<byte[]> request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().x509CertificateSha256Thumbprint(x5tS256).build()
@@ -94,7 +97,8 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha256ThumbprintEnabled() {
-        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
+        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        Request<InputStream> request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
         def jwk = builder().x509CertificateChain(CHAIN).withX509Sha256Thumbprint(true).build()

@@ -139,8 +139,9 @@ class JwtsTest {
         def key = TestKeys.HS256
         def h = base64Url('{"alg":"HS256"}')
         def c = base64Url('{"sub":"joe","exp":"-42-"}')
-        def payload = ("$h.$c" as String).getBytes(StandardCharsets.UTF_8)
-        def request = new DefaultSecureRequest<byte[], SecretKey>(payload, null, null, key)
+        def data = Strings.utf8(("$h.$c" as String))
+        def payload = new ByteArrayInputStream(data)
+        def request = new DefaultSecureRequest<>(payload, null, null, key)
         def result = Jwts.SIG.HS256.digest(request)
         def sig = Encoders.BASE64URL.encode(result)
         def compact = "$h.$c.$sig" as String
@@ -1025,7 +1026,7 @@ class JwtsTest {
             }
 
             @Override
-            byte[] digest(SecureRequest<byte[], SecretKey> request) {
+            byte[] digest(SecureRequest<InputStream, SecretKey> request) {
                 return realAlg.digest(request)
             }
 
