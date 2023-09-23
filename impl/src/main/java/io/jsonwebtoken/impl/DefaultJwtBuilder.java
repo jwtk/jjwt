@@ -761,8 +761,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         ByteArrayOutputStream jwe = new ByteArrayOutputStream(4096);
         OutputStream out = this.encoder.wrap(jwe); // automatically base64url-encode as we write
-        writeAndClose(out, header);
-        Objects.nullSafeClose(out); // closes/flushes the 'out' (base64url-encoding) stream, not 'jwe' (since BAOSs don't close)
+        writeAndClose(out, header); // closes/flushes the base64url-encoding stream, not 'jwe' (since BAOSs don't close)
 
         // JWE RFC requires AAD to be the ASCII bytes of the Base64URL-encoded header. Since the header bytes are
         // already Base64URL-encoded at this point (via the encoder.wrap call just above), and Base64Url-encoding uses

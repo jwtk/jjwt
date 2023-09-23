@@ -258,7 +258,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link HeaderMutator#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
      * identifier to indicate the data format of the resulting byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.  This is a
-     * convenience method semantically equivalent to:</p>
+     * convenience method semantically equivalent to:
      *
      * <blockquote><pre>
      * {@link #content(String) content(content)}.{@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
@@ -305,7 +305,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link HeaderMutator#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.  This is a
-     * convenience method semantically equivalent to:</p>
+     * convenience method semantically equivalent to:
      *
      * <blockquote><pre>
      * {@link #content(byte[]) content(content)}.{@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
@@ -351,7 +351,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
      * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
      * {@code cty} value to determine how to convert the byte array to the final content type as desired.  This is a
-     * convenience method semantically equivalent to:</p>
+     * convenience method semantically equivalent to:
      *
      * <blockquote><pre>
      * {@link #content(InputStream) content(content)}.{@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
