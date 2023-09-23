@@ -18,6 +18,7 @@ package io.jsonwebtoken
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
+import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
@@ -167,21 +168,61 @@ class JwtsTest {
     }
 
     @Test
-    void testSetContentWithContentType() {
+    void testContentWithContentType() {
         String s = 'Hello JJWT'
         String cty = 'text/plain'
-        String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
+        String compact = Jwts.builder().content(s, cty).compact()
         def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
 
     @Test
-    void testSetContentWithApplicationContentType() {
+    void testContentBytesWithContentType() {
+        String s = 'Hello JJWT'
+        byte[] content = Strings.utf8(s)
+        String cty = 'text/plain'
+        String compact = Jwts.builder().content(content, cty).compact()
+        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        assertEquals cty, jwt.header.getContentType()
+        assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
+    }
+
+    @Test
+    void testContentStreamWithContentType() {
+        String s = 'Hello JJWT'
+        InputStream content = new ByteArrayInputStream(Strings.utf8(s))
+        String cty = 'text/plain'
+        String compact = Jwts.builder().content(content, cty).compact()
+        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        assertEquals cty, jwt.header.getContentType()
+        assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
+    }
+
+    @Test
+    void testContentStreamWithoutContentType() {
+        String s = 'Hello JJWT'
+        InputStream content = new ByteArrayInputStream(Strings.utf8(s))
+        String compact = Jwts.builder().content(content).compact()
+        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        assertNull jwt.header.getContentType()
+        assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
+    }
+
+    @Test
+    void testContentStreamNull() {
+        String compact = Jwts.builder().content((InputStream)null).compact()
+        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        assertEquals 'none', jwt.header.getAlgorithm()
+        assertTrue Bytes.isEmpty(jwt.getPayload())
+    }
+
+    @Test
+    void testContentWithApplicationContentType() {
         String s = 'Hello JJWT'
         String subtype = 'foo'
         String cty = "application/$subtype"
-        String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
+        String compact = Jwts.builder().content(s, cty).compact()
         def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
         // assert raw value is compact form:
         assertEquals subtype, jwt.header.get('cty')
@@ -191,11 +232,11 @@ class JwtsTest {
     }
 
     @Test
-    void testSetContentWithNonCompactApplicationContentType() {
+    void testContentWithNonCompactApplicationContentType() {
         String s = 'Hello JJWT'
         String subtype = 'foo'
         String cty = "application/$subtype;part=1/2"
-        String compact = Jwts.builder().content(s.getBytes(StandardCharsets.UTF_8), cty).compact()
+        String compact = Jwts.builder().content(s, cty).compact()
         def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType() // two slashes, can't compact
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)

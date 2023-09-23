@@ -73,6 +73,33 @@ class RFC7797Test {
     }
 
     @Test
+    void payloadStreamThatDoesNotSupportMark() {
+        def key = TestKeys.HS256
+        String s = 'Hello JJWT'
+        byte[] data = Strings.utf8(s)
+        InputStream stream = new ByteArrayInputStream(data) {
+            @Override
+            boolean markSupported() {
+                return false
+            }
+
+            @Override
+            void mark(int readAheadLimit) {
+                throw new UnsupportedOperationException("Not supported.");
+            }
+        }
+
+        // compact/sign shouldn't fail, should still compute signature:
+        String compact = Jwts.builder().content(stream).signWith(key).encodePayload(false).compact()
+
+        // signature still verified:
+        def jwt = Jwts.parser().verifyWith(key).critical(DefaultJwsHeader.B64.id)
+                .build().parseContentJws(compact, data)
+        assertEquals 'HS256', jwt.header.getAlgorithm()
+        assertEquals s, Strings.utf8(jwt.getPayload());
+    }
+
+    @Test
     void testClaimsPayload() {
 
         def key = TestKeys.HS256
@@ -189,14 +216,12 @@ class RFC7797Test {
     }
 
     @Test
-    void testNonDetatchedClaims() {
+    void testNonDetachedClaims() {
 
         def key = TestKeys.HS256
 
-        String payload = '{"sub":"me"}'
-
         // create a non-detached unencoded JWS:
-        String s = Jwts.builder().signWith(key).content(payload).encodePayload(false).compact()
+        String s = Jwts.builder().signWith(key).subject('me').encodePayload(false).compact()
 
         def jws = Jwts.parser().verifyWith(key).critical(DefaultJwsHeader.B64.id).build()
                 .parseClaimsJws(s) // <--- parse normally, without calling parseClaimsJws(s, unencodedPayload)

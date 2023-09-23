@@ -75,8 +75,19 @@ public class Streams {
         }, exmsg);
     }
 
+    public static void reset(final InputStream in, String exmsg) {
+        if (in == null || !in.markSupported()) return;
+        run(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                in.reset();
+                return null;
+            }
+        }, exmsg);
+    }
+
     public static void write(final OutputStream out, final byte[] bytes, String exMsg) {
-        if (Bytes.isEmpty(bytes)) return;
+        if (out == null || Bytes.isEmpty(bytes)) return;
         run(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
@@ -99,8 +110,8 @@ public class Streams {
         Assert.hasText(ioExMsg, "IO Exception Message cannot be null or empty.");
         try {
             return c.call();
-        } catch (Exception e) {
-            throw new io.jsonwebtoken.io.IOException(ioExMsg, e);
+        } catch (Throwable t) {
+            throw new io.jsonwebtoken.io.IOException(ioExMsg, t);
         }
     }
 }

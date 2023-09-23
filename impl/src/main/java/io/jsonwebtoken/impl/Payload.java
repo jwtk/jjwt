@@ -33,35 +33,54 @@ class Payload {
     private final String string;
     private final byte[] bytes;
     private final Claims claims;
+    private final InputStream inputStream;
+    private final boolean inputStreamEmpty;
     private final String contentType;
-
     private CompressionAlgorithm zip;
 
+    Payload(Claims claims) {
+        this(claims, null, null, null, null);
+    }
+
     Payload(String content, String contentType) {
-        this(null, content, null, contentType);
+        this(null, content, null, null, contentType);
     }
 
     Payload(byte[] content, String contentType) {
-        this(null, null, content, contentType);
+        this(null, null, content, null, contentType);
     }
 
-    Payload(Claims claims, String contentType) {
-        this(claims, null, null, contentType);
+    Payload(InputStream inputStream, String contentType) {
+        this(null, null, null, inputStream, contentType);
     }
 
-    private Payload(Claims claims, String string, byte[] bytes, String contentType) {
+    private Payload(Claims claims, String string, byte[] bytes, InputStream inputStream, String contentType) {
         this.claims = claims;
-        this.bytes = Bytes.nullSafe(bytes);
         this.string = Strings.clean(string);
         this.contentType = Strings.clean(contentType);
+        InputStream in = inputStream;
+        byte[] data = Bytes.nullSafe(bytes);
+        if (Strings.hasText(this.string)) {
+            data = Strings.utf8(this.string);
+        }
+        this.bytes = data;
+        if (!Bytes.isEmpty(this.bytes)) {
+            in = new ByteArrayInputStream(data);
+        }
+        this.inputStreamEmpty = in == null;
+        this.inputStream = this.inputStreamEmpty ? new ByteArrayInputStream(Bytes.EMPTY) : in;
+    }
+
+    boolean isClaims() {
+        return !Collections.isEmpty(this.claims);
     }
 
     Claims getRequiredClaims() {
         return Assert.notEmpty(this.claims, "Claims cannot be null or empty when calling this method.");
     }
 
-    String getString() {
-        return this.string;
+    boolean isString() {
+        return Strings.hasText(this.string);
     }
 
     String getContentType() {
@@ -72,23 +91,21 @@ class Payload {
         this.zip = zip;
     }
 
+    boolean isCompressed() {
+        return this.zip != null;
+    }
+
     boolean isEmpty() {
-        return Collections.isEmpty(this.claims) && Bytes.isEmpty(this.bytes) && !Strings.hasText(this.string);
+        return !isClaims() && !isString() && Bytes.isEmpty(this.bytes) && this.inputStreamEmpty;
     }
 
     public OutputStream wrap(OutputStream out) {
         return this.zip != null ? zip.wrap(out) : out;
     }
 
-    boolean hasClaims() {
-        return !Collections.isEmpty(this.claims);
-    }
-
     InputStream toInputStream() {
-        byte[] data = this.bytes;
-        if (Bytes.isEmpty(data) && Strings.hasText(this.string)) {
-            data = Strings.utf8(this.string);
-        }
-        return new ByteArrayInputStream(Bytes.nullSafe(data));
+        // should only ever call this when claims don't exist:
+        Assert.state(!isClaims(), "Claims exist, cannot convert to InputStream directly.");
+        return this.inputStream;
     }
 }
