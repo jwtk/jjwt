@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.compression;
 
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.CompressionException;
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.Function;
@@ -155,12 +156,11 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
         InputStream decompress = wrap(is);
         byte[] buffer = new byte[512];
         ByteArrayOutputStream out = new ByteArrayOutputStream(buffer.length);
-        int read;
+        int read = 0;
         try {
-            read = decompress.read(buffer); //assignment separate from loop invariant check for code coverage checks
-            while (read != -1) {
-                out.write(buffer, 0, read);
-                read = decompress.read(buffer);
+            while (read != Streams.EOF) {
+                read = decompress.read(buffer); //assignment separate from loop invariant check for code coverage checks
+                if (read > 0) out.write(buffer, 0, read);
             }
         } finally {
             Objects.nullSafeClose(decompress);

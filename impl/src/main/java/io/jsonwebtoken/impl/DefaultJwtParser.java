@@ -40,6 +40,8 @@ import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
+import io.jsonwebtoken.impl.io.Streams;
+import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
@@ -52,6 +54,7 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
@@ -69,8 +72,10 @@ import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
@@ -258,7 +263,6 @@ public class DefaultJwtParser implements JwtParser {
         return header != null && Strings.hasText(header.getContentType());
     }
 
-
     /**
      * Returns {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
      * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
@@ -330,7 +334,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
-                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, byte[] payload) {
+                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, Payload payload) {
 
         Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
 
@@ -349,7 +353,7 @@ public class DefaultJwtParser implements JwtParser {
         if (claims != null) {
             key = resolver.resolveSigningKey(jwsHeader, claims);
         } else {
-            key = resolver.resolveSigningKey(jwsHeader, payload);
+            key = resolver.resolveSigningKey(jwsHeader, payload.getBytes());
         }
         if (key == null) {
             String msg = "Cannot verify JWS signature: unable to locate signature verification key for JWS with header: " + jwsHeader;
@@ -365,7 +369,8 @@ public class DefaultJwtParser implements JwtParser {
         final byte[] signature = decode(tokenized.getDigest(), "JWS signature");
 
         //re-create the jwt part without the signature.  This is what is needed for signature verification:
-        byte[] verificationInput;
+        InputStream payloadStream = null;
+        InputStream verificationInput;
         if (jwsHeader.isPayloadEncoded()) {
             int len = tokenized.getProtected().length() + 1 + tokenized.getPayload().length();
             CharBuffer cb = CharBuffer.allocate(len);
@@ -375,24 +380,28 @@ public class DefaultJwtParser implements JwtParser {
             cb.rewind();
             ByteBuffer bb = StandardCharsets.US_ASCII.encode(cb);
             bb.rewind();
-            verificationInput = new byte[bb.remaining()];
-            bb.get(verificationInput);
-        } else {
+            byte[] data = new byte[bb.remaining()];
+            bb.get(data);
+            verificationInput = new ByteArrayInputStream(data);
+        } else { // b64 extension
             ByteBuffer headerBuf = StandardCharsets.US_ASCII.encode(Strings.wrap(tokenized.getProtected()));
             headerBuf.rewind();
-            ByteBuffer buf = ByteBuffer.allocate(headerBuf.remaining() + 1 + Bytes.length(payload));
+            ByteBuffer buf = ByteBuffer.allocate(headerBuf.remaining() + 1);
             buf.put(headerBuf);
             buf.put((byte) SEPARATOR_CHAR);
-            buf.put(payload);
             buf.rewind();
-            verificationInput = new byte[buf.remaining()];
-            buf.get(verificationInput);
+            byte[] data = new byte[buf.remaining()];
+            buf.get(data);
+            InputStream prefixStream = new ByteArrayInputStream(data);
+            payloadStream = payload.toInputStream();
+            // We wrap the payloadStream here in an UncloseableInputStream to prevent the SequenceInputStream from
+            // closing it since we'll need to rewind/reset it if decompression is enabled
+            verificationInput = new SequenceInputStream(prefixStream, new UncloseableInputStream(payloadStream));
         }
 
         try {
-            InputStream in = new ByteArrayInputStream(verificationInput);
             VerifySecureDigestRequest<Key> request =
-                    new DefaultVerifySecureDigestRequest<>(in, provider, null, key, signature);
+                    new DefaultVerifySecureDigestRequest<>(verificationInput, provider, null, key, signature);
             if (!algorithm.verify(request)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
                         "asserted and should not be trusted.";
@@ -410,23 +419,28 @@ public class DefaultJwtParser implements JwtParser {
                     "trusted.  Another possibility is that the parser was provided the incorrect " +
                     "signature verification key, but this cannot be assumed for security reasons.";
             throw new UnsupportedJwtException(msg, e);
+        } finally {
+            Streams.reset(payloadStream);
         }
     }
 
     @Override
     public Jwt<?, ?> parse(String compact) {
         CharBuffer buffer = Strings.wrap(compact); // so compact.subsequence calls don't add new Strings on the heap
-        return parse(buffer, Bytes.EMPTY);
+        return parse(buffer, Payload.EMPTY);
     }
 
-    private Jwt<?, ?> parse(CharSequence compact, final byte[] unencodedPayload) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    private Jwt<?, ?> parse(CharSequence compact, Payload unencodedPayload)
+            throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
         Assert.hasText(compact, "JWT String cannot be null or empty.");
+        Assert.stateNotNull(unencodedPayload, "internal error: unencodedPayload is null.");
 
         final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
         final CharSequence base64UrlHeader = tokenized.getProtected();
         if (!Strings.hasText(base64UrlHeader)) {
-            String msg = "Compact JWT strings MUST always have a Base64Url protected header per https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).";
+            String msg = "Compact JWT strings MUST always have a Base64Url protected header per " +
+                    "https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).";
             throw new MalformedJwtException(msg);
         }
 
@@ -495,26 +509,26 @@ public class DefaultJwtParser implements JwtParser {
 
         // =============== Payload =================
         final CharSequence payloadToken = tokenized.getPayload();
-        byte[] payload;
+        Payload payload;
         boolean integrityVerified = false; // only true after successful signature verification or AEAD decryption
 
         // check if b64 extension enabled:
         final boolean payloadBase64UrlEncoded = !(header instanceof JwsHeader) || ((JwsHeader) header).isPayloadEncoded();
         if (payloadBase64UrlEncoded) {
             // standard encoding, so decode it:
-            payload = decode(tokenized.getPayload(), "payload");
+            byte[] data = decode(tokenized.getPayload(), "payload");
+            payload = new Payload(data, header.getContentType());
         } else {
             // The JWT uses the b64 extension, and we already know the parser supports that extension at this point
             // in the code execution path because of the ----- crit ----- assertions section above as well as the
             // (JwsHeader).isPayloadEncoded() check
-
             if (Strings.hasText(payloadToken)) {
                 // we need to verify what was in the token, otherwise it'd be a security issue if we ignored it
                 // and assumed the (likely safe) unencodedPayload value instead:
-                payload = Strings.utf8(payloadToken);
+                payload = new Payload(payloadToken, header.getContentType());
             } else {
                 //no payload token (a detached payload), so we need to ensure that they've specified the payload value:
-                if (Bytes.isEmpty(unencodedPayload)) {
+                if (unencodedPayload.isEmpty()) {
                     String msg = String.format(B64_MISSING_PAYLOAD, header);
                     throw new SignatureException(msg);
                 }
@@ -523,7 +537,7 @@ public class DefaultJwtParser implements JwtParser {
             }
         }
 
-        if (tokenized instanceof TokenizedJwe && Bytes.isEmpty(payload)) {
+        if (tokenized instanceof TokenizedJwe && payload.isEmpty()) {
             // Only JWS payload can be empty per https://github.com/jwtk/jjwt/pull/540
             String msg = "Compact JWE strings MUST always contain a payload (ciphertext).";
             throw new MalformedJwtException(msg);
@@ -606,10 +620,13 @@ public class DefaultJwtParser implements JwtParser {
             // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
             // As such, the provider here is intentionally omitted (null):
             // TODO: add encProvider(Provider) builder method that applies to this request only?
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
+            InputStream payloadStream = payload.toInputStream();
+            Streams.copy(payloadStream, baos, new byte[8192], "Unable to obtain payload bytes for decryption.");
             DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(null, null, payload, cek, aad, tag, iv);
+                    new DefaultAeadResult(null, null, baos.toByteArray(), cek, aad, tag, iv);
             Message<byte[]> result = encAlg.decrypt(decryptRequest);
-            payload = result.getPayload();
+            payload = new Payload(result.getPayload(), header.getContentType());
 
             integrityVerified = true; // AEAD performs integrity verification, so no exception = verified
 
@@ -618,7 +635,7 @@ public class DefaultJwtParser implements JwtParser {
             // always safer:
             JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
             verifySignature(tokenized, jwsHeader, alg, new LocatingKeyResolver(this.keyLocator), null, payload);
-            integrityVerified = true; // no exception = signature verified
+            integrityVerified = true; // no exception means signature verified
         }
 
         final CompressionAlgorithm compressionAlgorithm = zipAlgFn.apply(header);
@@ -632,7 +649,7 @@ public class DefaultJwtParser implements JwtParser {
                     throw new UnsupportedJwtException(msg);
                 }
             }
-            payload = compressionAlgorithm.decompress(payload);
+            payload = payload.decompress(compressionAlgorithm);
         }
 
         Claims claims = null;
@@ -643,8 +660,8 @@ public class DefaultJwtParser implements JwtParser {
                 //                          "This parameter is ignored by JWS implementations; any processing of this
                 //                          parameter is performed by the JWS application."
                 //
-                isLikelyJson(payload)) { // likely to be json, try to deserialize it:
-            Map<String, ?> claimsMap = deserialize(payload, "claims");
+                isLikelyJson(payload.getBytes())) { // likely to be json, try to deserialize it:
+            Map<String, ?> claimsMap = deserialize(payload.getBytes(), "claims");
             try {
                 claims = new DefaultClaims(claimsMap);
             } catch (Exception e) {
@@ -654,7 +671,7 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         Jwt<?, ?> jwt;
-        Object body = claims != null ? claims : payload;
+        Object body = claims != null ? claims : payload.getBytes();
         if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else if (hasDigest) {
@@ -786,10 +803,10 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public <T> T parse(String compact, JwtHandler<T> handler) {
-        return parse(compact, Bytes.EMPTY, handler);
+        return parse(compact, Payload.EMPTY, handler);
     }
 
-    private <T> T parse(String compact, byte[] unencodedPayload, JwtHandler<T> handler)
+    private <T> T parse(String compact, Payload unencodedPayload, JwtHandler<T> handler)
             throws ExpiredJwtException, MalformedJwtException, SignatureException {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
@@ -862,9 +879,7 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
-    @Override
-    public Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload) {
-        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+    private Jws<byte[]> parseContentJws(String jws, Payload unencodedPayload) {
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
             public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
@@ -873,15 +888,48 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
-    @Override
-    public Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload) {
-        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+    private Jws<Claims> parseClaimsJws(String jws, Payload unencodedPayload) {
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
                 return jws;
             }
         });
+    }
+
+    @Override
+    public Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+        return parseContentJws(jws, new Payload(unencodedPayload, null));
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+        return parseClaimsJws(jws, new Payload(unencodedPayload, null));
+    }
+
+    private static Payload payloadFor(InputStream in) {
+        if (in instanceof ByteArrayInputStream) {
+            byte[] data = Classes.getFieldValue(in, "buf", byte[].class);
+            return new Payload(data, null);
+        }
+        //if (in.markSupported()) in.mark(0);
+        return new Payload(in, null);
+    }
+
+    @Override
+    public Jws<byte[]> parseContentJws(String jws, InputStream unencodedPayload) {
+        Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
+        return parseContentJws(jws, payloadFor(unencodedPayload));
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(String jws, InputStream unencodedPayload) {
+        Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
+        byte[] bytes = Streams.bytes(unencodedPayload,
+                "Unable to obtain Claims bytes from unencodedPayload InputStream");
+        return parseClaimsJws(jws, new Payload(bytes, null));
     }
 
     @Override

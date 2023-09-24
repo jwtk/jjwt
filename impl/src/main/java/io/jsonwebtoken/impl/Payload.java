@@ -16,6 +16,9 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
@@ -23,6 +26,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -30,7 +34,7 @@ class Payload {
 
     static final Payload EMPTY = new Payload(Bytes.EMPTY, null);
 
-    private final String string;
+    private final CharSequence string;
     private final byte[] bytes;
     private final Claims claims;
     private final InputStream inputStream;
@@ -42,7 +46,7 @@ class Payload {
         this(claims, null, null, null, null);
     }
 
-    Payload(String content, String contentType) {
+    Payload(CharSequence content, String contentType) {
         this(null, content, null, null, contentType);
     }
 
@@ -54,7 +58,7 @@ class Payload {
         this(null, null, null, inputStream, contentType);
     }
 
-    private Payload(Claims claims, String string, byte[] bytes, InputStream inputStream, String contentType) {
+    private Payload(Claims claims, CharSequence string, byte[] bytes, InputStream inputStream, String contentType) {
         this.claims = claims;
         this.string = Strings.clean(string);
         this.contentType = Strings.clean(contentType);
@@ -101,6 +105,30 @@ class Payload {
 
     public OutputStream wrap(OutputStream out) {
         return this.zip != null ? zip.wrap(out) : out;
+    }
+
+    public Payload decompress(CompressionAlgorithm alg) {
+        Assert.notNull(alg, "CompressionAlgorithm cannot be null.");
+        byte[] data = this.bytes;
+        if (!Bytes.isEmpty(data) && !isString()) {
+            if (alg.equals(Jwts.ZIP.DEF)) { // backwards compatibility
+                data = ((CompressionCodec) alg).decompress(data);
+            } else {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                InputStream in = new ByteArrayInputStream(data);
+                in = alg.wrap(in);
+                Streams.copy(in, out, new byte[8192], "Unable to decompress payload bytes.");
+                data = out.toByteArray();
+            }
+            return new Payload(data, getContentType());
+        }
+        // otherwise it's a String or b64/detached payload, in either case, we don't decompress since the caller is
+        // providing the bytes necessary for signature verification as-is, and there's no conversion we need to perform
+        return this;
+    }
+
+    public byte[] getBytes() {
+        return this.bytes;
     }
 
     InputStream toInputStream() {

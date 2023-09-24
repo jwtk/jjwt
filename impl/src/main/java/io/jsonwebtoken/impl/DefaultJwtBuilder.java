@@ -599,13 +599,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
             return -1;
         } else {
             try {
-                InputStream in = null;
-                try {
-                    in = payload.toInputStream();
-                    return Streams.copy(payload.toInputStream(), out, new byte[4096], "Unable to copy payload.");
-                } finally {
-                    Streams.reset(in, "Unable to reset payload InputStream.");
-                }
+                InputStream in = payload.toInputStream();
+                return Streams.copy(in, out, new byte[4096], "Unable to copy payload.");
             } finally {
                 Objects.nullSafeClose(out);
             }
@@ -679,8 +674,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
             if (!this.encodePayload) {
                 if (!payload.isCompressed() // don't print raw compressed bytes
                         && (payload.isClaims() || payload.isString())) {
-                    // rewind after signature calculation:
-                    Streams.reset(payloadStream, "Unable to reset attached Payload InputStream.");
                     // now add the payload to the jws output:
                     Streams.copy(payloadStream, jws, new byte[8192], "Unable to copy attached Payload InputStream.");
                 }
@@ -690,7 +683,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 }
             }
         } finally {
-            Streams.reset(payloadStream, "Unable to reset Payload InputStream");
+            Streams.reset(payloadStream);
         }
 
         // ----- separator -----

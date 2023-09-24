@@ -18,6 +18,8 @@ package io.jsonwebtoken;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
+import java.io.InputStream;
+
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
  *
@@ -220,6 +222,10 @@ public interface JwtParser {
     Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload);
 
     Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload);
+
+    Jws<byte[]> parseContentJws(String jws, InputStream unencodedPayload);
+
+    Jws<Claims> parseClaimsJws(String jws, InputStream unencodedPayload);
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and

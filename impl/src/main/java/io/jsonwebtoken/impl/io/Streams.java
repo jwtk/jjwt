@@ -17,9 +17,12 @@ package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Objects;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,6 +37,15 @@ public class Streams {
      * Represents the end-of-file (or stream).
      */
     public static final int EOF = -1;
+
+    public static byte[] bytes(final InputStream in, String exmsg) {
+        if (in instanceof ByteArrayInputStream) {
+            return Classes.getFieldValue(in, "buf", byte[].class);
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream(8192);
+        copy(in, out, new byte[8192], exmsg);
+        return out.toByteArray();
+    }
 
     /**
      * Copies bytes from a {@link InputStream} to an {@link OutputStream} using the specified {@code buffer}, avoiding
@@ -62,28 +74,37 @@ public class Streams {
         return count;
     }
 
-    public static long copy(final InputStream in, final OutputStream out, final byte[] buffer, String exmsg) {
+    public static long copy(final InputStream in, final OutputStream out, final byte[] buffer, final String exmsg) {
         return run(new Callable<Long>() {
             @Override
-            public Long call() throws Exception {
+            public Long call() throws IOException {
                 try {
+                    reset(in);
                     return copy(in, out, buffer);
                 } finally {
                     Objects.nullSafeFlush(out);
+                    reset(in);
                 }
             }
         }, exmsg);
     }
 
-    public static void reset(final InputStream in, String exmsg) {
-        if (in == null || !in.markSupported()) return;
-        run(new Callable<Object>() {
+    public static void reset(final InputStream in) {
+        if (in == null) return;
+        Callable<Object> callable = new Callable<Object>() {
             @Override
-            public Object call() throws Exception {
-                in.reset();
+            public Object call() {
+                try {
+                    in.reset();
+                } catch (Throwable ignored) {
+                }
                 return null;
             }
-        }, exmsg);
+        };
+        try {
+            callable.call();
+        } catch (Throwable ignored) {
+        }
     }
 
     public static void write(final OutputStream out, final byte[] bytes, String exMsg) {
