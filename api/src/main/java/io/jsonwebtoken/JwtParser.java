@@ -219,12 +219,84 @@ public interface JwtParser {
     Jws<byte[]> parseContentJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException,
             SecurityException, IllegalArgumentException;
 
+    /**
+     * Parses a JWS known to use the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS) Unencoded Payload
+     * Option</a>, using the specified {@code unencodedPayload} for signature verification.
+     *
+     * <p><b>Unencoded Non-Detached Payload</b></p>
+     * <p>Note that if the JWS contains a valid unencoded Payload string (what RFC 7797 calls an
+     * &quot;<a href="https://datatracker.ietf.org/doc/html/rfc7797#section-5.2">unencoded non-detached
+     * payload</a>&quot;, the {@code unencodedPayload} method argument will be ignored, as the JWS already includes
+     * the payload content necessary for signature verification.</p>
+     *
+     * @param jws              the Unencoded Payload JWS to parse.
+     * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
+     * @return the parsed Unencoded Payload.
+     */
     Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload);
 
+    /**
+     * Parses a JWS known to use the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS) Unencoded Payload
+     * Option</a>, using the specified {@code unencodedPayload} for signature verification.
+     *
+     * <p><b>Unencoded Non-Detached Payload</b></p>
+     * <p>Note that if the JWS contains a valid unencoded payload String (what RFC 7797 calls an
+     * &quot;<a href="https://datatracker.ietf.org/doc/html/rfc7797#section-5.2">unencoded non-detached
+     * payload</a>&quot;, the {@code unencodedPayload} method argument will be ignored, as the JWS already includes
+     * the payload content necessary for signature verification and claims creation.</p>
+     *
+     * @param jws              the Unencoded Payload JWS to parse.
+     * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
+     * @return the parsed Unencoded Payload.
+     */
     Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload);
 
+    /**
+     * Parses a JWS known to use the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS) Unencoded Payload
+     * Option</a>, using the bytes from the specified {@code unencodedPayload} stream for signature verification.
+     *
+     * <p>Because it is not possible to know how large the {@code unencodedPayload} stream will be, the stream bytes
+     * will not be buffered in memory, ensuring the resulting {@link Jws} return value's {@link Jws#getPayload()}
+     * is always empty.  This is generally not a concern since the caller already has access to the stream bytes and
+     * may obtain them independently before or after calling this method if they are needed otherwise.</p>
+     *
+     * <p><b>Unencoded Non-Detached Payload</b></p>
+     * <p>Note that if the JWS contains a valid unencoded payload String (what RFC 7797 calls an
+     * &quot;<a href="https://datatracker.ietf.org/doc/html/rfc7797#section-5.2">unencoded non-detached
+     * payload</a>&quot;, the {@code unencodedPayload} method argument will be ignored, as the JWS already includes
+     * the payload content necessary for signature verification. In this case the resulting {@link Jws} return
+     * value's {@link Jws#getPayload()} will contain the embedded payload String's UTF-8 bytes.</p>
+     *
+     * @param jws              the Unencoded Payload JWS to parse.
+     * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
+     * @return the parsed Unencoded Payload.
+     */
     Jws<byte[]> parseContentJws(String jws, InputStream unencodedPayload);
 
+    /**
+     * Parses a JWS known to use the
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS) Unencoded Payload
+     * Option</a>, using the bytes from the specified {@code unencodedPayload} stream for signature verification and
+     * {@link Claims} creation.
+     *
+     * <p><b>NOTE:</b> however, because calling this method indicates a completed
+     * {@link Claims} instance is desired, the specified {@code unencodedPayload} JSON stream will be fully
+     * read into a Claims instance.  If this will be problematic for your application (perhaps if you expect extremely
+     * large Claims), it is recommended to use the {@link #parseContentJws(String, InputStream)} method instead.</p>
+     *
+     * <p><b>Unencoded Non-Detached Payload</b></p>
+     * <p>Note that if the JWS contains a valid unencoded Payload string (what RFC 7797 calls an
+     * &quot;<a href="https://datatracker.ietf.org/doc/html/rfc7797#section-5.2">unencoded non-detached
+     * payload</a>&quot;, the {@code unencodedPayload} method argument will be ignored, as the JWS already includes
+     * the payload content necessary for signature verification and Claims creation.</p>
+     *
+     * @param jws              the Unencoded Payload JWS to parse.
+     * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
+     * @return the parsed Unencoded Payload.
+     */
     Jws<Claims> parseClaimsJws(String jws, InputStream unencodedPayload);
 
     /**

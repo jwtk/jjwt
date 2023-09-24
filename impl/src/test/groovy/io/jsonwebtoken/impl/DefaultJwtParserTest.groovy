@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.*
-import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.JwtDateConverter
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
@@ -150,6 +149,7 @@ class DefaultJwtParserTest {
         Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
     }
 
+    /*
     @Test
     void testIsLikelyJsonWithEmptyString() {
         assertFalse DefaultJwtParser.isLikelyJson(''.getBytes(StandardCharsets.UTF_8))
@@ -200,6 +200,7 @@ class DefaultJwtParserTest {
         String claimsJson = '{"sub":"joe"} x'
         assertFalse DefaultJwtParser.isLikelyJson(claimsJson.getBytes(StandardCharsets.UTF_8))
     }
+     */
 
     @Test
     void testUnprotectedCritRejected() {

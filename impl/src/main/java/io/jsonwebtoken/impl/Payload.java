@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
@@ -26,7 +25,6 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -41,6 +39,7 @@ class Payload {
     private final boolean inputStreamEmpty;
     private final String contentType;
     private CompressionAlgorithm zip;
+    private boolean claimsExpected;
 
     Payload(Claims claims) {
         this(claims, null, null, null, null);
@@ -68,7 +67,7 @@ class Payload {
             data = Strings.utf8(this.string);
         }
         this.bytes = data;
-        if (!Bytes.isEmpty(this.bytes)) {
+        if (in == null && !Bytes.isEmpty(this.bytes)) {
             in = new ByteArrayInputStream(data);
         }
         this.inputStreamEmpty = in == null;
@@ -99,6 +98,21 @@ class Payload {
         return this.zip != null;
     }
 
+    public void setClaimsExpected(boolean claimsExpected) {
+        this.claimsExpected = claimsExpected;
+    }
+
+    /**
+     * Returns {@code true} if the payload may be fully consumed and retained in memory, {@code false} if empty,
+     * already extracted, or a potentially too-large InputStream.
+     *
+     * @return {@code true} if the payload may be fully consumed and retained in memory, {@code false} if empty,
+     * already extracted, or a potentially too-large InputStream.
+     */
+    boolean isConsumable() {
+        return !isClaims() && (isString() || !Bytes.isEmpty(this.bytes) || (inputStream != null && claimsExpected));
+    }
+
     boolean isEmpty() {
         return !isClaims() && !isString() && Bytes.isEmpty(this.bytes) && this.inputStreamEmpty;
     }
@@ -109,22 +123,28 @@ class Payload {
 
     public Payload decompress(CompressionAlgorithm alg) {
         Assert.notNull(alg, "CompressionAlgorithm cannot be null.");
-        byte[] data = this.bytes;
-        if (!Bytes.isEmpty(data) && !isString()) {
-            if (alg.equals(Jwts.ZIP.DEF)) { // backwards compatibility
-                data = ((CompressionCodec) alg).decompress(data);
+        Payload payload = this;
+        if (!isString() && isConsumable()) {
+            if (alg.equals(Jwts.ZIP.DEF) && !Bytes.isEmpty(this.bytes)) { // backwards compatibility
+                byte[] data = ((CompressionCodec) alg).decompress(this.bytes);
+                payload = new Payload(claims, string, data, null, getContentType());
             } else {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                InputStream in = new ByteArrayInputStream(data);
+                InputStream in = toInputStream();
                 in = alg.wrap(in);
-                Streams.copy(in, out, new byte[8192], "Unable to decompress payload bytes.");
-                data = out.toByteArray();
+                payload = new Payload(claims, string, bytes, in, getContentType());
+//                payload.setClaimsExpected(claimsExpected);
+//                ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                InputStream in = new ByteArrayInputStream(data);
+//                in = alg.wrap(in);
+//                Streams.copy(in, out, new byte[8192], "Unable to decompress payload bytes.");
+//                data = out.toByteArray();
             }
-            return new Payload(data, getContentType());
+            payload.setClaimsExpected(claimsExpected);
+            //return new Payload(data, getContentType());
         }
         // otherwise it's a String or b64/detached payload, in either case, we don't decompress since the caller is
         // providing the bytes necessary for signature verification as-is, and there's no conversion we need to perform
-        return this;
+        return payload;
     }
 
     public byte[] getBytes() {

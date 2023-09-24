@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken
 
-
 import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
@@ -67,15 +66,27 @@ class JwtParserTest {
     void testParseWithJunkArgument() {
 
         String junkPayload = '{;aklsjd;fkajsd;fkjasd;lfkj}'
+        byte[] bytes = Strings.utf8(junkPayload)
+
+        String bad = base64Url('{"alg":"none"}') + '.' + base64Url(junkPayload) + '.'
+
+        // Can't be treated as claims, so payload must be treated as a byte array:
+        assertArrayEquals bytes, Jwts.parser().enableUnsecured().build().parse(bad).getPayload() as byte[]
+    }
+
+    @Test
+    void testParseClaimsWithJunkArgument() {
+
+        String junkPayload = '{;aklsjd;fkajsd;fkjasd;lfkj}'
 
         String bad = base64Url('{"alg":"none"}') + '.' + base64Url(junkPayload) + '.'
 
         try {
-            Jwts.parser().enableUnsecured().build().parse(bad)
+            Jwts.parser().enableUnsecured().build().parseClaimsJwt(bad)
             fail()
-        } catch (MalformedJwtException expected) {
-            String prefix = 'Malformed claims JSON: '
-            assertTrue expected.getMessage().startsWith(prefix)
+        } catch (UnsupportedJwtException expected) {
+            String msg = 'Unprotected content JWTs are not supported.'
+            assertEquals msg, expected.getMessage()
         }
     }
 
@@ -594,7 +605,7 @@ class JwtParserTest {
             String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
                     "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
             assertEquals msg, e.message
-            
+
             assertEquals e.getClaims().getSubject(), sub
             assertEquals e.getHeader().getAlgorithm(), "HS256"
         }

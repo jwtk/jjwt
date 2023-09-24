@@ -52,6 +52,7 @@ import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
+import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
@@ -71,6 +72,7 @@ import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -157,8 +159,8 @@ public class DefaultJwtParser implements JwtParser {
     private static final String B64_MISSING_PAYLOAD = "Unable to verify JWS signature: the parser has encountered an " +
             "Unencoded Payload JWS with detached payload, but the detached payload value required for signature " +
             "verification has not been provided. If you expect to receive and parse Unencoded Payload JWSs in your " +
-            "application, the JwtParser.parseContentJws(String, byte[]) or JwtParser.parseClaimsJws(String, byte[]) " +
-            "methods must be used for these kinds of JWSs. Header: %s";
+            "application, the overloaded JwtParser.parseContentJws or JwtParser.parseClaimsJws methods that " +
+            "accept a byte[] or InputStream must be used for these kinds of JWSs. Header: %s";
 
     private static final String B64_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
             "'%s', but payload decompression for Unencoded JWSs (those with an " + DefaultJwsHeader.B64 +
@@ -261,76 +263,6 @@ public class DefaultJwtParser implements JwtParser {
 
     private static boolean hasContentType(Header header) {
         return header != null && Strings.hasText(header.getContentType());
-    }
-
-    /**
-     * Returns {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
-     * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
-     * {@link Character#isWhitespace(char)}.  This does not guarantee JSON, just that it is likely JSON and
-     * should be passed to a JSON Deserializer to see if it is actually JSON.  If this {@code returns false}, it
-     * should be considered a byte[] payload and <em>not</em> delegated to a JSON Deserializer.
-     *
-     * @param payload the byte array that could be JSON
-     * @return {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
-     * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
-     * {@link Character#isWhitespace(char)}
-     * @since JJWT_RELEASE_VERSION
-     */
-    private static boolean isLikelyJson(byte[] payload) {
-
-        int len = Bytes.length(payload);
-        if (len == 0) {
-            return false;
-        }
-
-        int maxIndex = len - 1;
-        int jsonStartIndex = -1; // out of bounds means didn't find any
-        int jsonEndIndex = len; // out of bounds means didn't find any
-
-        for (int i = 0; i < len; i++) {
-            int c = payload[i];
-            if (c == '{') {
-                jsonStartIndex = i;
-                break;
-            }
-        }
-        if (jsonStartIndex == -1) { //exhausted entire payload, didn't find starting '{', can't be a JSON object
-            return false;
-        }
-        if (jsonStartIndex > 0) {
-            // we found content at the start of the payload, but before the first '{' character, so we need to check
-            // to see if any of it (when UTF-8 decoded) is not whitespace. If so, it can't be a valid JSON object.
-            byte[] leading = new byte[jsonStartIndex];
-            System.arraycopy(payload, 0, leading, 0, jsonStartIndex);
-            String s = new String(leading, StandardCharsets.UTF_8);
-            if (Strings.hasText(s)) { // found something before '{' that isn't whitespace; can't be a valid JSON object
-                return false;
-            }
-        }
-
-        for (int i = maxIndex; i > jsonStartIndex; i--) {
-            int c = payload[i];
-            if (c == '}') {
-                jsonEndIndex = i;
-                break;
-            }
-        }
-
-        if (jsonEndIndex > maxIndex) { // found start '{' char, but no closing '} char. Can't be a JSON object
-            return false;
-        }
-
-        if (jsonEndIndex < maxIndex) {
-            // We found content at the end of the payload, after the last '}' character.  We need to check to see if
-            // any of it (when UTF-8 decoded) is not whitespace. If so, it's not a valid JSON object payload.
-            int size = maxIndex - jsonEndIndex;
-            byte[] trailing = new byte[size];
-            System.arraycopy(payload, jsonEndIndex + 1, trailing, 0, size);
-            String s = new String(trailing, StandardCharsets.UTF_8);
-            return !Strings.hasText(s); // if just whitespace after last '}', we can assume JSON and try and parse it
-        }
-
-        return true;
     }
 
     private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
@@ -446,7 +378,7 @@ public class DefaultJwtParser implements JwtParser {
 
         // =============== Header =================
         final byte[] headerBytes = decode(base64UrlHeader, "protected header");
-        Map<String, ?> m = deserialize(headerBytes, "protected header");
+        Map<String, ?> m = deserialize(new ByteArrayInputStream(headerBytes), "protected header");
         Header header;
         try {
             header = tokenized.createHeader(m);
@@ -653,25 +585,50 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         Claims claims = null;
-        if (!hasContentType(header) &&   // If there is a content type set, then the application using JJWT is expected
+        byte[] payloadBytes = payload.getBytes();
+        if (payload.isConsumable()) {
+
+            InputStream in = payload.toInputStream();
+
+            if (!hasContentType(header)) {   // If there is a content type set, then the application using JJWT is expected
                 //                          to convert the byte payload themselves based on this content type
                 //                          https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
                 //
                 //                          "This parameter is ignored by JWS implementations; any processing of this
                 //                          parameter is performed by the JWS application."
                 //
-                isLikelyJson(payload.getBytes())) { // likely to be json, try to deserialize it:
-            Map<String, ?> claimsMap = deserialize(payload.getBytes(), "claims");
-            try {
-                claims = new DefaultClaims(claimsMap);
-            } catch (Exception e) {
-                String msg = "Invalid claims: " + e.getMessage();
-                throw new MalformedJwtException(msg, e);
+                Map<String, ?> claimsMap = null;
+                try {
+                    // if deserialization fails, we'll need to rewind to convert to a byte array.  So if
+                    // mark/reset isn't possible, we'll need to buffer:
+                    if (!in.markSupported()) {
+                        in = new BufferedInputStream(in);
+                        in.mark(0);
+                    }
+                    claimsMap = deserialize(new UncloseableInputStream(in) /* Don't close in case we need to rewind */, "claims");
+                } catch (DeserializationException | MalformedJwtException ignored) { // not JSON, treat it as a byte[]
+//                String msg = "Invalid claims: " + e.getMessage();
+//                throw new MalformedJwtException(msg, e);
+                } finally {
+                    Streams.reset(in);
+                }
+                if (claimsMap != null) {
+                    try {
+                        claims = new DefaultClaims(claimsMap);
+                    } catch (Throwable t) {
+                        String msg = "Invalid claims: " + t.getMessage();
+                        throw new MalformedJwtException(msg);
+                    }
+                }
+            }
+            if (claims == null) {
+                // consumable, but not claims, so convert to byte array:
+                payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
             }
         }
 
         Jwt<?, ?> jwt;
-        Object body = claims != null ? claims : payload.getBytes();
+        Object body = claims != null ? claims : payloadBytes;
         if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else if (hasDigest) {
@@ -889,6 +846,7 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     private Jws<Claims> parseClaimsJws(String jws, Payload unencodedPayload) {
+        unencodedPayload.setClaimsExpected(true);
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
@@ -963,9 +921,8 @@ public class DefaultJwtParser implements JwtParser {
         }
     }
 
-    protected Map<String, ?> deserialize(byte[] bytes, final String name) {
-        ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-        java.io.Reader r = new InputStreamReader(is);
+    protected Map<String, ?> deserialize(InputStream in, final String name) {
+        java.io.Reader r = new InputStreamReader(in);
         try {
             JsonObjectDeserializer deserializer = new JsonObjectDeserializer(jsonReader, name);
             return deserializer.apply(r);
