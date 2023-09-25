@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.io;
 
-import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.Jwts;
 
@@ -24,7 +23,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 
 /**
- * Compresses and decompresses byte arrays.
+ * Compresses and decompresses byte streams.
  *
  * <p><b>&quot;zip&quot; identifier</b></p>
  *
@@ -45,7 +44,19 @@ import java.util.Collection;
  */
 public interface CompressionAlgorithm extends Identifiable {
 
-    OutputStream wrap(OutputStream out) throws CompressionException;
+    /**
+     * Wraps the specified {@code OutputStream} to ensure any stream bytes are compressed as they are written.
+     *
+     * @param out the stream to wrap for compression
+     * @return the stream to use for writing
+     */
+    OutputStream wrap(OutputStream out);
 
-    InputStream wrap(InputStream in) throws CompressionException;
+    /**
+     * Wraps the specified {@code InputStream} to ensure any stream bytes are decompressed as they are read.
+     *
+     * @param in the stream to wrap for decompression
+     * @return the stream to use for reading
+     */
+    InputStream wrap(InputStream in);
 }

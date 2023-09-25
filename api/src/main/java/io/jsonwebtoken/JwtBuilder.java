@@ -420,28 +420,27 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     BuilderClaims claims();
 
     /**
-     * Sets (and replaces) the JWT Claims payload with the specified name/value pairs. If you do not want the JWT
-     * payload to be JSON claims and instead want it to be String or byte array content, use one of the
-     * {@code content} methods instead.
+     * Replaces the JWT Claims payload with the specified name/value pairs. This is an alias for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * <p>The {@code content} and {@code claims} properties are mutually exclusive - only one of the two variants
      * may be used.</p>
      *
      * @param claims the JWT Claims to be set as the JWT payload.
      * @return the builder for method chaining.
+     * @see #claims()
      * @see #content(String)
      * @see #content(byte[])
      * @see #content(InputStream)
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #claims()} method.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of using the {@link #claims()} builder.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder setClaims(Map<String, ?> claims);
 
     /**
-     * Adds/appends all given name/value pairs to the JSON Claims in the payload.
-     * <p>
-     * This is a convenience wrapper for:
+     * Adds/appends all given name/value pairs to the JSON Claims in the payload. This is an alias for:
      *
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -461,7 +460,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets a JWT claim, overwriting any existing claim with the same name. A {@code null} or empty
-     * value will remove the claim entirely. This is a convenience wrapper for:
+     * value will remove the claim entirely. This is a convenience alias for:
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
@@ -475,7 +474,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Adds all given name/value pairs to the JSON Claims in the payload, overwriting any existing claims
      * with the same names.  If any name has a {@code null} or empty value, that claim will be removed from the
-     * Claims.  This is a convenience wrapper for:
+     * Claims.  This is a convenience alias for:
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
@@ -982,7 +981,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
      *
      * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
-     * to specify a different encoder if necessar.</p>
+     * to specify a different encoder if desired.</p>
      *
      * @param encoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.

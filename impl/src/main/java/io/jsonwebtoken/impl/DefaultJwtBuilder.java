@@ -22,6 +22,7 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.io.CountingInputStream;
+import io.jsonwebtoken.impl.io.EncodingOutputStream;
 import io.jsonwebtoken.impl.io.SerializingMapWriter;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
@@ -605,7 +606,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
         final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build());
         final ByteArrayOutputStream jws = new ByteArrayOutputStream(4096);
-        OutputStream out = this.encoder.wrap(jws);
+        OutputStream out = wrap(jws, "JWS Protected Header");
         writeAndClose(out, header);
 
         // ----- separator -----
@@ -616,7 +617,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         InputStream signingInput;
         InputStream payloadStream = null; // not needed unless b64 is enabled
         if (this.encodePayload) {
-            out = this.encoder.wrap(jws);
+            out = wrap(jws, "JWS Payload");
             writeAndClose(out, payload);
             signingInput = new ByteArrayInputStream(jws.toByteArray());
         } else { // b64
@@ -674,7 +675,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         jws.write(DefaultJwtParser.SEPARATOR_CHAR);
 
         // ----- signature -----
-        out = this.encoder.wrap(jws);
+        out = wrap(jws, "JWS Signature");
         Streams.writeAndClose(out, signature, "Unable to write signature bytes");
 
         return Strings.utf8(jws.toByteArray());
@@ -690,14 +691,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // ----- header -----
         final Header header = this.headerBuilder.build();
         final ByteArrayOutputStream jwt = new ByteArrayOutputStream(512);
-        OutputStream out = this.encoder.wrap(jwt);
+        OutputStream out = wrap(jwt, "JWT Header");
         writeAndClose(out, header);
 
         // ----- separator -----
         jwt.write(DefaultJwtParser.SEPARATOR_CHAR);
 
         // ----- payload -----
-        out = this.encoder.wrap(jwt);
+        out = wrap(jwt, "JWT Payload");
         writeAndClose(out, content);
 
         // ----- period terminator -----
@@ -739,7 +740,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 "Invalid header created: ");
 
         ByteArrayOutputStream jwe = new ByteArrayOutputStream(4096);
-        OutputStream out = this.encoder.wrap(jwe); // automatically base64url-encode as we write
+        OutputStream out = wrap(jwe, "JWE Protected Header"); // automatically base64url-encode as we write
         writeAndClose(out, header); // closes/flushes the base64url-encoding stream, not 'jwe' (since BAOSs don't close)
 
         // JWE RFC requires AAD to be the ASCII bytes of the Base64URL-encoded header. Since the header bytes are
@@ -763,16 +764,16 @@ public class DefaultJwtBuilder implements JwtBuilder {
                 "Encryption result must have a non-empty authentication tag.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
-        Streams.writeAndClose(this.encoder.wrap(jwe), encryptedCek, "Unable to write encrypted CEK.");
+        Streams.writeAndClose(wrap(jwe, "JWE Encrypted CEK"), encryptedCek, "Unable to write encrypted CEK.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
-        Streams.writeAndClose(this.encoder.wrap(jwe), iv, "Unable to write initialization vector.");
+        Streams.writeAndClose(wrap(jwe, "JWE Initialization Vector"), iv, "Unable to write initialization vector.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
-        Streams.writeAndClose(this.encoder.wrap(jwe), ciphertext, "Unable to write ciphertext.");
+        Streams.writeAndClose(wrap(jwe, "JWE Ciphertext"), ciphertext, "Unable to write ciphertext.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
-        Streams.writeAndClose(this.encoder.wrap(jwe), tag, "Unable to write AAD tag.");
+        Streams.writeAndClose(wrap(jwe, "JWE AAD Tag"), tag, "Unable to write AAD tag.");
 
         return Strings.utf8(jwe.toByteArray());
     }
@@ -818,6 +819,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
         private Header build() {
             return new DefaultJwtHeaderBuilder(this).build();
         }
+    }
+
+    private OutputStream wrap(OutputStream out, String name) {
+        OutputStream wrapped = this.encoder.wrap(out);
+        return new EncodingOutputStream(wrapped, "base64url", name);
     }
 
 }

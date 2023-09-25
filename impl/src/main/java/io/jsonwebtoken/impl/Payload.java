@@ -132,15 +132,8 @@ class Payload {
                 InputStream in = toInputStream();
                 in = alg.wrap(in);
                 payload = new Payload(claims, string, bytes, in, getContentType());
-//                payload.setClaimsExpected(claimsExpected);
-//                ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                InputStream in = new ByteArrayInputStream(data);
-//                in = alg.wrap(in);
-//                Streams.copy(in, out, new byte[8192], "Unable to decompress payload bytes.");
-//                data = out.toByteArray();
             }
             payload.setClaimsExpected(claimsExpected);
-            //return new Payload(data, getContentType());
         }
         // otherwise it's a String or b64/detached payload, in either case, we don't decompress since the caller is
         // providing the bytes necessary for signature verification as-is, and there's no conversion we need to perform

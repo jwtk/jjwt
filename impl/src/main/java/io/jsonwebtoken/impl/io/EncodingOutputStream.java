@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.io;
 import io.jsonwebtoken.io.EncodingException;
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 public class EncodingOutputStream extends FilteredOutputStream {
@@ -33,8 +32,8 @@ public class EncodingOutputStream extends FilteredOutputStream {
     }
 
     @Override
-    protected void handleIOException(IOException e) {
-        String msg = "Unable to " + this.codecName + "-encode " + this.name + ": " + e.getMessage();
-        throw new EncodingException(msg, e);
+    protected void onThrowable(Throwable t) {
+        String msg = "Unable to " + this.codecName + "-encode " + this.name + ": " + t.getMessage();
+        throw new EncodingException(msg, t);
     }
 }

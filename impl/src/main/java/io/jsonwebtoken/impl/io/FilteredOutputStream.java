@@ -60,7 +60,7 @@ public class FilteredOutputStream extends FilterOutputStream {
      * @throws IOException if the post-processing fails
      * @since 2.0
      */
-    @SuppressWarnings("unused") // Possibly thrown from subclasses.
+    @SuppressWarnings({"unused", "RedundantThrows"}) // Possibly thrown from subclasses.
     protected void afterWrite(final int n) throws IOException {
         // noop
     }
@@ -76,9 +76,8 @@ public class FilteredOutputStream extends FilterOutputStream {
      *
      * @param n number of bytes to be written
      * @throws IOException if the pre-processing fails
-     * @since 2.0
      */
-    @SuppressWarnings("unused") // Possibly thrown from subclasses.
+    @SuppressWarnings({"unused", "RedundantThrows"}) // Possibly thrown from subclasses.
     protected void beforeWrite(final int n) throws IOException {
         // noop
     }
@@ -92,8 +91,8 @@ public class FilteredOutputStream extends FilterOutputStream {
     public void close() throws IOException {
         try {
             super.close();
-        } catch (IOException e) {
-            handleIOException(e);
+        } catch (Throwable t) {
+            onThrowable(t);
         }
     }
 
@@ -106,8 +105,8 @@ public class FilteredOutputStream extends FilterOutputStream {
     public void flush() throws IOException {
         try {
             out.flush();
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
         }
     }
 
@@ -117,12 +116,12 @@ public class FilteredOutputStream extends FilterOutputStream {
      * This method provides a point to implement custom exception
      * handling. The default behavior is to re-throw the exception.
      *
-     * @param e The IOException thrown
+     * @param t The Throwable thrown
      * @throws IOException if an I/O error occurs.
-     * @since 2.0
      */
-    protected void handleIOException(final IOException e) throws IOException {
-        throw e;
+    protected void onThrowable(final Throwable t) throws IOException {
+        if (t instanceof IOException) throw (IOException) t;
+        throw new IOException("IO Exception " + t.getMessage(), t);
     }
 
     /**
@@ -138,8 +137,8 @@ public class FilteredOutputStream extends FilterOutputStream {
             beforeWrite(len);
             out.write(bts);
             afterWrite(len);
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
         }
     }
 
@@ -157,8 +156,8 @@ public class FilteredOutputStream extends FilterOutputStream {
             beforeWrite(end);
             out.write(bts, st, end);
             afterWrite(end);
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
         }
     }
 
@@ -174,8 +173,8 @@ public class FilteredOutputStream extends FilterOutputStream {
             beforeWrite(1);
             out.write(idx);
             afterWrite(1);
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
         }
     }
 

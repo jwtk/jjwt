@@ -62,7 +62,7 @@ public abstract class FilteredInputStream extends FilterInputStream {
      * @throws IOException if the post-processing fails
      * @since 2.0
      */
-    @SuppressWarnings("unused") // Possibly thrown from subclasses.
+    @SuppressWarnings({"unused", "RedundantThrows"}) // Possibly thrown from subclasses.
     protected void afterRead(final int n) throws IOException {
         // no-op
     }
@@ -77,8 +77,8 @@ public abstract class FilteredInputStream extends FilterInputStream {
     public int available() throws IOException {
         try {
             return super.available();
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
             return 0;
         }
     }
@@ -103,7 +103,7 @@ public abstract class FilteredInputStream extends FilterInputStream {
      * @throws IOException if the pre-processing fails
      * @since 2.0
      */
-    @SuppressWarnings("unused") // Possibly thrown from subclasses.
+    @SuppressWarnings({"unused", "RedundantThrows"}) // Possibly thrown from subclasses.
     protected void beforeRead(final int n) throws IOException {
         // no-op
     }
@@ -117,24 +117,24 @@ public abstract class FilteredInputStream extends FilterInputStream {
     public void close() throws IOException {
         try {
             super.close();
-        } catch (IOException e) {
-            handleIOException(e);
+        } catch (Throwable t) {
+            onThrowable(t);
         }
     }
 
     /**
-     * Handle any IOExceptions thrown; by default, throws the given exception.
+     * Handle any Throwable thrown; by default, throws the given exception.
      * <p>
      * This method provides a point to implement custom exception
      * handling. The default behavior is to re-throw the exception.
      * </p>
      *
-     * @param e The IOException thrown
+     * @param t The IOException thrown
      * @throws IOException if an I/O error occurs.
-     * @since 2.0
      */
-    protected void handleIOException(final IOException e) throws IOException {
-        throw e;
+    protected void onThrowable(final Throwable t) throws IOException {
+        if (t instanceof IOException) throw (IOException) t;
+        throw new IOException("IO Exception: " + t.getMessage(), t);
     }
 
     /**
@@ -170,8 +170,8 @@ public abstract class FilteredInputStream extends FilterInputStream {
             final int b = in.read();
             afterRead(b != Streams.EOF ? 1 : Streams.EOF);
             return b;
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
             return Streams.EOF;
         }
     }
@@ -190,8 +190,8 @@ public abstract class FilteredInputStream extends FilterInputStream {
             final int n = in.read(bts);
             afterRead(n);
             return n;
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
             return Streams.EOF;
         }
     }
@@ -212,8 +212,8 @@ public abstract class FilteredInputStream extends FilterInputStream {
             final int n = in.read(bts, off, len);
             afterRead(n);
             return n;
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
             return Streams.EOF;
         }
     }
@@ -227,8 +227,8 @@ public abstract class FilteredInputStream extends FilterInputStream {
     public synchronized void reset() throws IOException {
         try {
             in.reset();
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
         }
     }
 
@@ -243,8 +243,8 @@ public abstract class FilteredInputStream extends FilterInputStream {
     public long skip(final long ln) throws IOException {
         try {
             return in.skip(ln);
-        } catch (final IOException e) {
-            handleIOException(e);
+        } catch (final Throwable t) {
+            onThrowable(t);
             return 0;
         }
     }

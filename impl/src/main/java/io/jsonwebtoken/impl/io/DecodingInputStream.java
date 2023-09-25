@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.io;
 import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class DecodingInputStream extends FilteredInputStream {
@@ -33,8 +32,8 @@ public class DecodingInputStream extends FilteredInputStream {
     }
 
     @Override
-    protected void handleIOException(IOException e) {
-        String msg = "Unable to " + this.codecName + "-decode " + this.name + ": " + e.getMessage();
-        throw new DecodingException(msg, e);
+    protected void onThrowable(Throwable t) {
+        String msg = "Unable to " + this.codecName + "-decode " + this.name + ": " + t.getMessage();
+        throw new DecodingException(msg, t);
     }
 }
