@@ -42,6 +42,10 @@ import java.util.Objects;
  * the original, i.e. no changes occur on the final character. This requires that the input bytes use the same padding
  * and alphabet as the encoder.
  * </p>
+ *
+ * @since JJWT_RELEASE_VERSION, copied from
+ * <a href="https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6">commons-codec
+ * 585497f09b026f6602daf986723a554e051bdfe6</a>
  */
 abstract class BaseNCodec {
 

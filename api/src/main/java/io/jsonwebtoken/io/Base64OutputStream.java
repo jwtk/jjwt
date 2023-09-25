@@ -55,7 +55,9 @@ import java.io.OutputStream;
  * </p>
  *
  * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>
- * @since 1.4
+ * @since JJWT_RELEASE_VERSION, copied from
+ * <a href="https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6">commons-codec
+ * 585497f09b026f6602daf986723a554e051bdfe6</a>
  */
 class Base64OutputStream extends BaseNCodecOutputStream {
 

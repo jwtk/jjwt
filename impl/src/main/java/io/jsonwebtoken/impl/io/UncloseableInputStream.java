@@ -16,9 +16,13 @@
 package io.jsonwebtoken.impl.io;
 
 import java.io.FilterInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * @since JJWT_RELEASE_VERSION, copied from
+ * <a href="https://github.com/apache/commons-io/blob/3a17f5259b105e734c8adce1d06d68f29884d1bb/src/main/java/org/apache/commons/io/input/CloseShieldInputStream.java">
+ * commons-io 3a17f5259b105e734c8adce1d06d68f29884d1bb</a>
+ */
 public final class UncloseableInputStream extends FilterInputStream {
 
     public UncloseableInputStream(InputStream in) {
@@ -26,7 +30,7 @@ public final class UncloseableInputStream extends FilterInputStream {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         in = ClosedInputStream.INSTANCE;
     }
 }
