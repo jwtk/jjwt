@@ -87,6 +87,7 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -235,7 +236,7 @@ public class DefaultJwtParser implements JwtParser {
         this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = Assert.notNull(clock, "Clock cannot be null.");
-        this.critical = Assert.notNull(critical, "Critical set cannot be null (but it can be empty).");
+        this.critical = Collections.nullSafe(critical);
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
@@ -426,13 +427,23 @@ public class DefaultJwtParser implements JwtParser {
         // ----- crit assertions -----
         if (header instanceof ProtectedHeader) {
             Set<String> crit = Collections.nullSafe(((ProtectedHeader) header).getCritical());
+            Set<String> supportedCrit = this.critical;
+            String b64Id = DefaultJwsHeader.B64.getId();
+            if (!unencodedPayload.isEmpty() && !this.critical.contains(b64Id)) {
+                // The application developer explicitly indicates they're using a B64 payload, so
+                // ensure that the B64 crit header is supported, even if they forgot to configure it on the
+                // parser builder:
+                supportedCrit = new LinkedHashSet<>(Collections.size(this.critical) + 1);
+                supportedCrit.add(DefaultJwsHeader.B64.getId());
+                supportedCrit.addAll(this.critical);
+            }
             // assert any values per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11:
             for (String name : crit) {
                 if (!header.containsKey(name)) {
                     String msg = String.format(CRIT_MISSING_MSG, name, name, header);
                     throw new MalformedJwtException(msg);
                 }
-                if (!this.critical.contains(name)) {
+                if (!supportedCrit.contains(name)) {
                     String msg = String.format(CRIT_UNSUPPORTED_MSG, name, name, header);
                     throw new UnsupportedJwtException(msg);
                 }

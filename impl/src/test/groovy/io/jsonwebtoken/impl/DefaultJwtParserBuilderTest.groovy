@@ -109,6 +109,11 @@ class DefaultJwtParserBuilderTest {
                 invoked = true
                 return Decoders.BASE64URL.decode(s)
             }
+            @Override
+            InputStream wrap(InputStream inputStream) {
+                invoked = true;
+                return Decoders.BASE64URL.wrap(inputStream)
+            }
         }
         def parser = builder.base64UrlDecodeWith(decoder).enableUnsecured().build()
         assertFalse invoked

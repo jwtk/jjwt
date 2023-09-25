@@ -30,7 +30,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
-     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the JSON map.
+     * <code>iss</code></a> (issuer) claim.  A {@code null} value will remove the property from the JSON Claims map.
      *
      * @param iss the JWT {@code iss} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
@@ -42,7 +42,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
-     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the JSON map.
+     * <code>iss</code></a> (issuer) claim.  A {@code null} value will remove the property from the JSON Claims map.
      *
      * @param iss the JWT {@code iss} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
@@ -52,7 +52,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2">
-     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the JSON map.
+     * <code>sub</code></a> (subject) claim.  A {@code null} value will remove the property from the JSON Claims map.
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
@@ -64,7 +64,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2">
-     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the JSON map.
+     * <code>sub</code></a> (subject) claim.  A {@code null} value will remove the property from the JSON Claims map.
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
@@ -74,7 +74,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code> (audience)
-     * Claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
+     * claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
      * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
      * strongly recommended to avoid calling this method whenever possible and favor the
      * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
@@ -135,7 +135,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
-     * <code>exp</code></a> (expiration) timestamp.  A {@code null} value will remove the property from the JSON map.
+     * <code>exp</code></a> (expiration) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
@@ -149,7 +150,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
-     * <code>exp</code></a> (expiration) timestamp.  A {@code null} value will remove the property from the JSON map.
+     * <code>exp</code></a> (expiration) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
@@ -161,7 +163,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
-     * <code>nbf</code></a> (not before) timestamp.  A {@code null} value will remove the property from the JSON map.
+     * <code>nbf</code></a> (not before) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
      *
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
@@ -175,7 +178,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
-     * <code>nbf</code></a> (not before) timestamp.  A {@code null} value will remove the property from the JSON map.
+     * <code>nbf</code></a> (not before) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
      *
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
@@ -187,7 +191,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
-     * <code>iat</code></a> (issued at) timestamp.  A {@code null} value will remove the property from the JSON map.
+     * <code>iat</code></a> (issued at) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
      *
      * <p>The value is the timestamp when the JWT was created.</p>
      *
@@ -201,7 +206,8 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
-     * <code>iat</code></a> (issued at) timestamp.  A {@code null} value will remove the property from the JSON map.
+     * <code>iat</code></a> (issued at) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
      *
      * <p>The value is the timestamp when the JWT was created.</p>
      *
@@ -213,7 +219,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
-     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the JSON map.
+     * <code>jti</code></a> (JWT ID) claim.  A {@code null} value will remove the property from the JSON Claims map.
      *
      * <p>This value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
      * manner that ensures that there is a negligible probability that the same value will be accidentally
@@ -229,7 +235,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
-     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the JSON map.
+     * <code>jti</code></a> (JWT ID) claim.  A {@code null} value will remove the property from the JSON Claims map.
      *
      * <p>This value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
      * manner that ensures that there is a negligible probability that the same value will be accidentally

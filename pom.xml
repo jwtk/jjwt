@@ -307,6 +307,8 @@
                             <exclude>io/jsonwebtoken/io/BaseNCodecInputStream.java</exclude>
                             <exclude>io/jsonwebtoken/io/Base64OutputStream.java</exclude>
                             <exclude>io/jsonwebtoken/io/Base64InputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/FilteredInputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/FilteredOutputStream.java</exclude>
                         </excludes>
                         <methodPercentage>100.000000%</methodPercentage>
                         <statementPercentage>100.000000%</statementPercentage>

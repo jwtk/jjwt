@@ -24,6 +24,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.io.CountingInputStream;
 import io.jsonwebtoken.impl.io.SerializingMapWriter;
 import io.jsonwebtoken.impl.io.Streams;
+import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.io.WritingSerializer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
@@ -157,16 +158,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return this;
     }
 
-//    private byte[] serialize(Map<String, ?> map) {
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
-//        try {
-//            serialize(baos, map);
-//        } finally {
-//            Objects.nullSafeClose(baos);
-//        }
-//        return baos.toByteArray();
-//    }
-
     @Override
     public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> encoder) {
         return encoder(encoder);
@@ -193,17 +184,17 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder setHeader(Map<String, ?> map) {
-        return this.headerBuilder.empty().add(map).and();
+        return header().empty().add(map).and();
     }
 
     @Override
     public JwtBuilder setHeaderParams(Map<String, ?> params) {
-        return this.headerBuilder.add(params).and();
+        return header().add(params).and();
     }
 
     @Override
     public JwtBuilder setHeaderParam(String name, Object value) {
-        return this.headerBuilder.add(name, value).and();
+        return header().add(name, value).and();
     }
 
     protected static <K extends Key> SecureDigestAlgorithm<K, ?> forSigningKey(K key) {
@@ -448,32 +439,29 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder subject(String sub) {
-        this.claimsBuilder.subject(sub);
-        return this;
+        return claims().subject(sub).and();
     }
 
     @Override
     public JwtBuilder setAudience(String aud) {
-        this.claimsBuilder.setAudience(aud);
-        return this;
+        //noinspection deprecation
+        return claims().setAudience(aud).and();
     }
 
     @Override
     public JwtBuilder audienceSingle(String aud) {
-        this.claimsBuilder.audienceSingle(aud);
-        return this;
+        //noinspection deprecation
+        return claims().audienceSingle(aud).and();
     }
 
     @Override
     public JwtBuilder audience(String aud) {
-        this.claimsBuilder.audience(aud);
-        return this;
+        return claims().audience(aud).and();
     }
 
     @Override
     public JwtBuilder audience(Collection<String> aud) {
-        this.claimsBuilder.audience(aud);
-        return this;
+        return claims().audience(aud).and();
     }
 
     @Override
@@ -483,8 +471,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder expiration(Date exp) {
-        this.claimsBuilder.expiration(exp);
-        return this;
+        return claims().expiration(exp).and();
     }
 
     @Override
@@ -494,8 +481,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder notBefore(Date nbf) {
-        this.claimsBuilder.notBefore(nbf);
-        return this;
+        return claims().notBefore(nbf).and();
     }
 
     @Override
@@ -505,8 +491,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder issuedAt(Date iat) {
-        this.claimsBuilder.issuedAt(iat);
-        return this;
+        return claims().issuedAt(iat).and();
     }
 
     @Override
@@ -516,8 +501,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder id(String jti) {
-        this.claimsBuilder.id(jti);
-        return this;
+        return claims().id(jti).and();
     }
 
     private void assertPayloadEncoding(String type) {
@@ -592,15 +576,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         }
     }
 
-    private long writeAndClose(OutputStream out, final Payload payload) {
+    private void writeAndClose(OutputStream out, final Payload payload) {
         out = payload.wrap(out); // compression if necessary
         if (payload.isClaims()) {
             writeAndClose(out, payload.getRequiredClaims());
-            return -1;
         } else {
             try {
                 InputStream in = payload.toInputStream();
-                return Streams.copy(in, out, new byte[4096], "Unable to copy payload.");
+                Streams.copy(in, out, new byte[4096], "Unable to copy payload.");
             } finally {
                 Objects.nullSafeClose(out);
             }
@@ -659,7 +642,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
             }
 
             // (base64url header bytes + separator char) + raw payload bytes:
-            signingInput = new SequenceInputStream(prefixStream, payloadStream);
+            // and don't let the SequenceInputStream close the payloadStream in case reset is needed:
+            signingInput = new SequenceInputStream(prefixStream, new UncloseableInputStream(payloadStream));
         }
 
         byte[] signature;
@@ -709,8 +693,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         OutputStream out = this.encoder.wrap(jwt);
         writeAndClose(out, header);
 
-        // ----- payload -----
+        // ----- separator -----
         jwt.write(DefaultJwtParser.SEPARATOR_CHAR);
+
+        // ----- payload -----
         out = this.encoder.wrap(jwt);
         writeAndClose(out, content);
 

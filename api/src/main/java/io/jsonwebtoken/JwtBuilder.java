@@ -489,7 +489,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
-     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
+     * <code>iss</code></a> (issuer) claim.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link ClaimsMutator#issuer(String) issuer(iss)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -503,7 +503,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2">
-     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
+     * <code>sub</code></a> (subject) claim.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link ClaimsMutator#subject(String) subject(sub)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -517,7 +517,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
-     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
+     * <code>aud</code></a> (audience) claim. A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -531,7 +531,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
-     * <code>exp</code></a> (expiration) value.  A {@code null} value will remove the property from the Claims.
+     * <code>exp</code></a> (expiration) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
@@ -548,7 +548,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
-     * <code>nbf</code></a> (not before) value.  A {@code null} value will remove the property from the Claims.
+     * <code>nbf</code></a> (not before) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
@@ -561,11 +561,11 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      */
     @Override
     // for better/targeted JavaDoc
-    JwtBuilder setNotBefore(Date nbf);
+    JwtBuilder notBefore(Date nbf);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
-     * <code>iat</code></a> (issued at) value.  A {@code null} value will remove the property from the Claims.
+     * <code>iat</code></a> (issued at) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>The value is the timestamp when the JWT was created.</p>
      *
@@ -582,7 +582,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
-     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the Claims.
+     * <code>jti</code></a> (JWT ID) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>The value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
      * manner that ensures that there is a negligible probability that the same value will be accidentally

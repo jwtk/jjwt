@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.io
 
+import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -39,6 +40,11 @@ class ExceptionPropagatingDecoderTest {
             Object decode(Object o) throws DecodingException {
                 throw new DecodingException("problem", new java.io.IOException("dummy"))
             }
+
+            @Override
+            InputStream wrap(InputStream inputStream) {
+                return null
+            }
         })
         try {
             decoder.decode("hello")
@@ -58,6 +64,11 @@ class ExceptionPropagatingDecoderTest {
             Object decode(Object o) throws EncodingException {
                 throw causeEx
             }
+
+            @Override
+            InputStream wrap(InputStream inputStream) {
+                return null
+            }
         })
         try {
             decoder.decode("hello")
@@ -66,5 +77,15 @@ class ExceptionPropagatingDecoderTest {
             assertEquals "Unable to decode input: whatevs", ex.getMessage()
             assertSame causeEx, ex.getCause()
         }
+    }
+
+    @Test
+    void wrap() {
+        def ins = new ByteArrayInputStream(Strings.utf8('test'))
+        def decoder = Decoders.BASE64URL
+        assertTrue decoder instanceof ExceptionPropagatingDecoder
+        def wrapped = decoder.wrap(ins)
+        assertTrue wrapped instanceof Base64InputStream
+        assertSame ins, wrapped.@in
     }
 }

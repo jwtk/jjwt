@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,36 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.impl.io;
 
+import io.jsonwebtoken.io.Decoder;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.InputStream;
 
-/**
- * Very fast <a href="https://datatracker.ietf.org/doc/html/rfc4648#section-4">Base64</a> decoder guaranteed to
- * work in all &gt;= Java 7 JDK and Android environments.
- *
- * @since 0.10.0
- */
-class Base64Decoder extends Base64Support implements Decoder<CharSequence, byte[]> {
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated //TODO: delete when deleting JwtParserBuilder#base64UrlDecodeWith
+public class DelegateStringDecoder implements Decoder<CharSequence, byte[]> {
 
-    Base64Decoder() {
-        super(Base64.DEFAULT);
-    }
+    private final Decoder<String, byte[]> delegate;
 
-    Base64Decoder(Base64 base64) {
-        super(base64);
+    public DelegateStringDecoder(Decoder<String, byte[]> delegate) {
+        this.delegate = Assert.notNull(delegate, "delegate cannot be null.");
     }
 
     @Override
-    public byte[] decode(CharSequence s) throws DecodingException {
-        Assert.notNull(s, "String argument cannot be null");
-        return this.base64.decodeFast(s);
+    public byte[] decode(CharSequence charSequence) throws DecodingException {
+        return delegate.decode(charSequence.toString());
     }
 
     @Override
     public InputStream wrap(InputStream in) {
-        return new Base64InputStream(in);
+        return delegate.wrap(in);
     }
 }

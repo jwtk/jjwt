@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.io;
 
+import java.io.InputStream;
+
 /**
  * A decoder converts an already-encoded data value to a desired data type.
  *
@@ -30,4 +32,12 @@ public interface Decoder<T, R> {
      * @throws DecodingException if there is a problem during decoding.
      */
     R decode(T t) throws DecodingException;
+
+    /**
+     * Wraps the specified {@code InputStream} to ensure any stream bytes are decoded as they are read.
+     *
+     * @param in the input stream to decode
+     * @return a new input stream that will decode stream content
+     */
+    InputStream wrap(InputStream in);
 }

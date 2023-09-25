@@ -77,38 +77,38 @@ class Base64InputStream extends BaseNCodecInputStream {
         super(inputStream, new Base64Codec(false), doEncode);
     }
 
-    /**
-     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
-     * provided InputStream.
-     *
-     * @param inputStream   InputStream to wrap.
-     * @param doEncode      true if we should encode all data read from us, false if we should decode.
-     * @param lineLength    If doEncode is true, each line of encoded data will contain lineLength characters (rounded down to
-     *                      the nearest multiple of 4). If lineLength &lt;= 0, the encoded data is not divided into lines. If
-     *                      doEncode is false, lineLength is ignored.
-     * @param lineSeparator If doEncode is true, each line of encoded data will be terminated with this byte sequence (e.g. \r\n).
-     *                      If lineLength &lt;= 0, the lineSeparator is not used. If doEncode is false lineSeparator is ignored.
-     */
-    Base64InputStream(final InputStream inputStream, final boolean doEncode, final int lineLength, final byte[] lineSeparator) {
-        super(inputStream, new Base64Codec(lineLength, lineSeparator), doEncode);
-    }
-
-    /**
-     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
-     * provided InputStream.
-     *
-     * @param inputStream    InputStream to wrap.
-     * @param doEncode       true if we should encode all data read from us, false if we should decode.
-     * @param lineLength     If doEncode is true, each line of encoded data will contain lineLength characters (rounded down to
-     *                       the nearest multiple of 4). If lineLength &lt;= 0, the encoded data is not divided into lines. If
-     *                       doEncode is false, lineLength is ignored.
-     * @param lineSeparator  If doEncode is true, each line of encoded data will be terminated with this byte sequence (e.g. \r\n).
-     *                       If lineLength &lt;= 0, the lineSeparator is not used. If doEncode is false lineSeparator is ignored.
-     * @param decodingPolicy The decoding policy.
-     * @since 1.15
-     */
-    Base64InputStream(final InputStream inputStream, final boolean doEncode, final int lineLength, final byte[] lineSeparator,
-                      final CodecPolicy decodingPolicy) {
-        super(inputStream, new Base64Codec(lineLength, lineSeparator, false, decodingPolicy), doEncode);
-    }
+//    /**
+//     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
+//     * provided InputStream.
+//     *
+//     * @param inputStream   InputStream to wrap.
+//     * @param doEncode      true if we should encode all data read from us, false if we should decode.
+//     * @param lineLength    If doEncode is true, each line of encoded data will contain lineLength characters (rounded down to
+//     *                      the nearest multiple of 4). If lineLength &lt;= 0, the encoded data is not divided into lines. If
+//     *                      doEncode is false, lineLength is ignored.
+//     * @param lineSeparator If doEncode is true, each line of encoded data will be terminated with this byte sequence (e.g. \r\n).
+//     *                      If lineLength &lt;= 0, the lineSeparator is not used. If doEncode is false lineSeparator is ignored.
+//     */
+//    Base64InputStream(final InputStream inputStream, final boolean doEncode, final int lineLength, final byte[] lineSeparator) {
+//        super(inputStream, new Base64Codec(lineLength, lineSeparator), doEncode);
+//    }
+//
+//    /**
+//     * Creates a Base64InputStream such that all data read is either Base64-encoded or Base64-decoded from the original
+//     * provided InputStream.
+//     *
+//     * @param inputStream    InputStream to wrap.
+//     * @param doEncode       true if we should encode all data read from us, false if we should decode.
+//     * @param lineLength     If doEncode is true, each line of encoded data will contain lineLength characters (rounded down to
+//     *                       the nearest multiple of 4). If lineLength &lt;= 0, the encoded data is not divided into lines. If
+//     *                       doEncode is false, lineLength is ignored.
+//     * @param lineSeparator  If doEncode is true, each line of encoded data will be terminated with this byte sequence (e.g. \r\n).
+//     *                       If lineLength &lt;= 0, the lineSeparator is not used. If doEncode is false lineSeparator is ignored.
+//     * @param decodingPolicy The decoding policy.
+//     * @since 1.15
+//     */
+//    Base64InputStream(final InputStream inputStream, final boolean doEncode, final int lineLength, final byte[] lineSeparator,
+//                      final CodecPolicy decodingPolicy) {
+//        super(inputStream, new Base64Codec(lineLength, lineSeparator, false, decodingPolicy), doEncode);
+//    }
 }

@@ -23,13 +23,13 @@ import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.impl.io.DelegateStringDecoder;
 import io.jsonwebtoken.impl.io.DeserializingMapReader;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Assert;
@@ -136,15 +136,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public JwtParserBuilder base64UrlDecodeWith(final Decoder<String, byte[]> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
-        return decoder(new Decoder<CharSequence, byte[]>() {
-            @Override
-            public byte[] decode(CharSequence charSequence) throws DecodingException {
-                return decoder.decode(charSequence.toString());
-            }
-        });
+        return decoder(new DelegateStringDecoder(decoder));
     }
 
     @Override

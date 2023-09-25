@@ -193,6 +193,27 @@ class RFC7797Test {
         assertEquals 'me', jws.getPayload().getSubject()
     }
 
+    /**
+     * Asserts that, even if the parser builder is not explicitly called with .critical("b64") to indicate B64 payloads
+     * are supported, that a call to .parse*Jws(String, unencodedPayload) still works.  Just the fact that the
+     * overloaded method is called explicitly means they want B64 payload support, so it should still 'just work'
+     * even if .critical isn't configured.
+     */
+    @Test
+    void critUnspecifiedOnParserBuilder() {
+
+        def key = TestKeys.HS256
+
+        byte[] payload = Strings.utf8('{"sub":"me"}')
+
+        String s = Jwts.builder().signWith(key).content(payload).encodePayload(false).compact()
+
+        def jws = Jwts.parser().verifyWith(key) // .critical("b64") is not called, should still work:
+                .build().parseClaimsJws(s, payload)
+
+        assertEquals 'me', jws.getPayload().getSubject()
+    }
+
     @Test
     void testEmptyBytesPayload() {
         try {
