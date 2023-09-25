@@ -119,7 +119,7 @@ class EcSignatureAlgorithmTest {
     @Test
     void testSignWithPublicKey() {
         ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
-        def request = new DefaultSecureRequest(new byte[1], null, null, key)
+        def request = new DefaultSecureRequest(Bytes.stream(new byte[1]), null, null, key)
         def alg = Jwts.SIG.ES256
         try {
             alg.digest(request)
@@ -136,7 +136,7 @@ class EcSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPrivateKey priv = new TestECPrivateKey(algorithm: 'EC', params: spec)
-            def request = new DefaultSecureRequest(new byte[1], null, null, priv)
+            def request = new DefaultSecureRequest(Bytes.stream(new byte[1]), null, null, priv)
             try {
                 it.digest(request)
             } catch (InvalidKeyException expected) {
@@ -153,7 +153,7 @@ class EcSignatureAlgorithmTest {
     void testSignWithInvalidKeyFieldLength() {
         def keypair = Jwts.SIG.ES256.keyPair().build()
         def data = "foo".getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultSecureRequest(data, null, null, keypair.private)
+        def req = new DefaultSecureRequest(Bytes.stream(data), null, null, keypair.private)
         try {
             Jwts.SIG.ES384.digest(req)
         } catch (InvalidKeyException expected) {

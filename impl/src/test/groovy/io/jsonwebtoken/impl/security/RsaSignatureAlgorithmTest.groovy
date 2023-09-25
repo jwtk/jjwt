@@ -87,7 +87,7 @@ class RsaSignatureAlgorithmTest {
     @Test
     void testValidateSigningKeyNotPrivate() {
         RSAPublicKey key = createMock(RSAPublicKey)
-        def request = new DefaultSecureRequest(new byte[1], null, null, key)
+        def request = new DefaultSecureRequest(Bytes.stream(new byte[1]), null, null, key)
         try {
             Jwts.SIG.RS256.digest(request)
             fail()
@@ -115,7 +115,7 @@ class RsaSignatureAlgorithmTest {
 
         algs.each {
             def pair = it.getId().startsWith("PS") ? pssPair : rsaPair
-            def request = new DefaultSecureRequest(new byte[1], null, null, pair.getPrivate())
+            def request = new DefaultSecureRequest(Bytes.stream(new byte[1]), null, null, pair.getPrivate())
             try {
                 it.digest(request)
                 fail()
