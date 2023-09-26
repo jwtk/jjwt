@@ -41,5 +41,5 @@ public interface Encoder<T, R> {
      * @param out the output stream to encode
      * @return a new output stream that will encode stream content
      */
-    OutputStream wrap(OutputStream out);
+    OutputStream encode(OutputStream out);
 }

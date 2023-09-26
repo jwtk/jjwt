@@ -30,7 +30,7 @@ class AbstractCompressionAlgorithmTest {
     @Test
     void testCompressNull() {
         def alg = new ExceptionThrowingAlgorithm()
-        assertSame Bytes.EMPTY, alg.compress(null)
+        assertSame Bytes.EMPTY, alg.compress((byte[])null)
     }
 
     @Test
@@ -74,12 +74,12 @@ class AbstractCompressionAlgorithmTest {
         }
 
         @Override
-        protected OutputStream doWrap(OutputStream out) throws IOException {
+        protected OutputStream doCompress(OutputStream out) throws IOException {
             throw new IOException("Test Wrap OutputStream Exception")
         }
 
         @Override
-        protected InputStream doWrap(InputStream is) throws IOException {
+        protected InputStream doDecompress(InputStream is) throws IOException {
             throw new IOException("Test Wrap InputStream Exception")
         }
 

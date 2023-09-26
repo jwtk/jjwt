@@ -474,7 +474,7 @@ class DefaultJwtBuilderTest {
                 return null
             }
             @Override
-            OutputStream wrap(OutputStream out) {
+            OutputStream encode(OutputStream out) {
                 return out
             }
         }

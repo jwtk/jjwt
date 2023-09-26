@@ -37,7 +37,7 @@ public class DelegateStringDecoder implements Decoder<CharSequence, byte[]> {
     }
 
     @Override
-    public InputStream wrap(InputStream in) {
-        return delegate.wrap(in);
+    public InputStream decode(InputStream in) {
+        return delegate.decode(in);
     }
 }

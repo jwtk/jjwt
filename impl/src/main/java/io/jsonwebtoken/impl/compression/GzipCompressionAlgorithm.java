@@ -35,12 +35,12 @@ public class GzipCompressionAlgorithm extends AbstractCompressionAlgorithm {
     }
 
     @Override
-    protected OutputStream doWrap(OutputStream out) throws IOException {
+    protected OutputStream doCompress(OutputStream out) throws IOException {
         return new GZIPOutputStream(out);
     }
 
     @Override
-    protected InputStream doWrap(InputStream is) throws IOException {
+    protected InputStream doDecompress(InputStream is) throws IOException {
         return new GZIPInputStream(is);
     }
 }

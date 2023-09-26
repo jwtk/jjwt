@@ -110,9 +110,9 @@ class DefaultJwtParserBuilderTest {
                 return Decoders.BASE64URL.decode(s)
             }
             @Override
-            InputStream wrap(InputStream inputStream) {
+            InputStream decode(InputStream inputStream) {
                 invoked = true;
-                return Decoders.BASE64URL.wrap(inputStream)
+                return Decoders.BASE64URL.decode(inputStream)
             }
         }
         def parser = builder.base64UrlDecodeWith(decoder).enableUnsecured().build()
@@ -407,12 +407,12 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
-        OutputStream wrap(OutputStream out) throws CompressionException {
+        OutputStream compress(OutputStream out) throws CompressionException {
             return out
         }
 
         @Override
-        InputStream wrap(InputStream inputStream) throws CompressionException {
+        InputStream decompress(InputStream inputStream) throws CompressionException {
             return inputStream
         }
     }

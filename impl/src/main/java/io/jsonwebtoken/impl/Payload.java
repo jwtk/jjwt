@@ -117,8 +117,8 @@ class Payload {
         return !isClaims() && !isString() && Bytes.isEmpty(this.bytes) && this.inputStreamEmpty;
     }
 
-    public OutputStream wrap(OutputStream out) {
-        return this.zip != null ? zip.wrap(out) : out;
+    public OutputStream compress(OutputStream out) {
+        return this.zip != null ? zip.compress(out) : out;
     }
 
     public Payload decompress(CompressionAlgorithm alg) {
@@ -130,7 +130,7 @@ class Payload {
                 payload = new Payload(claims, string, data, null, getContentType());
             } else {
                 InputStream in = toInputStream();
-                in = alg.wrap(in);
+                in = alg.decompress(in);
                 payload = new Payload(claims, string, bytes, in, getContentType());
             }
             payload.setClaimsExpected(claimsExpected);

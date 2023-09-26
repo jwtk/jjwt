@@ -61,7 +61,7 @@ class ExceptionPropagatingDecoder<T, R> implements Decoder<T, R> {
     }
 
     @Override
-    public InputStream wrap(InputStream in) {
-        return this.decoder.wrap(in);
+    public InputStream decode(InputStream in) {
+        return this.decoder.decode(in);
     }
 }

@@ -42,7 +42,7 @@ class Base64Decoder extends Base64Support implements Decoder<CharSequence, byte[
     }
 
     @Override
-    public InputStream wrap(InputStream in) {
+    public InputStream decode(InputStream in) {
         return new Base64InputStream(in);
     }
 }

@@ -50,7 +50,7 @@ public interface CompressionAlgorithm extends Identifiable {
      * @param out the stream to wrap for compression
      * @return the stream to use for writing
      */
-    OutputStream wrap(OutputStream out);
+    OutputStream compress(OutputStream out);
 
     /**
      * Wraps the specified {@code InputStream} to ensure any stream bytes are decompressed as they are read.
@@ -58,5 +58,5 @@ public interface CompressionAlgorithm extends Identifiable {
      * @param in the stream to wrap for decompression
      * @return the stream to use for reading
      */
-    InputStream wrap(InputStream in);
+    InputStream decompress(InputStream in);
 }

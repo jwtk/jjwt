@@ -65,7 +65,7 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
         this.OS_WRAP_FN = forCompression(new CheckedFunction<OutputStream, OutputStream>() {
             @Override
             public OutputStream apply(OutputStream out) throws Exception {
-                return doWrap(out);
+                return doCompress(out);
             }
         });
         this.COMPRESS_FN = forCompression(new CheckedFunction<byte[], byte[]>() {
@@ -77,7 +77,7 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
         this.IS_WRAP_FN = forDecompression(new CheckedFunction<InputStream, InputStream>() {
             @Override
             public InputStream apply(InputStream is) throws Exception {
-                return doWrap(is);
+                return doDecompress(is);
             }
         });
         this.DECOMPRESS_FN = forDecompression(new CheckedFunction<byte[], byte[]>() {
@@ -99,18 +99,18 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
     }
 
     @Override
-    public final OutputStream wrap(final OutputStream out) throws CompressionException {
+    public final OutputStream compress(final OutputStream out) throws CompressionException {
         return OS_WRAP_FN.apply(out);
     }
 
-    protected abstract OutputStream doWrap(OutputStream out) throws IOException;
+    protected abstract OutputStream doCompress(OutputStream out) throws IOException;
 
     @Override
-    public final InputStream wrap(InputStream is) throws CompressionException {
+    public final InputStream decompress(InputStream is) throws CompressionException {
         return IS_WRAP_FN.apply(is);
     }
 
-    protected abstract InputStream doWrap(InputStream is) throws IOException;
+    protected abstract InputStream doDecompress(InputStream is) throws IOException;
 
     @Override
     public final byte[] compress(byte[] content) {
@@ -120,7 +120,7 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
 
     private byte[] doCompress(byte[] data) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream(512);
-        OutputStream compression = wrap(out);
+        OutputStream compression = compress(out);
         try {
             compression.write(data);
             compression.flush();
@@ -153,7 +153,7 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
      */
     protected byte[] doDecompress(byte[] compressed) throws IOException {
         InputStream is = new ByteArrayInputStream(compressed);
-        InputStream decompress = wrap(is);
+        InputStream decompress = decompress(is);
         byte[] buffer = new byte[512];
         ByteArrayOutputStream out = new ByteArrayOutputStream(buffer.length);
         int read = 0;

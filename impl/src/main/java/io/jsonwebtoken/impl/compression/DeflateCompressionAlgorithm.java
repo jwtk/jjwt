@@ -39,12 +39,12 @@ public class DeflateCompressionAlgorithm extends AbstractCompressionAlgorithm {
     }
 
     @Override
-    protected OutputStream doWrap(OutputStream out) {
+    protected OutputStream doCompress(OutputStream out) {
         return new DeflaterOutputStream(out);
     }
 
     @Override
-    protected InputStream doWrap(InputStream is) {
+    protected InputStream doDecompress(InputStream is) {
         return new InflaterInputStream(is);
     }
 

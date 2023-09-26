@@ -34,7 +34,7 @@ class DelegateStringDecoderTest {
                 return Strings.utf8(value);
             }
             @Override
-            InputStream wrap(InputStream inputStream) {
+            InputStream decode(InputStream inputStream) {
                 return null
             }
         }
@@ -43,7 +43,7 @@ class DelegateStringDecoderTest {
     }
 
     @Test
-    void wrap() {
+    void decodeStream() {
         def value = 'test'
         boolean invoked = false
         def stream = new ByteArrayInputStream(Strings.utf8(value))
@@ -53,13 +53,13 @@ class DelegateStringDecoderTest {
                 return Strings.utf8(value);
             }
             @Override
-            InputStream wrap(InputStream inputStream) {
+            InputStream decode(InputStream inputStream) {
                 invoked = true
                 stream
             }
         }
         def d = new DelegateStringDecoder(test)
-        assertSame stream, d.wrap(stream)
+        assertSame stream, d.decode(stream)
         assertTrue invoked
     }
 }

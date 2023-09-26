@@ -44,12 +44,12 @@ class YagCompressionCodec implements CompressionCodec {
     }
 
     @Override
-    OutputStream wrap(OutputStream out) throws CompressionException {
+    OutputStream compress(OutputStream out) throws CompressionException {
         return out
     }
 
     @Override
-    InputStream wrap(InputStream inputStream) throws CompressionException {
+    InputStream decompress(InputStream inputStream) throws CompressionException {
         return inputStream
     }
 }

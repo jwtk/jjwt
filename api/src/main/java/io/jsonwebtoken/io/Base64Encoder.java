@@ -42,7 +42,7 @@ class Base64Encoder extends Base64Support implements Encoder<byte[], String> {
     }
 
     @Override
-    public OutputStream wrap(OutputStream out) {
+    public OutputStream encode(OutputStream out) {
         return new Base64OutputStream(out, true, base64.isUrlsafe());
     }
 }

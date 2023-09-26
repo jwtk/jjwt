@@ -20,10 +20,11 @@ import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
-import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.io.Writer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
+import java.nio.charset.StandardCharsets
 import java.security.Key
 
 import static org.junit.Assert.*
@@ -98,7 +99,11 @@ class RFC7797Test {
 
         def claims = Jwts.claims().subject('me').build()
 
-        byte[] content = Services.loadFirst(Serializer).serialize(claims)
+        ByteArrayOutputStream out = new ByteArrayOutputStream()
+        Services.loadFirst(Writer).write(new OutputStreamWriter(out, StandardCharsets.UTF_8), claims)
+        byte[] content = out.toByteArray()
+
+        //byte[] content = Services.loadFirst(Serializer).serialize(claims)
 
         String s = Jwts.builder().signWith(key).content(content).encodePayload(false).compact()
 
@@ -339,7 +344,7 @@ class RFC7797Test {
         for (def zip : Jwts.ZIP.get().values()) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream()
-            OutputStream cos = zip.wrap(out); cos.write(content); cos.close()
+            OutputStream cos = zip.compress(out); cos.write(content); cos.close()
             def compressed = out.toByteArray()
 
             // create a detached unencoded JWS that is compressed:

@@ -39,5 +39,5 @@ public interface Decoder<T, R> {
      * @param in the input stream to decode
      * @return a new input stream that will decode stream content
      */
-    InputStream wrap(InputStream in);
+    InputStream decode(InputStream in);
 }

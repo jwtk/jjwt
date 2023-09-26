@@ -42,7 +42,7 @@ class ExceptionPropagatingEncoderTest {
             }
 
             @Override
-            OutputStream wrap(OutputStream out) {
+            OutputStream encode(OutputStream out) {
                 return null
             }
         })
@@ -66,7 +66,7 @@ class ExceptionPropagatingEncoderTest {
             }
 
             @Override
-            OutputStream wrap(OutputStream out) {
+            OutputStream encode(OutputStream out) {
                 return null
             }
         })

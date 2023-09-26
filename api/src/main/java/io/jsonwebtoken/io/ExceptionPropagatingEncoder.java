@@ -61,7 +61,7 @@ class ExceptionPropagatingEncoder<T, R> implements Encoder<T, R> {
     }
 
     @Override
-    public OutputStream wrap(OutputStream out) {
-        return this.encoder.wrap(out);
+    public OutputStream encode(OutputStream out) {
+        return this.encoder.encode(out);
     }
 }

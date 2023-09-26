@@ -42,7 +42,7 @@ class ExceptionPropagatingDecoderTest {
             }
 
             @Override
-            InputStream wrap(InputStream inputStream) {
+            InputStream decode(InputStream inputStream) {
                 return null
             }
         })
@@ -66,7 +66,7 @@ class ExceptionPropagatingDecoderTest {
             }
 
             @Override
-            InputStream wrap(InputStream inputStream) {
+            InputStream decode(InputStream inputStream) {
                 return null
             }
         })
@@ -80,11 +80,11 @@ class ExceptionPropagatingDecoderTest {
     }
 
     @Test
-    void wrap() {
+    void decode() {
         def ins = new ByteArrayInputStream(Strings.utf8('test'))
         def decoder = Decoders.BASE64URL
         assertTrue decoder instanceof ExceptionPropagatingDecoder
-        def wrapped = decoder.wrap(ins)
+        def wrapped = decoder.decode(ins)
         assertTrue wrapped instanceof Base64InputStream
         assertSame ins, wrapped.@in
     }

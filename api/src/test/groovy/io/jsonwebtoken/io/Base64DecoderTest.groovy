@@ -28,7 +28,7 @@ class Base64DecoderTest {
     }
 
     @Test
-    void testDecode() {
+    void decode() {
         String encoded = 'SGVsbG8g5LiW55WM' // Hello 世界
         byte[] bytes = new Base64Decoder().decode(encoded)
         String result = new String(bytes, Strings.UTF_8)
@@ -36,9 +36,9 @@ class Base64DecoderTest {
     }
 
     @Test
-    void wrap() {
+    void decodeStream() {
         def ins = new ByteArrayInputStream(Strings.utf8('hello'))
-        def wrapped = new Base64Decoder().wrap(ins)
+        def wrapped = new Base64Decoder().decode(ins)
         assertTrue wrapped instanceof Base64InputStream
         assertSame ins, wrapped.@in
     }
