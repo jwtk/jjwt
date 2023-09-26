@@ -164,7 +164,7 @@ JJWT is open source under the terms of the [Apache 2.0 License](http://www.apach
  * Convenient and readable [fluent](http://en.wikipedia.org/wiki/Fluent_interface) interfaces, great for IDE 
    auto-completion to write code quickly
  * Fully RFC specification compliant on all implemented functionality, tested against RFC-specified test vectors
- * Stable implementation with over 1,500+ tests and enforced 100% test code coverage.  Every single method, statement 
+ * Stable implementation with almost 1,700 tests and enforced 100% test code coverage.  Every single method, statement 
    and conditional branch variant in the entire codebase is tested and required to pass on every build.
  * Creating, parsing and verifying digitally signed compact JWTs (aka JWSs) with all standard JWS algorithms:
    

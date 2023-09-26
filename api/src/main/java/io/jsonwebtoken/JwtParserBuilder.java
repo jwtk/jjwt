@@ -696,7 +696,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param base64UrlDecoder the decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #decoder(Decoder)}. This method will be removed
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #b64Url(Decoder)}. This method will be removed
      * before the JJWT 1.0 release.
      */
     @Deprecated
@@ -714,7 +714,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param base64UrlDecoder the stream decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
      */
-    JwtParserBuilder decoder(Decoder<InputStream, InputStream> base64UrlDecoder);
+    JwtParserBuilder b64Url(Decoder<InputStream, InputStream> base64UrlDecoder);
 
     /**
      * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is

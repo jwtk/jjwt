@@ -968,9 +968,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param base64UrlEncoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
-     * @see #encoder(Encoder)
+     * @see #b64Url(Encoder)
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #encoder(Encoder)}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #b64Url(Encoder)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -989,7 +989,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder encoder(Encoder<OutputStream, OutputStream> encoder);
+    JwtBuilder b64Url(Encoder<OutputStream, OutputStream> encoder);
 
     /**
      * Enables <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS)

@@ -138,11 +138,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParserBuilder base64UrlDecodeWith(final Decoder<CharSequence, byte[]> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
-        return decoder(new DelegateStringDecoder(decoder));
+        return b64Url(new DelegateStringDecoder(decoder));
     }
 
     @Override
-    public JwtParserBuilder decoder(Decoder<InputStream, InputStream> decoder) {
+    public JwtParserBuilder b64Url(Decoder<InputStream, InputStream> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
         this.decoder = decoder;
         return this;

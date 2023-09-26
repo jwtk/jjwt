@@ -156,11 +156,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> encoder) {
-        return encoder(new ByteBase64UrlStreamEncoder(encoder));
+        return b64Url(new ByteBase64UrlStreamEncoder(encoder));
     }
 
     @Override
-    public JwtBuilder encoder(Encoder<OutputStream, OutputStream> encoder) {
+    public JwtBuilder b64Url(Encoder<OutputStream, OutputStream> encoder) {
         Assert.notNull(encoder, "encoder cannot be null.");
         this.encoder = encoder;
         return this;

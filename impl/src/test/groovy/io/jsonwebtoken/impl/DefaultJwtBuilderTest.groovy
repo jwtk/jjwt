@@ -468,7 +468,7 @@ class DefaultJwtBuilderTest {
                 return null
             }
         }
-        def b = new DefaultJwtBuilder().encoder(encoder)
+        def b = new DefaultJwtBuilder().b64Url(encoder)
         assertSame encoder, b.encoder
     }
 
