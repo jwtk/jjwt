@@ -17,28 +17,30 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.RfcTests
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Reader
-import io.jsonwebtoken.io.Writer
+import io.jsonwebtoken.io.Serializer
 import org.junit.Test
-
-import java.nio.charset.StandardCharsets
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.fail
 
 class RFC7515AppendixETest {
 
-    static final Writer<Map<String,?>> writer = Services.loadFirst(Writer)
-    static final Reader<Map<String,?>> reader = Services.loadFirst(Reader)
+    static final Serializer<Map<String, ?>> serializer = Services.loadFirst(Serializer)
+    static final Deserializer<Map<String, ?>> deserializer = Services.loadFirst(Deserializer)
 
-    static byte[] ser(Writer writer, def value) {
+    static byte[] ser(def value) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(512)
-        OutputStreamWriter w = new OutputStreamWriter(baos, StandardCharsets.UTF_8)
-        writer.write(w, value)
-        w.close()
+        serializer.serialize(value, baos)
         return baos.toByteArray()
+    }
+
+    static <T> T deser(String s) {
+        T t = deserializer.deserialize(Streams.stream(s)) as Map<String, ?> as T
+        return t
     }
 
     @Test
@@ -49,8 +51,8 @@ class RFC7515AppendixETest {
          "crit":["http://example.invalid/UNDEFINED"],
          "http://example.invalid/UNDEFINED":true
         }''')
-        Map<String, ?> header = reader.read(new StringReader(headerString))
-        String b64url = Encoders.BASE64URL.encode(ser(writer, header))
+        Map<String, ?> header = deser(headerString)
+        String b64url = Encoders.BASE64URL.encode(ser(header))
 
         String jws = b64url + '.RkFJTA.'
 
@@ -80,8 +82,8 @@ class RFC7515AppendixETest {
          "crit":["$critVal"],
          "$critVal":true
         }""")
-        Map<String, ?> header = reader.read(new StringReader(headerString))
-        String b64url = Encoders.BASE64URL.encode(ser(writer, header))
+        Map<String, ?> header = deser(headerString)
+        String b64url = Encoders.BASE64URL.encode(ser(header))
 
         String jws = b64url + '.RkFJTA.fakesignature' // needed to parse a JWS properly
 

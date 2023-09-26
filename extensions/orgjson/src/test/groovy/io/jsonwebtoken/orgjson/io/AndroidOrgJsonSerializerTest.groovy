@@ -39,7 +39,7 @@ class AndroidOrgJsonSerializerTest {
 
         replay Classes
 
-        assertFalse OrgJsonWriter.isJSONString('foo')
+        assertFalse OrgJsonSerializer.isJSONString('foo')
 
         verify Classes
     }

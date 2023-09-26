@@ -23,7 +23,7 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Writer
+import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
@@ -73,10 +73,10 @@ class JwtsTest {
     }
 
     static def toJson(def o) {
-        def writer = Services.loadFirst(Writer)
-        StringWriter w = new StringWriter(512)
-        writer.write(w, o)
-        return w.toString()
+        def serializer = Services.loadFirst(Serializer)
+        def out = new ByteArrayOutputStream()
+        serializer.serialize(o, out)
+        return Strings.utf8(out.toByteArray())
     }
 
     @Test
@@ -211,7 +211,7 @@ class JwtsTest {
 
     @Test
     void testContentStreamNull() {
-        String compact = Jwts.builder().content((InputStream)null).compact()
+        String compact = Jwts.builder().content((InputStream) null).compact()
         def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
         assertEquals 'none', jwt.header.getAlgorithm()
         assertTrue Bytes.isEmpty(jwt.getPayload())

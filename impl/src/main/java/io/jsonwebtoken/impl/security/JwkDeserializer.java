@@ -16,13 +16,13 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
-import io.jsonwebtoken.io.Reader;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.security.MalformedKeyException;
 
 public class JwkDeserializer extends JsonObjectDeserializer {
 
-    public JwkDeserializer(Reader<?> reader) {
-        super(reader, "JWK");
+    public JwkDeserializer(Deserializer<?> deserializer) {
+        super(deserializer, "JWK");
     }
 
     @Override

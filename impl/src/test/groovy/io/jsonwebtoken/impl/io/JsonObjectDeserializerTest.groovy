@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl.io
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Reader
+import io.jsonwebtoken.io.Deserializer
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -31,17 +31,23 @@ class JsonObjectDeserializerTest {
     @Test
     void testStackOverflowError() {
         def err = new StackOverflowError('foo')
-        // create a Reader that will throw a StackOverflowError
-        def reader = new Reader() {
+        // create one that will throw a StackOverflowError
+        def deser = new Deserializer() {
             @Override
-            Object read(java.io.Reader reader) throws IOException {
+            Object deserialize(byte[] bytes) throws DeserializationException {
+                fail() // shouldn't be called in this test
+                return null
+            }
+
+            @Override
+            Object deserialize(InputStream inputStream) throws DeserializationException {
                 throw err
             }
         }
         try {
             // doesn't matter for this test, just has to be non-null:
-            def r = new InputStreamReader(new ByteArrayInputStream(Bytes.EMPTY))
-            new JsonObjectDeserializer(reader, 'claims').apply(r)
+            def ins = new ByteArrayInputStream(Bytes.EMPTY)
+            new JsonObjectDeserializer(deser, 'claims').apply(ins)
             fail()
         } catch (DeserializationException e) {
             String msg = String.format(JsonObjectDeserializer.MALFORMED_COMPLEX_ERROR, 'claims', 'claims', 'foo')
@@ -54,17 +60,22 @@ class JsonObjectDeserializerTest {
     @Test
     void testDeserializationExceptionMessage() {
         def ex = new IOException('foo')
-        // create a Reader that will throw a StackOverflowError
-        def reader = new Reader() {
+        // create one that will throw a StackOverflowError
+        def deser = new Deserializer() {
             @Override
-            Object read(java.io.Reader reader) throws IOException {
+            Object deserialize(byte[] bytes) throws DeserializationException {
+                fail() // should not be called in this test
+                return null
+            }
+            @Override
+            Object deserialize(InputStream inputStream) throws DeserializationException {
                 throw ex
             }
         }
         try {
             // doesn't matter for this test, just has to be non-null:
-            def r = new InputStreamReader(new ByteArrayInputStream(Bytes.EMPTY))
-            new JsonObjectDeserializer(reader, 'claims').apply(r)
+            def ins = new ByteArrayInputStream(Bytes.EMPTY)
+            new JsonObjectDeserializer(deser, 'claims').apply(ins)
             fail()
         } catch (MalformedJwtException e) {
             String msg = String.format(JsonObjectDeserializer.MALFORMED_ERROR, 'claims', 'foo')

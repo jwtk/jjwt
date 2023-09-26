@@ -16,42 +16,38 @@
 package io.jsonwebtoken.gson.io;
 
 import com.google.gson.Gson;
-import io.jsonwebtoken.io.DeserializationException;
-import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.io.AbstractDeserializer;
+import io.jsonwebtoken.lang.Assert;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
-@SuppressWarnings("DeprecatedIsStillUsed")
-@Deprecated
-public class GsonDeserializer<T> extends GsonReader<T> implements Deserializer<T> {
+public class GsonDeserializer<T> extends AbstractDeserializer<T> {
+
+    private final Class<T> returnType;
+    protected final Gson gson;
 
     public GsonDeserializer() {
-        super();
+        this(GsonSerializer.DEFAULT_GSON);
     }
 
+    @SuppressWarnings("unchecked")
     public GsonDeserializer(Gson gson) {
-        super(gson);
+        this(gson, (Class<T>) Object.class);
     }
 
-    @SuppressWarnings("deprecation")
-    @Deprecated
+    private GsonDeserializer(Gson gson, Class<T> returnType) {
+        Assert.notNull(gson, "gson cannot be null.");
+        Assert.notNull(returnType, "Return type cannot be null.");
+        this.gson = gson;
+        this.returnType = returnType;
+    }
+
     @Override
-    public T deserialize(byte[] bytes) throws DeserializationException {
-        try {
-            return readValue(bytes);
-        } catch (Throwable t) {
-            String msg = "Unable to deserialize JSON: " + t.getMessage();
-            throw new DeserializationException(msg, t);
-        }
-    }
-
-    @Deprecated
-    protected T readValue(byte[] bytes) throws IOException {
-        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes))) {
-            return read(reader);
-        }
+    protected T doDeserialize(InputStream in) throws Exception {
+        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+        return gson.fromJson(reader, returnType);
     }
 }

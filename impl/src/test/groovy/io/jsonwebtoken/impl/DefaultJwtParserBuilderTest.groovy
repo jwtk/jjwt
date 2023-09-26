@@ -22,7 +22,6 @@ import io.jsonwebtoken.impl.security.LocatingKeyResolver
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.*
 import io.jsonwebtoken.security.*
-import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Test
 
@@ -30,7 +29,6 @@ import javax.crypto.SecretKey
 import java.security.Provider
 
 import static org.easymock.EasyMock.*
-import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.Assert.*
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParserBuilder
@@ -124,14 +122,14 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDeserializeJsonWithCustomSerializer() {
-        def deserializer = new Deserializer() {
+        def deserializer = new AbstractDeserializer() {
             @Override
-            Object deserialize(byte[] bytes) throws DeserializationException {
-                return OBJECT_MAPPER.readValue(bytes, Map.class)
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
+                return OBJECT_MAPPER.readValue(inputStream, Map.class)
             }
         }
         def p = builder.deserializeJsonWith(deserializer)
-        assertSame deserializer, p.jsonReader.deserializer
+        assertSame deserializer, p.@deserializer
 
         def alg = Jwts.SIG.HS256
         def key = alg.key().build()
@@ -343,14 +341,14 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testDefaultDeserializer() {
         JwtParser parser = builder.build() // perform ServiceLoader lookup
-        assertThat parser.jsonReader, CoreMatchers.instanceOf(Reader)
+        assertTrue parser.@deserializer instanceof Deserializer
     }
 
     @Test
     void testUserSetDeserializerWrapped() {
         Deserializer deserializer = niceMock(Deserializer)
         JwtParser parser = builder.deserializeJsonWith(deserializer).build()
-        assertSame deserializer, parser.jsonReader.deserializer
+        assertSame deserializer, parser.@deserializer
     }
 
     @Test

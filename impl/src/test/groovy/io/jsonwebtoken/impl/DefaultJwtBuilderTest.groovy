@@ -19,12 +19,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.io.Streams
+import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKey
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.*
-import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Before
 import org.junit.Test
@@ -44,12 +45,15 @@ class DefaultJwtBuilderTest {
     private DefaultJwtBuilder builder
 
     private static byte[] serialize(Map<String, ?> map) {
-        def writer = Services.loadFirst(Writer)
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(512)
-        OutputStreamWriter w = new OutputStreamWriter(baos, StandardCharsets.UTF_8)
-        writer.write(w, map)
-        w.close()
-        return baos.toByteArray()
+        def serializer = Services.loadFirst(Serializer)
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512)
+        serializer.serialize(map, out)
+        return out.toByteArray()
+    }
+
+    private static Map<String, ?> deser(byte[] data) {
+        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.stream(data)) as Map<String, ?>
+        return m
     }
 
     @Before
@@ -286,39 +290,29 @@ class DefaultJwtBuilderTest {
     @Test
     void testHeaderSerializationErrorException() {
         def ex = new IOException('foo')
-        def writer = new Writer() {
-            @Override
-            void write(java.io.Writer out, Object o) throws java.io.IOException {
-                throw ex
-            }
-        }
-        def b = new DefaultJwtBuilder().jsonWriter(writer)
+        def ser = new TestSerializer(ex: ex)
+        def b = new DefaultJwtBuilder().json(ser)
         try {
             b.content('bar').compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Cannot serialize JWT header to JSON. Cause: foo', expected.getMessage()
+            assertEquals 'Cannot serialize JWT Header to JSON. Cause: foo', expected.getMessage()
         }
     }
 
     @Test
     void testCompactCompressionCodecJsonProcessingException() {
         def ex = new IOException('dummy text')
-        def writer = new Writer() {
-            @Override
-            void write(java.io.Writer out, Object o) throws java.io.IOException {
-                throw ex
-            }
-        }
+        def ser = new TestSerializer(ex: ex)
         def b = new DefaultJwtBuilder()
                 .setSubject("Joe") // ensures claims instance
                 .compressWith(Jwts.ZIP.DEF)
-                .jsonWriter(writer)
+                .json(ser)
         try {
             b.compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Cannot serialize JWT header to JSON. Cause: dummy text', expected.message
+            assertEquals 'Cannot serialize JWT Header to JSON. Cause: dummy text', expected.message
         }
     }
 
@@ -509,11 +503,12 @@ class DefaultJwtBuilderTest {
     @Test
     void testSerializeToJsonWithCustomSerializer() {
         boolean invoked = false
-        def serializer = new Serializer() {
+        def serializer = new AbstractSerializer() {
             @Override
-            byte[] serialize(Object o) throws SerializationException {
+            protected void doSerialize(Object o, OutputStream out) throws Exception {
                 invoked = true
-                return objectMapper.writeValueAsBytes(o)
+                byte[] data = objectMapper.writeValueAsBytes(o)
+                out.write(data)
             }
         }
 
@@ -604,7 +599,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Reader).read(new StringReader(Strings.utf8(bytes)))
+        def claims = deser(bytes)
 
         assertEquals audienceSingleString, claims.aud
     }
@@ -622,7 +617,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Reader).read(new StringReader(Strings.utf8(bytes)))
+        def claims = deser(bytes)
 
         assertEquals second, claims.aud // second audienceSingle call replaces first value
     }
@@ -754,7 +749,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Reader).read(new StringReader(Strings.utf8(bytes))) as Map<String, ?>
+        def claims = Services.loadFirst(Deserializer).deserialize(Streams.stream(bytes))
 
         assertEquals two, claims.aud
     }
@@ -790,7 +785,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Reader).read(new StringReader(Strings.utf8(bytes))) as Map<String, ?>
+        def claims = deser(bytes)
 
         assertEquals three, claims.aud
     }

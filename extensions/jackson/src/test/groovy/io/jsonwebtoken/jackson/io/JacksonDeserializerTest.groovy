@@ -26,7 +26,6 @@ import io.jsonwebtoken.lang.Strings
 import org.junit.Before
 import org.junit.Test
 
-import static org.hamcrest.CoreMatchers.instanceOf
 import static org.junit.Assert.*
 
 class JacksonDeserializerTest {
@@ -41,27 +40,19 @@ class JacksonDeserializerTest {
     @Test
     void loadService() {
         def deserializer = ServiceLoader.load(Deserializer).iterator().next()
-        assertThat(deserializer, instanceOf(JacksonDeserializer))
+        assertTrue deserializer instanceof JacksonDeserializer
     }
 
     @Test
     void testDefaultConstructor() {
-        def fields = deserializer.getClass().superclass.declaredFields as List
-        def field = fields.find { it.type == ObjectMapper }
-        field.accessible = true
-        ObjectMapper found = field.get(deserializer) as ObjectMapper
-        assertSame JacksonWriter.DEFAULT_OBJECT_MAPPER, found
+        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER, deserializer.objectMapper
     }
 
     @Test
     void testObjectMapperConstructor() {
         def customOM = new ObjectMapper()
-        deserializer = new JacksonDeserializer(customOM)
-        def fields = deserializer.getClass().superclass.declaredFields as List
-        def field = fields.find { it.type == ObjectMapper }
-        field.accessible = true
-        ObjectMapper found = field.get(deserializer) as ObjectMapper
-        assertSame customOM, found
+        deserializer = new JacksonDeserializer<>(customOM)
+        assertSame customOM, deserializer.objectMapper
     }
 
     @Test(expected = IllegalArgumentException)
@@ -71,9 +62,9 @@ class JacksonDeserializerTest {
 
     @Test
     void testDeserialize() {
-        byte[] serialized = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
+        byte[] data = Strings.utf8('{"hello":"世界"}')
         def expected = [hello: '世界']
-        def result = new JacksonDeserializer().deserialize(serialized)
+        def result = deserializer.deserialize(new ByteArrayInputStream(data))
         assertEquals expected, result
     }
 
@@ -127,7 +118,8 @@ class JacksonDeserializerTest {
                 )
 
         def expected = [oneKey: "oneValue", custom: expectedCustomBean]
-        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build()).deserialize(serialized)
+        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build())
+                .deserialize(new ByteArrayInputStream(serialized))
         assertEquals expected, result
     }
 
@@ -162,7 +154,8 @@ class JacksonDeserializerTest {
         typeMap.put("custom", CustomBean)
 
         def deserializer = new JacksonDeserializer(typeMap)
-        def result = deserializer.deserialize('{"alg":"HS256"}'.getBytes("UTF-8"))
+        def ins = new ByteArrayInputStream(Strings.utf8('{"alg":"HS256"}'))
+        def result = deserializer.deserialize(ins)
         assertEquals(["alg": "HS256"], result)
     }
 
@@ -172,21 +165,21 @@ class JacksonDeserializerTest {
     }
 
     @Test
-    void testDeserializeFailsWithJsonProcessingException() {
+    void testDeserializeFailsWithException() {
 
         def ex = new IOException('foo')
 
         deserializer = new JacksonDeserializer() {
             @Override
-            protected Object readValue(byte[] bytes) throws IOException {
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
                 throw ex
             }
         }
         try {
-            deserializer.deserialize(Strings.utf8('{"hello":"世界"}'))
+            deserializer.deserialize(new ByteArrayInputStream(Strings.utf8('{"hello":"世界"}')))
             fail()
         } catch (DeserializationException se) {
-            String msg = 'Unable to deserialize JSON bytes: foo'
+            String msg = 'Unable to deserialize: foo'
             assertEquals msg, se.getMessage()
             assertSame ex, se.getCause()
         }

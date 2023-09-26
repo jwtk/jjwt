@@ -16,8 +16,9 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.io.ConvertingParser
+import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Reader
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
@@ -61,13 +62,13 @@ class DefaultJwkParserBuilderTest {
     }
 
     @Test
-    void testJsonReader() {
-        def reader = createMock(Reader) as Reader
+    void testDeserializer() {
+        def deser = createMock(Deserializer) as Deserializer<Map<String,?>>
         def m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
-        expect(reader.read(anyObject(java.io.Reader.class))).andReturn(m)
-        replay reader
-        def jwk = Jwks.parser().jsonReader(reader).build().parse('foo')
-        verify reader
+        expect(deser.deserialize((InputStream)anyObject(InputStream))).andReturn(m)
+        replay deser
+        def jwk = Jwks.parser().json(deser).build().parse('foo')
+        verify deser
         assertTrue jwk instanceof SecretJwk
         assertEquals m.kty, jwk.kty
         assertEquals m.k, jwk.k.get()
@@ -138,13 +139,13 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testDeserializationFailure() {
-        def reader = new Reader() {
+        def deser = new AbstractDeserializer() {
             @Override
-            Object read(java.io.Reader reader) throws IOException {
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
                 throw new DeserializationException('test')
             }
         }
-        def parser = new DefaultJwkParserBuilder().jsonReader(reader).build()
+        def parser = new DefaultJwkParserBuilder().json(deser).build()
         try {
             parser.parse('foo')
             fail()

@@ -15,14 +15,14 @@
  */
 package io.jsonwebtoken.io;
 
+import java.io.InputStream;
+
 /**
- * A {@code Deserializer} is able to convert serialized data byte arrays into Java objects.
+ * A {@code Deserializer} is able to convert serialized byte streams into Java objects.
  *
  * @param <T> the type of object to be returned as a result of deserialization.
  * @since 0.10.0
- * @deprecated since JJWT_RELEASE_VERSION in favor of {@link io.jsonwebtoken.io.Reader}
  */
-@Deprecated
 public interface Deserializer<T> {
 
     /**
@@ -31,8 +31,18 @@ public interface Deserializer<T> {
      * @param bytes the formatted data byte array to convert
      * @return the reconstituted Java object
      * @throws DeserializationException if there is a problem converting the byte array to an object.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Reader#read(java.io.Reader)}
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #deserialize(InputStream)}
      */
     @Deprecated
     T deserialize(byte[] bytes) throws DeserializationException;
+
+    /**
+     * Reads the specified {@code InputStream} and returns the corresponding Java object.
+     *
+     * @param in the input stream to read
+     * @return the deserialized Java object
+     * @throws DeserializationException if there is a problem reading the stream or creating the expected Java object
+     * @since JJWT_RELEASE_VERSION
+     */
+    T deserialize(InputStream in) throws DeserializationException;
 }

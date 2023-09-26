@@ -15,16 +15,16 @@
  */
 package io.jsonwebtoken.impl.security
 
-
-import io.jsonwebtoken.gson.io.GsonReader
-import io.jsonwebtoken.gson.io.GsonWriter
-import io.jsonwebtoken.io.Reader
-import io.jsonwebtoken.io.Writer
-import io.jsonwebtoken.jackson.io.JacksonReader
-import io.jsonwebtoken.jackson.io.JacksonWriter
+import io.jsonwebtoken.gson.io.GsonDeserializer
+import io.jsonwebtoken.gson.io.GsonSerializer
+import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.jackson.io.JacksonDeserializer
+import io.jsonwebtoken.jackson.io.JacksonSerializer
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.lang.Supplier
-import io.jsonwebtoken.orgjson.io.OrgJsonReader
-import io.jsonwebtoken.orgjson.io.OrgJsonWriter
+import io.jsonwebtoken.orgjson.io.OrgJsonDeserializer
+import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
@@ -40,63 +40,63 @@ import static org.junit.Assert.assertTrue
  */
 class JwkSerializationTest {
 
-    static String serialize(Writer writer, def value) {
-        def w = new StringWriter(512)
-        writer.write(w, value)
-        return w.toString()
+    static String serialize(Serializer ser, def value) {
+        def out = new ByteArrayOutputStream()
+        ser.serialize(value, out)
+        return Strings.utf8(out.toByteArray())
     }
 
-    static Map<String, ?> deserialize(Reader reader, String value) {
-        StringReader r = new StringReader(value)
-        return reader.read(r) as Map<String, ?>
+    static Map<String, ?> deserialize(Deserializer des, String value) {
+        def ins = new ByteArrayInputStream(Strings.utf8(value))
+        return des.deserialize(ins) as Map<String, ?>
     }
 
     @Test
     void testJacksonSecretJwk() {
-        testSecretJwk(new JacksonWriter(), new JacksonReader())
+        testSecretJwk(new JacksonSerializer(), new JacksonDeserializer())
     }
 
     @Test
     void testJacksonPrivateEcJwk() {
-        testPrivateEcJwk(new JacksonWriter(), new JacksonReader())
+        testPrivateEcJwk(new JacksonSerializer(), new JacksonDeserializer())
     }
 
     @Test
     void testJacksonPrivateRsaJwk() {
-        testPrivateRsaJwk(new JacksonWriter(), new JacksonReader())
+        testPrivateRsaJwk(new JacksonSerializer(), new JacksonDeserializer())
     }
 
     @Test
     void testGsonSecretJwk() {
-        testSecretJwk(new GsonWriter(), new GsonReader())
+        testSecretJwk(new GsonSerializer(), new GsonDeserializer())
     }
 
     @Test
     void testGsonPrivateEcJwk() {
-        testPrivateEcJwk(new GsonWriter(), new GsonReader())
+        testPrivateEcJwk(new GsonSerializer(), new GsonDeserializer())
     }
 
     @Test
     void testGsonPrivateRsaJwk() {
-        testPrivateRsaJwk(new GsonWriter(), new GsonReader())
+        testPrivateRsaJwk(new GsonSerializer(), new GsonDeserializer())
     }
 
     @Test
     void testOrgJsonSecretJwk() {
-        testSecretJwk(new OrgJsonWriter(), new OrgJsonReader())
+        testSecretJwk(new OrgJsonSerializer(), new OrgJsonDeserializer())
     }
 
     @Test
     void testOrgJsonPrivateEcJwk() {
-        testPrivateEcJwk(new OrgJsonWriter(), new OrgJsonReader())
+        testPrivateEcJwk(new OrgJsonSerializer(), new OrgJsonDeserializer())
     }
 
     @Test
     void testOrgJsonPrivateRsaJwk() {
-        testPrivateRsaJwk(new OrgJsonWriter(), new OrgJsonReader())
+        testPrivateRsaJwk(new OrgJsonSerializer(), new OrgJsonDeserializer())
     }
 
-    static void testSecretJwk(Writer writer, Reader reader) {
+    static void testSecretJwk(Serializer ser, Deserializer des) {
 
         def key = TestKeys.A128GCM
         def jwk = Jwks.builder().key(key).id('id').build()
@@ -107,14 +107,14 @@ class JwkSerializationTest {
         assertEquals '{kid=id, kty=oct, k=<redacted>}', jwk.toString() // java toString
 
         //but serialization prints the real value:
-        String json = serialize(writer, jwk)
+        String json = serialize(ser, jwk)
         // assert substrings here because JSON order is not guaranteed:
         assertTrue json.contains('"kid":"id"')
         assertTrue json.contains('"kty":"oct"')
         assertTrue json.contains("\"k\":\"${jwk.k.get()}\"" as String)
 
         //now ensure it deserializes back to a JWK:
-        def map = deserialize(reader, json)
+        def map = deserialize(des, json)
         def jwk2 = Jwks.builder().add(map).build()
         assertTrue jwk.k instanceof Supplier
         assertEquals jwk, jwk2
@@ -122,7 +122,7 @@ class JwkSerializationTest {
         assertEquals jwk.k.get(), jwk2.k.get()
     }
 
-    static void testPrivateEcJwk(Writer writer, Reader reader) {
+    static void testPrivateEcJwk(Serializer ser, Deserializer des) {
 
         def jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).id('id').build()
         assertWrapped(jwk, ['d'])
@@ -134,7 +134,7 @@ class JwkSerializationTest {
         // java toString
 
         //but serialization prints the real value:
-        String json = serialize(writer, jwk)
+        String json = serialize(ser, jwk)
         // assert substrings here because JSON order is not guaranteed:
         assertTrue json.contains('"kid":"id"')
         assertTrue json.contains('"kty":"EC"')
@@ -144,7 +144,7 @@ class JwkSerializationTest {
         assertTrue json.contains("\"d\":\"${jwk.d.get()}\"" as String)
 
         //now ensure it deserializes back to a JWK:
-        def map = deserialize(reader, json)
+        def map = deserialize(des, json)
         def jwk2 = Jwks.builder().add(map).build()
         assertTrue jwk.d instanceof Supplier
         assertEquals jwk, jwk2
@@ -171,7 +171,7 @@ class JwkSerializationTest {
         }
     }
 
-    static void testPrivateRsaJwk(Writer writer, Reader reader) {
+    static void testPrivateRsaJwk(Serializer ser, Deserializer des) {
 
         def jwk = Jwks.builder().rsaKeyPair(TestKeys.RS256.pair).id('id').build()
         def privateFieldNames = ['d', 'p', 'q', 'dp', 'dq', 'qi']
@@ -184,7 +184,7 @@ class JwkSerializationTest {
         // java toString
 
         //but serialization prints the real value:
-        String json = serialize(writer, jwk)
+        String json = serialize(ser, jwk)
         // assert substrings here because JSON order is not guaranteed:
         assertTrue json.contains('"kid":"id"')
         assertTrue json.contains('"kty":"RSA"')
@@ -198,7 +198,7 @@ class JwkSerializationTest {
         assertTrue json.contains("\"qi\":\"${jwk.qi.get()}\"" as String)
 
         //now ensure it deserializes back to a JWK:
-        def map = deserialize(reader, json)
+        def map = deserialize(des, json)
         def jwk2 = Jwks.builder().add(map).build()
         assertEquals(jwk, jwk2, privateFieldNames)
     }

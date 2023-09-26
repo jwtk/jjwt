@@ -24,7 +24,7 @@ public class DefaultJwkParserBuilder extends AbstractJwkParserBuilder<Jwk<?>, Jw
         implements JwkParserBuilder {
     @Override
     public Parser<Jwk<?>> doBuild() {
-        JwkDeserializer deserializer = new JwkDeserializer(this.jsonReader);
+        JwkDeserializer deserializer = new JwkDeserializer(this.deserializer);
         JwkBuilderSupplier supplier = new JwkBuilderSupplier(this.provider, this.operationPolicy);
         JwkConverter<Jwk<?>> converter = new JwkConverter<>(supplier);
         return new ConvertingParser<>(deserializer, converter);

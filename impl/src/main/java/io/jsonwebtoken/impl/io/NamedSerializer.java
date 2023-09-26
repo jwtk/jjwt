@@ -15,27 +15,30 @@
  */
 package io.jsonwebtoken.impl.io;
 
-import io.jsonwebtoken.impl.lang.BiConsumer;
+import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.io.SerializationException;
-import io.jsonwebtoken.io.Writer;
+import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Assert;
 
-public class WritingSerializer<T> implements BiConsumer<java.io.Writer, T> {
+import java.io.OutputStream;
+import java.util.Map;
 
-    private final Writer<T> DELEGATE;
+public class NamedSerializer extends AbstractSerializer<Map<String, ?>> {
+
     private final String name;
+    private final Serializer<Map<String, ?>> DELEGATE;
 
-    public WritingSerializer(Writer<T> jsonWriter, String name) {
-        this.DELEGATE = Assert.notNull(jsonWriter, "JSON Writer cannot be null.");
+    public NamedSerializer(String name, Serializer<Map<String, ?>> serializer) {
+        this.DELEGATE = Assert.notNull(serializer, "JSON Serializer cannot be null.");
         this.name = Assert.hasText(name, "Name cannot be null or empty.");
     }
 
     @Override
-    public void accept(java.io.Writer writer, T object) {
+    protected void doSerialize(Map<String, ?> m, OutputStream out) throws SerializationException {
         try {
-            this.DELEGATE.write(writer, object);
+            this.DELEGATE.serialize(m, out);
         } catch (Throwable t) {
-            String msg = String.format("Cannot serialize %s to JSON. Cause: %s", name, t.getMessage());
+            String msg = String.format("Cannot serialize %s to JSON. Cause: %s", this.name, t.getMessage());
             throw new SerializationException(msg, t);
         }
     }

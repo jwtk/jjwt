@@ -18,7 +18,6 @@ package io.jsonwebtoken;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -729,27 +728,27 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #jsonReader(Reader)}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #json(Deserializer)}.
      * This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
     /**
-     * Uses the specified JSON {@link Reader} to deserialize JSON (UTF-8 byte streams) into Java Map objects.  This is
-     * used by the parser after Base64Url-decoding to convert JWT/JWS/JWT headers and Claims into Java Map
+     * Uses the specified JSON {@link Deserializer} to deserialize JSON (UTF-8 byte streams) into Java Map objects.
+     * This is used by the parser after Base64Url-decoding to convert JWT/JWS/JWT headers and Claims into Java Map
      * instances.
      *
-     * <p>If this method is not called, JJWT will use whatever Reader it can find at runtime, checking for the
+     * <p>If this method is not called, JJWT will use whatever Deserializer it can find at runtime, checking for the
      * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
      * in the runtime classpath, an exception will be thrown when one of the various {@code parse}* methods is
      * invoked.</p>
      *
-     * @param reader the reader to use to deserialize JSON (UTF-8 byte streams) into Map instances.
+     * @param deserializer the deserializer to use to deserialize JSON (UTF-8 byte streams) into Map instances.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder jsonReader(Reader<Map<String, ?>> reader);
+    JwtParserBuilder json(Deserializer<Map<String, ?>> deserializer);
 
     /**
      * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.

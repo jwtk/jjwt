@@ -33,7 +33,7 @@ public class DefaultJwkSetParserBuilder extends AbstractJwkParserBuilder<JwkSet,
 
     @Override
     public Parser<JwkSet> doBuild() {
-        JwkSetDeserializer deserializer = new JwkSetDeserializer(this.jsonReader);
+        JwkSetDeserializer deserializer = new JwkSetDeserializer(this.deserializer);
         JwkBuilderSupplier supplier = new JwkBuilderSupplier(this.provider, this.operationPolicy);
         JwkSetConverter converter = new JwkSetConverter(supplier, this.ignoreUnsupported);
         return new ConvertingParser<>(deserializer, converter);

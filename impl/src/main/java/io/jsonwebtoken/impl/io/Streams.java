@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Strings;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -45,6 +46,14 @@ public class Streams {
         ByteArrayOutputStream out = new ByteArrayOutputStream(8192);
         copy(in, out, new byte[8192], exmsg);
         return out.toByteArray();
+    }
+
+    public static InputStream stream(byte[] bytes) {
+        return new ByteArrayInputStream(bytes);
+    }
+
+    public static InputStream stream(CharSequence seq) {
+        return stream(Strings.utf8(seq));
     }
 
     /**

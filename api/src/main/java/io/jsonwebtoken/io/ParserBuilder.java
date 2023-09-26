@@ -40,15 +40,15 @@ public interface ParserBuilder<T, B extends ParserBuilder<T, B>> extends Builder
     B provider(Provider provider);
 
     /**
-     * Uses the specified reader to convert JSON Strings (UTF-8 byte streams) into Java Map objects.  The
+     * Uses the specified {@code Deserializer} to convert JSON Strings (UTF-8 byte streams) into Java Map objects.  The
      * resulting Maps are then used to construct respective JWT objects (JWTs, JWKs, etc).
      *
-     * <p>If this method is not called, JJWT will use whatever Reader it can find at runtime, checking for the
+     * <p>If this method is not called, JJWT will use whatever Deserializer it can find at runtime, checking for the
      * presence of well-known implementations such as Jackson, Gson, and org.json.  If one of these is not found
      * in the runtime classpath, an exception will be thrown when the {@link #build()} method is called.
      *
-     * @param reader the Reader to use when converting JSON Strings (UTF-8 byte streams) into Map objects.
+     * @param reader the Deserializer to use when converting JSON Strings (UTF-8 byte streams) into Map objects.
      * @return the builder for method chaining.
      */
-    B jsonReader(Reader<Map<String, ?>> reader);
+    B json(Deserializer<Map<String, ?>> reader);
 }

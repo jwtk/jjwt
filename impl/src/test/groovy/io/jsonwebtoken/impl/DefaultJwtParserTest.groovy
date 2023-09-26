@@ -20,10 +20,9 @@ import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.lang.JwtDateConverter
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
-import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Writer
+import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
@@ -33,7 +32,6 @@ import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.SecretKey
-import java.nio.charset.StandardCharsets
 
 import static org.junit.Assert.*
 
@@ -56,12 +54,10 @@ class DefaultJwtParserTest {
     }
 
     private static byte[] serialize(Map<String, ?> map) {
-        def writer = Services.loadFirst(Writer)
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(512)
-        OutputStreamWriter w = new OutputStreamWriter(baos, StandardCharsets.UTF_8)
-        writer.write(w, map)
-        w.close()
-        return baos.toByteArray()
+        def serializer = Services.loadFirst(Serializer)
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512)
+        serializer.serialize(map, out)
+        return out.toByteArray()
     }
 
     @Before
@@ -77,11 +73,11 @@ class DefaultJwtParserTest {
     @Test
     void testDesrializeJsonWithCustomSerializer() {
         boolean invoked = false
-        def deserializer = new Deserializer() {
+        def deserializer = new AbstractDeserializer() {
             @Override
-            Object deserialize(byte[] bytes) throws DeserializationException {
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
                 invoked = true
-                return OBJECT_MAPPER.readValue(bytes, Map.class)
+                return OBJECT_MAPPER.readValue(inputStream, Map.class)
             }
         }
         def pb = Jwts.parser().deserializeJsonWith(deserializer)

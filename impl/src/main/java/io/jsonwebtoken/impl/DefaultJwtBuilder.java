@@ -25,14 +25,12 @@ import io.jsonwebtoken.impl.io.Base64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.ByteBase64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.CountingInputStream;
 import io.jsonwebtoken.impl.io.EncodingOutputStream;
-import io.jsonwebtoken.impl.io.SerializingMapWriter;
+import io.jsonwebtoken.impl.io.NamedSerializer;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
-import io.jsonwebtoken.impl.io.WritingSerializer;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
-import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
@@ -45,7 +43,6 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
-import io.jsonwebtoken.io.Writer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
@@ -70,9 +67,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.SequenceInputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -111,7 +106,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private Key key;
 
-    private Writer<Map<String, ?>> jsonWriter;
+    private Serializer<Map<String, ?>> serializer;
 
     protected Encoder<OutputStream, OutputStream> encoder = Base64UrlStreamEncoder.INSTANCE;
     private boolean encodePayload = true;
@@ -148,15 +143,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return Functions.wrap(fn, SecurityException.class, fmt, args);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public JwtBuilder serializeToJsonWith(final Serializer<Map<String, ?>> serializer) {
-        return jsonWriter(new SerializingMapWriter(serializer));
+        return json(serializer);
     }
 
     @Override
-    public JwtBuilder jsonWriter(Writer<Map<String, ?>> writer) {
-        this.jsonWriter = Assert.notNull(writer, "JSON Writer cannot be null.");
+    public JwtBuilder json(Serializer<Map<String, ?>> serializer) {
+        this.serializer = Assert.notNull(serializer, "JSON Serializer cannot be null.");
         return this;
     }
 
@@ -535,9 +529,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
             throw new IllegalStateException("Both 'content' and 'claims' cannot be specified. Choose either one.");
         }
 
-        if (this.jsonWriter == null) { // try to find one based on the services available
+        if (this.serializer == null) { // try to find one based on the services available
             //noinspection unchecked
-            jsonWriter(Services.loadFirst(Writer.class));
+            json(Services.loadFirst(Serializer.class));
         }
 
         if (!Collections.isEmpty(claims)) { // normalize so we have one object to deal with:
@@ -566,22 +560,19 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     // automatically closes the OutputStream
-    private void writeAndClose(OutputStream os, Map<String, ?> map) {
-        Nameable nameable = Assert.isInstanceOf(Nameable.class, map, "JWT internal maps implement Nameable.");
-        Writer<Map<String, ?>> jsonWriter = Assert.stateNotNull(this.jsonWriter, "JSON Writer cannot be null.");
-        WritingSerializer<Map<String, ?>> serializer = new WritingSerializer<>(jsonWriter, nameable.getName());
-        java.io.Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+    private void writeAndClose(String name, Map<String, ?> map, OutputStream out) {
         try {
-            serializer.accept(writer, map);
+            Serializer<Map<String, ?>> named = new NamedSerializer(name, this.serializer);
+            named.serialize(map, out);
         } finally {
-            Objects.nullSafeClose(writer);
+            Objects.nullSafeClose(out);
         }
     }
 
-    private void writeAndClose(OutputStream out, final Payload payload) {
+    private void writeAndClose(String name, final Payload payload, OutputStream out) {
         out = payload.compress(out); // compression if necessary
         if (payload.isClaims()) {
-            writeAndClose(out, payload.getRequiredClaims());
+            writeAndClose(name, payload.getRequiredClaims(), out);
         } else {
             try {
                 InputStream in = payload.toInputStream();
@@ -608,7 +599,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build());
         final ByteArrayOutputStream jws = new ByteArrayOutputStream(4096);
         OutputStream out = encode(jws, "JWS Protected Header");
-        writeAndClose(out, header);
+        writeAndClose("JWS Protected Header", header, out);
 
         // ----- separator -----
         jws.write(DefaultJwtParser.SEPARATOR_CHAR);
@@ -619,7 +610,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         InputStream payloadStream = null; // not needed unless b64 is enabled
         if (this.encodePayload) {
             out = encode(jws, "JWS Payload");
-            writeAndClose(out, payload);
+            writeAndClose("JWS Payload", payload, out);
             signingInput = new ByteArrayInputStream(jws.toByteArray());
         } else { // b64
 
@@ -630,7 +621,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
             // so we ensure we have an input stream for that:
             if (payload.isClaims() || payload.isCompressed()) {
                 ByteArrayOutputStream claimsOut = new ByteArrayOutputStream(8192);
-                writeAndClose(claimsOut, payload);
+                writeAndClose("JWS Unencoded Payload", payload, claimsOut);
                 payloadStream = new ByteArrayInputStream(claimsOut.toByteArray());
             } else {
                 // No claims and not compressed, so just get the direct InputStream:
@@ -693,14 +684,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final Header header = this.headerBuilder.build();
         final ByteArrayOutputStream jwt = new ByteArrayOutputStream(512);
         OutputStream out = encode(jwt, "JWT Header");
-        writeAndClose(out, header);
+        writeAndClose("JWT Header", header, out);
 
         // ----- separator -----
         jwt.write(DefaultJwtParser.SEPARATOR_CHAR);
 
         // ----- payload -----
         out = encode(jwt, "JWT Payload");
-        writeAndClose(out, content);
+        writeAndClose("JWT Payload", content, out);
 
         // ----- period terminator -----
         jwt.write(DefaultJwtParser.SEPARATOR_CHAR); // https://www.rfc-editor.org/rfc/rfc7519#section-6.1
@@ -719,7 +710,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         assertPayloadEncoding("JWE");
 
         ByteArrayOutputStream pos = new ByteArrayOutputStream(4096);
-        writeAndClose(pos, content);
+        writeAndClose("JWE Payload", content, pos);
         final byte[] payload = Assert.notEmpty(pos.toByteArray(),
                 "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
 
@@ -742,7 +733,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         ByteArrayOutputStream jwe = new ByteArrayOutputStream(4096);
         OutputStream out = encode(jwe, "JWE Protected Header"); // automatically base64url-encode as we write
-        writeAndClose(out, header); // closes/flushes the base64url-encoding stream, not 'jwe' (since BAOSs don't close)
+        writeAndClose("JWE Protected Header", header, out); // closes/flushes the base64url-encoding stream, not 'jwe' (since BAOSs don't close)
 
         // JWE RFC requires AAD to be the ASCII bytes of the Base64URL-encoded header. Since the header bytes are
         // already Base64URL-encoded at this point (via the encoder.wrap call just above), and Base64Url-encoding uses

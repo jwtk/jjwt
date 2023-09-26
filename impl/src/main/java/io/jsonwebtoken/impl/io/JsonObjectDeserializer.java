@@ -18,37 +18,38 @@ package io.jsonwebtoken.impl.io;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.io.DeserializationException;
-import io.jsonwebtoken.io.Reader;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 
+import java.io.InputStream;
 import java.util.Map;
 
 /**
- * Function that wraps a {@link Reader} to add JWT-related error handling.
+ * Function that wraps a {@link Deserializer} to add JWT-related error handling.
  *
  * @since 0.11.3 (renamed from JwtDeserializer)
  */
-public class JsonObjectDeserializer implements Function<java.io.Reader, Map<String, ?>> {
+public class JsonObjectDeserializer implements Function<InputStream, Map<String, ?>> {
 
     private static final String MALFORMED_ERROR = "Malformed %s JSON: %s";
     private static final String MALFORMED_COMPLEX_ERROR = "Malformed or excessively complex %s JSON. " +
             "If experienced in a production environment, this could reflect a potential malicious %s, please " +
             "investigate the source further. Cause: %s";
 
-    private final Reader<?> reader;
+    private final Deserializer<?> deserializer;
     private final String name;
 
-    public JsonObjectDeserializer(Reader<?> reader, String name) {
-        this.reader = Assert.notNull(reader, "reader cannot be null.");
+    public JsonObjectDeserializer(Deserializer<?> deserializer, String name) {
+        this.deserializer = Assert.notNull(deserializer, "JSON Deserializer cannot be null.");
         this.name = Assert.hasText(name, "name cannot be null or empty.");
     }
 
     @Override
-    public Map<String, ?> apply(java.io.Reader reader) {
-        Assert.notNull(reader, "Reader argument cannot be null.");
+    public Map<String, ?> apply(InputStream in) {
+        Assert.notNull(in, "InputStream argument cannot be null.");
         Object value;
         try {
-            value = this.reader.read(reader);
+            value = this.deserializer.deserialize(in);
             if (value == null) {
                 String msg = "Deserialized data resulted in a null value; cannot create Map<String,?>";
                 throw new DeserializationException(msg);

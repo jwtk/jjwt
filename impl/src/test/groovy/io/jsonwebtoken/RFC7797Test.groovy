@@ -20,11 +20,10 @@ import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
-import io.jsonwebtoken.io.Writer
+import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
 import java.security.Key
 
 import static org.junit.Assert.*
@@ -100,7 +99,7 @@ class RFC7797Test {
         def claims = Jwts.claims().subject('me').build()
 
         ByteArrayOutputStream out = new ByteArrayOutputStream()
-        Services.loadFirst(Writer).write(new OutputStreamWriter(out, StandardCharsets.UTF_8), claims)
+        Services.loadFirst(Serializer).serialize(claims, out)
         byte[] content = out.toByteArray()
 
         //byte[] content = Services.loadFirst(Serializer).serialize(claims)

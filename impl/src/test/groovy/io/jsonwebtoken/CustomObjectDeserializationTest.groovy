@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.jackson.io.JacksonReader
+import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -41,8 +41,8 @@ class CustomObjectDeserializationTest {
         assertEquals jwt.getPayload().get('cust'), [key1: 'value1', key2: 42]
 
         // custom type for 'cust' claim
-        def reader = new JacksonReader([cust: CustomBean])
-        jwt = Jwts.parser().enableUnsecured().jsonReader(reader).build().parseClaimsJwt(jwtString)
+        def des = new JacksonDeserializer([cust: CustomBean])
+        jwt = Jwts.parser().enableUnsecured().json(des).build().parseClaimsJwt(jwtString)
         assertNotNull jwt
         CustomBean result = jwt.getPayload().get("cust", CustomBean)
         assertEquals customBean, result

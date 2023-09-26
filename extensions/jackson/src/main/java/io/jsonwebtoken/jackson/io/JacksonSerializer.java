@@ -15,30 +15,41 @@
  */
 package io.jsonwebtoken.jackson.io;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.io.SerializationException;
-import io.jsonwebtoken.io.Serializer;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
 
 /**
  * Serializer using a Jackson {@link ObjectMapper}.
  *
  * @since 0.10.0
- * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JacksonWriter}
  */
-@SuppressWarnings("DeprecatedIsStillUsed")
-@Deprecated
-public class JacksonSerializer<T> extends JacksonWriter<T> implements Serializer<T> {
+public class JacksonSerializer<T> extends AbstractSerializer<T> {
+
+    static final String MODULE_ID = "jjwt-jackson";
+    static final Module MODULE;
+
+    static {
+        SimpleModule module = new SimpleModule(MODULE_ID);
+        module.addSerializer(JacksonSupplierSerializer.INSTANCE);
+        MODULE = module;
+    }
+
+    static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper().registerModule(MODULE);
+
+    protected final ObjectMapper objectMapper;
 
     /**
      * Constructor using JJWT's default {@link ObjectMapper} singleton for serialization.
      */
     public JacksonSerializer() {
-        super();
+        this(DEFAULT_OBJECT_MAPPER);
     }
 
     /**
@@ -47,42 +58,14 @@ public class JacksonSerializer<T> extends JacksonWriter<T> implements Serializer
      * @param objectMapper the ObjectMapper to use for serialization.
      */
     public JacksonSerializer(ObjectMapper objectMapper) {
-        super(objectMapper);
+        Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
+        this.objectMapper = objectMapper.registerModule(MODULE);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public byte[] serialize(T t) throws SerializationException {
-        Assert.notNull(t, "Object to serialize cannot be null.");
-        try {
-            return writeValueAsBytes(t);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            String msg = "Unable to serialize object: " + e.getMessage();
-            throw new SerializationException(msg, e);
-        }
-    }
-
-    /**
-     * Serializes the specified instance value to a byte array using the underlying Jackson {@link ObjectMapper}.
-     *
-     * @param t the instance to serialize to a byte array
-     * @return the byte array serialization of the specified instance
-     * @throws com.fasterxml.jackson.core.JsonProcessingException if there is a problem during serialization
-     */
-    protected byte[] writeValueAsBytes(T t) throws com.fasterxml.jackson.core.JsonProcessingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
-        try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {
-            write(writer, t);
-        } catch (Throwable ex) {
-            String msg = "Unable to write value as bytes: " + ex.getMessage();
-            throw new JsonProcessingException(msg, ex);
-        }
-        return baos.toByteArray();
-    }
-
-    private static class JsonProcessingException extends com.fasterxml.jackson.core.JsonProcessingException {
-        protected JsonProcessingException(String msg, Throwable rootCause) {
-            super(msg, rootCause);
-        }
+    protected void doSerialize(T t, OutputStream out) throws Exception {
+        Assert.notNull(out, "OutputStream cannot be null.");
+        ObjectWriter writer = this.objectMapper.writer().without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        writer.writeValue(out, t);
     }
 }

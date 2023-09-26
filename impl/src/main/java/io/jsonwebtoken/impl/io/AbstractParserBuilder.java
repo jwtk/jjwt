@@ -16,9 +16,9 @@
 package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.impl.lang.Services;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.io.ParserBuilder;
-import io.jsonwebtoken.io.Reader;
 
 import java.security.Provider;
 import java.util.Map;
@@ -27,7 +27,7 @@ public abstract class AbstractParserBuilder<T, B extends ParserBuilder<T, B>> im
 
     protected Provider provider;
 
-    protected Reader<Map<String, ?>> jsonReader;
+    protected Deserializer<Map<String, ?>> deserializer;
 
     @SuppressWarnings("unchecked")
     protected final B self() {
@@ -41,16 +41,16 @@ public abstract class AbstractParserBuilder<T, B extends ParserBuilder<T, B>> im
     }
 
     @Override
-    public B jsonReader(Reader<Map<String, ?>> reader) {
-        this.jsonReader = reader;
+    public B json(Deserializer<Map<String, ?>> reader) {
+        this.deserializer = reader;
         return self();
     }
 
     @Override
     public final Parser<T> build() {
-        if (this.jsonReader == null) {
+        if (this.deserializer == null) {
             //noinspection unchecked
-            this.jsonReader = Services.loadFirst(Reader.class);
+            this.deserializer = Services.loadFirst(Deserializer.class);
         }
         return doBuild();
     }

@@ -20,7 +20,6 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
-import io.jsonwebtoken.io.Writer;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -1017,25 +1016,25 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param serializer the serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #jsonWriter(Writer)}
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #json(Serializer)}
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
 
     /**
-     * Perform Map-to-JSON serialization with the specified writer.  This is used by the builder to convert
+     * Perform Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
      * JWT/JWS/JWE headers and Claims Maps to JSON strings as required by the JWT specification.
      *
-     * <p>If this method is not called, JJWT will use whatever Writer it can find at runtime, checking for the
+     * <p>If this method is not called, JJWT will use whatever Serializer it can find at runtime, checking for the
      * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
      * in the runtime classpath, an exception will be thrown when the {@link #compact()} method is invoked.</p>
      *
-     * @param writer the writer to use when converting Map objects to JSON strings.
+     * @param serializer the Serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder jsonWriter(Writer<Map<String, ?>> writer);
+    JwtBuilder json(Serializer<Map<String, ?>> serializer);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

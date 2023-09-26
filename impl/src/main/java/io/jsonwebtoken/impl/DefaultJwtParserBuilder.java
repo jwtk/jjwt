@@ -24,14 +24,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.io.DelegateStringDecoder;
-import io.jsonwebtoken.impl.io.DeserializingMapReader;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.io.Reader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -94,7 +92,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Decoder<InputStream, InputStream> decoder = new DelegateStringDecoder(Decoders.BASE64URL);
 
-    private Reader<Map<String, ?>> jsonReader;
+    private Deserializer<Map<String, ?>> deserializer;
 
     private final ClaimsBuilder expectedClaims = Jwts.claims();
 
@@ -127,13 +125,12 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
-        Assert.notNull(deserializer, "deserializer cannot be null.");
-        return jsonReader(new DeserializingMapReader(deserializer));
+        return json(deserializer);
     }
 
     @Override
-    public JwtParserBuilder jsonReader(Reader<Map<String, ?>> reader) {
-        this.jsonReader = Assert.notNull(reader, "JSON Reader cannot be null.");
+    public JwtParserBuilder json(Deserializer<Map<String, ?>> reader) {
+        this.deserializer = Assert.notNull(reader, "JSON Deserializer cannot be null.");
         return this;
     }
 
@@ -355,9 +352,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParser build() {
 
-        if (this.jsonReader == null) {
+        if (this.deserializer == null) {
             //noinspection unchecked
-            jsonReader(Services.loadFirst(Reader.class));
+            json(Services.loadFirst(Deserializer.class));
         }
         if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
             String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " +
@@ -410,7 +407,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 allowedClockSkewMillis,
                 expClaims,
                 decoder,
-                jsonReader,
+                deserializer,
                 compressionCodecResolver,
                 extraZipAlgs,
                 extraSigAlgs,

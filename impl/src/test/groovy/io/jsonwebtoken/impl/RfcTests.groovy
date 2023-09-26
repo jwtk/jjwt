@@ -15,11 +15,12 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Reader
 
 class RfcTests {
 
@@ -36,7 +37,8 @@ class RfcTests {
     }
 
     static final Map<String, ?> jsonToMap(String json) {
-        return Services.loadFirst(Reader).read(new StringReader(json)) as Map<String, ?>
+        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.stream(json)) as Map<String, ?>
+        return m
     }
 
     /**

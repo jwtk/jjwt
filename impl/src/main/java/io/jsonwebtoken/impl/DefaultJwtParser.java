@@ -53,7 +53,7 @@ import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.DeserializationException;
-import io.jsonwebtoken.io.Reader;
+import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
@@ -76,7 +76,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -202,7 +201,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Decoder<InputStream, InputStream> decoder;
 
-    private final Reader<Map<String, ?>> jsonReader;
+    private final Deserializer<Map<String, ?>> deserializer;
 
     private final ClaimsBuilder expectedClaims;
 
@@ -224,7 +223,7 @@ public class DefaultJwtParser implements JwtParser {
                      long allowedClockSkewMillis,
                      DefaultClaims expectedClaims,
                      Decoder<InputStream, InputStream> base64UrlDecoder,
-                     Reader<Map<String, ?>> jsonReader,
+                     Deserializer<Map<String, ?>> deserializer,
                      CompressionCodecResolver compressionCodecResolver,
                      Collection<CompressionAlgorithm> extraZipAlgs,
                      Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs,
@@ -240,7 +239,7 @@ public class DefaultJwtParser implements JwtParser {
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
-        this.jsonReader = Assert.notNull(jsonReader, "jsonReader cannot be null.");
+        this.deserializer = Assert.notNull(deserializer, "JSON Deserializer cannot be null.");
 
         this.sigAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extraSigAlgs, MISSING_JWS_ALG_MSG);
         this.keyAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extraKeyAlgs, MISSING_JWE_ALG_MSG);
@@ -934,12 +933,11 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     protected Map<String, ?> deserialize(InputStream in, final String name) {
-        java.io.Reader r = new InputStreamReader(in);
         try {
-            JsonObjectDeserializer deserializer = new JsonObjectDeserializer(jsonReader, name);
-            return deserializer.apply(r);
+            JsonObjectDeserializer deserializer = new JsonObjectDeserializer(this.deserializer, name);
+            return deserializer.apply(in);
         } finally {
-            Objects.nullSafeClose(r);
+            Objects.nullSafeClose(in);
         }
     }
 }

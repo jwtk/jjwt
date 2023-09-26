@@ -16,44 +16,78 @@
 package io.jsonwebtoken.gson.io;
 
 import com.google.gson.Gson;
-import io.jsonwebtoken.io.SerializationException;
-import io.jsonwebtoken.io.Serializer;
+import com.google.gson.GsonBuilder;
+import io.jsonwebtoken.io.AbstractSerializer;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Supplier;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-@SuppressWarnings("DeprecatedIsStillUsed")
-@Deprecated
-public class GsonSerializer<T> extends GsonWriter<T> implements Serializer<T> {
+public class GsonSerializer<T> extends AbstractSerializer<T> {
+
+    static final Gson DEFAULT_GSON = new GsonBuilder()
+            .registerTypeHierarchyAdapter(Supplier.class, GsonSupplierSerializer.INSTANCE)
+            .disableHtmlEscaping().create();
+
+    protected final Gson gson;
 
     public GsonSerializer() {
-        super();
+        this(DEFAULT_GSON);
     }
 
     public GsonSerializer(Gson gson) {
-        super(gson);
+        Assert.notNull(gson, "gson cannot be null.");
+        this.gson = gson;
+
+        //ensure the necessary type adapter has been registered, and if not, throw an error:
+        String json = this.gson.toJson(TestSupplier.INSTANCE);
+        if (json.contains("value")) {
+            String msg = "Invalid Gson instance - it has not been registered with the necessary " +
+                    Supplier.class.getName() + " type adapter.  When using the GsonBuilder, ensure this " +
+                    "type adapter is registered by calling gsonBuilder.registerTypeHierarchyAdapter(" +
+                    Supplier.class.getName() + ".class, " +
+                    GsonSupplierSerializer.class.getName() + ".INSTANCE) before calling gsonBuilder.create()";
+            throw new IllegalArgumentException(msg);
+        }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public byte[] serialize(T t) throws SerializationException {
-        Assert.notNull(t, "Object to serialize cannot be null.");
+    protected void doSerialize(T t, OutputStream out) {
+        Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         try {
-            return writeValueAsBytes(t);
-        } catch (Throwable ex) {
-            String msg = "Unable to serialize object: " + ex.getMessage();
-            throw new SerializationException(msg, ex);
+            Object o = t;
+            if (o instanceof byte[]) {
+                o = Encoders.BASE64.encode((byte[]) o);
+            } else if (o instanceof char[]) {
+                o = new String((char[]) o);
+            }
+            writeValue(o, writer);
+        } finally {
+            Objects.nullSafeClose(writer);
         }
     }
 
-    protected byte[] writeValueAsBytes(T t) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
-        try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {
-            write(writer, t);
+    protected void writeValue(Object o, java.io.Writer writer) {
+        this.gson.toJson(o, writer);
+    }
+
+    private static class TestSupplier<T> implements Supplier<T> {
+
+        private static final TestSupplier<String> INSTANCE = new TestSupplier<>("test");
+        private final T value;
+
+        private TestSupplier(T value) {
+            this.value = value;
         }
-        return baos.toByteArray();
+
+        @Override
+        public T get() {
+            return value;
+        }
     }
 }

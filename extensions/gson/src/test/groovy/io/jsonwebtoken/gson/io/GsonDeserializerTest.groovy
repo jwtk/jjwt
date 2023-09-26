@@ -29,6 +29,14 @@ class GsonDeserializerTest {
 
     private GsonDeserializer deserializer
 
+    private def deser(byte[] data) {
+        deserializer.deserialize(new ByteArrayInputStream(data))
+    }
+
+    private def deser(String s) {
+        return deser(Strings.utf8(s))
+    }
+
     @Before
     void setUp() {
         deserializer = new GsonDeserializer()
@@ -46,37 +54,37 @@ class GsonDeserializerTest {
     }
 
     @Test
-    void testObjectMapperConstructor() {
+    void testGsonConstructor() {
         def customGSON = new Gson()
-        def deserializer = new GsonDeserializer(customGSON)
+        deserializer = new GsonDeserializer(customGSON)
         assertSame customGSON, deserializer.gson
     }
 
     @Test(expected = IllegalArgumentException)
-    void testObjectMapperConstructorWithNullArgument() {
-        new GsonDeserializer<>(null)
+    void testGsonConstructorNullArgument() {
+        new GsonDeserializer(null)
     }
 
     @Test
     void testDeserialize() {
         def expected = [hello: '世界']
-        assertEquals expected, deserializer.deserialize(Strings.utf8('{"hello":"世界"}'))
+        assertEquals expected, deser('{"hello":"世界"}')
     }
 
     @Test
-    void testDeserializeFailsWithJsonProcessingException() {
+    void testDeserializeThrows() {
         def ex = new IOException('foo')
         deserializer = new GsonDeserializer() {
             @Override
-            protected Object readValue(byte[] bytes) throws IOException {
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
                 throw ex
             }
         }
         try {
-            deserializer.deserialize(Strings.utf8('{"hello":"世界"}'))
+            deser('{"hello":"世界"}')
             fail()
         } catch (DeserializationException expected) {
-            String msg = 'Unable to deserialize JSON: foo'
+            String msg = 'Unable to deserialize: foo'
             assertEquals msg, expected.message
             assertSame ex, expected.cause
         }
