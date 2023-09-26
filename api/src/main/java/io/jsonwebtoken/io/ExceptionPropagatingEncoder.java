@@ -17,8 +17,6 @@ package io.jsonwebtoken.io;
 
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.OutputStream;
-
 /**
  * Encoder that ensures any exceptions thrown that are <em>not</em> {@link EncodingException}s are wrapped
  * and re-thrown as a {@code EncodingException}.
@@ -58,10 +56,5 @@ class ExceptionPropagatingEncoder<T, R> implements Encoder<T, R> {
             String msg = "Unable to encode input: " + e.getMessage();
             throw new EncodingException(msg, e);
         }
-    }
-
-    @Override
-    public OutputStream encode(OutputStream out) {
-        return this.encoder.encode(out);
     }
 }

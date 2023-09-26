@@ -20,7 +20,7 @@ import io.jsonwebtoken.io.DecodingException
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertArrayEquals
 
 @SuppressWarnings('GrDeprecatedAPIUsage')
 class DelegateStringDecoderTest {
@@ -28,38 +28,16 @@ class DelegateStringDecoderTest {
     @Test
     void decode() {
         def value = 'test'
-        def test = new Decoder<String,byte[]>() {
+        def bytes = Strings.utf8(value)
+        def ins = new ByteArrayInputStream(bytes)
+        def test = new Decoder<CharSequence, byte[]>() {
             @Override
-            byte[] decode(String s) throws DecodingException {
-                return Strings.utf8(value);
-            }
-            @Override
-            InputStream decode(InputStream inputStream) {
-                return null
+            byte[] decode(CharSequence s) throws DecodingException {
+                return Strings.utf8(value)
             }
         }
         def d = new DelegateStringDecoder(test)
-        assertArrayEquals Strings.utf8(value), d.decode(value)
-    }
 
-    @Test
-    void decodeStream() {
-        def value = 'test'
-        boolean invoked = false
-        def stream = new ByteArrayInputStream(Strings.utf8(value))
-        def test = new Decoder<String,byte[]>() {
-            @Override
-            byte[] decode(String s) throws DecodingException {
-                return Strings.utf8(value);
-            }
-            @Override
-            InputStream decode(InputStream inputStream) {
-                invoked = true
-                stream
-            }
-        }
-        def d = new DelegateStringDecoder(test)
-        assertSame stream, d.decode(stream)
-        assertTrue invoked
+        assertArrayEquals bytes, Streams.bytes(d.decode(ins), 'foo')
     }
 }

@@ -473,13 +473,32 @@ class DefaultJwtBuilderTest {
             Object encode(Object o) throws EncodingException {
                 return null
             }
-            @Override
-            OutputStream encode(OutputStream out) {
-                return out
-            }
         }
         def b = new DefaultJwtBuilder().encoder(encoder)
         assertSame encoder, b.encoder
+    }
+
+    @Test
+    void base64UrlEncodeWith() {
+
+        boolean invoked = false
+
+        Encoder<byte[], String> encoder = new Encoder<byte[], String>() {
+            @Override
+            String encode(byte[] bytes) throws EncodingException {
+                invoked = true
+                return Encoders.BASE64URL.encode(bytes)
+            }
+        }
+
+        def key = TestKeys.HS256
+        def b = new DefaultJwtBuilder().signWith(key).subject('me')
+
+        def jws1 = b.compact()
+        def jws2 = b.base64UrlEncodeWith(encoder).compact()
+
+        assertEquals jws1, jws2
+        assertTrue invoked
     }
 
     @Test(expected = IllegalArgumentException)

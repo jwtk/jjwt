@@ -200,7 +200,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Locator<? extends Key> keyLocator;
 
-    private final Decoder<CharSequence, byte[]> decoder;
+    private final Decoder<InputStream, InputStream> decoder;
 
     private final Reader<Map<String, ?>> jsonReader;
 
@@ -223,7 +223,7 @@ public class DefaultJwtParser implements JwtParser {
                      Set<String> critical,
                      long allowedClockSkewMillis,
                      DefaultClaims expectedClaims,
-                     Decoder<CharSequence, byte[]> base64UrlDecoder,
+                     Decoder<InputStream, InputStream> base64UrlDecoder,
                      Reader<Map<String, ?>> jsonReader,
                      CompressionCodecResolver compressionCodecResolver,
                      Collection<CompressionAlgorithm> extraZipAlgs,
@@ -923,7 +923,8 @@ public class DefaultJwtParser implements JwtParser {
 
     protected byte[] decode(CharSequence base64UrlEncoded, String name) {
         try {
-            return decoder.decode(base64UrlEncoded);
+            InputStream decoding = this.decoder.decode(new ByteArrayInputStream(Strings.utf8(base64UrlEncoded)));
+            return Streams.bytes(decoding, "Unable to Base64Url-decode input.");
         } catch (Throwable t) {
             // Don't disclose potentially-sensitive information per https://github.com/jwtk/jjwt/issues/824:
             String value = "payload".equals(name) ? RedactedSupplier.REDACTED_VALUE : base64UrlEncoded.toString();

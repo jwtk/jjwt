@@ -18,26 +18,30 @@ package io.jsonwebtoken.impl.io;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated //TODO: delete when deleting JwtParserBuilder#base64UrlDecodeWith
-public class DelegateStringDecoder implements Decoder<CharSequence, byte[]> {
+public class DelegateStringDecoder implements Decoder<InputStream, InputStream> {
 
-    private final Decoder<String, byte[]> delegate;
+    private final Decoder<CharSequence, byte[]> delegate;
 
-    public DelegateStringDecoder(Decoder<String, byte[]> delegate) {
+    public DelegateStringDecoder(Decoder<CharSequence, byte[]> delegate) {
         this.delegate = Assert.notNull(delegate, "delegate cannot be null.");
     }
 
     @Override
-    public byte[] decode(CharSequence charSequence) throws DecodingException {
-        return delegate.decode(charSequence.toString());
-    }
-
-    @Override
-    public InputStream decode(InputStream in) {
-        return delegate.decode(in);
+    public InputStream decode(InputStream in) throws DecodingException {
+        try {
+            byte[] data = Streams.bytes(in, "Unable to Base64URL-decode input.");
+            data = delegate.decode(Strings.utf8(data));
+            return new ByteArrayInputStream(data);
+        } catch (Throwable t) {
+            String msg = "Unable to Base64Url-decode InputStream: " + t.getMessage();
+            throw new DecodingException(msg, t);
+        }
     }
 }

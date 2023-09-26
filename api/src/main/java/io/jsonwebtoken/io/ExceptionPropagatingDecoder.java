@@ -17,8 +17,6 @@ package io.jsonwebtoken.io;
 
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.InputStream;
-
 /**
  * Decoder that ensures any exceptions thrown that are <em>not</em> {@link DecodingException}s are wrapped
  * and re-thrown as a {@code DecodingException}.
@@ -58,10 +56,5 @@ class ExceptionPropagatingDecoder<T, R> implements Decoder<T, R> {
             String msg = "Unable to decode input: " + e.getMessage();
             throw new DecodingException(msg, e);
         }
-    }
-
-    @Override
-    public InputStream decode(InputStream in) {
-        return this.decoder.decode(in);
     }
 }

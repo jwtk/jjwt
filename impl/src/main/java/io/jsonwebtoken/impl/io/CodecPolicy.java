@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.impl.io;
 
 /**
  * Defines encoding and decoding policies.

@@ -246,9 +246,11 @@ public final class Strings {
         byte[] bytes = null;
         if (s != null) {
             CharBuffer cb = s instanceof CharBuffer ? (CharBuffer) s : CharBuffer.wrap(s);
+            cb.mark();
             ByteBuffer buf = UTF_8.encode(cb);
             bytes = new byte[buf.remaining()];
             buf.get(bytes);
+            cb.reset();
         }
         return bytes;
     }

@@ -17,8 +17,6 @@ package io.jsonwebtoken.io;
 
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.InputStream;
-
 /**
  * Very fast <a href="https://datatracker.ietf.org/doc/html/rfc4648#section-4">Base64</a> decoder guaranteed to
  * work in all &gt;= Java 7 JDK and Android environments.
@@ -39,10 +37,5 @@ class Base64Decoder extends Base64Support implements Decoder<CharSequence, byte[
     public byte[] decode(CharSequence s) throws DecodingException {
         Assert.notNull(s, "String argument cannot be null");
         return this.base64.decodeFast(s);
-    }
-
-    @Override
-    public InputStream decode(InputStream in) {
-        return new Base64InputStream(in);
     }
 }

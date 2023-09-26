@@ -21,6 +21,8 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.io.Base64UrlStreamEncoder;
+import io.jsonwebtoken.impl.io.ByteBase64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.CountingInputStream;
 import io.jsonwebtoken.impl.io.EncodingOutputStream;
 import io.jsonwebtoken.impl.io.SerializingMapWriter;
@@ -42,7 +44,6 @@ import io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.io.Writer;
 import io.jsonwebtoken.lang.Assert;
@@ -112,7 +113,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private Writer<Map<String, ?>> jsonWriter;
 
-    protected Encoder<byte[], String> encoder = Encoders.BASE64URL;
+    protected Encoder<OutputStream, OutputStream> encoder = Base64UrlStreamEncoder.INSTANCE;
     private boolean encodePayload = true;
     protected CompressionAlgorithm compressionAlgorithm;
 
@@ -161,11 +162,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> encoder) {
-        return encoder(encoder);
+        return encoder(new ByteBase64UrlStreamEncoder(encoder));
     }
 
     @Override
-    public JwtBuilder encoder(Encoder<byte[], String> encoder) {
+    public JwtBuilder encoder(Encoder<OutputStream, OutputStream> encoder) {
         Assert.notNull(encoder, "encoder cannot be null.");
         this.encoder = encoder;
         return this;

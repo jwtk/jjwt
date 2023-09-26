@@ -40,11 +40,6 @@ class ExceptionPropagatingEncoderTest {
             Object encode(Object o) throws EncodingException {
                 throw new EncodingException("problem", new java.io.IOException("dummy"))
             }
-
-            @Override
-            OutputStream encode(OutputStream out) {
-                return null
-            }
         })
         try {
             encoder.encode("hello")
@@ -63,11 +58,6 @@ class ExceptionPropagatingEncoderTest {
             @Override
             Object encode(Object o) throws EncodingException {
                 throw causeEx;
-            }
-
-            @Override
-            OutputStream encode(OutputStream out) {
-                return null
             }
         })
         try {

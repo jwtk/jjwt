@@ -68,10 +68,6 @@ final class Base64 { //final and package-protected on purpose
         this.IALPHABET = urlsafe ? BASE64URL_IALPHABET : BASE64_IALPHABET;
     }
 
-    public boolean isUrlsafe() {
-        return this.urlsafe;
-    }
-
     // ****************************************************************************************
     // *  char[] version
     // ****************************************************************************************
@@ -408,7 +404,7 @@ final class Base64 { //final and package-protected on purpose
             }
         }
 
-        // Check so that legal chars (including '=') are evenly divideable by 4 as specified in RFC 2045.
+        // Check so that legal chars (including '=') are evenly divisible by 4 as specified in RFC 2045.
         if ((sLen - sepCnt) % 4 != 0) {
             return null;
         }
@@ -451,7 +447,7 @@ final class Base64 { //final and package-protected on purpose
 
 
     /*
-     * Decodes a BASE64 encoded byte array that is known to be resonably well formatted. The method is about twice as
+     * Decodes a BASE64 encoded byte array that is known to be reasonably well formatted. The method is about twice as
      * fast as {@link #decode(byte[])}. The preconditions are:<br>
      * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
      * + Line separator must be "\r\n", as specified in RFC 2045

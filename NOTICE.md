@@ -36,13 +36,13 @@ OF SUCH DAMAGE.
 
 Additionally, the following classes were copied from the Apache Commons-Codec project, with further JJWT-specific
 modifications:
-* io.jsonwebtoken.io.Base64Codec
-* io.jsonwebtoken.io.Base64InputStream
-* io.jsonwebtoken.io.Base64OutputStream
-* io.jsonwebtoken.io.BaseNCodec
-* io.jsonwebtoken.io.BaseNCodecInputStream
-* io.jsonwebtoken.io.BaseNCodecOutputStream
-* io.jsonwebtoken.io.CodecPolicy
+* io.jsonwebtoken.impl.io.Base64Codec
+* io.jsonwebtoken.impl.io.Base64InputStream
+* io.jsonwebtoken.impl.io.Base64OutputStream
+* io.jsonwebtoken.impl.io.BaseNCodec
+* io.jsonwebtoken.impl.io.BaseNCodecInputStream
+* io.jsonwebtoken.impl.io.BaseNCodecOutputStream
+* io.jsonwebtoken.impl.io.CodecPolicy
 
 Its attribution:
 

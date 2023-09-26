@@ -18,7 +18,7 @@ package io.jsonwebtoken.io
 import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
 
 class Base64DecoderTest {
 
@@ -33,13 +33,5 @@ class Base64DecoderTest {
         byte[] bytes = new Base64Decoder().decode(encoded)
         String result = new String(bytes, Strings.UTF_8)
         assertEquals 'Hello 世界', result
-    }
-
-    @Test
-    void decodeStream() {
-        def ins = new ByteArrayInputStream(Strings.utf8('hello'))
-        def wrapped = new Base64Decoder().decode(ins)
-        assertTrue wrapped instanceof Base64InputStream
-        assertSame ins, wrapped.@in
     }
 }

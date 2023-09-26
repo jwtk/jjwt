@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.io;
+package io.jsonwebtoken.impl.io;
 
 import java.io.InputStream;
 
@@ -55,14 +55,14 @@ import java.io.InputStream;
  * <a href="https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6">commons-codec
  * 585497f09b026f6602daf986723a554e051bdfe6</a>
  */
-class Base64InputStream extends BaseNCodecInputStream {
+public class Base64InputStream extends BaseNCodecInputStream {
 
     /**
      * Creates a Base64InputStream such that all data read is Base64-decoded from the original provided InputStream.
      *
      * @param inputStream InputStream to wrap.
      */
-    Base64InputStream(final InputStream inputStream) {
+    public Base64InputStream(final InputStream inputStream) {
         this(inputStream, false);
     }
 
@@ -74,7 +74,7 @@ class Base64InputStream extends BaseNCodecInputStream {
      * @param doEncode    true if we should encode all data read from us, false if we should decode.
      */
     Base64InputStream(final InputStream inputStream, final boolean doEncode) {
-        super(inputStream, new Base64Codec(false), doEncode);
+        super(inputStream, new Base64Codec(0, BaseNCodec.CHUNK_SEPARATOR, false, CodecPolicy.STRICT), doEncode);
     }
 
 //    /**

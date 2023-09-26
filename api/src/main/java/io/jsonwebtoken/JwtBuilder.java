@@ -33,6 +33,7 @@ import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -970,24 +971,26 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @see #encoder(Encoder)
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
-     * {@link #encoder(Encoder)} method.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #encoder(Encoder)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
 
     /**
-     * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
+     * Perform Base64Url encoding during {@link #compact() compaction} with the specified {@code OutputStream} Encoder.
+     * The Encoder's {@link Encoder#encode(Object) encode} method will be given a target {@code OutputStream} to
+     * wrap, and the resulting (wrapping) {@code OutputStream} will be used for writing, ensuring automatic
+     * Base64URL-encoding during write operations.
      *
      * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
-     * to specify a different encoder if desired.</p>
+     * to specify a different stream encoder if desired.</p>
      *
      * @param encoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder encoder(Encoder<byte[], String> encoder);
+    JwtBuilder encoder(Encoder<OutputStream, OutputStream> encoder);
 
     /**
      * Enables <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS)

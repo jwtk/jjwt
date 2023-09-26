@@ -42,6 +42,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -91,7 +92,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
 
-    private Decoder<CharSequence, byte[]> decoder = Decoders.BASE64URL;
+    private Decoder<InputStream, InputStream> decoder = new DelegateStringDecoder(Decoders.BASE64URL);
 
     private Reader<Map<String, ?>> jsonReader;
 
@@ -138,13 +139,13 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @SuppressWarnings("deprecation")
     @Override
-    public JwtParserBuilder base64UrlDecodeWith(final Decoder<String, byte[]> decoder) {
+    public JwtParserBuilder base64UrlDecodeWith(final Decoder<CharSequence, byte[]> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
         return decoder(new DelegateStringDecoder(decoder));
     }
 
     @Override
-    public JwtParserBuilder decoder(Decoder<CharSequence, byte[]> decoder) {
+    public JwtParserBuilder decoder(Decoder<InputStream, InputStream> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
         this.decoder = decoder;
         return this;
