@@ -71,7 +71,8 @@ final class Base64 { //final and package-protected on purpose
     // ****************************************************************************************
     // *  char[] version
     // ****************************************************************************************
-    String getName() {
+
+    private String getName() {
         return urlsafe ? "base64url" : "base64"; // RFC 4648 codec names are all lowercase
     }
 

@@ -21,7 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
- * Convenient base class to use to implement {@link Deserializer}s, with only the {@link #doDeserialize(InputStream)}.
+ * Convenient base class to use to implement {@link Deserializer}s, with subclasses only needing to implement
+ * {@link #doDeserialize(InputStream)}.
  *
  * @param <T> the type of object returned after deserialization
  * @since JJWT_RELEASE_VERSION

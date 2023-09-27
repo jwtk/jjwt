@@ -20,8 +20,18 @@ import io.jsonwebtoken.lang.Objects;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
+/**
+ * Convenient base class to use to implement {@link Serializer}s, with subclasses only needing to implement
+ * * {@link #doSerialize(Object, OutputStream)}.
+ *
+ * @param <T> the type of object to serialize
+ * @since JJWT_RELEASE_VERSION
+ */
 public abstract class AbstractSerializer<T> implements Serializer<T> {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final byte[] serialize(T t) throws SerializationException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -29,8 +39,11 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
         return out.toByteArray();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void serialize(T t, OutputStream out) throws SerializationException {
+    public final void serialize(T t, OutputStream out) throws SerializationException {
         try {
             doSerialize(t, out);
         } catch (Throwable e) {
@@ -42,5 +55,15 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
         }
     }
 
+    /**
+     * Converts the specified Java object into a formatted data byte stream, writing the bytes to the specified
+     * {@code out}put stream.
+     *
+     * @param t   the object to convert to a byte stream
+     * @param out the stream to write to
+     * @throws SerializationException if there is a problem converting the object to a byte stream or writing the
+     *                                bytes to the {@code out}put stream.
+     * @since JJWT_RELEASE_VERSION
+     */
     protected abstract void doSerialize(T t, OutputStream out) throws Exception;
 }

@@ -24,7 +24,7 @@ import io.jsonwebtoken.io.ParserBuilder;
  * <blockquote><pre>
  * JwkSet jwkSet = Jwks.setParser()
  *         .provider(aJcaProvider)      // optional
- *         .deserializer(deserializer)  // optional
+ *         .json(deserializer)          // optional
  *         .operationPolicy(policy)     // optional
  *         .ignoreUnsupported(aBoolean) // optional
  *         .build()

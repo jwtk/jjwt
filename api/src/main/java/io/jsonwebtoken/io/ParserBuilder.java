@@ -47,8 +47,8 @@ public interface ParserBuilder<T, B extends ParserBuilder<T, B>> extends Builder
      * presence of well-known implementations such as Jackson, Gson, and org.json.  If one of these is not found
      * in the runtime classpath, an exception will be thrown when the {@link #build()} method is called.
      *
-     * @param reader the Deserializer to use when converting JSON Strings (UTF-8 byte streams) into Map objects.
+     * @param deserializer the Deserializer to use when converting JSON Strings (UTF-8 byte streams) into Map objects.
      * @return the builder for method chaining.
      */
-    B json(Deserializer<Map<String, ?>> reader);
+    B json(Deserializer<Map<String, ?>> deserializer);
 }
