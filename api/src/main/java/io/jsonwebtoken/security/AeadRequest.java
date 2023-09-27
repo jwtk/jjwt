@@ -17,6 +17,7 @@ package io.jsonwebtoken.security;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A request to an {@link AeadAlgorithm} to perform authenticated encryption with a supplied symmetric
@@ -27,4 +28,13 @@ import java.io.InputStream;
  * @since JJWT_RELEASE_VERSION
  */
 public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, AssociatedDataSupplier {
+
+    /**
+     * Returns the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
+     * encryption or plaintext during decryption.
+     *
+     * @return the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
+     * encryption or plaintext during decryption.
+     */
+    OutputStream getOutputStream();
 }

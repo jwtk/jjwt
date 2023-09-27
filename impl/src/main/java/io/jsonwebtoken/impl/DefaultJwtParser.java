@@ -45,7 +45,7 @@ import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
-import io.jsonwebtoken.impl.security.DefaultAeadResult;
+import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
@@ -65,7 +65,6 @@ import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
@@ -563,11 +562,10 @@ public class DefaultJwtParser implements JwtParser {
             // As such, the provider here is intentionally omitted (null):
             // TODO: add encProvider(Provider) builder method that applies to this request only?
             InputStream ciphertext = payload.toInputStream();
-            ByteArrayOutputStream plaintext = new ByteArrayOutputStream();
-            DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(null, null, ciphertext, cek, aad, tag, iv);
-            Message<byte[]> result = encAlg.decrypt(decryptRequest);
-            payload = new Payload(result.getPayload(), header.getContentType());
+            ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
+            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, plaintext, cek, aad, iv, tag);
+            encAlg.decrypt(dreq);
+            payload = new Payload(plaintext.toByteArray(), header.getContentType());
 
             integrityVerified = true; // AEAD performs integrity verification, so no exception = verified
 

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.io.Streams;
+import io.jsonwebtoken.impl.io.TeeOutputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
@@ -23,7 +24,6 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.DecryptAeadRequest;
-import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureException;
@@ -34,6 +34,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.SequenceInputStream;
 import java.security.MessageDigest;
 import java.security.spec.AlgorithmParameterSpec;
@@ -97,30 +98,32 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
         final InputStream plaintext = Assert.notNull(req.getPayload(),
-                "Request content (plaintext) InputStream cannot be null or empty.");
+                "Request content (plaintext) InputStream cannot be null.");
+        final OutputStream out = Assert.notNull(req.getOutputStream(), "Request ciphertext OutputStream cannot be null.");
         final byte[] aad = getAAD(req); //can be null if request associated data does not exist or is empty
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        // we need the ciphertext bytes for message digest calculation, so we'll use a TeeOutputStream to
+        // aggregate those results while they're being written to the result output stream
+        final ByteArrayOutputStream copy = new ByteArrayOutputStream(8192);
+        final OutputStream tee = new TeeOutputStream(out, copy);
 
         jca(req).withCipher(new CheckedFunction<Cipher, Object>() {
             @Override
             public Object apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, ivSpec);
-                withCipher(cipher, plaintext, out);
+                withCipher(cipher, plaintext, tee);
                 return null; // don't need to return anything
             }
         });
 
-        byte[] ciphertext = out.toByteArray();
-        byte[] tag = sign(aad, iv, ciphertext, macKeyBytes);
+        byte[] tag = sign(aad, iv, Streams.of(copy.toByteArray()), macKeyBytes);
 
-        InputStream stream = new ByteArrayInputStream(ciphertext);
-        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), stream, encryptionKey, aad, tag, iv);
+        return new DefaultAeadResult(tag, iv);
     }
 
-    private byte[] sign(byte[] aad, byte[] iv, byte[] ciphertext, byte[] macKeyBytes) {
+    private byte[] sign(byte[] aad, byte[] iv, InputStream ciphertext, byte[] macKeyBytes) {
 
         long aadLength = io.jsonwebtoken.lang.Arrays.length(aad);
         long aadLengthInBits = aadLength * Byte.SIZE;
@@ -132,7 +135,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
             streams.add(new ByteArrayInputStream(aad));
         }
         streams.add(new ByteArrayInputStream(iv));
-        streams.add(new ByteArrayInputStream(ciphertext));
+        streams.add(ciphertext);
         streams.add(new ByteArrayInputStream(AL));
         InputStream in = new SequenceInputStream(Collections.enumeration(streams));
 
@@ -147,7 +150,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public Message<byte[]> decrypt(final DecryptAeadRequest req) {
+    public void decrypt(final DecryptAeadRequest req) {
 
         Assert.notNull(req, "Request cannot be null.");
 
@@ -157,7 +160,10 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] ciphertext = Assert.notEmpty(Streams.bytes(req.getPayload(), "testing"), "Decryption request content (ciphertext) cannot be null or empty.");
+        InputStream in = Assert.notNull(req.getPayload(),
+                "Decryption request content (ciphertext) InputStream cannot be null.");
+        final OutputStream plaintext = Assert.notNull(req.getOutputStream(),
+                "Decryption request plaintext OutputStream cannot be null.");
         final byte[] aad = getAAD(req);
         final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);
@@ -165,20 +171,21 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
         // Assert that the aad + iv + ciphertext provided, when signed, equals the tag provided,
         // thereby verifying none of it has been tampered with:
-        byte[] digest = sign(aad, iv, ciphertext, macKeyBytes);
+        byte[] digest = sign(aad, iv, in, macKeyBytes);
         if (!MessageDigest.isEqual(digest, tag)) { //constant time comparison to avoid side-channel attacks
             String msg = "Ciphertext decryption failed: Authentication tag verification failed.";
             throw new SignatureException(msg);
         }
+        Streams.reset(in); // rewind for decryption
 
-        byte[] plaintext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
+        final InputStream ciphertext = in;
+        jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, decryptionKey, ivSpec);
-                return cipher.doFinal(ciphertext);
+                withCipher(cipher, ciphertext, plaintext);
+                return Bytes.EMPTY;
             }
         });
-
-        return new DefaultMessage<>(plaintext);
     }
 }

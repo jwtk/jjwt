@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2021 jsonwebtoken.io
  *
@@ -15,11 +16,13 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.InitializationVectorSupplier;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
@@ -30,18 +33,19 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
 
     private final byte[] AAD;
 
-    DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom, SecretKey key, byte[] aad, byte[] iv) {
+    private final OutputStream out;
+
+    DefaultAeadRequest(InputStream payload, OutputStream out, Provider provider, SecureRandom secureRandom,
+                       SecretKey key, byte[] aad, byte[] iv) {
         super(payload, provider, secureRandom, key);
         this.AAD = aad;
         this.IV = iv;
+        this.out = Assert.notNull(out, "OutputStream cannot be null.");
     }
 
-    public DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom, SecretKey key, byte[] aad) {
-        this(payload, provider, secureRandom, key, aad, null);
-    }
-
-    public DefaultAeadRequest(InputStream payload, SecretKey key, byte[] aad) {
-        this(payload, null, null, key, aad, null);
+    public DefaultAeadRequest(InputStream payload, OutputStream out, Provider provider, SecureRandom secureRandom,
+                              SecretKey key, byte[] aad) {
+        this(payload, out, provider, secureRandom, key, aad, null);
     }
 
     @Override
@@ -52,5 +56,10 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
     @Override
     public byte[] getInitializationVector() {
         return this.IV;
+    }
+
+    @Override
+    public OutputStream getOutputStream() {
+        return this.out;
     }
 }

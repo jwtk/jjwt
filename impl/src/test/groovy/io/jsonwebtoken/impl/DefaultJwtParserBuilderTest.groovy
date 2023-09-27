@@ -426,8 +426,7 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
-        Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException {
-            return null
+        void decrypt(DecryptAeadRequest request) throws SecurityException {
         }
 
         @Override

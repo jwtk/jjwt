@@ -79,13 +79,14 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
     AeadResult encrypt(AeadRequest request) throws SecurityException;
 
     /**
-     * Perform AEAD decryption with the ciphertext represented by the specific {@code request}, also verifying the
-     * integrity and authenticity of any associated data, returning the decrypted plaintext result.
+     * Decrypts requested {@link DecryptAeadRequest#getPayload() ciphertext} while also verifying the integrity and
+     * authenticity of any {@link DecryptAeadRequest#getAssociatedData() associated data}, writing the
+     * decrypted plaintext to the {@link DecryptAeadRequest#getOutputStream() request OutputStream}.
      *
      * @param request the decryption request representing the ciphertext to be decrypted, any additional
-     *                integrity-protected data, authentication tag, initialization vector, and the decryption key.
-     * @return the decryption result containing the plaintext
+     *                integrity-protected data, authentication tag, initialization vector, decryption key, and the
+     *                destination OutputStream for writing decrypted plaintext.
      * @throws SecurityException if there is a decryption problem or authenticity assertions fail.
      */
-    Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException;
+    void decrypt(DecryptAeadRequest request) throws SecurityException;
 }

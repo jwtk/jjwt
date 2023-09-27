@@ -88,21 +88,21 @@ class RFC7518AppendixB3Test {
     void test() {
 
         def alg = Jwts.ENC.A256CBC_HS512
-        AeadRequest req = new DefaultAeadRequest(Streams.of(P), null, null, KEY, A, IV)
+        def out = new ByteArrayOutputStream(8192)
+        AeadRequest req = new DefaultAeadRequest(Streams.of(P), out, null, null, KEY, A, IV)
         AeadResult result = alg.encrypt(req)
+        byte[] ciphertext = out.toByteArray()
+        byte[] tag = result.getDigest()
+        byte[] iv = result.getInitializationVector()
 
-        InputStream ciphertext = result.getPayload()
-        byte[] resultCiphertext = Streams.bytes(ciphertext)
-        byte[] resultTag = result.getDigest()
-        byte[] resultIv = result.getInitializationVector()
-
-        assertArrayEquals E, resultCiphertext
-        assertArrayEquals T, resultTag
-        assertArrayEquals IV, resultIv //shouldn't have been altered
+        assertArrayEquals E, ciphertext
+        assertArrayEquals T, tag
+        assertArrayEquals IV, iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, A, resultTag, resultIv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-        assertArrayEquals(P, decryptionResult)
+        out = new ByteArrayOutputStream(8192)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, A, iv, tag)
+        alg.decrypt(dreq)
+        assertArrayEquals(P, out.toByteArray())
     }
 }

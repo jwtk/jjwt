@@ -24,6 +24,7 @@ import io.jsonwebtoken.lang.Strings;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,10 +39,6 @@ public class Streams {
      * Represents the end-of-file (or stream).
      */
     public static final int EOF = -1;
-
-    public static byte[] bytes(InputStream in) {
-        return bytes(in, "Unable to extract InputStream bytes.");
-    }
 
     public static byte[] bytes(final InputStream in, String exmsg) {
         if (in instanceof ByteArrayInputStream) {
@@ -58,6 +55,10 @@ public class Streams {
 
     public static ByteArrayInputStream of(CharSequence seq) {
         return of(Strings.utf8(seq));
+    }
+
+    public static void flush(Flushable... flushables) {
+        Objects.nullSafeFlush(flushables);
     }
 
     /**

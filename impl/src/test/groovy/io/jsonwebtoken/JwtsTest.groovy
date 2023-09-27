@@ -1106,8 +1106,8 @@ class JwtsTest {
             }
 
             @Override
-            Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException {
-                return realAlg.decrypt(request)
+            void decrypt(DecryptAeadRequest request) throws SecurityException {
+                realAlg.decrypt(request)
             }
 
             @Override

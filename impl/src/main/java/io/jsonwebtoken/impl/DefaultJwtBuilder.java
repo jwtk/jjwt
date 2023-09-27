@@ -746,12 +746,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
         // As such, the provider here is intentionally omitted (null):
         // TODO: add encProvider(Provider) builder method that applies to this request only?
-        AeadRequest encRequest = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
+        ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
+        AeadRequest encRequest = new DefaultAeadRequest(plaintext, ciphertextOut, null, secureRandom, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(),
                 "Encryption result must have a non-empty initialization vector.");
-        byte[] ciphertext = Assert.notEmpty(Streams.bytes(encResult.getPayload()),
+        byte[] ciphertext = Assert.notEmpty(ciphertextOut.toByteArray(),
                 "Encryption result must have non-empty ciphertext.");
         byte[] tag = Assert.notEmpty(encResult.getDigest(),
                 "Encryption result must have a non-empty authentication tag.");

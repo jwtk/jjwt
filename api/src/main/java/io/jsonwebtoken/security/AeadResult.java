@@ -15,11 +15,9 @@
  */
 package io.jsonwebtoken.security;
 
-import java.io.InputStream;
-
 /**
- * The result of authenticated encryption, providing access to the resulting {@link #getPayload() ciphertext},
- * {@link #getDigest() AAD tag}, and {@link #getInitializationVector() initialization vector}. The AAD tag and
+ * The result of authenticated encryption, providing access to the resulting {@link #getDigest() AAD tag}, and ]
+ * {@link #getInitializationVector() initialization vector}. The AAD tag and
  * initialization vector must be supplied with the ciphertext to decrypt.
  *
  * <p><b>AAD Tag</b></p>
@@ -35,5 +33,5 @@ import java.io.InputStream;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadResult extends Message<InputStream>, DigestSupplier, InitializationVectorSupplier {
+public interface AeadResult extends DigestSupplier, InitializationVectorSupplier {
 }

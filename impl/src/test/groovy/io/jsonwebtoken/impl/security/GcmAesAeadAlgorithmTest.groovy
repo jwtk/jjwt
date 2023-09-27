@@ -23,7 +23,6 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.fail
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -62,13 +61,12 @@ class GcmAesAeadAlgorithmTest {
         def alg = Jwts.ENC.A256GCM
 
         def ins = new ByteArrayInputStream(P)
-
-        def req = new DefaultAeadRequest(ins, null, null, KEY, AAD, IV)
+        def out = new ByteArrayOutputStream(8192)
+        def req = new DefaultAeadRequest(ins, out, null, null, KEY, AAD, IV)
 
         def result = alg.encrypt(req)
 
-        InputStream stream = result.getPayload()
-        byte[] ciphertext = Streams.bytes(stream, "testing")
+        byte[] ciphertext = out.toByteArray()
         byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
@@ -77,17 +75,14 @@ class GcmAesAeadAlgorithmTest {
         assertArrayEquals IV, iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, stream, KEY, AAD, tag, iv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-        assertArrayEquals(P, decryptionResult)
+        out = new ByteArrayOutputStream(8192)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, AAD, iv, tag)
+        alg.decrypt(dreq)
+        assertArrayEquals(P, out.toByteArray())
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException)
     void testInstantiationWithInvalidKeyLength() {
-        try {
-            new GcmAesAeadAlgorithm(5)
-            fail()
-        } catch (IllegalArgumentException ignored) {
-        }
+        new GcmAesAeadAlgorithm(5)
     }
 }

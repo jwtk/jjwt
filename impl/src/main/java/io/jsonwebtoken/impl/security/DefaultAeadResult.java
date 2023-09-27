@@ -17,26 +17,24 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.DecryptAeadRequest;
 
-import javax.crypto.SecretKey;
-import java.io.InputStream;
-import java.security.Provider;
-import java.security.SecureRandom;
-
-public class DefaultAeadResult extends DefaultAeadRequest implements AeadResult, DecryptAeadRequest {
+public class DefaultAeadResult implements AeadResult {
 
     private final byte[] TAG;
+    private final byte[] IV;
 
-    public DefaultAeadResult(Provider provider, SecureRandom secureRandom,
-                             InputStream ciphertext, SecretKey key, byte[] aad, byte[] tag, byte[] iv) {
-        super(ciphertext, provider, secureRandom, key, aad, iv);
-        Assert.notEmpty(iv, "initialization vector cannot be null or empty.");
+    public DefaultAeadResult(byte[] tag, byte[] iv) {
+        this.IV = Assert.notEmpty(iv, "initialization vector cannot be null or empty.");
         this.TAG = Assert.notEmpty(tag, "authentication tag cannot be null or empty.");
     }
 
     @Override
     public byte[] getDigest() {
         return this.TAG;
+    }
+
+    @Override
+    public byte[] getInitializationVector() {
+        return this.IV;
     }
 }

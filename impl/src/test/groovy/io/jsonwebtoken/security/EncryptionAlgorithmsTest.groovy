@@ -18,7 +18,7 @@ package io.jsonwebtoken.security
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
-import io.jsonwebtoken.impl.security.DefaultAeadResult
+import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import io.jsonwebtoken.lang.Registry
 import org.junit.Test
@@ -111,25 +111,26 @@ class EncryptionAlgorithmsTest {
 
             def key = alg.key().build()
 
-            def request = new DefaultAeadRequest(Streams.of(PLAINTEXT_BYTES), key, null)
+            def out = new ByteArrayOutputStream()
+            def request = new DefaultAeadRequest(Streams.of(PLAINTEXT_BYTES), out, null, null, key, null)
 
             def result = alg.encrypt(request)
-
+            byte[] iv = result.getInitializationVector()
             byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
 
-            InputStream ciphertext = result.getPayload()
-            byte[] ciphertextBytes = Streams.bytes(ciphertext)
+            byte[] ciphertextBytes = out.toByteArray()
 
-            boolean gcm = alg instanceof GcmAesAeadAlgorithm
-
-            if (gcm) { //AES GCM always results in ciphertext the same length as the plaintext:
+            //AES GCM always results in ciphertext the same length as the plaintext:
+            if (alg instanceof GcmAesAeadAlgorithm) {
                 assertEquals(ciphertextBytes.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadResult(null, null, ciphertext, key, null, tag, result.getInitializationVector())
-
-            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
+            def ciphertext = new ByteArrayInputStream(ciphertextBytes)
+            out = new ByteArrayOutputStream(8192)
+            def dreq = new DefaultDecryptAeadRequest(ciphertext, out, key, null, iv, tag)
+            alg.decrypt(dreq)
+            byte[] decryptedPlaintextBytes = out.toByteArray()
 
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }
@@ -142,21 +143,25 @@ class EncryptionAlgorithmsTest {
 
             def key = alg.key().build()
 
-            def req = new DefaultAeadRequest(Streams.of(PLAINTEXT_BYTES), null, null, key, AAD_BYTES)
+            def plaintextIn = Streams.of(PLAINTEXT_BYTES)
+            def out = new ByteArrayOutputStream(8192)
+            def req = new DefaultAeadRequest(plaintextIn, out, null, null, key, AAD_BYTES)
 
             def result = alg.encrypt(req)
+            byte[] iv = result.getInitializationVector()
+            byte[] tag = result.getDigest()
+            byte[] ciphertextBytes = out.toByteArray()
 
-            InputStream ciphertext = result.getPayload()
-            byte[] ciphertextBytes = Streams.bytes(ciphertext)
-
-            boolean gcm = alg instanceof GcmAesAeadAlgorithm
-
-            if (gcm) {
+            //AES GCM always results in ciphertext the same length as the plaintext:
+            if (alg instanceof GcmAesAeadAlgorithm) {
                 assertEquals(ciphertextBytes.length, PLAINTEXT_BYTES.length)
             }
 
-            def dreq = new DefaultAeadResult(null, null, ciphertext, key, AAD_BYTES, result.getDigest(), result.getInitializationVector())
-            byte[] decryptedPlaintextBytes = alg.decrypt(dreq).getPayload()
+            def ciphertext = new ByteArrayInputStream(ciphertextBytes)
+            out = new ByteArrayOutputStream(8192)
+            def dreq = new DefaultDecryptAeadRequest(ciphertext, out, key, AAD_BYTES, iv, tag)
+            alg.decrypt(dreq)
+            byte[] decryptedPlaintextBytes = out.toByteArray()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }
     }
