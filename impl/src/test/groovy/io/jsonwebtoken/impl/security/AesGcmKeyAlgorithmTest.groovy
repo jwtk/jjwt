@@ -68,14 +68,14 @@ class AesGcmKeyAlgorithmTest {
 
         byte[] tag = new byte[16]
         System.arraycopy(jcaResult, ciphertextLength, tag, 0, 16)
-        def resultA = new DefaultAeadResult(tag, iv)
 
         def out = new ByteArrayOutputStream(8192)
-        def encRequest = new DefaultAeadRequest(Streams.of(cek.getEncoded()), out, null, null, kek, null, iv)
-        def encResult = Jwts.ENC.A256GCM.encrypt(encRequest)
+        def encRequest = new DefaultAeadRequest(Streams.of(cek.getEncoded()), null, null, kek, null, iv)
+        def encResult = new DefaultAeadResult(out)
+        Jwts.ENC.A256GCM.encrypt(encRequest, encResult)
 
-        assertArrayEquals resultA.digest, encResult.digest
-        assertArrayEquals resultA.initializationVector, encResult.initializationVector
+        assertArrayEquals tag, encResult.digest
+        assertArrayEquals iv, encResult.iv
         assertArrayEquals ciphertext, out.toByteArray()
     }
 

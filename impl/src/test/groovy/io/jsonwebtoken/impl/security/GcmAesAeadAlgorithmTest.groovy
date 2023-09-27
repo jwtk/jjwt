@@ -61,25 +61,24 @@ class GcmAesAeadAlgorithmTest {
         def alg = Jwts.ENC.A256GCM
 
         def ins = new ByteArrayInputStream(P)
-        def out = new ByteArrayOutputStream(8192)
         def aad = Streams.of(AAD)
-        def req = new DefaultAeadRequest(ins, out, null, null, KEY, aad, IV)
+        def out = new ByteArrayOutputStream(8192)
+        def res = new DefaultAeadResult(out)
+        def req = new DefaultAeadRequest(ins, null, null, KEY, aad, IV)
 
-        def result = alg.encrypt(req)
+        alg.encrypt(req, res)
         Streams.reset(aad)
 
         byte[] ciphertext = out.toByteArray()
-        byte[] tag = result.getDigest()
-        byte[] iv = result.getInitializationVector()
 
         assertArrayEquals E, ciphertext
-        assertArrayEquals T, tag
-        assertArrayEquals IV, iv //shouldn't have been altered
+        assertArrayEquals T, res.digest
+        assertArrayEquals IV, res.iv //shouldn't have been altered
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, aad, iv, tag)
-        alg.decrypt(dreq)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), KEY, aad, res.iv, res.digest)
+        alg.decrypt(dreq, out)
         assertArrayEquals(P, out.toByteArray())
     }
 

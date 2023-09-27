@@ -20,7 +20,6 @@ import io.jsonwebtoken.security.DecryptAeadRequest;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -29,8 +28,8 @@ public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements Dec
 
     private final byte[] TAG;
 
-    public DefaultDecryptAeadRequest(InputStream payload, OutputStream out, SecretKey key, InputStream aad, byte[] iv, byte[] tag) {
-        super(payload, out, null, null, key, aad,
+    public DefaultDecryptAeadRequest(InputStream payload, SecretKey key, InputStream aad, byte[] iv, byte[] tag) {
+        super(payload, null, null, key, aad,
                 Assert.notEmpty(iv, "Initialization Vector cannot be null or empty."));
         this.TAG = Assert.notEmpty(tag, "AAD Authentication Tag cannot be null or empty.");
     }

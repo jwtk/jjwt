@@ -18,6 +18,7 @@ package io.jsonwebtoken.security
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
+import io.jsonwebtoken.impl.security.DefaultAeadResult
 import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import io.jsonwebtoken.lang.Registry
@@ -112,10 +113,11 @@ class EncryptionAlgorithmsTest {
             def key = alg.key().build()
 
             def out = new ByteArrayOutputStream()
-            def request = new DefaultAeadRequest(Streams.of(PLAINTEXT_BYTES), out, null, null, key, null)
+            def request = new DefaultAeadRequest(Streams.of(PLAINTEXT_BYTES), null, null, key, null)
+            def result = new DefaultAeadResult(out)
 
-            def result = alg.encrypt(request)
-            byte[] iv = result.getInitializationVector()
+            alg.encrypt(request, result)
+            byte[] iv = result.getIv()
             byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
 
@@ -128,8 +130,8 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = new ByteArrayInputStream(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = new DefaultDecryptAeadRequest(ciphertext, out, key, null, iv, tag)
-            alg.decrypt(dreq)
+            def dreq = new DefaultDecryptAeadRequest(ciphertext, key, null, iv, tag)
+            alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
 
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
@@ -146,11 +148,12 @@ class EncryptionAlgorithmsTest {
             def plaintextIn = Streams.of(PLAINTEXT_BYTES)
             def out = new ByteArrayOutputStream(8192)
             def aad = Streams.of(AAD_BYTES)
-            def req = new DefaultAeadRequest(plaintextIn, out, null, null, key, aad)
+            def req = new DefaultAeadRequest(plaintextIn, null, null, key, aad)
+            def res = new DefaultAeadResult(out)
 
-            def result = alg.encrypt(req)
-            byte[] iv = result.getInitializationVector()
-            byte[] tag = result.getDigest()
+            alg.encrypt(req, res)
+            byte[] iv = res.getIv()
+            byte[] tag = res.getDigest()
             byte[] ciphertextBytes = out.toByteArray()
             Streams.reset(aad)
 
@@ -161,8 +164,8 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = new ByteArrayInputStream(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = new DefaultDecryptAeadRequest(ciphertext, out, key, aad, iv, tag)
-            alg.decrypt(dreq)
+            def dreq = new DefaultDecryptAeadRequest(ciphertext, key, aad, iv, tag)
+            alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)
         }

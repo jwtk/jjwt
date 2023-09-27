@@ -66,12 +66,13 @@ class HmacAesAeadAlgorithmTest {
         def plaintext = Streams.of(data)
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(8192)
-        def req = new DefaultAeadRequest(plaintext, out, null, null, key, null)
+        def res = new DefaultAeadResult(out)
+        def req = new DefaultAeadRequest(plaintext, null, null, key, null)
 
-        def result = alg.encrypt(req)
+        alg.encrypt(req, res)
 
-        def iv = result.getInitializationVector()
-        def realTag = result.getDigest()
+        def iv = res.getIv()
+        def realTag = res.getDigest()
 
         //fake it:
         def fakeTag = new byte[realTag.length]
@@ -79,7 +80,7 @@ class HmacAesAeadAlgorithmTest {
 
         byte[] ciphertext = out.toByteArray()
         out = new ByteArrayOutputStream(8192)
-        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, key, null, iv, fakeTag)
-        alg.decrypt(dreq)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), key, null, iv, fakeTag)
+        alg.decrypt(dreq, out)
     }
 }

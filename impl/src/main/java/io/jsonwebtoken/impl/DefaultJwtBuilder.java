@@ -34,6 +34,7 @@ import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
+import io.jsonwebtoken.impl.security.DefaultAeadResult;
 import io.jsonwebtoken.impl.security.DefaultKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
@@ -99,7 +100,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Function<SecureRequest<InputStream, Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
-    private Function<AeadRequest, AeadResult> encFunction;
 
     private KeyAlgorithm<Key, ?> keyAlg;
     private Function<KeyRequest<Key>, KeyResult> keyAlgFunction;
@@ -137,10 +137,6 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder random(SecureRandom secureRandom) {
         this.secureRandom = secureRandom;
         return this;
-    }
-
-    protected <I, O> Function<I, O> wrap(Function<I, O> fn, String fmt, Object... args) {
-        return Functions.wrap(fn, SecurityException.class, fmt, args);
     }
 
     @Override
@@ -300,13 +296,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public <K extends Key> JwtBuilder encryptWith(final K key, final KeyAlgorithm<? super K, ?> keyAlg, final AeadAlgorithm enc) {
         this.enc = Assert.notNull(enc, "Encryption algorithm cannot be null.");
-        final String encId = Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
-        this.encFunction = wrap(new Function<AeadRequest, AeadResult>() {
-            @Override
-            public AeadResult apply(AeadRequest request) {
-                return enc.encrypt(request);
-            }
-        }, "%s encryption failed.", encId);
+        Assert.hasText(enc.getId(), "Encryption algorithm id cannot be null or empty.");
 
         Assert.notNull(key, "Encryption key cannot be null.");
         if (key instanceof PrivateKey) {
@@ -510,7 +500,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public String compact() {
 
-        final boolean jwe = encFunction != null;
+        final boolean jwe = this.enc != null;
 
         if (jwe && signFunction != null) {
             String msg = "Both 'signWith' and 'encryptWith' cannot be specified. Choose either one.";
@@ -696,12 +686,22 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return Strings.ascii(jwt.toByteArray());
     }
 
+    private void encrypt(final AeadRequest req, final AeadResult res) throws SecurityException {
+        Function<Object, Object> fn = Functions.wrap(new Function<Object, Object>() {
+            @Override
+            public Object apply(Object o) {
+                enc.encrypt(req, res);
+                return null;
+            }
+        }, SecurityException.class, "%s encryption failed.", enc.getId());
+        fn.apply(null);
+    }
+
     private String encrypt(final Payload content, final Key key, final Provider keyProvider) {
 
         Assert.stateNotNull(content, "Payload argument cannot be null.");
         Assert.stateNotNull(key, "Key is required."); // set by encryptWith*
         Assert.stateNotNull(enc, "Encryption algorithm is required."); // set by encryptWith*
-        Assert.stateNotNull(encFunction, "Encryption function cannot be null.");
         Assert.stateNotNull(keyAlg, "KeyAlgorithm is required."); //set by encryptWith*
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
@@ -747,10 +747,11 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // As such, the provider here is intentionally omitted (null):
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
-        AeadRequest encRequest = new DefaultAeadRequest(plaintext, ciphertextOut, null, secureRandom, cek, aad);
-        AeadResult encResult = encFunction.apply(encRequest);
+        AeadRequest encRequest = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
+        DefaultAeadResult encResult = new DefaultAeadResult(ciphertextOut);
+        encrypt(encRequest, encResult);
 
-        byte[] iv = Assert.notEmpty(encResult.getInitializationVector(),
+        byte[] iv = Assert.notEmpty(encResult.getIv(),
                 "Encryption result must have a non-empty initialization vector.");
         byte[] ciphertext = Assert.notEmpty(ciphertextOut.toByteArray(),
                 "Encryption result must have non-empty ciphertext.");

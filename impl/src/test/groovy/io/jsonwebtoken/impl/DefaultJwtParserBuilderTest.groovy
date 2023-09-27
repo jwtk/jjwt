@@ -421,12 +421,11 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
-        AeadResult encrypt(AeadRequest request) throws SecurityException {
-            return null
+        void encrypt(AeadRequest request, AeadResult result) throws SecurityException {
         }
 
         @Override
-        void decrypt(DecryptAeadRequest request) throws SecurityException {
+        void decrypt(DecryptAeadRequest request, OutputStream out) throws SecurityException {
         }
 
         @Override

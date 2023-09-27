@@ -110,11 +110,10 @@ class AesAlgorithmTest {
 
         def secureRandom = new SecureRandom()
 
-        def out = new ByteArrayOutputStream()
         def ins = Streams.of('data')
         def key = TestKeys.A256GCM
         def aad = Strings.utf8('aad')
-        def req = new DefaultAeadRequest(ins, out, null, secureRandom, key, Streams.of(aad))
+        def req = new DefaultAeadRequest(ins, null, secureRandom, key, Streams.of(aad))
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 
@@ -128,12 +127,11 @@ class AesAlgorithmTest {
         }
 
         @Override
-        AeadResult encrypt(AeadRequest symmetricAeadRequest) {
-            return null
+        void encrypt(AeadRequest req, AeadResult res) {
         }
 
         @Override
-        void decrypt(DecryptAeadRequest symmetricAeadDecryptionRequest) {
+        void decrypt(DecryptAeadRequest req, OutputStream res) {
         }
     }
 

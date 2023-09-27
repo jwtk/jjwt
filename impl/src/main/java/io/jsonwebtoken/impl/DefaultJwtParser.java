@@ -564,8 +564,8 @@ public class DefaultJwtParser implements JwtParser {
             // TODO: add encProvider(Provider) builder method that applies to this request only?
             InputStream ciphertext = payload.toInputStream();
             ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
-            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, plaintext, cek, aad, iv, tag);
-            encAlg.decrypt(dreq);
+            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, tag);
+            encAlg.decrypt(dreq, plaintext);
             payload = new Payload(plaintext.toByteArray(), header.getContentType());
 
             integrityVerified = true; // AEAD performs integrity verification, so no exception = verified

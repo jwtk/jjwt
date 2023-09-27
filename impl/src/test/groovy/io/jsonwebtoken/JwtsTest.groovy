@@ -1101,13 +1101,13 @@ class JwtsTest {
         def enc = realAlg.getId() + 'X' // custom id
         def encAlg = new AeadAlgorithm() {
             @Override
-            AeadResult encrypt(AeadRequest request) throws SecurityException {
-                return realAlg.encrypt(request)
+            void encrypt(AeadRequest request, AeadResult result) throws SecurityException {
+                realAlg.encrypt(request, result)
             }
 
             @Override
-            void decrypt(DecryptAeadRequest request) throws SecurityException {
-                realAlg.decrypt(request)
+            void decrypt(DecryptAeadRequest request, OutputStream out) throws SecurityException {
+                realAlg.decrypt(request, out)
             }
 
             @Override

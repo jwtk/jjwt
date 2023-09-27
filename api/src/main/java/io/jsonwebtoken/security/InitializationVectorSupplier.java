@@ -32,5 +32,5 @@ public interface InitializationVectorSupplier {
      * @return the secure-random Initialization Vector used during encryption, which must in turn be presented for
      * use during decryption.
      */
-    byte[] getInitializationVector();
+    byte[] getIv();
 }

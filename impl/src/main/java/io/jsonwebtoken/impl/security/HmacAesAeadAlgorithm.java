@@ -87,9 +87,10 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public AeadResult encrypt(final AeadRequest req) {
+    public void encrypt(final AeadRequest req, final AeadResult res) {
 
         Assert.notNull(req, "Request cannot be null.");
+        Assert.notNull(res, "Result cannot be null.");
 
         byte[] compositeKeyBytes = assertKeyBytes(req);
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
@@ -99,7 +100,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
         final InputStream plaintext = Assert.notNull(req.getPayload(),
                 "Request content (plaintext) InputStream cannot be null.");
-        final OutputStream out = Assert.notNull(req.getOutputStream(), "Request ciphertext OutputStream cannot be null.");
+        final OutputStream out = Assert.notNull(res.getOutputStream(), "Result ciphertext OutputStream cannot be null.");
         final InputStream aad = req.getAssociatedData(); //can be null if there's no associated data
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
@@ -122,7 +123,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
         byte[] tag = sign(aadBytes, iv, Streams.of(copy.toByteArray()), macKeyBytes);
 
-        return new DefaultAeadResult(tag, iv);
+        res.setTag(tag).setIv(iv);
     }
 
     private byte[] sign(byte[] aad, byte[] iv, InputStream ciphertext, byte[] macKeyBytes) {
@@ -152,9 +153,10 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public void decrypt(final DecryptAeadRequest req) {
+    public void decrypt(final DecryptAeadRequest req, final OutputStream plaintext) {
 
         Assert.notNull(req, "Request cannot be null.");
+        Assert.notNull(plaintext, "Plaintext OutputStream cannot be null.");
 
         byte[] compositeKeyBytes = assertKeyBytes(req);
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
@@ -164,8 +166,6 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
         InputStream in = Assert.notNull(req.getPayload(),
                 "Decryption request content (ciphertext) InputStream cannot be null.");
-        final OutputStream plaintext = Assert.notNull(req.getOutputStream(),
-                "Decryption request plaintext OutputStream cannot be null.");
         final InputStream aad = req.getAssociatedData(); // can be null if there's no associated data
         final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);

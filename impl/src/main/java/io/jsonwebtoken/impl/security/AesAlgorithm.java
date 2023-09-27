@@ -128,7 +128,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     }
 
     byte[] assertDecryptionIv(InitializationVectorSupplier src) throws IllegalArgumentException {
-        byte[] iv = src.getInitializationVector();
+        byte[] iv = src.getIv();
         Assert.notEmpty(iv, DECRYPT_NO_IV);
         return assertIvLength(iv);
     }
@@ -136,7 +136,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     protected byte[] ensureInitializationVector(Request<?> request) {
         byte[] iv = null;
         if (request instanceof InitializationVectorSupplier) {
-            iv = Arrays.clean(((InitializationVectorSupplier) request).getInitializationVector());
+            iv = Arrays.clean(((InitializationVectorSupplier) request).getIv());
         }
         int ivByteLength = this.ivBitLength / Byte.SIZE;
         if (iv == null || iv.length == 0) {
