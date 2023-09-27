@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.gson.io
 
 import com.google.gson.Gson
@@ -21,23 +22,33 @@ import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.lang.Supplier
+import org.junit.Before
 import org.junit.Test
 
-import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
 class GsonSerializerTest {
 
+    private GsonSerializer s
+
+    @Before
+    void setUp() {
+        s = new GsonSerializer()
+    }
+
+    private String ser(Object o) {
+        return Strings.utf8(s.serialize(o))
+    }
+
     @Test
     void loadService() {
         def serializer = ServiceLoader.load(Serializer).iterator().next()
-        assertTrue serializer instanceof GsonSerializer
+        assert serializer instanceof GsonSerializer
     }
 
     @Test
     void testDefaultConstructor() {
-        def serializer = new GsonSerializer()
-        assertNotNull serializer.gson
+        assertNotNull s.gson
     }
 
     @Test
@@ -45,8 +56,23 @@ class GsonSerializerTest {
         def customGSON = new GsonBuilder()
                 .registerTypeHierarchyAdapter(Supplier.class, GsonSupplierSerializer.INSTANCE)
                 .disableHtmlEscaping().create()
-        def serializer = new GsonSerializer<>(customGSON)
-        assertSame customGSON, serializer.gson
+        s = new GsonSerializer(customGSON)
+        assertSame customGSON, s.gson
+    }
+
+    @Test
+    void testSerialize() {
+        assertEquals '"hello"', ser('hello')
+    }
+
+    private byte[] bytes(def o) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream()
+        s.serialize(o, out)
+        return out.toByteArray()
+    }
+
+    private String json(def o) {
+        return Strings.utf8(bytes(o))
     }
 
     @Test
@@ -72,71 +98,74 @@ class GsonSerializerTest {
 
     @Test
     void testByte() {
-        byte[] expected = "120".getBytes(Strings.UTF_8) //ascii("x") = 120
-        byte[] bytes = "x".getBytes(Strings.UTF_8)
-        byte[] result = new GsonSerializer().serialize(bytes[0]) //single byte
-        assertTrue Arrays.equals(expected, result)
+        byte[] expected = Strings.utf8("120") //ascii("x") = 120
+        byte[] result = bytes(Strings.utf8("x")[0]) //single byte
+        assertArrayEquals expected, result
     }
 
     @Test
     void testByteArray() { //expect Base64 string by default:
-        byte[] bytes = "hi".getBytes(Strings.UTF_8)
         String expected = '"aGk="' as String //base64(hi) --> aGk=
-        byte[] result = new GsonSerializer().serialize(bytes)
-        assertEquals expected, new String(result, Strings.UTF_8)
+        assertEquals expected, json(Strings.utf8('hi'))
     }
 
     @Test
     void testEmptyByteArray() { //expect Base64 string by default:
-        byte[] bytes = new byte[0]
-        byte[] result = new GsonSerializer().serialize(bytes)
-        assertEquals '""', new String(result, Strings.UTF_8)
+        byte[] result = bytes(new byte[0])
+        assertEquals '""', Strings.utf8(result)
     }
 
     @Test
     void testChar() { //expect Base64 string by default:
-        byte[] result = new GsonSerializer().serialize('h' as char)
-        assertEquals "\"h\"", new String(result, Strings.UTF_8)
+        assertEquals '"h"', json('h' as char)
     }
 
     @Test
-    void testCharArray() { //expect Base64 string by default:
-        byte[] result = new GsonSerializer().serialize("hi".toCharArray())
-        assertEquals "\"hi\"", new String(result, Strings.UTF_8)
+    void testCharArray() { //expect string by default:
+        assertEquals '"hi"', json('hi'.toCharArray())
     }
 
     @Test
-    void testSerialize() {
-        byte[] expected = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
-        byte[] result = new GsonSerializer().serialize([hello: '世界'])
-        assertTrue Arrays.equals(expected, result)
+    void testWrite() {
+        assertEquals '{"hello":"世界"}', json([hello: '世界'])
     }
 
-
     @Test
-    void testSerializeFailsWithJsonProcessingException() {
-
-        def ex = createMock(SerializationException)
-
-        expect(ex.getMessage()).andReturn('foo')
-
-        def serializer = new GsonSerializer() {
+    void testWriteFailure() {
+        def ex = new IOException('foo')
+        s = new GsonSerializer() {
             @Override
-            protected byte[] writeValueAsBytes(Object o) throws SerializationException {
+            protected void doSerialize(Object o, OutputStream out) {
                 throw ex
             }
         }
-
-        replay ex
-
         try {
-            serializer.serialize([hello: 'world'])
+            ser([hello: 'world'])
             fail()
-        } catch (SerializationException se) {
-            assertEquals 'Unable to serialize object: foo', se.getMessage()
-            assertSame ex, se.getCause()
+        } catch (SerializationException expected) {
+            String msg = 'Unable to serialize object of type java.util.LinkedHashMap: foo'
+            assertEquals msg, expected.message
+            assertSame ex, expected.cause
         }
+    }
 
-        verify ex
+    @Test
+    void testIOExceptionConvertedToSerializationException() {
+        def ex = new IOException('foo')
+        s = new GsonSerializer() {
+            @Override
+            protected void doSerialize(Object o, OutputStream out) {
+                throw ex
+            }
+        }
+        try {
+            ser(new Object())
+            fail()
+        } catch (SerializationException expected) {
+            String causeMsg = 'foo'
+            String msg = "Unable to serialize object of type java.lang.Object: $causeMsg"
+            assertEquals causeMsg, expected.cause.message
+            assertEquals msg, expected.message
+        }
     }
 }

@@ -30,6 +30,7 @@ import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.util.LinkedHashMap;
@@ -199,12 +200,19 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
     }
 
     @Override
-    public byte[] doDigest(final SecureRequest<byte[], SecretKey> request) {
+    public byte[] doDigest(final SecureRequest<InputStream, SecretKey> request) {
         return jca(request).withMac(new CheckedFunction<Mac, byte[]>() {
             @Override
             public byte[] apply(Mac mac) throws Exception {
                 mac.init(request.getKey());
-                return mac.doFinal(request.getPayload());
+                InputStream payload = request.getPayload();
+                byte[] buf = new byte[1024];
+                int len = 0;
+                while (len != -1) {
+                    len = payload.read(buf);
+                    if (len > 0) mac.update(buf, 0, len);
+                }
+                return mac.doFinal();
             }
         });
     }

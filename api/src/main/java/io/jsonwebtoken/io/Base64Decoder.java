@@ -23,7 +23,7 @@ import io.jsonwebtoken.lang.Assert;
  *
  * @since 0.10.0
  */
-class Base64Decoder extends Base64Support implements Decoder<String, byte[]> {
+class Base64Decoder extends Base64Support implements Decoder<CharSequence, byte[]> {
 
     Base64Decoder() {
         super(Base64.DEFAULT);
@@ -34,8 +34,8 @@ class Base64Decoder extends Base64Support implements Decoder<String, byte[]> {
     }
 
     @Override
-    public byte[] decode(String s) throws DecodingException {
+    public byte[] decode(CharSequence s) throws DecodingException {
         Assert.notNull(s, "String argument cannot be null");
-        return this.base64.decodeFast(s.toCharArray());
+        return this.base64.decodeFast(s);
     }
 }

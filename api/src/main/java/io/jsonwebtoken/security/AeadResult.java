@@ -15,23 +15,39 @@
  */
 package io.jsonwebtoken.security;
 
+import java.io.OutputStream;
+
 /**
- * The result of authenticated encryption, providing access to the resulting {@link #getPayload() ciphertext},
- * {@link #getDigest() AAD tag}, and {@link #getInitializationVector() initialization vector}. The AAD tag and
- * initialization vector must be supplied with the ciphertext to decrypt.
- *
- * <p><b>AAD Tag</b></p>
- *
- * {@code AeadResult} inherits {@link DigestSupplier} which is a generic concept for supplying any digest.  The digest
- * in the case of AEAD is called an AAD tag, and it must in turn be supplied for verification during decryption.
- *
- * <p><b>Initialization Vector</b></p>
- *
- * All JWE-standard AEAD algorithms use a secure-random Initialization Vector for safe ciphertext creation, so
- * {@code AeadResult} inherits {@link InitializationVectorSupplier} to make the generated IV available after
- * encryption. This IV must in turn be supplied during decryption.
+ * The result of authenticated encryption, providing access to the ciphertext {@link #getOutputStream() output stream}
+ * and resulting {@link #setTag(byte[]) AAD tag} and {@link #setIv(byte[]) initialization vector}.
+ * The AAD tag and initialization vector must be supplied with the ciphertext to decrypt.
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadResult extends Message<byte[]>, DigestSupplier, InitializationVectorSupplier {
+public interface AeadResult {
+
+    /**
+     * Returns the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
+     * encryption or plaintext during decryption.
+     *
+     * @return the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
+     * encryption or plaintext during decryption.
+     */
+    OutputStream getOutputStream();
+
+    /**
+     * Sets the AEAD authentication tag.
+     *
+     * @param tag the AEAD authentication tag.
+     * @return the AeadResult for method chaining.
+     */
+    AeadResult setTag(byte[] tag);
+
+    /**
+     * Sets the initialization vector used during encryption.
+     *
+     * @param iv the initialization vector used during encryption.
+     * @return the AeadResult for method chaining.
+     */
+    AeadResult setIv(byte[] iv);
 }

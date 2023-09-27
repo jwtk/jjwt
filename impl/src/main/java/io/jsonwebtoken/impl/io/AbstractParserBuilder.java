@@ -41,15 +41,14 @@ public abstract class AbstractParserBuilder<T, B extends ParserBuilder<T, B>> im
     }
 
     @Override
-    public B deserializer(Deserializer<Map<String, ?>> deserializer) {
-        this.deserializer = deserializer;
+    public B json(Deserializer<Map<String, ?>> reader) {
+        this.deserializer = reader;
         return self();
     }
 
     @Override
     public final Parser<T> build() {
         if (this.deserializer == null) {
-            // try to find one based on the services available:
             //noinspection unchecked
             this.deserializer = Services.loadFirst(Deserializer.class);
         }

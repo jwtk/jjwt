@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -29,8 +30,8 @@ class DefaultMacAlgorithmTest {
     static final byte[] payload = "Hello World".getBytes(StandardCharsets.UTF_8)
     static final char[] passwordChars = "correct horse battery staple".toCharArray()
 
-    static <T extends Key> SecureRequest<byte[], T> request(T key) {
-        return new DefaultSecureRequest<byte[], T>(payload, null, null, key)
+    static <T extends Key> SecureRequest<InputStream, T> request(T key) {
+        return new DefaultSecureRequest<InputStream, T>(Streams.of(payload), null, null, key)
     }
 
     static DefaultMacAlgorithm newAlg() {
@@ -178,7 +179,7 @@ class DefaultMacAlgorithmTest {
 
     @Test
     void testFindByKey() {
-        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+        for (def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
             def key = mac.key().build()
             assertSame mac, DefaultMacAlgorithm.findByKey(key)
         }
@@ -196,7 +197,7 @@ class DefaultMacAlgorithmTest {
 
     @Test
     void testFindByWeakKey() {
-        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+        for (def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
             def key = mac.key().build()
             def encoded = new byte[key.getEncoded().length - 1] // one byte less than required
             def weak = new TestSecretKey(algorithm: key.getAlgorithm(), format: key.getFormat(), encoded: encoded)
@@ -207,7 +208,7 @@ class DefaultMacAlgorithmTest {
 
     @Test
     void testFindByLargerThanExpectedKey() {
-        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+        for (def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
             def key = mac.key().build()
             def encoded = new byte[key.getEncoded().length + 1] // one byte less than required
             def strong = new TestSecretKey(algorithm: key.getAlgorithm(), format: key.getFormat(), encoded: encoded)
@@ -217,7 +218,7 @@ class DefaultMacAlgorithmTest {
 
     @Test
     void testFindByKeyOid() {
-        for(def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
+        for (def mac : DefaultMacAlgorithm.JCA_NAME_MAP.values()) {
             def key = mac.key().build()
             def alg = key.getAlgorithm()
             if (alg.endsWith('256')) {

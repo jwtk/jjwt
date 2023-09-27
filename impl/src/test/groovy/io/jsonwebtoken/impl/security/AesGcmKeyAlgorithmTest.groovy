@@ -19,6 +19,7 @@ import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Arrays
@@ -67,14 +68,15 @@ class AesGcmKeyAlgorithmTest {
 
         byte[] tag = new byte[16]
         System.arraycopy(jcaResult, ciphertextLength, tag, 0, 16)
-        def resultA = new DefaultAeadResult(null, null, ciphertext, kek, null, tag, iv)
 
-        def encRequest = new DefaultAeadRequest(cek.getEncoded(), null, null, kek, null, iv)
-        def encResult = Jwts.ENC.A256GCM.encrypt(encRequest)
+        def out = new ByteArrayOutputStream(8192)
+        def encRequest = new DefaultAeadRequest(Streams.of(cek.getEncoded()), null, null, kek, null, iv)
+        def encResult = new DefaultAeadResult(out)
+        Jwts.ENC.A256GCM.encrypt(encRequest, encResult)
 
-        assertArrayEquals resultA.digest, encResult.digest
-        assertArrayEquals resultA.initializationVector, encResult.initializationVector
-        assertArrayEquals resultA.getPayload(), encResult.getPayload()
+        assertArrayEquals tag, encResult.digest
+        assertArrayEquals iv, encResult.iv
+        assertArrayEquals ciphertext, out.toByteArray()
     }
 
     static void assertAlgorithm(int keyLength) {

@@ -16,20 +16,19 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.io.ConvertingParser
-import io.jsonwebtoken.impl.lang.Services
+import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
+import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.security.Provider
 
-import static org.easymock.EasyMock.createMock
+import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
 class DefaultJwkParserBuilderTest {
@@ -64,9 +63,15 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testDeserializer() {
-        def deserializer = createMock(Deserializer)
-        def parser = Jwks.parser().deserializer(deserializer).build() as ConvertingParser
-        assertSame deserializer, parser.deserializer
+        Deserializer<Map<String,?>> deser = createMock(Deserializer)
+        def  m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
+        expect(deser.deserialize((InputStream)anyObject(InputStream))).andReturn(m)
+        replay deser
+        def jwk = Jwks.parser().json(deser).build().parse('foo')
+        verify deser
+        assertTrue jwk instanceof SecretJwk
+        assertEquals m.kty, jwk.kty
+        assertEquals m.k, jwk.k.get()
     }
 
     @Test
@@ -101,12 +106,10 @@ class DefaultJwkParserBuilderTest {
             keys.add(it.pair.private)
         }
 
-        def serializer = Services.loadFirst(Serializer)
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwks.builder().key(key).build()
-            def data = serializer.serialize(jwk)
-            String json = new String(data, StandardCharsets.UTF_8)
+            String json = Jwks.UNSAFE_JSON(jwk)
             def parsed = Jwks.parser().build().parse(json)
             assertEquals jwk, parsed
         }
@@ -122,14 +125,12 @@ class DefaultJwkParserBuilderTest {
             keys.add(it.pair.private)
         }
 
-        def serializer = Services.loadFirst(Serializer)
         def provider = TestKeys.BC //always used
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwks.builder().provider(provider).key(key).build()
-            def data = serializer.serialize(jwk)
-            String json = new String(data, StandardCharsets.UTF_8)
+            String json = Jwks.UNSAFE_JSON(jwk)
             def parsed = Jwks.parser().provider(provider).build().parse(json)
             assertEquals jwk, parsed
             assertSame provider, parsed.@context.@provider
@@ -138,18 +139,18 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testDeserializationFailure() {
-        def deserializer = new Deserializer() {
+        def deser = new AbstractDeserializer() {
             @Override
-            Object deserialize(byte[] bytes) throws DeserializationException {
-                throw new DeserializationException("test")
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
+                throw new DeserializationException('test')
             }
         }
-        def parser = new DefaultJwkParserBuilder().deserializer(deserializer).build()
+        def parser = new DefaultJwkParserBuilder().json(deser).build()
         try {
             parser.parse('foo')
             fail()
         } catch (MalformedKeyException expected) {
-            String msg = "Unable to deserialize JWK: test"
+            String msg = "Malformed JWK JSON: test"
             assertEquals msg, expected.getMessage()
         }
     }

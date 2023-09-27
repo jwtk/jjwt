@@ -26,7 +26,7 @@ import io.jsonwebtoken.lang.Assert;
 class Base64Encoder extends Base64Support implements Encoder<byte[], String> {
 
     Base64Encoder() {
-        super(Base64.DEFAULT);
+        this(Base64.DEFAULT);
     }
 
     Base64Encoder(Base64 base64) {

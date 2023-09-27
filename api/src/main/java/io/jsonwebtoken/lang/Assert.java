@@ -140,12 +140,13 @@ public final class Assert {
      * be <code>null</code> and must contain at least one non-whitespace character.
      * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
      *
-     * @param text    the String to check
+     * @param <T>     the type of CharSequence
+     * @param text    the CharSequence to check
      * @param message the exception message to use if the assertion fails
-     * @return the string if it has text
+     * @return the CharSequence if it has text
      * @see Strings#hasText
      */
-    public static String hasText(String text, String message) {
+    public static <T extends CharSequence> T hasText(T text, String message) {
         if (!Strings.hasText(text)) {
             throw new IllegalArgumentException(message);
         }

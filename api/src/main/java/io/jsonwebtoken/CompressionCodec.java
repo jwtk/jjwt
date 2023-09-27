@@ -46,4 +46,25 @@ public interface CompressionCodec extends CompressionAlgorithm {
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     String getAlgorithmName();
+
+    /**
+     * Compresses the specified byte array, returning the compressed byte array result.
+     *
+     * @param content bytes to compress
+     * @return compressed bytes
+     * @throws CompressionException if the specified byte array cannot be compressed.
+     */
+    @Deprecated
+    byte[] compress(byte[] content) throws CompressionException;
+
+    /**
+     * Decompresses the specified compressed byte array, returning the decompressed byte array result.  The
+     * specified byte array must already be in compressed form.
+     *
+     * @param compressed compressed bytes
+     * @return decompressed bytes
+     * @throws CompressionException if the specified byte array cannot be decompressed.
+     */
+    @Deprecated
+    byte[] decompress(byte[] compressed) throws CompressionException;
 }

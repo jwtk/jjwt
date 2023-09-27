@@ -28,7 +28,7 @@ class Base64DecoderTest {
     }
 
     @Test
-    void testDecode() {
+    void decode() {
         String encoded = 'SGVsbG8g5LiW55WM' // Hello 世界
         byte[] bytes = new Base64Decoder().decode(encoded)
         String result = new String(bytes, Strings.UTF_8)

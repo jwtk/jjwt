@@ -15,18 +15,21 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.DecryptAeadRequest;
-import io.jsonwebtoken.security.Message;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.SequenceInputStream;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
@@ -41,62 +44,66 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
     }
 
     @Override
-    public AeadResult encrypt(final AeadRequest req) throws SecurityException {
+    public void encrypt(final AeadRequest req, AeadResult res) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
+        Assert.notNull(res, "Result cannot be null.");
+
         final SecretKey key = assertKey(req.getKey());
-        final byte[] plaintext = Assert.notEmpty(req.getPayload(), "Request content (plaintext) cannot be null or empty.");
-        final byte[] aad = getAAD(req);
+        final InputStream plaintext = Assert.notNull(req.getPayload(),
+                "Request content (plaintext) InputStream cannot be null.");
+        final OutputStream out = Assert.notNull(res.getOutputStream(),
+                "Result ciphertext OutputStream cannot be null.");
+        final InputStream aad = req.getAssociatedData();
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        byte[] taggedCiphertext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
+        final byte[] tag = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-                if (Arrays.length(aad) > 0) {
-                    cipher.updateAAD(aad);
-                }
-                return cipher.doFinal(plaintext);
+                byte[] taggedCiphertext = withCipher(cipher, plaintext, aad, out);
+                // When using GCM mode, the JDK appends the authentication tag to the ciphertext, so let's extract it:
+                // (tag has a length of BLOCK_BYTE_SIZE):
+                int ciphertextLength = Bytes.length(taggedCiphertext) - BLOCK_BYTE_SIZE;
+                Streams.write(out, taggedCiphertext, 0, ciphertextLength, "Ciphertext write failure.");
+                byte[] tag = new byte[BLOCK_BYTE_SIZE];
+                System.arraycopy(taggedCiphertext, ciphertextLength, tag, 0, BLOCK_BYTE_SIZE);
+                return tag;
             }
         });
+        Streams.flush(out);
+        Streams.reset(plaintext);
 
-        // When using GCM mode, the JDK appends the authentication tag to the ciphertext, so let's extract it:
-        // (tag has a length of BLOCK_SIZE_BITS):
-        int ciphertextLength = taggedCiphertext.length - BLOCK_BYTE_SIZE;
-        byte[] ciphertext = new byte[ciphertextLength];
-        System.arraycopy(taggedCiphertext, 0, ciphertext, 0, ciphertextLength);
-        byte[] tag = new byte[BLOCK_BYTE_SIZE];
-        System.arraycopy(taggedCiphertext, ciphertextLength, tag, 0, BLOCK_BYTE_SIZE);
-
-        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), ciphertext, key, aad, tag, iv);
+        res.setTag(tag).setIv(iv);
     }
 
     @Override
-    public Message<byte[]> decrypt(final DecryptAeadRequest req) throws SecurityException {
+    public void decrypt(final DecryptAeadRequest req, final OutputStream out) throws SecurityException {
 
         Assert.notNull(req, "Request cannot be null.");
+        Assert.notNull(out, "Plaintext OutputStream cannot be null.");
         final SecretKey key = assertKey(req.getKey());
-        final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
-        final byte[] aad = getAAD(req);
-        final byte[] tag = Assert.notEmpty(req.getDigest(), "Decryption request authentication tag cannot be null or empty.");
+        final InputStream ciphertext = Assert.notNull(req.getPayload(),
+                "Decryption request content (ciphertext) InputStream cannot be null.");
+        final InputStream aad = req.getAssociatedData();
+        final byte[] tag = Assert.notEmpty(req.getDigest(),
+                "Decryption request authentication tag cannot be null or empty.");
         final byte[] iv = assertDecryptionIv(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
-        final byte[] taggedCiphertext = Bytes.concat(ciphertext, tag);
+        final InputStream taggedCiphertext = new SequenceInputStream(ciphertext, new ByteArrayInputStream(tag));
 
-        byte[] plaintext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
+        jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
-                if (Arrays.length(aad) > 0) {
-                    cipher.updateAAD(aad);
-                }
-                return cipher.doFinal(taggedCiphertext);
+                byte[] last = withCipher(cipher, taggedCiphertext, aad, out);
+                Streams.write(out, last, "GcmAesAeadAlgorithm#decrypt plaintext write failure.");
+                return Bytes.EMPTY;
             }
         });
-
-        return new DefaultMessage<>(plaintext);
+        Streams.flush(out);
     }
 }

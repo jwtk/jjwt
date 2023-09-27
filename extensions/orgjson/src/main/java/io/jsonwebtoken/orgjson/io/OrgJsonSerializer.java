@@ -15,9 +15,8 @@
  */
 package io.jsonwebtoken.orgjson.io;
 
+import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.io.Encoders;
-import io.jsonwebtoken.io.SerializationException;
-import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
@@ -27,6 +26,8 @@ import io.jsonwebtoken.lang.Supplier;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -37,7 +38,7 @@ import java.util.Map;
 /**
  * @since 0.10.0
  */
-public class OrgJsonSerializer<T> implements Serializer<T> {
+public class OrgJsonSerializer<T> extends AbstractSerializer<T> {
 
     // we need reflection for these because of Android - see https://github.com/jwtk/jjwt/issues/388
     private static final String JSON_WRITER_CLASS_NAME = "org.json.JSONWriter";
@@ -54,17 +55,11 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
     }
 
     @Override
-    public byte[] serialize(T t) throws SerializationException {
-        try {
-            Object o = toJSONInstance(t);
-            return toBytes(o);
-        } catch (SerializationException se) {
-            //propagate
-            throw se;
-        } catch (Exception e) {
-            String msg = "Unable to serialize object of type " + t.getClass().getName() + " to JSON: " + e.getMessage();
-            throw new SerializationException(msg, e);
-        }
+    protected void doSerialize(T t, OutputStream out) throws Exception {
+        Object o = toJSONInstance(t);
+        String s = toString(o);
+        byte[] bytes = Strings.utf8(s);
+        out.write(bytes);
     }
 
     /**
@@ -77,7 +72,7 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         return false;
     }
 
-    private Object toJSONInstance(Object object) {
+    private Object toJSONInstance(Object object) throws IOException {
 
         if (object == null) {
             return JSONObject.NULL;
@@ -132,10 +127,10 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         //not an immediately JSON-compatible object and probably a JavaBean (or similar).  We can't convert that
         //directly without using a marshaller of some sort:
         String msg = "Unable to serialize object of type " + object.getClass().getName() + " to JSON using known heuristics.";
-        throw new SerializationException(msg);
+        throw new IOException(msg);
     }
 
-    private JSONObject toJSONObject(Map<?, ?> m) {
+    private JSONObject toJSONObject(Map<?, ?> m) throws IOException {
 
         JSONObject obj = new JSONObject();
 
@@ -151,7 +146,7 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         return obj;
     }
 
-    private JSONArray toJSONArray(Collection<?> c) {
+    private JSONArray toJSONArray(Collection<?> c) throws IOException {
 
         JSONArray array = new JSONArray();
 
@@ -164,14 +159,12 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
     }
 
     /**
-     * Serializes the specified org.json instance a byte array.
+     * Serializes the specified org.json instance a JSON String.
      *
-     * @param o the org.json instance to serialize
-     * @return the JSON byte array
+     * @param o the org.json instance to convert to a String
+     * @return the JSON String
      */
-    @SuppressWarnings("WeakerAccess") //for testing
-    protected byte[] toBytes(Object o) {
-        String s;
+    protected String toString(Object o) {
         // https://github.com/jwtk/jjwt/issues/380 for Android compatibility (Android doesn't have org.json.JSONWriter):
         // This instanceof check is a sneaky (hacky?) heuristic: A JwtBuilder only ever provides Map<String,Object>
         // instances to its serializer instances, so by the time this method is invoked, 'o' will always be a
@@ -181,12 +174,23 @@ public class OrgJsonSerializer<T> implements Serializer<T> {
         // JJWT's internal Serializer implementation for general JSON serialization.  That is, its intended use
         // is within the context of JwtBuilder execution and not for application use beyond that.
         if (o instanceof JSONObject) {
-            s = o.toString();
-        } else {
-            // we still call JSONWriter for all other values 'just in case', and this works for all valid JSON values
-            // This would fail on Android unless they include the newer org.json dependency and ignore Android's.
-            s = Classes.invokeStatic(JSON_WRITER_CLASS_NAME, "valueToString", VALUE_TO_STRING_ARG_TYPES, o);
+            return o.toString();
         }
-        return s.getBytes(Strings.UTF_8);
+        // we still call JSONWriter for all other values 'just in case', and this works for all valid JSON values
+        // This would fail on Android unless they include the newer org.json dependency and ignore Android's.
+        return Classes.invokeStatic(JSON_WRITER_CLASS_NAME, "valueToString", VALUE_TO_STRING_ARG_TYPES, o);
+    }
+
+    /**
+     * Serializes the specified org.json instance a byte array.
+     *
+     * @param o the org.json instance to serialize
+     * @return the JSON byte array
+     * @deprecated not called by JJWT
+     */
+    @Deprecated
+    protected byte[] toBytes(Object o) {
+        String s = toString(o);
+        return Strings.utf8(s);
     }
 }

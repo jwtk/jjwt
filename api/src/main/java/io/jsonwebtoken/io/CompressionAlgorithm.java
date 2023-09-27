@@ -15,14 +15,15 @@
  */
 package io.jsonwebtoken.io;
 
-import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.Jwts;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 /**
- * Compresses and decompresses byte arrays.
+ * Compresses and decompresses byte streams.
  *
  * <p><b>&quot;zip&quot; identifier</b></p>
  *
@@ -44,21 +45,18 @@ import java.util.Collection;
 public interface CompressionAlgorithm extends Identifiable {
 
     /**
-     * Compresses the specified byte array, returning the compressed byte array result.
+     * Wraps the specified {@code OutputStream} to ensure any stream bytes are compressed as they are written.
      *
-     * @param content bytes to compress
-     * @return compressed bytes
-     * @throws CompressionException if the specified byte array cannot be compressed.
+     * @param out the stream to wrap for compression
+     * @return the stream to use for writing
      */
-    byte[] compress(byte[] content) throws CompressionException;
+    OutputStream compress(OutputStream out);
 
     /**
-     * Decompresses the specified compressed byte array, returning the decompressed byte array result.  The
-     * specified byte array must already be in compressed form.
+     * Wraps the specified {@code InputStream} to ensure any stream bytes are decompressed as they are read.
      *
-     * @param compressed compressed bytes
-     * @return decompressed bytes
-     * @throws CompressionException if the specified byte array cannot be decompressed.
+     * @param in the stream to wrap for decompression
+     * @return the stream to use for reading
      */
-    byte[] decompress(byte[] compressed) throws CompressionException;
+    InputStream decompress(InputStream in);
 }

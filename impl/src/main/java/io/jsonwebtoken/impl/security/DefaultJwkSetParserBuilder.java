@@ -16,11 +16,9 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.io.ConvertingParser;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.security.JwkSet;
 import io.jsonwebtoken.security.JwkSetParserBuilder;
-import io.jsonwebtoken.security.MalformedKeySetException;
 
 public class DefaultJwkSetParserBuilder extends AbstractJwkParserBuilder<JwkSet, JwkSetParserBuilder>
         implements JwkSetParserBuilder {
@@ -35,15 +33,9 @@ public class DefaultJwkSetParserBuilder extends AbstractJwkParserBuilder<JwkSet,
 
     @Override
     public Parser<JwkSet> doBuild() {
+        JwkSetDeserializer deserializer = new JwkSetDeserializer(this.deserializer);
         JwkBuilderSupplier supplier = new JwkBuilderSupplier(this.provider, this.operationPolicy);
         JwkSetConverter converter = new JwkSetConverter(supplier, this.ignoreUnsupported);
-        return new ConvertingParser<>(this.deserializer, converter,
-                new Function<Throwable, RuntimeException>() {
-                    @Override
-                    public RuntimeException apply(Throwable t) {
-                        String msg = "Unable to deserialize JWK Set: " + t.getMessage();
-                        return new MalformedKeySetException(msg, t);
-                    }
-                });
+        return new ConvertingParser<>(deserializer, converter);
     }
 }

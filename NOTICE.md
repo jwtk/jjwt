@@ -33,3 +33,39 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 ```
+
+Additionally, the following classes were copied from the Apache Commons-Codec project, with further JJWT-specific
+modifications:
+* io.jsonwebtoken.impl.io.Base64Codec
+* io.jsonwebtoken.impl.io.Base64InputStream
+* io.jsonwebtoken.impl.io.Base64OutputStream
+* io.jsonwebtoken.impl.io.BaseNCodec
+* io.jsonwebtoken.impl.io.BaseNCodecInputStream
+* io.jsonwebtoken.impl.io.BaseNCodecOutputStream
+* io.jsonwebtoken.impl.io.CodecPolicy
+
+Its attribution:
+
+```
+Apache Commons Codec
+Copyright 2002-2023 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (https://www.apache.org/).
+```
+
+Also, the following classes were copied from the Apache Commons-IO project, with further JJWT-specific modifications:
+* io.jsonwebtoken.impl.io.FilteredInputStream
+* io.jsonwebtoken.impl.io.FilteredOutputStream
+* io.jsonwebtoken.impl.io.ClosedInputStream
+* io.jsonwebtoken.impl.io.UncloseableInputStream
+
+It's attribution:
+
+```
+Apache Commons IO
+Copyright 2002-2023 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (https://www.apache.org/).
+```

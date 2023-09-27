@@ -16,13 +16,13 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 import static org.junit.Assert.assertArrayEquals
-import static org.junit.Assert.fail
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -60,30 +60,30 @@ class GcmAesAeadAlgorithmTest {
 
         def alg = Jwts.ENC.A256GCM
 
-        def req = new DefaultAeadRequest(P, null, null, KEY, AAD, IV)
+        def ins = new ByteArrayInputStream(P)
+        def aad = Streams.of(AAD)
+        def out = new ByteArrayOutputStream(8192)
+        def res = new DefaultAeadResult(out)
+        def req = new DefaultAeadRequest(ins, null, null, KEY, aad, IV)
 
-        def result = alg.encrypt(req)
+        alg.encrypt(req, res)
+        Streams.reset(aad)
 
-        byte[] ciphertext = result.getPayload()
-        byte[] tag = result.getDigest()
-        byte[] iv = result.getInitializationVector()
+        byte[] ciphertext = out.toByteArray()
 
         assertArrayEquals E, ciphertext
-        assertArrayEquals T, tag
-        assertArrayEquals IV, iv //shouldn't have been altered
+        assertArrayEquals T, res.digest
+        assertArrayEquals IV, res.iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, AAD, tag, iv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-        assertArrayEquals(P, decryptionResult)
+        out = new ByteArrayOutputStream(8192)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), KEY, aad, res.iv, res.digest)
+        alg.decrypt(dreq, out)
+        assertArrayEquals(P, out.toByteArray())
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException)
     void testInstantiationWithInvalidKeyLength() {
-        try {
-            new GcmAesAeadAlgorithm(5)
-            fail()
-        } catch (IllegalArgumentException ignored) {
-        }
+        new GcmAesAeadAlgorithm(5)
     }
 }

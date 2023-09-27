@@ -20,12 +20,8 @@ import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.security.ConstantKeyLocator
 import io.jsonwebtoken.impl.security.LocatingKeyResolver
 import io.jsonwebtoken.impl.security.TestKeys
-import io.jsonwebtoken.io.Decoder
-import io.jsonwebtoken.io.DecodingException
-import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.*
 import io.jsonwebtoken.security.*
-import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Test
 
@@ -33,7 +29,6 @@ import javax.crypto.SecretKey
 import java.security.Provider
 
 import static org.easymock.EasyMock.*
-import static org.hamcrest.MatcherAssert.assertThat
 import static org.junit.Assert.*
 
 // NOTE to the casual reader: even though this test class appears mostly empty, the DefaultJwtParserBuilder
@@ -102,14 +97,22 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testBase64UrlEncodeWithCustomDecoder() {
-        def decoder = new Decoder() {
+
+        String jwt = Jwts.builder().claim('foo', 'bar').compact()
+
+        boolean invoked = false
+        Decoder<String, byte[]> decoder = new Decoder<String, byte[]>() {
             @Override
-            Object decode(Object o) throws DecodingException {
-                return null
+            byte[] decode(String s) throws DecodingException {
+                invoked = true
+                return Decoders.BASE64URL.decode(s)
             }
         }
-        def b = builder.base64UrlDecodeWith(decoder).build()
-        assertSame decoder, b.decoder
+        def parser = builder.base64UrlDecodeWith(decoder).enableUnsecured().build()
+        assertFalse invoked
+
+        assertEquals 'bar', parser.parseClaimsJwt(jwt).getPayload().get('foo')
+        assertTrue invoked
     }
 
     @Test(expected = IllegalArgumentException)
@@ -119,14 +122,14 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDeserializeJsonWithCustomSerializer() {
-        def deserializer = new Deserializer() {
+        def deserializer = new AbstractDeserializer() {
             @Override
-            Object deserialize(byte[] bytes) throws DeserializationException {
-                return OBJECT_MAPPER.readValue(bytes, Map.class)
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
+                return OBJECT_MAPPER.readValue(inputStream, Map.class)
             }
         }
         def p = builder.deserializeJsonWith(deserializer)
-        assertSame deserializer, p.deserializer
+        assertSame deserializer, p.@deserializer
 
         def alg = Jwts.SIG.HS256
         def key = alg.key().build()
@@ -337,17 +340,15 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDefaultDeserializer() {
-        JwtParser parser = builder.build()
-        assertThat parser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
+        JwtParser parser = builder.build() // perform ServiceLoader lookup
+        assertTrue parser.@deserializer instanceof Deserializer
     }
 
     @Test
     void testUserSetDeserializerWrapped() {
         Deserializer deserializer = niceMock(Deserializer)
         JwtParser parser = builder.deserializeJsonWith(deserializer).build()
-
-        assertThat parser.deserializer, CoreMatchers.instanceOf(JwtDeserializer)
-        assertSame deserializer, parser.deserializer.deserializer
+        assertSame deserializer, parser.@deserializer
     }
 
     @Test
@@ -397,6 +398,16 @@ class DefaultJwtParserBuilderTest {
         byte[] decompress(byte[] compressed) throws CompressionException {
             return new byte[0]
         }
+
+        @Override
+        OutputStream compress(OutputStream out) throws CompressionException {
+            return out
+        }
+
+        @Override
+        InputStream decompress(InputStream inputStream) throws CompressionException {
+            return inputStream
+        }
     }
 
     static class TestAeadAlgorithm implements AeadAlgorithm {
@@ -410,13 +421,11 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
-        AeadResult encrypt(AeadRequest request) throws SecurityException {
-            return null
+        void encrypt(AeadRequest request, AeadResult result) throws SecurityException {
         }
 
         @Override
-        Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException {
-            return null
+        void decrypt(DecryptAeadRequest request, OutputStream out) throws SecurityException {
         }
 
         @Override
@@ -461,7 +470,7 @@ class DefaultJwtParserBuilderTest {
         }
 
         @Override
-        byte[] digest(SecureRequest<byte[], SecretKey> request) throws SecurityException {
+        byte[] digest(SecureRequest<InputStream, SecretKey> request) throws SecurityException {
             return new byte[0]
         }
 

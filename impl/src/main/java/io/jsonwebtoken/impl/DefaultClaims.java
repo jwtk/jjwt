@@ -62,7 +62,7 @@ public class DefaultClaims extends ParameterMap implements Claims {
 
     @Override
     public String getName() {
-        return "JWT Claim";
+        return "JWT Claims";
     }
 
     @Override

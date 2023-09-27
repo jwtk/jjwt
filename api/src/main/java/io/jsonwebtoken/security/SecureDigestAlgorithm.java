@@ -17,6 +17,7 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 
+import java.io.InputStream;
 import java.security.Key;
 
 /**
@@ -50,5 +51,5 @@ import java.security.Key;
  * @since JJWT_RELEASE_VERSION
  */
 public interface SecureDigestAlgorithm<S extends Key, V extends Key>
-        extends DigestAlgorithm<SecureRequest<byte[], S>, VerifySecureDigestRequest<V>> {
+        extends DigestAlgorithm<SecureRequest<InputStream, S>, VerifySecureDigestRequest<V>> {
 }

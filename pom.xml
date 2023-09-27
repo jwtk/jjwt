@@ -298,6 +298,17 @@
                         <excludes>
                             <exclude>io/jsonwebtoken/lang/*</exclude>
                             <exclude>io/jsonwebtoken/all/JavaReadmeTest.java</exclude>
+                            <!-- Imported from commons-codec 585497f09b026f6602daf986723a554e051bdfe6, don't
+                            need full coverage: -->
+                            <exclude>io/jsonwebtoken/impl/io/CodecPolicy.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/BaseNCodec.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/Base64Codec.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/BaseNCodecOutputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/BaseNCodecInputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/Base64OutputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/Base64InputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/FilteredInputStream.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/io/FilteredOutputStream.java</exclude>
                         </excludes>
                         <methodPercentage>100.000000%</methodPercentage>
                         <statementPercentage>100.000000%</statementPercentage>

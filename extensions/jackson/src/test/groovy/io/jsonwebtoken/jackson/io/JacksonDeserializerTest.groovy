@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.jackson.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,29 +23,35 @@ import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.jackson.io.stubs.CustomBean
 import io.jsonwebtoken.lang.Maps
 import io.jsonwebtoken.lang.Strings
+import org.junit.Before
 import org.junit.Test
 
-import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
-import static org.hamcrest.CoreMatchers.instanceOf
 
 class JacksonDeserializerTest {
+
+    private JacksonDeserializer deserializer
+
+    @Before
+    void setUp() {
+        deserializer = new JacksonDeserializer()
+    }
+
     @Test
     void loadService() {
         def deserializer = ServiceLoader.load(Deserializer).iterator().next()
-        assertThat(deserializer, instanceOf(JacksonDeserializer))
+        assertTrue deserializer instanceof JacksonDeserializer
     }
 
     @Test
     void testDefaultConstructor() {
-        def deserializer = new JacksonDeserializer()
-        assertNotNull deserializer.objectMapper
+        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER, deserializer.objectMapper
     }
 
     @Test
     void testObjectMapperConstructor() {
         def customOM = new ObjectMapper()
-        def deserializer = new JacksonDeserializer(customOM)
+        deserializer = new JacksonDeserializer<>(customOM)
         assertSame customOM, deserializer.objectMapper
     }
 
@@ -55,9 +62,9 @@ class JacksonDeserializerTest {
 
     @Test
     void testDeserialize() {
-        byte[] serialized = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
+        byte[] data = Strings.utf8('{"hello":"世界"}')
         def expected = [hello: '世界']
-        def result = new JacksonDeserializer().deserialize(serialized)
+        def result = deserializer.deserialize(new ByteArrayInputStream(data))
         assertEquals expected, result
     }
 
@@ -66,7 +73,8 @@ class JacksonDeserializerTest {
 
         long currentTime = System.currentTimeMillis()
 
-        byte[] serialized = """{
+        String json = """
+             {
                 "oneKey":"oneValue", 
                 "custom": {
                     "stringValue": "s-value",
@@ -87,28 +95,31 @@ class JacksonDeserializerTest {
                     }
                 }
             }
-            """.getBytes(Strings.UTF_8)
+            """
+
+        byte[] serialized = Strings.utf8(json)
 
         CustomBean expectedCustomBean = new CustomBean()
-            .setByteArrayValue("bytes".getBytes("UTF-8"))
-            .setByteValue(0xF as byte)
-            .setDateValue(new Date(currentTime))
-            .setIntValue(11)
-            .setShortValue(22 as short)
-            .setLongValue(33L)
-            .setStringValue("s-value")
-            .setNestedValue(new CustomBean()
-                .setByteArrayValue("bytes2".getBytes("UTF-8"))
-                .setByteValue(0xA as byte)
-                .setDateValue(new Date(currentTime+1))
-                .setIntValue(111)
-                .setShortValue(222 as short)
-                .setLongValue(333L)
-                .setStringValue("nested-value")
-            )
+                .setByteArrayValue("bytes".getBytes("UTF-8"))
+                .setByteValue(0xF as byte)
+                .setDateValue(new Date(currentTime))
+                .setIntValue(11)
+                .setShortValue(22 as short)
+                .setLongValue(33L)
+                .setStringValue("s-value")
+                .setNestedValue(new CustomBean()
+                        .setByteArrayValue("bytes2".getBytes("UTF-8"))
+                        .setByteValue(0xA as byte)
+                        .setDateValue(new Date(currentTime + 1))
+                        .setIntValue(111)
+                        .setShortValue(222 as short)
+                        .setLongValue(333L)
+                        .setStringValue("nested-value")
+                )
 
         def expected = [oneKey: "oneValue", custom: expectedCustomBean]
-        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build()).deserialize(serialized)
+        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build())
+                .deserialize(new ByteArrayInputStream(serialized))
         assertEquals expected, result
     }
 
@@ -143,7 +154,8 @@ class JacksonDeserializerTest {
         typeMap.put("custom", CustomBean)
 
         def deserializer = new JacksonDeserializer(typeMap)
-        def result = deserializer.deserialize('{"alg":"HS256"}'.getBytes("UTF-8"))
+        def ins = new ByteArrayInputStream(Strings.utf8('{"alg":"HS256"}'))
+        def result = deserializer.deserialize(ins)
         assertEquals(["alg": "HS256"], result)
     }
 
@@ -153,33 +165,27 @@ class JacksonDeserializerTest {
     }
 
     @Test
-    void testDeserializeFailsWithJsonProcessingException() {
+    void testDeserializeFailsWithException() {
 
-        def ex = createMock(java.io.IOException)
+        def ex = new IOException('foo')
 
-        expect(ex.getMessage()).andReturn('foo')
-
-        def deserializer = new JacksonDeserializer() {
+        deserializer = new JacksonDeserializer() {
             @Override
-            protected Object readValue(byte[] bytes) throws java.io.IOException {
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
                 throw ex
             }
         }
-
-        replay ex
-
         try {
-            deserializer.deserialize('{"hello":"世界"}'.getBytes(Strings.UTF_8))
+            deserializer.deserialize(new ByteArrayInputStream(Strings.utf8('{"hello":"世界"}')))
             fail()
         } catch (DeserializationException se) {
-            assertEquals 'Unable to deserialize bytes into a java.lang.Object instance: foo', se.getMessage()
+            String msg = 'Unable to deserialize: foo'
+            assertEquals msg, se.getMessage()
             assertSame ex, se.getCause()
         }
-
-        verify ex
     }
 
-    private String base64(String input) {
+    private static String base64(String input) {
         return Encoders.BASE64.encode(input.getBytes('UTF-8'))
     }
 }

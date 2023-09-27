@@ -23,28 +23,28 @@ import java.util.Map;
 
 class DefaultTokenizedJwt implements TokenizedJwt {
 
-    private final String protectedHeader;
-    private final String payload;
-    private final String digest;
+    private final CharSequence protectedHeader;
+    private final CharSequence payload;
+    private final CharSequence digest;
 
-    DefaultTokenizedJwt(String protectedHeader, String payload, String digest) {
+    DefaultTokenizedJwt(CharSequence protectedHeader, CharSequence payload, CharSequence digest) {
         this.protectedHeader = protectedHeader;
         this.payload = payload;
         this.digest = digest;
     }
 
     @Override
-    public String getProtected() {
+    public CharSequence getProtected() {
         return this.protectedHeader;
     }
 
     @Override
-    public String getPayload() {
+    public CharSequence getPayload() {
         return this.payload;
     }
 
     @Override
-    public String getDigest() {
+    public CharSequence getDigest() {
         return this.digest;
     }
 

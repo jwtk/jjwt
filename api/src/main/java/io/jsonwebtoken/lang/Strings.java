@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.lang;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,6 +42,8 @@ public final class Strings {
      * Empty String, equal to <code>&quot;&quot;</code>.
      */
     public static final String EMPTY = "";
+
+    private static final CharBuffer EMPTY_BUF = CharBuffer.wrap(EMPTY);
 
     private static final String FOLDER_SEPARATOR = "/";
 
@@ -238,11 +242,14 @@ public final class Strings {
      * @return the specified string's UTF-8 bytes, or {@code null} if the string is {@code null}.
      * @since JJWT_RELEASE_VERSION
      */
-    public static byte[] utf8(String s) {
-        byte[] bytes = null;
-        if (s != null) {
-            bytes = s.getBytes(UTF_8);
-        }
+    public static byte[] utf8(CharSequence s) {
+        if (s == null) return null;
+        CharBuffer cb = s instanceof CharBuffer ? (CharBuffer) s : CharBuffer.wrap(s);
+        cb.mark();
+        ByteBuffer buf = UTF_8.encode(cb);
+        byte[] bytes = new byte[buf.remaining()];
+        buf.get(bytes);
+        cb.reset();
         return bytes;
     }
 
@@ -255,6 +262,41 @@ public final class Strings {
      */
     public static String utf8(byte[] utf8Bytes) {
         return new String(utf8Bytes, UTF_8);
+    }
+
+    /**
+     * Returns {@code new String(asciiBytes, StandardCharsets.US_ASCII)}.
+     *
+     * @param asciiBytes US_ASCII bytes to use with the {@code String} constructor.
+     * @return {@code new String(asciiBytes, StandardCharsets.US_ASCII)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    public static String ascii(byte[] asciiBytes) {
+        return new String(asciiBytes, StandardCharsets.US_ASCII);
+    }
+
+    public static byte[] ascii(CharSequence s) {
+        byte[] bytes = null;
+        if (s != null) {
+            CharBuffer cb = s instanceof CharBuffer ? (CharBuffer) s : CharBuffer.wrap(s);
+            ByteBuffer buf = StandardCharsets.US_ASCII.encode(cb);
+            bytes = new byte[buf.remaining()];
+            buf.get(bytes);
+        }
+        return bytes;
+    }
+
+    /**
+     * Returns a {@code CharBuffer} that wraps {@code seq}, or an empty buffer if {@code seq} is null. If
+     * {@code seq} is already a {@code CharBuffer}, it is returned unmodified.
+     *
+     * @param seq the {@code CharSequence} to wrap.
+     * @return a {@code CharBuffer} that wraps {@code seq}, or an empty buffer if {@code seq} is null.
+     */
+    public static CharBuffer wrap(CharSequence seq) {
+        if (!hasLength(seq)) return EMPTY_BUF;
+        if (seq instanceof CharBuffer) return (CharBuffer) seq;
+        return CharBuffer.wrap(seq);
     }
 
     /**
@@ -823,8 +865,7 @@ public final class Strings {
         for (int i = 0; i < localePart.length(); i++) {
             char ch = localePart.charAt(i);
             if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
-                throw new IllegalArgumentException(
-                        "Locale part \"" + localePart + "\" contains invalid characters");
+                throw new IllegalArgumentException("Locale part \"" + localePart + "\" contains invalid characters");
             }
         }
     }
@@ -1049,8 +1090,7 @@ public final class Strings {
      * @return a <code>Properties</code> instance representing the array contents,
      * or <code>null</code> if the array to process was <code>null</code> or empty
      */
-    public static Properties splitArrayElementsIntoProperties(
-            String[] array, String delimiter, String charsToDelete) {
+    public static Properties splitArrayElementsIntoProperties(String[] array, String delimiter, String charsToDelete) {
 
         if (Objects.isEmpty(array)) {
             return null;
@@ -1109,8 +1149,7 @@ public final class Strings {
      * @see java.lang.String#trim()
      * @see #delimitedListToStringArray
      */
-    public static String[] tokenizeToStringArray(
-            String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+    public static String[] tokenizeToStringArray(String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 
         if (str == null) {
             return null;

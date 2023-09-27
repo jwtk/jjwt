@@ -24,6 +24,7 @@ import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -695,22 +696,25 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param base64UrlDecoder the decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
-     * {@link #decoder(Decoder)}. This method will be removed before the JJWT 1.0 release.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #b64Url(Decoder)}. This method will be removed
+     * before the JJWT 1.0 release.
      */
     @Deprecated
-    JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> base64UrlDecoder);
+    JwtParserBuilder base64UrlDecodeWith(Decoder<CharSequence, byte[]> base64UrlDecoder);
 
     /**
-     * Perform Base64Url decoding with the specified Decoder
+     * Perform Base64Url decoding during parsing with the specified {@code InputStream} Decoder.
+     * The Decoder's {@link Decoder#decode(Object) decode} method will be given a source {@code InputStream} to
+     * wrap, and the resulting (wrapping) {@code InputStream} will be used for reading , ensuring automatic
+     * Base64URL-decoding during read operations.
      *
      * <p>JJWT uses a spec-compliant decoder that works on all supported JDK versions, but you may call this method
-     * to specify a different decoder if you desire.</p>
+     * to specify a different stream decoder if desired.</p>
      *
-     * @param base64UrlDecoder the decoder to use when Base64Url-decoding
+     * @param base64UrlDecoder the stream decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
      */
-    JwtParserBuilder decoder(Decoder<String, byte[]> base64UrlDecoder);
+    JwtParserBuilder b64Url(Decoder<InputStream, InputStream> base64UrlDecoder);
 
     /**
      * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
@@ -724,26 +728,27 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
-     * {@link #deserializer(Deserializer)}. This method will be removed before the JJWT 1.0 release.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #json(Deserializer)}.
+     * This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer);
 
     /**
-     * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
-     * used by the parser after Base64Url-decoding to convert JWT/JWS/JWT JSON headers and claims into Java Map
-     * objects.
+     * Uses the specified JSON {@link Deserializer} to deserialize JSON (UTF-8 byte streams) into Java Map objects.
+     * This is used by the parser after Base64Url-decoding to convert JWT/JWS/JWT headers and Claims into Java Map
+     * instances.
      *
-     * <p>If this method is not called, JJWT will use whatever deserializer it can find at runtime, checking for the
+     * <p>If this method is not called, JJWT will use whatever Deserializer it can find at runtime, checking for the
      * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
      * in the runtime classpath, an exception will be thrown when one of the various {@code parse}* methods is
      * invoked.</p>
      *
-     * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
+     * @param deserializer the deserializer to use to deserialize JSON (UTF-8 byte streams) into Map instances.
      * @return the builder for method chaining.
+     * @since JJWT_RELEASE_VERSION
      */
-    JwtParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer);
+    JwtParserBuilder json(Deserializer<Map<String, ?>> deserializer);
 
     /**
      * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.

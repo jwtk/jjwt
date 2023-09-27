@@ -16,7 +16,9 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.AeadAlgorithm
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -60,18 +62,25 @@ class HmacAesAeadAlgorithmTest {
 
         SecretKey key = alg.key().build()
 
-        def plaintext = "Hello World! Nice to meet you!".getBytes("UTF-8")
+        byte[] data = Strings.utf8('Hello World! Nice to meet you!')
+        def plaintext = Streams.of(data)
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream(8192)
+        def res = new DefaultAeadResult(out)
         def req = new DefaultAeadRequest(plaintext, null, null, key, null)
-        def result = alg.encrypt(req)
 
-        def realTag = result.getDigest()
+        alg.encrypt(req, res)
+
+        def iv = res.getIv()
+        def realTag = res.getDigest()
 
         //fake it:
         def fakeTag = new byte[realTag.length]
         Randoms.secureRandom().nextBytes(fakeTag)
 
-        def dreq = new DefaultAeadResult(null, null, result.getPayload(), key, null, fakeTag, result.getInitializationVector())
-        alg.decrypt(dreq)
+        byte[] ciphertext = out.toByteArray()
+        out = new ByteArrayOutputStream(8192)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), key, null, iv, fakeTag)
+        alg.decrypt(dreq, out)
     }
 }

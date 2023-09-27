@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 
+import java.io.InputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -48,16 +49,35 @@ abstract class AbstractSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
         }
     }
 
+    protected final byte[] sign(Signature sig, InputStream payload) throws Exception {
+        byte[] buf = new byte[2048];
+        int len = 0;
+        while (len != -1) {
+            len = payload.read(buf);
+            if (len > 0) sig.update(buf, 0, len);
+        }
+        return sig.sign();
+    }
+
     @Override
-    protected byte[] doDigest(final SecureRequest<byte[], PrivateKey> request) {
+    protected byte[] doDigest(final SecureRequest<InputStream, PrivateKey> request) {
         return jca(request).withSignature(new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
                 sig.initSign(request.getKey());
-                sig.update(request.getPayload());
-                return sig.sign();
+                return sign(sig, request.getPayload());
             }
         });
+    }
+
+    protected boolean verify(Signature sig, InputStream payload, byte[] digest) throws Exception {
+        byte[] buf = new byte[1024];
+        int len = 0;
+        while (len != -1) {
+            len = payload.read(buf);
+            if (len > 0) sig.update(buf, 0, len);
+        }
+        return sig.verify(digest);
     }
 
     @Override
@@ -66,8 +86,7 @@ abstract class AbstractSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
             @Override
             public Boolean apply(Signature sig) throws Exception {
                 sig.initVerify(request.getKey());
-                sig.update(request.getPayload());
-                return sig.verify(request.getDigest());
+                return verify(sig, request.getPayload(), request.getDigest());
             }
         });
     }

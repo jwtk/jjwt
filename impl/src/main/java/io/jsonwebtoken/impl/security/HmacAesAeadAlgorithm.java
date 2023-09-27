@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.io.Streams;
+import io.jsonwebtoken.impl.io.TeeOutputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
@@ -22,7 +24,6 @@ import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.DecryptAeadRequest;
-import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureException;
@@ -30,9 +31,17 @@ import io.jsonwebtoken.security.SignatureException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.SequenceInputStream;
 import java.security.MessageDigest;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -78,9 +87,10 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public AeadResult encrypt(final AeadRequest req) {
+    public void encrypt(final AeadRequest req, final AeadResult res) {
 
         Assert.notNull(req, "Request cannot be null.");
+        Assert.notNull(res, "Result cannot be null.");
 
         byte[] compositeKeyBytes = assertKeyBytes(req);
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
@@ -88,47 +98,53 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] plaintext = Assert.notEmpty(req.getPayload(), "Request content (plaintext) cannot be null or empty.");
-        final byte[] aad = getAAD(req); //can be null if request associated data does not exist or is empty
+        final InputStream plaintext = Assert.notNull(req.getPayload(),
+                "Request content (plaintext) InputStream cannot be null.");
+        final OutputStream out = Assert.notNull(res.getOutputStream(), "Result ciphertext OutputStream cannot be null.");
+        final InputStream aad = req.getAssociatedData(); //can be null if there's no associated data
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        final byte[] ciphertext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
+        // we need the ciphertext bytes for message digest calculation, so we'll use a TeeOutputStream to
+        // aggregate those results while they're being written to the result output stream
+        final ByteArrayOutputStream copy = new ByteArrayOutputStream(8192);
+        final OutputStream tee = new TeeOutputStream(out, copy);
+
+        jca(req).withCipher(new CheckedFunction<Cipher, Object>() {
             @Override
-            public byte[] apply(Cipher cipher) throws Exception {
+            public Object apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, ivSpec);
-                return cipher.doFinal(plaintext);
+                withCipher(cipher, plaintext, tee);
+                return null; // don't need to return anything
             }
         });
 
-        byte[] tag = sign(aad, iv, ciphertext, macKeyBytes);
+        byte[] aadBytes = aad == null ? Bytes.EMPTY : Streams.bytes(aad, "Unable to read AAD bytes.");
 
-        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), ciphertext, encryptionKey, aad, tag, iv);
+        byte[] tag = sign(aadBytes, iv, Streams.of(copy.toByteArray()), macKeyBytes);
+
+        res.setTag(tag).setIv(iv);
     }
 
-    private byte[] sign(byte[] aad, byte[] iv, byte[] ciphertext, byte[] macKeyBytes) {
+    private byte[] sign(byte[] aad, byte[] iv, InputStream ciphertext, byte[] macKeyBytes) {
 
         long aadLength = io.jsonwebtoken.lang.Arrays.length(aad);
         long aadLengthInBits = aadLength * Byte.SIZE;
         long aadLengthInBitsAsUnsignedInt = aadLengthInBits & 0xffffffffL;
         byte[] AL = Bytes.toBytes(aadLengthInBitsAsUnsignedInt);
 
-        byte[] toHash = new byte[(int) aadLength + iv.length + ciphertext.length + AL.length];
-
-        if (aad != null) {
-            System.arraycopy(aad, 0, toHash, 0, aad.length);
-            System.arraycopy(iv, 0, toHash, aad.length, iv.length);
-            System.arraycopy(ciphertext, 0, toHash, aad.length + iv.length, ciphertext.length);
-            System.arraycopy(AL, 0, toHash, aad.length + iv.length + ciphertext.length, AL.length);
-        } else {
-            System.arraycopy(iv, 0, toHash, 0, iv.length);
-            System.arraycopy(ciphertext, 0, toHash, iv.length, ciphertext.length);
-            System.arraycopy(AL, 0, toHash, iv.length + ciphertext.length, AL.length);
+        Collection<InputStream> streams = new ArrayList<>(4);
+        if (!Bytes.isEmpty(aad)) { // must come first if it exists
+            streams.add(new ByteArrayInputStream(aad));
         }
+        streams.add(new ByteArrayInputStream(iv));
+        streams.add(ciphertext);
+        streams.add(new ByteArrayInputStream(AL));
+        InputStream in = new SequenceInputStream(Collections.enumeration(streams));
 
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());
-        SecureRequest<byte[], SecretKey> request =
-                new DefaultSecureRequest<>(toHash, null, null, key);
+        SecureRequest<InputStream, SecretKey> request =
+                new DefaultSecureRequest<>(in, null, null, key);
         byte[] digest = SIGALG.digest(request);
 
         // https://tools.ietf.org/html/rfc7518#section-5.2.2.1 #5 requires truncating the signature
@@ -137,9 +153,10 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
     }
 
     @Override
-    public Message<byte[]> decrypt(final DecryptAeadRequest req) {
+    public void decrypt(final DecryptAeadRequest req, final OutputStream plaintext) {
 
         Assert.notNull(req, "Request cannot be null.");
+        Assert.notNull(plaintext, "Plaintext OutputStream cannot be null.");
 
         byte[] compositeKeyBytes = assertKeyBytes(req);
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
@@ -147,28 +164,31 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
-        final byte[] aad = getAAD(req);
+        InputStream in = Assert.notNull(req.getPayload(),
+                "Decryption request content (ciphertext) InputStream cannot be null.");
+        final InputStream aad = req.getAssociatedData(); // can be null if there's no associated data
         final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         // Assert that the aad + iv + ciphertext provided, when signed, equals the tag provided,
         // thereby verifying none of it has been tampered with:
-        byte[] digest = sign(aad, iv, ciphertext, macKeyBytes);
+        byte[] aadBytes = aad == null ? Bytes.EMPTY : Streams.bytes(aad, "Unable to read AAD bytes.");
+        byte[] digest = sign(aadBytes, iv, in, macKeyBytes);
         if (!MessageDigest.isEqual(digest, tag)) { //constant time comparison to avoid side-channel attacks
             String msg = "Ciphertext decryption failed: Authentication tag verification failed.";
             throw new SignatureException(msg);
         }
+        Streams.reset(in); // rewind for decryption
 
-        byte[] plaintext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
+        final InputStream ciphertext = in;
+        jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override
             public byte[] apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.DECRYPT_MODE, decryptionKey, ivSpec);
-                return cipher.doFinal(ciphertext);
+                withCipher(cipher, ciphertext, plaintext);
+                return Bytes.EMPTY;
             }
         });
-
-        return new DefaultMessage<>(plaintext);
     }
 }

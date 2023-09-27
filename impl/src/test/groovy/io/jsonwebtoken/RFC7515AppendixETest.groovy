@@ -17,11 +17,11 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.RfcTests
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -29,8 +29,19 @@ import static org.junit.Assert.fail
 
 class RFC7515AppendixETest {
 
-    static final Serializer serializer = Services.loadFirst(Serializer)
-    static final Deserializer deserializer = Services.loadFirst(Deserializer)
+    static final Serializer<Map<String, ?>> serializer = Services.loadFirst(Serializer)
+    static final Deserializer<Map<String, ?>> deserializer = Services.loadFirst(Deserializer)
+
+    static byte[] ser(def value) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(512)
+        serializer.serialize(value, baos)
+        return baos.toByteArray()
+    }
+
+    static <T> T deser(String s) {
+        T t = deserializer.deserialize(Streams.of(s)) as T
+        return t
+    }
 
     @Test
     void test() {
@@ -40,8 +51,8 @@ class RFC7515AppendixETest {
          "crit":["http://example.invalid/UNDEFINED"],
          "http://example.invalid/UNDEFINED":true
         }''')
-        Map<String, ?> header = deserializer.deserialize(Strings.utf8(headerString)) as Map<String, ?>
-        String b64url = Encoders.BASE64URL.encode(serializer.serialize(header))
+        Map<String, ?> header = deser(headerString)
+        String b64url = Encoders.BASE64URL.encode(ser(header))
 
         String jws = b64url + '.RkFJTA.'
 
@@ -71,8 +82,8 @@ class RFC7515AppendixETest {
          "crit":["$critVal"],
          "$critVal":true
         }""")
-        Map<String, ?> header = deserializer.deserialize(Strings.utf8(headerString)) as Map<String, ?>
-        String b64url = Encoders.BASE64URL.encode(serializer.serialize(header))
+        Map<String, ?> header = deser(headerString)
+        String b64url = Encoders.BASE64URL.encode(ser(header))
 
         String jws = b64url + '.RkFJTA.fakesignature' // needed to parse a JWS properly
 

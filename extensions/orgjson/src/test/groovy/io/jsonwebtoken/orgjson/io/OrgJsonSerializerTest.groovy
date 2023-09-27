@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.SignatureAlgorithm
@@ -20,13 +21,13 @@ import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.lang.Supplier
 import org.json.JSONObject
 import org.json.JSONString
 import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.*
-import static org.hamcrest.CoreMatchers.instanceOf
 
 class OrgJsonSerializerTest {
 
@@ -38,38 +39,24 @@ class OrgJsonSerializerTest {
     }
 
     private String ser(Object o) {
-        byte[] bytes = s.serialize(o)
-        return new String(bytes, Strings.UTF_8)
+        return Strings.utf8(s.serialize(o))
     }
 
     @Test
     void loadService() {
         def serializer = ServiceLoader.load(Serializer).iterator().next()
-        assertThat(serializer, instanceOf(OrgJsonSerializer))
-    }
-
-    @Test(expected = SerializationException)
-    void testInvalidArgument() {
-        s.serialize(new Object())
+        assertTrue serializer instanceof OrgJsonSerializer
     }
 
     @Test
-    void testToBytesFailure() {
-
-        final IllegalArgumentException iae = new IllegalArgumentException("foo")
-
-        s = new OrgJsonSerializer() {
-            @Override
-            protected byte[] toBytes(Object o) {
-                throw iae
-            }
-        }
+    void testInvalidArgument() {
         try {
-            s.serialize("hello")
+            ser(new Object())
             fail()
-        } catch (SerializationException se) {
-            assertTrue se.getMessage().endsWith(iae.getMessage())
-            assertSame iae, se.getCause()
+        } catch (SerializationException expected) {
+            String causeMsg = 'Unable to serialize object of type java.lang.Object to JSON using known heuristics.'
+            String msg = "Unable to serialize object of type java.lang.Object: $causeMsg"
+            assertEquals msg, expected.message
         }
     }
 
@@ -177,6 +164,17 @@ class OrgJsonSerializerTest {
     }
 
     @Test
+    void testSupplier() {
+        def supplier = new Supplier() {
+            @Override
+            Object get() {
+                return 'test'
+            }
+        }
+        assertEquals '"test"', ser(supplier)
+    }
+
+    @Test
     void testEmptyString() {
         assertEquals '""', ser('')
     }
@@ -275,5 +273,29 @@ class OrgJsonSerializerTest {
     @Test
     void testListWithNestedObject() {
         assertEquals '[1,null,{"hello":"世界"}]', ser([1, null, [hello: '世界']])
+    }
+
+    @Test
+    void testSerialize() {
+        assertEquals '"hello"', ser('hello')
+    }
+
+    @Test
+    void testIOExceptionConvertedToSerializationException() {
+        try {
+            ser(new Object())
+            fail()
+        } catch (SerializationException expected) {
+            String causeMsg = 'Unable to serialize object of type java.lang.Object to JSON using known heuristics.'
+            String msg = "Unable to serialize object of type java.lang.Object: $causeMsg"
+            assertEquals causeMsg, expected.cause.message
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testToBytes() {
+        assertEquals 'null', Strings.utf8(s.toBytes(null))
+        assertEquals '"hello"', Strings.utf8(s.toBytes('hello'))
     }
 }

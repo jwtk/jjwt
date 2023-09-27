@@ -19,10 +19,10 @@ import javax.crypto.SecretKey;
 
 /**
  * A request to an {@link AeadAlgorithm} to decrypt ciphertext and perform integrity-protection with a supplied
- * decryption {@link SecretKey}. Extends both {@link InitializationVectorSupplier} and {@link DigestSupplier} to
+ * decryption {@link SecretKey}. Extends both {@link IvSupplier} and {@link DigestSupplier} to
  * ensure the respective required IV and AAD tag returned from an {@link AeadResult} are available for decryption.
  *
  * @since JJWT_RELEASE_VERSION
  */
-public interface DecryptAeadRequest extends AeadRequest, InitializationVectorSupplier, DigestSupplier {
+public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSupplier {
 }

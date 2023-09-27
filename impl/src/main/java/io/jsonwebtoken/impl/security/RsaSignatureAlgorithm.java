@@ -26,6 +26,7 @@ import io.jsonwebtoken.security.SignatureAlgorithm;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
+import java.io.InputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -198,7 +199,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     }
 
     @Override
-    protected byte[] doDigest(final SecureRequest<byte[], PrivateKey> request) {
+    protected byte[] doDigest(final SecureRequest<InputStream, PrivateKey> request) {
         return jca(request).withSignature(new CheckedFunction<Signature, byte[]>() {
             @Override
             public byte[] apply(Signature sig) throws Exception {
@@ -206,8 +207,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initSign(request.getKey());
-                sig.update(request.getPayload());
-                return sig.sign();
+                return sign(sig, request.getPayload());
             }
         });
     }
@@ -221,8 +221,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
                     sig.setParameter(algorithmParameterSpec);
                 }
                 sig.initVerify(request.getKey());
-                sig.update(request.getPayload());
-                return sig.verify(request.getDigest());
+                return verify(sig, request.getPayload(), request.getDigest());
             }
         });
     }

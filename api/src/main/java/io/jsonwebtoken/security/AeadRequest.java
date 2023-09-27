@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 
 /**
  * A request to an {@link AeadAlgorithm} to perform authenticated encryption with a supplied symmetric
@@ -25,5 +26,5 @@ import javax.crypto.SecretKey;
  * @see AssociatedDataSupplier
  * @since JJWT_RELEASE_VERSION
  */
-public interface AeadRequest extends SecureRequest<byte[], SecretKey>, AssociatedDataSupplier {
+public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, AssociatedDataSupplier {
 }

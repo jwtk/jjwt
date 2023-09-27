@@ -23,7 +23,6 @@ import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.Request
 import org.junit.Before
 import org.junit.Test
 
@@ -269,7 +268,8 @@ class DefaultMutableJweHeaderTest {
      */
     @Test
     void testX509CertificateSha1Thumbprint() {
-        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
+        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        def request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
 
@@ -284,7 +284,8 @@ class DefaultMutableJweHeaderTest {
      */
     @Test
     void testX509CertificateSha256Thumbprint() {
-        Request<byte[]> request = new DefaultRequest(TestKeys.RS256.cert.getEncoded(), null, null)
+        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        def request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.@SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
 

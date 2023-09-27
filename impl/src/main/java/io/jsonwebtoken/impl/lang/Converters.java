@@ -31,11 +31,11 @@ public final class Converters {
     public static final Converter<byte[], Object> BASE64URL_BYTES = Converters.forEncoded(byte[].class, Codec.BASE64URL);
 
     public static final Converter<X509Certificate, Object> X509_CERTIFICATE =
-        Converters.forEncoded(X509Certificate.class, JwtX509StringConverter.INSTANCE);
+            Converters.forEncoded(X509Certificate.class, JwtX509StringConverter.INSTANCE);
 
     public static final Converter<BigInteger, byte[]> BIGINT_UBYTES = new BigIntegerUBytesConverter();
     public static final Converter<BigInteger, Object> BIGINT = Converters.forEncoded(BigInteger.class,
-        compound(BIGINT_UBYTES, Codec.BASE64URL));
+            compound(BIGINT_UBYTES, Codec.BASE64URL));
 
     //prevent instantiation
     private Converters() {
@@ -53,7 +53,7 @@ public final class Converters {
         return CollectionConverter.forList(elementConverter);
     }
 
-    public static <T> Converter<T, Object> forEncoded(Class<T> elementType, Converter<T, String> elementConverter) {
+    public static <T> Converter<T, Object> forEncoded(Class<T> elementType, Converter<T, CharSequence> elementConverter) {
         return new EncodedObjectConverter<>(elementType, elementConverter);
     }
 

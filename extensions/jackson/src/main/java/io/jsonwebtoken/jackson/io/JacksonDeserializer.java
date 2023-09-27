@@ -20,11 +20,11 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import io.jsonwebtoken.io.DeserializationException;
-import io.jsonwebtoken.io.Deserializer;
+import io.jsonwebtoken.io.AbstractDeserializer;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
@@ -33,9 +33,10 @@ import java.util.Map;
  *
  * @since 0.10.0
  */
-public class JacksonDeserializer<T> implements Deserializer<T> {
+public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
 
     private final Class<T> returnType;
+
     private final ObjectMapper objectMapper;
 
     /**
@@ -86,7 +87,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
      *
      * @param objectMapper the ObjectMapper to use for deserialization.
      */
-    @SuppressWarnings({"unchecked", "WeakerAccess", "unused"}) // for end-users providing a custom ObjectMapper
+    @SuppressWarnings("unchecked")
     public JacksonDeserializer(ObjectMapper objectMapper) {
         this(objectMapper, (Class<T>) Object.class);
     }
@@ -99,24 +100,8 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
     }
 
     @Override
-    public T deserialize(byte[] bytes) throws DeserializationException {
-        try {
-            return readValue(bytes);
-        } catch (IOException e) {
-            String msg = "Unable to deserialize bytes into a " + returnType.getName() + " instance: " + e.getMessage();
-            throw new DeserializationException(msg, e);
-        }
-    }
-
-    /**
-     * Converts the specified byte array value to the desired typed instance using the Jackson {@link ObjectMapper}.
-     *
-     * @param bytes the byte array value to convert
-     * @return the desired typed instance
-     * @throws IOException if there is a problem during reading or instance creation
-     */
-    protected T readValue(byte[] bytes) throws IOException {
-        return objectMapper.readValue(bytes, returnType);
+    protected T doDeserialize(InputStream in) throws Exception {
+        return objectMapper.readValue(in, returnType);
     }
 
     /**
@@ -138,6 +123,7 @@ public class JacksonDeserializer<T> implements Deserializer<T> {
             String name = parser.currentName();
             if (claimTypeMap != null && name != null && claimTypeMap.containsKey(name)) {
                 Class<?> type = claimTypeMap.get(name);
+                //noinspection resource
                 return parser.readValueAsTree().traverse(parser.getCodec()).readValueAs(type);
             }
             // otherwise default to super

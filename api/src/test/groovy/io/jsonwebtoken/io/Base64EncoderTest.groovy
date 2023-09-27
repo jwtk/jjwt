@@ -28,7 +28,7 @@ class Base64EncoderTest {
     }
 
     @Test
-    void testDecode() {
+    void encode() {
         String input = 'Hello 世界'
         byte[] bytes = input.getBytes(Strings.UTF_8)
         String encoded = new Base64Encoder().encode(bytes)

@@ -15,15 +15,16 @@
  */
 package io.jsonwebtoken.orgjson.io;
 
-import io.jsonwebtoken.io.DeserializationException;
-import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.io.AbstractDeserializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -33,29 +34,17 @@ import java.util.Map;
 /**
  * @since 0.10.0
  */
-public class OrgJsonDeserializer implements Deserializer<Object> {
+public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
 
     @Override
-    public Object deserialize(byte[] bytes) throws DeserializationException {
-
-        Assert.notNull(bytes, "JSON byte array cannot be null");
-
-        if (bytes.length == 0) {
-            throw new DeserializationException("Invalid JSON: zero length byte array.");
-        }
-
-        try {
-            String s = new String(bytes, Strings.UTF_8);
-            return parse(s);
-        } catch (Exception e) {
-            String msg = "Invalid JSON: " + e.getMessage();
-            throw new DeserializationException(msg, e);
-        }
+    protected Object doDeserialize(InputStream in) {
+        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+        return parse(reader);
     }
 
-    private Object parse(String json) throws JSONException {
+    private Object parse(java.io.Reader reader) throws JSONException {
 
-        JSONTokener tokener = new JSONTokener(json);
+        JSONTokener tokener = new JSONTokener(reader);
 
         char c = tokener.nextClean(); //peak ahead
         tokener.back(); //revert

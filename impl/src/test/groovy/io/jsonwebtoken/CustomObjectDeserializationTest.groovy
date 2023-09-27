@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import org.junit.Test
 
@@ -42,8 +41,8 @@ class CustomObjectDeserializationTest {
         assertEquals jwt.getPayload().get('cust'), [key1: 'value1', key2: 42]
 
         // custom type for 'cust' claim
-        Deserializer deserializer = new JacksonDeserializer([cust: CustomBean])
-        jwt = Jwts.parser().enableUnsecured().deserializeJsonWith(deserializer).build().parseClaimsJwt(jwtString)
+        def des = new JacksonDeserializer([cust: CustomBean])
+        jwt = Jwts.parser().enableUnsecured().json(des).build().parseClaimsJwt(jwtString)
         assertNotNull jwt
         CustomBean result = jwt.getPayload().get("cust", CustomBean)
         assertEquals customBean, result

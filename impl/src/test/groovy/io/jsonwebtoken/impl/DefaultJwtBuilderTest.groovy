@@ -19,12 +19,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.impl.io.Streams
+import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKey
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.*
-import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import io.jsonwebtoken.security.*
 import org.junit.Before
 import org.junit.Test
@@ -42,6 +43,18 @@ class DefaultJwtBuilderTest {
     private static ObjectMapper objectMapper = new ObjectMapper()
 
     private DefaultJwtBuilder builder
+
+    private static byte[] serialize(Map<String, ?> map) {
+        def serializer = Services.loadFirst(Serializer)
+        ByteArrayOutputStream out = new ByteArrayOutputStream(512)
+        serializer.serialize(map, out)
+        return out.toByteArray()
+    }
+
+    private static Map<String, ?> deser(byte[] data) {
+        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.of(data)) as Map<String, ?>
+        return m
+    }
 
     @Before
     void setUp() {
@@ -238,16 +251,14 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactWithoutPayloadOrClaims() {
-        def serializer = Services.loadFirst(Serializer.class)
-        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg': 'none']))
+        def header = Encoders.BASE64URL.encode(serialize(['alg': 'none']))
         assertEquals "$header.." as String, new DefaultJwtBuilder().compact()
     }
 
     @Test
     void testNullPayloadString() {
         String payload = null
-        def serializer = Services.loadFirst(Serializer.class)
-        def header = Encoders.BASE64URL.encode(serializer.serialize(['alg': 'none']))
+        def header = Encoders.BASE64URL.encode(serialize(['alg': 'none']))
         assertEquals "$header.." as String, builder.setPayload((String) payload).compact()
     }
 
@@ -278,38 +289,30 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testHeaderSerializationErrorException() {
-        def serializer = new Serializer() {
-            @Override
-            byte[] serialize(Object o) throws SerializationException {
-                throw new SerializationException('foo', new Exception())
-            }
-        }
-        def b = new DefaultJwtBuilder().serializer(serializer)
+        def ex = new IOException('foo')
+        def ser = new TestSerializer(ex: ex)
+        def b = new DefaultJwtBuilder().json(ser)
         try {
-            b.setPayload('foo').compact()
+            b.content('bar').compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Unable to serialize header to JSON. Cause: foo', expected.getMessage()
+            assertEquals 'Cannot serialize JWT Header to JSON. Cause: foo', expected.getMessage()
         }
     }
 
     @Test
     void testCompactCompressionCodecJsonProcessingException() {
-        def serializer = new Serializer() {
-            @Override
-            byte[] serialize(Object o) throws SerializationException {
-                throw new SerializationException('dummy text', new Exception())
-            }
-        }
+        def ex = new IOException('dummy text')
+        def ser = new TestSerializer(ex: ex)
         def b = new DefaultJwtBuilder()
                 .setSubject("Joe") // ensures claims instance
                 .compressWith(Jwts.ZIP.DEF)
-                .serializeToJsonWith(serializer)
+                .json(ser)
         try {
             b.compact()
             fail()
         } catch (SerializationException expected) {
-            assertEquals 'Unable to serialize claims to JSON. Cause: dummy text', expected.message
+            assertEquals 'Cannot serialize JWT Header to JSON. Cause: dummy text', expected.message
         }
     }
 
@@ -465,8 +468,31 @@ class DefaultJwtBuilderTest {
                 return null
             }
         }
-        def b = new DefaultJwtBuilder().encoder(encoder)
+        def b = new DefaultJwtBuilder().b64Url(encoder)
         assertSame encoder, b.encoder
+    }
+
+    @Test
+    void base64UrlEncodeWith() {
+
+        boolean invoked = false
+
+        Encoder<byte[], String> encoder = new Encoder<byte[], String>() {
+            @Override
+            String encode(byte[] bytes) throws EncodingException {
+                invoked = true
+                return Encoders.BASE64URL.encode(bytes)
+            }
+        }
+
+        def key = TestKeys.HS256
+        def b = new DefaultJwtBuilder().signWith(key).subject('me')
+
+        def jws1 = b.compact()
+        def jws2 = b.base64UrlEncodeWith(encoder).compact()
+
+        assertEquals jws1, jws2
+        assertTrue invoked
     }
 
     @Test(expected = IllegalArgumentException)
@@ -476,15 +502,17 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSerializeToJsonWithCustomSerializer() {
-        def serializer = new Serializer() {
+        boolean invoked = false
+        def serializer = new AbstractSerializer() {
             @Override
-            byte[] serialize(Object o) throws SerializationException {
-                return objectMapper.writeValueAsBytes(o)
+            protected void doSerialize(Object o, OutputStream out) throws Exception {
+                invoked = true
+                byte[] data = objectMapper.writeValueAsBytes(o)
+                out.write(data)
             }
         }
 
         def b = new DefaultJwtBuilder().serializeToJsonWith(serializer)
-        assertSame serializer, b.serializer
 
         def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
@@ -492,6 +520,7 @@ class DefaultJwtBuilderTest {
                 .claim('foo', 'bar')
                 .compact()
 
+        assertTrue invoked // ensure we call our custom one
         assertEquals 'bar', Jwts.parser().setSigningKey(key).build().parseClaimsJws(jws).getPayload().get('foo')
     }
 
@@ -570,7 +599,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+        def claims = deser(bytes)
 
         assertEquals audienceSingleString, claims.aud
     }
@@ -588,7 +617,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+        def claims = deser(bytes)
 
         assertEquals second, claims.aud // second audienceSingle call replaces first value
     }
@@ -720,7 +749,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+        def claims = Services.loadFirst(Deserializer).deserialize(Streams.of(bytes))
 
         assertEquals two, claims.aud
     }
@@ -756,7 +785,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        Map<String, ?> claims = new JacksonDeserializer<>().deserialize(bytes) as Map<String, ?>
+        def claims = deser(bytes)
 
         assertEquals three, claims.aud
     }

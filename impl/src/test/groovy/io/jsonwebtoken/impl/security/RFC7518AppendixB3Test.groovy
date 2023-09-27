@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.AeadRequest
-import io.jsonwebtoken.security.AeadResult
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -87,20 +87,23 @@ class RFC7518AppendixB3Test {
     void test() {
 
         def alg = Jwts.ENC.A256CBC_HS512
-        AeadRequest req = new DefaultAeadRequest(P, null, null, KEY, A, IV)
-        AeadResult result = alg.encrypt(req)
+        def aad = Streams.of(A)
+        def out = new ByteArrayOutputStream(8192)
+        def res = new DefaultAeadResult(out)
+        AeadRequest req = new DefaultAeadRequest(Streams.of(P), null, null, KEY, aad, IV)
+        alg.encrypt(req, res)
+        byte[] ciphertext = out.toByteArray()
+        byte[] tag = res.getDigest()
+        byte[] iv = res.getIv()
 
-        byte[] resultCiphertext = result.getPayload()
-        byte[] resultTag = result.getDigest()
-        byte[] resultIv = result.getInitializationVector()
-
-        assertArrayEquals E, resultCiphertext
-        assertArrayEquals T, resultTag
-        assertArrayEquals IV, resultIv //shouldn't have been altered
+        assertArrayEquals E, ciphertext
+        assertArrayEquals T, tag
+        assertArrayEquals IV, iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, resultCiphertext, KEY, A, resultTag, resultIv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-        assertArrayEquals(P, decryptionResult)
+        out = new ByteArrayOutputStream(8192)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), KEY, aad, iv, tag)
+        alg.decrypt(dreq, out)
+        assertArrayEquals(P, out.toByteArray())
     }
 }

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -88,21 +89,25 @@ class RFC7518AppendixB1Test {
     void test() {
 
         def alg = Jwts.ENC.A128CBC_HS256
-        def request = new DefaultAeadRequest(P, null, null, KEY, A, IV)
-        def result = alg.encrypt(request)
+        def aad = Streams.of(A)
+        def out = new ByteArrayOutputStream(8192)
+        def result = new DefaultAeadResult(out)
+        def request = new DefaultAeadRequest(Streams.of(P), null, null, KEY, aad, IV)
+        alg.encrypt(request, result)
 
-        byte[] ciphertext = result.getPayload()
+        byte[] ciphertext = out.toByteArray()
         byte[] tag = result.getDigest()
-        byte[] iv = result.getInitializationVector()
+        byte[] iv = result.getIv()
 
         assertArrayEquals E, ciphertext
         assertArrayEquals T, tag
         assertArrayEquals IV, iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, A, tag, iv)
-        byte[] decryptionResult = alg.decrypt(dreq).getPayload()
-        assertArrayEquals(P, decryptionResult)
+        out = new ByteArrayOutputStream(8192)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), KEY, aad, iv, tag)
+        alg.decrypt(dreq, out)
+        assertArrayEquals(P, out.toByteArray())
     }
 
 }

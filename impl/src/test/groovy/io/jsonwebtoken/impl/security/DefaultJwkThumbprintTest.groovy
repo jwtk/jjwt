@@ -16,12 +16,12 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 import static org.junit.Assert.*
@@ -30,7 +30,7 @@ class DefaultJwkThumbprintTest {
 
     private static String content = "Hello World"
     private static HashAlgorithm alg = Jwks.HASH.SHA256
-    private static byte[] digest = alg.digest(new DefaultRequest<byte[]>(content.getBytes(StandardCharsets.UTF_8), null, null))
+    private static byte[] digest = alg.digest(new DefaultRequest<InputStream>(new ByteArrayInputStream(Strings.utf8(content)), null, null))
     private static String expectedToString = Encoders.BASE64URL.encode(digest)
     private static String expectedUriString = DefaultJwkThumbprint.URI_PREFIX + alg.getId() + ":" + expectedToString
     private static URI expectedUri = URI.create(expectedUriString)
@@ -81,7 +81,8 @@ class DefaultJwkThumbprintTest {
         assertFalse thumbprint == new DefaultJwkThumbprint(digest, DefaultHashAlgorithm.SHA1)
 
         // same alg, different digest:
-        byte[] digest2 = alg.digest(new DefaultRequest<byte[]>("Hello World!".getBytes(StandardCharsets.UTF_8), null, null))
+        def payload = new ByteArrayInputStream(Strings.utf8('Hello World!'))
+        byte[] digest2 = alg.digest(new DefaultRequest<>(payload, null, null))
         assertFalse thumbprint == new DefaultJwkThumbprint(digest2, DefaultHashAlgorithm.SHA1)
     }
 

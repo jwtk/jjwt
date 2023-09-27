@@ -144,14 +144,14 @@ public interface Claims extends Map<String, Object>, Identifiable {
     String getId();
 
     /**
-     * Returns the JWTs claim ({@code claimName}) value as a type {@code requiredType}, or {@code null} if not present.
+     * Returns the JWTs claim ({@code claimName}) value as a {@code requiredType} instance, or {@code null} if not
+     * present.
      *
      * <p>JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
-     * complex is expected to be already converted to your desired type by the JSON
-     * {@link io.jsonwebtoken.io.Deserializer Deserializer} implementation. You may specify a custom Deserializer for a
-     * JwtParser with the desired conversion configuration via the
-     * {@link JwtParserBuilder#deserializer deserializer} method.
-     * See <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a> for more
+     * complex is expected to be already converted to your desired type by the JSON parser. You may specify a custom
+     * JSON processor using the {@code JwtParserBuilder}'s
+     * {@link JwtParserBuilder#json(io.jsonwebtoken.io.Deserializer) json(Deserializer)} method. See the JJWT
+     * documentation on <a href="https://github.com/jwtk/jjwt#custom-json-processor">custom JSON processor</a>s for more
      * information. If using Jackson, you can specify custom claim POJO types as described in
      * <a href="https://github.com/jwtk/jjwt#json-jackson-custom-types">custom claim types</a>.
      *
@@ -160,6 +160,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * @param <T>          the type of the value expected to be returned
      * @return the JWT {@code claimName} value or {@code null} if not present.
      * @throws RequiredTypeException throw if the claim value is not null and not of type {@code requiredType}
+     * @see <a href="https://github.com/jwtk/jjwt#json-support">JJWT JSON Support</a>
      */
     <T> T get(String claimName, Class<T> requiredType);
 }

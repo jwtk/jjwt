@@ -67,8 +67,7 @@ class Base64Test {
         String encoded = Base64.DEFAULT.encodeToString(bytes, true)
 
         def r = new StringReader(encoded)
-        String line = ''
-
+        String line
         while ((line = r.readLine()) != null) {
             assertTrue line.length() <= 76
         }
@@ -82,7 +81,7 @@ class Base64Test {
 
     @Test
     void testDecodeFastWithEmptyCharArray() {
-        byte[] bytes = Base64.DEFAULT.decodeFast(new char[0])
+        byte[] bytes = Base64.DEFAULT.decodeFast(Strings.EMPTY)
         assertEquals 0, bytes.length
     }
 
@@ -90,7 +89,7 @@ class Base64Test {
     void testDecodeFastWithSurroundingIllegalCharacters() {
         String expected = 'Hello 世界'
         def encoded = '***SGVsbG8g5LiW55WM!!!'
-        byte[] bytes = Base64.DEFAULT.decodeFast(encoded.toCharArray())
+        byte[] bytes = Base64.DEFAULT.decodeFast(encoded)
         String result = new String(bytes, Strings.UTF_8)
         assertEquals expected, result
     }
@@ -99,7 +98,7 @@ class Base64Test {
     void testDecodeFastWithIntermediateIllegalInboundCharacters() {
         def encoded = 'SGVsbG8g*5LiW55WM'
         try {
-            Base64.DEFAULT.decodeFast(encoded.toCharArray())
+            Base64.DEFAULT.decodeFast(encoded)
             fail()
         } catch (DecodingException de) {
             assertEquals 'Illegal base64 character: \'*\'', de.getMessage()
@@ -110,7 +109,7 @@ class Base64Test {
     void testDecodeFastWithIntermediateIllegalOutOfBoundCharacters() {
         def encoded = 'SGVsbG8g世5LiW55WM'
         try {
-            Base64.DEFAULT.decodeFast(encoded.toCharArray())
+            Base64.DEFAULT.decodeFast(encoded)
             fail()
         } catch (DecodingException de) {
             assertEquals 'Illegal base64 character: \'世\'', de.getMessage()
@@ -121,7 +120,7 @@ class Base64Test {
     void testDecodeFastWithIntermediateIllegalSpaceCharacters() {
         def encoded = 'SGVsbG8g 5LiW55WM'
         try {
-            Base64.DEFAULT.decodeFast(encoded.toCharArray())
+            Base64.DEFAULT.decodeFast(encoded)
             fail()
         } catch (DecodingException de) {
             assertEquals 'Illegal base64 character: \' \'', de.getMessage()
@@ -134,23 +133,24 @@ class Base64Test {
         byte[] bytes = PLAINTEXT.getBytes(Strings.UTF_8)
         String encoded = Base64.DEFAULT.encodeToString(bytes, true)
 
-        byte[] resultBytes = Base64.DEFAULT.decodeFast(encoded.toCharArray())
+        byte[] resultBytes = Base64.DEFAULT.decodeFast(encoded)
 
         assertTrue Arrays.equals(bytes, resultBytes)
         assertEquals PLAINTEXT, new String(resultBytes, Strings.UTF_8)
     }
 
     private static String encode(String s) {
-        byte[] bytes = s.getBytes(Strings.UTF_8);
+        byte[] bytes = s.getBytes(Strings.UTF_8)
         return Base64.DEFAULT.encodeToString(bytes, false)
     }
 
     private static String decode(String s) {
-        byte[] bytes = Base64.DEFAULT.decodeFast(s.toCharArray())
+        byte[] bytes = Base64.DEFAULT.decodeFast(s)
         return new String(bytes, Strings.UTF_8)
     }
 
-    @Test // https://tools.ietf.org/html/rfc4648#page-12
+    @Test
+    // https://tools.ietf.org/html/rfc4648#page-12
     void testRfc4648Base64TestVectors() {
 
         assertEquals "", encode("")
@@ -181,16 +181,17 @@ class Base64Test {
     }
 
     private static String urlEncode(String s) {
-        byte[] bytes = s.getBytes(Strings.UTF_8);
+        byte[] bytes = s.getBytes(Strings.UTF_8)
         return Base64.URL_SAFE.encodeToString(bytes, false)
     }
 
     private static String urlDecode(String s) {
-        byte[] bytes = Base64.URL_SAFE.decodeFast(s.toCharArray())
+        byte[] bytes = Base64.URL_SAFE.decodeFast(s)
         return new String(bytes, Strings.UTF_8)
     }
 
-    @Test //same test vectors above, but with padding removed & some specials swapped: https://brockallen.com/2014/10/17/base64url-encoding/
+    @Test
+    //same test vectors above, but with padding removed & some specials swapped: https://brockallen.com/2014/10/17/base64url-encoding/
     void testRfc4648Base64UrlTestVectors() {
 
         assertEquals "", urlEncode("")
@@ -216,9 +217,9 @@ class Base64Test {
 
         def input = 'special: [\r\n \t], ascii[32..126]: [ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~]\n'
         def expected = "c3BlY2lhbDogWw0KIAldLCBhc2NpaVszMi4uMTI2XTogWyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+XQo="
-                        .replace("=", "")
-                        .replace("+", "-")
-                        .replace("/", "_")
+                .replace("=", "")
+                .replace("+", "-")
+                .replace("/", "_")
         assertEquals expected, urlEncode(input)
         assertEquals input, urlDecode(expected)
     }

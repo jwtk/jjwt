@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.security;
 
+import java.io.InputStream;
+
 /**
  * Provides any &quot;associated data&quot; that must be integrity protected (but not encrypted) when performing
  * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
@@ -33,5 +35,5 @@ public interface AssociatedDataSupplier {
      * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>, or
      * {@code null} if no additional data must be integrity protected.
      */
-    byte[] getAssociatedData();
+    InputStream getAssociatedData();
 }

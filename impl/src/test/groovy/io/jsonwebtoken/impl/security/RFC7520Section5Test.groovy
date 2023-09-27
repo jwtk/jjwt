@@ -16,11 +16,10 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.SerializationException
-import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
@@ -458,22 +457,20 @@ class RFC7520Section5Test {
         }
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
-        // serializer here to check the constructed data, and then, after guaranteeing the same data, return
+        // Serializer here to check the constructed data, and then, after guaranteeing the same data, return
         // the order expected by the RFC
-        def serializer = new Serializer<Map<String, ?>>() {
+        def ser = new TestSerializer() {
             @Override
-            byte[] serialize(Map<String, ?> m) throws SerializationException {
+            protected String toJson(Map<String, ?> m) {
                 assertEquals 3, m.size()
                 assertEquals alg.getId(), m.get('alg')
                 assertEquals jwk.getId(), m.get('kid')
                 assertEquals enc.getId(), m.get('enc')
-                //everything has been asserted per the RFC - return the exact order as shown in the RFC:
-                return utf8(FIGURE_77)
+                return FIGURE_77
             }
         }
-
         String result = Jwts.builder()
-                .serializer(serializer) // assert input, return RFC ordered string
+                .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
                 .encryptWith(key, alg, enc)
@@ -522,22 +519,21 @@ class RFC7520Section5Test {
         }
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
-        // serializer here to check the constructed data, and then, after guaranteeing the same data, return
+        // writer here to check the constructed data, and then, after guaranteeing the same data, return
         // the order expected by the RFC
-        def serializer = new Serializer<Map<String, ?>>() {
+        def ser = new TestSerializer() {
             @Override
-            byte[] serialize(Map<String, ?> m) throws SerializationException {
+            protected String toJson(Map<String, ?> m) {
                 assertEquals 3, m.size()
                 assertEquals alg.getId(), m.get('alg')
                 assertEquals jwk.getId(), m.get('kid')
                 assertEquals enc.getId(), m.get('enc')
-                //everything has been asserted per the RFC - return the exact order as shown in the RFC:
-                return utf8(FIGURE_88)
+                return FIGURE_88
             }
         }
 
         String result = Jwts.builder()
-                .serializer(serializer) // assert input, return RFC ordered string
+                .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
                 .encryptWith(key, alg, enc)
@@ -581,24 +577,23 @@ class RFC7520Section5Test {
         }
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
-        // serializer here to check the constructed data, and then, after guaranteeing the same data, return
+        // writer here to check the constructed data, and then, after guaranteeing the same data, return
         // the order expected by the RFC
-        def serializer = new Serializer<Map<String, ?>>() {
+        def ser = new TestSerializer() {
             @Override
-            byte[] serialize(Map<String, ?> m) throws SerializationException {
+            protected String toJson(Map<String, ?> m) {
                 assertEquals 5, m.size()
                 assertEquals alg.getId(), m.get('alg')
                 assertEquals FIGURE_99, m.get('p2s')
                 assertEquals p2c, m.get('p2c')
                 assertEquals cty, m.get('cty')
                 assertEquals enc.getId(), m.get('enc')
-                //everything has been asserted per the RFC - return the exact order as shown in the RFC:
-                return utf8(FIGURE_101)
+                return FIGURE_101
             }
         }
 
         String result = Jwts.builder()
-                .serializer(serializer) // assert input, return RFC ordered string
+                .json(ser) // assert input, return RFC ordered string
                 .header().contentType(cty).pbes2Count(p2c).and()
                 .setPayload(FIGURE_95)
                 .encryptWith(key, alg, enc)
@@ -647,23 +642,22 @@ class RFC7520Section5Test {
         }
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
-        // serializer here to check the constructed data, and then, after guaranteeing the same data, return
+        // writer here to check the constructed data, and then, after guaranteeing the same data, return
         // the order expected by the RFC
-        def serializer = new Serializer<Map<String, ?>>() {
+        def ser = new TestSerializer() {
             @Override
-            byte[] serialize(Map<String, ?> m) throws SerializationException {
+            protected String toJson(Map<String, ?> m) {
                 assertEquals 4, m.size()
                 assertEquals alg.getId(), m.get('alg')
                 assertEquals jwk.getId(), m.get('kid')
                 assertEquals enc.getId(), m.get('enc')
                 assertEquals RFC_EPK.toPublicJwk(), m.get('epk')
-                //everything has been asserted per the RFC - return the exact order as shown in the RFC:
-                return utf8(FIGURE_113)
+                return FIGURE_113
             }
         }
 
         String result = Jwts.builder()
-                .serializer(serializer) // assert input, return RFC ordered string
+                .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
                 .encryptWith(encKey, alg, enc)

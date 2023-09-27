@@ -15,10 +15,8 @@
  */
 package io.jsonwebtoken.impl.compression;
 
-import io.jsonwebtoken.CompressionCodec;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -28,28 +26,21 @@ import java.util.zip.GZIPOutputStream;
  *
  * @since 0.6.0
  */
-public class GzipCompressionAlgorithm extends AbstractCompressionAlgorithm implements CompressionCodec {
+public class GzipCompressionAlgorithm extends AbstractCompressionAlgorithm {
 
     private static final String ID = "GZIP";
-
-    private static final StreamWrapper WRAPPER = new StreamWrapper() {
-        @Override
-        public OutputStream wrap(OutputStream out) throws IOException {
-            return new GZIPOutputStream(out);
-        }
-    };
 
     public GzipCompressionAlgorithm() {
         super(ID);
     }
 
     @Override
-    protected byte[] doCompress(byte[] content) throws IOException {
-        return writeAndClose(content, WRAPPER);
+    protected OutputStream doCompress(OutputStream out) throws IOException {
+        return new GZIPOutputStream(out);
     }
 
     @Override
-    protected byte[] doDecompress(byte[] compressed) throws IOException {
-        return readAndClose(new GZIPInputStream(new ByteArrayInputStream(compressed)));
+    protected InputStream doDecompress(InputStream is) throws IOException {
+        return new GZIPInputStream(is);
     }
 }

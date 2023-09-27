@@ -19,6 +19,7 @@ import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.lang.Registry;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -75,7 +76,7 @@ import java.security.PublicKey;
  * @see io.jsonwebtoken.Jwts.SIG Jwts.SIG
  * @since JJWT_RELEASE_VERSION
  */
-public interface DigestAlgorithm<R extends Request<byte[]>, V extends VerifyDigestRequest> extends Identifiable {
+public interface DigestAlgorithm<R extends Request<InputStream>, V extends VerifyDigestRequest> extends Identifiable {
 
     /**
      * Returns a cryptographic digest of the request {@link Request#getPayload() payload}.

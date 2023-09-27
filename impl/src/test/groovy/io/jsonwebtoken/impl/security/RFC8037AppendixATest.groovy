@@ -258,7 +258,7 @@ class RFC8037AppendixATest {
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
-                .setIssuer(issuer)
+                .issuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A256GCM)
                 .compact()
 

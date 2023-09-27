@@ -305,8 +305,8 @@ class BytesTest {
         int len = 16
         byte[] bytes = Bytes.random(len)
         boolean allZero = true
-        for(int i = 0; i < len; i++) {
-            if (bytes[i] != (byte)0) {
+        for (int i = 0; i < len; i++) {
+            if (bytes[i] != (byte) 0) {
                 allZero = false
                 break
             }
@@ -316,13 +316,12 @@ class BytesTest {
         Bytes.clear(bytes)
 
         allZero = true
-        for(int i = 0; i < len; i++) {
-            if (bytes[i] != (byte)0) {
+        for (int i = 0; i < len; i++) {
+            if (bytes[i] != (byte) 0) {
                 allZero = false
                 break
             }
         }
         assertTrue allZero // asserts zeroed out entirely
     }
-
 }

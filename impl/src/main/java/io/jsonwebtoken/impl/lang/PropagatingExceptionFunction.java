@@ -32,6 +32,10 @@ public class PropagatingExceptionFunction<T, R, E extends RuntimeException> impl
         this(new DelegatingCheckedFunction<>(f), exceptionClass, new ConstantFunction<T, String>(msg));
     }
 
+    public PropagatingExceptionFunction(CheckedFunction<T, R> f, Class<E> exceptionClass, final String msg) {
+        this(f, exceptionClass, new ConstantFunction<T, String>(msg));
+    }
+
     public PropagatingExceptionFunction(CheckedFunction<T, R> fn, Class<E> exceptionClass, final Supplier<String> msgSupplier) {
         this(fn, exceptionClass, new Function<T, String>() {
             @Override

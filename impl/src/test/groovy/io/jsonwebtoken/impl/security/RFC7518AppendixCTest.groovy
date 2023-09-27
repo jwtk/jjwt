@@ -18,13 +18,14 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
 import java.security.KeyPair
 import java.security.Provider
 import java.security.SecureRandom
@@ -39,12 +40,11 @@ class RFC7518AppendixCTest {
 
     private static final Map<String, ?> fromEncoded(String s) {
         byte[] json = Decoders.BASE64URL.decode(s)
-        return Services.loadFirst(Deserializer.class).deserialize(json) as Map<String, ?>
+        return fromJson(Strings.utf8(json))
     }
 
     private static final Map<String, ?> fromJson(String s) {
-        byte[] bytes = s.getBytes(StandardCharsets.UTF_8)
-        return Services.loadFirst(Deserializer.class).deserialize(bytes) as Map<String, ?>
+        return Services.loadFirst(Deserializer).deserialize(Streams.of(s)) as Map<String, ?>
     }
 
     private static EcPrivateJwk readJwk(String json) {

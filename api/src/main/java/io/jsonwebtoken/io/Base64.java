@@ -224,20 +224,21 @@ final class Base64 { //final and package-protected on purpose
     }
 
     /**
-     * Decodes a BASE64 encoded char array that is known to be reasonably well formatted. The preconditions are:<br>
-     * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
+     * Decodes a BASE64-encoded {@code CharSequence} that is known to be reasonably well formatted. The preconditions
+     * are:<br>
+     * + The sequence must have a line length of 76 chars OR no line separators at all (one line).<br>
      * + Line separator must be "\r\n", as specified in RFC 2045
-     * + The array must not contain illegal characters within the encoded string<br>
-     * + The array CAN have illegal characters at the beginning and end, those will be dealt with appropriately.<br>
+     * + The sequence must not contain illegal characters within the encoded string<br>
+     * + The sequence CAN have illegal characters at the beginning and end, those will be dealt with appropriately.<br>
      *
-     * @param sArr The source array. Length 0 will return an empty array. <code>null</code> will throw an exception.
+     * @param seq The source sequence. Length 0 will return an empty array. <code>null</code> will throw an exception.
      * @return The decoded array of bytes. May be of length 0.
      * @throws DecodingException on illegal input
      */
-    final byte[] decodeFast(char[] sArr) throws DecodingException {
+    byte[] decodeFast(CharSequence seq) throws DecodingException {
 
         // Check special case
-        int sLen = sArr != null ? sArr.length : 0;
+        int sLen = seq != null ? seq.length() : 0;
         if (sLen == 0) {
             return new byte[0];
         }
@@ -245,19 +246,19 @@ final class Base64 { //final and package-protected on purpose
         int sIx = 0, eIx = sLen - 1;    // Start and end index after trimming.
 
         // Trim illegal chars from start
-        while (sIx < eIx && IALPHABET[sArr[sIx]] < 0) {
+        while (sIx < eIx && IALPHABET[seq.charAt(sIx)] < 0) {
             sIx++;
         }
 
         // Trim illegal chars from end
-        while (eIx > 0 && IALPHABET[sArr[eIx]] < 0) {
+        while (eIx > 0 && IALPHABET[seq.charAt(eIx)] < 0) {
             eIx--;
         }
 
         // get the padding count (=) (0, 1 or 2)
-        int pad = sArr[eIx] == '=' ? (sArr[eIx - 1] == '=' ? 2 : 1) : 0;  // Count '=' at end.
+        int pad = seq.charAt(eIx) == '=' ? (seq.charAt(eIx - 1) == '=' ? 2 : 1) : 0;  // Count '=' at end.
         int cCnt = eIx - sIx + 1;   // Content count including possible separators
-        int sepCnt = sLen > 76 ? (sArr[76] == '\r' ? cCnt / 78 : 0) << 1 : 0;
+        int sepCnt = sLen > 76 ? (seq.charAt(76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
 
         int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
         byte[] dArr = new byte[len];       // Preallocate byte[] of exact length
@@ -267,7 +268,7 @@ final class Base64 { //final and package-protected on purpose
         for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
 
             // Assemble three bytes into an int from four "valid" characters.
-            int i = ctoi(sArr[sIx++]) << 18 | ctoi(sArr[sIx++]) << 12 | ctoi(sArr[sIx++]) << 6 | ctoi(sArr[sIx++]);
+            int i = ctoi(seq.charAt(sIx++)) << 18 | ctoi(seq.charAt(sIx++)) << 12 | ctoi(seq.charAt(sIx++)) << 6 | ctoi(seq.charAt(sIx++));
 
             // Add the bytes
             dArr[d++] = (byte) (i >> 16);
@@ -285,7 +286,7 @@ final class Base64 { //final and package-protected on purpose
             // Decode last 1-3 bytes (incl '=') into 1-3 bytes
             int i = 0;
             for (int j = 0; sIx <= eIx - pad; j++) {
-                i |= ctoi(sArr[sIx++]) << (18 - j * 6);
+                i |= ctoi(seq.charAt(sIx++)) << (18 - j * 6);
             }
 
             for (int r = 16; d < len; r -= 8) {
@@ -404,7 +405,7 @@ final class Base64 { //final and package-protected on purpose
             }
         }
 
-        // Check so that legal chars (including '=') are evenly divideable by 4 as specified in RFC 2045.
+        // Check so that legal chars (including '=') are evenly divisible by 4 as specified in RFC 2045.
         if ((sLen - sepCnt) % 4 != 0) {
             return null;
         }
@@ -447,7 +448,7 @@ final class Base64 { //final and package-protected on purpose
 
 
     /*
-     * Decodes a BASE64 encoded byte array that is known to be resonably well formatted. The method is about twice as
+     * Decodes a BASE64 encoded byte array that is known to be reasonably well formatted. The method is about twice as
      * fast as {@link #decode(byte[])}. The preconditions are:<br>
      * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
      * + Line separator must be "\r\n", as specified in RFC 2045
@@ -533,7 +534,7 @@ final class Base64 { //final and package-protected on purpose
      *                little faster.
      * @return A BASE64 encoded array. Never <code>null</code>.
      */
-    final String encodeToString(byte[] sArr, boolean lineSep) {
+    String encodeToString(byte[] sArr, boolean lineSep) {
         // Reuse char[] since we can't create a String incrementally anyway and StringBuffer/Builder would be slower.
         return new String(encodeToChar(sArr, lineSep));
     }

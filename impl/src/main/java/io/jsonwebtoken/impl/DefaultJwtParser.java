@@ -39,35 +39,45 @@ import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
+import io.jsonwebtoken.impl.io.Streams;
+import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.security.DefaultAeadResult;
+import io.jsonwebtoken.impl.lang.RedactedSupplier;
+import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
-import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
-import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
+import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptAeadRequest;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.Message;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -75,6 +85,7 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -147,8 +158,8 @@ public class DefaultJwtParser implements JwtParser {
     private static final String B64_MISSING_PAYLOAD = "Unable to verify JWS signature: the parser has encountered an " +
             "Unencoded Payload JWS with detached payload, but the detached payload value required for signature " +
             "verification has not been provided. If you expect to receive and parse Unencoded Payload JWSs in your " +
-            "application, the JwtParser.parseContentJws(String, byte[]) or JwtParser.parseClaimsJws(String, byte[]) " +
-            "methods must be used for these kinds of JWSs. Header: %s";
+            "application, the overloaded JwtParser.parseContentJws or JwtParser.parseClaimsJws methods that " +
+            "accept a byte[] or InputStream must be used for these kinds of JWSs. Header: %s";
 
     private static final String B64_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
             "'%s', but payload decompression for Unencoded JWSs (those with an " + DefaultJwsHeader.B64 +
@@ -187,7 +198,7 @@ public class DefaultJwtParser implements JwtParser {
 
     private final Locator<? extends Key> keyLocator;
 
-    private final Decoder<String, byte[]> decoder;
+    private final Decoder<InputStream, InputStream> decoder;
 
     private final Deserializer<Map<String, ?>> deserializer;
 
@@ -210,7 +221,7 @@ public class DefaultJwtParser implements JwtParser {
                      Set<String> critical,
                      long allowedClockSkewMillis,
                      DefaultClaims expectedClaims,
-                     Decoder<String, byte[]> base64UrlDecoder,
+                     Decoder<InputStream, InputStream> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
                      CompressionCodecResolver compressionCodecResolver,
                      Collection<CompressionAlgorithm> extraZipAlgs,
@@ -223,11 +234,11 @@ public class DefaultJwtParser implements JwtParser {
         this.signingKeyResolver = signingKeyResolver;
         this.keyLocator = Assert.notNull(keyLocator, "Key Locator cannot be null.");
         this.clock = Assert.notNull(clock, "Clock cannot be null.");
-        this.critical = Assert.notNull(critical, "Critical set cannot be null (but it can be empty).");
+        this.critical = Collections.nullSafe(critical);
         this.allowedClockSkewMillis = allowedClockSkewMillis;
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
-        this.deserializer = Assert.notNull(deserializer, "Deserializer cannot be null.");
+        this.deserializer = Assert.notNull(deserializer, "JSON Deserializer cannot be null.");
 
         this.sigAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extraSigAlgs, MISSING_JWS_ALG_MSG);
         this.keyAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extraKeyAlgs, MISSING_JWE_ALG_MSG);
@@ -253,79 +264,8 @@ public class DefaultJwtParser implements JwtParser {
         return header != null && Strings.hasText(header.getContentType());
     }
 
-
-    /**
-     * Returns {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
-     * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
-     * {@link Character#isWhitespace(char)}.  This does not guarantee JSON, just that it is likely JSON and
-     * should be passed to a JSON Deserializer to see if it is actually JSON.  If this {@code returns false}, it
-     * should be considered a byte[] payload and <em>not</em> delegated to a JSON Deserializer.
-     *
-     * @param payload the byte array that could be JSON
-     * @return {@code true} IFF the specified payload starts with a <code>&#123;</code> character and ends with a
-     * <code>&#125;</code> character, ignoring any leading or trailing whitespace as defined by
-     * {@link Character#isWhitespace(char)}
-     * @since JJWT_RELEASE_VERSION
-     */
-    private static boolean isLikelyJson(byte[] payload) {
-
-        int len = Bytes.length(payload);
-        if (len == 0) {
-            return false;
-        }
-
-        int maxIndex = len - 1;
-        int jsonStartIndex = -1; // out of bounds means didn't find any
-        int jsonEndIndex = len; // out of bounds means didn't find any
-
-        for (int i = 0; i < len; i++) {
-            int c = payload[i];
-            if (c == '{') {
-                jsonStartIndex = i;
-                break;
-            }
-        }
-        if (jsonStartIndex == -1) { //exhausted entire payload, didn't find starting '{', can't be a JSON object
-            return false;
-        }
-        if (jsonStartIndex > 0) {
-            // we found content at the start of the payload, but before the first '{' character, so we need to check
-            // to see if any of it (when UTF-8 decoded) is not whitespace. If so, it can't be a valid JSON object.
-            byte[] leading = new byte[jsonStartIndex];
-            System.arraycopy(payload, 0, leading, 0, jsonStartIndex);
-            String s = new String(leading, StandardCharsets.UTF_8);
-            if (Strings.hasText(s)) { // found something before '{' that isn't whitespace; can't be a valid JSON object
-                return false;
-            }
-        }
-
-        for (int i = maxIndex; i > jsonStartIndex; i--) {
-            int c = payload[i];
-            if (c == '}') {
-                jsonEndIndex = i;
-                break;
-            }
-        }
-
-        if (jsonEndIndex > maxIndex) { // found start '{' char, but no closing '} char. Can't be a JSON object
-            return false;
-        }
-
-        if (jsonEndIndex < maxIndex) {
-            // We found content at the end of the payload, after the last '}' character.  We need to check to see if
-            // any of it (when UTF-8 decoded) is not whitespace. If so, it's not a valid JSON object payload.
-            int size = maxIndex - jsonEndIndex;
-            byte[] trailing = new byte[size];
-            System.arraycopy(payload, jsonEndIndex + 1, trailing, 0, size);
-            String s = new String(trailing, StandardCharsets.UTF_8);
-            return !Strings.hasText(s); // if just whitespace after last '}', we can assume JSON and try and parse it
-        }
-
-        return true;
-    }
-
     private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
-                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, byte[] payload) {
+                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, Payload payload) {
 
         Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
 
@@ -344,7 +284,7 @@ public class DefaultJwtParser implements JwtParser {
         if (claims != null) {
             key = resolver.resolveSigningKey(jwsHeader, claims);
         } else {
-            key = resolver.resolveSigningKey(jwsHeader, payload);
+            key = resolver.resolveSigningKey(jwsHeader, payload.getBytes());
         }
         if (key == null) {
             String msg = "Cannot verify JWS signature: unable to locate signature verification key for JWS with header: " + jwsHeader;
@@ -360,14 +300,34 @@ public class DefaultJwtParser implements JwtParser {
         final byte[] signature = decode(tokenized.getDigest(), "JWS signature");
 
         //re-create the jwt part without the signature.  This is what is needed for signature verification:
-        byte[] verificationInput;
-        String jwtPrefix = tokenized.getProtected() + SEPARATOR_CHAR;
+        InputStream payloadStream = null;
+        InputStream verificationInput;
         if (jwsHeader.isPayloadEncoded()) {
-            jwtPrefix += tokenized.getPayload();
-            verificationInput = jwtPrefix.getBytes(StandardCharsets.US_ASCII);
-        } else {
-            byte[] prefixBytes = jwtPrefix.getBytes(StandardCharsets.US_ASCII);
-            verificationInput = Bytes.concat(prefixBytes, payload);
+            int len = tokenized.getProtected().length() + 1 + tokenized.getPayload().length();
+            CharBuffer cb = CharBuffer.allocate(len);
+            cb.put(Strings.wrap(tokenized.getProtected()));
+            cb.put(SEPARATOR_CHAR);
+            cb.put(Strings.wrap(tokenized.getPayload()));
+            cb.rewind();
+            ByteBuffer bb = StandardCharsets.US_ASCII.encode(cb);
+            bb.rewind();
+            byte[] data = new byte[bb.remaining()];
+            bb.get(data);
+            verificationInput = new ByteArrayInputStream(data);
+        } else { // b64 extension
+            ByteBuffer headerBuf = StandardCharsets.US_ASCII.encode(Strings.wrap(tokenized.getProtected()));
+            headerBuf.rewind();
+            ByteBuffer buf = ByteBuffer.allocate(headerBuf.remaining() + 1);
+            buf.put(headerBuf);
+            buf.put((byte) SEPARATOR_CHAR);
+            buf.rewind();
+            byte[] data = new byte[buf.remaining()];
+            buf.get(data);
+            InputStream prefixStream = new ByteArrayInputStream(data);
+            payloadStream = payload.toInputStream();
+            // We wrap the payloadStream here in an UncloseableInputStream to prevent the SequenceInputStream from
+            // closing it since we'll need to rewind/reset it if decompression is enabled
+            verificationInput = new SequenceInputStream(prefixStream, new UncloseableInputStream(payloadStream));
         }
 
         try {
@@ -390,28 +350,34 @@ public class DefaultJwtParser implements JwtParser {
                     "trusted.  Another possibility is that the parser was provided the incorrect " +
                     "signature verification key, but this cannot be assumed for security reasons.";
             throw new UnsupportedJwtException(msg, e);
+        } finally {
+            Streams.reset(payloadStream);
         }
     }
 
     @Override
     public Jwt<?, ?> parse(String compact) {
-        return parse(compact, Bytes.EMPTY);
+        CharBuffer buffer = Strings.wrap(compact); // so compact.subsequence calls don't add new Strings on the heap
+        return parse(buffer, Payload.EMPTY);
     }
 
-    private Jwt<?, ?> parse(String compact, final byte[] unencodedPayload) throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    private Jwt<?, ?> parse(CharSequence compact, Payload unencodedPayload)
+            throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
         Assert.hasText(compact, "JWT String cannot be null or empty.");
+        Assert.stateNotNull(unencodedPayload, "internal error: unencodedPayload is null.");
 
         final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
-        final String base64UrlHeader = tokenized.getProtected();
+        final CharSequence base64UrlHeader = tokenized.getProtected();
         if (!Strings.hasText(base64UrlHeader)) {
-            String msg = "Compact JWT strings MUST always have a Base64Url protected header per https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).";
+            String msg = "Compact JWT strings MUST always have a Base64Url protected header per " +
+                    "https://tools.ietf.org/html/rfc7519#section-7.2 (steps 2-4).";
             throw new MalformedJwtException(msg);
         }
 
         // =============== Header =================
         final byte[] headerBytes = decode(base64UrlHeader, "protected header");
-        Map<String, ?> m = deserialize(headerBytes, "protected header");
+        Map<String, ?> m = deserialize(new ByteArrayInputStream(headerBytes), "protected header");
         Header header;
         try {
             header = tokenized.createHeader(m);
@@ -433,7 +399,7 @@ public class DefaultJwtParser implements JwtParser {
         }
         final boolean unsecured = Jwts.SIG.NONE.getId().equalsIgnoreCase(alg);
 
-        final String base64UrlDigest = tokenized.getDigest();
+        final CharSequence base64UrlDigest = tokenized.getDigest();
         final boolean hasDigest = Strings.hasText(base64UrlDigest);
         if (unsecured) {
             if (tokenized instanceof TokenizedJwe) {
@@ -459,13 +425,23 @@ public class DefaultJwtParser implements JwtParser {
         // ----- crit assertions -----
         if (header instanceof ProtectedHeader) {
             Set<String> crit = Collections.nullSafe(((ProtectedHeader) header).getCritical());
+            Set<String> supportedCrit = this.critical;
+            String b64Id = DefaultJwsHeader.B64.getId();
+            if (!unencodedPayload.isEmpty() && !this.critical.contains(b64Id)) {
+                // The application developer explicitly indicates they're using a B64 payload, so
+                // ensure that the B64 crit header is supported, even if they forgot to configure it on the
+                // parser builder:
+                supportedCrit = new LinkedHashSet<>(Collections.size(this.critical) + 1);
+                supportedCrit.add(DefaultJwsHeader.B64.getId());
+                supportedCrit.addAll(this.critical);
+            }
             // assert any values per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11:
             for (String name : crit) {
                 if (!header.containsKey(name)) {
                     String msg = String.format(CRIT_MISSING_MSG, name, name, header);
                     throw new MalformedJwtException(msg);
                 }
-                if (!this.critical.contains(name)) {
+                if (!supportedCrit.contains(name)) {
                     String msg = String.format(CRIT_UNSUPPORTED_MSG, name, name, header);
                     throw new UnsupportedJwtException(msg);
                 }
@@ -473,27 +449,27 @@ public class DefaultJwtParser implements JwtParser {
         }
 
         // =============== Payload =================
-        final String payloadToken = tokenized.getPayload();
-        byte[] payload;
+        final CharSequence payloadToken = tokenized.getPayload();
+        Payload payload;
         boolean integrityVerified = false; // only true after successful signature verification or AEAD decryption
 
         // check if b64 extension enabled:
         final boolean payloadBase64UrlEncoded = !(header instanceof JwsHeader) || ((JwsHeader) header).isPayloadEncoded();
         if (payloadBase64UrlEncoded) {
             // standard encoding, so decode it:
-            payload = decode(tokenized.getPayload(), "payload");
+            byte[] data = decode(tokenized.getPayload(), "payload");
+            payload = new Payload(data, header.getContentType());
         } else {
             // The JWT uses the b64 extension, and we already know the parser supports that extension at this point
             // in the code execution path because of the ----- crit ----- assertions section above as well as the
             // (JwsHeader).isPayloadEncoded() check
-
             if (Strings.hasText(payloadToken)) {
                 // we need to verify what was in the token, otherwise it'd be a security issue if we ignored it
                 // and assumed the (likely safe) unencodedPayload value instead:
-                payload = Strings.utf8(payloadToken);
+                payload = new Payload(payloadToken, header.getContentType());
             } else {
                 //no payload token (a detached payload), so we need to ensure that they've specified the payload value:
-                if (Bytes.isEmpty(unencodedPayload)) {
+                if (unencodedPayload.isEmpty()) {
                     String msg = String.format(B64_MISSING_PAYLOAD, header);
                     throw new SignatureException(msg);
                 }
@@ -502,7 +478,7 @@ public class DefaultJwtParser implements JwtParser {
             }
         }
 
-        if (tokenized instanceof TokenizedJwe && Bytes.isEmpty(payload)) {
+        if (tokenized instanceof TokenizedJwe && payload.isEmpty()) {
             // Only JWS payload can be empty per https://github.com/jwtk/jjwt/pull/540
             String msg = "Compact JWE strings MUST always contain a payload (ciphertext).";
             throw new MalformedJwtException(msg);
@@ -516,10 +492,10 @@ public class DefaultJwtParser implements JwtParser {
             JweHeader jweHeader = Assert.stateIsInstance(JweHeader.class, header, "Not a JweHeader. ");
 
             byte[] cekBytes = Bytes.EMPTY; //ignored unless using an encrypted key algorithm
-            String base64Url = tokenizedJwe.getEncryptedKey();
+            CharSequence base64Url = tokenizedJwe.getEncryptedKey();
             if (Strings.hasText(base64Url)) {
                 cekBytes = decode(base64Url, "JWE encrypted key");
-                if (Arrays.length(cekBytes) == 0) {
+                if (Bytes.isEmpty(cekBytes)) {
                     String msg = "Compact JWE string represents an encrypted key, but the key is empty.";
                     throw new MalformedJwtException(msg);
                 }
@@ -529,7 +505,7 @@ public class DefaultJwtParser implements JwtParser {
             if (Strings.hasText(base64Url)) {
                 iv = decode(base64Url, "JWE Initialization Vector");
             }
-            if (Arrays.length(iv) == 0) {
+            if (Bytes.isEmpty(iv)) {
                 String msg = "Compact JWE strings must always contain an Initialization Vector.";
                 throw new MalformedJwtException(msg);
             }
@@ -537,13 +513,16 @@ public class DefaultJwtParser implements JwtParser {
             // The AAD (Additional Authenticated Data) scheme for compact JWEs is to use the ASCII bytes of the
             // raw base64url text as the AAD, and NOT the base64url-decoded bytes per
             // https://www.rfc-editor.org/rfc/rfc7516.html#section-5.1, Step 14.
-            final byte[] aad = base64UrlHeader.getBytes(StandardCharsets.US_ASCII);
+            ByteBuffer buf = StandardCharsets.US_ASCII.encode(Strings.wrap(base64UrlHeader));
+            final byte[] aadBytes = new byte[buf.remaining()];
+            buf.get(aadBytes);
+            InputStream aad = new ByteArrayInputStream(aadBytes);
 
             base64Url = base64UrlDigest;
             //guaranteed to be non-empty via the `alg` + digest check above:
             Assert.hasText(base64Url, "JWE AAD Authentication Tag cannot be null or empty.");
             tag = decode(base64Url, "JWE AAD Authentication Tag");
-            if (Arrays.length(tag) == 0) {
+            if (Bytes.isEmpty(tag)) {
                 String msg = "Compact JWE strings must always contain an AAD Authentication Tag.";
                 throw new MalformedJwtException(msg);
             }
@@ -583,10 +562,11 @@ public class DefaultJwtParser implements JwtParser {
             // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
             // As such, the provider here is intentionally omitted (null):
             // TODO: add encProvider(Provider) builder method that applies to this request only?
-            DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(null, null, payload, cek, aad, tag, iv);
-            Message<byte[]> result = encAlg.decrypt(decryptRequest);
-            payload = result.getPayload();
+            InputStream ciphertext = payload.toInputStream();
+            ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
+            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, tag);
+            encAlg.decrypt(dreq, plaintext);
+            payload = new Payload(plaintext.toByteArray(), header.getContentType());
 
             integrityVerified = true; // AEAD performs integrity verification, so no exception = verified
 
@@ -595,7 +575,7 @@ public class DefaultJwtParser implements JwtParser {
             // always safer:
             JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
             verifySignature(tokenized, jwsHeader, alg, new LocatingKeyResolver(this.keyLocator), null, payload);
-            integrityVerified = true; // no exception = signature verified
+            integrityVerified = true; // no exception means signature verified
         }
 
         final CompressionAlgorithm compressionAlgorithm = zipAlgFn.apply(header);
@@ -609,34 +589,59 @@ public class DefaultJwtParser implements JwtParser {
                     throw new UnsupportedJwtException(msg);
                 }
             }
-            payload = compressionAlgorithm.decompress(payload);
+            payload = payload.decompress(compressionAlgorithm);
         }
 
         Claims claims = null;
-        if (!hasContentType(header) &&   // If there is a content type set, then the application using JJWT is expected
+        byte[] payloadBytes = payload.getBytes();
+        if (payload.isConsumable()) {
+
+            InputStream in = payload.toInputStream();
+
+            if (!hasContentType(header)) {   // If there is a content type set, then the application using JJWT is expected
                 //                          to convert the byte payload themselves based on this content type
                 //                          https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
                 //
                 //                          "This parameter is ignored by JWS implementations; any processing of this
                 //                          parameter is performed by the JWS application."
                 //
-                isLikelyJson(payload)) { // likely to be json, try to deserialize it:
-            Map<String, ?> claimsMap = deserialize(payload, "claims");
-            try {
-                claims = new DefaultClaims(claimsMap);
-            } catch (Exception e) {
-                String msg = "Invalid claims: " + e.getMessage();
-                throw new MalformedJwtException(msg, e);
+                Map<String, ?> claimsMap = null;
+                try {
+                    // if deserialization fails, we'll need to rewind to convert to a byte array.  So if
+                    // mark/reset isn't possible, we'll need to buffer:
+                    if (!in.markSupported()) {
+                        in = new BufferedInputStream(in);
+                        in.mark(0);
+                    }
+                    claimsMap = deserialize(new UncloseableInputStream(in) /* Don't close in case we need to rewind */, "claims");
+                } catch (DeserializationException | MalformedJwtException ignored) { // not JSON, treat it as a byte[]
+//                String msg = "Invalid claims: " + e.getMessage();
+//                throw new MalformedJwtException(msg, e);
+                } finally {
+                    Streams.reset(in);
+                }
+                if (claimsMap != null) {
+                    try {
+                        claims = new DefaultClaims(claimsMap);
+                    } catch (Throwable t) {
+                        String msg = "Invalid claims: " + t.getMessage();
+                        throw new MalformedJwtException(msg);
+                    }
+                }
+            }
+            if (claims == null) {
+                // consumable, but not claims, so convert to byte array:
+                payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
             }
         }
 
         Jwt<?, ?> jwt;
-        Object body = claims != null ? claims : payload;
+        Object body = claims != null ? claims : payloadBytes;
         if (header instanceof JweHeader) {
             jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
         } else if (hasDigest) {
             JwsHeader jwsHeader = Assert.isInstanceOf(JwsHeader.class, header, "JwsHeader required.");
-            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest);
+            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest.toString());
         } else {
             //noinspection rawtypes
             jwt = new DefaultJwt(header, body);
@@ -763,10 +768,10 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public <T> T parse(String compact, JwtHandler<T> handler) {
-        return parse(compact, Bytes.EMPTY, handler);
+        return parse(compact, Payload.EMPTY, handler);
     }
 
-    private <T> T parse(String compact, byte[] unencodedPayload, JwtHandler<T> handler)
+    private <T> T parse(String compact, Payload unencodedPayload, JwtHandler<T> handler)
             throws ExpiredJwtException, MalformedJwtException, SignatureException {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
@@ -839,9 +844,7 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
-    @Override
-    public Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload) {
-        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+    private Jws<byte[]> parseContentJws(String jws, Payload unencodedPayload) {
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
             public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
@@ -850,15 +853,49 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
-    @Override
-    public Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload) {
-        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+    private Jws<Claims> parseClaimsJws(String jws, Payload unencodedPayload) {
+        unencodedPayload.setClaimsExpected(true);
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
                 return jws;
             }
         });
+    }
+
+    @Override
+    public Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+        return parseContentJws(jws, new Payload(unencodedPayload, null));
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+        return parseClaimsJws(jws, new Payload(unencodedPayload, null));
+    }
+
+    private static Payload payloadFor(InputStream in) {
+        if (in instanceof ByteArrayInputStream) {
+            byte[] data = Classes.getFieldValue(in, "buf", byte[].class);
+            return new Payload(data, null);
+        }
+        //if (in.markSupported()) in.mark(0);
+        return new Payload(in, null);
+    }
+
+    @Override
+    public Jws<byte[]> parseContentJws(String jws, InputStream unencodedPayload) {
+        Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
+        return parseContentJws(jws, payloadFor(unencodedPayload));
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(String jws, InputStream unencodedPayload) {
+        Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
+        byte[] bytes = Streams.bytes(unencodedPayload,
+                "Unable to obtain Claims bytes from unencodedPayload InputStream");
+        return parseClaimsJws(jws, new Payload(bytes, null));
     }
 
     @Override
@@ -881,21 +918,24 @@ public class DefaultJwtParser implements JwtParser {
         });
     }
 
-    protected byte[] decode(String base64UrlEncoded, String name) {
+    protected byte[] decode(CharSequence base64UrlEncoded, String name) {
         try {
-            return decoder.decode(base64UrlEncoded);
-        } catch (DecodingException e) {
-            String msg = "Invalid Base64Url " + name + ": " + base64UrlEncoded;
-            throw new MalformedJwtException(msg, e);
+            InputStream decoding = this.decoder.decode(new ByteArrayInputStream(Strings.utf8(base64UrlEncoded)));
+            return Streams.bytes(decoding, "Unable to Base64Url-decode input.");
+        } catch (Throwable t) {
+            // Don't disclose potentially-sensitive information per https://github.com/jwtk/jjwt/issues/824:
+            String value = "payload".equals(name) ? RedactedSupplier.REDACTED_VALUE : base64UrlEncoded.toString();
+            String msg = "Invalid Base64Url " + name + ": " + value;
+            throw new MalformedJwtException(msg, t);
         }
     }
 
-    protected Map<String, ?> deserialize(byte[] bytes, final String name) {
+    protected Map<String, ?> deserialize(InputStream in, final String name) {
         try {
-            return deserializer.deserialize(bytes);
-        } catch (MalformedJwtException | DeserializationException e) {
-            String s = new String(bytes, StandardCharsets.UTF_8);
-            throw new MalformedJwtException("Unable to read " + name + " JSON: " + s, e);
+            JsonObjectDeserializer deserializer = new JsonObjectDeserializer(this.deserializer, name);
+            return deserializer.apply(in);
+        } finally {
+            Objects.nullSafeClose(in);
         }
     }
 }

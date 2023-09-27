@@ -15,8 +15,8 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.DeserializationException
-import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Parser
 import io.jsonwebtoken.security.JwkSet
 import io.jsonwebtoken.security.Jwks
@@ -66,18 +66,18 @@ class DefaultJwkSetParserBuilderTest {
      */
     @Test
     void testDeserializeException() {
-        def deserializer = new Deserializer() {
+        def deser = new AbstractDeserializer() {
             @Override
-            Object deserialize(byte[] bytes) throws DeserializationException {
-                throw new DeserializationException("foo")
+            protected Object doDeserialize(InputStream inputStream) throws Exception {
+                throw new DeserializationException('foo')
             }
         }
-        parser = new DefaultJwkSetParserBuilder().deserializer(deserializer).build()
+        parser = new DefaultJwkSetParserBuilder().json(deser).build()
 
         try {
             parser.parse('foo')
         } catch (MalformedKeySetException expected) {
-            String msg = "Unable to deserialize JWK Set: foo"
+            String msg = "Malformed JWK Set JSON: foo"
             assertEquals msg, expected.message
         }
     }

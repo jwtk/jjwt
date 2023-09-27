@@ -42,4 +42,14 @@ class YagCompressionCodec implements CompressionCodec {
     byte[] decompress(byte[] compressed) throws CompressionException {
         return new byte[0]
     }
+
+    @Override
+    OutputStream compress(OutputStream out) throws CompressionException {
+        return out
+    }
+
+    @Override
+    InputStream decompress(InputStream inputStream) throws CompressionException {
+        return inputStream
+    }
 }

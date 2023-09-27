@@ -15,42 +15,138 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodec;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
+import io.jsonwebtoken.io.CompressionAlgorithm;
+import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 class Payload {
 
-    static final Payload EMPTY = new Payload(null, null, null);
+    static final Payload EMPTY = new Payload(Bytes.EMPTY, null);
 
-    private String string;
-    private byte[] bytes;
-    private String contentType;
+    private final CharSequence string;
+    private final byte[] bytes;
+    private final Claims claims;
+    private final InputStream inputStream;
+    private final boolean inputStreamEmpty;
+    private final String contentType;
+    private CompressionAlgorithm zip;
+    private boolean claimsExpected;
 
-    Payload(String string, byte[] bytes, String contentType) {
-        this.string = Strings.clean(string);
-        this.bytes = Bytes.nullSafe(bytes);
-        this.contentType = Strings.clean(contentType);
+    Payload(Claims claims) {
+        this(claims, null, null, null, null);
     }
 
-    String getString() {
-        return this.string;
+    Payload(CharSequence content, String contentType) {
+        this(null, content, null, null, contentType);
+    }
+
+    Payload(byte[] content, String contentType) {
+        this(null, null, content, null, contentType);
+    }
+
+    Payload(InputStream inputStream, String contentType) {
+        this(null, null, null, inputStream, contentType);
+    }
+
+    private Payload(Claims claims, CharSequence string, byte[] bytes, InputStream inputStream, String contentType) {
+        this.claims = claims;
+        this.string = Strings.clean(string);
+        this.contentType = Strings.clean(contentType);
+        InputStream in = inputStream;
+        byte[] data = Bytes.nullSafe(bytes);
+        if (Strings.hasText(this.string)) {
+            data = Strings.utf8(this.string);
+        }
+        this.bytes = data;
+        if (in == null && !Bytes.isEmpty(this.bytes)) {
+            in = new ByteArrayInputStream(data);
+        }
+        this.inputStreamEmpty = in == null;
+        this.inputStream = this.inputStreamEmpty ? new ByteArrayInputStream(Bytes.EMPTY) : in;
+    }
+
+    boolean isClaims() {
+        return !Collections.isEmpty(this.claims);
+    }
+
+    Claims getRequiredClaims() {
+        return Assert.notEmpty(this.claims, "Claims cannot be null or empty when calling this method.");
+    }
+
+    boolean isString() {
+        return Strings.hasText(this.string);
     }
 
     String getContentType() {
         return this.contentType;
     }
 
-    boolean isEmpty() {
-        return !Strings.hasText(this.string) && Bytes.isEmpty(this.bytes);
+    public void setZip(CompressionAlgorithm zip) {
+        this.zip = zip;
     }
 
-    byte[] toByteArray() {
-        if (Bytes.isEmpty(this.bytes)) {
-            if (!Strings.hasText(this.string)) {
-                throw new IllegalStateException("Content is empty.");
+    boolean isCompressed() {
+        return this.zip != null;
+    }
+
+    public void setClaimsExpected(boolean claimsExpected) {
+        this.claimsExpected = claimsExpected;
+    }
+
+    /**
+     * Returns {@code true} if the payload may be fully consumed and retained in memory, {@code false} if empty,
+     * already extracted, or a potentially too-large InputStream.
+     *
+     * @return {@code true} if the payload may be fully consumed and retained in memory, {@code false} if empty,
+     * already extracted, or a potentially too-large InputStream.
+     */
+    boolean isConsumable() {
+        return !isClaims() && (isString() || !Bytes.isEmpty(this.bytes) || (inputStream != null && claimsExpected));
+    }
+
+    boolean isEmpty() {
+        return !isClaims() && !isString() && Bytes.isEmpty(this.bytes) && this.inputStreamEmpty;
+    }
+
+    public OutputStream compress(OutputStream out) {
+        return this.zip != null ? zip.compress(out) : out;
+    }
+
+    public Payload decompress(CompressionAlgorithm alg) {
+        Assert.notNull(alg, "CompressionAlgorithm cannot be null.");
+        Payload payload = this;
+        if (!isString() && isConsumable()) {
+            if (alg.equals(Jwts.ZIP.DEF) && !Bytes.isEmpty(this.bytes)) { // backwards compatibility
+                byte[] data = ((CompressionCodec) alg).decompress(this.bytes);
+                payload = new Payload(claims, string, data, null, getContentType());
+            } else {
+                InputStream in = toInputStream();
+                in = alg.decompress(in);
+                payload = new Payload(claims, string, bytes, in, getContentType());
             }
-            this.bytes = Strings.utf8(this.string);
+            payload.setClaimsExpected(claimsExpected);
         }
+        // otherwise it's a String or b64/detached payload, in either case, we don't decompress since the caller is
+        // providing the bytes necessary for signature verification as-is, and there's no conversion we need to perform
+        return payload;
+    }
+
+    public byte[] getBytes() {
         return this.bytes;
+    }
+
+    InputStream toInputStream() {
+        // should only ever call this when claims don't exist:
+        Assert.state(!isClaims(), "Claims exist, cannot convert to InputStream directly.");
+        return this.inputStream;
     }
 }

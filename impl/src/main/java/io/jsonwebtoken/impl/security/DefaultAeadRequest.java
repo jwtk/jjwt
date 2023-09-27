@@ -16,40 +16,42 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.security.AeadRequest;
-import io.jsonwebtoken.security.InitializationVectorSupplier;
+import io.jsonwebtoken.security.IvSupplier;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultAeadRequest extends DefaultSecureRequest<byte[], SecretKey>
-        implements AeadRequest, InitializationVectorSupplier {
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
+public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, SecretKey>
+        implements AeadRequest, IvSupplier {
 
     private final byte[] IV;
 
-    private final byte[] AAD;
+    private final InputStream AAD;
 
-    DefaultAeadRequest(byte[] data, Provider provider, SecureRandom secureRandom, SecretKey key, byte[] aad, byte[] iv) {
-        super(data, provider, secureRandom, key);
+    DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
+                       SecretKey key, InputStream aad, byte[] iv) {
+        super(payload, provider, secureRandom, key);
         this.AAD = aad;
         this.IV = iv;
     }
 
-    public DefaultAeadRequest(byte[] data, Provider provider, SecureRandom secureRandom, SecretKey key, byte[] aad) {
-        this(data, provider, secureRandom, key, aad, null);
-    }
-
-    public DefaultAeadRequest(byte[] data, SecretKey key, byte[] aad) {
-        this(data, null, null, key, aad, null);
+    public DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
+                              SecretKey key, InputStream aad) {
+        this(payload, provider, secureRandom, key, aad, null);
     }
 
     @Override
-    public byte[] getAssociatedData() {
+    public InputStream getAssociatedData() {
         return this.AAD;
     }
 
     @Override
-    public byte[] getInitializationVector() {
+    public byte[] getIv() {
         return this.IV;
     }
 }

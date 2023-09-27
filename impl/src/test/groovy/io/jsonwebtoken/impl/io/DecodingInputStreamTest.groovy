@@ -13,22 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl
+package io.jsonwebtoken.impl.io
 
+import io.jsonwebtoken.io.DecodingException
+import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.fail
 
-class PayloadTest {
+class DecodingInputStreamTest {
 
     @Test
-    void testToByteArrayWhenEmpty() {
+    void decodingException() {
+        def ins = new ByteArrayInputStream(Strings.utf8('test')) {
+            @Override
+            synchronized int read() {
+                throw new IOException("foo")
+            }
+        }
+
+        def decoding = new DecodingInputStream(ins, 'base64url', 'payload')
+
         try {
-            Payload.EMPTY.toByteArray()
+            decoding.read()
             fail()
-        } catch (IllegalStateException expected) {
-            String msg = 'Content is empty.'
+        } catch (DecodingException expected) {
+            String msg = 'Unable to base64url-decode payload: foo'
             assertEquals msg, expected.message
         }
     }

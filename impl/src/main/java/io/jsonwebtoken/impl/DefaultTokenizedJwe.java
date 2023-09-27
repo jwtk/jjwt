@@ -21,22 +21,23 @@ import java.util.Map;
 
 class DefaultTokenizedJwe extends DefaultTokenizedJwt implements TokenizedJwe {
 
-    private final String encryptedKey;
-    private final String iv;
+    private final CharSequence encryptedKey;
+    private final CharSequence iv;
 
-    DefaultTokenizedJwe(String protectedHeader, String body, String digest, String encryptedKey, String iv) {
+    DefaultTokenizedJwe(CharSequence protectedHeader, CharSequence body, CharSequence digest,
+                        CharSequence encryptedKey, CharSequence iv) {
         super(protectedHeader, body, digest);
         this.encryptedKey = encryptedKey;
         this.iv = iv;
     }
 
     @Override
-    public String getEncryptedKey() {
+    public CharSequence getEncryptedKey() {
         return this.encryptedKey;
     }
 
     @Override
-    public String getIv() {
+    public CharSequence getIv() {
         return this.iv;
     }
 

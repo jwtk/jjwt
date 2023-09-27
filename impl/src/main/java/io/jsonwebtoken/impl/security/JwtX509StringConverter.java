@@ -25,7 +25,7 @@ import io.jsonwebtoken.security.SecurityException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
-public class JwtX509StringConverter implements Converter<X509Certificate, String> {
+public class JwtX509StringConverter implements Converter<X509Certificate, CharSequence> {
 
     public static final JwtX509StringConverter INSTANCE = new JwtX509StringConverter();
 
@@ -57,7 +57,7 @@ public class JwtX509StringConverter implements Converter<X509Certificate, String
     }
 
     @Override
-    public X509Certificate applyFrom(String s) {
+    public X509Certificate applyFrom(CharSequence s) {
         Assert.hasText(s, "X.509 Certificate encoded string cannot be null or empty.");
         try {
             byte[] der = Decoders.BASE64.decode(s); //RFC requires Base64, not Base64Url

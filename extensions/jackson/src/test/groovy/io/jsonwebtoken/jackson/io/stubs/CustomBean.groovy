@@ -131,16 +131,16 @@ class CustomBean {
 
 
     @Override
-    public String toString() {
+    String toString() {
         return "CustomBean{" +
                 "stringValue='" + stringValue + '\'' +
                 ", intValue=" + intValue +
-                ", dateValue=" + dateValue?.time+
+                ", dateValue=" + dateValue?.time +
                 ", shortValue=" + shortValue +
                 ", longValue=" + longValue +
                 ", byteValue=" + byteValue +
 //                ", byteArrayValue=" + Arrays.toString(byteArrayValue) +
                 ", nestedValue=" + nestedValue +
-                '}';
+                '}'
     }
 }

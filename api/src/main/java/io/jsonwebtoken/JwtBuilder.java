@@ -31,6 +31,8 @@ import io.jsonwebtoken.security.WeakKeyException;
 import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -149,25 +151,13 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setHeaderParam(String name, Object value);
 
     /**
-     * Sets the JWT payload to the string's UTF-8-encoded bytes.  It is strongly recommended to also set the
-     * {@link BuilderHeader#contentType(String) contentType} header value so the JWT recipient may inspect that value to
-     * determine how to convert the byte array to the final data type as desired. In this case, consider using
-     * {@link #content(byte[], String)} instead.
-     *
-     * <p>This is a wrapper method for:</p>
-     * <blockquote><pre>s
-     * {@link #content(byte[]) setPayload}(payload.getBytes(StandardCharsets.UTF_8));</pre></blockquote>
-     *
-     * <p>If you want the JWT payload to be JSON, use the {@link #claims()} method instead.</p>
-     *
-     * <p>This method is mutually exclusive of the {@link #claims()} and {@link #claim(String, Object)}
-     * methods.  Either {@code claims} or {@code content}/{@code payload} method variants may be used, but not both.</p>
+     * Since JJWT JJWT_RELEASE_VERSION, this is an alias for {@link #content(String)}. This method will be removed
+     * before the 1.0 release.
      *
      * @param payload the string used to set UTF-8-encoded bytes as the JWT payload.
      * @return the builder for method chaining.
-     * @see #content(byte[])
-     * @see #content(byte[], String)
-     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #content(byte[])} or {@link #content(byte[], String)}
+     * @see #content(String)
+     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #content(String)}
      * because both Claims and Content are technically 'payloads', so this method name is misleading.  This method will
      * be removed before the 1.0 release.
      */
@@ -176,14 +166,18 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setPayload(String payload);
 
     /**
-     * Sets the JWT payload to be the specified string's UTF-8 bytes.
+     * Sets the JWT payload to be the specified string's UTF-8 bytes. This is a convenience method semantically
+     * equivalent to calling:
+     *
+     * <blockquote><pre>
+     * {@link #content(byte[]) content}(payload.getBytes(StandardCharsets.UTF_8))</pre></blockquote>
      *
      * <p><b>Content Type Recommendation</b></p>
      *
-     * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use the string
-     * without additional metadata, it is strongly recommended to use the {@link #content(byte[], String)} method
-     * instead of this one.  That method ensures that a JWT recipient can inspect the {@code cty} header to know
-     * how to handle the content without ambiguity.</p>
+     * <p>Unless you are confident that the JWT recipient will <em>always</em> know to convert the payload bytes
+     * to a UTF-8 string without additional metadata, it is strongly recommended to use the
+     * {@link #content(String, String)} method instead of this one.  That method ensures that a JWT recipient can
+     * inspect the {@code cty} header to know how to handle the payload bytes without ambiguity.</p>
      *
      * <p><b>Mutually Exclusive Claims and Content</b></p>
      *
@@ -193,20 +187,30 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param content the content string to use for the JWT payload
      * @return the builder for method chaining.
+     * @see #content(String, String)
      * @see #content(byte[], String)
+     * @see #content(InputStream, String)
      * @since JJWT_RELEASE_VERSION
      */
     JwtBuilder content(String content);
 
     /**
-     * Sets the JWT payload to be the specified content byte array.
+     * Sets the JWT payload to be the specified content byte array. This is a convenience method semantically
+     * equivalent to calling:
+     * <blockquote><pre>
+     * {@link #content(InputStream) content}(new ByteArrayInputStream(content))</pre></blockquote>
      *
      * <p><b>Content Type Recommendation</b></p>
      *
-     * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use
-     * the given byte array without additional metadata, it is strongly recommended to use the
-     * {@link #content(byte[], String)} method instead of this one.  That method ensures that a JWT recipient
-     * can inspect the {@code cty} header to know how to handle the byte array without ambiguity.</p>
+     * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use the payload bytes
+     * without additional metadata, it is strongly recommended to also set the
+     * {@link Header#getContentType() contentType} header. For example:</p>
+     *
+     * <blockquote><pre>
+     * content(bytes).{@link #header() header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
+     *
+     * <p>This ensures a JWT recipient can inspect the {@code cty} header to know how to handle the payload bytes
+     * without ambiguity.</p>
      *
      * <p><b>Mutually Exclusive Claims and Content</b></p>
      *
@@ -222,15 +226,89 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder content(byte[] content);
 
     /**
-     * Sets the JWT payload to be the specified content byte array and also sets the
-     * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
-     * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
-     * {@code cty} value to determine how to convert the byte array to the final content type as desired.
+     * Sets the JWT payload to be the bytes in the specified content stream.
      *
-     * <p>This is a convenience method semantically equivalent to:</p>
+     * <p><b>Content Type Recommendation</b></p>
+     *
+     * <p>Unless you are confident that the JWT recipient will <em>always</em> know how to use the payload bytes
+     * without additional metadata, it is strongly recommended to also set the
+     * {@link HeaderMutator#contentType(String) contentType} header. For example:</p>
+     *
      * <blockquote><pre>
-     *     {@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}
-     *     {@link #content(byte[]) content(content)}</pre></blockquote>
+     * content(in).{@link #header() header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
+     *
+     * <p>This ensures a JWT recipient can inspect the {@code cty} header to know how to handle the payload bytes
+     * without ambiguity.</p>
+     *
+     * <p><b>Mutually Exclusive Claims and Content</b></p>
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods. Either {@code claims} or {@code content} method variants may be used, but not both. If you want the
+     * JWT payload to be JSON claims, use the {@link #claim(String, Object)} or {@link #claims()} methods instead.</p>
+     *
+     * @param in the input stream containing the bytes to use as the JWT payload
+     * @return the builder for method chaining.
+     * @see #content(byte[], String)
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder content(InputStream in);
+
+    /**
+     * Sets the JWT payload to be the specified String's UTF-8 bytes, and also sets the
+     * {@link HeaderMutator#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
+     * identifier to indicate the data format of the resulting byte array. The JWT recipient can inspect the
+     * {@code cty} value to determine how to convert the byte array to the final content type as desired.  This is a
+     * convenience method semantically equivalent to:
+     *
+     * <blockquote><pre>
+     * {@link #content(String) content(content)}.{@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
+     *
+     * <p><b>Compact Media Type Identifier</b></p>
+     *
+     * <p>This method will automatically remove any <code><b>application/</b></code> prefix from the
+     * {@code cty} string if possible according to the rules defined in the last paragraph of
+     * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">RFC 7517, Section 4.1.10</a>:</p>
+     *
+     * <blockquote><pre>
+     *     To keep messages compact in common situations, it is RECOMMENDED that
+     *     producers omit an "application/" prefix of a media type value in a
+     *     "cty" Header Parameter when no other '/' appears in the media type
+     *     value.  A recipient using the media type value MUST treat it as if
+     *     "application/" were prepended to any "cty" value not containing a
+     *     '/'.  For instance, a "cty" value of "example" SHOULD be used to
+     *     represent the "application/example" media type, whereas the media
+     *     type "application/example;part="1/2"" cannot be shortened to
+     *     "example;part="1/2"".</pre></blockquote>
+     *
+     * <p>JJWT performs the reverse during JWT parsing: {@link Header#getContentType()} will automatically prepend the
+     * {@code application/} prefix if the parsed {@code cty} value does not contain a '<code>/</code>' character (as
+     * mandated by the RFC language above). This ensures application developers can use and read standard IANA Media
+     * Type identifiers without needing JWT-specific prefix conditional logic in application code.
+     * </p>
+     *
+     * <p><b>Mutually Exclusive Claims and Content</b></p>
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods. Either {@code claims} or {@code content} method variants may be used, but not both. If you want the
+     * JWT payload to be JSON claims, use the {@link #claim(String, Object)} or {@link #claims()} methods instead.</p>
+     *
+     * @param content the content byte array that will be the JWT payload.  Cannot be null or empty.
+     * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if either {@code content} or {@code cty} are null or empty.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder content(String content, String cty) throws IllegalArgumentException;
+
+    /**
+     * Sets the JWT payload to be the specified byte array, and also sets the
+     * {@link HeaderMutator#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
+     * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
+     * {@code cty} value to determine how to convert the byte array to the final content type as desired.  This is a
+     * convenience method semantically equivalent to:
+     *
+     * <blockquote><pre>
+     * {@link #content(byte[]) content(content)}.{@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
      *
      * <p><b>Compact Media Type Identifier</b></p>
      *
@@ -269,6 +347,53 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder content(byte[] content, String cty) throws IllegalArgumentException;
 
     /**
+     * Sets the JWT payload to be the specified content byte stream and also sets the
+     * {@link BuilderHeader#contentType(String) contentType} header value to a compact {@code cty} IANA Media Type
+     * identifier to indicate the data format of the byte array. The JWT recipient can inspect the
+     * {@code cty} value to determine how to convert the byte array to the final content type as desired.  This is a
+     * convenience method semantically equivalent to:
+     *
+     * <blockquote><pre>
+     * {@link #content(InputStream) content(content)}.{@link #header()}.{@link HeaderMutator#contentType(String) contentType(cty)}.{@link BuilderHeader#and() and()}</pre></blockquote>
+     *
+     * <p><b>Compact Media Type Identifier</b></p>
+     *
+     * <p>This method will automatically remove any <code><b>application/</b></code> prefix from the
+     * {@code cty} string if possible according to the rules defined in the last paragraph of
+     * <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10">RFC 7517, Section 4.1.10</a>:</p>
+     *
+     * <blockquote><pre>
+     *     To keep messages compact in common situations, it is RECOMMENDED that
+     *     producers omit an "application/" prefix of a media type value in a
+     *     "cty" Header Parameter when no other '/' appears in the media type
+     *     value.  A recipient using the media type value MUST treat it as if
+     *     "application/" were prepended to any "cty" value not containing a
+     *     '/'.  For instance, a "cty" value of "example" SHOULD be used to
+     *     represent the "application/example" media type, whereas the media
+     *     type "application/example;part="1/2"" cannot be shortened to
+     *     "example;part="1/2"".</pre></blockquote>
+     *
+     * <p>JJWT performs the reverse during JWT parsing: {@link Header#getContentType()} will automatically prepend the
+     * {@code application/} prefix if the parsed {@code cty} value does not contain a '<code>/</code>' character (as
+     * mandated by the RFC language above). This ensures application developers can use and read standard IANA Media
+     * Type identifiers without needing JWT-specific prefix conditional logic in application code.
+     * </p>
+     *
+     * <p><b>Mutually Exclusive Claims and Content</b></p>
+     *
+     * <p>This method is mutually exclusive of the {@link #claim(String, Object)} and {@link #claims()}
+     * methods. Either {@code claims} or {@code content} method variants may be used, but not both. If you want the
+     * JWT payload to be JSON claims, use the {@link #claim(String, Object)} or {@link #claims()} methods instead.</p>
+     *
+     * @param content the content byte array that will be the JWT payload.  Cannot be null.
+     * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if either {@code content} or {@code cty} are null or empty.
+     * @since JJWT_RELEASE_VERSION
+     */
+    JwtBuilder content(InputStream content, String cty) throws IllegalArgumentException;
+
+    /**
      * Returns the JWT {@code Claims} payload to modify as desired. When finished, callers may
      * return to {@code JwtBuilder} configuration via the {@link BuilderClaims#and() and()} method.
      * For example:
@@ -295,24 +420,27 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     BuilderClaims claims();
 
     /**
-     * Sets (and replaces) the JWT Claims payload with the specified name/value pairs. If you do not want the JWT
-     * payload to be JSON claims and instead want it to be a byte array for any content, use the
-     * {@link #content(byte[])} or {@link #content(byte[], String)} methods instead.
+     * Replaces the JWT Claims payload with the specified name/value pairs. This is an alias for:
+     * <blockquote><pre>
+     * {@link #claims()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
-     * <p>The content and claims properties are mutually exclusive - only one of the two may be used.</p>
+     * <p>The {@code content} and {@code claims} properties are mutually exclusive - only one of the two variants
+     * may be used.</p>
      *
      * @param claims the JWT Claims to be set as the JWT payload.
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #claims()} method.
+     * @see #claims()
+     * @see #content(String)
+     * @see #content(byte[])
+     * @see #content(InputStream)
+     * @deprecated since JJWT_RELEASE_VERSION in favor of using the {@link #claims()} builder.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder setClaims(Map<String, ?> claims);
 
     /**
-     * Adds/appends all given name/value pairs to the JSON Claims in the payload.
-     * <p>
-     * This is a convenience wrapper for:
+     * Adds/appends all given name/value pairs to the JSON Claims in the payload. This is an alias for:
      *
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -332,7 +460,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets a JWT claim, overwriting any existing claim with the same name. A {@code null} or empty
-     * value will remove the claim entirely. This is a convenience wrapper for:
+     * value will remove the claim entirely. This is a convenience alias for:
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
@@ -346,7 +474,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Adds all given name/value pairs to the JSON Claims in the payload, overwriting any existing claims
      * with the same names.  If any name has a {@code null} or empty value, that claim will be removed from the
-     * Claims.  This is a convenience wrapper for:
+     * Claims.  This is a convenience alias for:
      * <blockquote><pre>
      * {@link #claims()}.{@link MapMutator#add(Map) add(claims)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
@@ -360,7 +488,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1">
-     * <code>iss</code></a> (issuer) value.  A {@code null} value will remove the property from the Claims.
+     * <code>iss</code></a> (issuer) claim.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link ClaimsMutator#issuer(String) issuer(iss)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -374,7 +502,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2">
-     * <code>sub</code></a> (subject) value.  A {@code null} value will remove the property from the Claims.
+     * <code>sub</code></a> (subject) claim.  A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link ClaimsMutator#subject(String) subject(sub)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -388,7 +516,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
-     * <code>aud</code></a> (audience) value.  A {@code null} value will remove the property from the Claims.
+     * <code>aud</code></a> (audience) claim. A {@code null} value will remove the property from the Claims.
      * This is a convenience wrapper for:
      * <blockquote><pre>
      * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link BuilderClaims#and() and()}</pre></blockquote>
@@ -402,7 +530,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
-     * <code>exp</code></a> (expiration) value.  A {@code null} value will remove the property from the Claims.
+     * <code>exp</code></a> (expiration) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
@@ -419,7 +547,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
-     * <code>nbf</code></a> (not before) value.  A {@code null} value will remove the property from the Claims.
+     * <code>nbf</code></a> (not before) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
@@ -432,11 +560,11 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      */
     @Override
     // for better/targeted JavaDoc
-    JwtBuilder setNotBefore(Date nbf);
+    JwtBuilder notBefore(Date nbf);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
-     * <code>iat</code></a> (issued at) value.  A {@code null} value will remove the property from the Claims.
+     * <code>iat</code></a> (issued at) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>The value is the timestamp when the JWT was created.</p>
      *
@@ -453,7 +581,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
-     * <code>jti</code></a> (JWT ID) value.  A {@code null} value will remove the property from the Claims.
+     * <code>jti</code></a> (JWT ID) claim. A {@code null} value will remove the property from the Claims.
      *
      * <p>The value is a CaSe-SenSiTiVe unique identifier for the JWT. If specified, this value MUST be assigned in a
      * manner that ensures that there is a negligible probability that the same value will be accidentally
@@ -840,25 +968,28 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param base64UrlEncoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
-     * @see #encoder(Encoder)
+     * @see #b64Url(Encoder)
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
-     * {@link #encoder(Encoder)} method.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #b64Url(Encoder)}.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder base64UrlEncodeWith(Encoder<byte[], String> base64UrlEncoder);
 
     /**
-     * Perform Base64Url encoding during {@link #compact() compaction} with the specified Encoder.
+     * Perform Base64Url encoding during {@link #compact() compaction} with the specified {@code OutputStream} Encoder.
+     * The Encoder's {@link Encoder#encode(Object) encode} method will be given a target {@code OutputStream} to
+     * wrap, and the resulting (wrapping) {@code OutputStream} will be used for writing, ensuring automatic
+     * Base64URL-encoding during write operations.
      *
      * <p>JJWT uses a spec-compliant encoder that works on all supported JDK versions, but you may call this method
-     * to specify a different encoder if necessar.</p>
+     * to specify a different stream encoder if desired.</p>
      *
      * @param encoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder encoder(Encoder<byte[], String> encoder);
+    JwtBuilder b64Url(Encoder<OutputStream, OutputStream> encoder);
 
     /**
      * Enables <a href="https://datatracker.ietf.org/doc/html/rfc7797">RFC 7797: JSON Web Signature (JWS)
@@ -885,9 +1016,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param serializer the serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style
-     * {@link #serializer(Serializer)} method.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #json(Serializer)}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     JwtBuilder serializeToJsonWith(Serializer<Map<String, ?>> serializer);
 
@@ -895,15 +1026,15 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Perform Map-to-JSON serialization with the specified Serializer.  This is used by the builder to convert
      * JWT/JWS/JWE headers and Claims Maps to JSON strings as required by the JWT specification.
      *
-     * <p>If this method is not called, JJWT will use whatever serializer it can find at runtime, checking for the
+     * <p>If this method is not called, JJWT will use whatever Serializer it can find at runtime, checking for the
      * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
      * in the runtime classpath, an exception will be thrown when the {@link #compact()} method is invoked.</p>
      *
-     * @param serializer the serializer to use when converting Map objects to JSON strings.
+     * @param serializer the Serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    JwtBuilder serializer(Serializer<Map<String, ?>> serializer);
+    JwtBuilder json(Serializer<Map<String, ?>> serializer);
 
     /**
      * Actually builds the JWT and serializes it to a compact, URL-safe string according to the

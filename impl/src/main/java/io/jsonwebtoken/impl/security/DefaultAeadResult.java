@@ -17,24 +17,45 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.DecryptAeadRequest;
+import io.jsonwebtoken.security.DigestSupplier;
+import io.jsonwebtoken.security.IvSupplier;
 
-import javax.crypto.SecretKey;
-import java.security.Provider;
-import java.security.SecureRandom;
+import java.io.OutputStream;
 
-public class DefaultAeadResult extends DefaultAeadRequest implements AeadResult, DecryptAeadRequest {
+public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier {
 
-    private final byte[] TAG;
+    private final OutputStream out;
+    private byte[] tag;
+    private byte[] iv;
 
-    public DefaultAeadResult(Provider provider, SecureRandom secureRandom, byte[] data, SecretKey key, byte[] aad, byte[] tag, byte[] iv) {
-        super(data, provider, secureRandom, key, aad, iv);
-        Assert.notEmpty(iv, "initialization vector cannot be null or empty.");
-        this.TAG = Assert.notEmpty(tag, "authentication tag cannot be null or empty.");
+    public DefaultAeadResult(OutputStream out) {
+        this.out = Assert.notNull(out, "OutputStream cannot be null.");
+    }
+
+    @Override
+    public OutputStream getOutputStream() {
+        return this.out;
     }
 
     @Override
     public byte[] getDigest() {
-        return this.TAG;
+        return this.tag;
+    }
+
+    @Override
+    public AeadResult setTag(byte[] tag) {
+        this.tag = Assert.notEmpty(tag, "Authentication Tag cannot be null or empty.");
+        return this;
+    }
+
+    @Override
+    public AeadResult setIv(byte[] iv) {
+        this.iv = Assert.notEmpty(iv, "Initialization Vector cannot be null or empty.");
+        return this;
+    }
+
+    @Override
+    public byte[] getIv() {
+        return this.iv;
     }
 }

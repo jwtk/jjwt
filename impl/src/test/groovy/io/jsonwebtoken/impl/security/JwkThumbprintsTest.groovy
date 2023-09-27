@@ -33,7 +33,8 @@ class JwkThumbprintsTest {
 
     static byte[] digest(String json, HashAlgorithm alg) {
         def utf8Bytes = json.getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultRequest(utf8Bytes, null, null)
+        def payload = new ByteArrayInputStream(utf8Bytes);
+        def req = new DefaultRequest(payload, null, null)
         return alg.digest(req)
     }
 

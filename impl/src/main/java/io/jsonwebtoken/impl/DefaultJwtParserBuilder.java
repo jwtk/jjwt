@@ -23,6 +23,7 @@ import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.impl.io.DelegateStringDecoder;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.CompressionAlgorithm;
@@ -39,6 +40,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -88,7 +90,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
 
-    private Decoder<String, byte[]> decoder = Decoders.BASE64URL;
+    private Decoder<InputStream, InputStream> decoder = new DelegateStringDecoder(Decoders.BASE64URL);
 
     private Deserializer<Map<String, ?>> deserializer;
 
@@ -123,23 +125,24 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder deserializeJsonWith(Deserializer<Map<String, ?>> deserializer) {
-        return deserializer(deserializer);
+        return json(deserializer);
     }
 
     @Override
-    public JwtParserBuilder deserializer(Deserializer<Map<String, ?>> deserializer) {
-        Assert.notNull(deserializer, "deserializer cannot be null.");
-        this.deserializer = deserializer;
+    public JwtParserBuilder json(Deserializer<Map<String, ?>> reader) {
+        this.deserializer = Assert.notNull(reader, "JSON Deserializer cannot be null.");
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public JwtParserBuilder base64UrlDecodeWith(Decoder<String, byte[]> decoder) {
-        return decoder(decoder);
+    public JwtParserBuilder base64UrlDecodeWith(final Decoder<CharSequence, byte[]> decoder) {
+        Assert.notNull(decoder, "decoder cannot be null.");
+        return b64Url(new DelegateStringDecoder(decoder));
     }
 
     @Override
-    public JwtParserBuilder decoder(Decoder<String, byte[]> decoder) {
+    public JwtParserBuilder b64Url(Decoder<InputStream, InputStream> decoder) {
         Assert.notNull(decoder, "decoder cannot be null.");
         this.decoder = decoder;
         return this;
@@ -349,14 +352,10 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @Override
     public JwtParser build() {
 
-        // Only lookup the deserializer IF it is null. It is possible a Deserializer implementation was set
-        // that is NOT exposed as a service and no other implementations are available for lookup.
         if (this.deserializer == null) {
-            // try to find one based on the services available:
             //noinspection unchecked
-            this.deserializer = Services.loadFirst(Deserializer.class);
+            json(Services.loadFirst(Deserializer.class));
         }
-
         if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
             String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " +
                     "Choose either, or prefer `keyLocator` when possible.";
@@ -408,7 +407,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 allowedClockSkewMillis,
                 expClaims,
                 decoder,
-                new JwtDeserializer<>(deserializer),
+                deserializer,
                 compressionCodecResolver,
                 extraZipAlgs,
                 extraSigAlgs,

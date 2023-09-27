@@ -19,6 +19,7 @@ import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.Jwts;
 
 import javax.crypto.SecretKey;
+import java.io.OutputStream;
 
 /**
  * A cryptographic algorithm that performs
@@ -67,25 +68,24 @@ import javax.crypto.SecretKey;
 public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuilderSupplier<SecretKey, SecretKeyBuilder> {
 
     /**
-     * Perform AEAD encryption with the plaintext represented by the specified {@code request}, returning the
-     * integrity-protected encrypted ciphertext result.
+     * Encrypts plaintext and signs any {@link AeadRequest#getAssociatedData() associated data}, placing the resulting
+     * ciphertext, initialization vector and authentication tag in the provided {@code result}.
      *
-     * @param request the encryption request representing the plaintext to be encrypted, any additional
-     *                integrity-protected data and the encryption key.
-     * @return the encryption result containing the ciphertext, and associated initialization vector and resulting
-     * authentication tag.
-     * @throws SecurityException if there is an encryption problem or authenticity cannot be guaranteed.
+     * @param req the encryption request representing the plaintext to be encrypted, any additional
+     *            integrity-protected data and the encryption key.
+     * @param res the result to write ciphertext, initialization vector and AAD authentication tag (aka digest)
+     * @throws SecurityException if there is an encryption problem or AAD authenticity cannot be guaranteed.
      */
-    AeadResult encrypt(AeadRequest request) throws SecurityException;
+    void encrypt(AeadRequest req, AeadResult res) throws SecurityException;
 
     /**
-     * Perform AEAD decryption with the ciphertext represented by the specific {@code request}, also verifying the
-     * integrity and authenticity of any associated data, returning the decrypted plaintext result.
+     * Decrypts ciphertext and authenticates any {@link DecryptAeadRequest#getAssociatedData() associated data},
+     * writing the decrypted plaintext to the provided {@code out}put stream.
      *
      * @param request the decryption request representing the ciphertext to be decrypted, any additional
-     *                integrity-protected data, authentication tag, initialization vector, and the decryption key.
-     * @return the decryption result containing the plaintext
+     *                integrity-protected data, authentication tag, initialization vector, and decryption key
+     * @param out     the OutputStream for writing decrypted plaintext
      * @throws SecurityException if there is a decryption problem or authenticity assertions fail.
      */
-    Message<byte[]> decrypt(DecryptAeadRequest request) throws SecurityException;
+    void decrypt(DecryptAeadRequest request, OutputStream out) throws SecurityException;
 }

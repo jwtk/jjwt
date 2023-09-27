@@ -17,6 +17,7 @@ package io.jsonwebtoken.lang;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -326,6 +327,20 @@ public final class Classes {
             String msg = "Unable to invoke class method " + clazz.getName() + "#" + methodName +
                     ". Ensure the necessary implementation is in the runtime classpath.";
             throw new IllegalStateException(msg, e);
+        }
+    }
+
+    public static <T> T getFieldValue(Object instance, String fieldName, Class<T> fieldType) {
+        if (instance == null) return null;
+        try {
+            Field field = instance.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Object o = field.get(instance);
+            return fieldType.cast(o);
+        } catch (Throwable t) {
+            String msg = "Unable to read field " + instance.getClass().getName() +
+                    "#" + fieldName + ": " + t.getMessage();
+            throw new IllegalStateException(msg, t);
         }
     }
 

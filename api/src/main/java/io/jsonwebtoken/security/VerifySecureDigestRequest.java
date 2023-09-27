@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.security;
 
+import java.io.InputStream;
 import java.security.Key;
 
 /**
@@ -29,5 +30,5 @@ import java.security.Key;
  * @param <K> the type of {@link Key} used to verify a digital signature or message authentication code
  * @since JJWT_RELEASE_VERSION
  */
-public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<byte[], K>, VerifyDigestRequest {
+public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<InputStream, K>, VerifyDigestRequest {
 }

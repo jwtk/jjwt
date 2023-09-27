@@ -17,28 +17,28 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.lang.Strings;
 
 public class JwtTokenizer {
 
     static final char DELIMITER = '.';
 
     private static final String DELIM_ERR_MSG_PREFIX = "Invalid compact JWT string: Compact JWSs must contain " +
-        "exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: ";
+            "exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: ";
 
     @SuppressWarnings("unchecked")
-    public <T extends TokenizedJwt> T tokenize(String jwt) {
+    public <T extends TokenizedJwt> T tokenize(CharSequence jwt) {
 
         Assert.hasText(jwt, "Argument cannot be null or empty.");
 
-        String protectedHeader = ""; //Both JWS and JWE
-        String body = ""; //JWS payload or JWE Ciphertext
-        String encryptedKey = ""; //JWE only
-        String iv = ""; //JWE only
-        String digest; //JWS Signature or JWE AAD Tag
+        CharSequence protectedHeader = Strings.EMPTY; //Both JWS and JWE
+        CharSequence body = Strings.EMPTY; //JWS payload or JWE Ciphertext
+        CharSequence encryptedKey = Strings.EMPTY; //JWE only
+        CharSequence iv = Strings.EMPTY; //JWE only
+        CharSequence digest; //JWS Signature or JWE AAD Tag
 
         int delimiterCount = 0;
-
-        StringBuilder sb = new StringBuilder(128);
+        int start = 0;
 
         for (int i = 0; i < jwt.length(); i++) {
 
@@ -51,7 +51,8 @@ public class JwtTokenizer {
 
             if (c == DELIMITER) {
 
-                String token = sb.toString();
+                CharSequence token = jwt.subSequence(start, i);
+                start = i + 1;
 
                 switch (delimiterCount) {
                     case 0:
@@ -62,7 +63,7 @@ public class JwtTokenizer {
                         encryptedKey = token; //for JWE
                         break;
                     case 2:
-                        body = ""; //clear out value set for JWS
+                        body = Strings.EMPTY; //clear out value set for JWS
                         iv = token;
                         break;
                     case 3:
@@ -70,10 +71,7 @@ public class JwtTokenizer {
                         break;
                 }
 
-                sb.setLength(0);
                 delimiterCount++;
-            } else {
-                sb.append(c);
             }
         }
 
@@ -82,7 +80,7 @@ public class JwtTokenizer {
             throw new MalformedJwtException(msg);
         }
 
-        digest = sb.toString();
+        digest = jwt.subSequence(start, jwt.length());
 
         if (delimiterCount == 2) {
             return (T) new DefaultTokenizedJwt(protectedHeader, body, digest);

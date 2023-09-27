@@ -23,9 +23,10 @@ import io.jsonwebtoken.io.ParserBuilder;
  * Example usage:
  * <blockquote><pre>
  * JwkSet jwkSet = Jwks.setParser()
- *         .provider(aJcaProvider)     // optional
- *         .deserializer(deserializer) // optional
- *         .operationPolicy(policy)    // optional
+ *         .provider(aJcaProvider)      // optional
+ *         .json(deserializer)          // optional
+ *         .operationPolicy(policy)     // optional
+ *         .ignoreUnsupported(aBoolean) // optional
  *         .build()
  *         .parse(jwkSetString);</pre></blockquote>
  *
