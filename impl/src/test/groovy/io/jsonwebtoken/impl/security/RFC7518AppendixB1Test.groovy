@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
-import io.jsonwebtoken.impl.lang.Bytes
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -90,7 +89,7 @@ class RFC7518AppendixB1Test {
     void test() {
 
         def alg = Jwts.ENC.A128CBC_HS256
-        def request = new DefaultAeadRequest(Bytes.stream(P), null, null, KEY, A, IV)
+        def request = new DefaultAeadRequest(Streams.of(P), null, null, KEY, A, IV)
         def result = alg.encrypt(request)
 
         InputStream stream = result.getPayload()

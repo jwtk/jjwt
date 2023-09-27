@@ -173,7 +173,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
                 len = in.read(buf);
                 if (len > 0) {
                     byte[] enc = cipher.update(buf, 0, len);
-                    Streams.write(out, enc, "AesAlgorithm#withCipher");
+                    Streams.write(out, enc, "Unable to write Cipher output to OutputStream");
                 }
             }
             return cipher.doFinal();

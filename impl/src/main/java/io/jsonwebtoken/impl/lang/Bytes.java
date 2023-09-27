@@ -19,8 +19,6 @@ import io.jsonwebtoken.impl.security.Randoms;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.ByteArrayInputStream;
-
 public final class Bytes {
 
     public static final byte[] EMPTY = new byte[0];
@@ -233,10 +231,6 @@ public final class Bytes {
 
     public static String bytesMsg(int byteArrayLength) {
         return bitsMsg((long) byteArrayLength * Byte.SIZE);
-    }
-
-    public static ByteArrayInputStream stream(byte[] bytes) {
-        return isEmpty(bytes) ? new ByteArrayInputStream(Bytes.EMPTY) : new ByteArrayInputStream(bytes);
     }
 
     public static void increment(byte[] a) {

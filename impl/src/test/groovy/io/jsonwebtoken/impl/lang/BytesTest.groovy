@@ -324,21 +324,4 @@ class BytesTest {
         }
         assertTrue allZero // asserts zeroed out entirely
     }
-
-    @Test
-    void streamFromNull() {
-        def stream = Bytes.stream(null)
-        assertNotNull stream
-        assertEquals 0, stream.available()
-        assertEquals(-1, stream.read())
-    }
-
-    @Test
-    void streamWithEmpty() {
-        def stream = Bytes.stream(Bytes.EMPTY)
-        assertNotNull stream
-        assertEquals 0, stream.available()
-        assertEquals(-1, stream.read())
-    }
-
 }

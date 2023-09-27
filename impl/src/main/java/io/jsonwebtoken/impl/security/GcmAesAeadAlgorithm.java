@@ -62,7 +62,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
                 cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
                 byte[] taggedCiphertext = withCipher(cipher, plaintext, aad, out);
                 // When using GCM mode, the JDK appends the authentication tag to the ciphertext, so let's extract it:
-                // (tag has a length of BLOCK_SIZE_BITS):
+                // (tag has a length of BLOCK_BYTE_SIZE):
                 int ciphertextLength = Bytes.length(taggedCiphertext) - BLOCK_BYTE_SIZE;
                 Streams.write(out, taggedCiphertext, 0, ciphertextLength, "Ciphertext write failure.");
                 byte[] tag = new byte[BLOCK_BYTE_SIZE];
@@ -70,6 +70,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
                 return tag;
             }
         });
+        Streams.reset(plaintext);
 
         InputStream ciphertext = new ByteArrayInputStream(out.toByteArray());
         return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), ciphertext, key, aad, tag, iv);

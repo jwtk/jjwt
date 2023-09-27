@@ -52,11 +52,11 @@ public class Streams {
         return out.toByteArray();
     }
 
-    public static InputStream of(byte[] bytes) {
-        return Bytes.stream(bytes);
+    public static ByteArrayInputStream of(byte[] bytes) {
+        return Bytes.isEmpty(bytes) ? new ByteArrayInputStream(Bytes.EMPTY) : new ByteArrayInputStream(bytes);
     }
 
-    public static InputStream of(CharSequence seq) {
+    public static ByteArrayInputStream of(CharSequence seq) {
         return of(Strings.utf8(seq));
     }
 
@@ -148,7 +148,12 @@ public class Streams {
         try {
             return c.call();
         } catch (Throwable t) {
-            throw new io.jsonwebtoken.io.IOException(ioExMsg, t);
+            String msg = "IO failure: " + ioExMsg;
+            if (!msg.endsWith(".")) {
+                msg += ".";
+            }
+            msg += " Cause: " + t.getMessage();
+            throw new io.jsonwebtoken.io.IOException(msg, t);
         }
     }
 }

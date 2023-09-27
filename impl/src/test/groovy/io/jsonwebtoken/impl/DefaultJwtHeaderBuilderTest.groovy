@@ -19,6 +19,7 @@ import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.ProtectedHeader
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
 import io.jsonwebtoken.impl.security.DefaultRequest
@@ -360,7 +361,7 @@ class DefaultJwtHeaderBuilderTest {
      */
     @Test
     void testX509CertificateSha1Thumbprint() {
-        def payload = Bytes.stream(TestKeys.RS256.cert.getEncoded())
+        def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
         def request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
@@ -373,7 +374,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX509CertificateSha1ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
-        def payload = Bytes.stream(chain[0].getEncoded())
+        def payload = Streams.of(chain[0].getEncoded())
         def request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
@@ -388,7 +389,7 @@ class DefaultJwtHeaderBuilderTest {
      */
     @Test
     void testX509CertificateSha256Thumbprint() {
-        def payload = Bytes.stream(TestKeys.RS256.cert.getEncoded())
+        def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
         def request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.@SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
@@ -400,7 +401,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX509CertificateSha256ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
-        def payload = Bytes.stream(chain[0].getEncoded())
+        def payload = Streams.of(chain[0].getEncoded())
         def request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -31,7 +31,7 @@ class DefaultMacAlgorithmTest {
     static final char[] passwordChars = "correct horse battery staple".toCharArray()
 
     static <T extends Key> SecureRequest<InputStream, T> request(T key) {
-        return new DefaultSecureRequest<InputStream, T>(Bytes.stream(payload), null, null, key)
+        return new DefaultSecureRequest<InputStream, T>(Streams.of(payload), null, null, key)
     }
 
     static DefaultMacAlgorithm newAlg() {

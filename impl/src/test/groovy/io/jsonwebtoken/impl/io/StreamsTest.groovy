@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.io
 
+import io.jsonwebtoken.impl.lang.Bytes
 import org.junit.Test
 
 import java.util.concurrent.Callable
@@ -36,9 +37,44 @@ class StreamsTest {
             Streams.run(c, 'bar')
             fail()
         } catch (io.jsonwebtoken.io.IOException expected) {
-            String msg = 'bar'
+            String msg = 'IO failure: bar. Cause: foo'
             assertEquals msg, expected.message
             assertSame ex, expected.cause
         }
+    }
+
+    @Test
+    void runWrapsExceptionAsRuntimeIOExceptionWithPunctuation() {
+        def ex = new RuntimeException('foo')
+        def c = new Callable() {
+            @Override
+            Object call() throws Exception {
+                throw ex
+            }
+        }
+        try {
+            Streams.run(c, 'bar.') // period at the end, don't add another
+            fail()
+        } catch (io.jsonwebtoken.io.IOException expected) {
+            String msg = 'IO failure: bar. Cause: foo'
+            assertEquals msg, expected.message
+            assertSame ex, expected.cause
+        }
+    }
+
+    @Test
+    void streamFromNullByteArray() {
+        def stream = Streams.of((byte[]) null)
+        assertNotNull stream
+        assertEquals 0, stream.available()
+        assertEquals(-1, stream.read())
+    }
+
+    @Test
+    void streamWithEmptyByteArray() {
+        def stream = Streams.of(Bytes.EMPTY)
+        assertNotNull stream
+        assertEquals 0, stream.available()
+        assertEquals(-1, stream.read())
     }
 }
