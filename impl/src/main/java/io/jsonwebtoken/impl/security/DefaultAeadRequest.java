@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.security.AeadRequest;
-import io.jsonwebtoken.security.InitializationVectorSupplier;
+import io.jsonwebtoken.security.IvSupplier;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
@@ -27,7 +27,7 @@ import java.security.SecureRandom;
  * @since JJWT_RELEASE_VERSION
  */
 public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, SecretKey>
-        implements AeadRequest, InitializationVectorSupplier {
+        implements AeadRequest, IvSupplier {
 
     private final byte[] IV;
 

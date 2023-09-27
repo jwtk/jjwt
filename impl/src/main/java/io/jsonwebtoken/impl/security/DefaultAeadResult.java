@@ -18,11 +18,11 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadResult;
 import io.jsonwebtoken.security.DigestSupplier;
-import io.jsonwebtoken.security.InitializationVectorSupplier;
+import io.jsonwebtoken.security.IvSupplier;
 
 import java.io.OutputStream;
 
-public class DefaultAeadResult implements AeadResult, DigestSupplier, InitializationVectorSupplier {
+public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier {
 
     private final OutputStream out;
     private byte[] tag;

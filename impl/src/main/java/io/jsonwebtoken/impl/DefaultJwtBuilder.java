@@ -747,16 +747,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // As such, the provider here is intentionally omitted (null):
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
-        AeadRequest encRequest = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
-        DefaultAeadResult encResult = new DefaultAeadResult(ciphertextOut);
-        encrypt(encRequest, encResult);
+        AeadRequest req = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
+        DefaultAeadResult res = new DefaultAeadResult(ciphertextOut);
+        encrypt(req, res);
 
-        byte[] iv = Assert.notEmpty(encResult.getIv(),
-                "Encryption result must have a non-empty initialization vector.");
-        byte[] ciphertext = Assert.notEmpty(ciphertextOut.toByteArray(),
-                "Encryption result must have non-empty ciphertext.");
-        byte[] tag = Assert.notEmpty(encResult.getDigest(),
-                "Encryption result must have a non-empty authentication tag.");
+        byte[] iv = Assert.notEmpty(res.getIv(), "Encryption result must have a non-empty initialization vector.");
+        byte[] tag = Assert.notEmpty(res.getDigest(), "Encryption result must have a non-empty authentication tag.");
+        byte[] ciphertext = Assert.notEmpty(ciphertextOut.toByteArray(), "Encryption result must have non-empty ciphertext.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
         encodeAndWrite("JWE Encrypted CEK", encryptedCek, jwe);

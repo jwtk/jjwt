@@ -19,7 +19,7 @@ import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.InitializationVectorSupplier;
+import io.jsonwebtoken.security.IvSupplier;
 import io.jsonwebtoken.security.KeyBuilderSupplier;
 import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.Request;
@@ -127,7 +127,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         return assertBytes(tag, "authentication tags", this.tagBitLength);
     }
 
-    byte[] assertDecryptionIv(InitializationVectorSupplier src) throws IllegalArgumentException {
+    byte[] assertDecryptionIv(IvSupplier src) throws IllegalArgumentException {
         byte[] iv = src.getIv();
         Assert.notEmpty(iv, DECRYPT_NO_IV);
         return assertIvLength(iv);
@@ -135,8 +135,8 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
 
     protected byte[] ensureInitializationVector(Request<?> request) {
         byte[] iv = null;
-        if (request instanceof InitializationVectorSupplier) {
-            iv = Arrays.clean(((InitializationVectorSupplier) request).getIv());
+        if (request instanceof IvSupplier) {
+            iv = Arrays.clean(((IvSupplier) request).getIv());
         }
         int ivByteLength = this.ivBitLength / Byte.SIZE;
         if (iv == null || iv.length == 0) {
