@@ -76,7 +76,7 @@ class AbstractDeserializerTest {
         }
 
         try {
-            des.deserialize(new byte[]{0x01})
+            des.deserialize(new byte[0])
         } catch (DeserializationException expected) {
             String msg = 'Unable to deserialize: foo'
             assertEquals msg, expected.message

@@ -63,8 +63,8 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testDeserializer() {
-        def deser = createMock(Deserializer) as Deserializer<Map<String,?>>
-        def m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
+        Deserializer<Map<String,?>> deser = createMock(Deserializer)
+        def  m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
         expect(deser.deserialize((InputStream)anyObject(InputStream))).andReturn(m)
         replay deser
         def jwk = Jwks.parser().json(deser).build().parse('foo')

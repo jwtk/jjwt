@@ -55,10 +55,7 @@ class RFC7516AppendixA3Test {
     final static SecretKey CEK = new SecretKeySpec(CEK_BYTES, "AES")
 
     // defined in https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.3.3
-    final static Map<String, String> KEK_VALUES = [
-            "kty": "oct",
-            "k"  : "GawgguFyGrWKav7AX4VKUg"
-    ]
+    final static Map<String, String> KEK_VALUES = ["kty": "oct", "k": "GawgguFyGrWKav7AX4VKUg"]
 
     final static byte[] ENCRYPTED_CEK_BYTES = [232, 160, 123, 211, 183, 76, 245, 132, 200, 128, 123, 75, 190, 216,
                                                22, 67, 201, 138, 193, 186, 9, 91, 122, 31, 246, 90, 28, 139, 57, 3,
