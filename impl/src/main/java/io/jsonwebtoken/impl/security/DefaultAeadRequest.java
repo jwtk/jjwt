@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2021 jsonwebtoken.io
  *
@@ -26,6 +25,9 @@ import java.io.OutputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
+/**
+ * @since JJWT_RELEASE_VERSION
+ */
 public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, SecretKey>
         implements AeadRequest, InitializationVectorSupplier {
 
