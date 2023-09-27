@@ -52,7 +52,8 @@ class AbstractDeserializerTest {
     @Test
     void deserializeByteArray() {
         byte b = 0x01
-        def bytes = new byte[]{b}
+        def bytes = new byte[1]
+        bytes[0] = b
         def des = new AbstractDeserializer() {
             @Override
             protected Object doDeserialize(InputStream inputStream) throws Exception {
