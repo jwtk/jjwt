@@ -62,9 +62,11 @@ class GcmAesAeadAlgorithmTest {
 
         def ins = new ByteArrayInputStream(P)
         def out = new ByteArrayOutputStream(8192)
-        def req = new DefaultAeadRequest(ins, out, null, null, KEY, AAD, IV)
+        def aad = Streams.of(AAD)
+        def req = new DefaultAeadRequest(ins, out, null, null, KEY, aad, IV)
 
         def result = alg.encrypt(req)
+        Streams.reset(aad)
 
         byte[] ciphertext = out.toByteArray()
         byte[] tag = result.getDigest()
@@ -76,7 +78,7 @@ class GcmAesAeadAlgorithmTest {
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, AAD, iv, tag)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, aad, iv, tag)
         alg.decrypt(dreq)
         assertArrayEquals(P, out.toByteArray())
     }

@@ -740,7 +740,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // already Base64URL-encoded at this point (via the encoder.wrap call just above), and Base64Url-encoding uses
         // only ASCII characters, we don't need to use StandardCharsets.US_ASCII to explicitly convert here - just
         // use the already-encoded (ascii) bytes:
-        byte[] aad = jwe.toByteArray();
+        InputStream aad = Streams.of(jwe.toByteArray());
 
         // During encryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).

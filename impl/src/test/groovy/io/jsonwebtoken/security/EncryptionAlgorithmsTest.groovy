@@ -145,12 +145,14 @@ class EncryptionAlgorithmsTest {
 
             def plaintextIn = Streams.of(PLAINTEXT_BYTES)
             def out = new ByteArrayOutputStream(8192)
-            def req = new DefaultAeadRequest(plaintextIn, out, null, null, key, AAD_BYTES)
+            def aad = Streams.of(AAD_BYTES)
+            def req = new DefaultAeadRequest(plaintextIn, out, null, null, key, aad)
 
             def result = alg.encrypt(req)
             byte[] iv = result.getInitializationVector()
             byte[] tag = result.getDigest()
             byte[] ciphertextBytes = out.toByteArray()
+            Streams.reset(aad)
 
             //AES GCM always results in ciphertext the same length as the plaintext:
             if (alg instanceof GcmAesAeadAlgorithm) {
@@ -159,7 +161,7 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = new ByteArrayInputStream(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = new DefaultDecryptAeadRequest(ciphertext, out, key, AAD_BYTES, iv, tag)
+            def dreq = new DefaultDecryptAeadRequest(ciphertext, out, key, aad, iv, tag)
             alg.decrypt(dreq)
             byte[] decryptedPlaintextBytes = out.toByteArray()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)

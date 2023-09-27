@@ -514,8 +514,9 @@ public class DefaultJwtParser implements JwtParser {
             // raw base64url text as the AAD, and NOT the base64url-decoded bytes per
             // https://www.rfc-editor.org/rfc/rfc7516.html#section-5.1, Step 14.
             ByteBuffer buf = StandardCharsets.US_ASCII.encode(Strings.wrap(base64UrlHeader));
-            final byte[] aad = new byte[buf.remaining()];
-            buf.get(aad);
+            final byte[] aadBytes = new byte[buf.remaining()];
+            buf.get(aadBytes);
+            InputStream aad = new ByteArrayInputStream(aadBytes);
 
             base64Url = base64UrlDigest;
             //guaranteed to be non-empty via the `alg` + digest check above:

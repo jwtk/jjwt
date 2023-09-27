@@ -19,7 +19,6 @@ import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.AssociatedDataSupplier;
 import io.jsonwebtoken.security.InitializationVectorSupplier;
 import io.jsonwebtoken.security.KeyBuilderSupplier;
 import io.jsonwebtoken.security.KeyLengthSupplier;
@@ -155,17 +154,25 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
         return this.gcm ? new GCMParameterSpec(BLOCK_SIZE, iv) : new IvParameterSpec(iv);
     }
 
-    protected byte[] getAAD(AssociatedDataSupplier request) {
-        return Arrays.clean(request.getAssociatedData());
-    }
-
     protected void withCipher(Cipher cipher, InputStream in, OutputStream out) throws Exception {
         byte[] last = withCipher(cipher, in, null, out);
         out.write(last); // no AAD, so no tag, so we can just append
     }
 
-    protected byte[] withCipher(Cipher cipher, InputStream in, byte[] aad, OutputStream out) throws Exception {
-        if (!Bytes.isEmpty(aad)) cipher.updateAAD(aad);
+    private void updateAAD(Cipher cipher, InputStream aad) throws Exception {
+        if (aad == null) return;
+        byte[] buf = new byte[2048];
+        int len = 0;
+        while (len != -1) {
+            len = aad.read(buf);
+            if (len > 0) {
+                cipher.updateAAD(buf, 0, len);
+            }
+        }
+    }
+
+    protected byte[] withCipher(Cipher cipher, InputStream in, InputStream aad, OutputStream out) throws Exception {
+        updateAAD(cipher, aad); // no-op if aad is null
         byte[] buf = new byte[2048];
         try {
             int len = 0;

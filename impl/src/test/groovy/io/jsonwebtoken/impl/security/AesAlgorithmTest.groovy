@@ -114,7 +114,7 @@ class AesAlgorithmTest {
         def ins = Streams.of('data')
         def key = TestKeys.A256GCM
         def aad = Strings.utf8('aad')
-        def req = new DefaultAeadRequest(ins, out, null, secureRandom, key, aad)
+        def req = new DefaultAeadRequest(ins, out, null, secureRandom, key, Streams.of(aad))
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 

@@ -52,7 +52,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
                 "Request content (plaintext) InputStream cannot be null.");
         final OutputStream out = Assert.notNull(req.getOutputStream(),
                 "Request ciphertext OutputStream cannot be null.");
-        final byte[] aad = getAAD(req);
+        final InputStream aad = req.getAssociatedData();
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
@@ -85,7 +85,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
                 "Decryption request content (ciphertext) InputStream cannot be null.");
         final OutputStream out = Assert.notNull(req.getOutputStream(),
                 "Request plaintext OutputStream cannot be null.");
-        final byte[] aad = getAAD(req);
+        final InputStream aad = req.getAssociatedData();
         final byte[] tag = Assert.notEmpty(req.getDigest(),
                 "Decryption request authentication tag cannot be null or empty.");
         final byte[] iv = assertDecryptionIv(req);

@@ -100,7 +100,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         final InputStream plaintext = Assert.notNull(req.getPayload(),
                 "Request content (plaintext) InputStream cannot be null.");
         final OutputStream out = Assert.notNull(req.getOutputStream(), "Request ciphertext OutputStream cannot be null.");
-        final byte[] aad = getAAD(req); //can be null if request associated data does not exist or is empty
+        final InputStream aad = req.getAssociatedData(); //can be null if there's no associated data
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
@@ -118,7 +118,9 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
             }
         });
 
-        byte[] tag = sign(aad, iv, Streams.of(copy.toByteArray()), macKeyBytes);
+        byte[] aadBytes = aad == null ? Bytes.EMPTY : Streams.bytes(aad, "Unable to read AAD bytes.");
+
+        byte[] tag = sign(aadBytes, iv, Streams.of(copy.toByteArray()), macKeyBytes);
 
         return new DefaultAeadResult(tag, iv);
     }
@@ -164,14 +166,15 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
                 "Decryption request content (ciphertext) InputStream cannot be null.");
         final OutputStream plaintext = Assert.notNull(req.getOutputStream(),
                 "Decryption request plaintext OutputStream cannot be null.");
-        final byte[] aad = getAAD(req);
+        final InputStream aad = req.getAssociatedData(); // can be null if there's no associated data
         final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         // Assert that the aad + iv + ciphertext provided, when signed, equals the tag provided,
         // thereby verifying none of it has been tampered with:
-        byte[] digest = sign(aad, iv, in, macKeyBytes);
+        byte[] aadBytes = aad == null ? Bytes.EMPTY : Streams.bytes(aad, "Unable to read AAD bytes.");
+        byte[] digest = sign(aadBytes, iv, in, macKeyBytes);
         if (!MessageDigest.isEqual(digest, tag)) { //constant time comparison to avoid side-channel attacks
             String msg = "Ciphertext decryption failed: Authentication tag verification failed.";
             throw new SignatureException(msg);

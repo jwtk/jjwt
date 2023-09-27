@@ -90,7 +90,8 @@ class RFC7518AppendixB1Test {
 
         def alg = Jwts.ENC.A128CBC_HS256
         def out = new ByteArrayOutputStream(8192)
-        def request = new DefaultAeadRequest(Streams.of(P), out, null, null, KEY, A, IV)
+        def aad = Streams.of(A)
+        def request = new DefaultAeadRequest(Streams.of(P), out, null, null, KEY, aad, IV)
         def result = alg.encrypt(request)
 
         byte[] ciphertext = out.toByteArray()
@@ -103,7 +104,7 @@ class RFC7518AppendixB1Test {
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, A, iv, tag)
+        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), out, KEY, aad, iv, tag)
         alg.decrypt(dreq)
         assertArrayEquals(P, out.toByteArray())
     }

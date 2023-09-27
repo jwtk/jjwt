@@ -33,12 +33,12 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
 
     private final byte[] IV;
 
-    private final byte[] AAD;
+    private final InputStream AAD;
 
     private final OutputStream out;
 
     DefaultAeadRequest(InputStream payload, OutputStream out, Provider provider, SecureRandom secureRandom,
-                       SecretKey key, byte[] aad, byte[] iv) {
+                       SecretKey key, InputStream aad, byte[] iv) {
         super(payload, provider, secureRandom, key);
         this.AAD = aad;
         this.IV = iv;
@@ -46,12 +46,12 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
     }
 
     public DefaultAeadRequest(InputStream payload, OutputStream out, Provider provider, SecureRandom secureRandom,
-                              SecretKey key, byte[] aad) {
+                              SecretKey key, InputStream aad) {
         this(payload, out, provider, secureRandom, key, aad, null);
     }
 
     @Override
-    public byte[] getAssociatedData() {
+    public InputStream getAssociatedData() {
         return this.AAD;
     }
 
