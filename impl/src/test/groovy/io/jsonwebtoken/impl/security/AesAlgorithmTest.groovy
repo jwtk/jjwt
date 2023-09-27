@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
@@ -108,7 +109,7 @@ class AesAlgorithmTest {
 
         def secureRandom = new SecureRandom()
 
-        def req = new DefaultAeadRequest('data'.getBytes(), null, secureRandom, alg.key().build(), 'aad'.getBytes())
+        def req = new DefaultAeadRequest(Streams.of('data'), null, secureRandom, alg.key().build(), 'aad'.getBytes())
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 

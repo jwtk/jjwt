@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
@@ -26,9 +27,12 @@ import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 import io.jsonwebtoken.security.WeakKeyException;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -153,5 +157,28 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
 
     protected byte[] getAAD(AssociatedDataSupplier request) {
         return Arrays.clean(request.getAssociatedData());
+    }
+
+    protected void withCipher(Cipher cipher, InputStream in, OutputStream out) throws Exception {
+        byte[] last = withCipher(cipher, in, null, out);
+        out.write(last); // no AAD, so no tag, so we can just append
+    }
+
+    protected byte[] withCipher(Cipher cipher, InputStream in, byte[] aad, OutputStream out) throws Exception {
+        if (!Bytes.isEmpty(aad)) cipher.updateAAD(aad);
+        byte[] buf = new byte[2048];
+        try {
+            int len = 0;
+            while (len != -1) {
+                len = in.read(buf);
+                if (len > 0) {
+                    byte[] enc = cipher.update(buf, 0, len);
+                    Streams.write(out, enc, "AesAlgorithm#withCipher");
+                }
+            }
+            return cipher.doFinal();
+        } finally {
+            Bytes.clear(buf);
+        }
     }
 }

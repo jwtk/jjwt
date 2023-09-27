@@ -562,11 +562,10 @@ public class DefaultJwtParser implements JwtParser {
             // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
             // As such, the provider here is intentionally omitted (null):
             // TODO: add encProvider(Provider) builder method that applies to this request only?
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
-            InputStream payloadStream = payload.toInputStream();
-            Streams.copy(payloadStream, baos, new byte[8192], "Unable to obtain payload bytes for decryption.");
+            InputStream ciphertext = payload.toInputStream();
+            ByteArrayOutputStream plaintext = new ByteArrayOutputStream();
             DecryptAeadRequest decryptRequest =
-                    new DefaultAeadResult(null, null, baos.toByteArray(), cek, aad, tag, iv);
+                    new DefaultAeadResult(null, null, ciphertext, cek, aad, tag, iv);
             Message<byte[]> result = encAlg.decrypt(decryptRequest);
             payload = new Payload(result.getPayload(), header.getContentType());
 

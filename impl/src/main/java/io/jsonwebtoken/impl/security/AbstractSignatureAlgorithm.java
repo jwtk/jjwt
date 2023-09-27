@@ -50,7 +50,7 @@ abstract class AbstractSignatureAlgorithm extends AbstractSecureDigestAlgorithm<
     }
 
     protected final byte[] sign(Signature sig, InputStream payload) throws Exception {
-        byte[] buf = new byte[1024];
+        byte[] buf = new byte[2048];
         int len = 0;
         while (len != -1) {
             len = payload.read(buf);

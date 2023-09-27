@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
@@ -31,10 +32,15 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.security.MessageDigest;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @since JJWT_RELEASE_VERSION
@@ -90,22 +96,28 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] plaintext = Assert.notEmpty(req.getPayload(), "Request content (plaintext) cannot be null or empty.");
+        final InputStream plaintext = Assert.notNull(req.getPayload(),
+                "Request content (plaintext) InputStream cannot be null or empty.");
         final byte[] aad = getAAD(req); //can be null if request associated data does not exist or is empty
         final byte[] iv = ensureInitializationVector(req);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        final byte[] ciphertext = jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        jca(req).withCipher(new CheckedFunction<Cipher, Object>() {
             @Override
-            public byte[] apply(Cipher cipher) throws Exception {
+            public Object apply(Cipher cipher) throws Exception {
                 cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, ivSpec);
-                return cipher.doFinal(plaintext);
+                withCipher(cipher, plaintext, out);
+                return null; // don't need to return anything
             }
         });
 
+        byte[] ciphertext = out.toByteArray();
         byte[] tag = sign(aad, iv, ciphertext, macKeyBytes);
 
-        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), ciphertext, encryptionKey, aad, tag, iv);
+        InputStream stream = new ByteArrayInputStream(ciphertext);
+        return new DefaultAeadResult(req.getProvider(), req.getSecureRandom(), stream, encryptionKey, aad, tag, iv);
     }
 
     private byte[] sign(byte[] aad, byte[] iv, byte[] ciphertext, byte[] macKeyBytes) {
@@ -115,21 +127,16 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         long aadLengthInBitsAsUnsignedInt = aadLengthInBits & 0xffffffffL;
         byte[] AL = Bytes.toBytes(aadLengthInBitsAsUnsignedInt);
 
-        byte[] toHash = new byte[(int) aadLength + iv.length + ciphertext.length + AL.length];
-
-        if (aad != null) {
-            System.arraycopy(aad, 0, toHash, 0, aad.length);
-            System.arraycopy(iv, 0, toHash, aad.length, iv.length);
-            System.arraycopy(ciphertext, 0, toHash, aad.length + iv.length, ciphertext.length);
-            System.arraycopy(AL, 0, toHash, aad.length + iv.length + ciphertext.length, AL.length);
-        } else {
-            System.arraycopy(iv, 0, toHash, 0, iv.length);
-            System.arraycopy(ciphertext, 0, toHash, iv.length, ciphertext.length);
-            System.arraycopy(AL, 0, toHash, iv.length + ciphertext.length, AL.length);
+        Collection<InputStream> streams = new ArrayList<>(4);
+        if (!Bytes.isEmpty(aad)) { // must come first if it exists
+            streams.add(new ByteArrayInputStream(aad));
         }
+        streams.add(new ByteArrayInputStream(iv));
+        streams.add(new ByteArrayInputStream(ciphertext));
+        streams.add(new ByteArrayInputStream(AL));
+        InputStream in = new SequenceInputStream(Collections.enumeration(streams));
 
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());
-        InputStream in = new ByteArrayInputStream(toHash);
         SecureRequest<InputStream, SecretKey> request =
                 new DefaultSecureRequest<>(in, null, null, key);
         byte[] digest = SIGALG.digest(request);
@@ -150,7 +157,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
         final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
 
-        final byte[] ciphertext = Assert.notEmpty(req.getPayload(), "Decryption request content (ciphertext) cannot be null or empty.");
+        final byte[] ciphertext = Assert.notEmpty(Streams.bytes(req.getPayload(), "testing"), "Decryption request content (ciphertext) cannot be null or empty.");
         final byte[] aad = getAAD(req);
         final byte[] tag = assertTag(req.getDigest());
         final byte[] iv = assertDecryptionIv(req);

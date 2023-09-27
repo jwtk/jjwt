@@ -709,10 +709,14 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
 
-        ByteArrayOutputStream pos = new ByteArrayOutputStream(4096);
-        writeAndClose("JWE Payload", content, pos);
-        final byte[] payload = Assert.notEmpty(pos.toByteArray(),
-                "JWE payload bytes cannot be empty."); // JWE invariant (JWS can be empty however)
+        InputStream plaintext;
+        if (content.isClaims()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
+            writeAndClose("JWE Claims", content, out);
+            plaintext = new ByteArrayInputStream(out.toByteArray());
+        } else {
+            plaintext = content.toInputStream();
+        }
 
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
@@ -731,7 +735,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final JweHeader header = Assert.isInstanceOf(JweHeader.class, this.headerBuilder.build(),
                 "Invalid header created: ");
 
-        ByteArrayOutputStream jwe = new ByteArrayOutputStream(4096);
+        ByteArrayOutputStream jwe = new ByteArrayOutputStream(8192);
         OutputStream out = encode(jwe, "JWE Protected Header"); // automatically base64url-encode as we write
         writeAndClose("JWE Protected Header", header, out); // closes/flushes the base64url-encoding stream, not 'jwe' (since BAOSs don't close)
 
@@ -745,13 +749,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
         // As such, the provider here is intentionally omitted (null):
         // TODO: add encProvider(Provider) builder method that applies to this request only?
-        AeadRequest encRequest = new DefaultAeadRequest(payload, null, secureRandom, cek, aad);
+        AeadRequest encRequest = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
         AeadResult encResult = encFunction.apply(encRequest);
 
         byte[] iv = Assert.notEmpty(encResult.getInitializationVector(),
                 "Encryption result must have a non-empty initialization vector.");
-        byte[] ciphertext = Assert.notEmpty(encResult.getPayload(),
-                "Encryption result must have non-empty ciphertext (result.getData()).");
+        byte[] ciphertext = Assert.notEmpty(Streams.bytes(encResult.getPayload()),
+                "Encryption result must have non-empty ciphertext.");
         byte[] tag = Assert.notEmpty(encResult.getDigest(),
                 "Encryption result must have a non-empty authentication tag.");
 
@@ -762,6 +766,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Streams.writeAndClose(encode(jwe, "JWE Initialization Vector"), iv, "Unable to write initialization vector.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);
+        //Streams.copy(Streams.of(ciphertext), encode(jwe, "JWE Ciphertext"), new byte[8192], "Unable to write ciphertext.");
         Streams.writeAndClose(encode(jwe, "JWE Ciphertext"), ciphertext, "Unable to write ciphertext.");
 
         jwe.write(DefaultJwtParser.SEPARATOR_CHAR);

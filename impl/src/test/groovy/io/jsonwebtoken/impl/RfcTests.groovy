@@ -37,7 +37,7 @@ class RfcTests {
     }
 
     static final Map<String, ?> jsonToMap(String json) {
-        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.stream(json)) as Map<String, ?>
+        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.of(json)) as Map<String, ?>
         return m
     }
 

@@ -39,7 +39,7 @@ class RFC7515AppendixETest {
     }
 
     static <T> T deser(String s) {
-        T t = deserializer.deserialize(Streams.stream(s)) as T
+        T t = deserializer.deserialize(Streams.of(s)) as T
         return t
     }
 

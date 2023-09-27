@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -60,11 +61,14 @@ class GcmAesAeadAlgorithmTest {
 
         def alg = Jwts.ENC.A256GCM
 
-        def req = new DefaultAeadRequest(P, null, null, KEY, AAD, IV)
+        def ins = new ByteArrayInputStream(P)
+
+        def req = new DefaultAeadRequest(ins, null, null, KEY, AAD, IV)
 
         def result = alg.encrypt(req)
 
-        byte[] ciphertext = result.getPayload()
+        InputStream stream = result.getPayload()
+        byte[] ciphertext = Streams.bytes(stream, "testing")
         byte[] tag = result.getDigest()
         byte[] iv = result.getInitializationVector()
 
@@ -73,7 +77,7 @@ class GcmAesAeadAlgorithmTest {
         assertArrayEquals IV, iv //shouldn't have been altered
 
         // now test decryption:
-        def dreq = new DefaultAeadResult(null, null, ciphertext, KEY, AAD, tag, iv)
+        def dreq = new DefaultAeadResult(null, null, stream, KEY, AAD, tag, iv)
         byte[] decryptionResult = alg.decrypt(dreq).getPayload()
         assertArrayEquals(P, decryptionResult)
     }

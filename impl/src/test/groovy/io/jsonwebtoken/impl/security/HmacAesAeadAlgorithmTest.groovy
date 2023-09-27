@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Bytes
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.AeadAlgorithm
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -60,7 +61,8 @@ class HmacAesAeadAlgorithmTest {
 
         SecretKey key = alg.key().build()
 
-        def plaintext = "Hello World! Nice to meet you!".getBytes("UTF-8")
+        byte[] data = Strings.utf8('Hello World! Nice to meet you!')
+        def plaintext = Bytes.stream(data)
 
         def req = new DefaultAeadRequest(plaintext, null, null, key, null)
         def result = alg.encrypt(req)

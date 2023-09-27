@@ -39,6 +39,10 @@ public class Streams {
      */
     public static final int EOF = -1;
 
+    public static byte[] bytes(InputStream in) {
+        return bytes(in, "Unable to extract InputStream bytes.");
+    }
+
     public static byte[] bytes(final InputStream in, String exmsg) {
         if (in instanceof ByteArrayInputStream) {
             return Classes.getFieldValue(in, "buf", byte[].class);
@@ -48,12 +52,12 @@ public class Streams {
         return out.toByteArray();
     }
 
-    public static InputStream stream(byte[] bytes) {
-        return new ByteArrayInputStream(bytes);
+    public static InputStream of(byte[] bytes) {
+        return Bytes.stream(bytes);
     }
 
-    public static InputStream stream(CharSequence seq) {
-        return stream(Strings.utf8(seq));
+    public static InputStream of(CharSequence seq) {
+        return of(Strings.utf8(seq));
     }
 
     /**
@@ -117,12 +121,15 @@ public class Streams {
     }
 
     public static void write(final OutputStream out, final byte[] bytes, String exMsg) {
-        if (out == null || Bytes.isEmpty(bytes)) return;
+        write(out, bytes, 0, Bytes.length(bytes), exMsg);
+    }
+
+    public static void write(final OutputStream out, final byte[] data, final int offset, final int len, String exMsg) {
+        if (out == null || Bytes.isEmpty(data) || len <= 0) return;
         run(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                out.write(bytes);
-                Objects.nullSafeFlush(out);
+                out.write(data, offset, len);
                 return null;
             }
         }, exMsg);
