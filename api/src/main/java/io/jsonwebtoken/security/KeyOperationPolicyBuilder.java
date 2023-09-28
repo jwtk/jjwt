@@ -35,25 +35,21 @@ import java.util.Collection;
 public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
 
     /**
-     * Sets if a JWK is allowed to have unrelated {@link KeyOperation}s in its {@code key_ops} parameter values.
-     * The default value is {@code false} per the JWK
-     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
-     *
+     * Allows a JWK to have unrelated {@link KeyOperation}s in its {@code key_ops} parameter values. <b>Be careful
+     * when calling this method - one should fully understand the security implications of using the same key
+     * with multiple algorithms in your application.</b>
+     * <p>If this method is not called, unrelated key operations are disabled by default per the recommendations in
+     * <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">RFC 7517, Section 4.3</a>:</p>
      * <blockquote><pre>
      * Multiple unrelated key operations SHOULD NOT be specified for a key
      * because of the potential vulnerabilities associated with using the
-     * same key with multiple algorithms.
-     * </pre></blockquote>
+     * same key with multiple algorithms.</pre></blockquote>
      *
-     * <p>Only set this value to {@code true} if you fully understand the security implications of using the same key
-     * with multiple algorithms in your application. Otherwise it is best not to use this builder method, or
-     * explicitly set it to {@code false}.</p>
-     *
-     * @param allow if a JWK is allowed to have unrelated key {@link KeyOperation}s in its {@code key_ops}
-     *              parameter values.
      * @return the builder for method chaining
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.3">&quot;key_ops&quot; (Key Operations)
+     * Parameter</a>
      */
-    KeyOperationPolicyBuilder unrelated(boolean allow);
+    KeyOperationPolicyBuilder unrelated();
 
     /**
      * Adds the specified key operation to the policy's total set of supported key operations

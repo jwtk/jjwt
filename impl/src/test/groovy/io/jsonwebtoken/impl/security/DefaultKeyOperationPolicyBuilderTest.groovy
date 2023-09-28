@@ -80,7 +80,7 @@ class DefaultKeyOperationPolicyBuilderTest {
     @Test
     void testAllowUnrelatedTrue() { // testDefault has it false as expected
         def foo = Jwks.OP.builder().id('foo').build()
-        def policy = builder.unrelated(true).build()
+        def policy = builder.unrelated().build()
         policy.validate([foo, Jwks.OP.SIGN]) // no exception thrown since unrelated == true
     }
 
