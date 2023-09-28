@@ -53,7 +53,7 @@ public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
      *              parameter values.
      * @return the builder for method chaining
      */
-    KeyOperationPolicyBuilder allowUnrelated(boolean allow);
+    KeyOperationPolicyBuilder unrelated(boolean allow);
 
     /**
      * Adds the specified key operation to the policy's total set of supported key operations

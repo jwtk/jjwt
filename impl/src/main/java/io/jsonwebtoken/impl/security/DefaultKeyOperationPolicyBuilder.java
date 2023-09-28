@@ -36,7 +36,7 @@ public class DefaultKeyOperationPolicyBuilder implements KeyOperationPolicyBuild
     }
 
     @Override
-    public KeyOperationPolicyBuilder allowUnrelated(boolean allow) {
+    public KeyOperationPolicyBuilder unrelated(boolean allow) {
         this.allowUnrelated = allow;
         return this;
     }
