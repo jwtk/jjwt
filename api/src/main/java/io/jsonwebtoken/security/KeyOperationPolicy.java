@@ -20,8 +20,8 @@ import java.util.Collection;
 /**
  * A key operation policy determines which {@link KeyOperation}s may be assigned to a JWK.
  *
- * @since JJWT_RELEASE_VERSION
  * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
+ * @since JJWT_RELEASE_VERSION
  */
 public interface KeyOperationPolicy {
 
@@ -39,5 +39,5 @@ public interface KeyOperationPolicy {
      * @param ops the operations to validate
      */
     @SuppressWarnings("GrazieInspection")
-    void validate(Collection<KeyOperation> ops) throws IllegalArgumentException;
+    void validate(Collection<? extends KeyOperation> ops) throws IllegalArgumentException;
 }

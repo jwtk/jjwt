@@ -15,24 +15,20 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.impl.lang.DefaultCollectionMutator;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyOperation;
 import io.jsonwebtoken.security.KeyOperationPolicy;
 import io.jsonwebtoken.security.KeyOperationPolicyBuilder;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+public class DefaultKeyOperationPolicyBuilder extends DefaultCollectionMutator<KeyOperation, KeyOperationPolicyBuilder>
+        implements KeyOperationPolicyBuilder {
 
-public class DefaultKeyOperationPolicyBuilder implements KeyOperationPolicyBuilder {
-
-    private final Map<String, KeyOperation> ops;
     private boolean unrelated = false;
 
     public DefaultKeyOperationPolicyBuilder() {
-        this.ops = new LinkedHashMap<>(Jwks.OP.get());
+        super(Jwks.OP.get().values());
     }
 
     @Override
@@ -42,27 +38,7 @@ public class DefaultKeyOperationPolicyBuilder implements KeyOperationPolicyBuild
     }
 
     @Override
-    public KeyOperationPolicyBuilder add(KeyOperation op) {
-        if (op != null) {
-            String id = Assert.hasText(op.getId(), "KeyOperation id cannot be null or empty.");
-            this.ops.remove(id);
-            this.ops.put(id, op);
-        }
-        return this;
-    }
-
-    @Override
-    public KeyOperationPolicyBuilder add(Collection<KeyOperation> ops) {
-        if (!Collections.isEmpty(ops)) {
-            for (KeyOperation op : ops) {
-                add(op);
-            }
-        }
-        return this;
-    }
-
-    @Override
     public KeyOperationPolicy build() {
-        return new DefaultKeyOperationPolicy(Collections.immutable(this.ops.values()), this.unrelated);
+        return new DefaultKeyOperationPolicy(Collections.immutable(getCollection()), this.unrelated);
     }
 }

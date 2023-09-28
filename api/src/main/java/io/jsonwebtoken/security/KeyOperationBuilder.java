@@ -17,11 +17,9 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Builder;
 
-import java.util.Collection;
-
 /**
  * A {@code KeyOperationBuilder} produces {@link KeyOperation} instances that may be added to a JWK's
- * {@link JwkBuilder#operations(Collection) key operations} parameter. This is primarily only useful for creating
+ * {@link JwkBuilder#operations() key operations} parameter. This is primarily only useful for creating
  * custom (non-standard) {@code KeyOperation}s for use with a custom {@link KeyOperationPolicy}, as all standard ones
  * are available already via the {@link Jwks.OP} registry singleton.
  *

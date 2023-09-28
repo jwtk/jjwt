@@ -33,8 +33,10 @@ public interface KeyOperationPolicied<T extends KeyOperationPolicied<T>> {
      * <blockquote><pre>
      * Multiple unrelated key operations SHOULD NOT be specified for a key
      * because of the potential vulnerabilities associated with using the
-     * same key with multiple algorithms.
-     * </pre></blockquote></li>
+     * same key with multiple algorithms.  Thus, the combinations "{@link Jwks.OP#SIGN sign}"
+     * with "{@link Jwks.OP#VERIFY verify}", "{@link Jwks.OP#ENCRYPT encrypt}" with "{@link Jwks.OP#DECRYPT decrypt}", and "{@link Jwks.OP#WRAP_KEY wrapKey}" with
+     * "{@link Jwks.OP#UNWRAP_KEY unwrapKey}" are permitted, but other combinations SHOULD NOT be used.</pre></blockquote>
+     * </li>
      * </ul>
      *
      * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,

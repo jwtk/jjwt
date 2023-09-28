@@ -48,7 +48,7 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String, Obj
 
     Set<KeyOperation> getOperations();
 
-    JwkContext<K> setOperations(Collection<KeyOperation> operations);
+    JwkContext<K> setOperations(Collection<? extends KeyOperation> operations);
 
     String getAlgorithm();
 

@@ -17,6 +17,7 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.lang.Builder;
+import io.jsonwebtoken.lang.CollectionMutator;
 
 import java.util.Collection;
 
@@ -32,7 +33,8 @@ import java.util.Collection;
  * @see Jwks.OP#builder()
  * @since JJWT_RELEASE_VERSION
  */
-public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
+public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperation, KeyOperationPolicyBuilder>,
+        Builder<KeyOperationPolicy> {
 
     /**
      * Allows a JWK to have unrelated {@link KeyOperation}s in its {@code key_ops} parameter values. <b>Be careful
@@ -72,8 +74,10 @@ public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
      * @see Jwks.OP
      * @see Jwks.OP#builder()
      * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
-     * @see JwkBuilder#operations(Collection)
+     * @see JwkBuilder#operations()
      */
+    @Override
+    // for better JavaDoc
     KeyOperationPolicyBuilder add(KeyOperation op);
 
     /**
@@ -101,8 +105,10 @@ public interface KeyOperationPolicyBuilder extends Builder<KeyOperationPolicy> {
      * @see Jwks.OP
      * @see Jwks.OP#builder()
      * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
-     * @see JwkBuilder#operations(Collection)
+     * @see JwkBuilder#operations()
      */
-    KeyOperationPolicyBuilder add(Collection<KeyOperation> ops);
+    @Override
+    // for better JavaDoc
+    KeyOperationPolicyBuilder add(Collection<? extends KeyOperation> ops);
 
 }

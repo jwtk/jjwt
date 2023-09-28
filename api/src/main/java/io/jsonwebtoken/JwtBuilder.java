@@ -20,6 +20,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -1052,14 +1053,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims> {
-
-        /**
-         * Returns the associated JwtBuilder for continued configuration.
-         *
-         * @return the associated JwtBuilder for continued configuration.
-         */
-        JwtBuilder and();
+    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims>,
+            Conjunctor<JwtBuilder> {
     }
 
     /**
@@ -1069,13 +1064,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader> {
-
-        /**
-         * Returns the associated JwtBuilder for continued configuration.
-         *
-         * @return the associated JwtBuilder for continued configuration.
-         */
-        JwtBuilder and();
+    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader>,
+            Conjunctor<JwtBuilder> {
     }
 }

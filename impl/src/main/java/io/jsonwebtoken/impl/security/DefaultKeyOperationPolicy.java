@@ -41,7 +41,7 @@ final class DefaultKeyOperationPolicy implements KeyOperationPolicy {
     }
 
     @Override
-    public void validate(Collection<KeyOperation> ops) {
+    public void validate(Collection<? extends KeyOperation> ops) {
         if (allowUnrelated || Collections.isEmpty(ops)) return;
         for (KeyOperation operation : ops) {
             for (KeyOperation inner : ops) {
