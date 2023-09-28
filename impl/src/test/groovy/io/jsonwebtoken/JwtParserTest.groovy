@@ -1131,7 +1131,7 @@ class JwtParserTest {
         def one = 'one'
         def two = 'two'
         def expected = [one, two]
-        String jwt = Jwts.builder().audience(one).audience(two).compact()
+        String jwt = Jwts.builder().audience().add(one).add(two).and().compact()
         def aud = Jwts.parser().unsecured().requireAudience(one).requireAudience(two).build()
                 .parseClaimsJwt(jwt).getPayload().getAudience()
         assertEquals expected.size(), aud.size()
@@ -1142,7 +1142,7 @@ class JwtParserTest {
     void testParseAtLeastOneAudiences() {
         def one = 'one'
 
-        String jwt = Jwts.builder().audience(one).audience('two').compact() // more audiences than required
+        String jwt = Jwts.builder().audience().add(one).add('two').and().compact() // more audiences than required
 
         def aud = Jwts.parser().unsecured().requireAudience(one) // require only one
                 .build().parseClaimsJwt(jwt).getPayload().getAudience()

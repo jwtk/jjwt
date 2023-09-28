@@ -163,7 +163,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder requireAudience(String audience) {
-        expectedClaims.audience(audience);
+        expectedClaims.audience().add(audience).and();
         return this;
     }
 

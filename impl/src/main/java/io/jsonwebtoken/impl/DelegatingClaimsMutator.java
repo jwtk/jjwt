@@ -23,9 +23,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.lang.Strings;
 
-import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -74,7 +72,8 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
 
     @Override
     public T setAudience(String aud) {
-        return audienceSingle(aud);
+        //noinspection deprecation
+        return audience().single(aud);
     }
 
     private Set<String> getAudience() {
@@ -83,51 +82,36 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
             String existing = get(AUDIENCE_STRING);
             remove(AUDIENCE_STRING.getId()); // clear out any canonical/idiomatic values since we're replacing
             setDelegate(this.DELEGATE.replace(DefaultClaims.AUDIENCE));
-            if (Strings.hasText(existing)) {
-                put(DefaultClaims.AUDIENCE, Collections.setOf(existing)); // replace as Set
-            }
+            put(DefaultClaims.AUDIENCE, Collections.setOf(existing)); // replace as Set
         }
         return get(DefaultClaims.AUDIENCE);
     }
 
-    @Override
-    public T audienceSingle(String aud) {
+    private T audienceSingle(String aud) {
         if (!Strings.hasText(aud)) {
             return put(DefaultClaims.AUDIENCE, null);
         }
         // otherwise it's an actual single string, we need to ensure that we can represent it as a single
-        // string by swapping out the AUDIENCE param if necessary:
-        if (this.DELEGATE.PARAMS.get(AUDIENCE_STRING.getId()).supports(Collections.emptySet())) { // need to swap:
-            remove(AUDIENCE_STRING.getId()); //remove any existing value, as conversion will throw an exception
-            setDelegate(this.DELEGATE.replace(AUDIENCE_STRING));
-        }
+        // string by swapping out the AUDIENCE param:
+        remove(AUDIENCE_STRING.getId()); //remove any existing value, as conversion will throw an exception
+        setDelegate(this.DELEGATE.replace(AUDIENCE_STRING));
         return put(AUDIENCE_STRING, aud);
     }
 
     @Override
-    public T audience(String aud) {
-        aud = Strings.clean(aud);
-        if (Strings.hasText(aud)) {
-            audience(java.util.Collections.singleton(aud));
-        }
-        return self();
-    }
-
-    @Override
-    public T audience(Collection<String> aud) {
-        if (!Collections.isEmpty(aud)) {
-            Set<String> existing = Collections.nullSafe(getAudience());
-            Set<String> set = new LinkedHashSet<>(existing.size() + aud.size());
-            set.addAll(existing);
-            for (String s : aud) {
-                s = Strings.clean(s);
-                if (s != null) {
-                    set.add(s);
-                }
+    public AudienceCollection<T> audience() {
+        return new AbstractAudienceCollection<T>(self(), getAudience()) {
+            @Override
+            public T single(String audience) {
+                return audienceSingle(audience);
             }
-            put(DefaultClaims.AUDIENCE, set);
-        }
-        return self();
+
+            @Override
+            public T and() {
+                put(DefaultClaims.AUDIENCE, Collections.asSet(getCollection()));
+                return super.and();
+            }
+        };
     }
 
     @Override

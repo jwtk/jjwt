@@ -74,7 +74,6 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -435,19 +434,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder audienceSingle(String aud) {
-        //noinspection deprecation
-        return claims().audienceSingle(aud).and();
-    }
-
-    @Override
-    public JwtBuilder audience(String aud) {
-        return claims().audience(aud).and();
-    }
-
-    @Override
-    public JwtBuilder audience(Collection<String> aud) {
-        return claims().audience(aud).and();
+    public AudienceCollection<JwtBuilder> audience() {
+        return new DelegateAudienceCollection<>((JwtBuilder) this, claims().audience());
     }
 
     @Override

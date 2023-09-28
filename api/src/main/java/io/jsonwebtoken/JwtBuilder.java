@@ -403,9 +403,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * String jwt = Jwts.builder()
      *
      *     <b>.claims()
-     *         .subject("Joe")
-     *         .audience("you")
      *         .issuer("me")
+     *         .subject("Joe")
+     *         .audience().add("you").and()
      *         .add("customClaim", customValue)
      *         .add(myClaimsMap)
      *         // ... etc ...
@@ -514,20 +514,6 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     @Override
     // for better/targeted JavaDoc
     JwtBuilder subject(String sub);
-
-    /**
-     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
-     * <code>aud</code></a> (audience) claim. A {@code null} value will remove the property from the Claims.
-     * This is a convenience wrapper for:
-     * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link BuilderClaims#and() and()}</pre></blockquote>
-     *
-     * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     */
-    @Override
-    // for better/targeted JavaDoc
-    JwtBuilder audience(String aud);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
