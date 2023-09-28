@@ -62,38 +62,38 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
     }
 
     @Override
-    public X509BuilderSupport withX509Sha1Thumbprint(boolean enable) {
-        this.computeX509Sha1Thumbprint = enable;
-        return this;
-    }
-
-    @Override
-    public X509BuilderSupport withX509Sha256Thumbprint(boolean enable) {
-        this.computeX509Sha256Thumbprint = enable;
-        return this;
-    }
-
-    @Override
     public X509BuilderSupport x509Url(URI uri) {
         this.map.put(AbstractAsymmetricJwk.X5U.getId(), uri);
         return this;
     }
 
     @Override
-    public X509BuilderSupport x509CertificateChain(List<X509Certificate> chain) {
+    public X509BuilderSupport x509Chain(List<X509Certificate> chain) {
         this.map.put(AbstractAsymmetricJwk.X5C.getId(), chain);
         return this;
     }
 
     @Override
-    public X509BuilderSupport x509CertificateSha1Thumbprint(byte[] thumbprint) {
+    public X509BuilderSupport x509Sha1Thumbprint(byte[] thumbprint) {
         this.map.put(AbstractAsymmetricJwk.X5T.getId(), thumbprint);
         return this;
     }
 
     @Override
-    public X509BuilderSupport x509CertificateSha256Thumbprint(byte[] thumbprint) {
+    public X509BuilderSupport x509Sha1Thumbprint(boolean enable) {
+        this.computeX509Sha1Thumbprint = enable;
+        return this;
+    }
+
+    @Override
+    public X509BuilderSupport x509Sha256Thumbprint(byte[] thumbprint) {
         this.map.put(AbstractAsymmetricJwk.X5T_S256.getId(), thumbprint);
+        return this;
+    }
+
+    @Override
+    public X509BuilderSupport x509Sha256Thumbprint(boolean enable) {
+        this.computeX509Sha256Thumbprint = enable;
         return this;
     }
 
@@ -121,11 +121,11 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
         if (firstCert != null) {
             if (computeX509Sha1Thumbprint) {
                 byte[] thumbprint = computeThumbprint(firstCert, DefaultHashAlgorithm.SHA1);
-                x509CertificateSha1Thumbprint(thumbprint);
+                x509Sha1Thumbprint(thumbprint);
             }
             if (computeX509Sha256) {
                 byte[] thumbprint = computeThumbprint(firstCert, Jwks.HASH.SHA256);
-                x509CertificateSha256Thumbprint(thumbprint);
+                x509Sha256Thumbprint(thumbprint);
             }
         }
     }

@@ -61,7 +61,7 @@ public interface KeyOperationBuilder extends Builder<KeyOperation> {
      *     assert built.isRelated(other);</pre></blockquote>
      *
      * <p>A {@link JwkBuilder}'s key operation {@link JwkBuilder#operationPolicy(KeyOperationPolicy) policy} is likely
-     * to {@link KeyOperationPolicyBuilder#allowUnrelated(boolean) reject} any <em>un</em>related operations specified
+     * to {@link KeyOperationPolicyBuilder#unrelated() reject} any <em>un</em>related operations specified
      * together due to the potential security vulnerabilities that could occur.</p>
      *
      * <p>This method may be called multiple times to add/append a related {@code id} to the constructed

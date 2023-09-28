@@ -51,17 +51,17 @@ public abstract class AbstractAsymmetricJwk<K extends Key> extends AbstractJwk<K
     }
 
     @Override
-    public List<X509Certificate> getX509CertificateChain() {
-        return Collections.immutable(this.context.getX509CertificateChain());
+    public List<X509Certificate> getX509Chain() {
+        return Collections.immutable(this.context.getX509Chain());
     }
 
     @Override
-    public byte[] getX509CertificateSha1Thumbprint() {
-        return (byte[])Arrays.copy(this.context.getX509CertificateSha1Thumbprint());
+    public byte[] getX509Sha1Thumbprint() {
+        return (byte[])Arrays.copy(this.context.getX509Sha1Thumbprint());
     }
 
     @Override
-    public byte[] getX509CertificateSha256Thumbprint() {
-        return (byte[])Arrays.copy(this.context.getX509CertificateSha256Thumbprint());
+    public byte[] getX509Sha256Thumbprint() {
+        return (byte[])Arrays.copy(this.context.getX509Sha256Thumbprint());
     }
 }

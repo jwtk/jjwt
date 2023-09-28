@@ -29,15 +29,15 @@ import java.util.Map;
 public class DefaultKeyOperationPolicyBuilder implements KeyOperationPolicyBuilder {
 
     private final Map<String, KeyOperation> ops;
-    private boolean allowUnrelated = false;
+    private boolean unrelated = false;
 
     public DefaultKeyOperationPolicyBuilder() {
         this.ops = new LinkedHashMap<>(Jwks.OP.get());
     }
 
     @Override
-    public KeyOperationPolicyBuilder allowUnrelated(boolean allow) {
-        this.allowUnrelated = allow;
+    public KeyOperationPolicyBuilder unrelated() {
+        this.unrelated = true;
         return this;
     }
 
@@ -63,6 +63,6 @@ public class DefaultKeyOperationPolicyBuilder implements KeyOperationPolicyBuild
 
     @Override
     public KeyOperationPolicy build() {
-        return new DefaultKeyOperationPolicy(Collections.immutable(this.ops.values()), this.allowUnrelated);
+        return new DefaultKeyOperationPolicy(Collections.immutable(this.ops.values()), this.unrelated);
     }
 }

@@ -92,17 +92,17 @@ public class DefaultMutableJweHeader extends DefaultJweHeaderMutator<DefaultMuta
     }
 
     @Override
-    public List<X509Certificate> getX509CertificateChain() {
+    public List<X509Certificate> getX509Chain() {
         return get(DefaultProtectedHeader.X5C);
     }
 
     @Override
-    public byte[] getX509CertificateSha1Thumbprint() {
+    public byte[] getX509Sha1Thumbprint() {
         return get(DefaultProtectedHeader.X5T);
     }
 
     @Override
-    public byte[] getX509CertificateSha256Thumbprint() {
+    public byte[] getX509Sha256Thumbprint() {
         return get(DefaultProtectedHeader.X5T_S256);
     }
 

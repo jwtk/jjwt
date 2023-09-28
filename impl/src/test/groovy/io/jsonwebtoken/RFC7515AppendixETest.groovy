@@ -57,7 +57,7 @@ class RFC7515AppendixETest {
         String jws = b64url + '.RkFJTA.'
 
         try {
-            Jwts.parser().enableUnsecured().build().parse(jws)
+            Jwts.parser().unsecured().build().parse(jws)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_UNSECURED_MSG, header)
@@ -88,7 +88,7 @@ class RFC7515AppendixETest {
         String jws = b64url + '.RkFJTA.fakesignature' // needed to parse a JWS properly
 
         try {
-            Jwts.parser().enableUnsecured().build().parse(jws)
+            Jwts.parser().unsecured().build().parse(jws)
             fail()
         } catch (UnsupportedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_UNSUPPORTED_MSG, critVal, critVal, header)

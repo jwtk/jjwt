@@ -56,7 +56,7 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testProvider() {
-        def provider = createMock(Provider)
+        Provider provider = createMock(Provider)
         def parser = Jwks.parser().provider(provider).build() as ConvertingParser
         assertSame provider, parser.converter.supplier.provider
     }
@@ -91,7 +91,7 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testOperationPolicyOverride() {
-        def policy = Jwks.OP.policy().allowUnrelated(true).build()
+        def policy = Jwks.OP.policy().unrelated().build()
         def parser = Jwks.parser().operationPolicy(policy).build()
         assertNotNull parser.parse(UNRELATED_OPS_JSON) // no exception because policy allows it
     }

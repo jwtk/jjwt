@@ -108,7 +108,7 @@ class DefaultJwtParserBuilderTest {
                 return Decoders.BASE64URL.decode(s)
             }
         }
-        def parser = builder.base64UrlDecodeWith(decoder).enableUnsecured().build()
+        def parser = builder.base64UrlDecodeWith(decoder).unsecured().build()
         assertFalse invoked
 
         assertEquals 'bar', parser.parseClaimsJwt(jwt).getPayload().get('foo')
@@ -309,10 +309,10 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testEnableUnsecuredDecompressionWithoutEnablingUnsecuredJws() {
         try {
-            builder.enableUnsecuredDecompression().build()
+            builder.unsecuredDecompression().build()
             fail()
         } catch (IllegalStateException ise) {
-            String expected = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecured' " + "is also configured. Please read the JavaDoc of both features before enabling either " + "due to their security implications."
+            String expected = "'unsecuredDecompression' is only relevant if 'unsecured' " + "is also configured. Please read the JavaDoc of both features before enabling either " + "due to their security implications."
             assertEquals expected, ise.getMessage()
         }
     }
@@ -322,7 +322,7 @@ class DefaultJwtParserBuilderTest {
         def codec = Jwts.ZIP.GZIP
         String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
         try {
-            builder.enableUnsecured().build().parse(jwt)
+            builder.unsecured().build().parse(jwt)
             fail()
         } catch (UnsupportedJwtException e) {
             String expected = String.format(DefaultJwtParser.UNPROTECTED_DECOMPRESSION_MSG, codec.getId())
@@ -334,7 +334,7 @@ class DefaultJwtParserBuilderTest {
     void testDecompressUnprotectedJwtEnabled() {
         def codec = Jwts.ZIP.GZIP
         String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
-        def jwt = builder.enableUnsecured().enableUnsecuredDecompression().build().parse(jws)
+        def jwt = builder.unsecured().unsecuredDecompression().build().parse(jws)
         assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()
     }
 

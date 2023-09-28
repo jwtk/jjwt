@@ -316,7 +316,7 @@ class DefaultJwkSetBuilderTest {
                 k      : Encoders.BASE64URL.encode(key.getEncoded()),
                 key_ops: ['sign', 'encrypt'] // unrelated, but we'll allow next:
         ]
-        KeyOperationPolicy policy = Jwks.OP.policy().allowUnrelated(true).build()
+        KeyOperationPolicy policy = Jwks.OP.policy().unrelated().build()
         def jwk = Jwks.builder().operationPolicy(policy).add(badMap).build()
 
         builder.operationPolicy(policy)

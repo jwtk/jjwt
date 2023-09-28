@@ -166,20 +166,20 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     }
 
     @Override
-    public T x509CertificateChain(List<X509Certificate> chain) {
-        this.x509.x509CertificateChain(chain);
+    public T x509Chain(List<X509Certificate> chain) {
+        this.x509.x509Chain(chain);
         return self();
     }
 
     @Override
-    public T x509CertificateSha1Thumbprint(byte[] thumbprint) {
-        this.x509.x509CertificateSha1Thumbprint(thumbprint);
+    public T x509Sha1Thumbprint(byte[] thumbprint) {
+        this.x509.x509Sha1Thumbprint(thumbprint);
         return self();
     }
 
     @Override
-    public T x509CertificateSha256Thumbprint(byte[] thumbprint) {
-        this.x509.x509CertificateSha256Thumbprint(thumbprint);
+    public T x509Sha256Thumbprint(byte[] thumbprint) {
+        this.x509.x509Sha256Thumbprint(thumbprint);
         return self();
     }
 

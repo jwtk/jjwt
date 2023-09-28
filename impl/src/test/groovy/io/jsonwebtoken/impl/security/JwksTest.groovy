@@ -51,7 +51,7 @@ class JwksTest {
 
     static void testProperty(String name, String id, def val, def expectedFieldValue = val) {
         String cap = "${name.capitalize()}"
-        def key = name == 'publicKeyUse' || name == 'x509CertificateChain' ? EC_PAIR.public : SKEY
+        def key = name == 'publicKeyUse' || name == 'x509Chain' ? EC_PAIR.public : SKEY
 
         //test non-null value:
         //noinspection GroovyAssignabilityCheck
@@ -198,7 +198,7 @@ class JwksTest {
         //get a test cert:
         X509Certificate cert = TestKeys.forAlgorithm(Jwts.SIG.RS256).cert
         def sval = JwtX509StringConverter.INSTANCE.applyTo(cert)
-        testProperty('x509CertificateChain', 'x5c', [cert], [sval])
+        testProperty('x509Chain', 'x5c', [cert], [sval])
     }
 
     @Test
@@ -232,16 +232,16 @@ class JwksTest {
             def builder = Jwks.builder().chain(Arrays.asList(cert))
 
             if (number == 1) {
-                builder.withX509Sha1Thumbprint(true)
+                builder.x509Sha1Thumbprint(true)
             } // otherwise, when a chain is present, a sha256 thumbprint is calculated automatically
 
             def jwkFromKey = builder.build() as PublicJwk
-            byte[] thumbprint = jwkFromKey."getX509CertificateSha${number}Thumbprint"()
+            byte[] thumbprint = jwkFromKey."getX509Sha${number}Thumbprint"()
             assertNotNull thumbprint
 
             //ensure base64url encoding/decoding of the thumbprint works:
             def jwkFromValues = Jwks.builder().add(jwkFromKey).build() as PublicJwk
-            assertArrayEquals thumbprint, jwkFromValues."getX509CertificateSha${number}Thumbprint"() as byte[]
+            assertArrayEquals thumbprint, jwkFromValues."getX509Sha${number}Thumbprint"() as byte[]
         }
     }
 
@@ -455,7 +455,7 @@ class JwksTest {
             ECPublicKey key = it.pair.public as ECPublicKey
             def jwk = Jwks.builder().ecChain(it.chain).build()
             assertEquals key, jwk.toKey()
-            assertEquals it.chain, jwk.getX509CertificateChain()
+            assertEquals it.chain, jwk.getX509Chain()
         }
     }
 
@@ -465,7 +465,7 @@ class JwksTest {
             RSAPublicKey key = it.pair.public as RSAPublicKey
             def jwk = Jwks.builder().rsaChain(it.chain).build()
             assertEquals key, jwk.toKey()
-            assertEquals it.chain, jwk.getX509CertificateChain()
+            assertEquals it.chain, jwk.getX509Chain()
         }
     }
 
@@ -475,7 +475,7 @@ class JwksTest {
             PublicKey key = it.pair.public
             def jwk = Jwks.builder().octetChain(it.chain).build()
             assertEquals key, jwk.toKey()
-            assertEquals it.chain, jwk.getX509CertificateChain()
+            assertEquals it.chain, jwk.getX509Chain()
         }
     }
 

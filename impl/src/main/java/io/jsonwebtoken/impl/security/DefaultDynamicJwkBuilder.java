@@ -134,7 +134,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         Assert.notEmpty(chain, "chain cannot be null or empty.");
         X509Certificate cert = Assert.notNull(chain.get(0), "The first X509Certificate cannot be null.");
         PublicKey key = Assert.notNull(cert.getPublicKey(), "The first X509Certificate's PublicKey cannot be null.");
-        return this.<A, B>key((A) key).x509CertificateChain(chain);
+        return this.<A, B>key((A) key).x509Chain(chain);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         X509Certificate cert = chain.get(0);
         PublicKey key = cert.getPublicKey();
         RSAPublicKey pubKey = KeyPairs.assertKey(key, RSAPublicKey.class, "The first X509Certificate's ");
-        return key(pubKey).x509CertificateChain(chain);
+        return key(pubKey).x509Chain(chain);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         X509Certificate cert = chain.get(0);
         PublicKey key = cert.getPublicKey();
         ECPublicKey pubKey = KeyPairs.assertKey(key, ECPublicKey.class, "The first X509Certificate's ");
-        return key(pubKey).x509CertificateChain(chain);
+        return key(pubKey).x509Chain(chain);
     }
 
     @SuppressWarnings("unchecked") // ok because of the EdwardsCurve.assertEdwards calls
@@ -173,7 +173,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         PublicKey key = cert.getPublicKey();
         Assert.notNull(key, "The first X509Certificate's PublicKey cannot be null.");
         EdwardsCurve.assertEdwards(key);
-        return this.<A, B>octetKey((A) key).x509CertificateChain(chain);
+        return this.<A, B>octetKey((A) key).x509Chain(chain);
     }
 
     @Override

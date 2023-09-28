@@ -38,16 +38,16 @@ class DefaultJwkContextTest {
     void testX509CertificateChain() {
         def chain = TestKeys.RS256.chain
         def ctx = new DefaultJwkContext()
-        ctx.x509CertificateChain(chain)
-        assertEquals chain, ctx.getX509CertificateChain()
+        ctx.x509Chain(chain)
+        assertEquals chain, ctx.getX509Chain()
     }
 
     @Test
     void testX509CertificateSha1Thumbprint() {
         def thumbprint = Bytes.randomBits(128)
         def ctx = new DefaultJwkContext()
-        ctx.x509CertificateSha1Thumbprint(thumbprint)
-        assertArrayEquals thumbprint, ctx.getX509CertificateSha1Thumbprint()
+        ctx.x509Sha1Thumbprint(thumbprint)
+        assertArrayEquals thumbprint, ctx.getX509Sha1Thumbprint()
         assertEquals Encoders.BASE64URL.encode(thumbprint), ctx.get('x5t')
     }
 
@@ -55,8 +55,8 @@ class DefaultJwkContextTest {
     void testX509CertificateSha256Thumbprint() {
         def thumbprint = Bytes.randomBits(256)
         def ctx = new DefaultJwkContext()
-        ctx.x509CertificateSha256Thumbprint(thumbprint)
-        assertArrayEquals thumbprint, ctx.getX509CertificateSha256Thumbprint()
+        ctx.x509Sha256Thumbprint(thumbprint)
+        assertArrayEquals thumbprint, ctx.getX509Sha256Thumbprint()
         assertEquals Encoders.BASE64URL.encode(thumbprint), ctx.get('x5t#S256')
     }
 

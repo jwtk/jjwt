@@ -70,9 +70,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Provider provider;
 
-    private boolean enableUnsecured = false;
+    private boolean unsecured = false;
 
-    private boolean enableUnsecuredDecompression = false;
+    private boolean unsecuredDecompression = false;
 
     private Locator<? extends Key> keyLocator;
 
@@ -106,14 +106,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     private Key decryptionKey;
 
     @Override
-    public JwtParserBuilder enableUnsecured() {
-        this.enableUnsecured = true;
+    public JwtParserBuilder unsecured() {
+        this.unsecured = true;
         return this;
     }
 
     @Override
-    public JwtParserBuilder enableUnsecuredDecompression() {
-        this.enableUnsecuredDecompression = true;
+    public JwtParserBuilder unsecuredDecompression() {
+        this.unsecuredDecompression = true;
         return this;
     }
 
@@ -379,8 +379,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
             keyLocator = new ConstantKeyLocator(this.signatureVerificationKey, this.decryptionKey);
         }
 
-        if (!enableUnsecured && enableUnsecuredDecompression) {
-            String msg = "'enableUnsecuredDecompression' is only relevant if 'enableUnsecured' is also " +
+        if (!unsecured && unsecuredDecompression) {
+            String msg = "'unsecuredDecompression' is only relevant if 'unsecured' is also " +
                     "configured. Please read the JavaDoc of both features before enabling either " +
                     "due to their security implications.";
             throw new IllegalStateException(msg);
@@ -399,8 +399,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
         return new DefaultJwtParser(
                 provider,
                 signingKeyResolver,
-                enableUnsecured,
-                enableUnsecuredDecompression,
+                unsecured,
+                unsecuredDecompression,
                 keyLocator,
                 clock,
                 critical,

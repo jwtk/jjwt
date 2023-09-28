@@ -634,7 +634,7 @@ class DefaultJwtBuilderTest {
                 .compact()
 
         // shouldn't be an audience at all:
-        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertNull Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     /**
@@ -651,7 +651,7 @@ class DefaultJwtBuilderTest {
                 .audience([first, second]) // sets collection
                 .compact()
 
-        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        def aud = Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
         assertEquals expected, aud
     }
 
@@ -665,7 +665,7 @@ class DefaultJwtBuilderTest {
         String audienceSingleString = 'test'
         def jwt = builder.audienceSingle(audienceSingleString).compact()
 
-        assertEquals audienceSingleString, Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload
+        assertEquals audienceSingleString, Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload
                 .getAudience().iterator().next() // a collection, not a single string
     }
 
@@ -673,19 +673,19 @@ class DefaultJwtBuilderTest {
     void testAudience() {
         def aud = 'fubar'
         def jwt = Jwts.builder().audience(aud).compact()
-        assertEquals aud, Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience().iterator().next()
+        assertEquals aud, Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience().iterator().next()
     }
 
     @Test
     void testAudienceNullString() {
         def jwt = Jwts.builder().subject('me').audience(null).compact()
-        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertNull Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     @Test
     void testAudienceEmptyString() {
         def jwt = Jwts.builder().subject('me').audience('  ').compact()
-        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertNull Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     @Test
@@ -693,7 +693,7 @@ class DefaultJwtBuilderTest {
         def one = 'one'
         def two = 'two'
         def jwt = Jwts.builder().audience(one).audience(two).compact()
-        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        def aud = Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
         assertTrue aud.contains(one)
         assertTrue aud.contains(two)
     }
@@ -702,14 +702,14 @@ class DefaultJwtBuilderTest {
     void testAudienceNullCollection() {
         Collection c = null
         def jwt = Jwts.builder().subject('me').audience(c).compact()
-        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertNull Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     @Test
     void testAudienceEmptyCollection() {
         Collection c = new ArrayList()
         def jwt = Jwts.builder().subject('me').audience(c).compact()
-        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertNull Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     @Test
@@ -717,7 +717,7 @@ class DefaultJwtBuilderTest {
         Collection c = new ArrayList()
         c.add(null)
         def jwt = Jwts.builder().subject('me').audience(c).compact()
-        assertNull Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        assertNull Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
     }
 
     /**
@@ -729,7 +729,7 @@ class DefaultJwtBuilderTest {
         def one = 'one'
         def two = 'two'
         def jwt = Jwts.builder().audienceSingle(one).audience(two).compact()
-        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        def aud = Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
         assertTrue aud.contains(one)
         assertTrue aud.contains(two)
     }
@@ -764,7 +764,7 @@ class DefaultJwtBuilderTest {
         def collection = ['two', 'three'] as Set<String>
         def expected = ['one', 'two', 'three'] as Set<String>
         def jwt = Jwts.builder().audienceSingle(single).audience(collection).compact()
-        def aud = Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt).payload.getAudience()
+        def aud = Jwts.parser().unsecured().build().parseClaimsJwt(jwt).payload.getAudience()
         assertEquals expected.size(), aud.size()
         assertTrue aud.contains(single) && aud.containsAll(collection)
     }

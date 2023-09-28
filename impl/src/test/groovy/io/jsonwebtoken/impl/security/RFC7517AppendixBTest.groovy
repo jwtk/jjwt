@@ -75,7 +75,7 @@ class RFC7517AppendixBTest {
         assertEquals m.kid, jwk.getId()
         assertEquals m.n, Converters.BIGINT.applyTo(key.getModulus())
         assertEquals m.e, Converters.BIGINT.applyTo(key.getPublicExponent())
-        def chain = jwk.getX509CertificateChain()
+        def chain = jwk.getX509Chain()
         assertNotNull chain
         assertFalse chain.isEmpty()
         assertEquals 1, chain.size()

@@ -65,7 +65,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.6">X.509 Certificate Chain Header</a> name: the string literal <b><code>x5c</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509CertificateChain()}
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Chain()}
      */
     @Deprecated
     String X509_CERT_CHAIN = "x5c";
@@ -73,7 +73,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.7">X.509 Certificate SHA-1 Thumbprint Header</a> name: the string literal <b><code>x5t</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509CertificateSha1Thumbprint()}
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Sha1Thumbprint()}
      */
     @Deprecated
     String X509_CERT_SHA1_THUMBPRINT = "x5t";
@@ -81,7 +81,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.8">X.509 Certificate SHA-256 Thumbprint Header</a> name: the string literal <b><code>x5t#S256</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509CertificateSha256Thumbprint()}
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Sha256Thumbprint()}
      */
     @Deprecated
     String X509_CERT_SHA256_THUMBPRINT = "x5t#S256";
