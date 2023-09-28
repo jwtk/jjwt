@@ -586,7 +586,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
         if (!this.encodePayload) { // b64 extension:
             String id = DefaultJwsHeader.B64.getId();
-            this.headerBuilder.critical(id).add(id, false);
+            this.headerBuilder.critical().add(id).and().add(id, false);
         }
         final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build());
         encodeAndWrite("JWS Protected Header", header, jws);

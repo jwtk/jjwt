@@ -45,6 +45,7 @@ class DefaultMutableJweHeaderTest {
         switch (propName) {
             case 'algorithm': header.add('alg', val); break // no setter
             case 'compressionAlgorithm': header.add('zip', val); break // no setter
+            case 'critical': header.critical().add(val).and(); break // no setter
             default: header."$propName"(val)
         }
 

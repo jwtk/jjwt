@@ -105,15 +105,15 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     T idFromThumbprint(HashAlgorithm alg);
 
     /**
-     * Configures the JWK's {@link KeyOperation}s that identify the operation(s) for which the key is intended to be
-     * used. Resume JWK modifications by using the nested collection's {@link Conjunctor#and() and()} method
-     * to return to the JWK builder, for example:
+     * Configures the <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key operations</a> for which
+     * the key is intended to be used. When finished, use the collection's {@link Conjunctor#and() and()} method to
+     * return to the JWK builder, for example:
      * <blockquote><pre>
      * jwkBuilder.operations().add(aKeyOperation).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
      *
      * <p>The {@code and()} method will throw an {@link IllegalArgumentException} if any of the specified
      * {@code KeyOperation}s are not permitted by the JWK's
-     * {@link #operationPolicy(KeyOperationPolicy) operationPolicy}. See that method's documentation for more
+     * {@link #operationPolicy(KeyOperationPolicy) operationPolicy}. See that documentation for more
      * information on security vulnerabilities when using the same key with multiple algorithms.</p>
      *
      * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>

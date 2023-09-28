@@ -214,7 +214,7 @@ class AbstractProtectedHeaderTest {
     void testCritical() {
         Set<String> crits = Collections.setOf('foo', 'bar')
         def header = Jwts.header().add('alg', 'HS256').add('foo', 'value1').add('bar', 'value2')
-                .critical(crits).build() as DefaultProtectedHeader
+                .critical().add(crits).and().build() as DefaultProtectedHeader
         assertEquals crits, header.getCritical()
     }
 
