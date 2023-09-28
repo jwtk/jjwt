@@ -204,7 +204,7 @@ class DefaultJwtParserTest {
         def header = b64Url(serialize(map))
         String compact = header + '.doesntMatter.'
         try {
-            Jwts.parser().enableUnsecured().build().parse(compact)
+            Jwts.parser().unsecured().build().parse(compact)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_UNSECURED_MSG, map)
@@ -218,7 +218,7 @@ class DefaultJwtParserTest {
         def header = b64Url(serialize(map))
         String compact = header + '.a.b'
         try {
-            Jwts.parser().enableUnsecured().build().parse(compact)
+            Jwts.parser().unsecured().build().parse(compact)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_MISSING_MSG, 'whatever', 'whatever', map)
@@ -232,7 +232,7 @@ class DefaultJwtParserTest {
         def header = b64Url(serialize(map))
         String compact = header + '.a.b'
         try {
-            Jwts.parser().enableUnsecured().build().parse(compact)
+            Jwts.parser().unsecured().build().parse(compact)
             fail()
         } catch (UnsupportedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_UNSUPPORTED_MSG, 'whatever', 'whatever', map)
@@ -267,7 +267,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().expiration(exp).compact()
 
         try {
-            Jwts.parser().enableUnsecured().clock(new FixedClock(later)).build().parseClaimsJwt(s)
+            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parseClaimsJwt(s)
         } catch (ExpiredJwtException expected) {
             def exp8601 = DateFormats.formatIso8601(exp, true)
             def later8601 = DateFormats.formatIso8601(later, true)
@@ -286,7 +286,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().notBefore(nbf).compact()
 
         try {
-            Jwts.parser().enableUnsecured().clock(new FixedClock(earlier)).build().parseClaimsJwt(s)
+            Jwts.parser().unsecured().clock(new FixedClock(earlier)).build().parseClaimsJwt(s)
         } catch (PrematureJwtException expected) {
             def nbf8601 = DateFormats.formatIso8601(nbf, true)
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
@@ -301,7 +301,7 @@ class DefaultJwtParserTest {
         def jwt = Encoders.BASE64URL.encode(Strings.utf8('{"alg":"none"}'))
         jwt += ".F!3!#." // <-- invalid Base64URL payload
         try {
-            Jwts.parser().enableUnsecured().build().parseClaimsJwt(jwt)
+            Jwts.parser().unsecured().build().parseClaimsJwt(jwt)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = 'Invalid Base64Url payload: <redacted>'

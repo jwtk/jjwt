@@ -172,7 +172,7 @@ class JwtsTest {
         String s = 'Hello JJWT'
         String cty = 'text/plain'
         String compact = Jwts.builder().content(s, cty).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -183,7 +183,7 @@ class JwtsTest {
         byte[] content = Strings.utf8(s)
         String cty = 'text/plain'
         String compact = Jwts.builder().content(content, cty).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -194,7 +194,7 @@ class JwtsTest {
         InputStream content = new ByteArrayInputStream(Strings.utf8(s))
         String cty = 'text/plain'
         String compact = Jwts.builder().content(content, cty).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -204,7 +204,7 @@ class JwtsTest {
         String s = 'Hello JJWT'
         InputStream content = new ByteArrayInputStream(Strings.utf8(s))
         String compact = Jwts.builder().content(content).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         assertNull jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -212,7 +212,7 @@ class JwtsTest {
     @Test
     void testContentStreamNull() {
         String compact = Jwts.builder().content((InputStream) null).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         assertEquals 'none', jwt.header.getAlgorithm()
         assertTrue Bytes.isEmpty(jwt.getPayload())
     }
@@ -223,7 +223,7 @@ class JwtsTest {
         String subtype = 'foo'
         String cty = "application/$subtype"
         String compact = Jwts.builder().content(s, cty).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         // assert raw value is compact form:
         assertEquals subtype, jwt.header.get('cty')
         // assert getter reflects normalized form per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10:
@@ -237,7 +237,7 @@ class JwtsTest {
         String subtype = 'foo'
         String cty = "application/$subtype;part=1/2"
         String compact = Jwts.builder().content(s, cty).compact()
-        def jwt = Jwts.parser().enableUnsecured().build().parseContentJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseContentJwt(compact)
         assertEquals cty, jwt.header.getContentType() // two slashes, can't compact
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -249,7 +249,7 @@ class JwtsTest {
 
         String jwt = Jwts.builder().claims().add(claims).and().compact()
 
-        def token = Jwts.parser().enableUnsecured().build().parse(jwt)
+        def token = Jwts.parser().unsecured().build().parse(jwt)
 
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert token.payload == claims
@@ -279,7 +279,7 @@ class JwtsTest {
         String claims = Encoders.BASE64URL.encode(claimsJson.getBytes(StandardCharsets.UTF_8))
 
         String compact = header + '.' + claims + '.'
-        def jwt = Jwts.parser().enableUnsecured().build().parseClaimsJwt(compact)
+        def jwt = Jwts.parser().unsecured().build().parseClaimsJwt(compact)
         assertEquals 'none', jwt.header.getAlgorithm()
         assertEquals 'joe', jwt.payload.getSubject()
     }
@@ -323,7 +323,7 @@ class JwtsTest {
     @Test
     void testParseWithHeaderOnly() {
         String unsecuredJwt = base64Url("{\"alg\":\"none\"}") + ".."
-        Jwt jwt = Jwts.parser().enableUnsecured().build().parse(unsecuredJwt)
+        Jwt jwt = Jwts.parser().unsecured().build().parse(unsecuredJwt)
         assertEquals "none", jwt.getHeader().get("alg")
     }
 
@@ -344,7 +344,7 @@ class JwtsTest {
         int i = compact.lastIndexOf('.')
         String missingSig = compact.substring(0, i + 1)
         try {
-            Jwts.parser().enableUnsecured().setSigningKey(key).build().parseClaimsJws(missingSig)
+            Jwts.parser().unsecured().setSigningKey(key).build().parseClaimsJws(missingSig)
             fail()
         } catch (MalformedJwtException expected) {
             String s = String.format(DefaultJwtParser.MISSING_JWS_DIGEST_MSG_FMT, 'HS256')
@@ -364,7 +364,7 @@ class JwtsTest {
     @Test
     void testConvenienceIssuer() {
         String compact = Jwts.builder().setIssuer("Me").compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertEquals 'Me', claims.getIssuer()
 
         compact = Jwts.builder().setSubject("Joe")
@@ -372,14 +372,14 @@ class JwtsTest {
                 .setIssuer(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getIssuer()
     }
 
     @Test
     void testConvenienceSubject() {
         String compact = Jwts.builder().setSubject("Joe").compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertEquals 'Joe', claims.getSubject()
 
         compact = Jwts.builder().setIssuer("Me")
@@ -387,14 +387,14 @@ class JwtsTest {
                 .setSubject(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getSubject()
     }
 
     @Test
     void testConvenienceAudience() {
         String compact = Jwts.builder().setAudience("You").compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertEquals 'You', claims.getAudience().iterator().next()
 
         compact = Jwts.builder().setIssuer("Me")
@@ -402,7 +402,7 @@ class JwtsTest {
                 .setAudience(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getAudience()
     }
 
@@ -410,7 +410,7 @@ class JwtsTest {
     void testConvenienceExpiration() {
         Date then = laterDate(10000)
         String compact = Jwts.builder().setExpiration(then).compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         def claimedDate = claims.getExpiration()
         assertEquals then, claimedDate
 
@@ -419,7 +419,7 @@ class JwtsTest {
                 .setExpiration(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getExpiration()
     }
 
@@ -427,7 +427,7 @@ class JwtsTest {
     void testConvenienceNotBefore() {
         Date now = now() //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setNotBefore(now).compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         def claimedDate = claims.getNotBefore()
         assertEquals now, claimedDate
 
@@ -436,7 +436,7 @@ class JwtsTest {
                 .setNotBefore(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getNotBefore()
     }
 
@@ -444,7 +444,7 @@ class JwtsTest {
     void testConvenienceIssuedAt() {
         Date now = now() //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setIssuedAt(now).compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         def claimedDate = claims.getIssuedAt()
         assertEquals now, claimedDate
 
@@ -453,7 +453,7 @@ class JwtsTest {
                 .setIssuedAt(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getIssuedAt()
     }
 
@@ -461,7 +461,7 @@ class JwtsTest {
     void testConvenienceId() {
         String id = UUID.randomUUID().toString()
         String compact = Jwts.builder().setId(id).compact()
-        Claims claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertEquals id, claims.getId()
 
         compact = Jwts.builder().setIssuer("Me")
@@ -469,7 +469,7 @@ class JwtsTest {
                 .setId(null) //null should remove it
                 .compact()
 
-        claims = Jwts.parser().enableUnsecured().build().parse(compact).payload as Claims
+        claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         assertNull claims.getId()
     }
 
@@ -791,7 +791,7 @@ class JwtsTest {
         String notSigned = Jwts.builder().setSubject("Foo").compact()
 
         try {
-            Jwts.parser().enableUnsecured().setSigningKey(key).build().parseClaimsJws(notSigned)
+            Jwts.parser().unsecured().setSigningKey(key).build().parseClaimsJws(notSigned)
             fail('parseClaimsJws must fail for unsigned JWTs')
         } catch (UnsupportedJwtException expected) {
             assertEquals 'Unprotected Claims JWTs are not supported.', expected.message
@@ -1210,14 +1210,14 @@ class JwtsTest {
         String forged = Jwts.builder().setSubject("Not Joe").compact()
 
         //assert that our forged header has a 'NONE' algorithm:
-        assertEquals 'none', Jwts.parser().enableUnsecured().build().parseClaimsJwt(forged).getHeader().get('alg')
+        assertEquals 'none', Jwts.parser().unsecured().build().parseClaimsJwt(forged).getHeader().get('alg')
 
         //now let's forge it by appending the signature the server expects:
         forged += signature
 
         //now assert that, when the server tries to parse the forged token, parsing fails:
         try {
-            Jwts.parser().enableUnsecured().setSigningKey(key).build().parse(forged)
+            Jwts.parser().unsecured().setSigningKey(key).build().parse(forged)
             fail("Parsing must fail for a forged token.")
         } catch (MalformedJwtException expected) {
             assertEquals 'The JWS header references signature algorithm \'none\' yet the compact JWS string contains a signature. This is not permitted per https://tools.ietf.org/html/rfc7518#section-3.6.', expected.message
