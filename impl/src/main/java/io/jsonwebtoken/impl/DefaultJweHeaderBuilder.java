@@ -34,14 +34,14 @@ public class DefaultJweHeaderBuilder<T extends JweHeaderMutator<T> & X509Builder
     }
 
     @Override
-    public T withX509Sha1Thumbprint(boolean enable) {
-        this.x509.withX509Sha1Thumbprint(enable);
+    public T x509Sha1Thumbprint(boolean enable) {
+        this.x509.x509Sha1Thumbprint(enable);
         return self();
     }
 
     @Override
-    public T withX509Sha256Thumbprint(boolean enable) {
-        this.x509.withX509Sha256Thumbprint(enable);
+    public T x509Sha256Thumbprint(boolean enable) {
+        this.x509.x509Sha256Thumbprint(enable);
         return self();
     }
 }

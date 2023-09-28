@@ -186,7 +186,7 @@ class AbstractProtectedHeaderTest {
         def bundle = TestKeys.RS256
         List<String> encodedCerts = Collections.of(Encoders.BASE64.encode(bundle.cert.getEncoded()))
         def header = h([x5c: bundle.chain])
-        assertEquals bundle.chain, header.getX509CertificateChain()
+        assertEquals bundle.chain, header.getX509Chain()
         assertEquals encodedCerts, header.get('x5c')
     }
 
@@ -196,7 +196,7 @@ class AbstractProtectedHeaderTest {
         Randoms.secureRandom().nextBytes(thumbprint)
         String encoded = Encoders.BASE64URL.encode(thumbprint)
         def header = h([x5t: thumbprint])
-        assertArrayEquals thumbprint, header.getX509CertificateSha1Thumbprint()
+        assertArrayEquals thumbprint, header.getX509Sha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
 
@@ -206,7 +206,7 @@ class AbstractProtectedHeaderTest {
         Randoms.secureRandom().nextBytes(thumbprint)
         String encoded = Encoders.BASE64URL.encode(thumbprint)
         def header = h(['x5t#S256': thumbprint])
-        assertArrayEquals thumbprint, header.getX509CertificateSha256Thumbprint()
+        assertArrayEquals thumbprint, header.getX509Sha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
 

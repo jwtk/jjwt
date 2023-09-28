@@ -47,34 +47,34 @@ public class AbstractX509Context<T extends X509Mutator<T>> extends ParameterMap 
     }
 
     @Override
-    public List<X509Certificate> getX509CertificateChain() {
+    public List<X509Certificate> getX509Chain() {
         return get(AbstractAsymmetricJwk.X5C);
     }
 
     @Override
-    public T x509CertificateChain(List<X509Certificate> chain) {
+    public T x509Chain(List<X509Certificate> chain) {
         put(AbstractAsymmetricJwk.X5C, chain);
         return self();
     }
 
     @Override
-    public byte[] getX509CertificateSha1Thumbprint() {
+    public byte[] getX509Sha1Thumbprint() {
         return get(AbstractAsymmetricJwk.X5T);
     }
 
     @Override
-    public T x509CertificateSha1Thumbprint(byte[] thumbprint) {
+    public T x509Sha1Thumbprint(byte[] thumbprint) {
         put(AbstractAsymmetricJwk.X5T, thumbprint);
         return self();
     }
 
     @Override
-    public byte[] getX509CertificateSha256Thumbprint() {
+    public byte[] getX509Sha256Thumbprint() {
         return get(AbstractAsymmetricJwk.X5T_S256);
     }
 
     @Override
-    public T x509CertificateSha256Thumbprint(byte[] thumbprint) {
+    public T x509Sha256Thumbprint(byte[] thumbprint) {
         put(AbstractAsymmetricJwk.X5T_S256, thumbprint);
         return self();
     }

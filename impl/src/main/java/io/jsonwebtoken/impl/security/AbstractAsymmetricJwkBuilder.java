@@ -83,9 +83,9 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
      */
 
     @Override
-    public T x509CertificateChain(List<X509Certificate> chain) {
+    public T x509Chain(List<X509Certificate> chain) {
         Assert.notEmpty(chain, "X509Certificate chain cannot be null or empty.");
-        this.x509.x509CertificateChain(chain);
+        this.x509.x509Chain(chain);
         return self();
     }
 
@@ -105,26 +105,26 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
      */
 
     @Override
-    public T x509CertificateSha1Thumbprint(byte[] thumbprint) {
-        this.x509.x509CertificateSha1Thumbprint(thumbprint);
+    public T x509Sha1Thumbprint(byte[] thumbprint) {
+        this.x509.x509Sha1Thumbprint(thumbprint);
         return self();
     }
 
     @Override
-    public T x509CertificateSha256Thumbprint(byte[] thumbprint) {
-        this.x509.x509CertificateSha256Thumbprint(thumbprint);
+    public T x509Sha256Thumbprint(byte[] thumbprint) {
+        this.x509.x509Sha256Thumbprint(thumbprint);
         return self();
     }
 
     @Override
-    public T withX509Sha1Thumbprint(boolean enable) {
-        this.x509.withX509Sha1Thumbprint(enable);
+    public T x509Sha1Thumbprint(boolean enable) {
+        this.x509.x509Sha1Thumbprint(enable);
         return self();
     }
 
     @Override
-    public T withX509Sha256Thumbprint(boolean enable) {
-        this.x509.withX509Sha256Thumbprint(enable);
+    public T x509Sha256Thumbprint(boolean enable) {
+        this.x509.x509Sha256Thumbprint(enable);
         return self();
     }
 

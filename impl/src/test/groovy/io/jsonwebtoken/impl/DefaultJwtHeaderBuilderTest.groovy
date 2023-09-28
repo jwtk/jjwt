@@ -351,8 +351,8 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX509CertificateChain() {
         def chain = TestKeys.RS256.chain
-        header = jws().x509CertificateChain(chain).build() as JwsHeader
-        assertEquals chain, header.getX509CertificateChain()
+        header = jws().x509Chain(chain).build() as JwsHeader
+        assertEquals chain, header.getX509Chain()
     }
 
     /**
@@ -366,8 +366,8 @@ class DefaultJwtHeaderBuilderTest {
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
 
-        header = jws().x509CertificateSha1Thumbprint(x5t).build() as JwsHeader
-        assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
+        header = jws().x509Sha1Thumbprint(x5t).build() as JwsHeader
+        assertArrayEquals x5t, header.getX509Sha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
 
@@ -378,8 +378,8 @@ class DefaultJwtHeaderBuilderTest {
         def request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5t)
-        header = jws().x509CertificateChain(chain).withX509Sha1Thumbprint(true).build() as JwsHeader
-        assertArrayEquals x5t, header.getX509CertificateSha1Thumbprint()
+        header = jws().x509Chain(chain).x509Sha1Thumbprint(true).build() as JwsHeader
+        assertArrayEquals x5t, header.getX509Sha1Thumbprint()
         assertEquals encoded, header.get('x5t')
     }
 
@@ -393,8 +393,8 @@ class DefaultJwtHeaderBuilderTest {
         def request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.@SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
-        header = jws().x509CertificateSha256Thumbprint(x5tS256).build() as JwsHeader
-        assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
+        header = jws().x509Sha256Thumbprint(x5tS256).build() as JwsHeader
+        assertArrayEquals x5tS256, header.getX509Sha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
 
@@ -405,8 +405,8 @@ class DefaultJwtHeaderBuilderTest {
         def request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
-        header = jws().x509CertificateChain(chain).withX509Sha256Thumbprint(true).build() as JwsHeader
-        assertArrayEquals x5tS256, header.getX509CertificateSha256Thumbprint()
+        header = jws().x509Chain(chain).x509Sha256Thumbprint(true).build() as JwsHeader
+        assertArrayEquals x5tS256, header.getX509Sha256Thumbprint()
         assertEquals encoded, header.get('x5t#S256')
     }
 

@@ -28,8 +28,8 @@ public interface X509Builder<T extends X509Builder<T>> extends X509Mutator<T> {
 
     /**
      * If the {@code enable} argument is {@code true}, compute the SHA-1 thumbprint of the first
-     * {@link X509Certificate} in the configured {@link #x509CertificateChain(List) x509CertificateChain}, and set
-     * the resulting value as the {@link #x509CertificateSha1Thumbprint(byte[])} parameter.
+     * {@link X509Certificate} in the configured {@link #x509Chain(List) x509CertificateChain}, and set
+     * the resulting value as the {@link #x509Sha1Thumbprint(byte[])} parameter.
      *
      * <p>If no chain has been configured, or {@code enable} is {@code false}, the builder will not compute nor add a
      * {@code x5t} value.</p>
@@ -38,12 +38,12 @@ public interface X509Builder<T extends X509Builder<T>> extends X509Mutator<T> {
      *               the resulting value as the {@code x5t} value.
      * @return the builder for method chaining.
      */
-    T withX509Sha1Thumbprint(boolean enable);
+    T x509Sha1Thumbprint(boolean enable);
 
     /**
      * If the {@code enable} argument is {@code true}, compute the SHA-256 thumbprint of the first
-     * {@link X509Certificate} in the configured {@link #x509CertificateChain(List) x509CertificateChain}, and set
-     * the resulting value as the {@link #x509CertificateSha256Thumbprint(byte[])} parameter.
+     * {@link X509Certificate} in the configured {@link #x509Chain(List) x509CertificateChain}, and set
+     * the resulting value as the {@link #x509Sha256Thumbprint(byte[])} parameter.
      *
      * <p>If no chain has been configured, or {@code enable} is {@code false}, the builder will not compute nor add a
      * {@code x5t#S256} value.</p>
@@ -52,5 +52,5 @@ public interface X509Builder<T extends X509Builder<T>> extends X509Mutator<T> {
      *               the resulting value as the {@code x5t#S256} value.
      * @return the builder for method chaining.
      */
-    T withX509Sha256Thumbprint(boolean enable);
+    T x509Sha256Thumbprint(boolean enable);
 }

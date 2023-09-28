@@ -99,17 +99,17 @@ public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHe
     }
 
     @Override
-    public List<X509Certificate> getX509CertificateChain() {
+    public List<X509Certificate> getX509Chain() {
         return get(X5C);
     }
 
     @Override
-    public byte[] getX509CertificateSha1Thumbprint() {
+    public byte[] getX509Sha1Thumbprint() {
         return get(X5T);
     }
 
     @Override
-    public byte[] getX509CertificateSha256Thumbprint() {
+    public byte[] getX509Sha256Thumbprint() {
         return get(X5T_S256);
     }
 
