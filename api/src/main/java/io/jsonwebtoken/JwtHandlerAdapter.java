@@ -30,6 +30,12 @@ package io.jsonwebtoken;
  */
 public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
 
+    /**
+     * Default constructor, does not initialize any internal state.
+     */
+    public JwtHandlerAdapter() {
+    }
+
     @Override
     public T onContentJwt(Jwt<Header, byte[]> jwt) {
         throw new UnsupportedJwtException("Unprotected content JWTs are not supported.");

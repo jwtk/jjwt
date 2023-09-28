@@ -107,7 +107,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
     /**
      * Configures the JWK's {@link KeyOperation}s that identify the operation(s) for which the key is intended to be
      * used. Resume JWK modifications by using the nested collection's {@link Conjunctor#and() and()} method
-     * to return to the JWK builder, for example:</p>
+     * to return to the JWK builder, for example:
      * <blockquote><pre>
      * jwkBuilder.operations().add(aKeyOperation).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
      *

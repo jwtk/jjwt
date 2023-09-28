@@ -20,6 +20,7 @@ import java.security.Key;
 /**
  * A request to a cryptographic algorithm requiring a {@link Key}.
  *
+ * @param <T> the type of payload in the request
  * @param <K> they type of key used by the algorithm during the request
  * @since JJWT_RELEASE_VERSION
  */

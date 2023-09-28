@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Assert;
  * {@link #locate(JweHeader)} methods for type-specific logic if desired when the encountered header is an
  * unprotected JWT, or an integrity-protected JWT (either a JWS or JWE).
  *
+ * @param <T> the type of object to locate
  * @since JJWT_RELEASE_VERSION
  */
 public abstract class LocatorAdapter<T> implements Locator<T> {

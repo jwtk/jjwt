@@ -18,6 +18,8 @@ package io.jsonwebtoken.io;
 /**
  * A decoder converts an already-encoded data value to a desired data type.
  *
+ * @param <T> decoding input type
+ * @param <R> decoding output type
  * @since 0.10.0
  */
 public interface Decoder<T, R> {
