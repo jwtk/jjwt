@@ -75,9 +75,8 @@ public class JavaReadmeTest {
                 .compact();
 
         Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
-                .critical("b64")                               // 2
                 .build()
-                .parseContentJws(jws, content);                // 3
+                .parseContentJws(jws, content);                // 2
 
         assertArrayEquals(content, parsed.getPayload());
     }
@@ -98,7 +97,7 @@ public class JavaReadmeTest {
                 .compact();
 
         Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
-                .critical("b64")                               // 2
+                .critical().add("b64").and()                   // 2
                 .build()
                 .parseClaimsJws(jws);                          // 3
 
@@ -106,7 +105,6 @@ public class JavaReadmeTest {
         assert "me".equals(parsed.getPayload().getIssuer());
 
         parsed = Jwts.parser().verifyWith(testKey)
-                .critical("b64")
                 .build()
                 .parseClaimsJws(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
 

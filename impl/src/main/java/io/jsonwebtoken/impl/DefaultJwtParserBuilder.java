@@ -24,6 +24,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.io.DelegateStringDecoder;
+import io.jsonwebtoken.impl.lang.DefaultNestedCollection;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.io.CompressionAlgorithm;
@@ -32,7 +33,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.lang.NestedCollection;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -211,20 +212,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder critical(String crit) {
-        if (Strings.hasText(crit)) {
-            Set<String> existing = Collections.nullSafe(this.critical);
-            Set<String> newSet = new LinkedHashSet<>(existing);
-            newSet.add(crit);
-            critical(newSet);
-        }
-        return this;
-    }
-
-    @Override
-    public JwtParserBuilder critical(Set<String> crit) {
-        this.critical = Collections.immutable(new LinkedHashSet<>(Collections.nullSafe(crit)));
-        return this;
+    public NestedCollection<String, JwtParserBuilder> critical() {
+        return new DefaultNestedCollection<String, JwtParserBuilder>(this, this.critical) {
+            @Override
+            public JwtParserBuilder and() {
+                critical = Collections.asSet(getCollection());
+                return super.and();
+            }
+        };
     }
 
     @Override

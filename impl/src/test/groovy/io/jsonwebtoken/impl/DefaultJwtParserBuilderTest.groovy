@@ -47,7 +47,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testCriticalEmtpy() {
-        builder.critical(' ') // shouldn't modify the set
+        builder.critical().add(' ').and() // shouldn't modify the set
         assertTrue builder.@critical.isEmpty()
     }
 

@@ -249,7 +249,7 @@ class DefaultJwtParserTest {
                 .subject('me')
                 .signWith(key).compact()
 
-        def jwt = Jwts.parser().critical(crit).verifyWith(key).build().parseClaimsJws(jws)
+        def jwt = Jwts.parser().critical().add(crit).and().verifyWith(key).build().parseClaimsJws(jws)
 
         // no exception thrown, as expected, check the header values:
         def parsedCrit = jwt.getHeader().getCritical()

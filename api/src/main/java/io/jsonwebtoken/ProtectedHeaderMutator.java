@@ -37,7 +37,7 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
      * <blockquote><pre>
      * builder.critical().add("headerName").{@link Conjunctor#and() and()} // etc...</pre></blockquote>
      *
-     * @return foo
+     * @return the {@link NestedCollection} to use for {@code crit} configuration.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13">JWS <code>crit</code> (Critical) Header Parameter</a>
      */
