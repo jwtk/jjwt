@@ -126,8 +126,7 @@ JJWT is open source under the terms of the [Apache 2.0 License](http://www.apach
   * [JWK Security Considerations](#jwk-security)
     * [JWK `toString()` Safety](#jwk-tostring)
 * [Compression](#compression)
-  * [Custom Compression Codec](#compression-custom)
-  * [Custom Compression Codec Locator](#compression-custom-locator)
+  * [Custom Compression Algorithm](#compression-custom)
 * [JSON Processor](#json)
   * [Custom JSON Processor](#json-custom)
   * [Jackson ObjectMapper](#json-jackson)
@@ -1425,7 +1424,7 @@ guarantee deterministic behavior.
 ### JWT Decompression
 
 If you used JJWT to compress a JWT and you used a custom compression algorithm, you will need to tell the
-`JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
+`JwtParserBuilder` how to resolve your `CompressionAlgorithm` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
 
@@ -1471,7 +1470,7 @@ key algorithms:
 
 <sup><b>2</b>. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.</sup>
 
-These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` convenience class.
+These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry class.
 
 <a name="jws-key"></a>
 ### Signature Algorithms Keys
@@ -1600,9 +1599,12 @@ public key (`keyPair.getPublic()`) to parse/verify a JWS.
 
 > **Note**
 > 
-> **The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider
-> (like BouncyCastle) in the runtime classpath.**  
-> **The `EdDSA` algorithms requires JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.** 
+> * **The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider
+> (like BouncyCastle) in the runtime classpath.**
+> 
+> 
+> * **The `EdDSA` algorithms requires JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.**
+>
 > If you want to use either set of algorithms, and you are on an earlier JDK that does not support them, 
 > see the [Installation](#Installation) section to see how to enable BouncyCastle.  All other algorithms are 
 > natively supported by the JDK.
@@ -1820,7 +1822,7 @@ parsing JWSs or JWEs.
 #### JWS Decompression
 
 If you used JJWT to compress a JWS and you used a custom compression algorithm, you will need to tell the 
-`JwtParserBuilder` how to resolve your `CompressionCodec` to decompress the JWT.
+`JwtParserBuilder` how to resolve your `CompressionAlgorithm` to decompress the JWT.
 
 Please see the [Compression](#compression) section below to see how to decompress JWTs during parsing.
 
@@ -1893,28 +1895,18 @@ String jws = Jwts.builder().signWith(testKey) // #1
         .compact();
 ```
 
-To parse the resulting `jws` string, we need to do three things when creating the `JwtParser`:
+To parse the resulting `jws` string, we need to do two things when creating the `JwtParser`:
 
 1. Specify the signature verification key.
-2. Indicate that we want to support Unencoded Payload Option JWSs by enabling the `b64` `crit` header parameter.
 3. Specify the externally-transmitted unencoded payload bytes, required for signature verification.
 
 ```java
 Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
-        .critical("b64")                               // 2
         .build()
-        .parseContentJws(jws, content);                // 3
+        .parseContentJws(jws, content);                // 2
         
 assertArrayEquals(content, parsed.getPayload());
 ```
-
-> **Note**
->
-> **Disabled by Default**: Because of the aforementioned 
-> [security considerations](https://www.rfc-editor.org/rfc/rfc7797.html#section-8), Unencoded Payload Option
-> JWSs are rejected by the parser by default. Simply enabling the `b64` `crit`ical header as shown above (#2) enables
-> the feature, with the presumption that the application developer understands the security considerations when doing
-> so.
 
 <a name="jws-unencoded-nondetached"></a>
 #### Non-Detached Payload Example
@@ -1952,7 +1944,6 @@ See how the `claimsString` is embedded directly as the center `payload` token in
 This is why no period (`.`) characters can exist in the payload.  If they did, any standard JWT parser would see more
 than two periods total, which is required for parsing standard JWSs.
 
-
 To parse the resulting `jws` string, we need to do two things when creating the `JwtParser`:
 
 1. Specify the signature verification key.
@@ -1960,7 +1951,7 @@ To parse the resulting `jws` string, we need to do two things when creating the 
 
 ```java
 Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
-        .critical("b64")                               // 2
+        .critical().add("b64").and()                   // 2
         .build()
         .parseClaimsJws(jws);                          
 
@@ -1971,11 +1962,16 @@ assert "me".equals(parsed.getPayload().getIssuer());
 Did you notice we used the `.parseClaimsJws(String)` method instead of `.parseClaimsJws(String, byte[])`? This is 
 because the non-detached payload is already present and JJWT has what it needs for signature verification.
 
-Even so, you could call `.parseClaimsJws(String, byte[])` if you wanted by using the string's UTF-8 bytes:
+Additionally, we needed to specify the `b64` critical value:  because we're not using the two-argument 
+`parseClaimsJws(jws, content)` method, the parser has no way of knowing if you wish to allow or support unencoded
+payloads. Unencoded payloads have additional security considerations as described above, so they are disabled by
+the parser by default unless you indicate you want to support them by using `critical().add("b64")`.
+
+Finally, even if the payload contains a non-detached String, you could still use the two-argument method using the 
+payload String's UTF-8 bytes instead:
 
 ```java
 parsed = Jwts.parser().verifyWith(testKey)
-        .critical("b64")
         .build()
         .parseClaimsJws(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
 ```
@@ -2485,7 +2481,7 @@ You then use the resulting `jwtParserDecryptionKey` (not `pair.getPrivate()`) wi
 the return value from a custom [Key Locator](#key-locator) implementation.  For example:
 
 ```java
-PrivateKey decryptionKey = Keys.wrap(pkcs11PrivateKey, pkcs11PublicKey);
+PrivateKey decryptionKey = Keys.builder(pkcs11PrivateKey).publicKey(pkcs11PublicKey).build();
 
 Jwts.parser()
     .decryptWith(decryptionKey) // <----
@@ -2850,15 +2846,16 @@ When you call `compressWith`, the JWT `payload` will be compressed with your alg
 header will automatically be set to the value returned by your algorithm's `algorithm.getId()` method as 
 required by the JWT specification.
 
+<a name="compression-custom-locator"></a> <!-- legacy link -->
 However, the `JwtParser` needs to be aware of this custom algorithm as well, so it can use it while parsing. You do this 
-by calling the `JwtParserBuilder`'s `addCompressionAlgorithms` method.  For example:
+by modifying the `JwtParserBuilder`'s `zip()` collection.  For example:
 
 ```java
 CompressionAlgorithm myAlg = new MyCompressionAlgorithm();
 
 Jwts.parser()
 
-    .addCompressionAlgorithms(Collections.of(myAlg)) // <----
+    .zip().add(myAlg).and() // <----
     
     // .. etc ...
 ```
@@ -2915,7 +2912,7 @@ Serializer<Map<String,?>> serializer = getMySerializer(); //implement me
 
 Jwts.builder()
 
-    .serializer(serializer)
+    .json(serializer)
     
     // ... etc ...
 ```
@@ -2927,7 +2924,7 @@ Deserializer<Map<String,?>> deserializer = getMyDeserializer(); //implement me
 
 Jwts.parser()
 
-    .deserializer(deserializer)
+    .json(deserializer)
     
     // ... etc ...
 ```
@@ -2975,7 +2972,7 @@ ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
 String jws = Jwts.builder()
 
-    .serializer(new JacksonSerializer(objectMapper))
+    .json(new JacksonSerializer(objectMapper))
     
     // ... etc ...
 ```
@@ -2987,7 +2984,7 @@ ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
 Jwts.parser()
 
-    .deserializer(new JacksonDeserializer(objectMapper))
+    .json(new JacksonDeserializer(objectMapper))
     
     // ... etc ...
 ```
@@ -3021,7 +3018,7 @@ The `User` object could be retrieved from the `user` claim with the following co
 ```java
 Jwts.parser()
 
-    .deserializer(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
+    .json(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
 
     .build()
 
@@ -3096,7 +3093,7 @@ Gson gson = new GsonBuilder()
 
 String jws = Jwts.builder()
 
-    .serializer(new GsonSerializer(gson))
+    .json(new GsonSerializer(gson))
     
     // ... etc ...
 ```
@@ -3108,7 +3105,7 @@ Gson gson = getGson(); //implement me
 
 Jwts.parser()
 
-    .deserializer(new GsonDeserializer(gson))
+    .json(new GsonDeserializer(gson))
     
     // ... etc ...
 ```
@@ -3250,7 +3247,7 @@ Encoder<byte[], String> encoder = getMyBase64UrlEncoder(); //implement me
 
 String jws = Jwts.builder()
 
-    .encoder(encoder)
+    .b64Url(encoder)
     
     // ... etc ...
 ```
@@ -3262,7 +3259,7 @@ Decoder<String, byte[]> decoder = getMyBase64UrlDecoder(); //implement me
 
 Jwts.parser()
 
-    .decoder(decoder)
+    .b64Url(decoder)
     
     // ... etc ...
 ```
@@ -3480,7 +3477,7 @@ KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP o
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-String jwe = Jwts.builder().audience("Alice")
+String jwe = Jwts.builder().audience().add("Alice").and()
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
     .compact();
 
@@ -3543,12 +3540,12 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 KeyPair pair = Jwts.SIG.ES512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
-KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc.
+KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
 // Choose the Encryption Algorithm to encrypt the payload:
 AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-String jwe = Jwts.builder().audience("Alice")
+String jwe = Jwts.builder().audience().add("Alice").and()
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
     .compact();
 
