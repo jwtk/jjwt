@@ -46,13 +46,6 @@ class StandardAlgorithmsTest {
     }
 
     @Test
-    void testForKeyCaseInsensitive() {
-        eachRegAlg { reg, alg ->
-            assertSame alg, reg.forKey(alg.getId().toLowerCase())
-        }
-    }
-
-    @Test
     void testForKeyWithInvalidId() {
         //unlike the 'get' paradigm, 'forKey' requires the value to exist
         registries.each { reg ->
@@ -69,13 +62,6 @@ class StandardAlgorithmsTest {
     void testGet() {
         eachRegAlg { reg, alg ->
             assertSame alg, reg.get(alg.getId())
-        }
-    }
-
-    @Test
-    void testGetCaseInsensitive() {
-        eachRegAlg { reg, alg ->
-            assertSame alg, reg.get(alg.getId().toLowerCase())
         }
     }
 

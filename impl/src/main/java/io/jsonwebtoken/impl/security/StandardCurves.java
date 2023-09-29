@@ -15,17 +15,16 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Curve;
 
 import java.security.Key;
 
-public final class StandardCurves extends DelegatingRegistry<String, Curve> {
+public final class StandardCurves extends IdRegistry<Curve> {
 
     public StandardCurves() {
-        super(new IdRegistry<>("Elliptic Curve", Collections.<Curve>of(
+        super("Elliptic Curve", Collections.<Curve>of(
                 ECCurve.P256,
                 ECCurve.P384,
                 ECCurve.P521,
@@ -33,7 +32,7 @@ public final class StandardCurves extends DelegatingRegistry<String, Curve> {
                 EdwardsCurve.X448,
                 EdwardsCurve.Ed25519,
                 EdwardsCurve.Ed448
-        ), false));
+        ));
     }
 
     public static Curve findByKey(Key key) {

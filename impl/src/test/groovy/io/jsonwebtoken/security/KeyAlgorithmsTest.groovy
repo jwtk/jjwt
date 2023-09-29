@@ -23,7 +23,7 @@ import java.security.Key
 import static org.junit.Assert.*
 
 /**
- * Tests {@link Jwts#KEY} values.
+ * Tests {@link Jwts.KEY} values.
  *
  * @since JJWT_RELEASE_VERSION
  */
@@ -63,13 +63,6 @@ class KeyAlgorithmsTest {
         }
     }
 
-    @Test
-    void testForKeyCaseInsensitive() {
-        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
-            assertSame alg, Jwts.KEY.get().forKey(alg.getId().toLowerCase())
-        }
-    }
-
     @Test(expected = IllegalArgumentException)
     void testForKeyWithInvalidId() {
         //unlike the 'get' paradigm, 'key' requires the value to exist
@@ -80,13 +73,6 @@ class KeyAlgorithmsTest {
     void testGet() {
         for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
             assertSame alg, Jwts.KEY.get().get(alg.getId())
-        }
-    }
-
-    @Test
-    void testGetCaseInsensitive() {
-        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
-            assertSame alg, Jwts.KEY.get().get(alg.getId().toLowerCase())
         }
     }
 

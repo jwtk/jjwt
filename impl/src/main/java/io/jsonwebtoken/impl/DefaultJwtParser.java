@@ -59,6 +59,7 @@ import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.DecryptAeadRequest;
@@ -188,13 +189,13 @@ public class DefaultJwtParser implements JwtParser {
 
     private final boolean unsecuredDecompression;
 
-    private final Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigAlgFn;
+    private final Function<JwsHeader, SecureDigestAlgorithm<?, ?>> sigAlgs;
 
-    private final Function<JweHeader, AeadAlgorithm> encAlgFn;
+    private final Function<JweHeader, AeadAlgorithm> encAlgs;
 
-    private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgFn;
+    private final Function<JweHeader, KeyAlgorithm<?, ?>> keyAlgs;
 
-    private final Function<Header, CompressionAlgorithm> zipAlgFn;
+    private final Function<Header, CompressionAlgorithm> zipAlgs;
 
     private final Locator<? extends Key> keyLocator;
 
@@ -224,10 +225,10 @@ public class DefaultJwtParser implements JwtParser {
                      Decoder<InputStream, InputStream> base64UrlDecoder,
                      Deserializer<Map<String, ?>> deserializer,
                      CompressionCodecResolver compressionCodecResolver,
-                     Collection<CompressionAlgorithm> extraZipAlgs,
-                     Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs,
-                     Collection<KeyAlgorithm<?, ?>> extraKeyAlgs,
-                     Collection<AeadAlgorithm> extraEncAlgs) {
+                     Registry<String, CompressionAlgorithm> zipAlgs,
+                     Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs,
+                     Registry<String, KeyAlgorithm<?, ?>> keyAlgs,
+                     Registry<String, AeadAlgorithm> encAlgs) {
         this.provider = provider;
         this.unsecured = unsecured;
         this.unsecuredDecompression = unsecuredDecompression;
@@ -239,12 +240,11 @@ public class DefaultJwtParser implements JwtParser {
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
         this.deserializer = Assert.notNull(deserializer, "JSON Deserializer cannot be null.");
-
-        this.sigAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.SIG.get(), extraSigAlgs, MISSING_JWS_ALG_MSG);
-        this.keyAlgFn = new IdLocator<>(DefaultHeader.ALGORITHM, Jwts.KEY.get(), extraKeyAlgs, MISSING_JWE_ALG_MSG);
-        this.encAlgFn = new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, Jwts.ENC.get(), extraEncAlgs, MISSING_ENC_MSG);
-        this.zipAlgFn = compressionCodecResolver != null ? new CompressionCodecLocator(compressionCodecResolver) :
-                new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, Jwts.ZIP.get(), extraZipAlgs, null);
+        this.sigAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, sigAlgs, MISSING_JWS_ALG_MSG);
+        this.keyAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, keyAlgs, MISSING_JWE_ALG_MSG);
+        this.encAlgs = new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, encAlgs, MISSING_ENC_MSG);
+        this.zipAlgs = compressionCodecResolver != null ? new CompressionCodecLocator(compressionCodecResolver) :
+                new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, zipAlgs, null);
     }
 
     @Override
@@ -271,7 +271,7 @@ public class DefaultJwtParser implements JwtParser {
 
         SecureDigestAlgorithm<?, Key> algorithm;
         try {
-            algorithm = (SecureDigestAlgorithm<?, Key>) sigAlgFn.apply(jwsHeader);
+            algorithm = (SecureDigestAlgorithm<?, Key>) sigAlgs.apply(jwsHeader);
         } catch (UnsupportedJwtException e) {
             //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
             String msg = "Unsupported signature algorithm '" + alg + "'";
@@ -531,10 +531,10 @@ public class DefaultJwtParser implements JwtParser {
             if (!Strings.hasText(enc)) {
                 throw new MalformedJwtException(MISSING_ENC_MSG);
             }
-            final AeadAlgorithm encAlg = this.encAlgFn.apply(jweHeader);
+            final AeadAlgorithm encAlg = this.encAlgs.apply(jweHeader);
             Assert.stateNotNull(encAlg, "JWE Encryption Algorithm cannot be null.");
 
-            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgFn.apply(jweHeader);
+            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgs.apply(jweHeader);
             Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
             Key key = this.keyLocator.locate(jweHeader);
@@ -578,7 +578,7 @@ public class DefaultJwtParser implements JwtParser {
             integrityVerified = true; // no exception means signature verified
         }
 
-        final CompressionAlgorithm compressionAlgorithm = zipAlgFn.apply(header);
+        final CompressionAlgorithm compressionAlgorithm = zipAlgs.apply(header);
         if (compressionAlgorithm != null) {
             if (!integrityVerified) {
                 if (!payloadBase64UrlEncoded) {

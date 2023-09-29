@@ -37,7 +37,18 @@ public class IdRegistry<T extends Identifiable> extends StringRegistry<T> {
     }
 
     public IdRegistry(String name, Collection<T> instances) {
-        this(name, instances, true);
+        // Each registry requires CaSe-SeNsItIvE keys by default purpose - all JWA standard algorithm identifiers
+        // (JWS 'alg', JWE 'enc', JWK 'kty', etc) are all case-sensitive per via the following RFC language:
+        //
+        //     This name is a case-sensitive ASCII string.  Names may not match other registered names in a
+        //     case-insensitive manner unless the Designated Experts state that there is a compelling reason to
+        //     allow an exception.
+        //
+        // References:
+        // - JWS/JWE alg and JWE enc 'Algorithm Name': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1
+        // - JWE zip 'Compression Algorithm Value': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1
+        // - JWK '"kty" Parameter Value': https://www.rfc-editor.org/rfc/rfc7518.html#section-7.4.1
+        this(name, instances, true); // <---
     }
 
     public IdRegistry(String name, Collection<T> instances, boolean caseSensitive) {

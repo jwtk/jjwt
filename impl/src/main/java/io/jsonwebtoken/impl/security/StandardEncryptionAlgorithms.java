@@ -15,21 +15,22 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.ENC
-public final class StandardEncryptionAlgorithms extends DelegatingRegistry<String, AeadAlgorithm> {
+public final class StandardEncryptionAlgorithms extends IdRegistry<AeadAlgorithm> {
+
+    public static final String NAME = "JWE Encryption Algorithm";
 
     public StandardEncryptionAlgorithms() {
-        super(new IdRegistry<>("JWE Encryption Algorithm", Collections.of(
+        super(NAME, Collections.of(
                 (AeadAlgorithm) new HmacAesAeadAlgorithm(128),
                 new HmacAesAeadAlgorithm(192),
                 new HmacAesAeadAlgorithm(256),
                 new GcmAesAeadAlgorithm(128),
                 new GcmAesAeadAlgorithm(192),
-                new GcmAesAeadAlgorithm(256)), false));
+                new GcmAesAeadAlgorithm(256)));
     }
 }

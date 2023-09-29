@@ -15,15 +15,14 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.KeyOperation;
 
-public class StandardKeyOperations extends DelegatingRegistry<String, KeyOperation> {
+public final class StandardKeyOperations extends IdRegistry<KeyOperation> {
 
     public StandardKeyOperations() {
-        super(new IdRegistry<>("JSON Web Key Operation", Collections.of(
+        super("JSON Web Key Operation", Collections.of(
                 DefaultKeyOperation.SIGN,
                 DefaultKeyOperation.VERIFY,
                 DefaultKeyOperation.ENCRYPT,
@@ -32,6 +31,6 @@ public class StandardKeyOperations extends DelegatingRegistry<String, KeyOperati
                 DefaultKeyOperation.UNWRAP,
                 DefaultKeyOperation.DERIVE_KEY,
                 DefaultKeyOperation.DERIVE_BITS
-        )));
+        ));
     }
 }

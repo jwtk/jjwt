@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.HashAlgorithm;
@@ -26,10 +25,10 @@ import io.jsonwebtoken.security.HashAlgorithm;
  * @since JJWT_RELEASE_VERSION
  */
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Jwks.HASH
-public class StandardHashAlgorithms extends DelegatingRegistry<String, HashAlgorithm> {
+public final class StandardHashAlgorithms extends IdRegistry<HashAlgorithm> {
 
     public StandardHashAlgorithms() {
-        super(new IdRegistry<>("IANA Hash Algorithm", Collections.<HashAlgorithm>of(
+        super("IANA Hash Algorithm", Collections.<HashAlgorithm>of(
                 // We don't include DefaultHashAlgorithm.SHA1 here on purpose because 1) it's not in the JWK IANA
                 // registry so we don't need to expose it anyway, and 2) we don't want to expose a less-safe algorithm.
                 // The SHA1 instance only exists in JJWT's codebase to support RFC-required `x5t`
@@ -40,6 +39,6 @@ public class StandardHashAlgorithms extends DelegatingRegistry<String, HashAlgor
                 new DefaultHashAlgorithm("sha3-256"),
                 new DefaultHashAlgorithm("sha3-384"),
                 new DefaultHashAlgorithm("sha3-512")
-        )));
+        ));
     }
 }

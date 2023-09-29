@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken;
 
-import java.util.Collection;
-
 /**
  * Looks for a JWT {@code zip} header, and if found, returns the corresponding {@link CompressionCodec} the parser
  * can use to decompress the JWT body.
@@ -31,9 +29,9 @@ import java.util.Collection;
  * {@link io.jsonwebtoken.JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.</p>
  *
  * @see JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver)
- * @see JwtParserBuilder#addCompressionAlgorithms(Collection)
+ * @see JwtParserBuilder#zip()
  * @since 0.6.0
- * @deprecated in favor of {@link JwtParserBuilder#addCompressionAlgorithms(Collection)}
+ * @deprecated in favor of {@link JwtParserBuilder#zip()}
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated

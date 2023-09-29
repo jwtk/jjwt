@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -30,7 +29,9 @@ import java.security.spec.MGF1ParameterSpec;
  *
  * @since JJWT_RELEASE_VERSION
  */
-public final class StandardKeyAlgorithms extends DelegatingRegistry<String, KeyAlgorithm<?, ?>> {
+public final class StandardKeyAlgorithms extends IdRegistry<KeyAlgorithm<?, ?>> {
+
+    public static final String NAME = "JWE Key Management Algorithm";
 
     private static final String RSA1_5_ID = "RSA1_5";
     private static final String RSA1_5_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
@@ -42,7 +43,7 @@ public final class StandardKeyAlgorithms extends DelegatingRegistry<String, KeyA
             new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
 
     public StandardKeyAlgorithms() {
-        super(new IdRegistry<>("JWE Key Management Algorithm", Collections.<KeyAlgorithm<?, ?>>of(
+        super(NAME, Collections.<KeyAlgorithm<?, ?>>of(
                 new DirectKeyAlgorithm(),
                 new AesWrapKeyAlgorithm(128),
                 new AesWrapKeyAlgorithm(192),
@@ -60,7 +61,7 @@ public final class StandardKeyAlgorithms extends DelegatingRegistry<String, KeyA
                 new DefaultRsaKeyAlgorithm(RSA1_5_ID, RSA1_5_TRANSFORMATION),
                 new DefaultRsaKeyAlgorithm(RSA_OAEP_ID, RSA_OAEP_TRANSFORMATION),
                 new DefaultRsaKeyAlgorithm(RSA_OAEP_256_ID, RSA_OAEP_256_TRANSFORMATION, RSA_OAEP_256_SPEC)
-        ), false));
+        ));
     }
 
     /*
