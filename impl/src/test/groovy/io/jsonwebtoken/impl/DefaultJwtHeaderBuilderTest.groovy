@@ -325,7 +325,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testCritical() {
         def crit = ['foo'] as Set<String>
-        header = jws().add('foo', 'bar').critical(crit).build() as JwsHeader
+        header = jws().add('foo', 'bar').critical().add(crit).and().build() as JwsHeader
         assertTrue header instanceof JwsHeader
         assertFalse header instanceof JweHeader
         assertEquals crit, header.getCritical()
@@ -502,7 +502,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testCritSingle() {
         def crit = 'test'
-        def header = jws().add(crit, 'foo').critical(crit).build() as ProtectedHeader
+        def header = jws().add(crit, 'foo').critical().add(crit).and().build() as ProtectedHeader
         def expected = [crit] as Set<String>
         assertEquals expected, header.getCritical()
     }
@@ -511,34 +511,34 @@ class DefaultJwtHeaderBuilderTest {
     void testCritSingleNullIgnored() {
         def crit = 'test'
         def expected = [crit] as Set<String>
-        def header = jws().add(crit, 'foo').critical(crit).build() as ProtectedHeader
+        def header = jws().add(crit, 'foo').critical().add(crit).and().build() as ProtectedHeader
         assertEquals expected, header.getCritical()
-        header = builder.critical((String) null).build() as ProtectedHeader // ignored
+        header = builder.critical().add((String) null).and().build() as ProtectedHeader // ignored
         assertEquals expected, header.getCritical() // nothing changed
     }
 
     @Test
     void testCritNullCollectionIgnored() {
         def crit = ['test'] as Set<String>
-        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        def header = jws().add('test', 'foo').critical().add(crit).and().build() as ProtectedHeader
         assertEquals crit, header.getCritical()
-        header = builder.critical((Collection) null).build() as ProtectedHeader
+        header = builder.critical().add((Collection) null).and().build() as ProtectedHeader
         assertEquals crit, header.getCritical() // nothing changed
     }
 
     @Test
     void testCritCollectionWithNullElement() {
         def crit = [null] as Set<String>
-        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        def header = jws().add('test', 'foo').critical().add(crit).and().build() as ProtectedHeader
         assertNull header.getCritical()
     }
 
     @Test
     void testCritEmptyIgnored() {
         def crit = ['test'] as Set<String>
-        def header = jws().add('test', 'foo').critical(crit).build() as ProtectedHeader
+        ProtectedHeader header = jws().add('test', 'foo').critical().add(crit).and().build() as ProtectedHeader
         assertEquals crit, header.getCritical()
-        header = builder.critical([] as Set<String>).build()
+        header = builder.critical().add([] as Set<String>).and().build() as ProtectedHeader
         assertEquals crit, header.getCritical() // ignored
     }
 
@@ -550,7 +550,7 @@ class DefaultJwtHeaderBuilderTest {
     void testCritRemovedForUnprotectedHeader() {
         def crit = Collections.setOf('foo', 'bar')
         // no JWS or JWE params specified:
-        def header = builder.add('test', 'value').critical(crit).build()
+        def header = builder.add('test', 'value').critical().add(crit).and().build()
         assertFalse header.containsKey(DefaultProtectedHeader.CRIT.getId())
     }
 
@@ -562,7 +562,7 @@ class DefaultJwtHeaderBuilderTest {
     void testCritNamesSanitizedWhenHeaderMissingCorrespondingParameter() {
         def critGiven = ['foo', 'bar'] as Set<String>
         def critExpected = ['foo'] as Set<String>
-        def header = jws().add('foo', 'fooVal').critical(critGiven).build() as ProtectedHeader
+        def header = jws().add('foo', 'fooVal').critical().add(critGiven).and().build() as ProtectedHeader
         // header didn't set the 'bar' parameter, so 'bar' should not be in the crit values:
         assertEquals critExpected, header.getCritical()
     }
@@ -570,7 +570,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testCritNamesRemovedWhenHeaderMissingCorrespondingParameter() {
         def critGiven = ['foo'] as Set<String>
-        def header = jws().critical(critGiven).build() as ProtectedHeader
+        ProtectedHeader header = jws().critical().add(critGiven).and().build() as ProtectedHeader
         // header didn't set the 'foo' parameter, so crit would have been empty, and then removed from the header:
         assertNull header.getCritical()
     }

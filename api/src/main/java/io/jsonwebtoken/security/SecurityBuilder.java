@@ -25,6 +25,7 @@ import java.security.SecureRandom;
  * during instance creation, such as a {@link java.security.Provider} or {@link java.security.SecureRandom}.
  *
  * @param <T> The type of object that will be created each time {@link #build()} is invoked.
+ * @param <B> the type of SecurityBuilder returned for method chaining
  * @see #provider(Provider)
  * @see #random(SecureRandom)
  * @since JJWT_RELEASE_VERSION

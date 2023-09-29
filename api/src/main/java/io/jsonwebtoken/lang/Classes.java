@@ -330,6 +330,15 @@ public final class Classes {
         }
     }
 
+    /**
+     * Returns the {@code instance}'s named (declared) field value.
+     *
+     * @param instance  the instance with the internal field
+     * @param fieldName the name of the field to inspect
+     * @param fieldType the type of field to inspect
+     * @param <T>       field instance value type
+     * @return the field value
+     */
     public static <T> T getFieldValue(Object instance, String fieldName, Class<T> fieldType) {
         if (instance == null) return null;
         try {

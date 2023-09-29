@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.security;
-
-import java.security.Key;
+package io.jsonwebtoken.lang;
 
 /**
- * A request to a cryptographic algorithm requiring a {@link Key}.
+ * A {@code Conjunctor} supplies a joined object. It is typically used for nested builders to return
+ * to the source/original builder.
  *
- * @param <T> the type of payload in the request
- * @param <K> they type of key used by the algorithm during the request
+ * @param <T> the type of joined object to return.
  * @since JJWT_RELEASE_VERSION
  */
-public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier<K> {
+public interface Conjunctor<T> {
+
+    /**
+     * Returns the joined object.
+     *
+     * @return the joined object.
+     */
+    T and();
 }

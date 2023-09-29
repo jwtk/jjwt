@@ -1055,37 +1055,12 @@ class JwtsTest {
         def realAlg = Jwts.SIG.HS256 // any alg will do, we're going to wrap it
         def key = TestKeys.HS256
         def id = realAlg.getId() + 'X' // custom id
-        def alg = new MacAlgorithm() {
-            @Override
-            SecretKeyBuilder key() {
-                return realAlg.key()
-            }
-
-            @Override
-            int getKeyBitLength() {
-                return realAlg.keyBitLength
-            }
-
-            @Override
-            byte[] digest(SecureRequest<InputStream, SecretKey> request) {
-                return realAlg.digest(request)
-            }
-
-            @Override
-            boolean verify(VerifySecureDigestRequest<SecretKey> request) {
-                return realAlg.verify(request)
-            }
-
-            @Override
-            String getId() {
-                return id
-            }
-        }
+        def alg = new TestMacAlgorithm(id: id, delegate: realAlg)
 
         def jws = Jwts.builder().setSubject("joe").signWith(key, alg).compact()
 
         assertEquals 'joe', Jwts.parser()
-                .addSignatureAlgorithms([alg])
+                .sig().add(alg).and()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(jws).payload.getSubject()
@@ -1129,7 +1104,7 @@ class JwtsTest {
         def jwe = Jwts.builder().setSubject("joe").encryptWith(key, encAlg).compact()
 
         assertEquals 'joe', Jwts.parser()
-                .addEncryptionAlgorithms([encAlg])
+                .enc().add(encAlg).and()
                 .decryptWith(key)
                 .build()
                 .parseClaimsJwe(jwe).payload.getSubject()
@@ -1168,7 +1143,7 @@ class JwtsTest {
         try {
             Jwts.parser()
                     .keyLocator(new ConstantKeyLocator(TestKeys.HS256, TestKeys.A128GCM))
-                    .addKeyAlgorithms([badKeyAlg]) // <-- add bad alg here
+                    .key().add(badKeyAlg).and() // <-- add bad alg here
                     .build()
                     .parseClaimsJwe(compact)
             fail()

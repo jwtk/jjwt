@@ -74,7 +74,6 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -435,19 +434,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder audienceSingle(String aud) {
-        //noinspection deprecation
-        return claims().audienceSingle(aud).and();
-    }
-
-    @Override
-    public JwtBuilder audience(String aud) {
-        return claims().audience(aud).and();
-    }
-
-    @Override
-    public JwtBuilder audience(Collection<String> aud) {
-        return claims().audience(aud).and();
+    public AudienceCollection<JwtBuilder> audience() {
+        return new DelegateAudienceCollection<>((JwtBuilder) this, claims().audience());
     }
 
     @Override
@@ -586,7 +574,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), sigAlg.getId());
         if (!this.encodePayload) { // b64 extension:
             String id = DefaultJwsHeader.B64.getId();
-            this.headerBuilder.critical(id).add(id, false);
+            this.headerBuilder.critical().add(id).and().add(id, false);
         }
         final JwsHeader header = Assert.isInstanceOf(JwsHeader.class, this.headerBuilder.build());
         encodeAndWrite("JWS Protected Header", header, jws);

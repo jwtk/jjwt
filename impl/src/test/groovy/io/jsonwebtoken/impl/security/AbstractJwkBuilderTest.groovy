@@ -142,7 +142,7 @@ class AbstractJwkBuilderTest {
         def op = Jwks.OP.get().get(s)
         def canonical = Collections.setOf(s)
         def idiomatic = Collections.setOf(op)
-        def jwk = builder().operation(op).build()
+        def jwk = builder().operations().add(op).and().build()
         assertEquals idiomatic, jwk.getOperations()
         assertEquals canonical, jwk.key_ops
     }
@@ -153,7 +153,7 @@ class AbstractJwkBuilderTest {
         def op = Jwks.OP.builder().id(s).build()
         def canonical = Collections.setOf(s)
         def idiomatic = Collections.setOf(op)
-        def jwk = builder().operation(op).build()
+        def jwk = builder().operations().add(op).and().build()
         assertEquals idiomatic, jwk.getOperations()
         assertEquals canonical, jwk.key_ops
     }
@@ -164,7 +164,7 @@ class AbstractJwkBuilderTest {
         def op = Jwks.OP.builder().id(s).related('verify').build()
         def canonical = Collections.setOf(s)
         def idiomatic = Collections.setOf(op)
-        def jwk = builder().operation(op).build()
+        def jwk = builder().operations().add(op).and().build()
         assertEquals idiomatic, jwk.getOperations()
         assertEquals canonical, jwk.key_ops
         assertSame op, jwk.getOperations().iterator().next()
@@ -172,7 +172,7 @@ class AbstractJwkBuilderTest {
         //now assert that the standard VERIFY operation treats this as related since it has the same ID:
         canonical = Collections.setOf(s, 'verify')
         idiomatic = Collections.setOf(op, Jwks.OP.VERIFY)
-        jwk = builder().operation(op).operation(Jwks.OP.VERIFY).build() as Jwk
+        jwk = builder().operations().add(op).add(Jwks.OP.VERIFY).and().build() as Jwk
         assertEquals idiomatic, jwk.getOperations()
         assertEquals canonical, jwk.key_ops
     }
@@ -183,7 +183,7 @@ class AbstractJwkBuilderTest {
         def b = 'verify'
         def canonical = Collections.setOf(a, b)
         def idiomatic = Collections.setOf(Jwks.OP.SIGN, Jwks.OP.VERIFY)
-        def jwk = builder().operations(idiomatic).build()
+        def jwk = builder().operations().add(idiomatic).and().build()
         assertEquals idiomatic, jwk.getOperations()
         assertEquals canonical, jwk.key_ops
     }
@@ -192,7 +192,7 @@ class AbstractJwkBuilderTest {
     void testOperationsUnrelated() {
         try {
             // exception thrown on setter, before calling build:
-            builder().operations(Collections.setOf(Jwks.OP.SIGN, Jwks.OP.ENCRYPT))
+            builder().operations().add(Collections.setOf(Jwks.OP.SIGN, Jwks.OP.ENCRYPT)).and()
             fail()
         } catch (IllegalArgumentException e) {
             String msg = 'Unrelated key operations are not allowed. KeyOperation [\'encrypt\' (Encrypt content)] is ' +
@@ -240,7 +240,7 @@ class AbstractJwkBuilderTest {
         def op = Jwks.OP.builder().id('sign').description('Different Description')
                 .related(Jwks.OP.VERIFY.id).build()
         def builder = builder().operationPolicy(Jwks.OP.policy().add(op).build())
-        def jwk = builder.operations(Collections.setOf(op, Jwks.OP.VERIFY)).build() as Jwk
+        def jwk = builder.operations().add(Collections.setOf(op, Jwks.OP.VERIFY)).and().build() as Jwk
         assertSame op, jwk.getOperations().find({it.id == 'sign'})
     }
 

@@ -195,7 +195,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
-    public JwkContext<K> setOperations(Collection<KeyOperation> ops) {
+    public JwkContext<K> setOperations(Collection<? extends KeyOperation> ops) {
         put(AbstractJwk.KEY_OPS, ops);
         return this;
     }

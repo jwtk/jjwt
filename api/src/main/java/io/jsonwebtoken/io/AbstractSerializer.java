@@ -30,6 +30,12 @@ import java.io.OutputStream;
 public abstract class AbstractSerializer<T> implements Serializer<T> {
 
     /**
+     * Default constructor, does not initialize any internal state.
+     */
+    protected AbstractSerializer() {
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -61,8 +67,8 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
      *
      * @param t   the object to convert to a byte stream
      * @param out the stream to write to
-     * @throws SerializationException if there is a problem converting the object to a byte stream or writing the
-     *                                bytes to the {@code out}put stream.
+     * @throws Exception if there is a problem converting the object to a byte stream or writing the
+     *                   bytes to the {@code out}put stream.
      * @since JJWT_RELEASE_VERSION
      */
     protected abstract void doSerialize(T t, OutputStream out) throws Exception;

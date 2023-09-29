@@ -20,6 +20,7 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoder;
 import io.jsonwebtoken.io.Serializer;
+import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -402,9 +403,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * String jwt = Jwts.builder()
      *
      *     <b>.claims()
-     *         .subject("Joe")
-     *         .audience("you")
      *         .issuer("me")
+     *         .subject("Joe")
+     *         .audience().add("you").and()
      *         .add("customClaim", customValue)
      *         .add(myClaimsMap)
      *         // ... etc ...
@@ -513,20 +514,6 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     @Override
     // for better/targeted JavaDoc
     JwtBuilder subject(String sub);
-
-    /**
-     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3">
-     * <code>aud</code></a> (audience) claim. A {@code null} value will remove the property from the Claims.
-     * This is a convenience wrapper for:
-     * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#audience(String) audience(aud)}.{@link BuilderClaims#and() and()}</pre></blockquote>
-     *
-     * @param aud the JWT {@code aud} value or {@code null} to remove the property from the Claims map.
-     * @return the builder instance for method chaining.
-     */
-    @Override
-    // for better/targeted JavaDoc
-    JwtBuilder audience(String aud);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
@@ -1052,14 +1039,8 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims> {
-
-        /**
-         * Returns the associated JwtBuilder for continued configuration.
-         *
-         * @return the associated JwtBuilder for continued configuration.
-         */
-        JwtBuilder and();
+    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims>,
+            Conjunctor<JwtBuilder> {
     }
 
     /**
@@ -1069,13 +1050,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader> {
-
-        /**
-         * Returns the associated JwtBuilder for continued configuration.
-         *
-         * @return the associated JwtBuilder for continued configuration.
-         */
-        JwtBuilder and();
+    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader>,
+            Conjunctor<JwtBuilder> {
     }
 }

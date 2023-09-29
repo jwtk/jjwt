@@ -147,14 +147,15 @@ class JwksTest {
         def op = Jwks.OP.ENCRYPT
         def expected = [op] as Set<KeyOperation>
         def canonical = [op.getId()] as Set<String>
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operation(op).build()
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(op).and().build()
         assertEquals expected, jwk.getOperations()
         assertEquals canonical, jwk.get(AbstractJwk.KEY_OPS.id)
     }
 
     @Test
     void testSingleOperationNull() {
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operation(null).build() //ignored null
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add((KeyOperation) null).and().build()
+        //ignored null
         assertNull jwk.getOperations() //nothing added
         assertFalse jwk.containsKey(AbstractJwk.KEY_OPS.id)
     }
@@ -163,7 +164,7 @@ class JwksTest {
     void testSingleOperationAppends() {
         def expected = [Jwks.OP.ENCRYPT, Jwks.OP.DECRYPT] as Set<KeyOperation>
         def jwk = Jwks.builder().key(TestKeys.A128GCM)
-                .operation(Jwks.OP.ENCRYPT).operation(Jwks.OP.DECRYPT)
+                .operations().add(Jwks.OP.ENCRYPT).add(Jwks.OP.DECRYPT).and()
                 .build()
         assertEquals expected, jwk.getOperations()
     }
@@ -171,20 +172,20 @@ class JwksTest {
     @Test
     void testOperations() {
         def val = [Jwks.OP.SIGN, Jwks.OP.VERIFY] as Set<KeyOperation>
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations(val).build()
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(val).and().build()
         assertEquals val, jwk.getOperations()
     }
 
     @Test
     void testOperationsNull() {
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations(null).build()
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add((Collection) null).and().build()
         assertNull jwk.getOperations()
         assertFalse jwk.containsKey(AbstractJwk.KEY_OPS.id)
     }
 
     @Test
     void testOperationsEmpty() {
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations(Collections.emptyList()).build()
+        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(Collections.emptyList()).and().build()
         assertNull jwk.getOperations()
     }
 

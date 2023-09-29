@@ -275,6 +275,12 @@ public final class Strings {
         return new String(asciiBytes, StandardCharsets.US_ASCII);
     }
 
+    /**
+     * Returns the {@link StandardCharsets#US_ASCII US_ASCII}-encoded bytes of the specified {@code CharSequence}.
+     *
+     * @param s the {@code CharSequence} to encode to {@code US_ASCII}.
+     * @return the {@link StandardCharsets#US_ASCII US_ASCII}-encoded bytes of the specified {@code CharSequence}.
+     */
     public static byte[] ascii(CharSequence s) {
         byte[] bytes = null;
         if (s != null) {

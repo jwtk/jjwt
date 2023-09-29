@@ -40,12 +40,12 @@ class IdLocatorTest {
         def a = new StringIdentifiable(value: 'A')
         def b = new StringIdentifiable(value: 'B')
         registry = new IdRegistry('Foo', [a, b], false)
-        locator = new IdLocator(TEST_PARAM, registry, Collections.emptyList(), exMsg)
+        locator = new IdLocator(TEST_PARAM, registry, exMsg)
     }
 
     @Test
     void unrequiredHeaderValueTest() {
-        locator = new IdLocator(TEST_PARAM, registry, Collections.emptyList(), null)
+        locator = new IdLocator(TEST_PARAM, registry, null)
         def header = Jwts.header().add('a', 'b').build()
         assertNull locator.apply(header)
     }

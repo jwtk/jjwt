@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.security;
-
-import java.security.Key;
+package io.jsonwebtoken.lang;
 
 /**
- * A request to a cryptographic algorithm requiring a {@link Key}.
+ * A {@link CollectionMutator} that can return access to its parent via the {@link Conjunctor#and() and()} method for
+ * continued configuration.
  *
- * @param <T> the type of payload in the request
- * @param <K> they type of key used by the algorithm during the request
+ * @param <E> the type of elements in the collection
+ * @param <P> the parent to return
  * @since JJWT_RELEASE_VERSION
  */
-public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier<K> {
+public interface NestedCollection<E, P> extends CollectionMutator<E, NestedCollection<E, P>>, Conjunctor<P> {
 }

@@ -24,15 +24,22 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.io.DelegateStringDecoder;
+import io.jsonwebtoken.impl.io.StandardCompressionAlgorithms;
+import io.jsonwebtoken.impl.lang.DefaultNestedCollection;
+import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
+import io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms;
+import io.jsonwebtoken.impl.security.StandardKeyAlgorithms;
+import io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.lang.NestedCollection;
+import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -45,9 +52,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,17 +84,18 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
 
-    private final Collection<AeadAlgorithm> extraEncAlgs = new LinkedHashSet<>();
+    private Registry<String, AeadAlgorithm> encAlgs = Jwts.ENC.get();
 
-    private final Collection<KeyAlgorithm<?, ?>> extraKeyAlgs = new LinkedHashSet<>();
+    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwts.KEY.get();
 
-    private final Collection<SecureDigestAlgorithm<?, ?>> extraSigAlgs = new LinkedHashSet<>();
+    private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jwts.SIG.get();
 
-    private final Collection<CompressionAlgorithm> extraZipAlgs = new LinkedHashSet<>();
+    private Registry<String, CompressionAlgorithm> zipAlgs = Jwts.ZIP.get();
 
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
 
+    @SuppressWarnings("deprecation")
     private Decoder<InputStream, InputStream> decoder = new DelegateStringDecoder(Decoders.BASE64URL);
 
     private Deserializer<Map<String, ?>> deserializer;
@@ -162,7 +168,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder requireAudience(String audience) {
-        expectedClaims.audience(audience);
+        expectedClaims.audience().add(audience).and();
         return this;
     }
 
@@ -211,20 +217,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder critical(String crit) {
-        if (Strings.hasText(crit)) {
-            Set<String> existing = Collections.nullSafe(this.critical);
-            Set<String> newSet = new LinkedHashSet<>(existing);
-            newSet.add(crit);
-            critical(newSet);
-        }
-        return this;
-    }
-
-    @Override
-    public JwtParserBuilder critical(Set<String> crit) {
-        this.critical = Collections.immutable(new LinkedHashSet<>(Collections.nullSafe(crit)));
-        return this;
+    public NestedCollection<String, JwtParserBuilder> critical() {
+        return new DefaultNestedCollection<String, JwtParserBuilder>(this, this.critical) {
+            @Override
+            public JwtParserBuilder and() {
+                critical = Collections.asSet(getCollection());
+                return super.and();
+            }
+        };
     }
 
     @Override
@@ -301,31 +301,47 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder addCompressionAlgorithms(Collection<? extends CompressionAlgorithm> algs) {
-        Assert.notEmpty(algs, "Additional CompressionAlgorithm collection cannot be null or empty.");
-        this.extraZipAlgs.addAll(algs);
-        return this;
+    public NestedCollection<CompressionAlgorithm, JwtParserBuilder> zip() {
+        return new DefaultNestedCollection<CompressionAlgorithm, JwtParserBuilder>(this, this.zipAlgs.values()) {
+            @Override
+            public JwtParserBuilder and() {
+                zipAlgs = new IdRegistry<>(StandardCompressionAlgorithms.NAME, getCollection());
+                return super.and();
+            }
+        };
     }
 
     @Override
-    public JwtParserBuilder addEncryptionAlgorithms(Collection<? extends AeadAlgorithm> algs) {
-        Assert.notEmpty(algs, "Additional AeadAlgorithm collection cannot be null or empty.");
-        this.extraEncAlgs.addAll(algs);
-        return this;
+    public NestedCollection<AeadAlgorithm, JwtParserBuilder> enc() {
+        return new DefaultNestedCollection<AeadAlgorithm, JwtParserBuilder>(this, this.encAlgs.values()) {
+            @Override
+            public JwtParserBuilder and() {
+                encAlgs = new IdRegistry<>(StandardEncryptionAlgorithms.NAME, getCollection());
+                return super.and();
+            }
+        };
     }
 
     @Override
-    public JwtParserBuilder addSignatureAlgorithms(Collection<? extends SecureDigestAlgorithm<?, ?>> algs) {
-        Assert.notEmpty(algs, "Additional SignatureAlgorithm collection cannot be null or empty.");
-        this.extraSigAlgs.addAll(algs);
-        return this;
+    public NestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder> sig() {
+        return new DefaultNestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder>(this, this.sigAlgs.values()) {
+            @Override
+            public JwtParserBuilder and() {
+                sigAlgs = new IdRegistry<>(StandardSecureDigestAlgorithms.NAME, getCollection());
+                return super.and();
+            }
+        };
     }
 
     @Override
-    public JwtParserBuilder addKeyAlgorithms(Collection<? extends KeyAlgorithm<?, ?>> algs) {
-        Assert.notEmpty(algs, "Additional KeyAlgorithm collection cannot be null or empty.");
-        this.extraKeyAlgs.addAll(algs);
-        return this;
+    public NestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder> key() {
+        return new DefaultNestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder>(this, this.keyAlgs.values()) {
+            @Override
+            public JwtParserBuilder and() {
+                keyAlgs = new IdRegistry<>(StandardKeyAlgorithms.NAME, getCollection());
+                return super.and();
+            }
+        };
     }
 
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
@@ -385,9 +401,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                     "due to their security implications.";
             throw new IllegalStateException(msg);
         }
-        if (this.compressionCodecResolver != null && !Collections.isEmpty(extraZipAlgs)) {
-            String msg = "Both 'addCompressionAlgorithms' and 'compressionCodecResolver' " +
-                    "cannot be specified. Choose either.";
+        if (this.compressionCodecResolver != null && !Jwts.ZIP.get().equals(this.zipAlgs)) {
+            String msg = "Both 'zip()' and 'compressionCodecResolver' " +
+                    "cannot be configured. Choose either.";
             throw new IllegalStateException(msg);
         }
 
@@ -409,10 +425,10 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 decoder,
                 deserializer,
                 compressionCodecResolver,
-                extraZipAlgs,
-                extraSigAlgs,
-                extraKeyAlgs,
-                extraEncAlgs
+                zipAlgs,
+                sigAlgs,
+                keyAlgs,
+                encAlgs
         );
     }
 }

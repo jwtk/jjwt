@@ -16,24 +16,22 @@
 package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Registry;
+import io.jsonwebtoken.lang.NestedCollection;
 
-/**
- * {@code Registry} implementation that delegates all calls to an internal Registry instance.
- *
- * @param <K> Registry key type
- * @param <V> Registry value type
- * @since JJWT_RELEASE_VERSION
- */
-public class DelegatingRegistry<K, V> extends DelegatingMap<K, V, Registry<K, V>> implements Registry<K, V> {
+import java.util.Collection;
 
-    protected DelegatingRegistry(Registry<K, V> registry) {
-        super(registry);
-        this.DELEGATE = Assert.notEmpty(registry, "Delegate registry cannot be null or empty.");
+public class DefaultNestedCollection<E, P> extends DefaultCollectionMutator<E, NestedCollection<E, P>>
+        implements NestedCollection<E, P> {
+
+    private final P parent;
+
+    public DefaultNestedCollection(P parent, Collection<? extends E> seed) {
+        super(seed);
+        this.parent = Assert.notNull(parent, "Parent cannot be null.");
     }
 
     @Override
-    public V forKey(K key) throws IllegalArgumentException {
-        return DELEGATE.forKey(key);
+    public P and() {
+        return this.parent;
     }
 }

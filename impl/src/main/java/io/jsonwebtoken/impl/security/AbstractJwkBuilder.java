@@ -15,12 +15,13 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.DefaultNestedCollection;
 import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Collections;
+import io.jsonwebtoken.lang.NestedCollection;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
@@ -37,7 +38,6 @@ import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
@@ -108,18 +108,16 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     }
 
     @Override
-    public T operation(KeyOperation operation) throws IllegalArgumentException {
-        return operation != null ? operations(Collections.setOf(operation)) : self();
-    }
-
-    @Override
-    public T operations(Collection<KeyOperation> ops) {
-        Set<KeyOperation> set = new LinkedHashSet<>(Collections.nullSafe(ops)); // new ones override existing ones
-        Set<KeyOperation> existing = Collections.nullSafe(this.DELEGATE.getOperations());
-        set.addAll(existing);
-        this.opsPolicy.validate(set);
-        this.DELEGATE.setOperations(set);
-        return self();
+    public NestedCollection<KeyOperation, T> operations() {
+        return new DefaultNestedCollection<KeyOperation, T>(self(), this.DELEGATE.getOperations()) {
+            @Override
+            public T and() {
+                Collection<? extends KeyOperation> c = getCollection();
+                opsPolicy.validate(c);
+                DELEGATE.setOperations(c);
+                return super.and();
+            }
+        };
     }
 
     @Override

@@ -37,6 +37,12 @@ public abstract class AbstractDeserializer<T> implements Deserializer<T> {
     private static final byte[] EMPTY_BYTES = new byte[0];
 
     /**
+     * Default constructor, does not initialize any internal state.
+     */
+    protected AbstractDeserializer() {
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -67,7 +73,7 @@ public abstract class AbstractDeserializer<T> implements Deserializer<T> {
      *
      * @param in the input stream to read
      * @return the deserialized Java object
-     * @throws DeserializationException if there is a problem reading the stream or creating the expected Java object
+     * @throws Exception if there is a problem reading the stream or creating the expected Java object
      */
     protected abstract T doDeserialize(InputStream in) throws Exception;
 }

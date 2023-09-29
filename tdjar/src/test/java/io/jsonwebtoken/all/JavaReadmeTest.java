@@ -75,9 +75,8 @@ public class JavaReadmeTest {
                 .compact();
 
         Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
-                .critical("b64")                               // 2
                 .build()
-                .parseContentJws(jws, content);                // 3
+                .parseContentJws(jws, content);                // 2
 
         assertArrayEquals(content, parsed.getPayload());
     }
@@ -98,7 +97,7 @@ public class JavaReadmeTest {
                 .compact();
 
         Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
-                .critical("b64")                               // 2
+                .critical().add("b64").and()                   // 2
                 .build()
                 .parseClaimsJws(jws);                          // 3
 
@@ -106,7 +105,6 @@ public class JavaReadmeTest {
         assert "me".equals(parsed.getPayload().getIssuer());
 
         parsed = Jwts.parser().verifyWith(testKey)
-                .critical("b64")
                 .build()
                 .parseClaimsJws(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
 
@@ -237,7 +235,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-        String jwe = Jwts.builder().audience("Alice")
+        String jwe = Jwts.builder().audience().add("Alice").and()
                 .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
                 .compact();
 
@@ -285,7 +283,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-        String jwe = Jwts.builder().audience("Alice")
+        String jwe = Jwts.builder().audience().add("Alice").and()
                 .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
                 .compact();
 

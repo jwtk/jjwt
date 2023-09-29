@@ -79,13 +79,6 @@ class EncryptionAlgorithmsTest {
         }
     }
 
-    @Test
-    void testGetCaseInsensitive() {
-        for (AeadAlgorithm alg : registry.values()) {
-            assertSame alg, registry.get(alg.getId().toLowerCase())
-        }
-    }
-
     @Test(expected = IllegalArgumentException)
     void testForIdWithInvalidId() {
         //unlike the 'get' paradigm, 'key' requires the value to exist

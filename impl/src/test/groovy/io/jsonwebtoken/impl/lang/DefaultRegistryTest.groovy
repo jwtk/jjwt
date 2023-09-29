@@ -18,8 +18,7 @@ package io.jsonwebtoken.impl.lang
 import org.junit.Before
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.fail
+import static org.junit.Assert.*
 
 class DefaultRegistryTest {
 
@@ -52,5 +51,31 @@ class DefaultRegistryTest {
     void testApplySameAsGet() {
         def key = 'a'
         assertEquals reg.apply(key), reg.get(key)
+    }
+
+    @Test
+    void testHashCode() {
+        assertEquals reg.@DELEGATE.hashCode(), reg.hashCode()
+    }
+
+    @Test
+    void testEqualsIdentity() {
+        assertEquals reg, reg
+    }
+
+    @Test
+    void testEqualsValues() {
+        def another = new DefaultRegistry<>('test', 'id', ['a', 'b', 'c', 'd'], Functions.identity())
+        assertEquals another, reg
+    }
+
+    @Test
+    void testNotEquals() {
+        assertFalse reg.equals(new Object())
+    }
+
+    @Test
+    void testToString() {
+        assertEquals reg.@DELEGATE.toString(), reg.toString()
     }
 }

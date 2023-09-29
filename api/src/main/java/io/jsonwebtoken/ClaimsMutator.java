@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.NestedCollection;
+
 import java.util.Collection;
 import java.util.Date;
 
@@ -77,61 +79,29 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
      * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
      * strongly recommended to avoid calling this method whenever possible and favor the
-     * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
-     * data type for recipients.
+     * {@link #audience()}.{@link AudienceCollection#add(Object) add(String)} and
+     * {@link AudienceCollection#add(Collection) add(Collection)} methods instead, as they ensure a single
+     * deterministic data type for recipients.
      *
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
-     * {@link #audience(String)}. This method will be removed before the JJWT 1.0 release.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #audience()}. This method will be removed before
+     * the JJWT 1.0 release.
      */
     @Deprecated
     T setAudience(String aud);
 
     /**
-     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code> (audience)
-     * Claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
-     * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array; it is
-     * strongly recommended to avoid calling this method whenever possible and favor the
-     * {@link #audience(String)} or {@link #audience(Collection)} methods instead, as they ensure a single deterministic
-     * data type for recipients.
-     *
-     * @param aud the value to use as the {@code aud} Claim single-String value (and not an array of Strings), or
-     *            {@code null}, empty or whitespace to remove the property from the JSON map.
-     * @return the instance for method chaining
-     * @since JJWT_RELEASE_VERSION
-     * @deprecated This is technically not deprecated because the JWT RFC mandates support for single string values,
-     * but it is marked as deprecated to discourage its use when possible.
-     */
-    // DO NOT REMOVE EVER. This is a required RFC feature, but marked as deprecated to discourage its use
-    @Deprecated
-    T audienceSingle(String aud);
-
-    /**
-     * Adds (appends) the specified {@code aud} value to the {@link #audience(Collection) audience} Claim set
-     * (JSON Array) unless it is {@code null}, empty, whitespace-only or already exists in the set.
-     *
-     * <p>This method may be called multiple times.</p>
-     *
-     * @param aud a JWT {@code aud} value to add to the {@link #audience(Collection) audience} Claim set.
-     * @return the {@code Claims} instance for method chaining.
-     * @throws IllegalArgumentException if the {@code aud} argument is null or empty.
-     * @since JJWT_RELEASE_VERSION
-     */
-    T audience(String aud);
-
-    /**
-     * Adds (appends) the specified values to the JWT
+     * Configures the JWT
      * <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience) Claim
      * set, quietly ignoring any null, empty, whitespace-only, or existing value already in the set.
      *
-     * <p>This method may be called multiple times.</p>
-     *
-     * @param aud the values to add to the {@code aud} Claim set (JSON Array)
-     * @return the instance for method chaining
+     * @return the {@link AudienceCollection AudienceCollection} to use for {@code aud} configuration.
+     * @see AudienceCollection AudienceCollection
+     * @see AudienceCollection#single(String) AudienceCollection.single(String)
      * @since JJWT_RELEASE_VERSION
      */
-    T audience(Collection<String> aud);
+    AudienceCollection<T> audience();
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
@@ -246,4 +216,34 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @since JJWT_RELEASE_VERSION
      */
     T id(String jti);
+
+    /**
+     * A {@code NestedCollection} for setting {@link #audience()} values that also allows overriding the collection
+     * to be a {@link #single(String) single string value} for legacy JWT recipients if necessary.
+     *
+     * @param <P> the type of ClaimsMutator to return for method chaining.
+     * @see #single(String)
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface AudienceCollection<P> extends NestedCollection<String, P> {
+
+        /**
+         * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code> (audience)
+         * Claim</a> as <em>a single String, <b>NOT</b> a String array</em>.  This method exists only for producing
+         * JWTs sent to legacy recipients that are unable to interpret the {@code aud} value as a JSON String Array;
+         * it is strongly recommended to avoid calling this method whenever possible and favor the
+         * {@link #add(Object) add(String)} or {@link #add(Collection)} methods instead, as they ensure a single
+         * deterministic data type for recipients.
+         *
+         * @param aud the value to use as the {@code aud} Claim single-String value (and not an array of Strings), or
+         *            {@code null}, empty or whitespace to remove the property from the JSON map.
+         * @return the instance for method chaining
+         * @since JJWT_RELEASE_VERSION
+         * @deprecated This is technically not deprecated because the JWT RFC mandates support for single string values,
+         * but it is marked as deprecated to discourage its use when possible.
+         */
+        // DO NOT REMOVE EVER. This is a required RFC feature, but marked as deprecated to discourage its use
+        @Deprecated
+        P single(String aud);
+    }
 }

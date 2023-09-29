@@ -84,4 +84,25 @@ public class DefaultRegistry<K, V> extends DelegatingMap<K, V, Map<K, V>> implem
     public void clear() {
         immutable();
     }
+
+    @Override
+    public int hashCode() {
+        return DELEGATE.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof DefaultRegistry) {
+            DefaultRegistry<?, ?> other = (DefaultRegistry<?, ?>) obj;
+            return this.qualifiedKeyName.equals(other.qualifiedKeyName) &&
+                    this.DELEGATE.equals(other.DELEGATE);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return DELEGATE.toString();
+    }
 }

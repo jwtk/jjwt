@@ -16,7 +16,6 @@
 package io.jsonwebtoken.security;
 
 import java.security.Key;
-import java.util.Collection;
 
 /**
  * A {@link JwkBuilder} that builds asymmetric (public or private) JWKs.
@@ -69,7 +68,7 @@ public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>,
      *
      * <p>Per
      * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">JWK RFC 7517, Section 4.3, last paragraph</a>,
-     * the <code>use (Public Key Use)</code> and {@link #operations(Collection) key_ops (Key Operations)} members
+     * the <code>use (Public Key Use)</code> and {@link #operations() key_ops (Key Operations)} members
      * <em>SHOULD NOT</em> be used together; however, if both are used, the information they convey <em>MUST</em> be
      * consistent. Applications should specify which of these members they use, if either is to be used by the
      * application.</p>

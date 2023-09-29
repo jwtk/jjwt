@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.DelegatingRegistry;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.Password;
@@ -26,10 +25,12 @@ import java.security.Key;
 import java.security.PrivateKey;
 
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.SIG
-public final class StandardSecureDigestAlgorithms extends DelegatingRegistry<String, SecureDigestAlgorithm<?, ?>> {
+public final class StandardSecureDigestAlgorithms extends IdRegistry<SecureDigestAlgorithm<?, ?>> {
+
+    public static final String NAME = "JWS Digital Signature or MAC";
 
     public StandardSecureDigestAlgorithms() {
-        super(new IdRegistry<>("JWS Digital Signature or MAC", Collections.of(
+        super(NAME, Collections.of(
                 NoneSignatureAlgorithm.INSTANCE,
                 DefaultMacAlgorithm.HS256,
                 DefaultMacAlgorithm.HS384,
@@ -44,7 +45,7 @@ public final class StandardSecureDigestAlgorithms extends DelegatingRegistry<Str
                 EcSignatureAlgorithm.ES384,
                 EcSignatureAlgorithm.ES512,
                 EdSignatureAlgorithm.INSTANCE
-        ), false));
+        ));
     }
 
     @SuppressWarnings("unchecked")
