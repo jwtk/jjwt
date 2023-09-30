@@ -39,7 +39,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @return {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      */
-    boolean isSigned(String compact);
+    boolean isSigned(CharSequence compact);
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -68,7 +68,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseContentJwe(String)
      * @see #parseClaimsJwe(String)
      */
-    Jwt<?, ?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException,
+    Jwt<?, ?> parse(CharSequence jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException,
             SecurityException, IllegalArgumentException;
 
     /**
@@ -121,7 +121,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseClaimsJws(String)
      * @see #parseContentJwe(String)
      * @see #parseClaimsJwe(String)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
     <T> T parse(String jwt, JwtHandler<T> handler) throws ExpiredJwtException, UnsupportedJwtException,
@@ -153,7 +153,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseContentJws(String)
      * @see #parseClaimsJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
     Jwt<Header, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException,
@@ -183,7 +183,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseContentJws(String)
      * @see #parseClaimsJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
     Jwt<Header, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException,
@@ -214,7 +214,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseClaimsJws(String)
      * @see #parseClaimsJwe(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
     Jws<byte[]> parseContentJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException,
@@ -325,7 +325,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseClaimsJwt(String)
      * @see #parseClaimsJwe(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
     Jws<Claims> parseClaimsJws(String jws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
@@ -355,7 +355,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseClaimsJws(String)
      * @see #parseClaimsJwe(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since JJWT_RELEASE_VERSION
      */
     Jwe<byte[]> parseContentJwe(String jwe) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
@@ -385,7 +385,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseClaimsJwt(String)
      * @see #parseClaimsJws(String)
      * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parse(CharSequence)
      * @since JJWT_RELEASE_VERSION
      */
     Jwe<Claims> parseClaimsJwe(String jwe) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,

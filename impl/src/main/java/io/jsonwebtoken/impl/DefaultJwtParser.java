@@ -251,7 +251,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public boolean isSigned(String compact) {
+    public boolean isSigned(CharSequence compact) {
         if (!Strings.hasText(compact)) {
             return false;
         }
@@ -362,11 +362,6 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     public Jwt<?, ?> parse(Reader reader) {
         Assert.notNull(reader, "Reader cannot be null.");
         return parse(reader, Payload.EMPTY);
-    }
-
-    @Override
-    public Jwt<?, ?> parse(String compact) {
-        return parse((CharSequence) compact);
     }
 
     private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload)

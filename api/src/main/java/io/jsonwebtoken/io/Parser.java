@@ -54,11 +54,11 @@ public interface Parser<T> {
     /**
      * Parses the specified {@link InputStream} assuming {@link java.nio.charset.StandardCharsets#UTF_8 UTF_8} encoding.
      * This is a convenience alias for:
-     * <p/>
-     * <p>&nbsp;&nbsp;&nbsp;&nbsp;<code>{@link #parse(Reader) parse}(new
-     * {@link java.io.InputStreamReader InputStreamReader}(in, {@link java.nio.charset.StandardCharsets#UTF_8
-     * StandardCharsets.UTF_8});</code></p>
-     * <p/>
+     *
+     * <blockquote><pre>{@link #parse(Reader) parse}(new {@link java.io.InputStreamReader
+     * InputStreamReader}(in, {@link java.nio.charset.StandardCharsets#UTF_8
+     * StandardCharsets.UTF_8});</pre></blockquote>
+     *
      *
      * @param in the UTF-8 InputStream.
      * @return the Java object represented by the specified {@link InputStream}.
