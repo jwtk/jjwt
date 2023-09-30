@@ -55,6 +55,7 @@ The Apache Software Foundation (https://www.apache.org/).
 ```
 
 Also, the following classes were copied from the Apache Commons-IO project, with further JJWT-specific modifications:
+* io.jsonwebtoken.impl.io.CharSequenceReader
 * io.jsonwebtoken.impl.io.FilteredInputStream
 * io.jsonwebtoken.impl.io.FilteredOutputStream
 * io.jsonwebtoken.impl.io.ClosedInputStream

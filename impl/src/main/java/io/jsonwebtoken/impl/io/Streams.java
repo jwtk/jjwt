@@ -27,7 +27,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.util.concurrent.Callable;
 
 /**
@@ -55,6 +57,18 @@ public class Streams {
 
     public static ByteArrayInputStream of(CharSequence seq) {
         return of(Strings.utf8(seq));
+    }
+
+    public static Reader reader(byte[] bytes) {
+        return reader(new ByteArrayInputStream(bytes));
+    }
+
+    public static Reader reader(InputStream in) {
+        return new InputStreamReader(in, Strings.UTF_8);
+    }
+
+    public static Reader reader(CharSequence seq) {
+        return new CharSequenceReader(seq);
     }
 
     public static void flush(Flushable... flushables) {

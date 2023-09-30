@@ -30,7 +30,9 @@ class GsonDeserializerTest {
     private GsonDeserializer deserializer
 
     private def deser(byte[] data) {
-        deserializer.deserialize(new ByteArrayInputStream(data))
+        def ins = new ByteArrayInputStream(data)
+        def reader = new InputStreamReader(ins, Strings.UTF_8)
+        deserializer.deserialize(reader)
     }
 
     private def deser(String s) {
@@ -76,7 +78,7 @@ class GsonDeserializerTest {
         def ex = new IOException('foo')
         deserializer = new GsonDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
+            protected Object doDeserialize(Reader reader) throws Exception {
                 throw ex
             }
         }

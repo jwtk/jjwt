@@ -29,7 +29,9 @@ class OrgJsonDeserializerTest {
     private OrgJsonDeserializer des
 
     private Object fromBytes(byte[] data) {
-        return des.deserialize(new ByteArrayInputStream(data))
+        def ins = new ByteArrayInputStream(data)
+        def reader = new InputStreamReader(ins, Strings.UTF_8)
+        return des.deserialize(reader)
     }
 
     private Object read(String s) {
@@ -38,7 +40,7 @@ class OrgJsonDeserializerTest {
 
     @Test(expected = IllegalArgumentException)
     void testNullArgument() {
-        des.deserialize((InputStream) null)
+        des.deserialize((Reader) null)
     }
 
     @Test(expected = DeserializationException)
@@ -157,7 +159,7 @@ class OrgJsonDeserializerTest {
 
     @Test(expected = IllegalArgumentException)
     void deserializeNull() {
-        des.deserialize((InputStream) null)
+        des.deserialize((Reader) null)
     }
 
     @Test(expected = DeserializationException)
@@ -172,7 +174,7 @@ class OrgJsonDeserializerTest {
 
         des = new OrgJsonDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) {
+            protected Object doDeserialize(Reader reader) {
                 throw t
             }
         }

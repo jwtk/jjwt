@@ -26,8 +26,8 @@ class AbstractDeserializerTest {
         boolean invoked = false
         def deser = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
-                assertEquals EOF, inputStream.read()
+            protected Object doDeserialize(Reader reader) throws Exception {
+                assertEquals EOF, reader.read()
                 invoked = true
             }
         }
@@ -40,8 +40,8 @@ class AbstractDeserializerTest {
         boolean invoked = false
         def deser = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
-                assertEquals EOF, inputStream.read()
+            protected Object doDeserialize(Reader reader) throws Exception {
+                assertEquals EOF, reader.read()
                 invoked = true
             }
         }
@@ -56,8 +56,8 @@ class AbstractDeserializerTest {
         bytes[0] = b
         def des = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
-                assertEquals b, inputStream.read()
+            protected Object doDeserialize(Reader reader) throws Exception {
+                assertEquals b, reader.read()
                 return 42
             }
         }
@@ -70,7 +70,7 @@ class AbstractDeserializerTest {
         def ex = new RuntimeException('foo')
         def des = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
+            protected Object doDeserialize(Reader reader) throws Exception {
                 throw ex
             }
         }

@@ -47,8 +47,7 @@ class JwkSerializationTest {
     }
 
     static Map<String, ?> deserialize(Deserializer des, String value) {
-        def ins = new ByteArrayInputStream(Strings.utf8(value))
-        return des.deserialize(ins) as Map<String, ?>
+        return des.deserialize(new StringReader(value)) as Map<String, ?>
     }
 
     @Test

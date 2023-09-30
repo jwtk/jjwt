@@ -68,7 +68,7 @@ class DefaultJwkSetParserBuilderTest {
     void testDeserializeException() {
         def deser = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
+            protected Object doDeserialize(Reader reader) throws Exception {
                 throw new DeserializationException('foo')
             }
         }

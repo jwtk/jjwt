@@ -15,32 +15,53 @@
  */
 package io.jsonwebtoken.io;
 
+import java.io.InputStream;
+import java.io.Reader;
+
 /**
- * A Parser converts character input into a Java object.
+ * A Parser converts a character stream into a Java object.
  *
- * <p>Semantically, this interface might have been more accurately named
- * <a href="https://en.wikipedia.org/wiki/Marshalling_(computer_science)">Unmarshaller</a> because it technically
- * converts a content stream into a Java object. However, the {@code Parser} name was chosen for consistency with the
- * {@link io.jsonwebtoken.JwtParser JwtParser} concept (which is a 'real' parser that scans text for tokens).  This
- * helps avoid confusion when trying to find similar concepts in the JJWT API by using the same taxonomy, for
- * example:</p>
- * <ul>
- *     <li>{@link io.jsonwebtoken.Jwts#parser() Jwts.parser()}</li>
- *     <li>{@link io.jsonwebtoken.security.Jwks#parser() Jwks.parser()}</li>
- *     <li>{@link io.jsonwebtoken.security.Jwks#setParser() Jwks.setParser()}</li>
- * </ul>
- *
- * @param <T> the instance type created after parsing/unmarshalling
+ * @param <T> the instance type created after parsing
  * @since JJWT_RELEASE_VERSION
  */
 public interface Parser<T> {
 
     /**
-     * Parse the specified input into a Java object.
+     * Parse the specified character sequence into a Java object.
      *
-     * @param input the string to parse into a Java object.
+     * @param input the character sequence to parse into a Java object.
      * @return the Java object represented by the specified {@code input} stream.
      */
-    T parse(String input);
+    T parse(CharSequence input);
 
+    /**
+     * @param input The character sequence, may be {@code null}
+     * @param start The start index in the character sequence, inclusive
+     * @param end   The end index in the character sequence, exclusive
+     * @return the Java object represented by the specified sequence bounds
+     * @throws IllegalArgumentException if the start index is negative, or if the end index is smaller than the start index
+     */
+    T parse(CharSequence input, int start, int end);
+
+    /**
+     * Parse the specified character sequence into a Java object.
+     *
+     * @param reader the reader to use to parse a Java object.
+     * @return the Java object represented by the specified {@code input} stream.
+     */
+    T parse(Reader reader);
+
+    /**
+     * Parses the specified {@link InputStream} assuming {@link java.nio.charset.StandardCharsets#UTF_8 UTF_8} encoding.
+     * This is a convenience alias for:
+     *
+     * <blockquote><pre>{@link #parse(Reader) parse}(new {@link java.io.InputStreamReader
+     * InputStreamReader}(in, {@link java.nio.charset.StandardCharsets#UTF_8
+     * StandardCharsets.UTF_8});</pre></blockquote>
+     *
+     *
+     * @param in the UTF-8 InputStream.
+     * @return the Java object represented by the specified {@link InputStream}.
+     */
+    T parse(InputStream in);
 }

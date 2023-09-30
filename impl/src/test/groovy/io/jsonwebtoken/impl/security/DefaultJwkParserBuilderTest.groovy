@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.CharSequenceReader
 import io.jsonwebtoken.impl.io.ConvertingParser
 import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.DeserializationException
@@ -49,6 +50,16 @@ class DefaultJwkParserBuilderTest {
                 KipQrCW9CGZH3T4ubpnoTKLDYJ_fF3_rJt"
         }''')
 
+    @Test(expected = IllegalArgumentException)
+    void parseNull() {
+        Jwks.parser().build().parse((CharSequence)null)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void parseEmpty() {
+        Jwks.parser().build().parse(Strings.EMPTY)
+    }
+
     @Test
     void testStaticFactoryMethod() {
         assertTrue Jwks.parser() instanceof DefaultJwkParserBuilder
@@ -63,9 +74,9 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testDeserializer() {
-        Deserializer<Map<String,?>> deser = createMock(Deserializer)
-        def  m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
-        expect(deser.deserialize((InputStream)anyObject(InputStream))).andReturn(m)
+        Deserializer<Map<String, ?>> deser = createMock(Deserializer)
+        def m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
+        expect(deser.deserialize((Reader) anyObject(Reader))).andReturn(m)
         replay deser
         def jwk = Jwks.parser().json(deser).build().parse('foo')
         verify deser
@@ -110,7 +121,19 @@ class DefaultJwkParserBuilderTest {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwks.builder().key(key).build()
             String json = Jwks.UNSAFE_JSON(jwk)
-            def parsed = Jwks.parser().build().parse(json)
+
+            def parser = Jwks.parser().build()
+
+            // CharSequence parsing:
+            def parsed = parser.parse(json)
+            assertEquals jwk, parsed
+
+            // Reader parsing:
+            parsed = parser.parse(new CharSequenceReader(json))
+            assertEquals jwk, parsed
+
+            // InputStream parsing:
+            parsed = parser.parse(new ByteArrayInputStream(Strings.utf8(json)))
             assertEquals jwk, parsed
         }
     }
@@ -141,7 +164,7 @@ class DefaultJwkParserBuilderTest {
     void testDeserializationFailure() {
         def deser = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
+            protected Object doDeserialize(Reader reader) throws Exception {
                 throw new DeserializationException('test')
             }
         }

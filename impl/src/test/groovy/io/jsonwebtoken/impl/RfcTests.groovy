@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.impl.io.Streams
+import io.jsonwebtoken.impl.io.CharSequenceReader
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.io.Decoders
@@ -37,7 +37,8 @@ class RfcTests {
     }
 
     static final Map<String, ?> jsonToMap(String json) {
-        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.of(json)) as Map<String, ?>
+        Reader r = new CharSequenceReader(json)
+        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(r) as Map<String, ?>
         return m
     }
 

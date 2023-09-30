@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -25,7 +26,7 @@ import java.io.InputStream;
  *
  * @since 0.1
  */
-public interface JwtParser {
+public interface JwtParser extends Parser<Jwt<?, ?>> {
 
     /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
@@ -38,7 +39,7 @@ public interface JwtParser {
      * @return {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
      */
-    boolean isSigned(String compact);
+    boolean isSigned(CharSequence compact);
 
     /**
      * Parses the specified compact serialized JWT string based on the builder's current configuration state and
@@ -46,7 +47,7 @@ public interface JwtParser {
      *
      * <p>This method returns a JWT, JWS, or JWE based on the parsed string.  Because it may be cumbersome to
      * determine if it is a JWT, JWS or JWE, or if the payload is a Claims or byte array with {@code instanceof} checks,
-     * the {@link #parse(String, JwtHandler) parse(String,JwtHandler)} method allows for a type-safe callback approach
+     * the {@link #parse(CharSequence, JwtHandler) parse(String,JwtHandler)} method allows for a type-safe callback approach
      * that may help reduce code or instanceof checks.</p>
      *
      * @param jwt the compact serialized JWT to parse
@@ -59,15 +60,15 @@ public interface JwtParser {
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace.
-     * @see #parse(String, JwtHandler)
-     * @see #parseContentJwt(String)
-     * @see #parseClaimsJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseClaimsJws(String)
-     * @see #parseContentJwe(String)
-     * @see #parseClaimsJwe(String)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parseContentJwe(CharSequence)
+     * @see #parseClaimsJwe(CharSequence)
      */
-    Jwt<?, ?> parse(String jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException,
+    Jwt<?, ?> parse(CharSequence jwt) throws ExpiredJwtException, MalformedJwtException, SignatureException,
             SecurityException, IllegalArgumentException;
 
     /**
@@ -93,12 +94,12 @@ public interface JwtParser {
      * following convenience methods instead of this one:</p>
      *
      * <ul>
-     * <li>{@link #parseContentJwt(String)}</li>
-     * <li>{@link #parseClaimsJwt(String)}</li>
-     * <li>{@link #parseContentJws(String)}</li>
-     * <li>{@link #parseClaimsJws(String)}</li>
-     * <li>{@link #parseContentJwe(String)}</li>
-     * <li>{@link #parseClaimsJwe(String)}</li>
+     * <li>{@link #parseContentJwt(CharSequence)}</li>
+     * <li>{@link #parseClaimsJwt(CharSequence)}</li>
+     * <li>{@link #parseContentJws(CharSequence)}</li>
+     * <li>{@link #parseClaimsJws(CharSequence)}</li>
+     * <li>{@link #parseContentJwe(CharSequence)}</li>
+     * <li>{@link #parseClaimsJwe(CharSequence)}</li>
      * </ul>
      *
      * @param jwt     the compact serialized JWT to parse
@@ -114,16 +115,16 @@ public interface JwtParser {
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace, or if the
      *                                  {@code handler} is {@code null}.
-     * @see #parseContentJwt(String)
-     * @see #parseClaimsJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseClaimsJws(String)
-     * @see #parseContentJwe(String)
-     * @see #parseClaimsJwe(String)
-     * @see #parse(String)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parseContentJwe(CharSequence)
+     * @see #parseClaimsJwe(CharSequence)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
-    <T> T parse(String jwt, JwtHandler<T> handler) throws ExpiredJwtException, UnsupportedJwtException,
+    <T> T parse(CharSequence jwt, JwtHandler<T> handler) throws ExpiredJwtException, UnsupportedJwtException,
             MalformedJwtException, SignatureException, SecurityException, IllegalArgumentException;
 
     /**
@@ -148,14 +149,14 @@ public interface JwtParser {
      * @throws SignatureException       if the {@code jwt} string is actually a JWS and signature validation fails
      * @throws SecurityException        if the {@code jwt} string is actually a JWE and decryption fails
      * @throws IllegalArgumentException if the {@code jwt} string is {@code null} or empty or only whitespace
-     * @see #parseClaimsJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseClaimsJws(String)
-     * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
-    Jwt<Header, byte[]> parseContentJwt(String jwt) throws UnsupportedJwtException, MalformedJwtException,
+    Jwt<Header, byte[]> parseContentJwt(CharSequence jwt) throws UnsupportedJwtException, MalformedJwtException,
             SignatureException, SecurityException, IllegalArgumentException;
 
     /**
@@ -178,14 +179,14 @@ public interface JwtParser {
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code jwt} string is {@code null} or empty or only whitespace
-     * @see #parseContentJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseClaimsJws(String)
-     * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
-    Jwt<Header, Claims> parseClaimsJwt(String jwt) throws ExpiredJwtException, UnsupportedJwtException,
+    Jwt<Header, Claims> parseClaimsJwt(CharSequence jwt) throws ExpiredJwtException, UnsupportedJwtException,
             MalformedJwtException, SignatureException, SecurityException, IllegalArgumentException;
 
     /**
@@ -207,16 +208,16 @@ public interface JwtParser {
      * @throws SignatureException       if the {@code jws} JWS signature validation fails
      * @throws SecurityException        if the {@code jws} string is actually a JWE and decryption fails
      * @throws IllegalArgumentException if the {@code jws} string is {@code null} or empty or only whitespace
-     * @see #parseContentJwt(String)
-     * @see #parseContentJwe(String)
-     * @see #parseClaimsJwt(String)
-     * @see #parseClaimsJws(String)
-     * @see #parseClaimsJwe(String)
-     * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseContentJwe(CharSequence)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parseClaimsJwe(CharSequence)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
-    Jws<byte[]> parseContentJws(String jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException,
+    Jws<byte[]> parseContentJws(CharSequence jws) throws UnsupportedJwtException, MalformedJwtException, SignatureException,
             SecurityException, IllegalArgumentException;
 
     /**
@@ -234,7 +235,7 @@ public interface JwtParser {
      * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
      * @return the parsed Unencoded Payload.
      */
-    Jws<byte[]> parseContentJws(String jws, byte[] unencodedPayload);
+    Jws<byte[]> parseContentJws(CharSequence jws, byte[] unencodedPayload);
 
     /**
      * Parses a JWS known to use the
@@ -251,7 +252,7 @@ public interface JwtParser {
      * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
      * @return the parsed Unencoded Payload.
      */
-    Jws<Claims> parseClaimsJws(String jws, byte[] unencodedPayload);
+    Jws<Claims> parseClaimsJws(CharSequence jws, byte[] unencodedPayload);
 
     /**
      * Parses a JWS known to use the
@@ -274,7 +275,7 @@ public interface JwtParser {
      * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
      * @return the parsed Unencoded Payload.
      */
-    Jws<byte[]> parseContentJws(String jws, InputStream unencodedPayload);
+    Jws<byte[]> parseContentJws(CharSequence jws, InputStream unencodedPayload);
 
     /**
      * Parses a JWS known to use the
@@ -285,7 +286,7 @@ public interface JwtParser {
      * <p><b>NOTE:</b> however, because calling this method indicates a completed
      * {@link Claims} instance is desired, the specified {@code unencodedPayload} JSON stream will be fully
      * read into a Claims instance.  If this will be problematic for your application (perhaps if you expect extremely
-     * large Claims), it is recommended to use the {@link #parseContentJws(String, InputStream)} method instead.</p>
+     * large Claims), it is recommended to use the {@link #parseContentJws(CharSequence, InputStream)} method instead.</p>
      *
      * <p><b>Unencoded Non-Detached Payload</b></p>
      * <p>Note that if the JWS contains a valid unencoded Payload string (what RFC 7797 calls an
@@ -297,7 +298,7 @@ public interface JwtParser {
      * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
      * @return the parsed Unencoded Payload.
      */
-    Jws<Claims> parseClaimsJws(String jws, InputStream unencodedPayload);
+    Jws<Claims> parseClaimsJws(CharSequence jws, InputStream unencodedPayload);
 
     /**
      * Parses the specified compact serialized JWS string based on the builder's current configuration state and
@@ -318,16 +319,16 @@ public interface JwtParser {
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJws} string is {@code null} or empty or only whitespace
-     * @see #parseContentJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseContentJwe(String)
-     * @see #parseClaimsJwt(String)
-     * @see #parseClaimsJwe(String)
-     * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseContentJwe(CharSequence)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseClaimsJwe(CharSequence)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parse(CharSequence)
      * @since 0.2
      */
-    Jws<Claims> parseClaimsJws(String jws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
+    Jws<Claims> parseClaimsJws(CharSequence jws) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
             SignatureException, SecurityException, IllegalArgumentException;
 
     /**
@@ -348,16 +349,16 @@ public interface JwtParser {
      * @throws MalformedJwtException    if the {@code jwe} string is not a valid JWE
      * @throws SecurityException        if the {@code jwe} JWE decryption fails
      * @throws IllegalArgumentException if the {@code jwe} string is {@code null} or empty or only whitespace
-     * @see #parseContentJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseClaimsJwt(String)
-     * @see #parseClaimsJws(String)
-     * @see #parseClaimsJwe(String)
-     * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parseClaimsJwe(CharSequence)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parse(CharSequence)
      * @since JJWT_RELEASE_VERSION
      */
-    Jwe<byte[]> parseContentJwe(String jwe) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
+    Jwe<byte[]> parseContentJwe(CharSequence jwe) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
             SecurityException, IllegalArgumentException;
 
     /**
@@ -378,15 +379,15 @@ public interface JwtParser {
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWE and the Claims has an expiration time
      *                                  before the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJwe} string is {@code null} or empty or only whitespace
-     * @see #parseContentJwt(String)
-     * @see #parseContentJws(String)
-     * @see #parseContentJwe(String)
-     * @see #parseClaimsJwt(String)
-     * @see #parseClaimsJws(String)
-     * @see #parse(String, JwtHandler)
-     * @see #parse(String)
+     * @see #parseContentJwt(CharSequence)
+     * @see #parseContentJws(CharSequence)
+     * @see #parseContentJwe(CharSequence)
+     * @see #parseClaimsJwt(CharSequence)
+     * @see #parseClaimsJws(CharSequence)
+     * @see #parse(CharSequence, JwtHandler)
+     * @see #parse(CharSequence)
      * @since JJWT_RELEASE_VERSION
      */
-    Jwe<Claims> parseClaimsJwe(String jwe) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
+    Jwe<Claims> parseClaimsJwe(CharSequence jwe) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException,
             SecurityException, IllegalArgumentException;
 }
