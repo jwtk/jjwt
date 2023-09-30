@@ -87,7 +87,7 @@ class DefaultJwtParserTest {
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
         assertFalse invoked
 
-        assertEquals 'bar', pb.verifyWith(key).build().parseClaimsJws(jws).getPayload().get('foo')
+        assertEquals 'bar', pb.verifyWith(key).build().parseSignedClaims(jws).getPayload().get('foo')
         assertTrue invoked
     }
 
@@ -106,7 +106,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseSignedClaims(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -124,7 +124,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        Jwts.parser().verifyWith(key).build().parseClaimsJwe(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseEncryptedClaims(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -142,7 +142,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        Jwts.parser().verifyWith(key).build().parseClaimsJws(invalidJws)
+        Jwts.parser().verifyWith(key).build().parseSignedClaims(invalidJws)
     }
 
     /*
@@ -249,7 +249,7 @@ class DefaultJwtParserTest {
                 .subject('me')
                 .signWith(key).compact()
 
-        def jwt = Jwts.parser().critical().add(crit).and().verifyWith(key).build().parseClaimsJws(jws)
+        def jwt = Jwts.parser().critical().add(crit).and().verifyWith(key).build().parseSignedClaims(jws)
 
         // no exception thrown, as expected, check the header values:
         def parsedCrit = jwt.getHeader().getCritical()
@@ -267,7 +267,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().expiration(exp).compact()
 
         try {
-            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parseClaimsJwt(s)
+            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parseUnprotectedClaims(s)
         } catch (ExpiredJwtException expected) {
             def exp8601 = DateFormats.formatIso8601(exp, true)
             def later8601 = DateFormats.formatIso8601(later, true)
@@ -286,7 +286,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().notBefore(nbf).compact()
 
         try {
-            Jwts.parser().unsecured().clock(new FixedClock(earlier)).build().parseClaimsJwt(s)
+            Jwts.parser().unsecured().clock(new FixedClock(earlier)).build().parseUnprotectedClaims(s)
         } catch (PrematureJwtException expected) {
             def nbf8601 = DateFormats.formatIso8601(nbf, true)
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
@@ -301,11 +301,34 @@ class DefaultJwtParserTest {
         def jwt = Encoders.BASE64URL.encode(Strings.utf8('{"alg":"none"}'))
         jwt += ".F!3!#." // <-- invalid Base64URL payload
         try {
-            Jwts.parser().unsecured().build().parseClaimsJwt(jwt)
+            Jwts.parser().unsecured().build().parseUnprotectedClaims(jwt)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = 'Invalid Base64Url payload: <redacted>'
             assertEquals msg, expected.message
         }
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void deprecatedAliases() { // TODO: delete this test when deleting these deprecated methods:
+
+        // parseContentJwt
+        byte[] data = Strings.utf8('hello')
+        def jwt = Jwts.builder().content(data).compact()
+        assertArrayEquals data, Jwts.parser().unsecured().build().parseContentJwt(jwt).getPayload()
+
+        // parseClaimsJwt
+        jwt = Jwts.builder().subject('me').compact()
+        assertEquals 'me', Jwts.parser().unsecured().build().parseClaimsJwt(jwt).getPayload().getSubject()
+
+        // parseContentJws
+        def key = TestKeys.HS256
+        jwt = Jwts.builder().content(data).signWith(key).compact()
+        assertArrayEquals data, Jwts.parser().verifyWith(key).build().parseContentJws(jwt).getPayload()
+
+        // parseClaimsJws
+        jwt = Jwts.builder().subject('me').signWith(key).compact()
+        assertEquals 'me', Jwts.parser().verifyWith(key).build().parseClaimsJws(jwt).getPayload().getSubject()
     }
 }

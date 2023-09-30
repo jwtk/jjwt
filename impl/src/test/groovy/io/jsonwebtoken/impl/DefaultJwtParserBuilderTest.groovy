@@ -108,7 +108,7 @@ class DefaultJwtParserBuilderTest {
         def parser = builder.base64UrlDecodeWith(decoder).unsecured().build()
         assertFalse invoked
 
-        assertEquals 'bar', parser.parseClaimsJwt(jwt).getPayload().get('foo')
+        assertEquals 'bar', parser.parseUnprotectedClaims(jwt).getPayload().get('foo')
         assertTrue invoked
     }
 
@@ -133,7 +133,7 @@ class DefaultJwtParserBuilderTest {
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
 
-        assertEquals 'bar', p.verifyWith(key).build().parseClaimsJws(jws).getPayload().get('foo')
+        assertEquals 'bar', p.verifyWith(key).build().parseSignedClaims(jws).getPayload().get('foo')
     }
 
     @Test

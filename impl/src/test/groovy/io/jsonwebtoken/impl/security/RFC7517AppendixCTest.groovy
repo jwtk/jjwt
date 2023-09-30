@@ -330,7 +330,7 @@ class RFC7517AppendixCTest {
         assertEquals RFC_COMPACT_JWE, compact
 
         //ensure we can decrypt now:
-        Jwe<byte[]> jwe = Jwts.parser().decryptWith(key).build().parseContentJwe(compact)
+        Jwe<byte[]> jwe = Jwts.parser().decryptWith(key).build().parseEncryptedContent(compact)
 
         assertEquals RFC_JWK_JSON, new String(jwe.getPayload(), StandardCharsets.UTF_8)
     }

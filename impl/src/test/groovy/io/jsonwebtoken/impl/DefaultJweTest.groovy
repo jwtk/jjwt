@@ -30,7 +30,7 @@ class DefaultJweTest {
         def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
-        def jwe = Jwts.parser().decryptWith(key).build().parseClaimsJwe(compact)
+        def jwe = Jwts.parser().decryptWith(key).build().parseEncryptedClaims(compact)
         String encodedIv = Encoders.BASE64URL.encode(jwe.initializationVector)
         String encodedTag = Encoders.BASE64URL.encode(jwe.digest)
         String expected = "header={alg=dir, enc=A128CBC-HS256},payload={foo=bar},tag=$encodedTag,iv=$encodedIv"
@@ -43,8 +43,8 @@ class DefaultJweTest {
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def parser = Jwts.parser().decryptWith(key).build()
-        def jwe1 = parser.parseClaimsJwe(compact)
-        def jwe2 = parser.parseClaimsJwe(compact)
+        def jwe1 = parser.parseEncryptedClaims(compact)
+        def jwe2 = parser.parseEncryptedClaims(compact)
         assertNotEquals jwe1, 'hello' as String
         assertEquals jwe1, jwe1
         assertEquals jwe2, jwe2

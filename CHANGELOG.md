@@ -44,7 +44,7 @@ AeadAlgorithm enc = Jwts.ENC.A256GCM;
 SecretKey key = enc.key().build();
 String compact = Jwts.builder().setSubject("Joe").encryptWith(key, enc).compact();
 
-Jwe<Claims> jwe = Jwts.parser().decryptWith(key).build().parseClaimsJwe(compact);
+Jwe<Claims> jwe = Jwts.parser().decryptWith(key).build().parseEncryptedClaims(compact);
 ```
 
 Many other RSA and Elliptic Curve examples are in the full README documentation. 
@@ -135,6 +135,11 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
 
 * `io.jsonwebtoken.Jws`'s `getSignature()` method has been deprecated in favor of a new `getDigest()` method to
   support expected congruent behavior with `Jwe` instances (both have digests).
+
+
+* `io.jsonwebtoken.JwtParser`'s `parseContentJwt`, `parseClaimsJwt`, `parseContentJws`, and `parseClaimsJws` methods
+  have been deprecated in favor of more intuitive respective `parseUnprotectedContent`, `parseUnprotectedClaims`,
+  `parseSignedContent` and `parseSignedClaims` methods.
 
 
 * `io.jsonwebtoken.CompressionCodec` is now deprecated in favor of the new `io.jsonwebtoken.io.CompressionAlgorithm`

@@ -162,7 +162,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     private static final String B64_MISSING_PAYLOAD = "Unable to verify JWS signature: the parser has encountered an " +
             "Unencoded Payload JWS with detached payload, but the detached payload value required for signature " +
             "verification has not been provided. If you expect to receive and parse Unencoded Payload JWSs in your " +
-            "application, the overloaded JwtParser.parseContentJws or JwtParser.parseClaimsJws methods that " +
+            "application, the overloaded JwtParser.parseSignedContent or JwtParser.parseSignedClaims methods that " +
             "accept a byte[] or InputStream must be used for these kinds of JWSs. Header: %s";
 
     private static final String B64_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
@@ -808,7 +808,27 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jwt<Header, byte[]> parseContentJwt(CharSequence compact) {
+    public Jwt<Header, byte[]> parseContentJwt(CharSequence jwt) {
+        return parseUnprotectedContent(jwt);
+    }
+
+    @Override
+    public Jwt<Header, Claims> parseClaimsJwt(CharSequence jwt) {
+        return parseUnprotectedClaims(jwt);
+    }
+
+    @Override
+    public Jws<byte[]> parseContentJws(CharSequence jws) {
+        return parseSignedContent(jws);
+    }
+
+    @Override
+    public Jws<Claims> parseClaimsJws(CharSequence jws) {
+        return parseSignedClaims(jws);
+    }
+
+    @Override
+    public Jwt<Header, byte[]> parseUnprotectedContent(CharSequence compact) {
         return parse(compact, new JwtHandlerAdapter<Jwt<Header, byte[]>>() {
             @Override
             public Jwt<Header, byte[]> onContentJwt(Jwt<Header, byte[]> jwt) {
@@ -818,7 +838,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jwt<Header, Claims> parseClaimsJwt(CharSequence compact) {
+    public Jwt<Header, Claims> parseUnprotectedClaims(CharSequence compact) {
         return parse(compact, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
             @Override
             public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
@@ -828,7 +848,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jws<byte[]> parseContentJws(CharSequence compact) {
+    public Jws<byte[]> parseSignedContent(CharSequence compact) {
         return parse(compact, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
             public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
@@ -838,7 +858,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jws<Claims> parseClaimsJws(CharSequence compact) {
+    public Jws<Claims> parseSignedClaims(CharSequence compact) {
         return parse(compact, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
             public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
@@ -847,7 +867,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         });
     }
 
-    private Jws<byte[]> parseContentJws(CharSequence jws, Payload unencodedPayload) {
+
+    private Jws<byte[]> parseSignedContent(CharSequence jws, Payload unencodedPayload) {
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<byte[]>>() {
             @Override
             public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
@@ -856,7 +877,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         });
     }
 
-    private Jws<Claims> parseClaimsJws(CharSequence jws, Payload unencodedPayload) {
+    private Jws<Claims> parseSignedClaims(CharSequence jws, Payload unencodedPayload) {
         unencodedPayload.setClaimsExpected(true);
         return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<Claims>>() {
             @Override
@@ -867,15 +888,15 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jws<byte[]> parseContentJws(CharSequence jws, byte[] unencodedPayload) {
+    public Jws<byte[]> parseSignedContent(CharSequence jws, byte[] unencodedPayload) {
         Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
-        return parseContentJws(jws, new Payload(unencodedPayload, null));
+        return parseSignedContent(jws, new Payload(unencodedPayload, null));
     }
 
     @Override
-    public Jws<Claims> parseClaimsJws(CharSequence jws, byte[] unencodedPayload) {
+    public Jws<Claims> parseSignedClaims(CharSequence jws, byte[] unencodedPayload) {
         Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
-        return parseClaimsJws(jws, new Payload(unencodedPayload, null));
+        return parseSignedClaims(jws, new Payload(unencodedPayload, null));
     }
 
     private static Payload payloadFor(InputStream in) {
@@ -888,21 +909,21 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jws<byte[]> parseContentJws(CharSequence jws, InputStream unencodedPayload) {
+    public Jws<byte[]> parseSignedContent(CharSequence jws, InputStream unencodedPayload) {
         Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
-        return parseContentJws(jws, payloadFor(unencodedPayload));
+        return parseSignedContent(jws, payloadFor(unencodedPayload));
     }
 
     @Override
-    public Jws<Claims> parseClaimsJws(CharSequence jws, InputStream unencodedPayload) {
+    public Jws<Claims> parseSignedClaims(CharSequence jws, InputStream unencodedPayload) {
         Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
         byte[] bytes = Streams.bytes(unencodedPayload,
                 "Unable to obtain Claims bytes from unencodedPayload InputStream");
-        return parseClaimsJws(jws, new Payload(bytes, null));
+        return parseSignedClaims(jws, new Payload(bytes, null));
     }
 
     @Override
-    public Jwe<byte[]> parseContentJwe(CharSequence compact) throws JwtException {
+    public Jwe<byte[]> parseEncryptedContent(CharSequence compact) throws JwtException {
         return parse(compact, new JwtHandlerAdapter<Jwe<byte[]>>() {
             @Override
             public Jwe<byte[]> onContentJwe(Jwe<byte[]> jwe) {
@@ -912,7 +933,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jwe<Claims> parseClaimsJwe(CharSequence compact) throws JwtException {
+    public Jwe<Claims> parseEncryptedClaims(CharSequence compact) throws JwtException {
         return parse(compact, new JwtHandlerAdapter<Jwe<Claims>>() {
             @Override
             public Jwe<Claims> onClaimsJwe(Jwe<Claims> jwe) {

@@ -42,7 +42,7 @@ class BasicTest {
             .setSigningKey(key)
             .build()
 
-        Jwt<Header, Claims> result = parser.parseClaimsJws(token)
+        Jwt<Header, Claims> result = parser.parseSignedClaims(token)
         assertThat result, notNullValue()
         assertThat result.getBody().getSubject(), equalTo("test-user")
         assertThat result.getBody().get("test", String), equalTo("basicUsageTest")
