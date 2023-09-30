@@ -24,7 +24,7 @@ import io.jsonwebtoken.io.AbstractDeserializer;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.Collections;
 import java.util.Map;
 
@@ -100,8 +100,8 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
     }
 
     @Override
-    protected T doDeserialize(InputStream in) throws Exception {
-        return objectMapper.readValue(in, returnType);
+    protected T doDeserialize(Reader reader) throws Exception {
+        return objectMapper.readValue(reader, returnType);
     }
 
     /**

@@ -76,6 +76,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -932,8 +933,9 @@ public class DefaultJwtParser implements JwtParser {
 
     protected Map<String, ?> deserialize(InputStream in, final String name) {
         try {
+            Reader reader = Streams.reader(in);
             JsonObjectDeserializer deserializer = new JsonObjectDeserializer(this.deserializer, name);
-            return deserializer.apply(in);
+            return deserializer.apply(reader);
         } finally {
             Objects.nullSafeClose(in);
         }

@@ -52,7 +52,8 @@ class DefaultJwtBuilderTest {
     }
 
     private static Map<String, ?> deser(byte[] data) {
-        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(Streams.of(data)) as Map<String, ?>
+        def reader = Streams.reader(data)
+        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(reader) as Map<String, ?>
         return m
     }
 
@@ -755,7 +756,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Deserializer).deserialize(Streams.of(bytes))
+        def claims = Services.loadFirst(Deserializer).deserialize(Streams.reader(bytes))
 
         assertEquals two, claims.aud
     }

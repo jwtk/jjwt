@@ -17,33 +17,24 @@ package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Strings;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 
-public class ConvertingParser<T> implements Parser<T> {
+public class ConvertingParser<T> extends AbstractParser<T> {
 
-    private final Function<InputStream, Map<String, ?>> deserializer;
+    private final Function<Reader, Map<String, ?>> deserializer;
     private final Converter<T, Object> converter;
 
-    public ConvertingParser(Function<InputStream, Map<String, ?>> deserializer, Converter<T, Object> converter) {
+    public ConvertingParser(Function<Reader, Map<String, ?>> deserializer, Converter<T, Object> converter) {
         this.deserializer = Assert.notNull(deserializer, "Deserializer function cannot be null.");
         this.converter = Assert.notNull(converter, "Converter cannot be null.");
     }
 
     @Override
-    public final T parse(String input) {
-        Assert.hasText(input, "Parse input String cannot be null or empty.");
-        InputStream in = new ByteArrayInputStream(Strings.utf8(input));
-        return parse(in);
-    }
-
-    public final T parse(InputStream in) {
-        Map<String, ?> m = this.deserializer.apply(in);
+    public final T parse(Reader reader) {
+        Map<String, ?> m = this.deserializer.apply(reader);
         return this.converter.applyFrom(m);
     }
 }

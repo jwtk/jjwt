@@ -19,10 +19,13 @@ import io.jsonwebtoken.lang.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Convenient base class to use to implement {@link Deserializer}s, with subclasses only needing to implement
- * {@link #doDeserialize(InputStream)}.
+ * {@link #doDeserialize(Reader)}.
  *
  * @param <T> the type of object returned after deserialization
  * @since JJWT_RELEASE_VERSION
@@ -48,17 +51,19 @@ public abstract class AbstractDeserializer<T> implements Deserializer<T> {
     @Override
     public final T deserialize(byte[] bytes) throws DeserializationException {
         bytes = bytes == null ? EMPTY_BYTES : bytes; // null safe
-        return deserialize(new ByteArrayInputStream(bytes));
+        InputStream in = new ByteArrayInputStream(bytes);
+        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+        return deserialize(reader);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final T deserialize(InputStream in) throws DeserializationException {
-        Assert.notNull(in, "InputStream argument cannot be null.");
+    public final T deserialize(Reader reader) throws DeserializationException {
+        Assert.notNull(reader, "Reader argument cannot be null.");
         try {
-            return doDeserialize(in);
+            return doDeserialize(reader);
         } catch (Throwable t) {
             if (t instanceof DeserializationException) {
                 throw (DeserializationException) t;
@@ -69,11 +74,11 @@ public abstract class AbstractDeserializer<T> implements Deserializer<T> {
     }
 
     /**
-     * Reads the specified {@code InputStream} and returns the corresponding Java object.
+     * Reads the specified character stream and returns the corresponding Java object.
      *
-     * @param in the input stream to read
+     * @param reader the reader to use to read the character stream
      * @return the deserialized Java object
      * @throws Exception if there is a problem reading the stream or creating the expected Java object
      */
-    protected abstract T doDeserialize(InputStream in) throws Exception;
+    protected abstract T doDeserialize(Reader reader) throws Exception;
 }

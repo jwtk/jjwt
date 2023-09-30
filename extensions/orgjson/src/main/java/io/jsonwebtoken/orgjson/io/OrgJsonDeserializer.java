@@ -21,10 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -37,8 +34,7 @@ import java.util.Map;
 public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
 
     @Override
-    protected Object doDeserialize(InputStream in) {
-        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+    protected Object doDeserialize(Reader reader) {
         return parse(reader);
     }
 

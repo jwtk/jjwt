@@ -19,10 +19,7 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.io.AbstractDeserializer;
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 
 public class GsonDeserializer<T> extends AbstractDeserializer<T> {
 
@@ -46,8 +43,7 @@ public class GsonDeserializer<T> extends AbstractDeserializer<T> {
     }
 
     @Override
-    protected T doDeserialize(InputStream in) throws Exception {
-        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+    protected T doDeserialize(Reader reader) {
         return gson.fromJson(reader, returnType);
     }
 }

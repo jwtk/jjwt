@@ -16,9 +16,9 @@
 package io.jsonwebtoken.impl.io
 
 import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.lang.Strings
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -40,14 +40,14 @@ class JsonObjectDeserializerTest {
             }
 
             @Override
-            Object deserialize(InputStream inputStream) throws DeserializationException {
+            Object deserialize(Reader reader) throws DeserializationException {
                 throw err
             }
         }
         try {
             // doesn't matter for this test, just has to be non-null:
-            def ins = new ByteArrayInputStream(Bytes.EMPTY)
-            new JsonObjectDeserializer(deser, 'claims').apply(ins)
+            def r = new StringReader(Strings.EMPTY)
+            new JsonObjectDeserializer(deser, 'claims').apply(r)
             fail()
         } catch (DeserializationException e) {
             String msg = String.format(JsonObjectDeserializer.MALFORMED_COMPLEX_ERROR, 'claims', 'claims', 'foo')
@@ -67,15 +67,16 @@ class JsonObjectDeserializerTest {
                 fail() // should not be called in this test
                 return null
             }
+
             @Override
-            Object deserialize(InputStream inputStream) throws DeserializationException {
+            Object deserialize(Reader reader) throws DeserializationException {
                 throw ex
             }
         }
         try {
             // doesn't matter for this test, just has to be non-null:
-            def ins = new ByteArrayInputStream(Bytes.EMPTY)
-            new JsonObjectDeserializer(deser, 'claims').apply(ins)
+            def r = new StringReader(Strings.EMPTY)
+            new JsonObjectDeserializer(deser, 'claims').apply(r)
             fail()
         } catch (MalformedJwtException e) {
             String msg = String.format(JsonObjectDeserializer.MALFORMED_ERROR, 'claims', 'foo')

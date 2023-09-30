@@ -121,8 +121,8 @@ class DefaultJwtParserBuilderTest {
     void testDeserializeJsonWithCustomSerializer() {
         def deserializer = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
-                return OBJECT_MAPPER.readValue(inputStream, Map.class)
+            protected Object doDeserialize(Reader reader) throws Exception {
+                return OBJECT_MAPPER.readValue(reader, Map.class)
             }
         }
         def p = builder.deserializeJsonWith(deserializer)

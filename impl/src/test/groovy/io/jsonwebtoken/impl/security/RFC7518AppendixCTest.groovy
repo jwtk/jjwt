@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
@@ -44,7 +43,7 @@ class RFC7518AppendixCTest {
     }
 
     private static final Map<String, ?> fromJson(String s) {
-        return Services.loadFirst(Deserializer).deserialize(Streams.of(s)) as Map<String, ?>
+        return Services.loadFirst(Deserializer).deserialize(new StringReader(s)) as Map<String, ?>
     }
 
     private static EcPrivateJwk readJwk(String json) {

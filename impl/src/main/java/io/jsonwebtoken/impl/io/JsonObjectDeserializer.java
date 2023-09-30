@@ -21,7 +21,7 @@ import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 
 /**
@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @since 0.11.3 (renamed from JwtDeserializer)
  */
-public class JsonObjectDeserializer implements Function<InputStream, Map<String, ?>> {
+public class JsonObjectDeserializer implements Function<Reader, Map<String, ?>> {
 
     private static final String MALFORMED_ERROR = "Malformed %s JSON: %s";
     private static final String MALFORMED_COMPLEX_ERROR = "Malformed or excessively complex %s JSON. " +
@@ -45,7 +45,7 @@ public class JsonObjectDeserializer implements Function<InputStream, Map<String,
     }
 
     @Override
-    public Map<String, ?> apply(InputStream in) {
+    public Map<String, ?> apply(Reader in) {
         Assert.notNull(in, "InputStream argument cannot be null.");
         Object value;
         try {

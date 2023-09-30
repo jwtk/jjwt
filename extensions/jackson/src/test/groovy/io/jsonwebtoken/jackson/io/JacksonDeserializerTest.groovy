@@ -22,7 +22,6 @@ import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.jackson.io.stubs.CustomBean
 import io.jsonwebtoken.lang.Maps
-import io.jsonwebtoken.lang.Strings
 import org.junit.Before
 import org.junit.Test
 
@@ -62,9 +61,9 @@ class JacksonDeserializerTest {
 
     @Test
     void testDeserialize() {
-        byte[] data = Strings.utf8('{"hello":"世界"}')
+        def reader = new StringReader('{"hello":"世界"}')
         def expected = [hello: '世界']
-        def result = deserializer.deserialize(new ByteArrayInputStream(data))
+        def result = deserializer.deserialize(reader)
         assertEquals expected, result
     }
 
@@ -97,8 +96,6 @@ class JacksonDeserializerTest {
             }
             """
 
-        byte[] serialized = Strings.utf8(json)
-
         CustomBean expectedCustomBean = new CustomBean()
                 .setByteArrayValue("bytes".getBytes("UTF-8"))
                 .setByteValue(0xF as byte)
@@ -119,7 +116,7 @@ class JacksonDeserializerTest {
 
         def expected = [oneKey: "oneValue", custom: expectedCustomBean]
         def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build())
-                .deserialize(new ByteArrayInputStream(serialized))
+                .deserialize(new StringReader(json))
         assertEquals expected, result
     }
 
@@ -154,8 +151,8 @@ class JacksonDeserializerTest {
         typeMap.put("custom", CustomBean)
 
         def deserializer = new JacksonDeserializer(typeMap)
-        def ins = new ByteArrayInputStream(Strings.utf8('{"alg":"HS256"}'))
-        def result = deserializer.deserialize(ins)
+        def reader = new StringReader('{"alg":"HS256"}')
+        def result = deserializer.deserialize(reader)
         assertEquals(["alg": "HS256"], result)
     }
 
@@ -171,12 +168,12 @@ class JacksonDeserializerTest {
 
         deserializer = new JacksonDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
+            protected Object doDeserialize(Reader reader) throws Exception {
                 throw ex
             }
         }
         try {
-            deserializer.deserialize(new ByteArrayInputStream(Strings.utf8('{"hello":"世界"}')))
+            deserializer.deserialize(new StringReader('{"hello":"世界"}'))
             fail()
         } catch (DeserializationException se) {
             String msg = 'Unable to deserialize: foo'

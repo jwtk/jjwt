@@ -75,9 +75,9 @@ class DefaultJwtParserTest {
         boolean invoked = false
         def deserializer = new AbstractDeserializer() {
             @Override
-            protected Object doDeserialize(InputStream inputStream) throws Exception {
+            protected Object doDeserialize(Reader reader) throws Exception {
                 invoked = true
-                return OBJECT_MAPPER.readValue(inputStream, Map.class)
+                return OBJECT_MAPPER.readValue(reader, Map.class)
             }
         }
         def pb = Jwts.parser().deserializeJsonWith(deserializer)
