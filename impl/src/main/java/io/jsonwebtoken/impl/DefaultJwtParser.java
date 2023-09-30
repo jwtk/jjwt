@@ -367,7 +367,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload)
             throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
-        //Assert.hasText(compact, "JWT String cannot be null or empty.");
+        Assert.notNull(compact, "Compact reader cannot be null.");
         Assert.stateNotNull(unencodedPayload, "internal error: unencodedPayload is null.");
 
         final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
