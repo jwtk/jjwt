@@ -50,6 +50,16 @@ class DefaultJwkParserBuilderTest {
                 KipQrCW9CGZH3T4ubpnoTKLDYJ_fF3_rJt"
         }''')
 
+    @Test(expected = IllegalArgumentException)
+    void parseNull() {
+        Jwks.parser().build().parse((CharSequence)null)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void parseEmpty() {
+        Jwks.parser().build().parse(Strings.EMPTY)
+    }
+
     @Test
     void testStaticFactoryMethod() {
         assertTrue Jwks.parser() instanceof DefaultJwkParserBuilder

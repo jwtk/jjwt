@@ -39,6 +39,8 @@ import io.jsonwebtoken.PrematureJwtException;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.impl.io.AbstractParser;
+import io.jsonwebtoken.impl.io.CharSequenceReader;
 import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
@@ -92,7 +94,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-public class DefaultJwtParser implements JwtParser {
+public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtParser {
 
     static final char SEPARATOR_CHAR = '.';
 
@@ -250,11 +252,11 @@ public class DefaultJwtParser implements JwtParser {
 
     @Override
     public boolean isSigned(String compact) {
-        if (compact == null) {
+        if (!Strings.hasText(compact)) {
             return false;
         }
         try {
-            final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
+            final TokenizedJwt tokenized = jwtTokenizer.tokenize(new CharSequenceReader(compact));
             return !(tokenized instanceof TokenizedJwe) && Strings.hasText(tokenized.getDigest());
         } catch (MalformedJwtException e) {
             return false;
@@ -357,15 +359,20 @@ public class DefaultJwtParser implements JwtParser {
     }
 
     @Override
-    public Jwt<?, ?> parse(String compact) {
-        CharBuffer buffer = Strings.wrap(compact); // so compact.subsequence calls don't add new Strings on the heap
-        return parse(buffer, Payload.EMPTY);
+    public Jwt<?, ?> parse(Reader reader) {
+        Assert.notNull(reader, "Reader cannot be null.");
+        return parse(reader, Payload.EMPTY);
     }
 
-    private Jwt<?, ?> parse(CharSequence compact, Payload unencodedPayload)
+    @Override
+    public Jwt<?, ?> parse(String compact) {
+        return parse((CharSequence) compact);
+    }
+
+    private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload)
             throws ExpiredJwtException, MalformedJwtException, SignatureException {
 
-        Assert.hasText(compact, "JWT String cannot be null or empty.");
+        //Assert.hasText(compact, "JWT String cannot be null or empty.");
         Assert.stateNotNull(unencodedPayload, "internal error: unencodedPayload is null.");
 
         final TokenizedJwt tokenized = jwtTokenizer.tokenize(compact);
@@ -777,7 +784,7 @@ public class DefaultJwtParser implements JwtParser {
         Assert.notNull(handler, "JwtHandler argument cannot be null.");
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
 
-        Jwt<?, ?> jwt = parse(compact, unencodedPayload);
+        Jwt<?, ?> jwt = parse(new CharSequenceReader(compact), unencodedPayload);
 
         if (jwt instanceof Jws) {
             Jws<?> jws = (Jws<?>) jwt;

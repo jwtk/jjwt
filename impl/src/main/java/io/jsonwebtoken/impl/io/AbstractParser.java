@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.io.Parser;
+import io.jsonwebtoken.lang.Assert;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -24,17 +25,20 @@ public abstract class AbstractParser<T> implements Parser<T> {
 
     @Override
     public final T parse(CharSequence input) {
+        Assert.hasText(input, "CharSequence cannot be null or empty.");
         return parse(input, 0, input.length());
     }
 
     @Override
     public T parse(CharSequence input, int start, int end) {
+        Assert.hasText(input, "CharSequence cannot be null or empty.");
         Reader reader = new CharSequenceReader(input, start, end);
         return parse(reader);
     }
 
     @Override
     public final T parse(InputStream in) {
+        Assert.notNull(in, "InputStream cannot be null.");
         Reader reader = Streams.reader(in);
         return parse(reader);
     }

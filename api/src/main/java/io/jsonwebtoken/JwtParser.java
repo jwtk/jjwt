@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 
@@ -25,7 +26,7 @@ import java.io.InputStream;
  *
  * @since 0.1
  */
-public interface JwtParser {
+public interface JwtParser extends Parser<Jwt<?, ?>> {
 
     /**
      * Returns {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}

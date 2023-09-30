@@ -34,6 +34,7 @@ public class ConvertingParser<T> extends AbstractParser<T> {
 
     @Override
     public final T parse(Reader reader) {
+        Assert.notNull(reader, "Reader cannot be null.");
         Map<String, ?> m = this.deserializer.apply(reader);
         return this.converter.applyFrom(m);
     }

@@ -16,8 +16,12 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+
+import java.io.IOException;
+import java.io.Reader;
 
 public class JwtTokenizer {
 
@@ -26,52 +30,70 @@ public class JwtTokenizer {
     private static final String DELIM_ERR_MSG_PREFIX = "Invalid compact JWT string: Compact JWSs must contain " +
             "exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: ";
 
-    @SuppressWarnings("unchecked")
-    public <T extends TokenizedJwt> T tokenize(CharSequence jwt) {
+    private static int read(Reader r, char[] buf) {
+        try {
+            return r.read(buf);
+        } catch (IOException e) {
+            String msg = "Unable to read compact JWT: " + e.getMessage();
+            throw new MalformedJwtException(msg, e);
+        }
+    }
 
-        Assert.hasText(jwt, "Argument cannot be null or empty.");
+    @SuppressWarnings("unchecked")
+    public <T extends TokenizedJwt> T tokenize(Reader reader) {
+
+        Assert.notNull(reader, "Reader argument cannot be null.");
 
         CharSequence protectedHeader = Strings.EMPTY; //Both JWS and JWE
         CharSequence body = Strings.EMPTY; //JWS payload or JWE Ciphertext
         CharSequence encryptedKey = Strings.EMPTY; //JWE only
         CharSequence iv = Strings.EMPTY; //JWE only
-        CharSequence digest; //JWS Signature or JWE AAD Tag
+        CharSequence digest = Strings.EMPTY; //JWS Signature or JWE AAD Tag
 
         int delimiterCount = 0;
-        int start = 0;
+        char[] buf = new char[4096];
+        int len = 0;
+        StringBuilder sb = new StringBuilder(4096);
+        while (len != Streams.EOF) {
 
-        for (int i = 0; i < jwt.length(); i++) {
+            len = read(reader, buf);
 
-            char c = jwt.charAt(i);
+            for (int i = 0; i < len; i++) {
 
-            if (Character.isWhitespace(c)) {
-                String msg = "Compact JWT strings may not contain whitespace.";
-                throw new MalformedJwtException(msg);
-            }
+                char c = buf[i];
 
-            if (c == DELIMITER) {
-
-                CharSequence token = jwt.subSequence(start, i);
-                start = i + 1;
-
-                switch (delimiterCount) {
-                    case 0:
-                        protectedHeader = token;
-                        break;
-                    case 1:
-                        body = token; //for JWS
-                        encryptedKey = token; //for JWE
-                        break;
-                    case 2:
-                        body = Strings.EMPTY; //clear out value set for JWS
-                        iv = token;
-                        break;
-                    case 3:
-                        body = token;
-                        break;
+                if (Character.isWhitespace(c)) {
+                    String msg = "Compact JWT strings may not contain whitespace.";
+                    throw new MalformedJwtException(msg);
                 }
 
-                delimiterCount++;
+                if (c == DELIMITER) {
+
+                    CharSequence seq = Strings.clean(sb);
+                    String token = seq != null ? seq.toString() : Strings.EMPTY;
+
+                    switch (delimiterCount) {
+                        case 0:
+                            protectedHeader = token;
+                            break;
+                        case 1:
+                            body = token; //for JWS
+                            encryptedKey = token; //for JWE
+                            break;
+                        case 2:
+                            body = Strings.EMPTY; //clear out value set for JWS
+                            iv = token;
+                            break;
+                        case 3:
+                            body = token;
+                            break;
+                    }
+
+                    delimiterCount++;
+                    sb.setLength(0);
+                } else {
+                    sb.append(c);
+                }
             }
         }
 
@@ -80,7 +102,9 @@ public class JwtTokenizer {
             throw new MalformedJwtException(msg);
         }
 
-        digest = jwt.subSequence(start, jwt.length());
+        if (sb.length() > 0) {
+            digest = sb.toString();
+        }
 
         if (delimiterCount == 2) {
             return (T) new DefaultTokenizedJwt(protectedHeader, body, digest);

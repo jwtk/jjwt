@@ -599,7 +599,7 @@ class DefaultJwtBuilderTest {
         def jwt = builder.audience().single(audienceSingleString).compact()
         // can't use the parser here to validate because it coerces the string value into an array automatically,
         // so we need to check the raw payload:
-        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        def encoded = new JwtTokenizer().tokenize(Streams.reader(jwt)).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
         def claims = deser(bytes)
 
@@ -618,7 +618,7 @@ class DefaultJwtBuilderTest {
         def jwt = builder.audience().single(first).audience().single(second).compact()
         // can't use the parser here to validate because it coerces the string value into an array automatically,
         // so we need to check the raw payload:
-        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        def encoded = new JwtTokenizer().tokenize(Streams.reader(jwt)).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
         def claims = deser(bytes)
 
@@ -754,7 +754,7 @@ class DefaultJwtBuilderTest {
 
         // can't use the parser here to validate because it coerces the string value into an array automatically,
         // so we need to check the raw payload:
-        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        def encoded = new JwtTokenizer().tokenize(Streams.reader(jwt)).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
         def claims = Services.loadFirst(Deserializer).deserialize(Streams.reader(bytes))
 
@@ -791,7 +791,7 @@ class DefaultJwtBuilderTest {
 
         // can't use the parser here to validate because it coerces the string value into an array automatically,
         // so we need to check the raw payload:
-        def encoded = new JwtTokenizer().tokenize(jwt).getPayload()
+        def encoded = new JwtTokenizer().tokenize(Streams.reader(jwt)).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
         def claims = deser(bytes)
 
