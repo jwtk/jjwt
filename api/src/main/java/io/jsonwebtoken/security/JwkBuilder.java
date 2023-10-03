@@ -39,7 +39,7 @@ import java.security.Key;
  * @see EcPrivateJwkBuilder
  * @see OctetPublicJwkBuilder
  * @see OctetPrivateJwkBuilder
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilder<K, J, T>>
         extends MapMutator<String, Object, T>, SecurityBuilder<J, T>, KeyOperationPolicied<T> {

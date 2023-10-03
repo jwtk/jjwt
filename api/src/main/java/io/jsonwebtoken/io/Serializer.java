@@ -32,7 +32,7 @@ public interface Serializer<T> {
      * @param t the object to serialize
      * @return the serialized byte array representing the specified object.
      * @throws SerializationException if there is a problem converting the object to a byte array.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #serialize(Object, OutputStream)}
+     * @deprecated since 0.12.0 in favor of {@link #serialize(Object, OutputStream)}
      */
     @Deprecated
     byte[] serialize(T t) throws SerializationException;
@@ -45,7 +45,7 @@ public interface Serializer<T> {
      * @param out the stream to write to
      * @throws SerializationException if there is a problem converting the object to a byte stream or writing the
      *                                bytes to the {@code out}put stream.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     void serialize(T t, OutputStream out) throws SerializationException;
 }

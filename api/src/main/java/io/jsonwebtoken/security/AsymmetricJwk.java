@@ -21,7 +21,7 @@ import java.security.Key;
  * JWK representation of an asymmetric (public or private) cryptographic key.
  *
  * @param <K> the type of {@link java.security.PublicKey} or {@link java.security.PrivateKey} represented by this JWK.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface AsymmetricJwk<K extends Key> extends Jwk<K>, X509Accessor {
 

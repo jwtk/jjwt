@@ -23,7 +23,7 @@ import java.util.Objects;
 /**
  * Abstract superclass for Base-N input streams.
  *
- * @since JJWT_RELEASE_VERSION, copied from
+ * @since 0.12.0, copied from
  * <a href="https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6">commons-codec
  * 585497f09b026f6602daf986723a554e051bdfe6</a>
  */

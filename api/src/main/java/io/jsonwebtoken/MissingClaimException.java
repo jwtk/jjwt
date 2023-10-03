@@ -46,7 +46,7 @@ public class MissingClaimException extends InvalidClaimException {
      * @param claimValue the value of the claim that could not be validated
      * @param message    the message explaining why the exception is thrown.
      * @param cause      the underlying cause that resulted in this exception being thrown.
-     * @deprecated since JJWT_RELEASE_VERSION since it is not used in JJWT's codebase
+     * @deprecated since 0.12.0 since it is not used in JJWT's codebase
      */
     @Deprecated
     public MissingClaimException(Header header, Claims claims, String claimName, Object claimValue, String message, Throwable cause) {

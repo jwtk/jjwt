@@ -27,7 +27,7 @@ import javax.crypto.SecretKey;
  * recommended to obtain the corresponding {@link SecretKey} instance returned by {@link #toKey()} and
  * query that instead.</p>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface SecretJwk extends Jwk<SecretKey> {
 }

@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Header implementation satisfying JWE header parameter requirements.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultJweHeader extends DefaultProtectedHeader implements JweHeader {
 

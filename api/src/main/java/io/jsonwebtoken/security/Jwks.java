@@ -34,7 +34,7 @@ import io.jsonwebtoken.lang.Registry;
  * Jwks.{@link Jwks.HASH HASH}.// press hotkeys to suggest individual hash algorithms or utility methods</pre></blockquote>
  *
  * @see #builder()
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public final class Jwks {
 
@@ -143,7 +143,7 @@ public final class Jwks {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class CRV {
 
@@ -268,7 +268,7 @@ public final class Jwks {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class HASH {
 
@@ -363,7 +363,7 @@ public final class Jwks {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class OP {
 

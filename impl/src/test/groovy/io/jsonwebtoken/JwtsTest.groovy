@@ -113,7 +113,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseMalformedHeader() {
@@ -133,7 +133,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseMalformedClaims() {
@@ -799,7 +799,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweMissingAlg() {
@@ -815,7 +815,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweEmptyAlg() {
@@ -831,7 +831,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWhitespaceAlg() {
@@ -847,7 +847,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithNoneAlg() {
@@ -863,7 +863,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithMissingAadTag() {
@@ -880,7 +880,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithEmptyAadTag() {
@@ -899,7 +899,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithMissingRequiredBody() {
@@ -915,7 +915,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithEmptyEncryptedKey() {
@@ -934,7 +934,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithMissingInitializationVector() {
@@ -951,7 +951,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithMissingEncHeader() {
@@ -970,7 +970,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithUnrecognizedEncValue() {
@@ -990,7 +990,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithUnrecognizedAlgValue() {
@@ -1010,7 +1010,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJwsWithUnrecognizedAlgValue() {
@@ -1028,7 +1028,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithUnlocatableKey() {
@@ -1048,7 +1048,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJwsWithCustomSignatureAlgorithm() {
@@ -1067,7 +1067,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithCustomEncryptionAlgorithm() {
@@ -1111,7 +1111,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseJweWithBadKeyAlg() {
@@ -1155,7 +1155,7 @@ class JwtsTest {
     }
 
     /**
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @Test
     void testParseRequiredInt() {

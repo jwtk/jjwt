@@ -28,7 +28,7 @@ import javax.crypto.SecretKey
 import static org.junit.Assert.assertEquals
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class HmacAesAeadAlgorithmTest {
 

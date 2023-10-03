@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * @param <T> subclass type
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & ClaimsMutator<T>>
         extends DelegatingMapMutator<String, Object, ParameterMap, T>

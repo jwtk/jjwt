@@ -33,7 +33,7 @@ import java.io.Reader;
 import java.util.concurrent.Callable;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class Streams {
 

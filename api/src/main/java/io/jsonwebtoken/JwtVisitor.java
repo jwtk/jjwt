@@ -21,7 +21,7 @@ package io.jsonwebtoken;
  * avoiding type-checking if-then-else conditionals in favor of type-safe method dispatch when encountering a JWT.
  *
  * @param <T> the type of object to return after invoking the {@link Jwt#accept(JwtVisitor)} method.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JwtVisitor<T> {
 

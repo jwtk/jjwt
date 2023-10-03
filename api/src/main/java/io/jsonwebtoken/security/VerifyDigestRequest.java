@@ -27,7 +27,7 @@ import java.io.InputStream;
  * authentication code</a> verification will use {@link VerifySecureDigestRequest} instead.</p>
  *
  * @see VerifySecureDigestRequest
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplier {
 }

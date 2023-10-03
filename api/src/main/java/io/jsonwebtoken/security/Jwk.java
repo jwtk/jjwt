@@ -81,7 +81,7 @@ import java.util.Set;
  * JWK internal serialization parameters.</p>
  *
  * @param <K> The type of Java {@link Key} represented by this JWK
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 

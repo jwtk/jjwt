@@ -240,7 +240,7 @@ public final class Strings {
      *
      * @param s the string to obtain UTF-8 bytes
      * @return the specified string's UTF-8 bytes, or {@code null} if the string is {@code null}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static byte[] utf8(CharSequence s) {
         if (s == null) return null;
@@ -258,7 +258,7 @@ public final class Strings {
      *
      * @param utf8Bytes UTF-8 bytes to use with the {@code String} constructor.
      * @return {@code new String(utf8Bytes, StandardCharsets.UTF_8)}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static String utf8(byte[] utf8Bytes) {
         return new String(utf8Bytes, UTF_8);
@@ -269,7 +269,7 @@ public final class Strings {
      *
      * @param asciiBytes US_ASCII bytes to use with the {@code String} constructor.
      * @return {@code new String(asciiBytes, StandardCharsets.US_ASCII)}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static String ascii(byte[] asciiBytes) {
         return new String(asciiBytes, StandardCharsets.US_ASCII);
@@ -1355,7 +1355,7 @@ public final class Strings {
      *
      * @param sb the string builder to append a space to if non-empty
      * @return the string builder argument for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static StringBuilder nespace(StringBuilder sb) {
         if (sb == null) {

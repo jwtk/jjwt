@@ -102,7 +102,7 @@ public final class Objects {
      *
      * @param v object to check
      * @return {@code true} if the specified argument is empty, {@code false} otherwise.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static boolean isEmpty(Object v) {
         return v == null ||
@@ -1015,7 +1015,7 @@ public final class Objects {
      * {@link Flushable#flush()} on each one, ignoring any potential {@link IOException}s.
      *
      * @param flushables the flushables to flush.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static void nullSafeFlush(Flushable... flushables) {
         if (flushables == null) return;

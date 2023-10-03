@@ -29,7 +29,7 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
  * @see Jwts.ZIP#DEF
  * @see Jwts.ZIP#GZIP
  * @since 0.6.0
- * @deprecated since JJWT_RELEASE_VERSION in favor of {@link io.jsonwebtoken.io.CompressionAlgorithm} to equal the RFC name for this concept.
+ * @deprecated since 0.12.0 in favor of {@link io.jsonwebtoken.io.CompressionAlgorithm} to equal the RFC name for this concept.
  */
 @Deprecated
 public interface CompressionCodec extends CompressionAlgorithm {
@@ -40,7 +40,7 @@ public interface CompressionCodec extends CompressionAlgorithm {
      *
      * @return the algorithm name to use as the JWT
      * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getId()} to ensure congruence with
+     * @deprecated since 0.12.0 in favor of {@link #getId()} to ensure congruence with
      * all other identifiable algorithms.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")

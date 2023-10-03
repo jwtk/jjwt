@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl.security;
 import java.security.SecureRandom;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public final class Randoms {
 

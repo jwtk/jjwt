@@ -1,6 +1,6 @@
 ## Release Notes
 
-### JJWT_RELEASE_VERSION
+### 0.12.0
 
 This is a big release! JJWT now fully supports Encrypted JSON Web Tokens (JWE), JSON Web Keys (JWK) and more!  See the 
 sections below enumerating all new features as well as important notes on breaking changes or backwards-incompatible 

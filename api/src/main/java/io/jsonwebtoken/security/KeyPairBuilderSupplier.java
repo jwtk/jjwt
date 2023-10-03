@@ -23,7 +23,7 @@ import java.security.KeyPair;
  *
  * @see #keyPair()
  * @see KeyPairBuilder
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyPairBuilderSupplier {
 

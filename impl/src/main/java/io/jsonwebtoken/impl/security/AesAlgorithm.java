@@ -36,7 +36,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplier<SecretKey, SecretKeyBuilder>, KeyLengthSupplier {
 

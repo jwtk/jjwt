@@ -33,7 +33,7 @@ import java.util.Map;
  *
  * @param <K> key type
  * @param <V> value type
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Registry<K, V> extends Map<K, V> {
 

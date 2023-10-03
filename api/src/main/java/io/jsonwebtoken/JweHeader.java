@@ -25,7 +25,7 @@ import java.security.Key;
 /**
  * A <a href="https://www.rfc-editor.org/rfc/rfc7516.html">JWE</a> header.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JweHeader extends ProtectedHeader {
 

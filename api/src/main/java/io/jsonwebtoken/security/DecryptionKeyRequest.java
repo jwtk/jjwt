@@ -36,7 +36,7 @@ import java.security.Key;
  * to be available in the JWE protected header, accessible via {@link #getHeader()}.</p>
  *
  * @param <K> the type of {@link Key} used during the request to obtain the resulting decryption key.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
 }

@@ -35,7 +35,7 @@ import io.jsonwebtoken.Identifiable;
  * <p>Constants for all JWA standard Curves are available via the {@link Jwks.CRV} registry.</p>
  *
  * @see Jwks.CRV
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Curve extends Identifiable, KeyPairBuilderSupplier {
 }

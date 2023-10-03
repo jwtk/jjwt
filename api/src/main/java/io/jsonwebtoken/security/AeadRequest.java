@@ -24,7 +24,7 @@ import java.io.InputStream;
  *
  * @see SecureRequest
  * @see AssociatedDataSupplier
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, AssociatedDataSupplier {
 }

@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl.lang;
 import io.jsonwebtoken.lang.Assert;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class RequiredTypeConverter<T> implements Converter<T, Object> {
 

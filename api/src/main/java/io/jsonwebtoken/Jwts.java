@@ -74,7 +74,7 @@ public final class Jwts {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class ENC {
 
@@ -166,7 +166,7 @@ public final class Jwts {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class SIG {
 
@@ -327,7 +327,7 @@ public final class Jwts {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class KEY {
 
@@ -955,7 +955,7 @@ public final class Jwts {
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static final class ZIP {
 
@@ -1004,7 +1004,7 @@ public final class Jwts {
     /**
      * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
      *
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public interface HeaderBuilder extends JweHeaderMutator<HeaderBuilder>, X509Builder<HeaderBuilder>, Builder<Header> {
     }
@@ -1015,7 +1015,7 @@ public final class Jwts {
      *
      * @return a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
      * which builder properties are set.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static HeaderBuilder header() {
         return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder");
@@ -1033,7 +1033,7 @@ public final class Jwts {
     }
 
     /**
-     * <p><b>Deprecated since JJWT_RELEASE_VERSION in favor of
+     * <p><b>Deprecated since 0.12.0 in favor of
      * {@code Jwts.}{@link #claims()}{@code .add(map).build()}</b>.
      * This method will be removed before 1.0.</p>
      *
@@ -1041,7 +1041,7 @@ public final class Jwts {
      *
      * @param claims the name/value pairs to populate the new Claims instance.
      * @return a new {@link Claims} instance populated with the specified name/value pairs.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}.
+     * @deprecated since 0.12.0 in favor of {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}.
      * This method will be removed before 1.0.
      */
     @Deprecated

@@ -25,7 +25,7 @@ import static org.junit.Assert.*
 /**
  * Tests {@link Jwts.KEY} values.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class KeyAlgorithmsTest {
 

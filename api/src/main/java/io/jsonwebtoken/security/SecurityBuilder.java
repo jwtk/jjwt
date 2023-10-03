@@ -28,7 +28,7 @@ import java.security.SecureRandom;
  * @param <B> the type of SecurityBuilder returned for method chaining
  * @see #provider(Provider)
  * @see #random(SecureRandom)
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface SecurityBuilder<T, B extends SecurityBuilder<T, B>> extends Builder<T> {
 

@@ -28,7 +28,7 @@ import javax.crypto.SecretKey;
  * <p>The result {@link #getKey() key} is the {@code JWE Content Encryption Key (CEK)} which will be used to encrypt
  * the JWE.</p>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyResult extends Message<byte[]>, KeySupplier<SecretKey> {
 }

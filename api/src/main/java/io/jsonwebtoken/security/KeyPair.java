@@ -24,7 +24,7 @@ import java.security.PublicKey;
  *
  * @param <A> The type of {@link PublicKey} in the key pair.
  * @param <B> The type of {@link PrivateKey} in the key pair.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyPair<A extends PublicKey, B extends PrivateKey> {
 

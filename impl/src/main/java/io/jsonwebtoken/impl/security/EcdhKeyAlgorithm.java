@@ -52,7 +52,7 @@ import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey, PrivateKey> {
 

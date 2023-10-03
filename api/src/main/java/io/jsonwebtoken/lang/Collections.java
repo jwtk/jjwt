@@ -89,7 +89,7 @@ public final class Collections {
      * @param c   the collection to represent as a set
      * @param <T> collection element type
      * @return a type-safe immutable {@code Set} containing the specified collection elements.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T> Set<T> asSet(Collection<T> c) {
         if (c instanceof Set) {
@@ -125,7 +125,7 @@ public final class Collections {
      * @param <K> map key type
      * @param <V> map value type
      * @return an immutable wrapper for {@code m}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <K, V> Map<K, V> immutable(Map<K, V> m) {
         return m != null ? java.util.Collections.unmodifiableMap(m) : null;
@@ -163,7 +163,7 @@ public final class Collections {
      * @param <C> type of collection
      * @param <T> type of elements in the collection
      * @return an immutable wrapper for {@code l}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("unchecked")
     public static <T, C extends Collection<T>> C immutable(C c) {
@@ -184,7 +184,7 @@ public final class Collections {
      * @param s   the set to check for null
      * @param <T> type of elements in the set
      * @return a non-null set, either {@code s} if it is not null, or {@link #emptySet()} otherwise.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T> Set<T> nullSafe(Set<T> s) {
         return s == null ? Collections.<T>emptySet() : s;
@@ -196,7 +196,7 @@ public final class Collections {
      * @param c   the collection to check for null
      * @param <T> type of elements in the collection
      * @return a non-null collection, either {@code c} if it is not null, or {@link #emptyList()} otherwise.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T> Collection<T> nullSafe(Collection<T> c) {
         return c == null ? Collections.<T>emptyList() : c;

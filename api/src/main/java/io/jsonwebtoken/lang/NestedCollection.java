@@ -21,7 +21,7 @@ package io.jsonwebtoken.lang;
  *
  * @param <E> the type of elements in the collection
  * @param <P> the parent to return
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface NestedCollection<E, P> extends CollectionMutator<E, NestedCollection<E, P>>, Conjunctor<P> {
 }

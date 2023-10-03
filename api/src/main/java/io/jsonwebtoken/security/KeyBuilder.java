@@ -28,7 +28,7 @@ import java.security.Key;
  * @param <K> the type of key to build
  * @param <B> the type of the builder, for subtype method chaining
  * @see KeyBuilderSupplier
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyBuilder<K extends Key, B extends KeyBuilder<K, B>> extends SecurityBuilder<K, B> {
 }

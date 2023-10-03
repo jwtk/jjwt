@@ -25,7 +25,7 @@ import java.util.Map;
  * @param <K> map key type
  * @param <V> map value type
  * @param <T> the mutator subtype, for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface MapMutator<K, V, T extends MapMutator<K, V, T>> {
 

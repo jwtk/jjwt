@@ -19,7 +19,7 @@ import java.io.FilterInputStream;
 import java.io.InputStream;
 
 /**
- * @since JJWT_RELEASE_VERSION, copied from
+ * @since 0.12.0, copied from
  * <a href="https://github.com/apache/commons-io/blob/3a17f5259b105e734c8adce1d06d68f29884d1bb/src/main/java/org/apache/commons/io/input/CloseShieldInputStream.java">
  * commons-io 3a17f5259b105e734c8adce1d06d68f29884d1bb</a>
  */

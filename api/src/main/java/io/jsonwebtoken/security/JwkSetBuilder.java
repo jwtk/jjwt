@@ -27,7 +27,7 @@ import java.util.Collection;
  *
  * @see #operationPolicy(KeyOperationPolicy)
  * @see #provider(Provider)
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JwkSetBuilder extends MapMutator<String, Object, JwkSetBuilder>,
         SecurityBuilder<JwkSet, JwkSetBuilder>, KeyOperationPolicied<JwkSetBuilder> {

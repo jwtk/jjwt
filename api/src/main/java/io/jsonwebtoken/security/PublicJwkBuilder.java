@@ -28,7 +28,7 @@ import java.security.PublicKey;
  * @param <P> the type of {@link PrivateJwkBuilder} that matches this builder if a {@link PrivateJwk} is desired.
  * @param <T> the type of the builder, for subtype method chaining
  * @see #privateKey(PrivateKey)
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface PublicJwkBuilder<K extends PublicKey, L extends PrivateKey,
         J extends PublicJwk<K>, M extends PrivateJwk<L, K, J>,

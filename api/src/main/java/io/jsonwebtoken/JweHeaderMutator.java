@@ -21,7 +21,7 @@ import io.jsonwebtoken.security.KeyAlgorithm;
  * Mutation (modifications) to a {@link JweHeader} instance.
  *
  * @param <T> the mutator subtype, for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JweHeaderMutator<T extends JweHeaderMutator<T>> extends ProtectedHeaderMutator<T> {
 

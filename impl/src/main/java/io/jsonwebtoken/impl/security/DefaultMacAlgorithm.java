@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey, SecretKey> implements MacAlgorithm {
 

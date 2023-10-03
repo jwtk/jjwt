@@ -25,7 +25,7 @@ import java.security.Key;
  * @param <B> type of builder to create each time {@link #key()} is called.
  * @see #key()
  * @see KeyBuilder
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyBuilderSupplier<K extends Key, B extends KeyBuilder<K, B>> {
 

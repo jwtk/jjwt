@@ -37,7 +37,7 @@ import java.security.interfaces.RSAPublicKey;
  * jwk.get(&quot;e&quot;);
  * // ... etc ...</pre></blockquote>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface RsaPrivateJwk extends PrivateJwk<RSAPrivateKey, RSAPublicKey, RsaPublicJwk> {
 }

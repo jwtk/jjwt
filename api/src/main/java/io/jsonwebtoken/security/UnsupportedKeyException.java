@@ -18,7 +18,7 @@ package io.jsonwebtoken.security;
 /**
  * Exception thrown when encountering a key or key material that is not supported or recognized.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class UnsupportedKeyException extends KeyException {
 

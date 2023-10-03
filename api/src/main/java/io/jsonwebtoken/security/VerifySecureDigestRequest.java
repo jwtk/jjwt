@@ -28,7 +28,7 @@ import java.security.Key;
  * be available via {@link #getDigest()}, and the verification key will be available via {@link #getKey()}.</p>
  *
  * @param <K> the type of {@link Key} used to verify a digital signature or message authentication code
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<InputStream, K>, VerifyDigestRequest {
 }

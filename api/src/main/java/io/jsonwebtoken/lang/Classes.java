@@ -130,7 +130,7 @@ public final class Classes {
      * @param name the name of the resource to acquire from the classloader(s).
      * @return the URL of the resource found, or <code>null</code> if the resource cannot be found from any
      * of the three mentioned ClassLoaders.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     private static URL getResource(String name) {
         URL url = THREAD_CL_ACCESSOR.getResource(name);
@@ -311,7 +311,7 @@ public final class Classes {
      * @param args       the actual runtime arguments to use when invoking the method
      * @param <T>        the type of object expected to be returned from the method
      * @return the result returned by the invoked method.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("unchecked")
     public static <T> T invokeStatic(Class<?> clazz, String methodName, Class<?>[] argTypes, Object... args) {

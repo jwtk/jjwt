@@ -26,7 +26,7 @@ import java.util.Set;
  *
  * @see JwsHeader
  * @see JweHeader
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface ProtectedHeader extends Header, X509Accessor {
 

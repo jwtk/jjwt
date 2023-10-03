@@ -42,7 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-// @since JJWT_RELEASE_VERSION
+// @since 0.12.0
 final class EcSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
     private static final String REQD_ORDER_BIT_LENGTH_MSG = "orderBitLength must equal 256, 384, or 521.";

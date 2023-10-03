@@ -31,7 +31,7 @@ import io.jsonwebtoken.security.DigestSupplier;
  *
  * @param <H> the type of the JWT protected header
  * @param <P> the type of the JWT payload, either a content byte array or a {@link Claims} instance.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface ProtectedJwt<H extends ProtectedHeader, P> extends Jwt<H, P>, DigestSupplier {
 }

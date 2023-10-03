@@ -31,7 +31,7 @@ public interface Deserializer<T> {
      * @param bytes the formatted data byte array to convert
      * @return the reconstituted Java object
      * @throws DeserializationException if there is a problem converting the byte array to an object.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #deserialize(Reader)}
+     * @deprecated since 0.12.0 in favor of {@link #deserialize(Reader)}
      */
     @Deprecated
     T deserialize(byte[] bytes) throws DeserializationException;
@@ -42,7 +42,7 @@ public interface Deserializer<T> {
      * @param reader the reader to use to read the character stream
      * @return the deserialized Java object
      * @throws DeserializationException if there is a problem reading the stream or creating the expected Java object
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T deserialize(Reader reader) throws DeserializationException;
 }

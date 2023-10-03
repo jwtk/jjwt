@@ -22,7 +22,7 @@ import java.security.Security;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 final class Providers {
 

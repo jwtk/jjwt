@@ -23,7 +23,7 @@ import java.security.interfaces.ECKey;
 import java.security.spec.ECParameterSpec;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class PrivateECKey implements PrivateKey, ECKey, KeySupplier<PrivateKey> {
 

@@ -31,7 +31,7 @@ import java.io.OutputStream;
  * a stream with custom pre-, post- or error processing functionality.
  * </p>
  *
- * @since JJWT_RELEASE_VERSION, copied from
+ * @since 0.12.0, copied from
  * <a href="https://github.com/apache/commons-io/blob/3a17f5259b105e734c8adce1d06d68f29884d1bb/src/main/java/org/apache/commons/io/output/ProxyOutputStream.java">
  * commons-io 3a17f5259b105e734c8adce1d06d68f29884d1bb</a>
  */

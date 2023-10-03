@@ -25,7 +25,7 @@ import javax.crypto.spec.SecretKeySpec
 import static org.junit.Assert.assertArrayEquals
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class GcmAesAeadAlgorithmTest {
 

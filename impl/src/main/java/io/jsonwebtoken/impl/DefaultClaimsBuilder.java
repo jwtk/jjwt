@@ -19,7 +19,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 @SuppressWarnings("unused") // used via reflection via Jwts.claims()
 public final class DefaultClaimsBuilder extends DelegatingClaimsMutator<ClaimsBuilder>

@@ -26,7 +26,7 @@ import io.jsonwebtoken.lang.Builder;
  * @see Jwks.OP#builder()
  * @see Jwks.OP#policy()
  * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyOperationBuilder extends Builder<KeyOperation> {
 

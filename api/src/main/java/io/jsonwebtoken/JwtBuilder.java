@@ -57,7 +57,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param provider the JCA Provider to use during cryptographic signing or encryption operations, or {@code null} if the
      *                 JCA subsystem preferred provider should be used.
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder provider(Provider provider);
 
@@ -68,7 +68,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param secureRandom the {@link SecureRandom} to use during cryptographic signing or encryption operations, or
      *                     {@code null} if a default {@link SecureRandom} should be used.
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder random(SecureRandom secureRandom);
 
@@ -92,7 +92,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     .compact();</pre></blockquote>
      *
      * @return the {@link BuilderHeader} to use for header construction.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     BuilderHeader header();
 
@@ -108,7 +108,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param map the name/value pairs to set as (and potentially replace) the constructed JWT header.
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * @deprecated since 0.12.0 in favor of
      * <code>{@link #header()}.{@link MapMutator#empty() empty()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>
      * (to replace all header parameters) or
      * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>
@@ -126,7 +126,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param params the header name/value pairs to append to the header.
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * @deprecated since 0.12.0 in favor of
      * <code>{@link #header()}.{@link MapMutator#add(Map) add(map)}.{@link BuilderHeader#and() and()}</code>.
      * This method will be removed before the 1.0 release.
      */
@@ -143,7 +143,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param name  the header parameter name
      * @param value the header parameter value
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of <code>
+     * @deprecated since 0.12.0 in favor of <code>
      * {@link #header()}.{@link MapMutator#add(Object, Object) add(name, value)}.{@link BuilderHeader#and() and()}</code>.
      * This method will be removed before the 1.0 release.
      */
@@ -152,7 +152,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     JwtBuilder setHeaderParam(String name, Object value);
 
     /**
-     * Since JJWT JJWT_RELEASE_VERSION, this is an alias for {@link #content(String)}. This method will be removed
+     * Since JJWT 0.12.0, this is an alias for {@link #content(String)}. This method will be removed
      * before the 1.0 release.
      *
      * @param payload the string used to set UTF-8-encoded bytes as the JWT payload.
@@ -191,7 +191,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @see #content(String, String)
      * @see #content(byte[], String)
      * @see #content(InputStream, String)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder content(String content);
 
@@ -222,7 +222,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param content the content byte array to use as the JWT payload
      * @return the builder for method chaining.
      * @see #content(byte[], String)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder content(byte[] content);
 
@@ -250,7 +250,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param in the input stream containing the bytes to use as the JWT payload
      * @return the builder for method chaining.
      * @see #content(byte[], String)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder content(InputStream in);
 
@@ -297,7 +297,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if either {@code content} or {@code cty} are null or empty.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder content(String content, String cty) throws IllegalArgumentException;
 
@@ -343,7 +343,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if either {@code content} or {@code cty} are null or empty.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder content(byte[] content, String cty) throws IllegalArgumentException;
 
@@ -390,7 +390,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param cty     the content type (media type) identifier attributed to the byte array. Cannot be null or empty.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if either {@code content} or {@code cty} are null or empty.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder content(InputStream content, String cty) throws IllegalArgumentException;
 
@@ -416,7 +416,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *     .compact();</pre></blockquote>
      *
      * @return the {@link BuilderClaims} to use for Claims construction.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     BuilderClaims claims();
 
@@ -434,7 +434,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @see #content(String)
      * @see #content(byte[])
      * @see #content(InputStream)
-     * @deprecated since JJWT_RELEASE_VERSION in favor of using the {@link #claims()} builder.
+     * @deprecated since 0.12.0 in favor of using the {@link #claims()} builder.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -451,7 +451,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param claims the JWT Claims to be added to the JWT payload.
      * @return the builder for method chaining.
      * @since 0.8
-     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * @deprecated since 0.12.0 in favor of
      * <code>{@link #claims()}.{@link BuilderClaims#add(Map) add(Map)}.{@link BuilderClaims#and() and()}</code>.
      * This method will be removed before the 1.0 release.
      */
@@ -483,7 +483,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param claims the JWT Claims to be added to the JWT payload.
      * @return the builder instance for method chaining
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder claims(Map<String, ?> claims);
 
@@ -815,7 +815,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * <p><b>Deprecation Notice</b></p>
      *
-     * <p><b>This has been deprecated since JJWT_RELEASE_VERSION.  Use
+     * <p><b>This has been deprecated since 0.12.0.  Use
      * {@link #signWith(Key, SecureDigestAlgorithm)} instead</b>.  Standard JWA algorithms
      * are represented as instances of this new interface in the {@link Jwts.SIG}
      * algorithm registry.</p>
@@ -833,7 +833,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *                             the specified algorithm.
      * @see #signWith(Key)
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION to use the more flexible {@link #signWith(Key, SecureDigestAlgorithm)}.
+     * @deprecated since 0.12.0 to use the more flexible {@link #signWith(Key, SecureDigestAlgorithm)}.
      */
     @Deprecated
     JwtBuilder signWith(Key key, SignatureAlgorithm alg) throws InvalidKeyException;
@@ -856,7 +856,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *                             the specified algorithm.
      * @see #signWith(Key)
      * @see Jwts.SIG
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     <K extends Key> JwtBuilder signWith(K key, SecureDigestAlgorithm<? super K, ?> alg) throws InvalidKeyException;
 
@@ -943,7 +943,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param alg implementation of the {@link CompressionAlgorithm} to be used.
      * @return the builder for method chaining.
      * @see Jwts.ZIP
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder compressWith(CompressionAlgorithm alg);
 
@@ -957,7 +957,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder for method chaining.
      * @see #b64Url(Encoder)
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #b64Url(Encoder)}.
+     * @deprecated since 0.12.0 in favor of {@link #b64Url(Encoder)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -974,7 +974,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param encoder the encoder to use when Base64Url-encoding
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder b64Url(Encoder<OutputStream, OutputStream> encoder);
 
@@ -1003,7 +1003,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param serializer the serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
      * @since 0.10.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #json(Serializer)}
+     * @deprecated since 0.12.0 in favor of {@link #json(Serializer)}
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -1019,7 +1019,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param serializer the Serializer to use when converting Map objects to JSON strings.
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtBuilder json(Serializer<Map<String, ?>> serializer);
 
@@ -1037,7 +1037,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * Once claims are configured, the associated {@link JwtBuilder} may be obtained with the {@link #and() and()}
      * method for continued configuration.
      *
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims>,
             Conjunctor<JwtBuilder> {
@@ -1048,7 +1048,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * standard JWT, JWS and JWE header parameters.  Once header parameters are configured, the associated
      * {@link JwtBuilder} may be obtained with the {@link #and() and()} method for continued configuration.
      *
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader>,
             Conjunctor<JwtBuilder> {

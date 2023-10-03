@@ -26,7 +26,7 @@ import java.security.Key;
  * {@code key} to decrypt a JWE or verify a JWS signature.</p>
  *
  * @param <T> the type of object that may be returned from the {@link #locate(Header)} method
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Locator<T> {
 

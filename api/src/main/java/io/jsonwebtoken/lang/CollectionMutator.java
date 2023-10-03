@@ -24,7 +24,7 @@ import java.util.Collection;
  *
  * @param <E> the type of elements in the collection
  * @param <M> the mutator subtype, for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface CollectionMutator<E, M extends CollectionMutator<E, M>> {
 

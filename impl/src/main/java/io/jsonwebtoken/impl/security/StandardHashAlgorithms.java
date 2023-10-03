@@ -22,7 +22,7 @@ import io.jsonwebtoken.security.HashAlgorithm;
 /**
  * Backing implementation for the {@link io.jsonwebtoken.security.Jwks.HASH} implementation.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Jwks.HASH
 public final class StandardHashAlgorithms extends IdRegistry<HashAlgorithm> {

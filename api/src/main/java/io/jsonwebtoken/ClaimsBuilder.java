@@ -23,7 +23,7 @@ import io.jsonwebtoken.lang.MapMutator;
  *
  * @see JwtBuilder
  * @see Claims
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface ClaimsBuilder extends MapMutator<String, Object, ClaimsBuilder>, ClaimsMutator<ClaimsBuilder>, Builder<Claims> {
 }

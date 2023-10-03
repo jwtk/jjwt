@@ -21,7 +21,7 @@ import java.net.URI;
  * A canonical cryptographic digest of a JWK as defined by the
  * <a href="https://www.rfc-editor.org/rfc/rfc7638">JSON Web Key (JWK) Thumbprint</a> specification.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JwkThumbprint {
 

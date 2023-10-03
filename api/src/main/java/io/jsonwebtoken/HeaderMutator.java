@@ -21,7 +21,7 @@ import io.jsonwebtoken.lang.MapMutator;
  * Mutation (modifications) to a {@link Header Header} instance.
  *
  * @param <T> the mutator subtype, for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<String, Object, T> {
 
@@ -47,7 +47,7 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
      *
      * @param alg the {@code alg} header value
      * @return this header for method chaining
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      *
     T algorithm(String alg);
     */
@@ -95,36 +95,36 @@ public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<St
     T contentType(String cty);
 
     /**
-     * Deprecated since of JJWT_RELEASE_VERSION, delegates to {@link #type(String)}.
+     * Deprecated since of 0.12.0, delegates to {@link #type(String)}.
      *
      * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
      * @return the instance for method chaining.
      * @see #type(String)
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #type(String)} method.
+     * @deprecated since 0.12.0 in favor of the more modern builder-style {@link #type(String)} method.
      * This method will be removed before the 1.0 release.
      */
     @Deprecated
     T setType(String typ);
 
     /**
-     * Deprecated as of JJWT_RELEASE_VERSION, delegates to {@link #contentType(String)}.
+     * Deprecated as of 0.12.0, delegates to {@link #contentType(String)}.
      *
      * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
      * @return the instance for method chaining.
      * @see #contentType(String)
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the more modern builder-style {@link #contentType(String)}.
+     * @deprecated since 0.12.0 in favor of the more modern builder-style {@link #contentType(String)}.
      */
     @Deprecated
     T setContentType(String cty);
 
     /**
-     * Deprecated as of JJWT_RELEASE_VERSION, there is no need to set this any longer as the {@code JwtBuilder} will
+     * Deprecated as of 0.12.0, there is no need to set this any longer as the {@code JwtBuilder} will
      * always set the {@code zip} header as necessary.
      *
      * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the JSON map.
      * @return the instance for method chaining.
      * @since 0.6.0
-     * @deprecated since JJWT_RELEASE_VERSION and will be removed before the 1.0 release.
+     * @deprecated since 0.12.0 and will be removed before the 1.0 release.
      */
     @Deprecated
     T setCompressionAlgorithm(String zip);
