@@ -238,7 +238,7 @@ class Pkcs11Test {
             } else {
                 builder.verifyWith(verifyKey as PublicKey)
             }
-            String iss = builder.build().parseClaimsJws(jws).getPayload().getIssuer()
+            String iss = builder.build().parseSignedClaims(jws).getPayload().getIssuer()
 
             assertEquals 'me', iss
         }
@@ -278,7 +278,7 @@ class Pkcs11Test {
             // Decryption may need private material inside the HSM:
             priv = Keys.builder(pair.private).publicKey(pub).provider(provider).build()
 
-            String iss = Jwts.parser().decryptWith(priv).build().parseClaimsJwe(jwe).getPayload().getIssuer()
+            String iss = Jwts.parser().decryptWith(priv).build().parseEncryptedClaims(jwe).getPayload().getIssuer()
             assertEquals 'me', iss
         }
     }

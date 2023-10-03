@@ -467,7 +467,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *             }
      *         }})
      *     .build()
-     *     .parseClaimsJws(compact);
+     *     .parseSignedClaims(compact);
      * </pre>
      *
      * <p>A Key {@code Locator} is invoked once during parsing before performing decryption or signature verification.</p>
@@ -535,7 +535,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *             //inspect the header or claims, lookup and return the signing key
      *             return getSigningKey(header, claims); //implement me
      *         }})
-     *     .build().parseClaimsJws(compact);
+     *     .build().parseSignedClaims(compact);
      * </pre>
      *
      * <p>A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.</p>

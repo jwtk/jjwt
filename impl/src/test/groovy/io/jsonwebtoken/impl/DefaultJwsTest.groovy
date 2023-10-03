@@ -40,7 +40,7 @@ class DefaultJwsTest {
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         int i = compact.lastIndexOf('.')
         String signature = compact.substring(i + 1)
-        def jws = Jwts.parser().verifyWith(key).build().parseClaimsJws(compact)
+        def jws = Jwts.parser().verifyWith(key).build().parseSignedClaims(compact)
         assertEquals 'header={alg=HS256},payload={foo=bar},signature=' + signature, jws.toString()
     }
 
@@ -50,8 +50,8 @@ class DefaultJwsTest {
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         def parser = Jwts.parser().verifyWith(key).build()
-        def jws1 = parser.parseClaimsJws(compact)
-        def jws2 = parser.parseClaimsJws(compact)
+        def jws1 = parser.parseSignedClaims(compact)
+        def jws2 = parser.parseSignedClaims(compact)
         assertNotEquals jws1, 'hello' as String
         assertEquals jws1, jws1
         assertEquals jws2, jws2

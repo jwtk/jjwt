@@ -35,6 +35,8 @@ public interface Parser<T> {
     T parse(CharSequence input);
 
     /**
+     * Parse the specified character sequence with the specified bounds into a Java object.
+     *
      * @param input The character sequence, may be {@code null}
      * @param start The start index in the character sequence, inclusive
      * @param end   The end index in the character sequence, exclusive
@@ -58,7 +60,6 @@ public interface Parser<T> {
      * <blockquote><pre>{@link #parse(Reader) parse}(new {@link java.io.InputStreamReader
      * InputStreamReader}(in, {@link java.nio.charset.StandardCharsets#UTF_8
      * StandardCharsets.UTF_8});</pre></blockquote>
-     *
      *
      * @param in the UTF-8 InputStream.
      * @return the Java object represented by the specified {@link InputStream}.

@@ -28,7 +28,7 @@ package io.jsonwebtoken;
  * @param <T> the type of object to return to the parser caller after handling the parsed JWT.
  * @since 0.2
  */
-public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
+public abstract class JwtHandlerAdapter<T> extends SupportedJwtVisitor<T> implements JwtHandler<T> {
 
     /**
      * Default constructor, does not initialize any internal state.
@@ -37,32 +37,62 @@ public abstract class JwtHandlerAdapter<T> implements JwtHandler<T> {
     }
 
     @Override
+    public T onUnsecuredContent(Jwt<Header, byte[]> jwt) {
+        return onContentJwt(jwt); // bridge for existing implementations
+    }
+
+    @Override
+    public T onUnsecuredClaims(Jwt<Header, Claims> jwt) {
+        return onClaimsJwt(jwt);
+    }
+
+    @Override
+    public T onVerifiedContent(Jws<byte[]> jws) {
+        return onContentJws(jws);
+    }
+
+    @Override
+    public T onVerifiedClaims(Jws<Claims> jws) {
+        return onClaimsJws(jws);
+    }
+
+    @Override
+    public T onDecryptedContent(Jwe<byte[]> jwe) {
+        return onContentJwe(jwe);
+    }
+
+    @Override
+    public T onDecryptedClaims(Jwe<Claims> jwe) {
+        return onClaimsJwe(jwe);
+    }
+
+    @Override
     public T onContentJwt(Jwt<Header, byte[]> jwt) {
-        throw new UnsupportedJwtException("Unprotected content JWTs are not supported.");
+        return super.onUnsecuredContent(jwt);
     }
 
     @Override
     public T onClaimsJwt(Jwt<Header, Claims> jwt) {
-        throw new UnsupportedJwtException("Unprotected Claims JWTs are not supported.");
+        return super.onUnsecuredClaims(jwt);
     }
 
     @Override
     public T onContentJws(Jws<byte[]> jws) {
-        throw new UnsupportedJwtException("Signed content JWTs are not supported.");
+        return super.onVerifiedContent(jws);
     }
 
     @Override
     public T onClaimsJws(Jws<Claims> jws) {
-        throw new UnsupportedJwtException("Signed Claims JWTs are not supported.");
+        return super.onVerifiedClaims(jws);
     }
 
     @Override
     public T onContentJwe(Jwe<byte[]> jwe) {
-        throw new UnsupportedJwtException("Encrypted content JWTs are not supported.");
+        return super.onDecryptedContent(jwe);
     }
 
     @Override
     public T onClaimsJwe(Jwe<Claims> jwe) {
-        throw new UnsupportedJwtException("Encrypted Claims JWTs are not supported.");
+        return super.onDecryptedClaims(jwe);
     }
 }

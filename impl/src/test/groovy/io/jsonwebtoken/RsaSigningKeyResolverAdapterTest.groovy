@@ -32,7 +32,7 @@ class RsaSigningKeyResolverAdapterTest {
 
         def compact = Jwts.builder().claim('foo', 'bar').signWith(pair.private, alg).compact()
 
-        Jws<Claims> jws = Jwts.parser().setSigningKey(pair.public).build().parseClaimsJws(compact)
+        Jws<Claims> jws = Jwts.parser().setSigningKey(pair.public).build().parseSignedClaims(compact)
 
         try {
             new SigningKeyResolverAdapter().resolveSigningKey(jws.header, jws.payload)

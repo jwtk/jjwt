@@ -27,66 +27,66 @@ class JwtHandlerAdapterTest {
 
     @Before
     void setUp() {
-        handler = new JwtHandlerAdapter(){}
+        handler = new JwtHandlerAdapter() {}
     }
 
     @Test
     void testOnContentJwt() {
         try {
-            handler.onContentJwt(null)
+            handler.onUnsecuredContent(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals 'Unprotected content JWTs are not supported.', e.getMessage()
+            assertEquals 'Unexpected unsecured content JWT.', e.getMessage()
         }
     }
 
     @Test
     void testOnClaimsJwt() {
         try {
-            handler.onClaimsJwt(null)
+            handler.onUnsecuredClaims(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals 'Unprotected Claims JWTs are not supported.', e.getMessage()
+            assertEquals 'Unexpected unsecured Claims JWT.', e.getMessage()
         }
     }
 
     @Test
     void testOnContentJws() {
         try {
-            handler.onContentJws(null)
+            handler.onVerifiedContent(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals 'Signed content JWTs are not supported.', e.getMessage()
+            assertEquals 'Unexpected content JWS.', e.getMessage()
         }
     }
 
     @Test
     void testOnClaimsJws() {
         try {
-            handler.onClaimsJws(null)
+            handler.onVerifiedClaims(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals 'Signed Claims JWTs are not supported.', e.getMessage()
+            assertEquals 'Unexpected Claims JWS.', e.getMessage()
         }
     }
 
     @Test
     void testOnContentJwe() {
         try {
-            handler.onContentJwe(null)
+            handler.onDecryptedContent(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals 'Encrypted content JWTs are not supported.', e.getMessage()
+            assertEquals 'Unexpected content JWE.', e.getMessage()
         }
     }
 
     @Test
     void testOnClaimsJwe() {
         try {
-            handler.onClaimsJwe(null)
+            handler.onDecryptedClaims(null)
             fail()
         } catch (UnsupportedJwtException e) {
-            assertEquals 'Encrypted Claims JWTs are not supported.', e.getMessage()
+            assertEquals 'Unexpected Claims JWE.', e.getMessage()
         }
     }
 }

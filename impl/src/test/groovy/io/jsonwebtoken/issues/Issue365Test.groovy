@@ -75,7 +75,7 @@ class Issue365Test {
             def pair = TestKeys.forAlgorithm(alg).pair
             String jws = Jwts.builder().issuer('me').signWith(pair.private).compact()
             try {
-                Jwts.parser().verifyWith(pair.private).build().parseClaimsJws(jws)
+                Jwts.parser().verifyWith(pair.private).build().parseSignedClaims(jws)
                 fail()
             } catch (IllegalArgumentException expected) {
                 assertEquals DefaultJwtParser.PRIV_KEY_VERIFY_MSG, expected.getMessage()
@@ -95,7 +95,7 @@ class Issue365Test {
                         return pair.private
                     }
                 })
-                        .build().parseClaimsJws(jws)
+                        .build().parseSignedClaims(jws)
                 fail()
             } catch (InvalidKeyException expected) {
                 assertEquals DefaultJwtParser.PRIV_KEY_VERIFY_MSG, expected.getMessage()
@@ -120,7 +120,7 @@ class Issue365Test {
         def pub = TestKeys.RS256.pair.public
         String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwts.KEY.RSA1_5, Jwts.ENC.A256GCM).compact()
         try {
-            Jwts.parser().decryptWith(new TestPublicKey()).build().parseClaimsJwe(jwe)
+            Jwts.parser().decryptWith(new TestPublicKey()).build().parseEncryptedClaims(jwe)
             fail()
         } catch (IllegalArgumentException expected) {
             assertEquals DefaultJwtParser.PUB_KEY_DECRYPT_MSG, expected.getMessage()
@@ -138,7 +138,7 @@ class Issue365Test {
                     return pub
                 }
             })
-                    .build().parseClaimsJwe(jwe)
+                    .build().parseEncryptedClaims(jwe)
             fail()
         } catch (InvalidKeyException expected) {
             assertEquals DefaultJwtParser.PUB_KEY_DECRYPT_MSG, expected.getMessage()

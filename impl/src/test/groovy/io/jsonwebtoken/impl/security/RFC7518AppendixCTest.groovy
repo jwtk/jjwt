@@ -128,7 +128,7 @@ class RFC7518AppendixCTest {
         // now reverse the process and ensure it all works:
         Jwe<Claims> claimsJwe = Jwts.parser()
                 .decryptWith(bobJwk.toKey())
-                .build().parseClaimsJwe(jwe)
+                .build().parseEncryptedClaims(jwe)
 
         assertEquals RFC_HEADER, claimsJwe.getHeader()
         assertEquals "World", claimsJwe.getPayload().get("Hello")

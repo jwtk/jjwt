@@ -194,7 +194,7 @@ class RFC8037AppendixATest {
         assertEquals(rfcExpectedHeaderMap.get('epk'), jweHeaderMap.get('epk'))
 
         //ensure that bob can decrypt:
-        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseClaimsJwe(jwe)
+        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseEncryptedClaims(jwe)
 
         assertEquals(issuer, jwt.getPayload().getIssuer())
     }
@@ -285,7 +285,7 @@ class RFC8037AppendixATest {
         assertEquals(rfcExpectedHeaderMap.get('epk'), jweHeaderMap.get('epk'))
 
         //ensure that Bob ("Dave") can decrypt:
-        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseClaimsJwe(jwe)
+        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseEncryptedClaims(jwe)
 
         //assert that we've decrypted and the value in the body/content is as expected:
         assertEquals(issuer, jwt.getPayload().getIssuer())
