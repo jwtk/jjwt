@@ -1,4 +1,4 @@
-\[![Build Status](https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster)
+[![Build Status](https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/github/jwtk/jjwt?branch=master)
 [![Vuln score](https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg)](https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg)
 [![Known Vulns](https://snyk.io/test/github/jwtk/jjwt/badge.svg)](https://snyk.io/test/github/jwtk/jjwt/badge.svg)
