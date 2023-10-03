@@ -139,7 +139,11 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
         byte[] apv = request.getHeader().getAgreementPartyVInfo();
         byte[] OtherInfo = createOtherInfo(requiredCekBitLen, AlgorithmID, apu, apv);
         byte[] Z = generateZ(request, publicKey, privateKey);
-        return CONCAT_KDF.deriveKey(Z, requiredCekBitLen, OtherInfo);
+        try {
+            return CONCAT_KDF.deriveKey(Z, requiredCekBitLen, OtherInfo);
+        } finally {
+            Bytes.clear(Z);
+        }
     }
 
     @Override

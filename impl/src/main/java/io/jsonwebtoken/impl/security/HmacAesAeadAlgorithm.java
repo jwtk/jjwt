@@ -96,7 +96,13 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
         byte[] macKeyBytes = Arrays.copyOfRange(compositeKeyBytes, 0, halfCount);
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
-        final SecretKey encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
+        final SecretKey encryptionKey;
+        try {
+            encryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
+        } finally {
+            Bytes.clear(encKeyBytes);
+            Bytes.clear(compositeKeyBytes);
+        }
 
         final InputStream plaintext = Assert.notNull(req.getPayload(),
                 "Request content (plaintext) InputStream cannot be null.");
@@ -121,9 +127,13 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
         byte[] aadBytes = aad == null ? Bytes.EMPTY : Streams.bytes(aad, "Unable to read AAD bytes.");
 
-        byte[] tag = sign(aadBytes, iv, Streams.of(copy.toByteArray()), macKeyBytes);
-
-        res.setTag(tag).setIv(iv);
+        byte[] tag;
+        try {
+            tag = sign(aadBytes, iv, Streams.of(copy.toByteArray()), macKeyBytes);
+            res.setTag(tag).setIv(iv);
+        } finally {
+            Bytes.clear(macKeyBytes);
+        }
     }
 
     private byte[] sign(byte[] aad, byte[] iv, InputStream ciphertext, byte[] macKeyBytes) {
@@ -162,7 +172,13 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         int halfCount = compositeKeyBytes.length / 2; // https://tools.ietf.org/html/rfc7518#section-5.2
         byte[] macKeyBytes = Arrays.copyOfRange(compositeKeyBytes, 0, halfCount);
         byte[] encKeyBytes = Arrays.copyOfRange(compositeKeyBytes, halfCount, compositeKeyBytes.length);
-        final SecretKey decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
+        final SecretKey decryptionKey;
+        try {
+            decryptionKey = new SecretKeySpec(encKeyBytes, KEY_ALG_NAME);
+        } finally {
+            Bytes.clear(encKeyBytes);
+            Bytes.clear(compositeKeyBytes);
+        }
 
         InputStream in = Assert.notNull(req.getPayload(),
                 "Decryption request content (ciphertext) InputStream cannot be null.");
@@ -174,7 +190,12 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         // Assert that the aad + iv + ciphertext provided, when signed, equals the tag provided,
         // thereby verifying none of it has been tampered with:
         byte[] aadBytes = aad == null ? Bytes.EMPTY : Streams.bytes(aad, "Unable to read AAD bytes.");
-        byte[] digest = sign(aadBytes, iv, in, macKeyBytes);
+        byte[] digest;
+        try {
+            digest = sign(aadBytes, iv, in, macKeyBytes);
+        } finally {
+            Bytes.clear(macKeyBytes);
+        }
         if (!MessageDigest.isEqual(digest, tag)) { //constant time comparison to avoid side-channel attacks
             String msg = "Ciphertext decryption failed: Authentication tag verification failed.";
             throw new SignatureException(msg);
