@@ -108,7 +108,7 @@ class DefaultJwtParserBuilderTest {
         def parser = builder.base64UrlDecodeWith(decoder).unsecured().build()
         assertFalse invoked
 
-        assertEquals 'bar', parser.parseUnprotectedClaims(jwt).getPayload().get('foo')
+        assertEquals 'bar', parser.parseUnsecuredClaims(jwt).getPayload().get('foo')
         assertTrue invoked
     }
 

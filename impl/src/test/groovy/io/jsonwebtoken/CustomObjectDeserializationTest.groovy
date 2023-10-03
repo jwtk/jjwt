@@ -36,13 +36,13 @@ class CustomObjectDeserializationTest {
         String jwtString = Jwts.builder().claim("cust", customBean).compact()
 
         // no custom deserialization, object is a map
-        Jwt<Header, Claims> jwt = Jwts.parser().unsecured().build().parseUnprotectedClaims(jwtString)
+        Jwt<Header, Claims> jwt = Jwts.parser().unsecured().build().parseUnsecuredClaims(jwtString)
         assertNotNull jwt
         assertEquals jwt.getPayload().get('cust'), [key1: 'value1', key2: 42]
 
         // custom type for 'cust' claim
         def des = new JacksonDeserializer([cust: CustomBean])
-        jwt = Jwts.parser().unsecured().json(des).build().parseUnprotectedClaims(jwtString)
+        jwt = Jwts.parser().unsecured().json(des).build().parseUnsecuredClaims(jwtString)
         assertNotNull jwt
         CustomBean result = jwt.getPayload().get("cust", CustomBean)
         assertEquals customBean, result

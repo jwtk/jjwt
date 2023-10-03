@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtVisitor;
 import io.jsonwebtoken.io.Decoders;
 
 public class DefaultJws<P> extends DefaultProtectedJwt<JwsHeader, P> implements Jws<P> {
@@ -35,4 +36,8 @@ public class DefaultJws<P> extends DefaultProtectedJwt<JwsHeader, P> implements 
         return this.signature;
     }
 
+    @Override
+    public <T> T accept(JwtVisitor<T> v) {
+        return v.visit(this);
+    }
 }

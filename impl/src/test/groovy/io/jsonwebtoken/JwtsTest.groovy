@@ -172,7 +172,7 @@ class JwtsTest {
         String s = 'Hello JJWT'
         String cty = 'text/plain'
         String compact = Jwts.builder().content(s, cty).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -183,7 +183,7 @@ class JwtsTest {
         byte[] content = Strings.utf8(s)
         String cty = 'text/plain'
         String compact = Jwts.builder().content(content, cty).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -194,7 +194,7 @@ class JwtsTest {
         InputStream content = new ByteArrayInputStream(Strings.utf8(s))
         String cty = 'text/plain'
         String compact = Jwts.builder().content(content, cty).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertEquals cty, jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -204,7 +204,7 @@ class JwtsTest {
         String s = 'Hello JJWT'
         InputStream content = new ByteArrayInputStream(Strings.utf8(s))
         String compact = Jwts.builder().content(content).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertNull jwt.header.getContentType()
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -212,7 +212,7 @@ class JwtsTest {
     @Test
     void testContentStreamNull() {
         String compact = Jwts.builder().content((InputStream) null).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertEquals 'none', jwt.header.getAlgorithm()
         assertTrue Bytes.isEmpty(jwt.getPayload())
     }
@@ -223,7 +223,7 @@ class JwtsTest {
         String subtype = 'foo'
         String cty = "application/$subtype"
         String compact = Jwts.builder().content(s, cty).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         // assert raw value is compact form:
         assertEquals subtype, jwt.header.get('cty')
         // assert getter reflects normalized form per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10:
@@ -237,7 +237,7 @@ class JwtsTest {
         String subtype = 'foo'
         String cty = "application/$subtype;part=1/2"
         String compact = Jwts.builder().content(s, cty).compact()
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedContent(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertEquals cty, jwt.header.getContentType() // two slashes, can't compact
         assertEquals s, new String(jwt.payload, StandardCharsets.UTF_8)
     }
@@ -279,7 +279,7 @@ class JwtsTest {
         String claims = Encoders.BASE64URL.encode(claimsJson.getBytes(StandardCharsets.UTF_8))
 
         String compact = header + '.' + claims + '.'
-        def jwt = Jwts.parser().unsecured().build().parseUnprotectedClaims(compact)
+        def jwt = Jwts.parser().unsecured().build().parseUnsecuredClaims(compact)
         assertEquals 'none', jwt.header.getAlgorithm()
         assertEquals 'joe', jwt.payload.getSubject()
     }
@@ -794,7 +794,7 @@ class JwtsTest {
             Jwts.parser().unsecured().setSigningKey(key).build().parseSignedClaims(notSigned)
             fail('parseSignedClaims must fail for unsigned JWTs')
         } catch (UnsupportedJwtException expected) {
-            assertEquals 'Unprotected Claims JWTs are not supported.', expected.message
+            assertEquals 'Unexpected unsecured Claims JWT.', expected.message
         }
     }
 
@@ -1185,7 +1185,7 @@ class JwtsTest {
         String forged = Jwts.builder().setSubject("Not Joe").compact()
 
         //assert that our forged header has a 'NONE' algorithm:
-        assertEquals 'none', Jwts.parser().unsecured().build().parseUnprotectedClaims(forged).getHeader().get('alg')
+        assertEquals 'none', Jwts.parser().unsecured().build().parseUnsecuredClaims(forged).getHeader().get('alg')
 
         //now let's forge it by appending the signature the server expects:
         forged += signature

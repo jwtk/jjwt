@@ -33,7 +33,7 @@ class DeflateCompressionCodecTest {
     @Test
     void testBackwardsCompatibility_0_10_6() {
         final String jwtFrom0106 = 'eyJhbGciOiJub25lIiwiemlwIjoiREVGIn0.eNqqVsosLlayUspNVdJRKi5NAjJLi1OLgJzMxBIlK0sTMzMLEwsDAx2l1IoCJSsTQwMjExOQQC0AAAD__w.'
-        Jwts.parser().unsecured().unsecuredDecompression().build().parseUnprotectedClaims(jwtFrom0106) // no exception should be thrown
+        Jwts.parser().unsecured().unsecuredDecompression().build().parseUnsecuredClaims(jwtFrom0106) // no exception should be thrown
     }
 
     /**

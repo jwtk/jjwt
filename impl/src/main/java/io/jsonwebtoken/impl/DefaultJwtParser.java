@@ -29,7 +29,6 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtHandler;
-import io.jsonwebtoken.JwtHandlerAdapter;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
@@ -364,8 +363,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         return parse(reader, Payload.EMPTY);
     }
 
-    private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload)
-            throws ExpiredJwtException, MalformedJwtException, SignatureException {
+    private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload) {
 
         Assert.notNull(compact, "Compact reader cannot be null.");
         Assert.stateNotNull(unencodedPayload, "internal error: unencodedPayload is null.");
@@ -769,52 +767,25 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public <T> T parse(CharSequence compact, JwtHandler<T> handler) {
-        return parse(compact, Payload.EMPTY, handler);
+        return parse(compact, Payload.EMPTY).accept(handler);
     }
 
-    private <T> T parse(CharSequence compact, Payload unencodedPayload, JwtHandler<T> handler)
-            throws ExpiredJwtException, MalformedJwtException, SignatureException {
-        Assert.notNull(handler, "JwtHandler argument cannot be null.");
+    private Jwt<?, ?> parse(CharSequence compact, Payload unencodedPayload) {
         Assert.hasText(compact, "JWT String argument cannot be null or empty.");
-
-        Jwt<?, ?> jwt = parse(new CharSequenceReader(compact), unencodedPayload);
-
-        if (jwt instanceof Jws) {
-            Jws<?> jws = (Jws<?>) jwt;
-            Object body = jws.getPayload();
-            if (body instanceof Claims) {
-                return handler.onClaimsJws((Jws<Claims>) jws);
-            } else {
-                return handler.onContentJws((Jws<byte[]>) jws);
-            }
-        } else if (jwt instanceof Jwe) {
-            Jwe<?> jwe = (Jwe<?>) jwt;
-            Object body = jwe.getPayload();
-            if (body instanceof Claims) {
-                return handler.onClaimsJwe((Jwe<Claims>) jwe);
-            } else {
-                return handler.onContentJwe((Jwe<byte[]>) jwe);
-            }
-        } else {
-            Object body = jwt.getPayload();
-            if (body instanceof Claims) {
-                return handler.onClaimsJwt((Jwt<Header, Claims>) jwt);
-            } else {
-                return handler.onContentJwt((Jwt<Header, byte[]>) jwt);
-            }
-        }
+        return parse(new CharSequenceReader(compact), unencodedPayload);
     }
 
     @Override
     public Jwt<Header, byte[]> parseContentJwt(CharSequence jwt) {
-        return parseUnprotectedContent(jwt);
+        return parse(jwt).accept(Jwt.UNSECURED_CONTENT);
     }
 
     @Override
     public Jwt<Header, Claims> parseClaimsJwt(CharSequence jwt) {
-        return parseUnprotectedClaims(jwt);
+        return parse(jwt).accept(Jwt.UNSECURED_CLAIMS);
     }
 
     @Override
@@ -828,75 +799,38 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
-    public Jwt<Header, byte[]> parseUnprotectedContent(CharSequence compact) {
-        return parse(compact, new JwtHandlerAdapter<Jwt<Header, byte[]>>() {
-            @Override
-            public Jwt<Header, byte[]> onContentJwt(Jwt<Header, byte[]> jwt) {
-                return jwt;
-            }
-        });
+    public Jwt<Header, byte[]> parseUnsecuredContent(CharSequence jwt) throws JwtException, IllegalArgumentException {
+        return parse(jwt).accept(Jwt.UNSECURED_CONTENT);
     }
 
     @Override
-    public Jwt<Header, Claims> parseUnprotectedClaims(CharSequence compact) {
-        return parse(compact, new JwtHandlerAdapter<Jwt<Header, Claims>>() {
-            @Override
-            public Jwt<Header, Claims> onClaimsJwt(Jwt<Header, Claims> jwt) {
-                return jwt;
-            }
-        });
+    public Jwt<Header, Claims> parseUnsecuredClaims(CharSequence jwt) throws JwtException, IllegalArgumentException {
+        return parse(jwt).accept(Jwt.UNSECURED_CLAIMS);
     }
 
     @Override
     public Jws<byte[]> parseSignedContent(CharSequence compact) {
-        return parse(compact, new JwtHandlerAdapter<Jws<byte[]>>() {
-            @Override
-            public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
-                return jws;
-            }
-        });
+        return parse(compact).accept(Jws.CONTENT);
+    }
+
+    private Jws<byte[]> parseSignedContent(CharSequence jws, Payload unencodedPayload) {
+        return parse(jws, unencodedPayload).accept(Jws.CONTENT);
     }
 
     @Override
     public Jws<Claims> parseSignedClaims(CharSequence compact) {
-        return parse(compact, new JwtHandlerAdapter<Jws<Claims>>() {
-            @Override
-            public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
-                return jws;
-            }
-        });
-    }
-
-
-    private Jws<byte[]> parseSignedContent(CharSequence jws, Payload unencodedPayload) {
-        return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<byte[]>>() {
-            @Override
-            public Jws<byte[]> onContentJws(Jws<byte[]> jws) {
-                return jws;
-            }
-        });
+        return parse(compact).accept(Jws.CLAIMS);
     }
 
     private Jws<Claims> parseSignedClaims(CharSequence jws, Payload unencodedPayload) {
         unencodedPayload.setClaimsExpected(true);
-        return parse(jws, unencodedPayload, new JwtHandlerAdapter<Jws<Claims>>() {
-            @Override
-            public Jws<Claims> onClaimsJws(Jws<Claims> jws) {
-                return jws;
-            }
-        });
+        return parse(jws, unencodedPayload).accept(Jws.CLAIMS);
     }
 
     @Override
     public Jws<byte[]> parseSignedContent(CharSequence jws, byte[] unencodedPayload) {
         Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
         return parseSignedContent(jws, new Payload(unencodedPayload, null));
-    }
-
-    @Override
-    public Jws<Claims> parseSignedClaims(CharSequence jws, byte[] unencodedPayload) {
-        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
-        return parseSignedClaims(jws, new Payload(unencodedPayload, null));
     }
 
     private static Payload payloadFor(InputStream in) {
@@ -915,6 +849,12 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     @Override
+    public Jws<Claims> parseSignedClaims(CharSequence jws, byte[] unencodedPayload) {
+        Assert.notEmpty(unencodedPayload, "unencodedPayload argument cannot be null or empty.");
+        return parseSignedClaims(jws, new Payload(unencodedPayload, null));
+    }
+
+    @Override
     public Jws<Claims> parseSignedClaims(CharSequence jws, InputStream unencodedPayload) {
         Assert.notNull(unencodedPayload, "unencodedPayload InputStream cannot be null.");
         byte[] bytes = Streams.bytes(unencodedPayload,
@@ -924,22 +864,12 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     @Override
     public Jwe<byte[]> parseEncryptedContent(CharSequence compact) throws JwtException {
-        return parse(compact, new JwtHandlerAdapter<Jwe<byte[]>>() {
-            @Override
-            public Jwe<byte[]> onContentJwe(Jwe<byte[]> jwe) {
-                return jwe;
-            }
-        });
+        return parse(compact).accept(Jwe.CONTENT);
     }
 
     @Override
     public Jwe<Claims> parseEncryptedClaims(CharSequence compact) throws JwtException {
-        return parse(compact, new JwtHandlerAdapter<Jwe<Claims>>() {
-            @Override
-            public Jwe<Claims> onClaimsJwe(Jwe<Claims> jwe) {
-                return jwe;
-            }
-        });
+        return parse(compact).accept(Jwe.CLAIMS);
     }
 
     protected byte[] decode(CharSequence base64UrlEncoded, String name) {

@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster)
+\[![Build Status](https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master)](https://coveralls.io/github/jwtk/jjwt?branch=master)
 [![Vuln score](https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg)](https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg)
 [![Known Vulns](https://snyk.io/test/github/jwtk/jjwt/badge.svg)](https://snyk.io/test/github/jwtk/jjwt/badge.svg)
@@ -1753,17 +1753,17 @@ For example:
 Jws<Claims> jws;
 
 try {
-    jws = Jwts.parser()         // (1)
+    jws = Jwts.parser()            // (1)
         
-    .keyLocator(keyLocator)     // (2) dynamically lookup verification keys based on each JWS    
-    //.verifyWith(key)          //     or a static key used to verify all encountered JWSs
+    .keyLocator(keyLocator)        // (2) dynamically lookup verification keys based on each JWS    
+    //.verifyWith(key)             //     or a static key used to verify all encountered JWSs
         
-    .build()                    // (3)
+    .build()                       // (3)
     .parseSignedClaims(jwsString); // (4) or parseSignedContent(jwsString)
     
     // we can safely trust the JWT
      
-catch (JwtException ex) {       // (5)
+catch (JwtException ex) {          // (5)
     
     // we *cannot* use the JWT as intended by its creator
 }
@@ -1903,7 +1903,7 @@ To parse the resulting `jws` string, we need to do two things when creating the 
 ```java
 Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
         .build()
-        .parseSignedContent(jws, content);                // 2
+        .parseSignedContent(jws, content);             // 2
         
 assertArrayEquals(content, parsed.getPayload());
 ```
@@ -2376,17 +2376,17 @@ For example:
 Jwe<Claims> jwe;
 
 try {
-    jwe = Jwts.parser()         // (1)
+    jwe = Jwts.parser()               // (1)
 
-    .keyLocator(keyLocator)     // (2) dynamically lookup decryption keys based on each JWE    
-    //.decryptWith(key)         //     or a static key used to decrypt all encountered JWEs
+    .keyLocator(keyLocator)           // (2) dynamically lookup decryption keys based on each JWE    
+    //.decryptWith(key)               //     or a static key used to decrypt all encountered JWEs
         
-    .build()                    // (3)
+    .build()                          // (3)
     .parseEncryptedClaims(jweString); // (4) or parseEncryptedContent(jweString);
     
     // we can safely trust the JWT
      
-catch (JwtException ex) {       // (5)
+catch (JwtException ex) {             // (5)
     
     // we *cannot* use the JWT as intended by its creator
 }
@@ -3026,7 +3026,7 @@ Jwts.parser()
 
     .getPayload()
     
-    .get("user", User.class) // <-----
+    .get("user", User.class); // <-----
 ```
 
 > **Note**

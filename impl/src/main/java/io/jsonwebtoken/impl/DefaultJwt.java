@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtVisitor;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
@@ -79,5 +80,10 @@ public class DefaultJwt<H extends Header, P> implements Jwt<H, P> {
     @Override
     public int hashCode() {
         return Objects.nullSafeHashCode(header, payload);
+    }
+
+    @Override
+    public <T> T accept(JwtVisitor<T> v) {
+        return v.visit(this);
     }
 }

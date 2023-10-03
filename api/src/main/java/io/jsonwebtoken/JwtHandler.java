@@ -21,17 +21,20 @@ package io.jsonwebtoken;
  *
  * @param <T> the type of object to return to the parser caller after handling the parsed JWT.
  * @since 0.2
+ * @deprecated since JJWT_RELEASE_VERSION in favor of calling {@link Jwt#accept(JwtVisitor)}.
  */
-public interface JwtHandler<T> {
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated
+public interface JwtHandler<T> extends JwtVisitor<T> {
 
     /**
      * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
-     * an unprotected content JWT.  An unprotected content JWT has a byte array payload that is not
+     * an unsecured content JWT.  An unsecured content JWT has a byte array payload that is not
      * cryptographically signed or encrypted.  If the JWT creator set the (optional)
      * {@link Header#getContentType() contentType} header value, the application may inspect that value to determine
      * how to convert the byte array to the final content type as desired.
      *
-     * @param jwt the parsed Unprotected content JWT
+     * @param jwt the parsed unsecured content JWT
      * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
      */
     T onContentJwt(Jwt<Header, byte[]> jwt);

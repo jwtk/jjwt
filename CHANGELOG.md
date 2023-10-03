@@ -138,7 +138,7 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
 
 
 * `io.jsonwebtoken.JwtParser`'s `parseContentJwt`, `parseClaimsJwt`, `parseContentJws`, and `parseClaimsJws` methods
-  have been deprecated in favor of more intuitive respective `parseUnprotectedContent`, `parseUnprotectedClaims`,
+  have been deprecated in favor of more intuitive respective `parseUnsecuredContent`, `parseUnsecuredClaims`,
   `parseSignedContent` and `parseSignedClaims` methods.
 
 

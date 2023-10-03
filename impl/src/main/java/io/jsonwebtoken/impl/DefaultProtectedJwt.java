@@ -23,13 +23,13 @@ import io.jsonwebtoken.lang.Objects;
 
 import java.security.MessageDigest;
 
-public class DefaultProtectedJwt<H extends ProtectedHeader, P> extends DefaultJwt<H, P> implements ProtectedJwt<H, P> {
+abstract class DefaultProtectedJwt<H extends ProtectedHeader, P> extends DefaultJwt<H, P> implements ProtectedJwt<H, P> {
 
     protected final byte[] digest;
 
     private final String digestName;
 
-    public DefaultProtectedJwt(H header, P payload, byte[] digest, String digestName) {
+    protected DefaultProtectedJwt(H header, P payload, byte[] digest, String digestName) {
         super(header, payload);
         this.digest = Assert.notEmpty(digest, "Digest byte array cannot be null or empty.");
         this.digestName = Assert.hasText(digestName, "digestName cannot be null or empty.");

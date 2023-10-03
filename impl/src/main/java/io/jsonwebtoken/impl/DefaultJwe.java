@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.JwtVisitor;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
@@ -59,5 +60,10 @@ public class DefaultJwe<P> extends DefaultProtectedJwt<JweHeader, P> implements 
     @Override
     public int hashCode() {
         return Objects.nullSafeHashCode(getHeader(), getPayload(), this.iv, this.digest);
+    }
+
+    @Override
+    public <T> T accept(JwtVisitor<T> v) {
+        return v.visit(this);
     }
 }

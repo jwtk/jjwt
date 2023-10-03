@@ -267,7 +267,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().expiration(exp).compact()
 
         try {
-            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parseUnprotectedClaims(s)
+            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
         } catch (ExpiredJwtException expected) {
             def exp8601 = DateFormats.formatIso8601(exp, true)
             def later8601 = DateFormats.formatIso8601(later, true)
@@ -286,7 +286,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().notBefore(nbf).compact()
 
         try {
-            Jwts.parser().unsecured().clock(new FixedClock(earlier)).build().parseUnprotectedClaims(s)
+            Jwts.parser().unsecured().clock(new FixedClock(earlier)).build().parseUnsecuredClaims(s)
         } catch (PrematureJwtException expected) {
             def nbf8601 = DateFormats.formatIso8601(nbf, true)
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
@@ -301,7 +301,7 @@ class DefaultJwtParserTest {
         def jwt = Encoders.BASE64URL.encode(Strings.utf8('{"alg":"none"}'))
         jwt += ".F!3!#." // <-- invalid Base64URL payload
         try {
-            Jwts.parser().unsecured().build().parseUnprotectedClaims(jwt)
+            Jwts.parser().unsecured().build().parse(jwt)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = 'Invalid Base64Url payload: <redacted>'
@@ -330,5 +330,15 @@ class DefaultJwtParserTest {
         // parseClaimsJws
         jwt = Jwts.builder().subject('me').signWith(key).compact()
         assertEquals 'me', Jwts.parser().verifyWith(key).build().parseClaimsJws(jwt).getPayload().getSubject()
+
+        //parse(jwt, handler)
+        def value = 'foo'
+        def handler = new JwtHandlerAdapter() {
+            @Override
+            Object onClaimsJws(Jws jws) {
+                return value
+            }
+        }
+        assertEquals value, Jwts.parser().verifyWith(key).build().parse(jwt, handler)
     }
 }

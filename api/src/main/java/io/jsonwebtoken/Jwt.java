@@ -25,6 +25,36 @@ package io.jsonwebtoken;
 public interface Jwt<H extends Header, P> {
 
     /**
+     * Visitor implementation that ensures the visited JWT is an unsecured content JWT (one not cryptographically
+     * signed or encrypted) and rejects all others with an {@link UnsupportedJwtException}.
+     *
+     * @see SupportedJwtVisitor#onUnsecuredContent(Jwt)
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("UnnecessaryModifier")
+    public static final JwtVisitor<Jwt<Header, byte[]>> UNSECURED_CONTENT = new SupportedJwtVisitor<Jwt<Header, byte[]>>() {
+        @Override
+        public Jwt<Header, byte[]> onUnsecuredContent(Jwt<Header, byte[]> jwt) {
+            return jwt;
+        }
+    };
+
+    /**
+     * Visitor implementation that ensures the visited JWT is an unsecured {@link Claims} JWT (one not
+     * cryptographically signed or encrypted) and rejects all others with an {@link UnsupportedJwtException}.
+     *
+     * @see SupportedJwtVisitor#onUnsecuredClaims(Jwt)
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("UnnecessaryModifier")
+    public static final JwtVisitor<Jwt<Header, Claims>> UNSECURED_CLAIMS = new SupportedJwtVisitor<Jwt<Header, Claims>>() {
+        @Override
+        public Jwt<Header, Claims> onUnsecuredClaims(Jwt<Header, Claims> jwt) {
+            return jwt;
+        }
+    };
+
+    /**
      * Returns the JWT {@link Header} or {@code null} if not present.
      *
      * @return the JWT {@link Header} or {@code null} if not present.
@@ -54,4 +84,13 @@ public interface Jwt<H extends Header, P> {
      * @since JJWT_RELEASE_VERSION
      */
     P getPayload();
+
+    /**
+     * Invokes the specified {@code visitor}'s appropriate type-specific {@code visit} method based on this JWT's type.
+     *
+     * @param visitor the visitor to invoke.
+     * @param <T>     the value type returned from the {@code visit} method.
+     * @return the value returned from visitor's {@code visit} method implementation.
+     */
+    <T> T accept(JwtVisitor<T> visitor);
 }

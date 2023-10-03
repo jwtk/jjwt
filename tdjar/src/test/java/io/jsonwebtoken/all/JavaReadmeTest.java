@@ -76,7 +76,7 @@ public class JavaReadmeTest {
 
         Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
                 .build()
-                .parseSignedContent(jws, content);                // 2
+                .parseSignedContent(jws, content);             // 2
 
         assertArrayEquals(content, parsed.getPayload());
     }
