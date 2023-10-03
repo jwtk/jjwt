@@ -33,7 +33,7 @@ import java.util.Set;
  * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
  * {@link UnsupportedOperationException}.</p>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JwkSet extends Map<String, Object>, Iterable<Jwk<?>> {
 

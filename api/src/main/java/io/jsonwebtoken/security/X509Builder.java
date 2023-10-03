@@ -22,7 +22,7 @@ import java.util.List;
  * Additional X.509-specific builder methods for constructing an associated JWT Header or JWK, enabling method chaining.
  *
  * @param <T> the mutator subtype, for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface X509Builder<T extends X509Builder<T>> extends X509Mutator<T> {
 

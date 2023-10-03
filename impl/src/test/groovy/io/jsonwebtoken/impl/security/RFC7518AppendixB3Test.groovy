@@ -29,7 +29,7 @@ import static org.junit.Assert.assertArrayEquals
  * Tests successful encryption and decryption using 'AES_256_CBC_HMAC_SHA_512' as defined in
  * <a href="https://tools.ietf.org/html/rfc7518#appendix-B.3">RFC 7518, Appendix B.3</a>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class RFC7518AppendixB3Test {
 

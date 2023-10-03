@@ -79,7 +79,7 @@ package io.jsonwebtoken;
  * </tbody>
  * </table>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Identifiable {
 

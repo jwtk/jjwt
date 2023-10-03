@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals
  * Tests successful parsing/decryption of a 'JWE using RSAES-PKCS1-v1_5 and AES_128_CBC_HMAC_SHA_256' as defined in
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.2">RFC 7516, Appendix A.2</a>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class RFC7516AppendixA2Test {
 

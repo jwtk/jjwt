@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals
  * Tests successful parsing/decryption of a 'JWE using RSAES-OAEP and AES GCM' as defined in
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#appendix-A.1">RFC 7516, Appendix A.1</a>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class RFC7516AppendixA1Test {
 

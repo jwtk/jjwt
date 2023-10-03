@@ -46,7 +46,7 @@ import io.jsonwebtoken.lang.Strings;
  * </p>
  *
  * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>
- * @since JJWT_RELEASE_VERSION, copied from
+ * @since 0.12.0, copied from
  * <a href="https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6">commons-codec
  * 585497f09b026f6602daf986723a554e051bdfe6</a>
  */

@@ -19,7 +19,7 @@ package io.jsonwebtoken.security;
  * Exception thrown when encountering a {@link JwkSet} that is incomplete or improperly configured or
  * formatted and cannot be used as expected.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class MalformedKeySetException extends SecurityException {
 

@@ -43,7 +43,7 @@ import java.io.OutputStream;
  * @see Jwts.ZIP#DEF
  * @see Jwts.ZIP#GZIP
  * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">JSON Web Encryption Compression Algorithms Registry</a>
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface CompressionAlgorithm extends Identifiable {
 

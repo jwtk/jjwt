@@ -22,7 +22,7 @@ import java.io.Reader;
  * A Parser converts a character stream into a Java object.
  *
  * @param <T> the instance type created after parsing
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Parser<T> {
 

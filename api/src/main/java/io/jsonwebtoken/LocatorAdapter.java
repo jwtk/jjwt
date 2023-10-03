@@ -24,7 +24,7 @@ import io.jsonwebtoken.lang.Assert;
  * unprotected JWT, or an integrity-protected JWT (either a JWS or JWE).
  *
  * @param <T> the type of object to locate
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public abstract class LocatorAdapter<T> implements Locator<T> {
 

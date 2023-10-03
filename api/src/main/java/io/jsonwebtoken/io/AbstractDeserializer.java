@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets;
  * {@link #doDeserialize(Reader)}.
  *
  * @param <T> the type of object returned after deserialization
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public abstract class AbstractDeserializer<T> implements Deserializer<T> {
 

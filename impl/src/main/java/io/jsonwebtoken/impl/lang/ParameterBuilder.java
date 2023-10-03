@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface ParameterBuilder<T> extends Builder<Parameter<T>> {
 

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class TeeOutputStream extends FilteredOutputStream {
 

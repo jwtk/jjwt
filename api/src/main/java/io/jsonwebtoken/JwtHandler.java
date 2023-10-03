@@ -21,7 +21,7 @@ package io.jsonwebtoken;
  *
  * @param <T> the type of object to return to the parser caller after handling the parsed JWT.
  * @since 0.2
- * @deprecated since JJWT_RELEASE_VERSION in favor of calling {@link Jwt#accept(JwtVisitor)}.
+ * @deprecated since 0.12.0 in favor of calling {@link Jwt#accept(JwtVisitor)}.
  */
 @SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
@@ -83,7 +83,7 @@ public interface JwtHandler<T> extends JwtVisitor<T> {
      *
      * @param jwe the parsed content jwe
      * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T onContentJwe(Jwe<byte[]> jwe);
 
@@ -95,7 +95,7 @@ public interface JwtHandler<T> extends JwtVisitor<T> {
      *
      * @param jwe the parsed claims jwe
      * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T onClaimsJwe(Jwe<Claims> jwe);
 

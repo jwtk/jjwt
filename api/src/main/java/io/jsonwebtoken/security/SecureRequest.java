@@ -22,7 +22,7 @@ import java.security.Key;
  *
  * @param <T> the type of payload in the request
  * @param <K> they type of key used by the algorithm during the request
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier<K> {
 }

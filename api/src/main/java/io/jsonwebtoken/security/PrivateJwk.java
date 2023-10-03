@@ -39,7 +39,7 @@ import java.security.PublicKey;
  * @param <K> The type of {@link PrivateKey} represented by this JWK
  * @param <L> The type of {@link PublicKey} represented by the JWK's corresponding {@link #toPublicJwk() public JWK}.
  * @param <M> The type of {@link PublicJwk} reflected by the JWK's public properties.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface PrivateJwk<K extends PrivateKey, L extends PublicKey, M extends PublicJwk<L>> extends AsymmetricJwk<K> {
 

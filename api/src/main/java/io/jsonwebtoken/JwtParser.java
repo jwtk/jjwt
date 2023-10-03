@@ -83,7 +83,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
             SecurityException, IllegalArgumentException;
 
     /**
-     * Deprecated since JJWT_RELEASE_VERSION in favor of calling any {@code parse*} method immediately
+     * Deprecated since 0.12.0 in favor of calling any {@code parse*} method immediately
      * followed by invoking the parsed JWT's {@link Jwt#accept(JwtVisitor) accept} method with your preferred visitor. For
      * example:
      *
@@ -107,7 +107,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      *                                  {@code handler} is {@code null}.
      * @see Jwt#accept(JwtVisitor)
      * @since 0.2
-     * @deprecated since JJWT_RELEASE_VERSION in favor of
+     * @deprecated since 0.12.0 in favor of
      * <code>{@link #parse(CharSequence)}.{@link Jwt#accept(JwtVisitor) accept}({@link JwtVisitor visitor});</code>
      */
     @Deprecated
@@ -115,7 +115,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
             MalformedJwtException, SignatureException, SecurityException, IllegalArgumentException;
 
     /**
-     * Deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseUnsecuredContent(CharSequence)}.
+     * Deprecated since 0.12.0 in favor of {@link #parseUnsecuredContent(CharSequence)}.
      *
      * <p>This method will be removed before the 1.0 release.</p>
      *
@@ -129,7 +129,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseUnsecuredContent(CharSequence)
      * @see Jwt#accept(JwtVisitor)
      * @since 0.2
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseUnsecuredContent(CharSequence)}.
+     * @deprecated since 0.12.0 in favor of {@link #parseUnsecuredContent(CharSequence)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -137,7 +137,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
             SignatureException, SecurityException, IllegalArgumentException;
 
     /**
-     * Deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseUnsecuredClaims(CharSequence)}.
+     * Deprecated since 0.12.0 in favor of {@link #parseUnsecuredClaims(CharSequence)}.
      *
      * <p>This method will be removed before the 1.0 release.</p>
      *
@@ -151,7 +151,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseUnsecuredClaims(CharSequence)
      * @see Jwt#accept(JwtVisitor)
      * @since 0.2
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseUnsecuredClaims(CharSequence)}.
+     * @deprecated since 0.12.0 in favor of {@link #parseUnsecuredClaims(CharSequence)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -159,7 +159,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
             MalformedJwtException, SignatureException, SecurityException, IllegalArgumentException;
 
     /**
-     * Deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseSignedContent(CharSequence)}.
+     * Deprecated since 0.12.0 in favor of {@link #parseSignedContent(CharSequence)}.
      *
      * <p>This method will be removed before the 1.0 release.</p>
      *
@@ -174,7 +174,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseEncryptedContent(CharSequence)
      * @see #parse(CharSequence)
      * @since 0.2
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseSignedContent(CharSequence)}.
+     * @deprecated since 0.12.0 in favor of {@link #parseSignedContent(CharSequence)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -182,7 +182,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
             SecurityException, IllegalArgumentException;
 
     /**
-     * Deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseSignedClaims(CharSequence)}.
+     * Deprecated since 0.12.0 in favor of {@link #parseSignedClaims(CharSequence)}.
      *
      * @param jws a compact Claims JWS string.
      * @return the parsed and validated Claims JWS
@@ -197,7 +197,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @see #parseEncryptedClaims(CharSequence)
      * @see #parse(CharSequence)
      * @since 0.2
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #parseSignedClaims(CharSequence)}.
+     * @deprecated since 0.12.0 in favor of {@link #parseSignedClaims(CharSequence)}.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -222,7 +222,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws IllegalArgumentException if the {@code jwt} string is {@code null} or empty or only whitespace
      * @see #parse(CharSequence)
      * @see Jwt#accept(JwtVisitor)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jwt<Header, byte[]> parseUnsecuredContent(CharSequence jwt) throws JwtException, IllegalArgumentException;
 
@@ -241,7 +241,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws IllegalArgumentException if the {@code jwt} string is {@code null} or empty or only whitespace
      * @see #parse(CharSequence)
      * @see Jwt#accept(JwtVisitor)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jwt<Header, Claims> parseUnsecuredClaims(CharSequence jwt) throws JwtException, IllegalArgumentException;
 
@@ -263,7 +263,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws IllegalArgumentException if the {@code jws} string is {@code null} or empty or only whitespace
      * @see #parse(CharSequence)
      * @see Jwt#accept(JwtVisitor)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jws<byte[]> parseSignedContent(CharSequence jws) throws JwtException, IllegalArgumentException;
 
@@ -282,7 +282,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @param jws              the Unencoded Payload JWS to parse.
      * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
      * @return the parsed Unencoded Payload.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jws<byte[]> parseSignedContent(CharSequence jws, byte[] unencodedPayload);
 
@@ -307,7 +307,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @param jws              the Unencoded Payload JWS to parse.
      * @param unencodedPayload the JWS's associated required unencoded payload used for signature verification.
      * @return the parsed Unencoded Payload.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jws<byte[]> parseSignedContent(CharSequence jws, InputStream unencodedPayload);
 
@@ -326,7 +326,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws IllegalArgumentException if the {@code jwt} string is {@code null} or empty or only whitespace
      * @see #parse(CharSequence)
      * @see Jwt#accept(JwtVisitor)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jws<Claims> parseSignedClaims(CharSequence jws) throws JwtException, IllegalArgumentException;
 
@@ -347,7 +347,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @return the parsed and validated Claims JWS.
      * @throws JwtException             if parsing, signature verification, or JWT validation fails.
      * @throws IllegalArgumentException if either the {@code jws} or {@code unencodedPayload} are null or empty.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jws<Claims> parseSignedClaims(CharSequence jws, byte[] unencodedPayload) throws JwtException, IllegalArgumentException;
 
@@ -375,7 +375,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @return the parsed and validated Claims JWS.
      * @throws JwtException             if parsing, signature verification, or JWT validation fails.
      * @throws IllegalArgumentException if either the {@code jws} or {@code unencodedPayload} are null or empty.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jws<Claims> parseSignedClaims(CharSequence jws, InputStream unencodedPayload) throws JwtException, IllegalArgumentException;
 
@@ -397,7 +397,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws IllegalArgumentException if the {@code jwe} string is {@code null} or empty or only whitespace
      * @see #parse(CharSequence)
      * @see Jwt#accept(JwtVisitor)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jwe<byte[]> parseEncryptedContent(CharSequence jwe) throws JwtException, IllegalArgumentException;
 
@@ -416,7 +416,7 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws IllegalArgumentException if the {@code jwe} string is {@code null} or empty or only whitespace
      * @see #parse(CharSequence)
      * @see Jwt#accept(JwtVisitor)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     Jwe<Claims> parseEncryptedClaims(CharSequence jwe) throws JwtException, IllegalArgumentException;
 }

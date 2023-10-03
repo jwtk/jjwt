@@ -22,7 +22,7 @@ import java.io.OutputStream;
  * and resulting {@link #setTag(byte[]) AAD tag} and {@link #setIv(byte[]) initialization vector}.
  * The AAD tag and initialization vector must be supplied with the ciphertext to decrypt.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface AeadResult {
 

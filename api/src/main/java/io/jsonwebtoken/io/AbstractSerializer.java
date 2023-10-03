@@ -25,7 +25,7 @@ import java.io.OutputStream;
  * * {@link #doSerialize(Object, OutputStream)}.
  *
  * @param <T> the type of object to serialize
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public abstract class AbstractSerializer<T> implements Serializer<T> {
 
@@ -69,7 +69,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
      * @param out the stream to write to
      * @throws Exception if there is a problem converting the object to a byte stream or writing the
      *                   bytes to the {@code out}put stream.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     protected abstract void doSerialize(T t, OutputStream out) throws Exception;
 }

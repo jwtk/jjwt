@@ -37,7 +37,7 @@ public class InvalidKeyException extends KeyException {
      *
      * @param message the message explaining why the exception is thrown.
      * @param cause   the underlying cause that resulted in this exception being thrown.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public InvalidKeyException(String message, Throwable cause) {
         super(message, cause);

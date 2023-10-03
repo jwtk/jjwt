@@ -36,7 +36,7 @@ import java.util.Set;
  * Header implementation satisfying shared JWS and JWE header parameter requirements.  Header parameters specific to
  * either JWE or JWS will be defined in respective subclasses.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHeader {
 

@@ -20,7 +20,7 @@ package io.jsonwebtoken.lang;
  * to the source/original builder.
  *
  * @param <T> the type of joined object to return.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Conjunctor<T> {
 

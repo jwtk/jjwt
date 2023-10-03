@@ -29,7 +29,7 @@ import io.jsonwebtoken.Identifiable;
  *
  * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">JWK key_ops (Key Operations) Parameter</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">JSON Web Key Operations Registry</a>
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyOperation extends Identifiable {
 

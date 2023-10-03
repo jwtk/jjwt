@@ -540,18 +540,18 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>JJWT_RELEASE_VERSION</version>
+    <version>0.12.0</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>JJWT_RELEASE_VERSION</version>
+    <version>0.12.0</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-    <version>JJWT_RELEASE_VERSION</version>
+    <version>0.12.0</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you are using:
@@ -574,9 +574,9 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION' // or 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION' for gson
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.0' // or 'io.jsonwebtoken:jjwt-gson:0.12.0' for gson
     /* 
       Uncomment this next dependency if you are using:
        - JDK 10 or earlier, and you want to use RSASSA-PSS (PS256, PS384, PS512) signature algorithms.
@@ -601,9 +601,9 @@ Add the dependencies to your project:
 
 ```groovy
 dependencies {
-    api('io.jsonwebtoken:jjwt-api:JJWT_RELEASE_VERSION')
-    runtimeOnly('io.jsonwebtoken:jjwt-impl:JJWT_RELEASE_VERSION') 
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:JJWT_RELEASE_VERSION') {
+    api('io.jsonwebtoken:jjwt-api:0.12.0')
+    runtimeOnly('io.jsonwebtoken:jjwt-impl:0.12.0') 
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.12.0') {
         exclude(group: 'org.json', module: 'json') //provided by Android natively
     }
     /* 
@@ -2952,7 +2952,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>JJWT_RELEASE_VERSION</version>
+    <version>0.12.0</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -2961,7 +2961,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-jackson:JJWT_RELEASE_VERSION'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.0'
 }
 ```
 
@@ -3069,7 +3069,7 @@ scope which is the typical JJWT default).  That is:
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-gson</artifactId>
-    <version>JJWT_RELEASE_VERSION</version>
+    <version>0.12.0</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ```
@@ -3078,7 +3078,7 @@ scope which is the typical JJWT default).  That is:
 
 ```groovy
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION'
+    implementation 'io.jsonwebtoken:jjwt-gson:0.12.0'
 }
 ```
 

@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
 

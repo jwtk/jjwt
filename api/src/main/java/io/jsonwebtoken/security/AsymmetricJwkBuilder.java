@@ -23,7 +23,7 @@ import java.security.Key;
  * @param <K> the type of Java key provided by the JWK.
  * @param <J> the type of asymmetric JWK created
  * @param <T> the type of the builder, for subtype method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface AsymmetricJwkBuilder<K extends Key, J extends AsymmetricJwk<K>, T extends AsymmetricJwkBuilder<K, J, T>>
         extends JwkBuilder<K, J, T>, X509Builder<T> {

@@ -19,7 +19,7 @@ package io.jsonwebtoken.lang;
  * Type-safe interface that reflects the <a href="https://en.wikipedia.org/wiki/Builder_pattern">Builder pattern</a>.
  *
  * @param <T> The type of object that will be created when {@link #build()} is invoked.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Builder<T> {
 

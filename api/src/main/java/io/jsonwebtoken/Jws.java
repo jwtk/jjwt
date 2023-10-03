@@ -29,7 +29,7 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
      * {@link UnsupportedJwtException}.
      *
      * @see SupportedJwtVisitor#onVerifiedContent(Jws)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("UnnecessaryModifier")
     public static final JwtVisitor<Jws<byte[]>> CONTENT = new SupportedJwtVisitor<Jws<byte[]>>() {
@@ -45,7 +45,7 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
      * {@link UnsupportedJwtException}.
      *
      * @see SupportedJwtVisitor#onVerifiedClaims(Jws)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("UnnecessaryModifier")
     public static final JwtVisitor<Jws<Claims>> CLAIMS = new SupportedJwtVisitor<Jws<Claims>>() {
@@ -59,7 +59,7 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
      * Returns the verified JWS signature as a Base64Url string.
      *
      * @return the verified JWS signature as a Base64Url string.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getDigest() getDigest()}.
+     * @deprecated since 0.12.0 in favor of {@link #getDigest() getDigest()}.
      */
     @Deprecated
     String getSignature(); //TODO for 1.0: return a byte[]

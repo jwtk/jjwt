@@ -29,7 +29,7 @@ public interface Jwt<H extends Header, P> {
      * signed or encrypted) and rejects all others with an {@link UnsupportedJwtException}.
      *
      * @see SupportedJwtVisitor#onUnsecuredContent(Jwt)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("UnnecessaryModifier")
     public static final JwtVisitor<Jwt<Header, byte[]>> UNSECURED_CONTENT = new SupportedJwtVisitor<Jwt<Header, byte[]>>() {
@@ -44,7 +44,7 @@ public interface Jwt<H extends Header, P> {
      * cryptographically signed or encrypted) and rejects all others with an {@link UnsupportedJwtException}.
      *
      * @see SupportedJwtVisitor#onUnsecuredClaims(Jwt)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("UnnecessaryModifier")
     public static final JwtVisitor<Jwt<Header, Claims>> UNSECURED_CLAIMS = new SupportedJwtVisitor<Jwt<Header, Claims>>() {
@@ -66,7 +66,7 @@ public interface Jwt<H extends Header, P> {
      * {@link #getPayload()} instead, as this method will be removed prior to the 1.0 release.
      *
      * @return the JWT payload, either a {@code byte[]} or a {@code Claims} instance.
-     * @deprecated since JJWT_RELEASE_VERSION because it has been renamed to {@link #getPayload()}.  'Payload' (not
+     * @deprecated since 0.12.0 because it has been renamed to {@link #getPayload()}.  'Payload' (not
      * body) is what the JWT specifications call this property, so it has been renamed to reflect the correct JWT
      * nomenclature/taxonomy.
      */
@@ -81,7 +81,7 @@ public interface Jwt<H extends Header, P> {
      * the final content type as desired.
      *
      * @return the JWT payload, either a {@code byte[]} or a {@code Claims} instance.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     P getPayload();
 

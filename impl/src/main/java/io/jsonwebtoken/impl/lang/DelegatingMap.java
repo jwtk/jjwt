@@ -26,7 +26,7 @@ import java.util.Set;
  *
  * @param <K> Map key type
  * @param <V> Map value type
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DelegatingMap<K, V, T extends Map<K, V>> implements Map<K, V> {
 

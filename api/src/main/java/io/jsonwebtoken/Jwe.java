@@ -20,7 +20,7 @@ package io.jsonwebtoken;
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html">JWE (RFC 7516) Specification</a>.
  *
  * @param <B> payload type, either {@link Claims} or {@code byte[]} content.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
 
@@ -30,7 +30,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * {@link UnsupportedJwtException}.
      *
      * @see SupportedJwtVisitor#onDecryptedContent(Jwe)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("UnnecessaryModifier")
     public static final JwtVisitor<Jwe<byte[]>> CONTENT = new SupportedJwtVisitor<Jwe<byte[]>>() {
@@ -46,7 +46,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * {@link UnsupportedJwtException}.
      *
      * @see SupportedJwtVisitor#onDecryptedClaims(Jwe)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     @SuppressWarnings("UnnecessaryModifier")
     public static final JwtVisitor<Jwe<Claims>> CLAIMS = new SupportedJwtVisitor<Jwe<Claims>>() {

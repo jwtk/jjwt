@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * No longer used by JJWT.  Will be removed before the 1.0 final release.
  *
- * @deprecated since JJWT_RELEASE_VERSION. will be removed before the 1.0 final release.
+ * @deprecated since 0.12.0. will be removed before the 1.0 final release.
  */
 @Deprecated
 public final class RuntimeEnvironment {
@@ -37,7 +37,7 @@ public final class RuntimeEnvironment {
     /**
      * {@code true} if BouncyCastle is in the runtime classpath, {@code false} otherwise.
      *
-     * @deprecated since JJWT_RELEASE_VERSION. will be removed before the 1.0 final release.
+     * @deprecated since 0.12.0. will be removed before the 1.0 final release.
      */
     @Deprecated
     public static final boolean BOUNCY_CASTLE_AVAILABLE = Classes.isAvailable(BC_PROVIDER_CLASS_NAME);
@@ -46,7 +46,7 @@ public final class RuntimeEnvironment {
      * Register BouncyCastle as a JCA provider in the system's {@link Security#getProviders() Security Providers} list
      * if BouncyCastle is in the runtime classpath.
      *
-     * @deprecated since JJWT_RELEASE_VERSION. will be removed before the 1.0 final release.
+     * @deprecated since 0.12.0. will be removed before the 1.0 final release.
      */
     @Deprecated
     public static void enableBouncyCastleIfPossible() {

@@ -25,7 +25,7 @@ import java.security.KeyPair;
  * ensuring the resulting {@link KeyPair}s are compatible with their associated cryptographic algorithm.</p>
  *
  * @see KeyPairBuilderSupplier
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyPairBuilder extends SecurityBuilder<KeyPair, KeyPairBuilder> {
 }

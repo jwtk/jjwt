@@ -46,7 +46,7 @@ import java.security.Key;
  *
  * @see io.jsonwebtoken.JwtParserBuilder#keyLocator(Locator)
  * @since 0.4
- * @deprecated since JJWT_RELEASE_VERSION. Implement {@link Locator} instead.
+ * @deprecated since 0.12.0. Implement {@link Locator} instead.
  */
 @Deprecated
 public interface SigningKeyResolver {

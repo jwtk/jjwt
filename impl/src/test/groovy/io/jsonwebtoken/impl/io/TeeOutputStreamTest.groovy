@@ -21,7 +21,7 @@ import static org.junit.Assert.assertArrayEquals
 import static org.junit.Assert.assertTrue
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class TeeOutputStreamTest {
 

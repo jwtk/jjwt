@@ -24,7 +24,7 @@ package io.jsonwebtoken.lang;
  * JDK 7 environments.</p>
  *
  * @param <T> the type of object returned by this supplier
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Supplier<T> {
 

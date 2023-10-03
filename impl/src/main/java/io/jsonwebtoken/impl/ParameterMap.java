@@ -137,7 +137,7 @@ public class ParameterMap implements Map<String, Object>, ParameterReadable, Nam
      * @param param the param representing the property name to set
      * @param value the value to set
      * @return the previous value for the param, or {@code null} if there was no previous value
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     protected final <T> Object put(Parameter<T> param, Object value) {
         assertMutable();

@@ -29,7 +29,7 @@ import io.jsonwebtoken.io.ParserBuilder;
  *         .build()
  *         .parse(jwkString);</pre></blockquote>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface JwkParserBuilder extends ParserBuilder<Jwk<?>, JwkParserBuilder>, KeyOperationPolicied<JwkParserBuilder> {
 }

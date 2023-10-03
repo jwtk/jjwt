@@ -25,7 +25,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">Algorithm Header</a> name: the string literal <b><code>alg</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getAlgorithm()}
+     * @deprecated since 0.12.0 in favor of {@link #getAlgorithm()}
      */
     @Deprecated
     String ALGORITHM = "alg";
@@ -33,7 +33,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7515#section-4.1.2">JWK Set URL Header</a> name: the string literal <b><code>jku</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getJwkSetUrl()}
+     * @deprecated since 0.12.0 in favor of {@link #getJwkSetUrl()}
      */
     @Deprecated
     String JWK_SET_URL = "jku";
@@ -41,7 +41,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7515#section-4.1.3">JSON Web Key Header</a> name: the string literal <b><code>jwk</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getJwk()}
+     * @deprecated since 0.12.0 in favor of {@link #getJwk()}
      */
     @Deprecated
     String JSON_WEB_KEY = "jwk";
@@ -49,7 +49,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.4">Key ID Header</a> name: the string literal <b><code>kid</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getKeyId()}
+     * @deprecated since 0.12.0 in favor of {@link #getKeyId()}
      */
     @Deprecated
     String KEY_ID = "kid";
@@ -57,7 +57,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.5">X.509 URL Header</a> name: the string literal <b><code>x5u</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Url()}
+     * @deprecated since 0.12.0 in favor of {@link #getX509Url()}
      */
     @Deprecated
     String X509_URL = "x5u";
@@ -65,7 +65,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.6">X.509 Certificate Chain Header</a> name: the string literal <b><code>x5c</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Chain()}
+     * @deprecated since 0.12.0 in favor of {@link #getX509Chain()}
      */
     @Deprecated
     String X509_CERT_CHAIN = "x5c";
@@ -73,7 +73,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.7">X.509 Certificate SHA-1 Thumbprint Header</a> name: the string literal <b><code>x5t</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Sha1Thumbprint()}
+     * @deprecated since 0.12.0 in favor of {@link #getX509Sha1Thumbprint()}
      */
     @Deprecated
     String X509_CERT_SHA1_THUMBPRINT = "x5t";
@@ -81,7 +81,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.8">X.509 Certificate SHA-256 Thumbprint Header</a> name: the string literal <b><code>x5t#S256</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getX509Sha256Thumbprint()}
+     * @deprecated since 0.12.0 in favor of {@link #getX509Sha256Thumbprint()}
      */
     @Deprecated
     String X509_CERT_SHA256_THUMBPRINT = "x5t#S256";
@@ -89,7 +89,7 @@ public interface JwsHeader extends ProtectedHeader {
     /**
      * JWS <a href="https://tools.ietf.org/html/rfc7516#section-4.1.11">Critical Header</a> name: the string literal <b><code>crit</code></b>
      *
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getCritical()}
+     * @deprecated since 0.12.0 in favor of {@link #getCritical()}
      */
     @Deprecated
     String CRITICAL = "crit";

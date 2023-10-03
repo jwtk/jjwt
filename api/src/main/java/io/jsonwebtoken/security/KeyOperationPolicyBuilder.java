@@ -31,7 +31,7 @@ import java.util.Collection;
  * @see Jwks.OP#policy()
  * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
  * @see Jwks.OP#builder()
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperation, KeyOperationPolicyBuilder>,
         Builder<KeyOperationPolicy> {

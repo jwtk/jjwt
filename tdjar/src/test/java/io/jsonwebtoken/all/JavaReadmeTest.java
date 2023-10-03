@@ -54,7 +54,7 @@ import static org.junit.Assert.assertArrayEquals;
 /**
  * Test cases to ensure snippets in README.md work/compile as expected with the Java language (not Groovy):
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class JavaReadmeTest {
 

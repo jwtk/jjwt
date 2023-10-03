@@ -25,7 +25,7 @@ import io.jsonwebtoken.security.SecurityException;
 import javax.crypto.SecretKey;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DirectKeyAlgorithm implements KeyAlgorithm<SecretKey, SecretKey> {
 

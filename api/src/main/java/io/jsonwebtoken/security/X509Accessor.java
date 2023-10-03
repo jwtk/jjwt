@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @see io.jsonwebtoken.ProtectedHeader
  * @see AsymmetricJwk
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface X509Accessor {
 

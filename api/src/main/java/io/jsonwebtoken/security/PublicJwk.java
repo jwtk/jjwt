@@ -21,7 +21,7 @@ import java.security.PublicKey;
  * JWK representation of a {@link PublicKey}.
  *
  * @param <K> The type of {@link PublicKey} represented by this JWK
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface PublicJwk<K extends PublicKey> extends AsymmetricJwk<K> {
 }

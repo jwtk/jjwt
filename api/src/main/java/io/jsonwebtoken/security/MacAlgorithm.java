@@ -58,7 +58,7 @@ import javax.crypto.SecretKey;
  * available via {@link io.jsonwebtoken.Jwts.SIG Jwts.SIG}.</p>
  *
  * @see io.jsonwebtoken.Jwts.SIG Jwts.SIG
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface MacAlgorithm extends SecureDigestAlgorithm<SecretKey, SecretKey>,
         KeyBuilderSupplier<SecretKey, SecretKeyBuilder>, KeyLengthSupplier {

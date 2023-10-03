@@ -22,7 +22,7 @@ import javax.crypto.SecretKey;
 import java.io.InputStream;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements DecryptAeadRequest {
 

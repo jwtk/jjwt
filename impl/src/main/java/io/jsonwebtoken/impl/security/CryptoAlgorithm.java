@@ -27,7 +27,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 abstract class CryptoAlgorithm implements Identifiable {
 

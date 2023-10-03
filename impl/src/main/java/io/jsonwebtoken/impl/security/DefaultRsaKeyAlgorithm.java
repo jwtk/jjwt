@@ -33,7 +33,7 @@ import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey, PrivateKey> {
 

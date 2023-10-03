@@ -86,7 +86,7 @@ public final class Keys {
     /**
      * <p><b>Deprecation Notice</b></p>
      *
-     * <p>As of JJWT JJWT_RELEASE_VERSION, symmetric (secret) key algorithm instances can generate a key of suitable
+     * <p>As of JJWT 0.12.0, symmetric (secret) key algorithm instances can generate a key of suitable
      * length for that specific algorithm by calling their {@code key()} builder method directly. For example:</p>
      *
      * <pre><code>
@@ -132,7 +132,7 @@ public final class Keys {
      * @return a new {@link SecretKey} instance suitable for use with the specified {@link SignatureAlgorithm}.
      * @throws IllegalArgumentException for any input value other than {@link io.jsonwebtoken.SignatureAlgorithm#HS256},
      *                                  {@link io.jsonwebtoken.SignatureAlgorithm#HS384}, or {@link io.jsonwebtoken.SignatureAlgorithm#HS512}
-     * @deprecated since JJWT_RELEASE_VERSION.  Use your preferred {@link MacAlgorithm} instance's
+     * @deprecated since 0.12.0.  Use your preferred {@link MacAlgorithm} instance's
      * {@link MacAlgorithm#key() key()} builder method directly.
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -150,7 +150,7 @@ public final class Keys {
     /**
      * <p><b>Deprecation Notice</b></p>
      *
-     * <p>As of JJWT JJWT_RELEASE_VERSION, asymmetric key algorithm instances can generate KeyPairs of suitable strength
+     * <p>As of JJWT 0.12.0, asymmetric key algorithm instances can generate KeyPairs of suitable strength
      * for that specific algorithm by calling their {@code keyPair()} builder method directly. For example:</p>
      *
      * <blockquote><pre>
@@ -236,7 +236,7 @@ public final class Keys {
      * @param alg the {@code SignatureAlgorithm} to inspect to determine which asymmetric algorithm to use.
      * @return a new {@link KeyPair} suitable for use with the specified asymmetric algorithm.
      * @throws IllegalArgumentException if {@code alg} is not an asymmetric algorithm
-     * @deprecated since JJWT_RELEASE_VERSION in favor of your preferred
+     * @deprecated since 0.12.0 in favor of your preferred
      * {@link io.jsonwebtoken.security.SignatureAlgorithm} instance's
      * {@link SignatureAlgorithm#keyPair() keyPair()} builder method directly.
      */
@@ -271,7 +271,7 @@ public final class Keys {
      * @param password the raw password character array to clone for use with password-based key derivation algorithms.
      * @return a new {@link Password} instance that wraps a new clone of the specified {@code password} character array.
      * @see Password#toCharArray()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static Password password(char[] password) {
         return invokeStatic("password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
@@ -296,7 +296,7 @@ public final class Keys {
      *            {@link Provider}
      * @return a new {@code SecretKeyBuilder} that produces the specified key, potentially associated with any
      * specified provider.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static SecretKeyBuilder builder(SecretKey key) {
         Assert.notNull(key, "SecretKey cannot be null.");
@@ -323,7 +323,7 @@ public final class Keys {
      *            {@link Provider} or {@link PublicKey}.
      * @return a new {@code PrivateKeyBuilder} that produces the specified private key, potentially associated with any
      * specified provider or {@code PublicKey}
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static PrivateKeyBuilder builder(PrivateKey key) {
         Assert.notNull(key, "PrivateKey cannot be null.");

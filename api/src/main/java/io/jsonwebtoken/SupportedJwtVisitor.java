@@ -23,7 +23,7 @@ import io.jsonwebtoken.lang.Assert;
  * only if the type-specific handler method is overridden by a subclass.
  *
  * @param <T> the type of value returned from the subclass handler method implementation.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class SupportedJwtVisitor<T> implements JwtVisitor<T> {
 

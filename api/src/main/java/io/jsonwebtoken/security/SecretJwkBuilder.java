@@ -20,7 +20,7 @@ import javax.crypto.SecretKey;
 /**
  * A {@link JwkBuilder} that creates {@link SecretJwk}s.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface SecretJwkBuilder extends JwkBuilder<SecretKey, SecretJwk, SecretJwkBuilder> {
 }

@@ -47,21 +47,21 @@ public interface Header extends Map<String, Object> {
     /**
      * JWT {@code Type} (typ) value: <code>"JWT"</code>
      *
-     * @deprecated since JJWT_RELEASE_VERSION - this constant is never used within the JJWT codebase.
+     * @deprecated since 0.12.0 - this constant is never used within the JJWT codebase.
      */
     @Deprecated
     String JWT_TYPE = "JWT";
 
     /**
      * JWT {@code Type} header parameter name: <code>"typ"</code>
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getType()}.
+     * @deprecated since 0.12.0 in favor of {@link #getType()}.
      */
     @Deprecated
     String TYPE = "typ";
 
     /**
      * JWT {@code Content Type} header parameter name: <code>"cty"</code>
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getContentType()}.
+     * @deprecated since 0.12.0 in favor of {@link #getContentType()}.
      */
     @Deprecated
     String CONTENT_TYPE = "cty";
@@ -71,14 +71,14 @@ public interface Header extends Map<String, Object> {
      *
      * @see <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1">JWS Algorithm Header</a>
      * @see <a href="https://tools.ietf.org/html/rfc7516#section-4.1.1">JWE Algorithm Header</a>
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getAlgorithm()}.
+     * @deprecated since 0.12.0 in favor of {@link #getAlgorithm()}.
      */
     @Deprecated
     String ALGORITHM = "alg";
 
     /**
      * JWT {@code Compression Algorithm} header parameter name: <code>"zip"</code>
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #getCompressionAlgorithm()}
+     * @deprecated since 0.12.0 in favor of {@link #getCompressionAlgorithm()}
      */
     @Deprecated
     String COMPRESSION_ALGORITHM = "zip";
@@ -143,7 +143,7 @@ public interface Header extends Map<String, Object> {
      *
      * @return the {@code alg} header value or {@code null} if not present.  This will always be
      * {@code non-null} on validly constructed JWT instances, but could be {@code null} during construction.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     String getAlgorithm();
 

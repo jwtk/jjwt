@@ -36,7 +36,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param iss the JWT {@code iss} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #issuer(String)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -48,7 +48,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param iss the JWT {@code iss} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T issuer(String iss);
 
@@ -58,7 +58,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #subject(String)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -70,7 +70,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param sub the JWT {@code sub} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T subject(String sub);
 
@@ -85,7 +85,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param aud the JWT {@code aud} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #audience()}. This method will be removed before
+     * @deprecated since 0.12.0 in favor of {@link #audience()}. This method will be removed before
      * the JJWT 1.0 release.
      */
     @Deprecated
@@ -99,7 +99,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @return the {@link AudienceCollection AudienceCollection} to use for {@code aud} configuration.
      * @see AudienceCollection AudienceCollection
      * @see AudienceCollection#single(String) AudienceCollection.single(String)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     AudienceCollection<T> audience();
 
@@ -112,7 +112,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #expiration(Date)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -127,7 +127,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T expiration(Date exp);
 
@@ -140,7 +140,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #notBefore(Date)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -155,7 +155,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T notBefore(Date nbf);
 
@@ -168,7 +168,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #issuedAt(Date)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -183,7 +183,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T issuedAt(Date iat);
 
@@ -197,7 +197,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param jti the JWT {@code jti} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #id(String)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -213,7 +213,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param jti the JWT {@code jti} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     T id(String jti);
 
@@ -223,7 +223,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      *
      * @param <P> the type of ClaimsMutator to return for method chaining.
      * @see #single(String)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     interface AudienceCollection<P> extends NestedCollection<String, P> {
 
@@ -238,7 +238,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
          * @param aud the value to use as the {@code aud} Claim single-String value (and not an array of Strings), or
          *            {@code null}, empty or whitespace to remove the property from the JSON map.
          * @return the instance for method chaining
-         * @since JJWT_RELEASE_VERSION
+         * @since 0.12.0
          * @deprecated This is technically not deprecated because the JWT RFC mandates support for single string values,
          * but it is marked as deprecated to discourage its use when possible.
          */

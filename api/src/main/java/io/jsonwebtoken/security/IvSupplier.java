@@ -21,7 +21,7 @@ package io.jsonwebtoken.security;
  * algorithms, a <em>new</em> secure-random Initialization Vector <em>MUST</em> be generated for every individual
  * encryption attempt.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface IvSupplier {
 

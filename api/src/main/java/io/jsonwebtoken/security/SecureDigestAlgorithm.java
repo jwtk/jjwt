@@ -48,7 +48,7 @@ import java.security.Key;
  * @param <V> the type of {@link Key} used to verify digital signatures or message authentication codes
  * @see MacAlgorithm
  * @see SignatureAlgorithm
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface SecureDigestAlgorithm<S extends Key, V extends Key>
         extends DigestAlgorithm<SecureRequest<InputStream, S>, VerifySecureDigestRequest<V>> {

@@ -26,7 +26,7 @@ import java.util.Objects;
  * <strong>Note:</strong> Supports {@link #mark(int)} and {@link #reset()}.
  * </p>
  *
- * @since JJWT_RELEASE_VERSION, copied from commons-io
+ * @since 0.12.0, copied from commons-io
  * <a href="https://github.com/apache/commons-io/blob/e67946c81a55069dcd32dd588faa57dd1532455f/src/main/java/org/apache/commons/io/input/CharSequenceInputStream.java">2.14.0</a>
  */
 public class CharSequenceReader extends Reader implements Serializable {

@@ -23,7 +23,7 @@ import org.junit.Test
 import static org.junit.Assert.*
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class DefaultCollectionMutatorTest {
 

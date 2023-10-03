@@ -63,7 +63,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
      * @see Jwts.SIG#NONE
      * @see #unsecuredDecompression()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder unsecured();
 
@@ -92,7 +92,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>
      * @see Jwts.SIG#NONE
      * @see #unsecured()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder unsecuredDecompression();
 
@@ -109,7 +109,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use for {@code crit} configuration.
      * @see ProtectedHeader#getCritical()
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     NestedCollection<String, JwtParserBuilder> critical();
 
@@ -120,7 +120,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param provider the JCA Provider to use during cryptographic signature and decryption operations, or {@code null}
      *                 if the JCA subsystem preferred provider should be used.
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder provider(Provider provider);
 
@@ -227,7 +227,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION for the more modern builder-style named {@link #clock(Clock)} method.
+     * @deprecated since 0.12.0 for the more modern builder-style named {@link #clock(Clock)} method.
      * This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -251,7 +251,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
      *                                  any such value would cause numeric overflow when multiplying by 1000 to obtain
      *                                  a millisecond value.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of the shorter and more modern builder-style named
+     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
      * {@link #clockSkewSeconds(long)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -272,7 +272,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
     /**
      * <p><b>Deprecation Notice</b></p>
      *
-     * <p>This method has been deprecated since JJWT_RELEASE_VERSION and will be removed before 1.0.  It was not
+     * <p>This method has been deprecated since 0.12.0 and will be removed before 1.0.  It was not
      * readily obvious to many JJWT users that this method was for bytes that pertained <em>only</em> to HMAC
      * {@code SecretKey}s, and could be confused with keys of other types.  It is better to obtain a type-safe
      * {@link SecretKey} instance and call {@link #verifyWith(SecretKey)} instead.</p>
@@ -290,7 +290,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the algorithm-specific signature verification key used to validate any discovered JWS digital
      *            signature.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(SecretKey)} for type safety and name
+     * @deprecated since 0.12.0 in favor of {@link #verifyWith(SecretKey)} for type safety and name
      * congruence with the {@link #decryptWith(SecretKey)} method.
      */
     @Deprecated
@@ -343,7 +343,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p>This method is being renamed to accurately reflect its purpose - the key is not technically a signing key,
      * it is a signature verification key, and the two concepts can be different, especially with asymmetric key
-     * cryptography.  The method has been deprecated since JJWT_RELEASE_VERSION in favor of
+     * cryptography.  The method has been deprecated since 0.12.0 in favor of
      * {@link #verifyWith(SecretKey)} for type safety, to reflect accurate naming of the concept, and for name
      * congruence with the {@link #decryptWith(SecretKey)} method.</p>
      *
@@ -352,7 +352,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
      *            signatures.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #verifyWith(SecretKey)} for naming congruence with the
+     * @deprecated since 0.12.0 in favor of {@link #verifyWith(SecretKey)} for naming congruence with the
      * {@link #decryptWith(SecretKey)} method.
      */
     @Deprecated
@@ -375,7 +375,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
      * @see #verifyWith(PublicKey)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder verifyWith(SecretKey key);
 
@@ -396,7 +396,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the signature verification key to use to verify all encountered JWS digital signatures.
      * @return the parser builder for method chaining.
      * @see #verifyWith(SecretKey)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder verifyWith(PublicKey key);
 
@@ -418,7 +418,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
      * @see #decryptWith(PrivateKey)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder decryptWith(SecretKey key);
 
@@ -439,7 +439,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
      * @return the parser builder for method chaining.
      * @see #decryptWith(SecretKey)
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder decryptWith(PrivateKey key);
 
@@ -506,14 +506,14 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param keyLocator the locator used to retrieve decryption or signature verification keys.
      * @return the parser builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder keyLocator(Locator<Key> keyLocator);
 
     /**
      * <p><b>Deprecation Notice</b></p>
      *
-     * <p>This method has been deprecated as of JJWT version JJWT_RELEASE_VERSION because it only supports key location
+     * <p>This method has been deprecated as of JJWT version 0.12.0 because it only supports key location
      * for JWSs (signed JWTs) instead of both signed (JWS) and encrypted (JWE) scenarios.  Use the
      * {@link #keyLocator(Locator) keyLocator} method instead to ensure a locator that can work for both JWS and
      * JWE inputs.  This method will be removed for the 1.0 release.</p>
@@ -542,7 +542,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #keyLocator(Locator)}
+     * @deprecated since 0.12.0 in favor of {@link #keyLocator(Locator)}
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
@@ -585,7 +585,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see Jwts.ENC
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2">&quot;enc&quot; (Encryption Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Encryption Algorithm Name (id) requirements</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     NestedCollection<AeadAlgorithm, JwtParserBuilder> enc();
 
@@ -625,7 +625,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see Jwts.KEY
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1">JWE &quot;alg&quot; (Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Key Algorithm Name (id) requirements</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     NestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder> key();
 
@@ -667,7 +667,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see Jwts.SIG
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.1">JWS &quot;alg&quot; (Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Algorithm Name (id) requirements</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     NestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder> sig();
 
@@ -707,14 +707,14 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see Jwts.ZIP
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516#section-4.1.3">&quot;zip&quot; (Compression Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1">Compression Algorithm Name (id) requirements</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     NestedCollection<CompressionAlgorithm, JwtParserBuilder> zip();
 
     /**
-     * <p><b>Deprecated as of JJWT JJWT_RELEASE_VERSION. This method will be removed before the 1.0 release.</b></p>
+     * <p><b>Deprecated as of JJWT 0.12.0. This method will be removed before the 1.0 release.</b></p>
      *
-     * <p>This method has been deprecated as of JJWT version JJWT_RELEASE_VERSION because it imposed unnecessary
+     * <p>This method has been deprecated as of JJWT version 0.12.0 because it imposed unnecessary
      * implementation requirements on application developers when simply adding to a compression algorithm collection
      * would suffice.  Use the {@link #zip()} method instead to add
      * any custom algorithm implementations without needing to also implement a Locator implementation.</p>
@@ -736,7 +736,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #zip()}. This method will be removed before the
+     * @deprecated since 0.12.0 in favor of {@link #zip()}. This method will be removed before the
      * 1.0 release.
      */
     @Deprecated
@@ -750,7 +750,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param base64UrlDecoder the decoder to use when Base64Url-decoding
      * @return the parser builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #b64Url(Decoder)}. This method will be removed
+     * @deprecated since 0.12.0 in favor of {@link #b64Url(Decoder)}. This method will be removed
      * before the JJWT 1.0 release.
      */
     @Deprecated
@@ -782,7 +782,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
      * @return the builder for method chaining.
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link #json(Deserializer)}.
+     * @deprecated since 0.12.0 in favor of {@link #json(Deserializer)}.
      * This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
@@ -800,7 +800,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @param deserializer the deserializer to use to deserialize JSON (UTF-8 byte streams) into Map instances.
      * @return the builder for method chaining.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     JwtParserBuilder json(Deserializer<Map<String, ?>> deserializer);
 

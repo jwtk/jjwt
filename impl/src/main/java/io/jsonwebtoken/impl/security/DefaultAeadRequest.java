@@ -24,7 +24,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, SecretKey>
         implements AeadRequest, IvSupplier {

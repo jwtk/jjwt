@@ -21,7 +21,7 @@ import java.security.interfaces.RSAPublicKey;
 /**
  * A {@link PublicJwkBuilder} that creates {@link RsaPublicJwk}s.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface RsaPublicJwkBuilder extends PublicJwkBuilder<RSAPublicKey, RSAPrivateKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder, RsaPublicJwkBuilder> {
 

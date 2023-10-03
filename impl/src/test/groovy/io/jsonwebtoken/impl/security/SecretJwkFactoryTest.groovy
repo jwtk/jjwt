@@ -26,7 +26,7 @@ import static org.junit.Assert.*
  * The {@link SecretJwkFactory} is tested in other classes (JwksTest, JwkParserTest, etc) - this class exists
  * primarily to fill in coverage gaps where necessary.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class SecretJwkFactoryTest {
 

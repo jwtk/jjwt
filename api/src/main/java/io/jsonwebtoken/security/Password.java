@@ -31,7 +31,7 @@ import javax.security.auth.Destroyable;
  * {@link UnsupportedOperationException UnsupportedOperationException}.</p>
  *
  * @see #toCharArray()
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Password extends SecretKey, Destroyable {
 

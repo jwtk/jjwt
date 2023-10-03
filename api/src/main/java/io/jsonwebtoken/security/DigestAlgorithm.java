@@ -74,7 +74,7 @@ import java.security.PublicKey;
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
  * @see Jwks.HASH
  * @see io.jsonwebtoken.Jwts.SIG Jwts.SIG
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface DigestAlgorithm<R extends Request<InputStream>, V extends VerifyDigestRequest> extends Identifiable {
 

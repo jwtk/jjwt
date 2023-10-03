@@ -21,7 +21,7 @@ import java.security.Key;
  * A message contains a {@link #getPayload() payload} used as input to or output from a cryptographic algorithm.
  *
  * @param <T> The type of payload in the message.
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Message<T> {
 

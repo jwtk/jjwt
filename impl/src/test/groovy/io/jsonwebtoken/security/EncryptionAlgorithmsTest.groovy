@@ -29,7 +29,7 @@ import static org.junit.Assert.*
 /**
  * Tests the {@link Jwts.ENC} implementation.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class EncryptionAlgorithmsTest {
 

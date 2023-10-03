@@ -21,7 +21,7 @@ import java.util.Collection;
  * A key operation policy determines which {@link KeyOperation}s may be assigned to a JWK.
  *
  * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface KeyOperationPolicy {
 

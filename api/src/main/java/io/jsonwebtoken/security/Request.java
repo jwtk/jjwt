@@ -33,7 +33,7 @@ import java.security.SecureRandom;
  * @param <T> the type of payload in the request.
  * @see #getProvider()
  * @see #getSecureRandom()
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface Request<T> extends Message<T> {
 

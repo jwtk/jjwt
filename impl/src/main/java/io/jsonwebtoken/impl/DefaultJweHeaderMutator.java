@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * @param <T> return type for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
         extends DelegatingMapMutator<String, Object, ParameterMap, T> implements JweHeaderMutator<T> {

@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @param <K> the type of Java {@link Key} represented by the created {@link Jwk}.
  * @param <J> the type of {@link Jwk} created by the builder
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkBuilder<K, J, DynamicJwkBuilder<K, J>> {
 

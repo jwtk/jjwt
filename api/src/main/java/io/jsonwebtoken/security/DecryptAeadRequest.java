@@ -22,7 +22,7 @@ import javax.crypto.SecretKey;
  * decryption {@link SecretKey}. Extends both {@link IvSupplier} and {@link DigestSupplier} to
  * ensure the respective required IV and AAD tag returned from an {@link AeadResult} are available for decryption.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSupplier {
 }

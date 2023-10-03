@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @param <T> The resulting parser's {@link Parser#parse parse} output type
  * @param <B> builder type used for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface ParserBuilder<T, B extends ParserBuilder<T, B>> extends Builder<Parser<T>> {
 

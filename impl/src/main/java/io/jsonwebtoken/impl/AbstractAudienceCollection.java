@@ -24,7 +24,7 @@ import java.util.Collection;
  * Abstract NestedCollection that requires the AudienceCollection interface to be implemented.
  *
  * @param <P> type of parent to return
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 abstract class AbstractAudienceCollection<P> extends DefaultNestedCollection<String, P>
         implements ClaimsMutator.AudienceCollection<P> {

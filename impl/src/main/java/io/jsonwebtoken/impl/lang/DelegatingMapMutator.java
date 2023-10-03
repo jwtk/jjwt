@@ -20,7 +20,7 @@ import io.jsonwebtoken.lang.MapMutator;
 import java.util.Map;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DelegatingMapMutator<K, V, D extends Map<K, V>, T extends MapMutator<K, V, T>>
         extends DelegatingMap<K, V, D> implements MapMutator<K, V, T> {

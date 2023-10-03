@@ -27,7 +27,7 @@ import java.security.spec.MGF1ParameterSpec;
 /**
  * Static class definitions for standard {@link KeyAlgorithm} instances.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public final class StandardKeyAlgorithms extends IdRegistry<KeyAlgorithm<?, ?>> {
 

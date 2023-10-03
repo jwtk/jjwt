@@ -20,7 +20,7 @@ import io.jsonwebtoken.security.X509Builder;
 
 /**
  * @param <T> return type for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultJweHeaderBuilder<T extends JweHeaderMutator<T> & X509Builder<T>>
         extends DefaultJweHeaderMutator<T> implements X509Builder<T> {

@@ -33,7 +33,7 @@ import java.io.SequenceInputStream;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
 

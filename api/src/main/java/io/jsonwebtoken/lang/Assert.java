@@ -230,7 +230,7 @@ public final class Assert {
      * @param msg   the exception message to use if the assertion fails
      * @return the byte array if the assertion passes
      * @throws IllegalArgumentException if the byte array is null or empty
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static byte[] notEmpty(byte[] array, String msg) {
         if (Objects.isEmpty(array)) {
@@ -246,7 +246,7 @@ public final class Assert {
      * @param msg   the exception message to use if the assertion fails
      * @return the character array if the assertion passes
      * @throws IllegalArgumentException if the character array is null or empty
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static char[] notEmpty(char[] chars, String msg) {
         if (Objects.isEmpty(chars)) {
@@ -454,7 +454,7 @@ public final class Assert {
      * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
      * @return {@code value} if greater than the specified {@code requirement}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T extends Comparable<T>> T eq(T value, T requirement, String msg) {
         if (compareTo(value, requirement) != 0) {
@@ -478,7 +478,7 @@ public final class Assert {
      * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
      * @return {@code value} if greater than the specified {@code requirement}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T extends Comparable<T>> T gt(T value, T requirement, String msg) {
         if (!(compareTo(value, requirement) > 0)) {
@@ -496,7 +496,7 @@ public final class Assert {
      * @param requirement the requirement that {@code value} must be greater than
      * @param msg         the message to use for the {@code IllegalArgumentException} if thrown.
      * @return {@code value} if greater than the specified {@code requirement}.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T extends Comparable<T>> T lte(T value, T requirement, String msg) {
         if (compareTo(value, requirement) > 0) {
@@ -546,7 +546,7 @@ public final class Assert {
      * @param <T>   value type
      * @return the non-null value
      * @throws IllegalStateException with the specified {@code msg} if {@code value} is null.
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.0
      */
     public static <T> T stateNotNull(T value, String msg) throws IllegalStateException {
         if (value == null) {

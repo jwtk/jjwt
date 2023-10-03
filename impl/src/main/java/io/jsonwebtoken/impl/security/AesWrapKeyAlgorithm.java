@@ -28,7 +28,7 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class AesWrapKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorithm {
 

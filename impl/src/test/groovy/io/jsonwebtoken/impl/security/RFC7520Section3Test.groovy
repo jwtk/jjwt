@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue
  * Tests successful parsing/creation of RFC 7520, Section 3
  * <a href="https://www.rfc-editor.org/rfc/rfc7520.html#section-3">JSON Web Key Examples</a>.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class RFC7520Section3Test {
 

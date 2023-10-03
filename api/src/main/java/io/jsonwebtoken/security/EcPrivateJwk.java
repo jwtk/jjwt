@@ -37,7 +37,7 @@ import java.security.interfaces.ECPublicKey;
  * jwk.get(&quot;y&quot;);
  * // ... etc ...</pre></blockquote>
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface EcPrivateJwk extends PrivateJwk<ECPrivateKey, ECPublicKey, EcPublicJwk> {
 }

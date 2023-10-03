@@ -26,7 +26,7 @@ import java.util.List;
  * Mutation (modifications) of X.509-specific properties of an associated JWT Header or JWK, enabling method chaining.
  *
  * @param <T> the mutator subtype, for method chaining
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface X509Mutator<T extends X509Mutator<T>> {
 

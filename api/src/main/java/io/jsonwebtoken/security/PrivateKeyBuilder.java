@@ -23,7 +23,7 @@ import java.security.PublicKey;
  * A builder that allows a {@code PrivateKey} to be transparently associated with a {@link #provider(Provider)} or
  * {@link #publicKey(PublicKey)} if necessary for algorithms that require them.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public interface PrivateKeyBuilder extends KeyBuilder<PrivateKey, PrivateKeyBuilder> {
 

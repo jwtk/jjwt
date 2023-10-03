@@ -19,7 +19,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class RandomSecretKeyBuilder extends DefaultSecretKeyBuilder {
 

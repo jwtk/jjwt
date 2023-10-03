@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import static org.junit.Assert.*
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 class DefaultJweHeaderTest {
 

@@ -21,7 +21,7 @@ import io.jsonwebtoken.security.SecretKeyBuilder;
 import javax.crypto.SecretKey;
 
 /**
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.0
  */
 public class DefaultSecretKeyBuilder extends AbstractSecurityBuilder<SecretKey, SecretKeyBuilder>
         implements SecretKeyBuilder {
