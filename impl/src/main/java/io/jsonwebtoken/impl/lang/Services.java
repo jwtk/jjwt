@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.lang;
 import io.jsonwebtoken.lang.Assert;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;

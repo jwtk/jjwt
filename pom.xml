@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jsonwebtoken</groupId>
@@ -90,13 +91,13 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments />
+        <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
-        <maven.jar.version>3.2.2</maven.jar.version>
-        <maven.compiler.version>3.8.1</maven.compiler.version> <!-- max version allowed for JDK 7 builds -->
+        <maven.jar.version>3.3.0</maven.jar.version>
+        <maven.compiler.version>3.11.0</maven.compiler.version>
         <maven.javadoc.version>3.1.1</maven.javadoc.version> <!-- max version allowed for JDK 7 builds -->
         <maven.source.version>3.2.1</maven.source.version>
         <maven.resources.version>3.1.0</maven.resources.version>
@@ -106,14 +107,14 @@
         <maven.license.version>4.2.rc3</maven.license.version>
         <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.12.7.1</jackson.version>
         <orgjson.version>20230618</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
-        <maven.javadoc.additionalOptions />
+        <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.76</bouncycastle.version>
@@ -129,31 +130,11 @@
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine />
+        <surefire.argLine/>
         <test.addOpens>
-            --add-opens java.base/java.time.zone=ALL-UNNAMED,
-            --add-opens java.base/java.lang.ref=ALL-UNNAMED,
-            --add-opens java.base/java.lang=ALL-UNNAMED,
-            --add-opens java.base/java.lang.reflect=ALL-UNNAMED,
-            --add-opens java.base/java.net=ALL-UNNAMED,
-            --add-opens java.base/java.nio.charset=ALL-UNNAMED,
-            --add-opens java.base/java.nio.file=ALL-UNNAMED,
-            --add-opens java.base/java.security.cert=ALL-UNNAMED,
-            --add-opens java.base/java.text=ALL-UNNAMED,
-            --add-opens java.base/java.util.regex=ALL-UNNAMED,
-            --add-opens java.base/java.util.stream=ALL-UNNAMED,
-            --add-opens java.base/java.util.concurrent=ALL-UNNAMED,
-            --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED,
-            --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED,
-            --add-opens java.base/java.time=ALL-UNNAMED,
-            --add-opens java.base/java.util=ALL-UNNAMED,
-            --add-opens java.base/java.io=ALL-UNNAMED,
-            --add-opens java.base/java.security=ALL-UNNAMED,
-            --add-opens java.base/jdk.internal.loader=ALL-UNNAMED,
-            --add-opens java.base/sun.nio.fs=ALL-UNNAMED,
-            --add-opens java.base/sun.security.x509=ALL-UNNAMED,
-            --add-opens java.base/sun.security.util=ALL-UNNAMED,
-            --add-opens java.logging/java.util.logging=ALL-UNNAMED
+            --add-opens java.base/java.lang=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
+            --add-opens java.desktop/java.beans=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
+            --add-opens java.base/java.lang.ref=ALL-UNNAMED <!-- Needed by PowerMock -->
         </test.addOpens>
 
     </properties>
@@ -309,6 +290,7 @@
                             <exclude>io/jsonwebtoken/impl/io/FilteredInputStream.java</exclude>
                             <exclude>io/jsonwebtoken/impl/io/FilteredOutputStream.java</exclude>
                             <exclude>io/jsonwebtoken/impl/io/CharSequenceReader.java</exclude>
+                            <exclude>io/jsonwebtoken/impl/lang/AddOpens.java</exclude>
                         </excludes>
                         <methodPercentage>100.000000%</methodPercentage>
                         <statementPercentage>100.000000%</statementPercentage>
@@ -386,6 +368,20 @@
                             <version>2.6</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven.jar.version}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -478,7 +474,8 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         </transformers>
                     </configuration>
                     <executions>
@@ -517,6 +514,40 @@
                     </execution>
                 </executions>
             </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>${maven.compiler.version}</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>default-compile</id>-->
+<!--                        <configuration>-->
+<!--                            <release>9</release>-->
+<!--                            &lt;!&ndash; no excludes: compile everything to ensure module-info contains right entries &ndash;&gt;-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>base-compile</id>-->
+<!--                        <goals>-->
+<!--                            <goal>compile</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            &lt;!&ndash; recompile everything for target VM except the module-info.java &ndash;&gt;-->
+<!--                            <excludes>-->
+<!--                                <exclude>module-info.java</exclude>-->
+<!--                            </excludes>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                &lt;!&ndash; defaults for compile and testCompile &ndash;&gt;-->
+<!--                <configuration>-->
+<!--                    <release>${jdk.version}</release>-->
+<!--&lt;!&ndash;                    &lt;!&ndash; Only required when Maven runtime JAVA_HOME isn't at least Java 9 and when haven't configured the maven-toolchains-plugin &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                    <jdkToolchain>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <version>9</version>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </jdkToolchain>&ndash;&gt;-->
+<!--                </configuration>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -609,7 +640,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -628,18 +659,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven.jar.version}</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
-                        </manifestFile>
-                    </archive>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>io.jsonwebtoken.coveralls</groupId>
@@ -655,6 +674,8 @@
                 <jdk>1.7</jdk>
             </activation>
             <properties>
+                <maven.jar.version>3.2.2</maven.jar.version>
+                <maven.compiler.version>3.8.1</maven.compiler.version>
                 <bcprov.artifactId>bcprov-jdk15to18</bcprov.artifactId>
                 <bcpkix.artifactId>bcpkix-jdk15to18</bcpkix.artifactId>
             </properties>
@@ -665,13 +686,39 @@
                 <jdk>[1.8,)</jdk>
             </activation>
             <properties>
-                <gmavenplus.version>1.13.1</gmavenplus.version>
+                <gmavenplus.version>3.0.2</gmavenplus.version>
                 <groovy.version>3.0.19</groovy.version>
                 <easymock.version>4.2</easymock.version>
                 <powermock.version>2.0.7</powermock.version>
                 <maven.japicmp.version>0.15.6</maven.japicmp.version>
+                <failsafe.plugin.version>3.1.2</failsafe.plugin.version>
+                <surefire.plugin.version>3.1.2</surefire.plugin.version>
             </properties>
         </profile>
+<!--        <profile>-->
+<!--            <id>jdk7And8</id>-->
+<!--            <activation>-->
+<!--                <jdk>[1.7,9)</jdk>-->
+<!--            </activation>-->
+<!--            <build>-->
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                        <version>${maven.compiler.version}</version>-->
+<!--                        <configuration>-->
+<!--                            <source>${jdk.version}</source>-->
+<!--                            <target>${jdk.version}</target>-->
+<!--                            <release/>-->
+<!--                            <encoding>${project.build.sourceEncoding}</encoding>-->
+<!--                            <excludes>-->
+<!--                                <exclude>module-info.java</exclude>-->
+<!--                            </excludes>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
+<!--                </plugins>-->
+<!--            </build>-->
+<!--        </profile>-->
         <profile>
             <!-- Added profile to address https://github.com/jwtk/jjwt/issues/364 -->
             <id>jdk9AndLater</id>
@@ -679,6 +726,8 @@
                 <jdk>[1.9,)</jdk>
             </activation>
             <properties>
+                <maven.compiler.version>3.11.0</maven.compiler.version>
+                <surefire.useModulePath>false</surefire.useModulePath>
                 <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
                 <surefire.argLine>${test.addOpens}, --illegal-access=debug</surefire.argLine>
             </properties>

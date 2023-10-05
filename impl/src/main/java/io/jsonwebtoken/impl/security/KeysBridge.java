@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.AddOpens;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.OptionalMethodInvoker;
 import io.jsonwebtoken.lang.Assert;
@@ -40,6 +41,11 @@ public final class KeysBridge {
     private static final OptionalMethodInvoker<Key, Integer> SUN_KEYSIZE =
             new OptionalMethodInvoker<>(SUN_KEYUTIL_CLASSNAME, "getKeySize", Key.class, true);
     private static final String SUN_KEYUTIL_ERR = "Unexpected " + SUN_KEYUTIL_CLASSNAME + " invocation error.";
+
+    static {
+        // For reflective access to KeyUtil on >= JDK 9:
+        AddOpens.open("java.base", "sun.security.util");
+    }
 
     // prevent instantiation
     private KeysBridge() {
