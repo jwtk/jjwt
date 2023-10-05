@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.io;
 
+import io.jsonwebtoken.impl.lang.AddOpens;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
@@ -41,6 +42,11 @@ public class Streams {
      * Represents the end-of-file (or stream).
      */
     public static final int EOF = -1;
+
+    static {
+        // For reflective access to ByteArrayInputStream via the 'bytes' static method on >= JDK 9:
+        AddOpens.open("java.base", "java.io");
+    }
 
     public static byte[] bytes(final InputStream in, String exmsg) {
         if (in instanceof ByteArrayInputStream) {

@@ -76,6 +76,6 @@ class DefaultRegistryTest {
 
     @Test
     void testToString() {
-        assertEquals reg.@DELEGATE.toString(), reg.toString()
+        assertEquals '{a=a, b=b, c=c, d=d}', reg.toString()
     }
 }

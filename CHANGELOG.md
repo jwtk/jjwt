@@ -1,5 +1,10 @@
 ## Release Notes
 
+### JJWT_RELEASE_VERSION
+
+Enabled reflective access on JDK 17+ to `java.io.ByteArrayInputStream` and `sun.security.util.KeyUtil` for
+`jjwt-impl.jar`
+
 ### 0.12.0
 
 This is a big release! JJWT now fully supports Encrypted JSON Web Tokens (JWE), JSON Web Keys (JWK) and more!  See the 
