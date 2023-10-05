@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
  * may break at any time in the future (theoretically even for a minor
  * release!).
  *
- * @since JJWT_RELEASE_VERSION, gratefully copied from <a href="https://github.com/stefan-zobel/wip/blob/b74e927edddf19a5dce7c8610835f620c0b6f557/src/main/java/misc/AddOpens.java">https://github.com/stefan-zobel/wip/blob/b74e927edddf19a5dce7c8610835f620c0b6f557/src/main/java/misc/AddOpens.java</a>
+ * @since 0.12.1, gratefully copied from <a href="https://github.com/stefan-zobel/wip/blob/b74e927edddf19a5dce7c8610835f620c0b6f557/src/main/java/misc/AddOpens.java">https://github.com/stefan-zobel/wip/blob/b74e927edddf19a5dce7c8610835f620c0b6f557/src/main/java/misc/AddOpens.java</a>
  * under the terms of the Apache 2 open source license (same as the JJWT license).
  */
 public final class AddOpens {
