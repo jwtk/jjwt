@@ -1,6 +1,6 @@
 ## Release Notes
 
-### JJWT_RELEASE_VERSION
+### 0.12.1
 
 Enabled reflective access on JDK 17+ to `java.io.ByteArrayInputStream` and `sun.security.util.KeyUtil` for
 `jjwt-impl.jar`
