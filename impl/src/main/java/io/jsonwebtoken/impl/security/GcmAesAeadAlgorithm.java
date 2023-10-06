@@ -26,7 +26,6 @@ import io.jsonwebtoken.security.DecryptAeadRequest;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
@@ -93,7 +92,7 @@ public class GcmAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm {
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
-        final InputStream taggedCiphertext = new SequenceInputStream(ciphertext, new ByteArrayInputStream(tag));
+        final InputStream taggedCiphertext = new SequenceInputStream(ciphertext, Streams.of(tag));
 
         jca(req).withCipher(new CheckedFunction<Cipher, byte[]>() {
             @Override

@@ -18,6 +18,7 @@ package io.jsonwebtoken
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
@@ -141,7 +142,7 @@ class JwtsTest {
         def h = base64Url('{"alg":"HS256"}')
         def c = base64Url('{"sub":"joe","exp":"-42-"}')
         def data = Strings.utf8(("$h.$c" as String))
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         def request = new DefaultSecureRequest<>(payload, null, null, key)
         def result = Jwts.SIG.HS256.digest(request)
         def sig = Encoders.BASE64URL.encode(result)
@@ -191,7 +192,7 @@ class JwtsTest {
     @Test
     void testContentStreamWithContentType() {
         String s = 'Hello JJWT'
-        InputStream content = new ByteArrayInputStream(Strings.utf8(s))
+        InputStream content = Streams.of(Strings.utf8(s))
         String cty = 'text/plain'
         String compact = Jwts.builder().content(content, cty).compact()
         def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
@@ -202,7 +203,7 @@ class JwtsTest {
     @Test
     void testContentStreamWithoutContentType() {
         String s = 'Hello JJWT'
-        InputStream content = new ByteArrayInputStream(Strings.utf8(s))
+        InputStream content = Streams.of(Strings.utf8(s))
         String compact = Jwts.builder().content(content).compact()
         def jwt = Jwts.parser().unsecured().build().parseUnsecuredContent(compact)
         assertNull jwt.header.getContentType()

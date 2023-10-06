@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Classes
@@ -347,7 +348,7 @@ class JcaTemplateTest {
         X509Certificate cert = template.withCertificateFactory(new CheckedFunction<CertificateFactory, X509Certificate>() {
             @Override
             X509Certificate apply(CertificateFactory certificateFactory) throws Exception {
-                (X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(expected.getEncoded()))
+                (X509Certificate) certificateFactory.generateCertificate(Streams.of(expected.getEncoded()))
             }
         })
         assertEquals expected, cert

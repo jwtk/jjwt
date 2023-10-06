@@ -15,15 +15,12 @@
  */
 package io.jsonwebtoken.impl.io;
 
-import io.jsonwebtoken.impl.lang.AddOpens;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Flushable;
 import java.io.IOException;
@@ -43,30 +40,26 @@ public class Streams {
      */
     public static final int EOF = -1;
 
-    static {
-        // For reflective access to ByteArrayInputStream via the 'bytes' static method on >= JDK 9:
-        AddOpens.open("java.base", "java.io");
-    }
-
     public static byte[] bytes(final InputStream in, String exmsg) {
-        if (in instanceof ByteArrayInputStream) {
-            return Classes.getFieldValue(in, "buf", byte[].class);
+        if (in instanceof BytesInputStream) {
+            return ((BytesInputStream) in).getBytes();
         }
+        // otherwise we have to copy over:
         ByteArrayOutputStream out = new ByteArrayOutputStream(8192);
         copy(in, out, new byte[8192], exmsg);
         return out.toByteArray();
     }
 
-    public static ByteArrayInputStream of(byte[] bytes) {
-        return Bytes.isEmpty(bytes) ? new ByteArrayInputStream(Bytes.EMPTY) : new ByteArrayInputStream(bytes);
+    public static InputStream of(byte[] bytes) {
+        return new BytesInputStream(bytes);
     }
 
-    public static ByteArrayInputStream of(CharSequence seq) {
+    public static InputStream of(CharSequence seq) {
         return of(Strings.utf8(seq));
     }
 
     public static Reader reader(byte[] bytes) {
-        return reader(new ByteArrayInputStream(bytes));
+        return reader(Streams.of(bytes));
     }
 
     public static Reader reader(InputStream in) {

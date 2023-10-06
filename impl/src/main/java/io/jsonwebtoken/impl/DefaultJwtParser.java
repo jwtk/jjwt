@@ -39,6 +39,7 @@ import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.io.AbstractParser;
+import io.jsonwebtoken.impl.io.BytesInputStream;
 import io.jsonwebtoken.impl.io.CharSequenceReader;
 import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
 import io.jsonwebtoken.impl.io.Streams;
@@ -56,7 +57,6 @@ import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
@@ -74,7 +74,6 @@ import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.Reader;
@@ -315,7 +314,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             bb.rewind();
             byte[] data = new byte[bb.remaining()];
             bb.get(data);
-            verificationInput = new ByteArrayInputStream(data);
+            verificationInput = Streams.of(data);
         } else { // b64 extension
             ByteBuffer headerBuf = StandardCharsets.US_ASCII.encode(Strings.wrap(tokenized.getProtected()));
             headerBuf.rewind();
@@ -325,7 +324,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             buf.rewind();
             byte[] data = new byte[buf.remaining()];
             buf.get(data);
-            InputStream prefixStream = new ByteArrayInputStream(data);
+            InputStream prefixStream = Streams.of(data);
             payloadStream = payload.toInputStream();
             // We wrap the payloadStream here in an UncloseableInputStream to prevent the SequenceInputStream from
             // closing it since we'll need to rewind/reset it if decompression is enabled
@@ -378,7 +377,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
         // =============== Header =================
         final byte[] headerBytes = decode(base64UrlHeader, "protected header");
-        Map<String, ?> m = deserialize(new ByteArrayInputStream(headerBytes), "protected header");
+        Map<String, ?> m = deserialize(Streams.of(headerBytes), "protected header");
         Header header;
         try {
             header = tokenized.createHeader(m);
@@ -517,7 +516,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             ByteBuffer buf = StandardCharsets.US_ASCII.encode(Strings.wrap(base64UrlHeader));
             final byte[] aadBytes = new byte[buf.remaining()];
             buf.get(aadBytes);
-            InputStream aad = new ByteArrayInputStream(aadBytes);
+            InputStream aad = Streams.of(aadBytes);
 
             base64Url = base64UrlDigest;
             //guaranteed to be non-empty via the `alg` + digest check above:
@@ -834,8 +833,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     private static Payload payloadFor(InputStream in) {
-        if (in instanceof ByteArrayInputStream) {
-            byte[] data = Classes.getFieldValue(in, "buf", byte[].class);
+        if (in instanceof BytesInputStream) {
+            byte[] data = Streams.bytes(in, "Unable to obtain payload InputStream bytes.");
             return new Payload(data, null);
         }
         //if (in.markSupported()) in.mark(0);
@@ -874,7 +873,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     protected byte[] decode(CharSequence base64UrlEncoded, String name) {
         try {
-            InputStream decoding = this.decoder.decode(new ByteArrayInputStream(Strings.utf8(base64UrlEncoded)));
+            InputStream decoding = this.decoder.decode(Streams.of(Strings.utf8(base64UrlEncoded)));
             return Streams.bytes(decoding, "Unable to Base64Url-decode input.");
         } catch (Throwable t) {
             // Don't disclose potentially-sensitive information per https://github.com/jwtk/jjwt/issues/824:

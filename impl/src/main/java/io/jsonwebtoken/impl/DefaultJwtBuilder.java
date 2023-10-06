@@ -64,7 +64,6 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -588,18 +587,18 @@ public class DefaultJwtBuilder implements JwtBuilder {
         InputStream payloadStream = null; // not needed unless b64 is enabled
         if (this.encodePayload) {
             encodeAndWrite("JWS Payload", payload, jws);
-            signingInput = new ByteArrayInputStream(jws.toByteArray());
+            signingInput = Streams.of(jws.toByteArray());
         } else { // b64
 
             // First, ensure we have the base64url header bytes + the SEPARATOR_CHAR byte:
-            ByteArrayInputStream prefixStream = new ByteArrayInputStream(jws.toByteArray());
+            InputStream prefixStream = Streams.of(jws.toByteArray());
 
             // Next, b64 extension requires the raw (non-encoded) payload to be included directly in the signing input,
             // so we ensure we have an input stream for that:
             if (payload.isClaims() || payload.isCompressed()) {
                 ByteArrayOutputStream claimsOut = new ByteArrayOutputStream(8192);
                 writeAndClose("JWS Unencoded Payload", payload, claimsOut);
-                payloadStream = new ByteArrayInputStream(claimsOut.toByteArray());
+                payloadStream = Streams.of(claimsOut.toByteArray());
             } else {
                 // No claims and not compressed, so just get the direct InputStream:
                 payloadStream = Assert.stateNotNull(payload.toInputStream(), "Payload InputStream cannot be null.");
@@ -698,7 +697,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (content.isClaims()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
             writeAndClose("JWE Claims", content, out);
-            plaintext = new ByteArrayInputStream(out.toByteArray());
+            plaintext = Streams.of(out.toByteArray());
         } else {
             plaintext = content.toInputStream();
         }

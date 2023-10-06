@@ -16,13 +16,13 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.RfcTests
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.JwkThumbprint
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
 import javax.crypto.SecretKey
-import java.nio.charset.StandardCharsets
 
 import static io.jsonwebtoken.impl.security.DefaultHashAlgorithm.SHA1
 import static org.junit.Assert.assertEquals
@@ -32,8 +32,7 @@ class JwkThumbprintsTest {
     static final HashAlgorithm SHA256 = Jwks.HASH.@SHA256
 
     static byte[] digest(String json, HashAlgorithm alg) {
-        def utf8Bytes = json.getBytes(StandardCharsets.UTF_8)
-        def payload = new ByteArrayInputStream(utf8Bytes);
+        def payload = Streams.of(json)
         def req = new DefaultRequest(payload, null, null)
         return alg.digest(req)
     }

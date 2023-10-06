@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
 import org.junit.Test
@@ -64,7 +65,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1Thumbprint() {
-        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
         Request<byte[]> request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
@@ -75,7 +76,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha1ThumbprintEnabled() {
-        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
         Request<byte[]> request = new DefaultRequest(payload, null, null)
         def x5t = DefaultHashAlgorithm.SHA1.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5t)
@@ -86,7 +87,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha256Thumbprint() {
-        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
         Request<byte[]> request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)
@@ -97,7 +98,7 @@ class AbstractAsymmetricJwkBuilderTest {
 
     @Test
     void testX509CertificateSha256ThumbprintEnabled() {
-        def payload = new ByteArrayInputStream(TestKeys.RS256.cert.getEncoded())
+        def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
         Request<InputStream> request = new DefaultRequest(payload, null, null)
         def x5tS256 = Jwks.HASH.SHA256.digest(request)
         def encoded = Encoders.BASE64URL.encode(x5tS256)

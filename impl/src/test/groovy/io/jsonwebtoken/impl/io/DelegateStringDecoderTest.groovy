@@ -29,7 +29,7 @@ class DelegateStringDecoderTest {
     void decode() {
         def value = 'test'
         def bytes = Strings.utf8(value)
-        def ins = new ByteArrayInputStream(bytes)
+        def ins = Streams.of(bytes)
         def test = new Decoder<CharSequence, byte[]>() {
             @Override
             byte[] decode(CharSequence s) throws DecodingException {

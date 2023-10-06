@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.CheckedSupplier;
@@ -36,7 +37,6 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -332,7 +332,7 @@ public class JcaTemplate {
         return fallback(CertificateFactory.class, new CheckedFunction<CertificateFactory, X509Certificate>() {
             @Override
             public X509Certificate apply(CertificateFactory cf) throws CertificateException {
-                InputStream is = new ByteArrayInputStream(x509DerBytes);
+                InputStream is = Streams.of(x509DerBytes);
                 return (X509Certificate) cf.generateCertificate(is);
             }
         });
