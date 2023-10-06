@@ -1,5 +1,17 @@
 ## Release Notes
 
+### 0.12.2
+
+This is a follow-up release to finalize the work in 0.12.1 that tried to fix a reflection scope problem
+on >= JDK 17.  The 0.12.1 fix worked, but only if the importing project or application did _not_ have its own
+`module-info.java` file.
+
+This release removes that reflection code entirely in favor of a JJWT-native implementation, eliminating JPMS 
+module (scope) problems on >= JDK 17. As such, `--add-opens` flags are no longer required to use JJWT.
+
+The fix has been tested up through JDK 21 in a separate application environment (out of JJWT's codebase) to assert
+expected functionality in a 'clean room' environment in a project both with and without `module-info.java` usage.
+
 ### 0.12.1
 
 Enabled reflective access on JDK 17+ to `java.io.ByteArrayInputStream` and `sun.security.util.KeyUtil` for
