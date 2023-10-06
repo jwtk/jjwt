@@ -24,7 +24,7 @@ import java.io.IOException;
  * Allows read access to the internal byte array, avoiding the need copy/extract to a
  * {@link java.io.ByteArrayOutputStream}.
  *
- * @since JJWT_RELEASE_VERSION
+ * @since 0.12.2
  */
 public final class BytesInputStream extends ByteArrayInputStream {
 

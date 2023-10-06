@@ -19,7 +19,7 @@
 
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-root</artifactId>
-    <version>0.12.2-SNAPSHOT</version>
+    <version>0.12.3-SNAPSHOT</version>
     <name>JJWT</name>
     <description>JSON Web Token support for the JVM and Android</description>
     <packaging>pom</packaging>
