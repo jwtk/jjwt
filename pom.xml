@@ -133,7 +133,10 @@
         <test.addOpens>
             --add-opens java.base/java.lang=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
             --add-opens java.desktop/java.beans=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
-            --add-opens java.base/java.lang.ref=ALL-UNNAMED <!-- Needed by PowerMock -->
+            --add-opens java.base/java.lang.ref=ALL-UNNAMED, <!-- Needed by PowerMock -->
+            <!-- needed by KeysImplTest.testKeyPairFor, KeysTest.testDeprecatedKeyPairFor, and
+                 KeysTest.testKeyPairBuilder: -->
+            --add-opens java.base/sun.security.util=ALL-UNNAMED
         </test.addOpens>
 
     </properties>
