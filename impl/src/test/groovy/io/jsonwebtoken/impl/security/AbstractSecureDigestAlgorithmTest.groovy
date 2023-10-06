@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.SignatureException
@@ -37,7 +38,7 @@ class AbstractSecureDigestAlgorithmTest {
         Provider provider = Security.getProvider('BC')
         def pair = Jwts.SIG.RS256.keyPair().build()
         byte[] data = Strings.utf8('foo')
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         byte[] signature = Jwts.SIG.RS256.digest(new DefaultSecureRequest<>(payload, provider, null, pair.getPrivate()))
         payload.reset()
         assertTrue Jwts.SIG.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(payload, provider, null, pair.getPublic(), signature))
@@ -54,7 +55,7 @@ class AbstractSecureDigestAlgorithmTest {
             }
         }
         try {
-            def payload = new ByteArrayInputStream(Strings.utf8('foo'))
+            def payload = Streams.of(Strings.utf8('foo'))
             alg.digest(new DefaultSecureRequest(payload, null, null, pair.getPrivate()))
         } catch (SignatureException e) {
             assertTrue e.getMessage().startsWith('Unable to compute test signature with JCA algorithm \'test\' using key {')
@@ -74,7 +75,7 @@ class AbstractSecureDigestAlgorithmTest {
             }
         }
         def data = Strings.utf8('foo')
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         try {
             byte[] signature = alg.digest(new DefaultSecureRequest(payload, null, null, pair.getPrivate()))
             payload.reset()

@@ -25,7 +25,7 @@ class CountingInputStreamTest {
 
     @Test
     void readEmpty() {
-        def stream = new CountingInputStream(new ByteArrayInputStream(Bytes.EMPTY))
+        def stream = new CountingInputStream(Streams.of(Bytes.EMPTY))
         stream.read()
         assertEquals 0, stream.getCount()
     }
@@ -34,7 +34,7 @@ class CountingInputStreamTest {
     void readSingle() {
         def single = (byte) 0x18 // any random byte is fine
         def data = new byte[1]; data[0] = single
-        def stream = new CountingInputStream(new ByteArrayInputStream(data))
+        def stream = new CountingInputStream(Streams.of(data))
         assertEquals single, stream.read()
         assertEquals 1, stream.getCount()
     }
@@ -42,7 +42,7 @@ class CountingInputStreamTest {
     @Test
     void testSkip() {
         def data = Strings.utf8('hello world')
-        def stream = new CountingInputStream(new ByteArrayInputStream(data))
+        def stream = new CountingInputStream(Streams.of(data))
         stream.skip(6)
         assertEquals 6, stream.getCount()
         int w = ('w' as char)

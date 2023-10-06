@@ -31,7 +31,6 @@ import io.jsonwebtoken.security.SignatureException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -145,11 +144,11 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
 
         Collection<InputStream> streams = new ArrayList<>(4);
         if (!Bytes.isEmpty(aad)) { // must come first if it exists
-            streams.add(new ByteArrayInputStream(aad));
+            streams.add(Streams.of(aad));
         }
-        streams.add(new ByteArrayInputStream(iv));
+        streams.add(Streams.of(iv));
         streams.add(ciphertext);
-        streams.add(new ByteArrayInputStream(AL));
+        streams.add(Streams.of(AL));
         InputStream in = new SequenceInputStream(Collections.enumeration(streams));
 
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());

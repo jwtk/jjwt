@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
@@ -29,7 +30,7 @@ class DefaultHashAlgorithmTest {
     @Test
     void testDigestAndVerify() {
         byte[] data = Strings.utf8('Hello World')
-        InputStream payload = new ByteArrayInputStream(data)
+        InputStream payload = Streams.of(data)
         for (HashAlgorithm alg : algs) {
             byte[] hash = alg.digest(new DefaultRequest<>(payload, null, null))
             payload.reset()

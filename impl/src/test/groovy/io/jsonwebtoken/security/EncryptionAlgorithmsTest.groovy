@@ -121,7 +121,7 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertextBytes.length, PLAINTEXT_BYTES.length)
             }
 
-            def ciphertext = new ByteArrayInputStream(ciphertextBytes)
+            def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
             def dreq = new DefaultDecryptAeadRequest(ciphertext, key, null, iv, tag)
             alg.decrypt(dreq, out)
@@ -155,7 +155,7 @@ class EncryptionAlgorithmsTest {
                 assertEquals(ciphertextBytes.length, PLAINTEXT_BYTES.length)
             }
 
-            def ciphertext = new ByteArrayInputStream(ciphertextBytes)
+            def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
             def dreq = new DefaultDecryptAeadRequest(ciphertext, key, aad, iv, tag)
             alg.decrypt(dreq, out)

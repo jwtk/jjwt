@@ -169,7 +169,7 @@ class EcSignatureAlgorithmTest {
     @Test
     void testVerifyWithPrivateKey() {
         byte[] data = 'foo'.getBytes(StandardCharsets.UTF_8)
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         algs().each {
             payload.reset()
             def pair = it.keyPair().build()
@@ -194,7 +194,7 @@ class EcSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPublicKey pub = new TestECPublicKey(algorithm: 'EC', params: spec)
-            def request = new DefaultVerifySecureDigestRequest(new ByteArrayInputStream(new byte[1]), null, null, pub, new byte[1])
+            def request = new DefaultVerifySecureDigestRequest(Streams.of(new byte[1]), null, null, pub, new byte[1])
             try {
                 it.verify(request)
             } catch (InvalidKeyException expected) {
@@ -310,7 +310,7 @@ class EcSignatureAlgorithmTest {
             def signatureStart = token.lastIndexOf('.')
             def withoutSignature = token.substring(0, signatureStart)
             def data = Strings.ascii(withoutSignature);
-            def payload = new ByteArrayInputStream(data)
+            def payload = Streams.of(data)
             def signature = Decoders.BASE64URL.decode(token.substring(signatureStart + 1))
             assertTrue "Signature do not match that of other implementations", alg.verify(new DefaultVerifySecureDigestRequest(payload, null, null, pub, signature))
         }
@@ -329,7 +329,7 @@ class EcSignatureAlgorithmTest {
             assertTrue keypair.getPublic() instanceof ECPublicKey
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
             def data = Strings.ascii(withoutSignature)
-            def payload = new ByteArrayInputStream(data)
+            def payload = Streams.of(data)
             def signature = alg.digest(new DefaultSecureRequest<>(payload, null, null, keypair.private))
             payload.reset()
             assertTrue alg.verify(new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, signature))
@@ -473,7 +473,7 @@ class EcSignatureAlgorithmTest {
             def signature = token.substring(signatureStart + 1)
 
             def data = withoutSignature.getBytes(StandardCharsets.US_ASCII)
-            def payload = new ByteArrayInputStream(data)
+            def payload = Streams.of(data)
             def sigBytes = Decoders.BASE64URL.decode(signature)
             def request = new DefaultVerifySecureDigestRequest(payload, null, null, pub, sigBytes)
             assert alg.verify(request), "Signature do not match that of other implementations"
@@ -495,7 +495,7 @@ class EcSignatureAlgorithmTest {
         signature.initSign(keypair.private)
         signature.update(data)
         def signed = signature.sign()
-        def request = new DefaultVerifySecureDigestRequest(new ByteArrayInputStream(data), null, null, keypair.public, signed)
+        def request = new DefaultVerifySecureDigestRequest(Streams.of(data), null, null, keypair.public, signed)
         try {
             alg.verify(request)
             fail()
@@ -519,7 +519,7 @@ class EcSignatureAlgorithmTest {
             def keypair = alg.keyPair().build()
             def signature = Signature.getInstance(alg.jcaName as String)
             def data = Strings.ascii(withoutSignature)
-            def payload = new ByteArrayInputStream(data)
+            def payload = Streams.of(data)
             signature.initSign(keypair.private)
             signature.update(data)
             def signed = signature.sign()
@@ -538,7 +538,7 @@ class EcSignatureAlgorithmTest {
         def alg = Jwts.SIG.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         def request = new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, forgedSig)
         assertFalse alg.verify(request)
     }
@@ -556,7 +556,7 @@ class EcSignatureAlgorithmTest {
         def alg = Jwts.SIG.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         def request = new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, sig)
         assertFalse alg.verify(request)
     }
@@ -574,7 +574,7 @@ class EcSignatureAlgorithmTest {
         def alg = Jwts.SIG.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         def request = new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, sig)
         assertFalse alg.verify(request)
     }
@@ -587,7 +587,7 @@ class EcSignatureAlgorithmTest {
         def alg = Jwts.SIG.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
-        def payload = new ByteArrayInputStream(data)
+        def payload = Streams.of(data)
         def invalidSignature = Decoders.BASE64URL.decode(invalidEncodedSignature)
         def request = new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, invalidSignature)
         assertFalse("Forged signature must not be considered valid.", alg.verify(request))

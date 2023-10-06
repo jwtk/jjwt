@@ -15,9 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.AddOpens;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.OptionalMethodInvoker;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -30,22 +28,14 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECKey;
+import java.security.interfaces.RSAKey;
 
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
 
     private static final String SUNPKCS11_GENERIC_SECRET_CLASSNAME = "sun.security.pkcs11.P11Key$P11SecretKey";
     private static final String SUNPKCS11_GENERIC_SECRET_ALGNAME = "Generic Secret"; // https://github.com/openjdk/jdk/blob/4f90abaf17716493bad740dcef76d49f16d69379/src/jdk.crypto.cryptoki/share/classes/sun/security/pkcs11/P11KeyStore.java#L1292
-
-    private static final String SUN_KEYUTIL_CLASSNAME = "sun.security.util.KeyUtil";
-    private static final OptionalMethodInvoker<Key, Integer> SUN_KEYSIZE =
-            new OptionalMethodInvoker<>(SUN_KEYUTIL_CLASSNAME, "getKeySize", Key.class, true);
-    private static final String SUN_KEYUTIL_ERR = "Unexpected " + SUN_KEYUTIL_CLASSNAME + " invocation error.";
-
-    static {
-        // For reflective access to KeyUtil on >= JDK 9:
-        AddOpens.open("java.base", "sun.security.util");
-    }
 
     // prevent instantiation
     private KeysBridge() {
@@ -119,23 +109,29 @@ public final class KeysBridge {
      */
     public static int findBitLength(Key key) {
 
-        Integer retval = SUN_KEYSIZE.apply(key);
-        int bitlen = Assert.stateNotNull(retval, SUN_KEYUTIL_ERR);
+        int bitlen = -1;
 
-        // SunPKCS11 SecretKey lengths are unfortunately reported in bytes, not bits
-        // per https://bugs.openjdk.org/browse/JDK-8163173
-        // (they should be multiplying the PKCS11 CKA_VALUE_LEN value by 8 since their own
-        // sun.security.util.Length#getLength() JavaDoc states that values are intended to be in bits, not bytes)
-        // So we account for that here:
-        if (bitlen > 0 && isSunPkcs11GenericSecret(key)) {
-            bitlen *= Byte.SIZE;
+        // try to parse the length from key specification
+        if (key instanceof SecretKey) {
+            SecretKey secretKey = (SecretKey) key;
+            if ("RAW".equals(secretKey.getFormat())) {
+                byte[] encoded = findEncoded(secretKey);
+                if (!Bytes.isEmpty(encoded)) {
+                    bitlen = (int) Bytes.bitLength(encoded);
+                    Bytes.clear(encoded);
+                }
+            }
+        } else if (key instanceof RSAKey) {
+            RSAKey rsaKey = (RSAKey) key;
+            bitlen = rsaKey.getModulus().bitLength();
+        } else if (key instanceof ECKey) {
+            ECKey ecKey = (ECKey) key;
+            bitlen = ecKey.getParams().getOrder().bitLength();
+        } else {
+            // We can check additional logic for EdwardsCurve even if the current JDK version doesn't support it:
+            EdwardsCurve curve = EdwardsCurve.findByKey(key);
+            if (curve != null) bitlen = curve.getKeyBitLength();
         }
-
-        if (bitlen > 0) return bitlen;
-
-        // We can check additional logic for EdwardsCurve even if the current JDK version doesn't support it:
-        EdwardsCurve curve = EdwardsCurve.findByKey(key);
-        if (curve != null) bitlen = curve.getKeyBitLength();
 
         return bitlen;
     }

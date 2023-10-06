@@ -18,13 +18,13 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodec;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -68,10 +68,10 @@ class Payload {
         }
         this.bytes = data;
         if (in == null && !Bytes.isEmpty(this.bytes)) {
-            in = new ByteArrayInputStream(data);
+            in = Streams.of(data);
         }
         this.inputStreamEmpty = in == null;
-        this.inputStream = this.inputStreamEmpty ? new ByteArrayInputStream(Bytes.EMPTY) : in;
+        this.inputStream = this.inputStreamEmpty ? Streams.of(Bytes.EMPTY) : in;
     }
 
     boolean isClaims() {

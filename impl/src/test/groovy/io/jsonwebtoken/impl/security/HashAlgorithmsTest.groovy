@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.lang.Registry
 import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
@@ -80,7 +81,7 @@ class HashAlgorithmsTest {
 
     static DefaultRequest<InputStream> request(String msg) {
         byte[] data = msg.getBytes(StandardCharsets.UTF_8)
-        InputStream payload = new ByteArrayInputStream(data)
+        InputStream payload = Streams.of(data)
         return new DefaultRequest<InputStream>(payload, null, null)
     }
 

@@ -20,7 +20,6 @@ import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @SuppressWarnings("DeprecatedIsStillUsed")
@@ -38,7 +37,7 @@ public class DelegateStringDecoder implements Decoder<InputStream, InputStream> 
         try {
             byte[] data = Streams.bytes(in, "Unable to Base64URL-decode input.");
             data = delegate.decode(Strings.utf8(data));
-            return new ByteArrayInputStream(data);
+            return Streams.of(data);
         } catch (Throwable t) {
             String msg = "Unable to Base64Url-decode InputStream: " + t.getMessage();
             throw new DecodingException(msg, t);

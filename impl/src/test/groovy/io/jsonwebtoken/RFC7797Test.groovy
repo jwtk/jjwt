@@ -17,6 +17,7 @@ package io.jsonwebtoken
 
 import io.jsonwebtoken.impl.DefaultJwsHeader
 import io.jsonwebtoken.impl.DefaultJwtParser
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
@@ -69,8 +70,8 @@ class RFC7797Test {
         String s = Jwts.builder().signWith(key).content(content).encodePayload(false).compact()
 
         // But verify with 3 types of sources: string, byte array, and two different kinds of InputStreams:
-        InputStream asByteInputStream = new ByteArrayInputStream(content)
-        InputStream asBufferedInputStream = new BufferedInputStream(new ByteArrayInputStream(content))
+        InputStream asByteInputStream = Streams.of(content)
+        InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
             def parser = Jwts.parser().verifyWith(key).build()
@@ -107,8 +108,8 @@ class RFC7797Test {
         String s = Jwts.builder().signWith(key).content(content).encodePayload(false).compact()
 
         // But verify with 3 types of sources: string, byte array, and two different kinds of InputStreams:
-        InputStream asByteInputStream = new ByteArrayInputStream(content)
-        InputStream asBufferedInputStream = new BufferedInputStream(new ByteArrayInputStream(content))
+        InputStream asByteInputStream = Streams.of(content)
+        InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
             def parser = Jwts.parser().verifyWith(key).build()
@@ -128,13 +129,13 @@ class RFC7797Test {
         def key = TestKeys.HS256
 
         byte[] content = Strings.utf8('$.02') // https://datatracker.ietf.org/doc/html/rfc7797#section-4.2
-        InputStream contentStream = new ByteArrayInputStream(content)
+        InputStream contentStream = Streams.of(content)
 
         String s = Jwts.builder().signWith(key).content(contentStream).encodePayload(false).compact()
 
         // But verify with 3 types of sources: byte array, and two different kinds of InputStreams:
-        InputStream asByteInputStream = new ByteArrayInputStream(content)
-        InputStream asBufferedInputStream = new BufferedInputStream(new ByteArrayInputStream(content))
+        InputStream asByteInputStream =Streams.of(content)
+        InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
             def parser = Jwts.parser().verifyWith(key).build()
@@ -348,8 +349,8 @@ class RFC7797Test {
                     .compact()
 
             // But verify with 3 types of sources: byte array, and two different kinds of InputStreams:
-            InputStream asByteInputStream = new ByteArrayInputStream(compressed)
-            InputStream asBufferedInputStream = new BufferedInputStream(new ByteArrayInputStream(compressed))
+            InputStream asByteInputStream = Streams.of(compressed)
+            InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(compressed))
 
             for (def payload : [compressed, asByteInputStream, asBufferedInputStream]) {
                 def parser = Jwts.parser().verifyWith(key).build()

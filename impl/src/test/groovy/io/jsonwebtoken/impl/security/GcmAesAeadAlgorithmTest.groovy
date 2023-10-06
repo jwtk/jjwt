@@ -60,7 +60,7 @@ class GcmAesAeadAlgorithmTest {
 
         def alg = Jwts.ENC.A256GCM
 
-        def ins = new ByteArrayInputStream(P)
+        def ins = Streams.of(P)
         def aad = Streams.of(AAD)
         def out = new ByteArrayOutputStream(8192)
         def res = new DefaultAeadResult(out)

@@ -27,7 +27,6 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,7 +151,7 @@ public abstract class AbstractCompressionAlgorithm implements CompressionAlgorit
      * @throws IOException if the decompression runs into an IO problem
      */
     protected byte[] doDecompress(byte[] compressed) throws IOException {
-        InputStream is = new ByteArrayInputStream(compressed);
+        InputStream is = Streams.of(compressed);
         InputStream decompress = decompress(is);
         byte[] buffer = new byte[512];
         ByteArrayOutputStream out = new ByteArrayOutputStream(buffer.length);

@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.io.CharSequenceReader
 import io.jsonwebtoken.impl.io.ConvertingParser
+import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
@@ -52,7 +53,7 @@ class DefaultJwkParserBuilderTest {
 
     @Test(expected = IllegalArgumentException)
     void parseNull() {
-        Jwks.parser().build().parse((CharSequence)null)
+        Jwks.parser().build().parse((CharSequence) null)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -133,7 +134,7 @@ class DefaultJwkParserBuilderTest {
             assertEquals jwk, parsed
 
             // InputStream parsing:
-            parsed = parser.parse(new ByteArrayInputStream(Strings.utf8(json)))
+            parsed = parser.parse(Streams.of(json))
             assertEquals jwk, parsed
         }
     }
