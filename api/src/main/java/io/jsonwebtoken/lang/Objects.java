@@ -94,7 +94,7 @@ public final class Objects {
      * Returns {@code true} if the specified argument:
      * <ol>
      *     <li>is {@code null}, or</li>
-     *     <li>is a String and {@link Strings#hasText(String)} is {@code false}, or</li>
+     *     <li>is a CharSequence and {@link Strings#hasText(CharSequence)} is {@code false}, or</li>
      *     <li>is a Collection or Map with zero size, or</li>
      *     <li>is an empty array</li>
      * </ol>
@@ -106,7 +106,7 @@ public final class Objects {
      */
     public static boolean isEmpty(Object v) {
         return v == null ||
-                (v instanceof String && !Strings.hasText((String) v)) ||
+                (v instanceof CharSequence && !Strings.hasText((CharSequence) v)) ||
                 (v instanceof Collection && Collections.isEmpty((Collection<?>) v)) ||
                 (v instanceof Map && Collections.isEmpty((Map<?, ?>) v)) ||
                 (v.getClass().isArray() && Array.getLength(v) == 0);
