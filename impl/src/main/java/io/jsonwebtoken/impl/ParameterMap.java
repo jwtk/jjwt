@@ -124,13 +124,6 @@ public class ParameterMap implements Map<String, Object>, ParameterReadable, Nam
         return values.get(o);
     }
 
-    private static Object clean(Object o) {
-        if (o instanceof String) {
-            o = Strings.clean((String) o);
-        }
-        return o;
-    }
-
     /**
      * Convenience method to put a value for an idiomatic param.
      *
@@ -143,7 +136,7 @@ public class ParameterMap implements Map<String, Object>, ParameterReadable, Nam
         assertMutable();
         Assert.notNull(param, "Parameter cannot be null.");
         Assert.hasText(param.getId(), "Parameter id cannot be null or empty.");
-        return apply(param, clean(value));
+        return apply(param, value);
     }
 
     @Override
@@ -156,12 +149,12 @@ public class ParameterMap implements Map<String, Object>, ParameterReadable, Nam
             return put(param, value);
         } else {
             // non-standard or custom property, just apply directly:
-            return nullSafePut(name, clean(value));
+            return nullSafePut(name, value);
         }
     }
 
     private Object nullSafePut(String name, Object value) {
-        if (Objects.isEmpty(value)) {
+        if (value == null) {
             return remove(name);
         } else {
             this.idiomaticValues.put(name, value);
@@ -199,9 +192,8 @@ public class ParameterMap implements Map<String, Object>, ParameterReadable, Nam
             String msg = sb.toString();
             throw new IllegalArgumentException(msg, e);
         }
-        Object retval = nullSafePut(id, canonicalValue);
         this.idiomaticValues.put(id, idiomaticValue);
-        return retval;
+        return this.values.put(id, canonicalValue);
     }
 
     @Override
