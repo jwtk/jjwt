@@ -158,7 +158,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param payload the string used to set UTF-8-encoded bytes as the JWT payload.
      * @return the builder for method chaining.
      * @see #content(String)
-     * @deprecated since JJWT_RELEASE VERSION in favor of {@link #content(String)}
+     * @deprecated since 0.12.0 in favor of {@link #content(String)}
      * because both Claims and Content are technically 'payloads', so this method name is misleading.  This method will
      * be removed before the 1.0 release.
      */
