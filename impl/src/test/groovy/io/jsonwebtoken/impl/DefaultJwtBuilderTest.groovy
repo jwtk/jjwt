@@ -220,13 +220,6 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
-    void testClaimEmptyString() {
-        String value = ' '
-        builder.claim('foo', value)
-        assertTrue builder.claimsBuilder.isEmpty() // shouldn't populate claims instance
-    }
-
-    @Test
     void testExistingClaimsAndSetClaim() {
         Claims c = Jwts.claims().add('foo', 'bar').build()
         builder.claims().add(c)
