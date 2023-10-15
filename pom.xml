@@ -677,6 +677,7 @@
             <properties>
                 <maven.jar.version>3.2.2</maven.jar.version>
                 <maven.compiler.version>3.8.1</maven.compiler.version>
+                <orgjson.version>20230618</orgjson.version>
                 <bcprov.artifactId>bcprov-jdk15to18</bcprov.artifactId>
                 <bcpkix.artifactId>bcpkix-jdk15to18</bcpkix.artifactId>
             </properties>
