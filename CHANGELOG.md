@@ -1,5 +1,14 @@
 ## Release Notes
 
+### 0.12.3
+
+This patch release:
+
+* Upgrades the `org.json` dependency to `20231013` to address that library's
+  [CVE-2023-5072](https://nvd.nist.gov/vuln/detail/CVE-2023-5072) vulnerability.
+* (Re-)enables empty values for custom claims, which was the behavior in <= 0.11.5. 
+  [Issue 858](https://github.com/jwtk/jjwt/issues/858).
+
 ### 0.12.2
 
 This is a follow-up release to finalize the work in 0.12.1 that tried to fix a reflection scope problem
