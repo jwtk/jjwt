@@ -15,11 +15,48 @@
  */
 package io.jsonwebtoken.lang
 
+import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.*
 
 class CollectionsTest {
+    private Enumeration<Integer> enumeration
+    private Collections.EnumerationIterator<Integer> iterator
+
+    @Before
+    void setUp() {
+        Vector<Integer> vector = new Vector<>()
+        vector.add(1)
+        vector.add(2)
+        enumeration = vector.elements()
+        iterator = new Collections.EnumerationIterator<>(enumeration)
+    }
+
+    @Test
+    void testHasNext() {
+        assertTrue(iterator.hasNext())
+        iterator.next()
+        assertTrue(iterator.hasNext())
+        iterator.next()
+        assertFalse(iterator.hasNext())
+    }
+
+    @Test
+    void testNext() {
+        assertEquals(1, iterator.next())
+        assertEquals(2, iterator.next())
+    }
+
+    @Test
+    void testRemove() {
+        try {
+            iterator.remove()
+            fail("Expected UnsupportedOperationException")
+        } catch (UnsupportedOperationException e) {
+            assertEquals("Not supported", e.getMessage())
+        }
+    }
 
     @Test
     void testAsSetFromNull() {
