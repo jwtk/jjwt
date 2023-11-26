@@ -1,0 +1,210 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProviderKey</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: ProviderKey (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProviderKey</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (14/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ProviderKey$getProvider</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (4/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (14/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.security.KeySupplier;
+&nbsp;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.Provider;
+&nbsp;
+&nbsp;public class ProviderKey&lt;T extends Key&gt; implements Key, KeySupplier&lt;T&gt; {
+&nbsp;
+&nbsp;    private final T key;
+&nbsp;
+&nbsp;    private final Provider provider;
+&nbsp;
+&nbsp;    public static Provider getProvider(Key key, Provider backup) {
+<b class="pc">&nbsp;        if (key instanceof ProviderKey&lt;?&gt;) {</b>
+<b class="nc">&nbsp;            ProviderKey&lt;?&gt; pkey = (ProviderKey&lt;?&gt;) key;</b>
+<b class="nc">&nbsp;            return Assert.stateNotNull(pkey.getProvider(), &quot;ProviderKey provider can never be null.&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return backup;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public static &lt;K extends Key&gt; K getKey(K key) {
+<b class="pc">&nbsp;        return key instanceof ProviderKey ? ((ProviderKey&lt;K&gt;) key).getKey() : key;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    ProviderKey(Provider provider, T key) {</b>
+<b class="fc">&nbsp;        this.provider = Assert.notNull(provider, &quot;Provider cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.key = Assert.notNull(key, &quot;Key argument cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        if (key instanceof ProviderKey&lt;?&gt;) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Nesting not permitted.&quot;;</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(msg);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T getKey() {
+<b class="fc">&nbsp;        return this.key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getAlgorithm() {
+<b class="fc">&nbsp;        return this.key.getAlgorithm();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getFormat() {
+<b class="fc">&nbsp;        return this.key.getFormat();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getEncoded() {
+<b class="fc">&nbsp;        return this.key.getEncoded();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public final Provider getProvider() {
+<b class="fc">&nbsp;        return this.provider;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultJwkSet</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultJwkSet (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultJwkSet</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.ParameterMap;
+&nbsp;import io.jsonwebtoken.impl.lang.Converter;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameter;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameters;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.security.Jwk;
+&nbsp;import io.jsonwebtoken.security.JwkSet;
+&nbsp;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;public class DefaultJwkSet extends ParameterMap implements JwkSet {
+&nbsp;
+&nbsp;    private static final String NAME = &quot;JWK Set&quot;;
+&nbsp;
+&nbsp;    static Parameter&lt;Set&lt;Jwk&lt;?&gt;&gt;&gt; param(Converter&lt;Jwk&lt;?&gt;, ?&gt; converter) {
+<b class="fc">&nbsp;        return Parameters.builder(JwkConverter.JWK_CLASS)</b>
+<b class="fc">&nbsp;                .setConverter(converter).set()</b>
+<b class="fc">&nbsp;                .setId(&quot;keys&quot;).setName(&quot;JSON Web Keys&quot;)</b>
+<b class="fc">&nbsp;                .setSecret(true)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;Set&lt;Jwk&lt;?&gt;&gt;&gt; KEYS = param(JwkConverter.ANY);</b>
+&nbsp;
+&nbsp;    public DefaultJwkSet(Parameter&lt;Set&lt;Jwk&lt;?&gt;&gt;&gt; param, Map&lt;String, ?&gt; src) {
+<b class="fc">&nbsp;        super(Parameters.registry(param), src);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getName() {
+<b class="fc">&nbsp;        return NAME;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;Jwk&lt;?&gt;&gt; getKeys() {
+<b class="fc">&nbsp;        Set&lt;Jwk&lt;?&gt;&gt; jwks = get(KEYS);</b>
+<b class="fc">&nbsp;        if (Collections.isEmpty(jwks)) {</b>
+<b class="fc">&nbsp;            return Collections.emptySet();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return Collections.immutable(jwks);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Iterator&lt;Jwk&lt;?&gt;&gt; iterator() {
+<b class="fc">&nbsp;        return getKeys().iterator(); // immutable because of getKeys() return value</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

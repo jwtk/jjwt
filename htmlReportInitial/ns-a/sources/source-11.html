@@ -1,0 +1,122 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Registry</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: Registry (io.jsonwebtoken.lang)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Registry$forKey</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2020 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.lang;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * An immutable (read-only) repository of key-value pairs. In addition to {@link Map} read methods, this interface also
+&nbsp; * provides guaranteed/expected lookup via the {@link #forKey(Object)} method.
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Immutability&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Registries are immutable and cannot be changed.  {@code Registry} extends the
+&nbsp; * {@link Map} interface purely out of convenience: to allow easy key/value
+&nbsp; * pair access and iteration, and other conveniences provided by the Map interface, as well as for seamless use with
+&nbsp; * existing Map-based APIs.  Attempting to call any of
+&nbsp; * the {@link Map} interface&#39;s mutation methods however (such as {@link Map#put(Object, Object) put},
+&nbsp; * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
+&nbsp; * {@link UnsupportedOperationException}.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @param &lt;K&gt; key type
+&nbsp; * @param &lt;V&gt; value type
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface Registry&lt;K, V&gt; extends Map&lt;K, V&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the value assigned the specified key or throws an {@code IllegalArgumentException} if there is no
+&nbsp;     * associated value.  If a value is not required, consider using the {@link #get(Object)} method instead.
+&nbsp;     *
+&nbsp;     * @param key the registry key assigned to the required value
+&nbsp;     * @return the value assigned the specified key
+&nbsp;     * @throws IllegalArgumentException if there is no value assigned the specified key
+&nbsp;     * @see #get(Object)
+&nbsp;     */
+&nbsp;    V forKey(K key) throws IllegalArgumentException;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

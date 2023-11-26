@@ -1,0 +1,378 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConcatKDF</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: ConcatKDF (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConcatKDF</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.4%
+  </span>
+  <span class="absValue">
+    (27/28)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConcatKDF$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConcatKDF$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConcatKDF$ClearableByteArrayOutputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85%
+  </span>
+  <span class="absValue">
+    (17/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.9%
+  </span>
+  <span class="absValue">
+    (47/48)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.Bytes;
+&nbsp;import io.jsonwebtoken.impl.lang.CheckedFunction;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.security.SecurityException;
+&nbsp;import io.jsonwebtoken.security.UnsupportedKeyException;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import javax.crypto.spec.SecretKeySpec;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.MessageDigest;
+&nbsp;
+&nbsp;import static io.jsonwebtoken.impl.lang.Bytes.*;
+&nbsp;
+&nbsp;/**
+&nbsp; * &#39;Clean room&#39; implementation of the Concat KDF algorithm based solely on
+&nbsp; * &lt;a href=&quot;https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf&quot;&gt;NIST.800-56A&lt;/a&gt;,
+&nbsp; * Section &lt;code&gt;5.8.1.1&lt;/code&gt;.  Call the {@link #deriveKey(byte[], long, byte[]) deriveKey} method.
+&nbsp; */
+<b class="fc">&nbsp;final class ConcatKDF extends CryptoAlgorithm {</b>
+&nbsp;
+&nbsp;    private static final long MAX_REP_COUNT = 0xFFFFFFFFL;
+&nbsp;    private static final long MAX_HASH_INPUT_BYTE_LENGTH = Integer.MAX_VALUE; //no Java byte arrays bigger than this
+&nbsp;    private static final long MAX_HASH_INPUT_BIT_LENGTH = MAX_HASH_INPUT_BYTE_LENGTH * Byte.SIZE;
+&nbsp;
+&nbsp;    private final int hashBitLength;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * NIST.SP.800-56Ar2.pdf, Section 5.8.1.1, Input requirement #2 says that the maximum bit length of the
+&nbsp;     * derived key cannot be more than this:
+&nbsp;     * &lt;code&gt;&lt;pre&gt;
+&nbsp;     *     hashBitLength * (2^32 - 1)
+&nbsp;     * &lt;/pre&gt;&lt;/code&gt;
+&nbsp;     * However, this number is always greater than Integer.MAX_VALUE * Byte.SIZE, which is the maximum number of
+&nbsp;     * bits that can be represented in a Java byte array.  So our implementation must be limited to that size
+&nbsp;     * regardless of what the spec allows:
+&nbsp;     */
+&nbsp;    private static final long MAX_DERIVED_KEY_BIT_LENGTH = (long) Integer.MAX_VALUE * (long) Byte.SIZE;
+&nbsp;
+&nbsp;    ConcatKDF(String jcaName) {
+<b class="fc">&nbsp;        super(&quot;ConcatKDF&quot;, jcaName);</b>
+<b class="fc">&nbsp;        int hashByteLength = jca().withMessageDigest(new CheckedFunction&lt;MessageDigest, Integer&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public Integer apply(MessageDigest instance) {
+<b class="fc">&nbsp;                return instance.getDigestLength();</b>
+&nbsp;            }
+&nbsp;        });
+<b class="fc">&nbsp;        this.hashBitLength = hashByteLength * Byte.SIZE;</b>
+<b class="pc">&nbsp;        Assert.state(this.hashBitLength &gt; 0, &quot;MessageDigest length must be a positive value.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &#39;Clean room&#39; implementation of the Concat KDF algorithm based solely on
+&nbsp;     * &lt;a href=&quot;https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf&quot;&gt;NIST.800-56A&lt;/a&gt;,
+&nbsp;     * Section &lt;code&gt;5.8.1.1&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param Z                   shared secret key to use to seed the derived secret. Cannot be null or empty.
+&nbsp;     * @param derivedKeyBitLength the total number of &lt;b&gt;bits&lt;/b&gt; &lt;em&gt;(not bytes)&lt;/em&gt; required in the returned derived
+&nbsp;     *                            key.
+&nbsp;     * @param otherInfo           any additional party info to be associated with the derived key. May be null/empty.
+&nbsp;     * @return the derived key
+&nbsp;     * @throws UnsupportedKeyException if unable to obtain {@code sharedSecretKey}&#39;s
+&nbsp;     *                                 {@link Key#getEncoded() encoded byte array}.
+&nbsp;     * @throws SecurityException       if unable to perform the necessary {@link MessageDigest} computations to
+&nbsp;     *                                 generate the derived key.
+&nbsp;     */
+&nbsp;    public SecretKey deriveKey(final byte[] Z, final long derivedKeyBitLength, final byte[] otherInfo)
+&nbsp;            throws UnsupportedKeyException, SecurityException {
+&nbsp;
+&nbsp;        // sharedSecretKey argument assertions:
+<b class="fc">&nbsp;        Assert.notEmpty(Z, &quot;Z cannot be null or empty.&quot;);</b>
+&nbsp;
+&nbsp;        // derivedKeyBitLength argument assertions:
+<b class="fc">&nbsp;        Assert.isTrue(derivedKeyBitLength &gt; 0, &quot;derivedKeyBitLength must be a positive integer.&quot;);</b>
+<b class="fc">&nbsp;        if (derivedKeyBitLength &gt; MAX_DERIVED_KEY_BIT_LENGTH) {</b>
+<b class="fc">&nbsp;            String msg = &quot;derivedKeyBitLength may not exceed &quot; + bitsMsg(MAX_DERIVED_KEY_BIT_LENGTH) +</b>
+<b class="fc">&nbsp;                    &quot;. Specified size: &quot; + bitsMsg(derivedKeyBitLength) + &quot;.&quot;;</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(msg);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final long derivedKeyByteLength = derivedKeyBitLength / Byte.SIZE;</b>
+&nbsp;
+<b class="fc">&nbsp;        final byte[] OtherInfo = otherInfo == null ? EMPTY : otherInfo;</b>
+&nbsp;
+&nbsp;        // Section 5.8.1.1, Process step #1:
+<b class="fc">&nbsp;        final double repsd = derivedKeyBitLength / (double) this.hashBitLength;</b>
+<b class="fc">&nbsp;        final long reps = (long) Math.ceil(repsd);</b>
+&nbsp;        // If repsd didn&#39;t result in a whole number, the last derived key byte will be partially filled per
+&nbsp;        // Section 5.8.1.1, Process step #6:
+<b class="fc">&nbsp;        final boolean kLastPartial = repsd != (double) reps;</b>
+&nbsp;
+&nbsp;        // Section 5.8.1.1, Process step #2:
+<b class="pc">&nbsp;        Assert.state(reps &lt;= MAX_REP_COUNT, &quot;derivedKeyBitLength is too large.&quot;);</b>
+&nbsp;
+&nbsp;        // Section 5.8.1.1, Process step #3:
+<b class="fc">&nbsp;        final byte[] counter = new byte[]{0, 0, 0, 1}; // same as 0x0001L, but no extra step to convert to byte[]</b>
+&nbsp;
+&nbsp;        // Section 5.8.1.1, Process step #4:
+<b class="fc">&nbsp;        long inputBitLength = bitLength(counter) + bitLength(Z) + bitLength(OtherInfo);</b>
+<b class="pc">&nbsp;        Assert.state(inputBitLength &lt;= MAX_HASH_INPUT_BIT_LENGTH, &quot;Hash input is too large.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        final ClearableByteArrayOutputStream stream = new ClearableByteArrayOutputStream((int) derivedKeyByteLength);</b>
+<b class="fc">&nbsp;        byte[] derivedKeyBytes = EMPTY;</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            derivedKeyBytes = jca().withMessageDigest(new CheckedFunction&lt;MessageDigest, byte[]&gt;() {</b>
+&nbsp;                @Override
+&nbsp;                public byte[] apply(MessageDigest md) throws Exception {
+&nbsp;
+&nbsp;                    // Section 5.8.1.1, Process step #5.  We depart from Java idioms here by starting iteration index at 1
+&nbsp;                    // (instead of 0) and continue to &lt;= reps (instead of &lt; reps) to match the NIST publication algorithm
+&nbsp;                    // notation convention (so variables like Ki and kLast below match the NIST definitions).
+<b class="fc">&nbsp;                    for (long i = 1; i &lt;= reps; i++) {</b>
+&nbsp;
+&nbsp;                        // Section 5.8.1.1, Process step #5.1:
+<b class="fc">&nbsp;                        md.update(counter);</b>
+<b class="fc">&nbsp;                        md.update(Z);</b>
+<b class="fc">&nbsp;                        md.update(OtherInfo);</b>
+<b class="fc">&nbsp;                        byte[] Ki = md.digest();</b>
+&nbsp;
+&nbsp;                        // Section 5.8.1.1, Process step #5.2:
+<b class="fc">&nbsp;                        increment(counter);</b>
+&nbsp;
+&nbsp;                        // Section 5.8.1.1, Process step #6:
+<b class="fc">&nbsp;                        if (i == reps &amp;&amp; kLastPartial) {</b>
+<b class="fc">&nbsp;                            long leftmostBitLength = derivedKeyBitLength % hashBitLength;</b>
+<b class="fc">&nbsp;                            int leftmostByteLength = (int) (leftmostBitLength / Byte.SIZE);</b>
+<b class="fc">&nbsp;                            byte[] kLast = new byte[leftmostByteLength];</b>
+<b class="fc">&nbsp;                            System.arraycopy(Ki, 0, kLast, 0, kLast.length);</b>
+<b class="fc">&nbsp;                            Ki = kLast;</b>
+&nbsp;                        }
+&nbsp;
+<b class="fc">&nbsp;                        stream.write(Ki);</b>
+&nbsp;                    }
+&nbsp;
+&nbsp;                    // Section 5.8.1.1, Process step #7:
+<b class="fc">&nbsp;                    return stream.toByteArray();</b>
+&nbsp;                }
+&nbsp;            });
+<b class="fc">&nbsp;            return new SecretKeySpec(derivedKeyBytes, AesAlgorithm.KEY_ALG_NAME);</b>
+&nbsp;        } finally {
+&nbsp;            // key cleanup
+<b class="fc">&nbsp;            Bytes.clear(derivedKeyBytes); // SecretKeySpec clones this, so we can clear it out safely</b>
+<b class="fc">&nbsp;            Bytes.clear(counter);</b>
+<b class="fc">&nbsp;            stream.reset();</b>
+&nbsp;            // we don&#39;t clear out &#39;Z&#39;, since that is the responsibility of the caller
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calling ByteArrayOutputStream.toByteArray returns a copy of the bytes, so this class allows us to completely
+&nbsp;     * zero-out the buffer upon reset (whereas BAOS just resets the position marker, leaving the bytes in tact)
+&nbsp;     */
+&nbsp;    private static class ClearableByteArrayOutputStream extends ByteArrayOutputStream {
+&nbsp;
+&nbsp;        public ClearableByteArrayOutputStream(int size) {
+<b class="fc">&nbsp;            super(size);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public synchronized void reset() {
+<b class="fc">&nbsp;            super.reset();</b>
+<b class="fc">&nbsp;            Bytes.clear(buf); // zero out internal buffer</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

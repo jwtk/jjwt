@@ -1,0 +1,145 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > KeyRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: KeyRequest (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">KeyRequest</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.JweHeader;
+&nbsp;
+&nbsp;/**
+&nbsp; * A request to a {@link KeyAlgorithm} to obtain the key necessary for AEAD encryption or decryption.  The exact
+&nbsp; * {@link AeadAlgorithm} that will be used is accessible via {@link #getEncryptionAlgorithm()}.
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Encryption Requests&lt;/b&gt;&lt;/p&gt;
+&nbsp; * &lt;p&gt;For an encryption key request, {@link #getPayload()} will return
+&nbsp; * the encryption key to use.  Additionally, any &lt;em&gt;public&lt;/em&gt; information specific to the called
+&nbsp; * {@link KeyAlgorithm} implementation that is required to be transmitted in the JWE (such as an initialization vector,
+&nbsp; * authentication tag or ephemeral key, etc) may be added to the JWE protected header, accessible via
+&nbsp; * {@link #getHeader()}. Although the JWE header is checked for authenticity and integrity, it itself is
+&nbsp; * &lt;em&gt;not&lt;/em&gt; encrypted, so {@link KeyAlgorithm}s should never place any secret or private information in the
+&nbsp; * header.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Decryption Requests&lt;/b&gt;&lt;/p&gt;
+&nbsp; * &lt;p&gt;For a decryption request, the {@code KeyRequest} instance will be
+&nbsp; * a {@link DecryptionKeyRequest} instance, {@link #getPayload()} will return the encrypted key ciphertext (a
+&nbsp; * byte array), and the decryption key will be available via {@link DecryptionKeyRequest#getKey()}.  Additionally,
+&nbsp; * any public information necessary by the called {@link KeyAlgorithm} (such as an initialization vector,
+&nbsp; * authentication tag, ephemeral key, etc) is expected to be available in the JWE protected header, accessible
+&nbsp; * via {@link #getHeader()}.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the type of object relevant during key algorithm cryptographic operations.
+&nbsp; * @see DecryptionKeyRequest
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface KeyRequest&lt;T&gt; extends Request&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
+&nbsp;     * {@code KeyRequest}.  {@link KeyAlgorithm} implementations that generate an ephemeral {@code SecretKey} to use
+&nbsp;     * as what the &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-2&quot;&gt;JWE specification calls&lt;/a&gt; a
+&nbsp;     * &amp;quot;Content Encryption Key (CEK)&amp;quot; should call the {@code AeadAlgorithm}&#39;s
+&nbsp;     * {@link AeadAlgorithm#key() key()} builder to create a key suitable for that exact {@code AeadAlgorithm}.
+&nbsp;     *
+&nbsp;     * @return the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
+&nbsp;     * {@code KeyRequest}.
+&nbsp;     */
+&nbsp;    AeadAlgorithm getEncryptionAlgorithm();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the {@link JweHeader} that will be used to construct the final JWE header, available for
+&nbsp;     * reading or writing any {@link KeyAlgorithm}-specific information.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;For an encryption key request, any &lt;em&gt;public&lt;/em&gt; information specific to the called {@code KeyAlgorithm}
+&nbsp;     * implementation that is required to be transmitted in the JWE (such as an initialization vector,
+&nbsp;     * authentication tag or ephemeral key, etc) is expected to be added to this header. Although the header is
+&nbsp;     * checked for authenticity and integrity, it itself is &lt;em&gt;not&lt;/em&gt; encrypted, so
+&nbsp;     * {@link KeyAlgorithm}s should never place any secret or private information in the header.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;For a decryption request, any public information necessary by the called {@link KeyAlgorithm}
+&nbsp;     * (such as an initialization vector, authentication tag, ephemeral key, etc) is expected to be available in
+&nbsp;     * this header.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link JweHeader} that will be used to construct the final JWE header, available for
+&nbsp;     * reading or writing any {@link KeyAlgorithm}-specific information.
+&nbsp;     */
+&nbsp;    JweHeader getHeader();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > EdSignatureAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: EdSignatureAlgorithm (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EdSignatureAlgorithm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.security.InvalidKeyException;
+&nbsp;import io.jsonwebtoken.security.KeyPairBuilder;
+&nbsp;import io.jsonwebtoken.security.Request;
+&nbsp;import io.jsonwebtoken.security.SecureRequest;
+&nbsp;import io.jsonwebtoken.security.VerifyDigestRequest;
+&nbsp;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.PrivateKey;
+&nbsp;
+&nbsp;final class EdSignatureAlgorithm extends AbstractSignatureAlgorithm {
+&nbsp;
+&nbsp;    private static final String ID = &quot;EdDSA&quot;;
+&nbsp;
+&nbsp;    private final EdwardsCurve preferredCurve;
+&nbsp;
+<b class="fc">&nbsp;    static final EdSignatureAlgorithm INSTANCE = new EdSignatureAlgorithm();</b>
+&nbsp;
+&nbsp;    static boolean isSigningKey(PrivateKey key) {
+<b class="fc">&nbsp;        EdwardsCurve curve = EdwardsCurve.findByKey(key);</b>
+<b class="pc">&nbsp;        return curve != null &amp;&amp; curve.isSignatureCurve();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private EdSignatureAlgorithm() {
+<b class="fc">&nbsp;        super(ID, ID);</b>
+<b class="fc">&nbsp;        this.preferredCurve = EdwardsCurve.Ed448;</b>
+<b class="fc">&nbsp;        Assert.isTrue(this.preferredCurve.isSignatureCurve(), &quot;Must be signature curve, not key agreement curve.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected String getJcaName(Request&lt;?&gt; request) {
+<b class="fc">&nbsp;        SecureRequest&lt;?, ?&gt; req = Assert.isInstanceOf(SecureRequest.class, request, &quot;SecureRequests are required.&quot;);</b>
+<b class="fc">&nbsp;        Key key = Assert.notNull(req.getKey(), &quot;Request key cannot be null.&quot;);</b>
+&nbsp;        // If we&#39;re signing, and this instance&#39;s algorithm name is the default/generic &#39;EdDSA&#39;, then prefer the
+&nbsp;        // signing key&#39;s curve algorithm ID.  This ensures the most specific JCA algorithm is used for signing,
+&nbsp;        // (while generic &#39;EdDSA&#39; is fine for validation)
+<b class="fc">&nbsp;        String jcaName = getJcaName(); //default for JCA interaction</b>
+<b class="fc">&nbsp;        if (!(request instanceof VerifyDigestRequest)) { // then we&#39;re signing, not verifying</b>
+<b class="fc">&nbsp;            jcaName = EdwardsCurve.forKey(key).getJcaName();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return jcaName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public KeyPairBuilder keyPair() {
+<b class="fc">&nbsp;        return this.preferredCurve.keyPair();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected void validateKey(Key key, boolean signing) {
+<b class="fc">&nbsp;        super.validateKey(key, signing);</b>
+&nbsp;        // should always be non-null due to algorithm name lookup, even without encoded key bytes:
+<b class="fc">&nbsp;        EdwardsCurve curve = EdwardsCurve.forKey(key);</b>
+<b class="fc">&nbsp;        if (!curve.isSignatureCurve()) {</b>
+<b class="fc">&nbsp;            String msg = curve.getId() + &quot; keys may not be used with &quot; + getId() + &quot; digital signatures per &quot; +</b>
+&nbsp;                    &quot;https://www.rfc-editor.org/rfc/rfc8037.html#section-3.2&quot;;
+<b class="fc">&nbsp;            throw new InvalidKeyException(msg);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

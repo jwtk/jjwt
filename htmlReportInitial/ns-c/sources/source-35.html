@@ -1,0 +1,158 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > KeyAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: KeyAlgorithm (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">KeyAlgorithm$getDecryptionKey$0</td>
+  </tr>
+  <tr>
+    <td class="name">KeyAlgorithm$getEncryptionKey</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.Identifiable;
+&nbsp;import io.jsonwebtoken.Jwts;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.security.Key;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code KeyAlgorithm} produces the {@link SecretKey} used to encrypt or decrypt a JWE. The {@code KeyAlgorithm}
+&nbsp; * used for a particular JWE is {@link #getId() identified} in the JWE&#39;s
+&nbsp; * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.1&quot;&gt;{@code alg} header&lt;/a&gt;.  The {@code KeyAlgorithm}
+&nbsp; * interface is JJWT&#39;s idiomatic approach to the JWE specification&#39;s
+&nbsp; * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-2&quot;&gt;{@code Key Management Mode}&lt;/a&gt; concept.
+&nbsp; *
+&nbsp; * &lt;p&gt;All standard Key Algorithms are defined in
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1&quot;&gt;JWA (RFC 7518), Section 4.1&lt;/a&gt;,
+&nbsp; * and they are all available as concrete instances via {@link Jwts.KEY}.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;&amp;quot;alg&amp;quot; identifier&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;{@code KeyAlgorithm} extends {@code Identifiable}: the value returned from
+&nbsp; * {@link Identifiable#getId() keyAlgorithm.getId()} will be used as the
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1&quot;&gt;JWE &amp;quot;alg&amp;quot; protected header&lt;/a&gt; value.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @param &lt;E&gt; The type of key to use to obtain the AEAD encryption key
+&nbsp; * @param &lt;D&gt; The type of key to use to obtain the AEAD decryption key
+&nbsp; * @see Jwts.KEY
+&nbsp; * @see &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-2&quot;&gt;RFC 7561, Section 2: JWE Key (Management) Algorithms&lt;/a&gt;
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;@SuppressWarnings(&quot;JavadocLinkAsPlainText&quot;)
+&nbsp;public interface KeyAlgorithm&lt;E extends Key, D extends Key&gt; extends Identifiable {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the {@link SecretKey} that should be used to encrypt a JWE via the request&#39;s specified
+&nbsp;     * {@link KeyRequest#getEncryptionAlgorithm() AeadAlgorithm}.  The encryption key will
+&nbsp;     * be available via the result&#39;s {@link KeyResult#getKey() result.getKey()} method.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the key algorithm uses key encryption or key agreement to produce an encrypted key value that must be
+&nbsp;     * included in the JWE, the encrypted key ciphertext will be available via the result&#39;s
+&nbsp;     * {@link KeyResult#getPayload() result.getPayload()} method.  If the key algorithm does not produce encrypted
+&nbsp;     * key ciphertext, {@link KeyResult#getPayload() result.getPayload()} will be a non-null empty byte array.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param request the {@code KeyRequest} containing information necessary to produce a {@code SecretKey} for
+&nbsp;     *                {@link AeadAlgorithm AEAD} encryption.
+&nbsp;     * @return the {@link SecretKey} that should be used to encrypt a JWE via the request&#39;s specified
+&nbsp;     * {@link KeyRequest#getEncryptionAlgorithm() AeadAlgorithm}, along with any optional encrypted key ciphertext.
+&nbsp;     * @throws SecurityException if there is a problem obtaining or encrypting the AEAD {@code SecretKey}.
+&nbsp;     */
+&nbsp;    KeyResult getEncryptionKey(KeyRequest&lt;E&gt; request) throws SecurityException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the {@link SecretKey} that should be used to decrypt a JWE via the request&#39;s specified
+&nbsp;     * {@link DecryptionKeyRequest#getEncryptionAlgorithm() AeadAlgorithm}.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the key algorithm used key encryption or key agreement to produce an encrypted key value, the encrypted
+&nbsp;     * key ciphertext will be available via the request&#39;s {@link DecryptionKeyRequest#getPayload() result.getPayload()}
+&nbsp;     * method. If the key algorithm did not produce encrypted key ciphertext,
+&nbsp;     * {@link DecryptionKeyRequest#getPayload() request.getPayload()} will return a non-null empty byte array.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param request the {@code DecryptionKeyRequest} containing information necessary to obtain a
+&nbsp;     *                {@code SecretKey} for {@link AeadAlgorithm AEAD} decryption.
+&nbsp;     * @return the {@link SecretKey} that should be used to decrypt a JWE via the request&#39;s specified
+&nbsp;     * {@link DecryptionKeyRequest#getEncryptionAlgorithm() AeadAlgorithm}.
+&nbsp;     * @throws SecurityException if there is a problem obtaining or decrypting the AEAD {@code SecretKey}.
+&nbsp;     */
+&nbsp;    SecretKey getDecryptionKey(DecryptionKeyRequest&lt;D&gt; request) throws SecurityException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

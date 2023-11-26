@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwtHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtHandler (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">JwtHandler</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;/**
+&nbsp; * A JwtHandler is invoked by a {@link io.jsonwebtoken.JwtParser JwtParser} after parsing a JWT to indicate the exact
+&nbsp; * type of JWT, JWS or JWE parsed.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the type of object to return to the parser caller after handling the parsed JWT.
+&nbsp; * @since 0.2
+&nbsp; * @deprecated since 0.12.0 in favor of calling {@link Jwt#accept(JwtVisitor)}.
+&nbsp; */
+&nbsp;@SuppressWarnings(&quot;DeprecatedIsStillUsed&quot;)
+&nbsp;@Deprecated
+&nbsp;public interface JwtHandler&lt;T&gt; extends JwtVisitor&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+&nbsp;     * an unsecured content JWT.  An unsecured content JWT has a byte array payload that is not
+&nbsp;     * cryptographically signed or encrypted.  If the JWT creator set the (optional)
+&nbsp;     * {@link Header#getContentType() contentType} header value, the application may inspect that value to determine
+&nbsp;     * how to convert the byte array to the final content type as desired.
+&nbsp;     *
+&nbsp;     * @param jwt the parsed unsecured content JWT
+&nbsp;     * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
+&nbsp;     */
+&nbsp;    T onContentJwt(Jwt&lt;Header, byte[]&gt; jwt);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+&nbsp;     * a Claims JWT.  A Claims JWT has a {@link Claims} payload that is not cryptographically signed or encrypted.
+&nbsp;     *
+&nbsp;     * @param jwt the parsed claims JWT
+&nbsp;     * @return any object to be used after inspecting the JWT, or {@code null} if no return value is necessary.
+&nbsp;     */
+&nbsp;    T onClaimsJwt(Jwt&lt;Header, Claims&gt; jwt);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+&nbsp;     * a content JWS.  A content JWS is a JWT with a byte array payload that has been cryptographically signed.
+&nbsp;     * If the JWT creator set the (optional) {@link Header#getContentType() contentType} header value, the
+&nbsp;     * application may inspect that value to determine how to convert the byte array to the final content type
+&nbsp;     * as desired.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method will only be invoked if the cryptographic signature can be successfully verified.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param jws the parsed content JWS
+&nbsp;     * @return any object to be used after inspecting the JWS, or {@code null} if no return value is necessary.
+&nbsp;     */
+&nbsp;    T onContentJws(Jws&lt;byte[]&gt; jws);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+&nbsp;     * a valid Claims JWS.  A Claims JWS is a JWT with a {@link Claims} payload that has been cryptographically signed.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method will only be invoked if the cryptographic signature can be successfully verified.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param jws the parsed claims JWS
+&nbsp;     * @return any object to be used after inspecting the JWS, or {@code null} if no return value is necessary.
+&nbsp;     */
+&nbsp;    T onClaimsJws(Jws&lt;Claims&gt; jws);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+&nbsp;     * a content JWE.  A content JWE is a JWE with a byte array payload that has been encrypted. If the JWT creator set
+&nbsp;     * the (optional) {@link Header#getContentType() contentType} header value, the application may inspect that
+&nbsp;     * value to determine how to convert the byte array to the final content type as desired.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method will only be invoked if the content JWE can be successfully decrypted.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param jwe the parsed content jwe
+&nbsp;     * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    T onContentJwe(Jwe&lt;byte[]&gt; jwe);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This method is invoked when a {@link io.jsonwebtoken.JwtParser JwtParser} determines that the parsed JWT is
+&nbsp;     * a valid Claims JWE.  A Claims JWE is a JWT with a {@link Claims} payload that has been encrypted.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method will only be invoked if the Claims JWE can be successfully decrypted.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param jwe the parsed claims jwe
+&nbsp;     * @return any object to be used after inspecting the JWE, or {@code null} if no return value is necessary.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    T onClaimsJwe(Jwe&lt;Claims&gt; jwe);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

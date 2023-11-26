@@ -1,0 +1,680 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Jwks</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: Jwks (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Jwks</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Jwks$builder</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$CRV</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$CRV$get</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$HASH</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$HASH$get</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$OP</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$OP$builder$0</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$OP$get</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$OP$policy$1</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$parser$0</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$set$2</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$setParser$3</td>
+  </tr>
+  <tr>
+    <td class="name">Jwks$UNSAFE_JSON$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (35/35)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.Identifiable;
+&nbsp;import io.jsonwebtoken.io.Parser;
+&nbsp;import io.jsonwebtoken.lang.Classes;
+&nbsp;import io.jsonwebtoken.lang.Registry;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility methods for creating
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html&quot;&gt;JWKs (JSON Web Keys)&lt;/a&gt; with a type-safe builder.
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Standard JWK Thumbprint Algorithm References&lt;/b&gt;&lt;/p&gt;
+&nbsp; * &lt;p&gt;Standard &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA Hash
+&nbsp; * Algorithms&lt;/a&gt; commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier&quot;&gt;JWK Thumbprint URIs&lt;/a&gt;
+&nbsp; * are available via the {@link Jwks.HASH} registry constants to allow for easy code-completion in IDEs. For example, when
+&nbsp; * typing:&lt;/p&gt;
+&nbsp; * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp; * Jwks.{@link Jwks.HASH HASH}.// press hotkeys to suggest individual hash algorithms or utility methods&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp; *
+&nbsp; * @see #builder()
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public final class Jwks {
+&nbsp;
+&nbsp;    private Jwks() {
+&nbsp;    } //prevent instantiation
+&nbsp;
+&nbsp;    private static final String JWKS_BRIDGE_FQCN = &quot;io.jsonwebtoken.impl.security.JwksBridge&quot;;
+&nbsp;    private static final String BUILDER_FQCN = &quot;io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder&quot;;
+&nbsp;    private static final String PARSER_BUILDER_FQCN = &quot;io.jsonwebtoken.impl.security.DefaultJwkParserBuilder&quot;;
+&nbsp;    private static final String SET_BUILDER_FQCN = &quot;io.jsonwebtoken.impl.security.DefaultJwkSetBuilder&quot;;
+&nbsp;    private static final String SET_PARSER_BUILDER_FQCN = &quot;io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+&nbsp;     *
+&nbsp;     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+&nbsp;     */
+&nbsp;    public static DynamicJwkBuilder&lt;?, ?&gt; builder() {
+<b class="fc">&nbsp;        return Classes.newInstance(BUILDER_FQCN);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * Jwk&amp;lt;?&amp;gt; jwk = Jwks.parser()
+&nbsp;     *         //.provider(aJcaProvider)     // optional
+&nbsp;     *         //.deserializer(deserializer) // optional
+&nbsp;     *         //.operationPolicy(policy)    // optional
+&nbsp;     *         .build()
+&nbsp;     *         .parse(jwkString);&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+&nbsp;     */
+&nbsp;    public static JwkParserBuilder parser() {
+<b class="fc">&nbsp;        return Classes.newInstance(PARSER_BUILDER_FQCN);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a new builder used to create {@link JwkSet}s.  For example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * JwkSet jwkSet = Jwks.set()
+&nbsp;     *     //.provider(aJcaProvider)     // optional
+&nbsp;     *     //.operationPolicy(policy)    // optional
+&nbsp;     *     .add(aJwk)                    // appends a key
+&nbsp;     *     .add(aCollection)             // appends multiple keys
+&nbsp;     *     //.keys(allJwks)              // sets/replaces all keys
+&nbsp;     *     .build()
+&nbsp;     * &lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @return a new builder used to create {@link JwkSet}s
+&nbsp;     */
+&nbsp;    public static JwkSetBuilder set() {
+<b class="fc">&nbsp;        return Classes.newInstance(SET_BUILDER_FQCN);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances. For example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * JwkSet jwkSet = Jwks.setParser()
+&nbsp;     *         //.provider(aJcaProvider)     // optional
+&nbsp;     *         //.deserializer(deserializer) // optional
+&nbsp;     *         //.operationPolicy(policy)    // optional
+&nbsp;     *         .build()
+&nbsp;     *         .parse(jwkSetString);&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
+&nbsp;     */
+&nbsp;    public static JwkSetParserBuilder setParser() {
+<b class="fc">&nbsp;        return Classes.newInstance(SET_PARSER_BUILDER_FQCN);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts the specified {@link PublicJwk} into JSON. Because {@link PublicJwk}s do not contain secret or private
+&nbsp;     * key material, they are safe to be printed to application logs or {@code System.out}.
+&nbsp;     *
+&nbsp;     * @param publicJwk the {@code PublicJwk} to convert to JSON
+&nbsp;     * @return the JWK&#39;s canonical JSON value
+&nbsp;     */
+&nbsp;    public static String json(PublicJwk&lt;?&gt; publicJwk) {
+<b class="fc">&nbsp;        return UNSAFE_JSON(publicJwk); // safe by nature of it being a Public JWK</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;b&gt;WARNING - UNSAFE OPERATION - RETURN VALUES CONTAIN RAW KEY MATERIAL, DO NOT LOG OR PRINT TO SYSTEM.OUT.&lt;/b&gt;
+&nbsp;     * Converts the specified JWK into JSON, including raw key material.  If the specified JWK
+&nbsp;     * is a {@link SecretJwk} or a {@link PrivateJwk}, be very careful with the return value, ensuring it is not
+&nbsp;     * printed to application logs or system.out.
+&nbsp;     *
+&nbsp;     * @param jwk the JWK to convert to JSON
+&nbsp;     * @return the JWK&#39;s canonical JSON value
+&nbsp;     */
+&nbsp;    public static String UNSAFE_JSON(Jwk&lt;?&gt; jwk) {
+<b class="fc">&nbsp;        return Classes.invokeStatic(JWKS_BRIDGE_FQCN, &quot;UNSAFE_JSON&quot;, new Class[]{Jwk.class}, jwk);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constants for all standard JWK
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1&quot;&gt;crv (Curve)&lt;/a&gt; parameter values
+&nbsp;     * defined in the &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7518#section-7.6&quot;&gt;JSON Web Key Elliptic
+&nbsp;     * Curve Registry&lt;/a&gt; (including its
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-5&quot;&gt;Edwards Elliptic Curve additions&lt;/a&gt;).
+&nbsp;     * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
+&nbsp;     * reference in application code. For example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * Jwks.CRV.P256.keyPair().build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     * &lt;p&gt;They are also available together as a {@link Registry} instance via the {@link #get()} method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see #get()
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    public static final class CRV {
+&nbsp;
+&nbsp;        private static final String IMPL_CLASSNAME = &quot;io.jsonwebtoken.impl.security.StandardCurves&quot;;
+<b class="fc">&nbsp;        private static final Registry&lt;String, Curve&gt; REGISTRY = Classes.newInstance(IMPL_CLASSNAME);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
+&nbsp;         * defined by &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7518#section-7.6&quot;&gt;RFC 7518, Section 7.6&lt;/a&gt;
+&nbsp;         * (for Weierstrass Elliptic Curves) and
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-5&quot;&gt;RFC 8037, Section 5&lt;/a&gt; (for Edwards Elliptic Curves).
+&nbsp;         *
+&nbsp;         * @return a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}.
+&nbsp;         */
+&nbsp;        public static Registry&lt;String, Curve&gt; get() {
+<b class="fc">&nbsp;            return REGISTRY;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code P-256} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1&quot;&gt;RFC 7518, Section 6.2.1.1&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code secp256r1} algorithm.
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve P256 = get().forKey(&quot;P-256&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code P-384} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1&quot;&gt;RFC 7518, Section 6.2.1.1&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code secp384r1} algorithm.
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve P384 = get().forKey(&quot;P-384&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code P-521} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1&quot;&gt;RFC 7518, Section 6.2.1.1&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code secp521r1} algorithm.
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve P521 = get().forKey(&quot;P-521&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code Ed25519} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-3.1&quot;&gt;RFC 8037, Section 3.1&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code Ed25519}&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; algorithm.
+&nbsp;         *
+&nbsp;         * &lt;p&gt;&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath. If on Java 14 or earlier, BouncyCastle will be used automatically if found in the runtime
+&nbsp;         * classpath.&lt;/p&gt;
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve Ed25519 = get().forKey(&quot;Ed25519&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code Ed448} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-3.1&quot;&gt;RFC 8037, Section 3.1&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code Ed448}&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; algorithm.
+&nbsp;         *
+&nbsp;         * &lt;p&gt;&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath. If on Java 14 or earlier, BouncyCastle will be used automatically if found in the runtime
+&nbsp;         * classpath.&lt;/p&gt;
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve Ed448 = get().forKey(&quot;Ed448&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code X25519} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-3.2&quot;&gt;RFC 8037, Section 3.2&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code X25519}&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; algorithm.
+&nbsp;         *
+&nbsp;         * &lt;p&gt;&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+&nbsp;         * classpath.&lt;/p&gt;
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve X25519 = get().forKey(&quot;X25519&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code X448} Elliptic Curve defined by
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-3.2&quot;&gt;RFC 8037, Section 3.2&lt;/a&gt;
+&nbsp;         * using the native Java JCA {@code X448}&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; algorithm.
+&nbsp;         *
+&nbsp;         * &lt;p&gt;&lt;b&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/b&gt; Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+&nbsp;         * classpath.&lt;/p&gt;
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html&quot;&gt;Java Security Standard Algorithm Names&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final Curve X448 = get().forKey(&quot;X448&quot;);</b>
+&nbsp;
+&nbsp;        //prevent instantiation
+&nbsp;        private CRV() {
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Various (&lt;em&gt;but not all&lt;/em&gt;)
+&nbsp;     * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA Hash
+&nbsp;     * Algorithms&lt;/a&gt; commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier&quot;&gt;JWK Thumbprint URIs&lt;/a&gt;.
+&nbsp;     * Each algorithm is made available as a ({@code public static final}) constant for direct type-safe
+&nbsp;     * reference in application code. For example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * Jwks.{@link Jwks#builder}()
+&nbsp;     *     // ... etc ...
+&nbsp;     *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(Jwts.HASH.{@link Jwks.HASH#SHA256 SHA256}) // &amp;lt;---
+&nbsp;     *     .build()&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     * &lt;p&gt;or&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * HashAlgorithm hashAlg = Jwks.HASH.{@link Jwks.HASH#SHA256 SHA256};
+&nbsp;     * {@link JwkThumbprint} thumbprint = aJwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(hashAlg);
+&nbsp;     * String &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc9278#section-3&quot;&gt;rfcMandatoryPrefix&lt;/a&gt; = &quot;urn:ietf:params:oauth:jwk-thumbprint:&quot; + hashAlg.getId();
+&nbsp;     * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
+&nbsp;     * &lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     * &lt;p&gt;They are also available together as a {@link Registry} instance via the {@link #get()} method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see #get()
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    public static final class HASH {
+&nbsp;
+&nbsp;        private static final String IMPL_CLASSNAME = &quot;io.jsonwebtoken.impl.security.StandardHashAlgorithms&quot;;
+<b class="fc">&nbsp;        private static final Registry&lt;String, HashAlgorithm&gt; REGISTRY = Classes.newInstance(IMPL_CLASSNAME);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Returns a registry of various (&lt;em&gt;but not all&lt;/em&gt;)
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA Hash
+&nbsp;         * Algorithms&lt;/a&gt; commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier&quot;&gt;JWK Thumbprint URIs&lt;/a&gt;.
+&nbsp;         *
+&nbsp;         * @return a registry of various (&lt;em&gt;but not all&lt;/em&gt;)
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA Hash
+&nbsp;         * Algorithms&lt;/a&gt; commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
+&nbsp;         * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier&quot;&gt;JWK Thumbprint URIs&lt;/a&gt;.
+&nbsp;         */
+&nbsp;        public static Registry&lt;String, HashAlgorithm&gt; get() {
+<b class="fc">&nbsp;            return REGISTRY;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA
+&nbsp;         * hash algorithm&lt;/a&gt; with an {@link Identifiable#getId() id} (aka IANA &amp;quot;{@code Hash Name String}&amp;quot;)
+&nbsp;         * value of {@code sha-256}. It is a {@code HashAlgorithm} alias for the native
+&nbsp;         * Java JCA {@code SHA-256} {@code MessageDigest} algorithm.
+&nbsp;         */
+<b class="fc">&nbsp;        public static final HashAlgorithm SHA256 = get().forKey(&quot;sha-256&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA
+&nbsp;         * hash algorithm&lt;/a&gt; with an {@link Identifiable#getId() id} (aka IANA &amp;quot;{@code Hash Name String}&amp;quot;)
+&nbsp;         * value of {@code sha-384}. It is a {@code HashAlgorithm} alias for the native
+&nbsp;         * Java JCA {@code SHA-384} {@code MessageDigest} algorithm.
+&nbsp;         */
+<b class="fc">&nbsp;        public static final HashAlgorithm SHA384 = get().forKey(&quot;sha-384&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA
+&nbsp;         * hash algorithm&lt;/a&gt; with an {@link Identifiable#getId() id} (aka IANA &amp;quot;{@code Hash Name String}&amp;quot;)
+&nbsp;         * value of {@code sha-512}. It is a {@code HashAlgorithm} alias for the native
+&nbsp;         * Java JCA {@code SHA-512} {@code MessageDigest} algorithm.
+&nbsp;         */
+<b class="fc">&nbsp;        public static final HashAlgorithm SHA512 = get().forKey(&quot;sha-512&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA
+&nbsp;         * hash algorithm&lt;/a&gt; with an {@link Identifiable#getId() id} (aka IANA &amp;quot;{@code Hash Name String}&amp;quot;)
+&nbsp;         * value of {@code sha3-256}. It is a {@code HashAlgorithm} alias for the native
+&nbsp;         * Java JCA {@code SHA3-256} {@code MessageDigest} algorithm.
+&nbsp;         * &lt;p&gt;&lt;b&gt;This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath.&lt;/b&gt;&lt;/p&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final HashAlgorithm SHA3_256 = get().forKey(&quot;sha3-256&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA
+&nbsp;         * hash algorithm&lt;/a&gt; with an {@link Identifiable#getId() id} (aka IANA &amp;quot;{@code Hash Name String}&amp;quot;)
+&nbsp;         * value of {@code sha3-384}. It is a {@code HashAlgorithm} alias for the native
+&nbsp;         * Java JCA {@code SHA3-384} {@code MessageDigest} algorithm.
+&nbsp;         * &lt;p&gt;&lt;b&gt;This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath.&lt;/b&gt;&lt;/p&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final HashAlgorithm SHA3_384 = get().forKey(&quot;sha3-384&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA
+&nbsp;         * hash algorithm&lt;/a&gt; with an {@link Identifiable#getId() id} (aka IANA &amp;quot;{@code Hash Name String}&amp;quot;)
+&nbsp;         * value of {@code sha3-512}. It is a {@code HashAlgorithm} alias for the native
+&nbsp;         * Java JCA {@code SHA3-512} {@code MessageDigest} algorithm.
+&nbsp;         * &lt;p&gt;&lt;b&gt;This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
+&nbsp;         * classpath.&lt;/b&gt;&lt;/p&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final HashAlgorithm SHA3_512 = get().forKey(&quot;sha3-512&quot;);</b>
+&nbsp;
+&nbsp;        //prevent instantiation
+&nbsp;        private HASH() {
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constants for all standard JWK
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3&quot;&gt;key_ops (Key Operations)&lt;/a&gt; parameter values
+&nbsp;     * defined in the &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3&quot;&gt;JSON Web Key Operations
+&nbsp;     * Registry&lt;/a&gt;. Each standard key operation is available as a ({@code public static final}) constant for
+&nbsp;     * direct type-safe reference in application code. For example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * Jwks.builder()
+&nbsp;     *     .operations(Jwks.OP.SIGN)
+&nbsp;     *     // ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     * &lt;p&gt;They are also available together as a {@link Registry} instance via the {@link #get()} method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see #get()
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    public static final class OP {
+&nbsp;
+&nbsp;        private static final String IMPL_CLASSNAME = &quot;io.jsonwebtoken.impl.security.StandardKeyOperations&quot;;
+<b class="fc">&nbsp;        private static final Registry&lt;String, KeyOperation&gt; REGISTRY = Classes.newInstance(IMPL_CLASSNAME);</b>
+&nbsp;
+&nbsp;        private static final String BUILDER_CLASSNAME = &quot;io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder&quot;;
+&nbsp;
+&nbsp;
+&nbsp;        private static final String POLICY_BUILDER_CLASSNAME =
+&nbsp;                &quot;io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder&quot;;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+&nbsp;         *
+&nbsp;         * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+&nbsp;         */
+&nbsp;        public static KeyOperationBuilder builder() {
+<b class="fc">&nbsp;            return Classes.newInstance(BUILDER_CLASSNAME);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+&nbsp;         *
+&nbsp;         * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+&nbsp;         */
+&nbsp;        public static KeyOperationPolicyBuilder policy() {
+<b class="fc">&nbsp;            return Classes.newInstance(POLICY_BUILDER_CLASSNAME);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
+&nbsp;         * defined by &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3&quot;&gt;RFC 7517, Section 8.3&lt;/a&gt;.
+&nbsp;         *
+&nbsp;         * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
+&nbsp;         */
+&nbsp;        public static Registry&lt;String, KeyOperation&gt; get() {
+<b class="fc">&nbsp;            return REGISTRY;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code sign} operation indicating a key is intended to be used to compute digital signatures or
+&nbsp;         * MACs. It&#39;s related operation is {@link #VERIFY}.
+&nbsp;         *
+&nbsp;         * @see #VERIFY
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation SIGN = get().forKey(&quot;sign&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
+&nbsp;         * MACs. It&#39;s related operation is {@link #SIGN}.
+&nbsp;         *
+&nbsp;         * @see #SIGN
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation VERIFY = get().forKey(&quot;verify&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It&#39;s
+&nbsp;         * related operation is {@link #DECRYPT}.
+&nbsp;         *
+&nbsp;         * @see #DECRYPT
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation ENCRYPT = get().forKey(&quot;encrypt&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It&#39;s
+&nbsp;         * related operation is {@link #ENCRYPT}.
+&nbsp;         *
+&nbsp;         * @see #ENCRYPT
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation DECRYPT = get().forKey(&quot;decrypt&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It&#39;s
+&nbsp;         * related operation is {@link #UNWRAP_KEY}.
+&nbsp;         *
+&nbsp;         * @see #UNWRAP_KEY
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation WRAP_KEY = get().forKey(&quot;wrapKey&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
+&nbsp;         * decryption, if applicable. It&#39;s related operation is
+&nbsp;         * {@link #WRAP_KEY}.
+&nbsp;         *
+&nbsp;         * @see #WRAP_KEY
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation UNWRAP_KEY = get().forKey(&quot;unwrapKey&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
+&nbsp;         * a related operation.
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation DERIVE_KEY = get().forKey(&quot;deriveKey&quot;);</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
+&nbsp;         * used as key. It does not have a related operation.
+&nbsp;         *
+&nbsp;         * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2&quot;&gt;Key Operation Registry Contents&lt;/a&gt;
+&nbsp;         */
+<b class="fc">&nbsp;        public static final KeyOperation DERIVE_BITS = get().forKey(&quot;deriveBits&quot;);</b>
+&nbsp;
+&nbsp;        //prevent instantiation
+&nbsp;        private OP() {
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

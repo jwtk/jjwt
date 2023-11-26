@@ -1,0 +1,118 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CompressionCodecResolver</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: CompressionCodecResolver (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">CompressionCodecResolver</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2015 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;/**
+&nbsp; * Looks for a JWT {@code zip} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+&nbsp; * can use to decompress the JWT body.
+&nbsp; *
+&nbsp; * &lt;p&gt;JJWT&#39;s default {@link JwtParser} implementation supports both the
+&nbsp; * {@link Jwts.ZIP#DEF DEFLATE} and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
+&nbsp; * specify a {@code CompressionCodecResolver} in these cases.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;However, if you want to use a compression algorithm other than {@code DEF} or {@code GZIP}, you can implement
+&nbsp; * your own {@link CompressionCodecResolver} and specify that when
+&nbsp; * {@link io.jsonwebtoken.JwtBuilder#compressWith(io.jsonwebtoken.io.CompressionAlgorithm) building} and
+&nbsp; * {@link io.jsonwebtoken.JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver) parsing} JWTs.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @see JwtParserBuilder#setCompressionCodecResolver(CompressionCodecResolver)
+&nbsp; * @see JwtParserBuilder#zip()
+&nbsp; * @since 0.6.0
+&nbsp; * @deprecated in favor of {@link JwtParserBuilder#zip()}
+&nbsp; */
+&nbsp;@SuppressWarnings(&quot;DeprecatedIsStillUsed&quot;)
+&nbsp;@Deprecated
+&nbsp;public interface CompressionCodecResolver {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Looks for a JWT {@code zip} header, and if found, returns the corresponding {@link CompressionCodec} the parser
+&nbsp;     * can use to decompress the JWT body.
+&nbsp;     *
+&nbsp;     * @param header of the JWT
+&nbsp;     * @return CompressionCodec matching the {@code zip} header, or null if there is no {@code zip} header.
+&nbsp;     * @throws CompressionException if a {@code zip} header value is found and not supported.
+&nbsp;     */
+&nbsp;    CompressionCodec resolveCompressionCodec(Header header) throws CompressionException;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,246 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Header</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: Header (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Header$getAlgorithm</td>
+  </tr>
+  <tr>
+    <td class="name">Header$getCompressionAlgorithm$1</td>
+  </tr>
+  <tr>
+    <td class="name">Header$getContentType$0</td>
+  </tr>
+  <tr>
+    <td class="name">Header$getType$2</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * A JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-5&quot;&gt;JOSE header&lt;/a&gt;.
+&nbsp; *
+&nbsp; * &lt;p&gt;This is an immutable JSON map with convenient type-safe getters for JWT standard header parameter names.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Because this interface extends &lt;code&gt;Map&amp;lt;String, Object&amp;gt;&lt;/code&gt;, you can use standard {@code Map}
+&nbsp; * accessor/iterator methods as desired, for example:&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp; * header.get(&quot;someKey&quot;);&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;However, because {@code Header} instances are immutable, calling any of the map mutation methods
+&nbsp; * (such as {@code Map.}{@link Map#put(Object, Object) put}, etc) will result in a runtime exception.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Security&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;The {@code Header} interface itself makes no implications of integrity protection via either digital signatures or
+&nbsp; * encryption. Instead, {@link JwsHeader} and {@link JweHeader} represent this information for respective
+&nbsp; * {@link Jws} and {@link Jwe} instances.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @see ProtectedHeader
+&nbsp; * @see JwsHeader
+&nbsp; * @see JweHeader
+&nbsp; * @since 0.1
+&nbsp; */
+&nbsp;public interface Header extends Map&lt;String, Object&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Type} (typ) value: &lt;code&gt;&quot;JWT&quot;&lt;/code&gt;
+&nbsp;     *
+&nbsp;     * @deprecated since 0.12.0 - this constant is never used within the JJWT codebase.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    String JWT_TYPE = &quot;JWT&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Type} header parameter name: &lt;code&gt;&quot;typ&quot;&lt;/code&gt;
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #getType()}.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    String TYPE = &quot;typ&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Content Type} header parameter name: &lt;code&gt;&quot;cty&quot;&lt;/code&gt;
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #getContentType()}.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    String CONTENT_TYPE = &quot;cty&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Algorithm} header parameter name: &lt;code&gt;&quot;alg&quot;&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @see &lt;a href=&quot;https://tools.ietf.org/html/rfc7515#section-4.1.1&quot;&gt;JWS Algorithm Header&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.1&quot;&gt;JWE Algorithm Header&lt;/a&gt;
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #getAlgorithm()}.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    String ALGORITHM = &quot;alg&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Compression Algorithm} header parameter name: &lt;code&gt;&quot;zip&quot;&lt;/code&gt;
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #getCompressionAlgorithm()}
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    String COMPRESSION_ALGORITHM = &quot;zip&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JJWT legacy/deprecated compression algorithm header parameter name: &lt;code&gt;&quot;calg&quot;&lt;/code&gt;
+&nbsp;     *
+&nbsp;     * @deprecated use {@link #COMPRESSION_ALGORITHM} instead.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    String DEPRECATED_COMPRESSION_ALGORITHM = &quot;calg&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1&quot;&gt;
+&nbsp;     * &lt;code&gt;typ&lt;/code&gt; (Type)&lt;/a&gt; header value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * @return the {@code typ} header value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    String getType();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10&quot;&gt;
+&nbsp;     * &lt;code&gt;cty&lt;/code&gt; (Content Type)&lt;/a&gt; header value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The &lt;code&gt;cty&lt;/code&gt; (Content Type) Header Parameter is used by applications to declare the
+&nbsp;     * &lt;a href=&quot;https://www.iana.org/assignments/media-types/media-types.xhtml&quot;&gt;IANA MediaType&lt;/a&gt; of the content
+&nbsp;     * (the payload).  This is intended for use by the application when more than
+&nbsp;     * one kind of object could be present in the Payload; the application can use this value to disambiguate among
+&nbsp;     * the different kinds of objects that might be present.  It will typically not be used by applications when
+&nbsp;     * the kind of object is already known.  This parameter is ignored by JWT implementations (like JJWT); any
+&nbsp;     * processing of this parameter is performed by the JWS application.  Use of this Header Parameter is OPTIONAL.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;To keep messages compact in common situations, it is RECOMMENDED that producers omit an
+&nbsp;     * &lt;b&gt;&lt;code&gt;application/&lt;/code&gt;&lt;/b&gt; prefix of a media type value in a {@code cty} Header Parameter when
+&nbsp;     * no other &#39;&lt;b&gt;/&lt;/b&gt;&#39; appears in the media type value.  A recipient using the media type value &lt;em&gt;MUST&lt;/em&gt;
+&nbsp;     * treat it as if &lt;b&gt;&lt;code&gt;application/&lt;/code&gt;&lt;/b&gt; were prepended to any {@code cty} value not containing a
+&nbsp;     * &#39;&lt;b&gt;/&lt;/b&gt;&#39;. For instance, a {@code cty} value of &lt;b&gt;&lt;code&gt;example&lt;/code&gt;&lt;/b&gt; &lt;em&gt;SHOULD&lt;/em&gt; be used to
+&nbsp;     * represent the &lt;b&gt;&lt;code&gt;application/example&lt;/code&gt;&lt;/b&gt; media type, whereas the media type
+&nbsp;     * &lt;b&gt;&lt;code&gt;application/example;part=&amp;quot;1/2&amp;quot;&lt;/code&gt;&lt;/b&gt; cannot be shortened to
+&nbsp;     * &lt;b&gt;&lt;code&gt;example;part=&amp;quot;1/2&amp;quot;&lt;/code&gt;&lt;/b&gt;.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@code typ} header parameter value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    String getContentType();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT {@code alg} (Algorithm) header value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;If the JWT is a Signed JWT (a JWS), the &lt;a href=&quot;https://tools.ietf.org/html/rfc7515#section-4.1.1&quot;&gt;
+&nbsp;     *      &lt;code&gt;alg&lt;/code&gt;&lt;/a&gt; (Algorithm) header parameter identifies the cryptographic algorithm used to secure the
+&nbsp;     *      JWS.  Consider using {@link Jwts.SIG}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)}
+&nbsp;     *      to convert this string value to a type-safe {@code SecureDigestAlgorithm} instance.&lt;/li&gt;
+&nbsp;     *      &lt;li&gt;If the JWT is an Encrypted JWT (a JWE), the
+&nbsp;     * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.1&quot;&gt;&lt;code&gt;alg&lt;/code&gt;&lt;/a&gt; (Algorithm) header parameter
+&nbsp;     * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
+&nbsp;     * Encryption Key (CEK).  The encrypted content is not usable if the &lt;code&gt;alg&lt;/code&gt; value does not represent a
+&nbsp;     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.  Consider
+&nbsp;     * using {@link Jwts.KEY}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)} to convert this string value
+&nbsp;     * to a type-safe {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} instance.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @return the {@code alg} header value or {@code null} if not present.  This will always be
+&nbsp;     * {@code non-null} on validly constructed JWT instances, but could be {@code null} during construction.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    String getAlgorithm();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT  &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.3&quot;&gt;&lt;code&gt;zip&lt;/code&gt;&lt;/a&gt;
+&nbsp;     * (Compression Algorithm) header parameter value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Compatibility Note&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;While the JWT family of specifications only defines the &lt;code&gt;zip&lt;/code&gt; header in the JWE
+&nbsp;     * (JSON Web Encryption) specification, JJWT will also support compression for JWS as well if you choose to use it.
+&nbsp;     * However, be aware that &lt;b&gt;if you use compression when creating a JWS token, other libraries may not be able to
+&nbsp;     * parse the JWS&lt;/b&gt;. However, compression when creating JWE tokens should be universally accepted for any library
+&nbsp;     * that supports JWE.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@code zip} header parameter value or {@code null} if not present.
+&nbsp;     * @since 0.6.0
+&nbsp;     */
+&nbsp;    String getCompressionAlgorithm();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

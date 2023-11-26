@@ -1,0 +1,427 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AbstractJwk</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: AbstractJwk (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AbstractJwk</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (30/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (28/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (86/86)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AbstractJwk$put</td>
+  </tr>
+  <tr>
+    <td class="name">AbstractJwk$toString$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (30/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (28/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (86/86)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.io.Streams;
+&nbsp;import io.jsonwebtoken.impl.lang.Nameable;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameter;
+&nbsp;import io.jsonwebtoken.impl.lang.ParameterReadable;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameters;
+&nbsp;import io.jsonwebtoken.lang.Arrays;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.lang.Objects;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.lang.Supplier;
+&nbsp;import io.jsonwebtoken.security.HashAlgorithm;
+&nbsp;import io.jsonwebtoken.security.Jwk;
+&nbsp;import io.jsonwebtoken.security.JwkThumbprint;
+&nbsp;import io.jsonwebtoken.security.Jwks;
+&nbsp;import io.jsonwebtoken.security.KeyOperation;
+&nbsp;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.nio.charset.StandardCharsets;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.PrivateKey;
+&nbsp;import java.security.PublicKey;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Iterator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;public abstract class AbstractJwk&lt;K extends Key&gt; implements Jwk&lt;K&gt;, ParameterReadable, Nameable {
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;String&gt; ALG = Parameters.string(&quot;alg&quot;, &quot;Algorithm&quot;);</b>
+<b class="fc">&nbsp;    public static final Parameter&lt;String&gt; KID = Parameters.string(&quot;kid&quot;, &quot;Key ID&quot;);</b>
+<b class="fc">&nbsp;    static final Parameter&lt;Set&lt;KeyOperation&gt;&gt; KEY_OPS =</b>
+<b class="fc">&nbsp;            Parameters.builder(KeyOperation.class).setConverter(KeyOperationConverter.DEFAULT)</b>
+<b class="fc">&nbsp;                    .set().setId(&quot;key_ops&quot;).setName(&quot;Key Operations&quot;).build();</b>
+<b class="fc">&nbsp;    static final Parameter&lt;String&gt; KTY = Parameters.string(&quot;kty&quot;, &quot;Key Type&quot;);</b>
+<b class="fc">&nbsp;    static final Set&lt;Parameter&lt;?&gt;&gt; PARAMS = Collections.setOf(ALG, KID, KEY_OPS, KTY);</b>
+&nbsp;    public static final String IMMUTABLE_MSG = &quot;JWKs are immutable and may not be modified.&quot;;
+&nbsp;
+&nbsp;    protected final JwkContext&lt;K&gt; context;
+&nbsp;    private final List&lt;Parameter&lt;?&gt;&gt; THUMBPRINT_PARAMS;
+&nbsp;    private final int hashCode;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * @param ctx              the backing JwkContext containing the JWK parameter values.
+&nbsp;     * @param thumbprintParams the required parameters to include in the JWK Thumbprint canonical JSON representation,
+&nbsp;     *                         sorted in lexicographic order as defined by
+&nbsp;     *                         &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7638#section-3.2&quot;&gt;RFC 7638, Section 3.2&lt;/a&gt;.
+&nbsp;     */
+<b class="fc">&nbsp;    AbstractJwk(JwkContext&lt;K&gt; ctx, List&lt;Parameter&lt;?&gt;&gt; thumbprintParams) {</b>
+<b class="fc">&nbsp;        this.context = Assert.notNull(ctx, &quot;JwkContext cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        Assert.isTrue(!ctx.isEmpty(), &quot;JwkContext cannot be empty.&quot;);</b>
+<b class="fc">&nbsp;        Assert.hasText(ctx.getType(), &quot;JwkContext type cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notNull(ctx.getKey(), &quot;JwkContext key cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.THUMBPRINT_PARAMS = Assert.notEmpty(thumbprintParams, &quot;JWK Thumbprint parameters cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        HashAlgorithm idThumbprintAlg = ctx.getIdThumbprintAlgorithm();</b>
+<b class="fc">&nbsp;        if (!Strings.hasText(getId()) &amp;&amp; idThumbprintAlg != null) {</b>
+<b class="fc">&nbsp;            JwkThumbprint thumbprint = thumbprint(idThumbprintAlg);</b>
+<b class="fc">&nbsp;            String kid = thumbprint.toString();</b>
+<b class="fc">&nbsp;            ctx.setId(kid);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        this.hashCode = computeHashCode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compute and return the JWK hashCode.  As JWKs are immutable, this value will be cached as a final constant
+&nbsp;     * upon JWK instantiation. This uses the JWK&#39;s thumbprint parameters during computation, but differs from
+&nbsp;     * JwkThumbprint calculation in two ways:
+&nbsp;     * &lt;ol&gt;
+&nbsp;     *     &lt;li&gt;JwkThumbprints use a MessageDigest calculation, which is unnecessary overhead for a hashcode&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;The hashCode calculation uses each parameter&#39;s idiomatic (Java) object value instead of the
+&nbsp;     *     JwkThumbprint-required canonical (String) value.&lt;/li&gt;
+&nbsp;     * &lt;/ol&gt;
+&nbsp;     *
+&nbsp;     * @return the JWK hashcode
+&nbsp;     */
+&nbsp;    private int computeHashCode() {
+<b class="fc">&nbsp;        List&lt;Object&gt; list = new ArrayList&lt;&gt;(this.THUMBPRINT_PARAMS.size() + 1 /* possible discriminator */);</b>
+&nbsp;        // So we don&#39;t leak information about the private key value, we need a discriminator to ensure that
+&nbsp;        // public and private key hashCodes are not identical (in case both JWKs need to be in the same hash set).
+&nbsp;        // So we add a discriminator String to the list of values that are used during hashCode calculation
+<b class="fc">&nbsp;        Key key = Assert.notNull(toKey(), &quot;JWK toKey() value cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        if (key instanceof PublicKey) {</b>
+<b class="fc">&nbsp;            list.add(&quot;Public&quot;);</b>
+<b class="fc">&nbsp;        } else if (key instanceof PrivateKey) {</b>
+<b class="fc">&nbsp;            list.add(&quot;Private&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (Parameter&lt;?&gt; param : this.THUMBPRINT_PARAMS) {</b>
+&nbsp;            // Unlike thumbprint calculation, we get the idiomatic (Java) value, not canonical (String) value
+&nbsp;            // (We could have used either actually, but the idiomatic value hashCode calculation is probably
+&nbsp;            // faster).
+<b class="fc">&nbsp;            Object val = Assert.notNull(get(param), &quot;computeHashCode: Parameter idiomatic value cannot be null.&quot;);</b>
+<b class="fc">&nbsp;            list.add(val);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return Objects.nullSafeHashCode(list.toArray());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getRequiredThumbprintValue(Parameter&lt;?&gt; param) {
+<b class="fc">&nbsp;        Object value = get(param.getId());</b>
+<b class="fc">&nbsp;        if (value instanceof Supplier) {</b>
+<b class="fc">&nbsp;            value = ((Supplier&lt;?&gt;) value).get();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return Assert.isInstanceOf(String.class, value, &quot;Parameter canonical value is not a String.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWK&#39;s canonically ordered JSON for JWK thumbprint computation as defined by
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7638#section-3.2&quot;&gt;RFC 7638, Section 3.2&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * @return the JWK&#39;s canonically ordered JSON for JWK thumbprint computation.
+&nbsp;     */
+&nbsp;    private String toThumbprintJson() {
+<b class="fc">&nbsp;        StringBuilder sb = new StringBuilder().append(&#39;{&#39;);</b>
+<b class="fc">&nbsp;        Iterator&lt;Parameter&lt;?&gt;&gt; i = this.THUMBPRINT_PARAMS.iterator();</b>
+<b class="fc">&nbsp;        while (i.hasNext()) {</b>
+<b class="fc">&nbsp;            Parameter&lt;?&gt; param = i.next();</b>
+<b class="fc">&nbsp;            String value = getRequiredThumbprintValue(param);</b>
+<b class="fc">&nbsp;            sb.append(&#39;&quot;&#39;).append(param.getId()).append(&quot;\&quot;:\&quot;&quot;).append(value).append(&#39;&quot;&#39;);</b>
+<b class="fc">&nbsp;            if (i.hasNext()) {</b>
+<b class="fc">&nbsp;                sb.append(&quot;,&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        sb.append(&#39;}&#39;);</b>
+<b class="fc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkThumbprint thumbprint() {
+<b class="fc">&nbsp;        return thumbprint(Jwks.HASH.SHA256);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkThumbprint thumbprint(final HashAlgorithm alg) {
+<b class="fc">&nbsp;        String json = toThumbprintJson();</b>
+<b class="fc">&nbsp;        Assert.hasText(json, &quot;Canonical JWK Thumbprint JSON cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        byte[] bytes = json.getBytes(StandardCharsets.UTF_8); // https://www.rfc-editor.org/rfc/rfc7638#section-3 #2</b>
+<b class="fc">&nbsp;        InputStream in = Streams.of(bytes);</b>
+<b class="fc">&nbsp;        byte[] digest = alg.digest(new DefaultRequest&lt;&gt;(in, this.context.getProvider(), this.context.getRandom()));</b>
+<b class="fc">&nbsp;        return new DefaultJwkThumbprint(digest, alg);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getType() {
+<b class="fc">&nbsp;        return this.context.getType();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getName() {
+<b class="fc">&nbsp;        return this.context.getName();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;KeyOperation&gt; getOperations() {
+<b class="fc">&nbsp;        return Collections.immutable(this.context.getOperations());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getAlgorithm() {
+<b class="fc">&nbsp;        return this.context.getAlgorithm();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getId() {
+<b class="fc">&nbsp;        return this.context.getId();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public K toKey() {
+<b class="fc">&nbsp;        return this.context.getKey();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int size() {
+<b class="fc">&nbsp;        return this.context.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isEmpty() {
+<b class="fc">&nbsp;        return this.context.isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean containsKey(Object key) {
+<b class="fc">&nbsp;        return this.context.containsKey(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean containsValue(Object value) {
+<b class="fc">&nbsp;        return this.context.containsValue(value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object get(Object key) {
+<b class="fc">&nbsp;        Object val = this.context.get(key);</b>
+<b class="fc">&nbsp;        if (val instanceof Map) {</b>
+<b class="fc">&nbsp;            return Collections.immutable((Map&lt;?, ?&gt;) val);</b>
+<b class="fc">&nbsp;        } else if (val instanceof Collection) {</b>
+<b class="fc">&nbsp;            return Collections.immutable((Collection&lt;?&gt;) val);</b>
+<b class="fc">&nbsp;        } else if (Objects.isArray(val)) {</b>
+<b class="fc">&nbsp;            return Arrays.copy(val);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return val;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public &lt;T&gt; T get(Parameter&lt;T&gt; param) {
+<b class="fc">&nbsp;        return this.context.get(param);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;String&gt; keySet() {
+<b class="fc">&nbsp;        return Collections.immutable(this.context.keySet());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Collection&lt;Object&gt; values() {
+<b class="fc">&nbsp;        return Collections.immutable(this.context.values());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;Entry&lt;String, Object&gt;&gt; entrySet() {
+<b class="fc">&nbsp;        return Collections.immutable(this.context.entrySet());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Object immutable() {
+<b class="fc">&nbsp;        throw new UnsupportedOperationException(IMMUTABLE_MSG);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object put(String s, Object o) {
+<b class="fc">&nbsp;        return immutable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object remove(Object o) {
+<b class="fc">&nbsp;        return immutable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void putAll(Map&lt;? extends String, ?&gt; m) {
+<b class="fc">&nbsp;        immutable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void clear() {
+<b class="fc">&nbsp;        immutable();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return this.context.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public final int hashCode() {
+<b class="fc">&nbsp;        return this.hashCode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public final boolean equals(Object obj) {
+<b class="fc">&nbsp;        if (obj == this) return true;</b>
+<b class="fc">&nbsp;        if (obj instanceof Jwk&lt;?&gt;) {</b>
+<b class="fc">&nbsp;            Jwk&lt;?&gt; other = (Jwk&lt;?&gt;) obj;</b>
+&nbsp;            // this.getType() guaranteed non-null in constructor:
+<b class="pc">&nbsp;            return getType().equals(other.getType()) &amp;&amp; equals(other);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected abstract boolean equals(Jwk&lt;?&gt; jwk);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

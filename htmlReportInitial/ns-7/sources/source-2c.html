@@ -1,0 +1,383 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultMacAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultMacAlgorithm (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultMacAlgorithm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (27/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (66/66)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DefaultMacAlgorithm$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.2%
+  </span>
+  <span class="absValue">
+    (31/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (75/75)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.Bytes;
+&nbsp;import io.jsonwebtoken.impl.lang.CheckedFunction;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.security.InvalidKeyException;
+&nbsp;import io.jsonwebtoken.security.MacAlgorithm;
+&nbsp;import io.jsonwebtoken.security.Password;
+&nbsp;import io.jsonwebtoken.security.SecretKeyBuilder;
+&nbsp;import io.jsonwebtoken.security.SecureRequest;
+&nbsp;import io.jsonwebtoken.security.VerifySecureDigestRequest;
+&nbsp;import io.jsonwebtoken.security.WeakKeyException;
+&nbsp;
+&nbsp;import javax.crypto.Mac;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.MessageDigest;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm&lt;SecretKey, SecretKey&gt; implements MacAlgorithm {
+&nbsp;
+&nbsp;    private static final String HS256_OID = &quot;1.2.840.113549.2.9&quot;;
+&nbsp;    private static final String HS384_OID = &quot;1.2.840.113549.2.10&quot;;
+&nbsp;    private static final String HS512_OID = &quot;1.2.840.113549.2.11&quot;;
+&nbsp;
+<b class="fc">&nbsp;    private static final Set&lt;String&gt; JWA_STANDARD_IDS = new LinkedHashSet&lt;&gt;(Collections.of(&quot;HS256&quot;, &quot;HS384&quot;, &quot;HS512&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;    static final DefaultMacAlgorithm HS256 = new DefaultMacAlgorithm(256);</b>
+<b class="fc">&nbsp;    static final DefaultMacAlgorithm HS384 = new DefaultMacAlgorithm(384);</b>
+<b class="fc">&nbsp;    static final DefaultMacAlgorithm HS512 = new DefaultMacAlgorithm(512);</b>
+&nbsp;
+&nbsp;    private static final Map&lt;String, DefaultMacAlgorithm&gt; JCA_NAME_MAP;
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        JCA_NAME_MAP = new LinkedHashMap&lt;&gt;(6);</b>
+&nbsp;
+&nbsp;        // In addition to JCA names, PKCS12 OIDs are added to these per
+&nbsp;        // https://bugs.openjdk.java.net/browse/JDK-8243551 as well:
+<b class="fc">&nbsp;        JCA_NAME_MAP.put(HS256.getJcaName().toUpperCase(Locale.ENGLISH), HS256); // for case-insensitive lookup</b>
+<b class="fc">&nbsp;        JCA_NAME_MAP.put(HS256_OID, HS256);</b>
+&nbsp;
+<b class="fc">&nbsp;        JCA_NAME_MAP.put(HS384.getJcaName().toUpperCase(Locale.ENGLISH), HS384);</b>
+<b class="fc">&nbsp;        JCA_NAME_MAP.put(HS384_OID, HS384);</b>
+&nbsp;
+<b class="fc">&nbsp;        JCA_NAME_MAP.put(HS512.getJcaName().toUpperCase(Locale.ENGLISH), HS512);</b>
+<b class="fc">&nbsp;        JCA_NAME_MAP.put(HS512_OID, HS512);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private final int minKeyBitLength; //in bits
+&nbsp;
+&nbsp;    private DefaultMacAlgorithm(int digestBitLength) {
+<b class="fc">&nbsp;        this(&quot;HS&quot; + digestBitLength, &quot;HmacSHA&quot; + digestBitLength, digestBitLength);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    DefaultMacAlgorithm(String id, String jcaName, int minKeyBitLength) {
+<b class="fc">&nbsp;        super(id, jcaName);</b>
+<b class="pc">&nbsp;        Assert.isTrue(minKeyBitLength &gt; 0, &quot;minKeyLength must be greater than zero.&quot;);</b>
+<b class="fc">&nbsp;        this.minKeyBitLength = minKeyBitLength;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getKeyBitLength() {
+<b class="fc">&nbsp;        return this.minKeyBitLength;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private boolean isJwaStandard() {
+<b class="fc">&nbsp;        return JWA_STANDARD_IDS.contains(getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static boolean isJwaStandardJcaName(String jcaName) {
+<b class="fc">&nbsp;        String key = jcaName.toUpperCase(Locale.ENGLISH);</b>
+<b class="fc">&nbsp;        return JCA_NAME_MAP.containsKey(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static DefaultMacAlgorithm findByKey(Key key) {
+&nbsp;
+<b class="fc">&nbsp;        String alg = KeysBridge.findAlgorithm(key);</b>
+<b class="fc">&nbsp;        if (!Strings.hasText(alg)) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String upper = alg.toUpperCase(Locale.ENGLISH);</b>
+<b class="fc">&nbsp;        DefaultMacAlgorithm mac = JCA_NAME_MAP.get(upper);</b>
+<b class="fc">&nbsp;        if (mac == null) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // even though we found a standard alg based on the JCA name, we need to confirm that the key length is
+&nbsp;        // sufficient if the encoded key bytes are available:
+<b class="fc">&nbsp;        byte[] encoded = KeysBridge.findEncoded(key);</b>
+<b class="fc">&nbsp;        long size = Bytes.bitLength(encoded);</b>
+<b class="fc">&nbsp;        if (size &gt;= mac.getKeyBitLength()) {</b>
+<b class="fc">&nbsp;            return mac;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return null; // couldn&#39;t find a suitable match</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public SecretKeyBuilder key() {
+<b class="fc">&nbsp;        return new DefaultSecretKeyBuilder(getJcaName(), getKeyBitLength());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void assertAlgorithmName(SecretKey key, boolean signing) {
+&nbsp;
+<b class="fc">&nbsp;        String name = key.getAlgorithm();</b>
+<b class="fc">&nbsp;        if (!Strings.hasText(name)) {</b>
+<b class="fc">&nbsp;            String msg = &quot;The &quot; + keyType(signing) + &quot; key&#39;s algorithm cannot be null or empty.&quot;;</b>
+<b class="fc">&nbsp;            throw new InvalidKeyException(msg);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // We can ignore PKCS11 key name assertions because HSM module key algorithm names don&#39;t always align with
+&nbsp;        // JCA standard algorithm names:
+<b class="fc">&nbsp;        boolean pkcs11Key = KeysBridge.isSunPkcs11GenericSecret(key);</b>
+&nbsp;
+&nbsp;        //assert key&#39;s jca name is valid if it&#39;s a JWA standard algorithm:
+<b class="pc">&nbsp;        if (!pkcs11Key &amp;&amp; isJwaStandard() &amp;&amp; !isJwaStandardJcaName(name)) {</b>
+<b class="fc">&nbsp;            throw new InvalidKeyException(&quot;The &quot; + keyType(signing) + &quot; key&#39;s algorithm &#39;&quot; + name +</b>
+&nbsp;                    &quot;&#39; does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with &quot; +
+<b class="fc">&nbsp;                    getId() + &quot;.&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected void validateKey(Key k, boolean signing) {
+&nbsp;
+<b class="fc">&nbsp;        final String keyType = keyType(signing);</b>
+<b class="fc">&nbsp;        if (k == null) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;MAC &quot; + keyType + &quot; key cannot be null.&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (!(k instanceof SecretKey)) {</b>
+<b class="fc">&nbsp;            String msg = &quot;MAC &quot; + keyType + &quot; keys must be SecretKey instances.  Specified key is of type &quot; +</b>
+<b class="fc">&nbsp;                    k.getClass().getName();</b>
+<b class="fc">&nbsp;            throw new InvalidKeyException(msg);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (k instanceof Password) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Passwords are intended for use with key derivation algorithms only.&quot;;</b>
+<b class="fc">&nbsp;            throw new InvalidKeyException(msg);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        final SecretKey key = (SecretKey) k;</b>
+&nbsp;
+<b class="fc">&nbsp;        final String id = getId();</b>
+&nbsp;
+<b class="fc">&nbsp;        assertAlgorithmName(key, signing);</b>
+&nbsp;
+<b class="fc">&nbsp;        int size = KeysBridge.findBitLength(key);</b>
+&nbsp;
+&nbsp;        // We can only perform length validation if key bit length is available
+&nbsp;        // per https://github.com/jwtk/jjwt/issues/478 and https://github.com/jwtk/jjwt/issues/619
+&nbsp;        // so return early if we can&#39;t:
+<b class="fc">&nbsp;        if (size &lt; 0) return;</b>
+&nbsp;
+<b class="fc">&nbsp;        if (size &lt; this.minKeyBitLength) {</b>
+<b class="fc">&nbsp;            String msg = &quot;The &quot; + keyType + &quot; key&#39;s size is &quot; + size + &quot; bits which &quot; +</b>
+&nbsp;                    &quot;is not secure enough for the &quot; + id + &quot; algorithm.&quot;;
+&nbsp;
+<b class="pc">&nbsp;            if (isJwaStandard() &amp;&amp; isJwaStandardJcaName(getJcaName())) { //JWA standard algorithm name - reference the spec:</b>
+<b class="fc">&nbsp;                msg += &quot; The JWT &quot; +</b>
+&nbsp;                        &quot;JWA Specification (RFC 7518, Section 3.2) states that keys used with &quot; + id + &quot; MUST have a &quot; +
+&nbsp;                        &quot;size &gt;= &quot; + minKeyBitLength + &quot; bits (the key size must be greater than or equal to the hash &quot; +
+&nbsp;                        &quot;output size). Consider using the Jwts.SIG.&quot; + id + &quot;.key() &quot; +
+&nbsp;                        &quot;builder to create a key guaranteed to be secure enough for &quot; + id + &quot;.  See &quot; +
+&nbsp;                        &quot;https://tools.ietf.org/html/rfc7518#section-3.2 for more information.&quot;;
+&nbsp;            } else { //custom algorithm - just indicate required key length:
+<b class="fc">&nbsp;                msg += &quot; The &quot; + id + &quot; algorithm requires keys to have a size &gt;= &quot; + minKeyBitLength + &quot; bits.&quot;;</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            throw new WeakKeyException(msg);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] doDigest(final SecureRequest&lt;InputStream, SecretKey&gt; request) {
+<b class="fc">&nbsp;        return jca(request).withMac(new CheckedFunction&lt;Mac, byte[]&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public byte[] apply(Mac mac) throws Exception {
+<b class="fc">&nbsp;                mac.init(request.getKey());</b>
+<b class="fc">&nbsp;                InputStream payload = request.getPayload();</b>
+<b class="fc">&nbsp;                byte[] buf = new byte[1024];</b>
+<b class="fc">&nbsp;                int len = 0;</b>
+<b class="fc">&nbsp;                while (len != -1) {</b>
+<b class="fc">&nbsp;                    len = payload.read(buf);</b>
+<b class="fc">&nbsp;                    if (len &gt; 0) mac.update(buf, 0, len);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                return mac.doFinal();</b>
+&nbsp;            }
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    protected boolean doVerify(VerifySecureDigestRequest&lt;SecretKey&gt; request) {
+<b class="fc">&nbsp;        byte[] providedSignature = request.getDigest();</b>
+<b class="fc">&nbsp;        Assert.notEmpty(providedSignature, &quot;Request signature byte array cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        byte[] computedSignature = digest(request);</b>
+<b class="fc">&nbsp;        return MessageDigest.isEqual(providedSignature, computedSignature);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

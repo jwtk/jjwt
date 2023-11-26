@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > X509Mutator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: X509Mutator (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">X509Mutator$x509Chain</td>
+  </tr>
+  <tr>
+    <td class="name">X509Mutator$x509Sha1Thumbprint$1</td>
+  </tr>
+  <tr>
+    <td class="name">X509Mutator$x509Sha256Thumbprint$0</td>
+  </tr>
+  <tr>
+    <td class="name">X509Mutator$x509Url$2</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.JweHeader;
+&nbsp;import io.jsonwebtoken.JwsHeader;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Mutation (modifications) of X.509-specific properties of an associated JWT Header or JWK, enabling method chaining.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the mutator subtype, for method chaining
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface X509Mutator&lt;T extends X509Mutator&lt;T&gt;&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@code x5u} (X.509 URL) that refers to a resource containing the X.509 public key certificate or
+&nbsp;     * certificate chain of the associated JWT or JWK. A {@code null} value will remove the property from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The URI &lt;em&gt;MUST&lt;/em&gt; refer to a resource for an X.509 public key certificate or certificate chain that
+&nbsp;     * conforms to &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc5280&quot;&gt;RFC 5280&lt;/a&gt; in PEM-encoded form, with
+&nbsp;     * each certificate delimited as specified in
+&nbsp;     * &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc4945#section-6.1&quot;&gt;Section 6.1 of RFC 4945&lt;/a&gt;.
+&nbsp;     * The key in the first certificate &lt;em&gt;MUST&lt;/em&gt; match the public key represented by other members of the
+&nbsp;     * associated JWT or JWK.  The protocol used to acquire the resource &lt;em&gt;MUST&lt;/em&gt; provide integrity protection;
+&nbsp;     * an HTTP GET request to retrieve the certificate &lt;em&gt;MUST&lt;/em&gt; use
+&nbsp;     * &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc2818&quot;&gt;HTTP over TLS&lt;/a&gt;; the identity of the server
+&nbsp;     * &lt;em&gt;MUST&lt;/em&gt; be validated, as per
+&nbsp;     * &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc6125#section-6&quot;&gt;Section 6 of RFC 6125&lt;/a&gt;.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;When set for a {@link JwsHeader}, the certificate or first certificate in the chain contains
+&nbsp;     *         the public key complement of the private key used to digitally sign the JWS.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for {@link JweHeader}, the certificate or first certificate in the chain contains the
+&nbsp;     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+&nbsp;     *         decrypt the JWE.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for an {@link AsymmetricJwk}, the certificate or first certificate in the chain
+&nbsp;     *         &lt;em&gt;MUST&lt;/em&gt; contain the public key represented by the JWK.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @param uri the {@code x5u} (X.509 URL) that refers to a resource for the X.509 public key certificate or
+&nbsp;     *            certificate chain associated with the JWT or JWK.
+&nbsp;     * @return the mutator/builder for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.6&quot;&gt;JWK &lt;code&gt;x5u&lt;/code&gt; (X.509 URL) Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.5&quot;&gt;JWS &lt;code&gt;x5u&lt;/code&gt; (X.509 URL) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.7&quot;&gt;JWE &lt;code&gt;x5u&lt;/code&gt; (X.509 URL) Header Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T x509Url(URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@code x5c} (X.509 Certificate Chain) of the associated JWT or JWK. A {@code null} value will remove the
+&nbsp;     * property from the JSON map. The initial certificate &lt;em&gt;MAY&lt;/em&gt; be followed by additional certificates, with
+&nbsp;     * each subsequent certificate being the one used to certify the previous one.
+&nbsp;     *
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;When set for a {@link JwsHeader}, the first certificate (at list index 0) &lt;em&gt;MUST&lt;/em&gt; contain
+&nbsp;     *         the public key complement of the private key used to digitally sign the JWS.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for {@link JweHeader}, the first certificate (at list index 0) &lt;em&gt;MUST&lt;/em&gt; contain the
+&nbsp;     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+&nbsp;     *         decrypt the JWE.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for an {@link AsymmetricJwk}, the first certificate (at list index 0) &lt;em&gt;MUST&lt;/em&gt; contain
+&nbsp;     *         the public key represented by the JWK.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @param chain the {@code x5c} (X.509 Certificate Chain) of the associated JWT or JWK.
+&nbsp;     * @return the header/builder for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.7&quot;&gt;JWK &lt;code&gt;x5c&lt;/code&gt; (X.509 Certificate Chain) Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.6&quot;&gt;JWS &lt;code&gt;x5c&lt;/code&gt; (X.509 Certificate Chain) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.8&quot;&gt;JWE &lt;code&gt;x5c&lt;/code&gt; (X.509 Certificate Chain) Header Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T x509Chain(List&lt;X509Certificate&gt; chain);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
+&nbsp;     * X.509 Certificate associated with the JWT or JWK. A {@code null} value will remove the
+&nbsp;     * property from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that certificate thumbprints are also sometimes known as certificate fingerprints.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;When set for a {@link JwsHeader}, it is the SHA-1 thumbprint of the X.509 certificate complement of
+&nbsp;     *         the private key used to digitally sign the JWS.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for {@link JweHeader}, it is the thumbprint of the X.509 Certificate containing the
+&nbsp;     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+&nbsp;     *         decrypt the JWE.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for an {@link AsymmetricJwk}, it is the thumbprint of the X.509 certificate containing the
+&nbsp;     *         public key represented by the JWK.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @param thumbprint the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
+&nbsp;     *                   X.509 Certificate associated with the JWT or JWK
+&nbsp;     * @return the header for method chaining
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.8&quot;&gt;JWK &lt;code&gt;x5t&lt;/code&gt; (X.509 Certificate SHA-1 Thumbprint) Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.7&quot;&gt;JWS &lt;code&gt;x5t&lt;/code&gt; (X.509 Certificate SHA-1 Thumbprint) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.9&quot;&gt;JWE &lt;code&gt;x5t&lt;/code&gt; (X.509 Certificate SHA-1 Thumbprint) Header Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T x509Sha1Thumbprint(byte[] thumbprint);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@code x5t#S256} (X.509 Certificate SHA-256 Thumbprint) (a.k.a. digest) of the DER-encoding of the
+&nbsp;     * X.509 Certificate associated with the JWT or JWK. A {@code null} value will remove the
+&nbsp;     * property from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that certificate thumbprints are also sometimes known as certificate fingerprints.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;When set for a {@link JwsHeader}, it is the SHA-256 thumbprint of the X.509 certificate complement
+&nbsp;     *         of the private key used to digitally sign the JWS.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for {@link JweHeader}, it is the SHA-256 thumbprint of the X.509 Certificate containing the
+&nbsp;     *         public key to which the JWE was encrypted, and may be used to determine the private key needed to
+&nbsp;     *         decrypt the JWE.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;When set for a {@link AsymmetricJwk}, it is the SHA-256 thumbprint of the X.509 certificate
+&nbsp;     *         containing the public key represented by the JWK.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @param thumbprint the {@code x5t} (X.509 Certificate SHA-1 Thumbprint) (a.k.a. digest) of the DER-encoding of the
+&nbsp;     *                   X.509 Certificate associated with the JWT or JWK
+&nbsp;     * @return the header for method chaining
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.9&quot;&gt;JWK &lt;code&gt;x5t#S256&lt;/code&gt; (X.509 Certificate SHA-256 Thumbprint) Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.8&quot;&gt;JWS &lt;code&gt;x5t#S256&lt;/code&gt; (X.509 Certificate SHA-256 Thumbprint) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.10&quot;&gt;JWE &lt;code&gt;x5t#S256&lt;/code&gt; (X.509 Certificate SHA-256 Thumbprint) Header Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T x509Sha256Thumbprint(byte[] thumbprint);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,206 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OctetPrivateJwkFactory</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: OctetPrivateJwkFactory (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OctetPrivateJwkFactory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (28/28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.ParameterReadable;
+&nbsp;import io.jsonwebtoken.impl.lang.RequiredParameterReader;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.security.InvalidKeyException;
+&nbsp;import io.jsonwebtoken.security.OctetPrivateJwk;
+&nbsp;import io.jsonwebtoken.security.OctetPublicJwk;
+&nbsp;
+&nbsp;import java.security.PrivateKey;
+&nbsp;import java.security.PublicKey;
+&nbsp;
+&nbsp;public class OctetPrivateJwkFactory extends OctetJwkFactory&lt;PrivateKey, OctetPrivateJwk&lt;PrivateKey, PublicKey&gt;&gt; {
+&nbsp;
+&nbsp;    public OctetPrivateJwkFactory() {
+<b class="fc">&nbsp;        super(PrivateKey.class, DefaultOctetPrivateJwk.PARAMS);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected boolean supportsKeyValues(JwkContext&lt;?&gt; ctx) {
+<b class="fc">&nbsp;        return super.supportsKeyValues(ctx) &amp;&amp; ctx.containsKey(DefaultOctetPrivateJwk.D.getId());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected OctetPrivateJwk&lt;PrivateKey, PublicKey&gt; createJwkFromKey(JwkContext&lt;PrivateKey&gt; ctx) {
+<b class="fc">&nbsp;        PrivateKey key = Assert.notNull(ctx.getKey(), &quot;PrivateKey cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        EdwardsCurve crv = EdwardsCurve.forKey(key);</b>
+&nbsp;
+<b class="fc">&nbsp;        PublicKey pub = ctx.getPublicKey();</b>
+<b class="fc">&nbsp;        if (pub != null) {</b>
+<b class="fc">&nbsp;            if (!crv.equals(EdwardsCurve.forKey(pub))) {</b>
+<b class="fc">&nbsp;                String msg = &quot;Specified Edwards Curve PublicKey does not match the specified PrivateKey&#39;s curve.&quot;;</b>
+<b class="fc">&nbsp;                throw new InvalidKeyException(msg);</b>
+&nbsp;            }
+&nbsp;        } else { // not supplied - try to generate it:
+<b class="fc">&nbsp;            pub = EdwardsCurve.derivePublic(key);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // If a JWK fingerprint has been requested to be the JWK id, ensure we copy over the one computed for the
+&nbsp;        // public key per https://www.rfc-editor.org/rfc/rfc7638#section-3.2.1
+<b class="pc">&nbsp;        boolean copyId = !Strings.hasText(ctx.getId()) &amp;&amp; ctx.getIdThumbprintAlgorithm() != null;</b>
+<b class="fc">&nbsp;        JwkContext&lt;PublicKey&gt; pubCtx = OctetPublicJwkFactory.INSTANCE.newContext(ctx, pub);</b>
+<b class="fc">&nbsp;        OctetPublicJwk&lt;PublicKey&gt; pubJwk = OctetPublicJwkFactory.INSTANCE.createJwk(pubCtx);</b>
+<b class="fc">&nbsp;        ctx.putAll(pubJwk);</b>
+<b class="fc">&nbsp;        if (copyId) {</b>
+<b class="fc">&nbsp;            ctx.setId(pubJwk.getId());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        //now add the d value
+<b class="fc">&nbsp;        byte[] d = crv.getKeyMaterial(key);</b>
+<b class="fc">&nbsp;        Assert.notEmpty(d, &quot;Edwards PrivateKey &#39;d&#39; value cannot be null or empty.&quot;);</b>
+&nbsp;        //TODO: assert that the curve contains the specified key
+<b class="fc">&nbsp;        put(ctx, DefaultOctetPrivateJwk.D, d);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new DefaultOctetPrivateJwk&lt;&gt;(ctx, pubJwk);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected OctetPrivateJwk&lt;PrivateKey, PublicKey&gt; createJwkFromValues(JwkContext&lt;PrivateKey&gt; ctx) {
+<b class="fc">&nbsp;        ParameterReadable reader = new RequiredParameterReader(ctx);</b>
+<b class="fc">&nbsp;        EdwardsCurve curve = getCurve(reader);</b>
+&nbsp;        //TODO: assert that the curve contains the specified key
+&nbsp;
+&nbsp;        // public values are required, so assert them:
+<b class="fc">&nbsp;        JwkContext&lt;PublicKey&gt; pubCtx = new DefaultJwkContext&lt;&gt;(DefaultOctetPublicJwk.PARAMS, ctx);</b>
+<b class="fc">&nbsp;        OctetPublicJwk&lt;PublicKey&gt; pubJwk = OctetPublicJwkFactory.INSTANCE.createJwkFromValues(pubCtx);</b>
+&nbsp;
+<b class="fc">&nbsp;        byte[] d = reader.get(DefaultOctetPrivateJwk.D);</b>
+<b class="fc">&nbsp;        PrivateKey key = curve.toPrivateKey(d, ctx.getProvider());</b>
+<b class="fc">&nbsp;        ctx.setKey(key);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new DefaultOctetPrivateJwk&lt;&gt;(ctx, pubJwk);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,810 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseNCodec</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.io</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseNCodec (io.jsonwebtoken.impl.io)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseNCodec</td>
+<td class="coverageStat">
+  <span class="percent">
+    34.6%
+  </span>
+  <span class="absValue">
+    (9/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    30.4%
+  </span>
+  <span class="absValue">
+    (17/56)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36.5%
+  </span>
+  <span class="absValue">
+    (31/85)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">BaseNCodec$Context</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    35.7%
+  </span>
+  <span class="absValue">
+    (10/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    30.4%
+  </span>
+  <span class="absValue">
+    (17/56)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36%
+  </span>
+  <span class="absValue">
+    (32/89)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.io;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract superclass for Base-N encoders and decoders.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * This class is thread-safe.
+&nbsp; * &lt;/p&gt;
+&nbsp; * &lt;p&gt;
+&nbsp; * You can set the decoding behavior when the input bytes contain leftover trailing bits that cannot be created by a
+&nbsp; * valid encoding. These can be bits that are unused from the final character or entire characters. The default mode is
+&nbsp; * lenient decoding.
+&nbsp; * &lt;/p&gt;
+&nbsp; * &lt;ul&gt;
+&nbsp; * &lt;li&gt;Lenient: Any trailing bits are composed into 8-bit bytes where possible. The remainder are discarded.
+&nbsp; * &lt;li&gt;Strict: The decoding will raise an {@link IllegalArgumentException} if trailing bits are not part of a valid
+&nbsp; * encoding. Any unused bits from the final character must be zero. Impossible counts of entire final characters are not
+&nbsp; * allowed.
+&nbsp; * &lt;/ul&gt;
+&nbsp; * &lt;p&gt;
+&nbsp; * When strict decoding is enabled it is expected that the decoded bytes will be re-encoded to a byte array that matches
+&nbsp; * the original, i.e. no changes occur on the final character. This requires that the input bytes use the same padding
+&nbsp; * and alphabet as the encoder.
+&nbsp; * &lt;/p&gt;
+&nbsp; *
+&nbsp; * @since 0.12.0, copied from
+&nbsp; * &lt;a href=&quot;https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6&quot;&gt;commons-codec
+&nbsp; * 585497f09b026f6602daf986723a554e051bdfe6&lt;/a&gt;
+&nbsp; */
+&nbsp;abstract class BaseNCodec {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * EOF
+&nbsp;     */
+&nbsp;    static final int EOF = -1;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * MIME chunk size per RFC 2045 section 6.8.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The {@value} character limit does not count the trailing CRLF, but counts all other characters, including any
+&nbsp;     * equal signs.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see &lt;a href=&quot;http://www.ietf.org/rfc/rfc2045.txt&quot;&gt;RFC 2045 section 6.8&lt;/a&gt;
+&nbsp;     */
+&nbsp;    public static final int MIME_CHUNK_SIZE = 76;
+&nbsp;
+&nbsp;//    /**
+&nbsp;//     * PEM chunk size per RFC 1421 section 4.3.2.4.
+&nbsp;//     *
+&nbsp;//     * &lt;p&gt;
+&nbsp;//     * The {@value} character limit does not count the trailing CRLF, but counts all other characters, including any
+&nbsp;//     * equal signs.
+&nbsp;//     * &lt;/p&gt;
+&nbsp;//     *
+&nbsp;//     * @see &lt;a href=&quot;http://tools.ietf.org/html/rfc1421&quot;&gt;RFC 1421 section 4.3.2.4&lt;/a&gt;
+&nbsp;//     */
+&nbsp;//    public static final int PEM_CHUNK_SIZE = 64;
+&nbsp;
+&nbsp;    private static final int DEFAULT_BUFFER_RESIZE_FACTOR = 2;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines the default buffer size - currently {@value}
+&nbsp;     * - must be large enough for at least one encoded block+separator
+&nbsp;     */
+&nbsp;    private static final int DEFAULT_BUFFER_SIZE = 8192;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The maximum size buffer to allocate.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is set to the same size used in the JDK {@code java.util.ArrayList}:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;
+&nbsp;     * Some VMs reserve some header words in an array.
+&nbsp;     * Attempts to allocate larger arrays may result in
+&nbsp;     * OutOfMemoryError: Requested array size exceeds VM limit.
+&nbsp;     * &lt;/blockquote&gt;
+&nbsp;     */
+&nbsp;    private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Mask used to extract 8 bits, used in decoding bytes
+&nbsp;     */
+&nbsp;    protected static final int MASK_8BITS = 0xff;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Byte used to pad output.
+&nbsp;     */
+&nbsp;    protected static final byte PAD_DEFAULT = &#39;=&#39;; // Allow static access to default
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The default decoding policy.
+&nbsp;     *
+&nbsp;     * @since 1.15
+&nbsp;     */
+<b class="fc">&nbsp;    protected static final CodecPolicy DECODING_POLICY_DEFAULT = CodecPolicy.LENIENT;</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Chunk separator per RFC 2045 section 2.1.
+&nbsp;     *
+&nbsp;     * @see &lt;a href=&quot;http://www.ietf.org/rfc/rfc2045.txt&quot;&gt;RFC 2045 section 2.1&lt;/a&gt;
+&nbsp;     */
+<b class="fc">&nbsp;    static final byte[] CHUNK_SEPARATOR = {&#39;\r&#39;, &#39;\n&#39;};</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Pad byte. Instance variable just in case it needs to vary later.
+&nbsp;     */
+&nbsp;    protected final byte pad;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Number of bytes in each full block of unencoded data, e.g. 4 for Base64 and 5 for Base32
+&nbsp;     */
+&nbsp;    private final int unencodedBlockSize;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Number of bytes in each full block of encoded data, e.g. 3 for Base64 and 8 for Base32
+&nbsp;     */
+&nbsp;    private final int encodedBlockSize;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Chunksize for encoding. Not used when decoding.
+&nbsp;     * A value of zero or less implies no chunking of the encoded data.
+&nbsp;     * Rounded down to the nearest multiple of encodedBlockSize.
+&nbsp;     */
+&nbsp;    protected final int lineLength;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Size of chunk separator. Not used unless {@link #lineLength} &amp;gt; 0.
+&nbsp;     */
+&nbsp;    private final int chunkSeparatorLength;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Defines the decoding behavior when the input bytes contain leftover trailing bits that
+&nbsp;     * cannot be created by a valid encoding. These can be bits that are unused from the final
+&nbsp;     * character or entire characters. The default mode is lenient decoding. Set this to
+&nbsp;     * {@code true} to enable strict decoding.
+&nbsp;     * &lt;ul&gt;
+&nbsp;     * &lt;li&gt;Lenient: Any trailing bits are composed into 8-bit bytes where possible.
+&nbsp;     *     The remainder are discarded.
+&nbsp;     * &lt;li&gt;Strict: The decoding will raise an {@link IllegalArgumentException} if trailing bits
+&nbsp;     *     are not part of a valid encoding. Any unused bits from the final character must
+&nbsp;     *     be zero. Impossible counts of entire final characters are not allowed.
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     * &lt;p&gt;
+&nbsp;     * When strict decoding is enabled it is expected that the decoded bytes will be re-encoded
+&nbsp;     * to a byte array that matches the original, i.e. no changes occur on the final
+&nbsp;     * character. This requires that the input bytes use the same padding and alphabet
+&nbsp;     * as the encoder.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     */
+&nbsp;    private final CodecPolicy decodingPolicy;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Holds thread context so classes can be thread-safe.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This class is not itself thread-safe; each thread must allocate its own copy.
+&nbsp;     *
+&nbsp;     * @since 1.7
+&nbsp;     */
+<b class="fc">&nbsp;    static class Context {</b>
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Placeholder for the bytes we&#39;re dealing with for our based logic.
+&nbsp;         * Bitwise operations store and extract the encoding or decoding from this variable.
+&nbsp;         */
+&nbsp;        int ibitWorkArea;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Placeholder for the bytes we&#39;re dealing with for our based logic.
+&nbsp;         * Bitwise operations store and extract the encoding or decoding from this variable.
+&nbsp;         */
+&nbsp;        long lbitWorkArea;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Buffer for streaming.
+&nbsp;         */
+&nbsp;        byte[] buffer;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Position where next character should be written in the buffer.
+&nbsp;         */
+&nbsp;        int pos;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Position where next character should be read from the buffer.
+&nbsp;         */
+&nbsp;        int readPos;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Boolean flag to indicate the EOF has been reached. Once EOF has been reached, this object becomes useless,
+&nbsp;         * and must be thrown away.
+&nbsp;         */
+&nbsp;        boolean eof;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Variable tracks how many characters have been written to the current line. Only used when encoding. We use
+&nbsp;         * it to make sure each encoded line never goes beyond lineLength (if lineLength &amp;gt; 0).
+&nbsp;         */
+&nbsp;        int currentLinePos;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Writes to the buffer only occur after every 3/5 reads when encoding, and every 4/8 reads when decoding. This
+&nbsp;         * variable helps track that.
+&nbsp;         */
+&nbsp;        int modulus;
+&nbsp;
+&nbsp;        /**
+&nbsp;         * Returns a String useful for debugging (especially within a debugger.)
+&nbsp;         *
+&nbsp;         * @return a String useful for debugging.
+&nbsp;         */
+&nbsp;        @Override
+&nbsp;        public String toString() {
+<b class="nc">&nbsp;            return String.format(&quot;%s[buffer=%s, currentLinePos=%s, eof=%s, ibitWorkArea=%s, lbitWorkArea=%s, &quot; +</b>
+<b class="nc">&nbsp;                            &quot;modulus=%s, pos=%s, readPos=%s]&quot;, getClass().getSimpleName(), Arrays.toString(buffer),</b>
+<b class="nc">&nbsp;                    currentLinePos, eof, ibitWorkArea, lbitWorkArea, modulus, pos, readPos);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create a positive capacity at least as large the minimum required capacity.
+&nbsp;     * If the minimum capacity is negative then this throws an OutOfMemoryError as no array
+&nbsp;     * can be allocated.
+&nbsp;     *
+&nbsp;     * @param minCapacity the minimum capacity
+&nbsp;     * @return the capacity
+&nbsp;     * @throws OutOfMemoryError if the {@code minCapacity} is negative
+&nbsp;     */
+&nbsp;    private static int createPositiveCapacity(final int minCapacity) {
+<b class="nc">&nbsp;        if (minCapacity &lt; 0) {</b>
+&nbsp;            // overflow
+<b class="nc">&nbsp;            throw new OutOfMemoryError(&quot;Unable to allocate array size: &quot; + (minCapacity &amp; 0xffffffffL));</b>
+&nbsp;        }
+&nbsp;        // This is called when we require buffer expansion to a very big array.
+&nbsp;        // Use the conservative maximum buffer size if possible, otherwise the biggest required.
+&nbsp;        //
+&nbsp;        // Note: In this situation JDK 1.8 java.util.ArrayList returns Integer.MAX_VALUE.
+&nbsp;        // This excludes some VMs that can exceed MAX_BUFFER_SIZE but not allocate a full
+&nbsp;        // Integer.MAX_VALUE length array.
+&nbsp;        // The result is that we may have to allocate an array of this size more than once if
+&nbsp;        // the capacity must be expanded again.
+<b class="nc">&nbsp;        return Math.max(minCapacity, MAX_BUFFER_SIZE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;//    /**
+&nbsp;//     * Gets a copy of the chunk separator per RFC 2045 section 2.1.
+&nbsp;//     *
+&nbsp;//     * @return the chunk separator
+&nbsp;//     * @see &lt;a href=&quot;http://www.ietf.org/rfc/rfc2045.txt&quot;&gt;RFC 2045 section 2.1&lt;/a&gt;
+&nbsp;//     * @since 1.15
+&nbsp;//     */
+&nbsp;//    public static byte[] getChunkSeparator() {
+&nbsp;//        return CHUNK_SEPARATOR.clone();
+&nbsp;//    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks if a byte value is whitespace or not.
+&nbsp;     *
+&nbsp;     * @param byteToCheck the byte to check
+&nbsp;     * @return true if byte is whitespace, false otherwise
+&nbsp;     * @see Character#isWhitespace(int)
+&nbsp;     * @deprecated Use {@link Character#isWhitespace(int)}.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    protected static boolean isWhiteSpace(final byte byteToCheck) {
+<b class="nc">&nbsp;        return Character.isWhitespace(byteToCheck);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static int compareUnsigned(int x, int y) {
+<b class="nc">&nbsp;        return Integer.compare(x + Integer.MIN_VALUE, y + Integer.MIN_VALUE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Increases our buffer by the {@link #DEFAULT_BUFFER_RESIZE_FACTOR}.
+&nbsp;     *
+&nbsp;     * @param context     the context to be used
+&nbsp;     * @param minCapacity the minimum required capacity
+&nbsp;     * @return the resized byte[] buffer
+&nbsp;     * @throws OutOfMemoryError if the {@code minCapacity} is negative
+&nbsp;     */
+&nbsp;    private static byte[] resizeBuffer(final Context context, final int minCapacity) {
+&nbsp;        // Overflow-conscious code treats the min and new capacity as unsigned.
+<b class="nc">&nbsp;        final int oldCapacity = context.buffer.length;</b>
+<b class="nc">&nbsp;        int newCapacity = oldCapacity * DEFAULT_BUFFER_RESIZE_FACTOR;</b>
+<b class="nc">&nbsp;        if (compareUnsigned(newCapacity, minCapacity) &lt; 0) {</b>
+<b class="nc">&nbsp;            newCapacity = minCapacity;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (compareUnsigned(newCapacity, MAX_BUFFER_SIZE) &gt; 0) {</b>
+<b class="nc">&nbsp;            newCapacity = createPositiveCapacity(minCapacity);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        final byte[] b = Arrays.copyOf(context.buffer, newCapacity);</b>
+<b class="nc">&nbsp;        context.buffer = b;</b>
+<b class="nc">&nbsp;        return b;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Note {@code lineLength} is rounded down to the nearest multiple of the encoded block size.
+&nbsp;     * If {@code chunkSeparatorLength} is zero, then chunking is disabled.
+&nbsp;     *
+&nbsp;     * @param unencodedBlockSize   the size of an unencoded block (e.g. Base64 = 3)
+&nbsp;     * @param encodedBlockSize     the size of an encoded block (e.g. Base64 = 4)
+&nbsp;     * @param lineLength           if &amp;gt; 0, use chunking with a length {@code lineLength}
+&nbsp;     * @param chunkSeparatorLength the chunk separator length, if relevant
+&nbsp;     */
+&nbsp;    protected BaseNCodec(final int unencodedBlockSize, final int encodedBlockSize,
+&nbsp;                         final int lineLength, final int chunkSeparatorLength) {
+<b class="nc">&nbsp;        this(unencodedBlockSize, encodedBlockSize, lineLength, chunkSeparatorLength, PAD_DEFAULT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Note {@code lineLength} is rounded down to the nearest multiple of the encoded block size.
+&nbsp;     * If {@code chunkSeparatorLength} is zero, then chunking is disabled.
+&nbsp;     *
+&nbsp;     * @param unencodedBlockSize   the size of an unencoded block (e.g. Base64 = 3)
+&nbsp;     * @param encodedBlockSize     the size of an encoded block (e.g. Base64 = 4)
+&nbsp;     * @param lineLength           if &amp;gt; 0, use chunking with a length {@code lineLength}
+&nbsp;     * @param chunkSeparatorLength the chunk separator length, if relevant
+&nbsp;     * @param pad                  byte used as padding byte.
+&nbsp;     */
+&nbsp;    protected BaseNCodec(final int unencodedBlockSize, final int encodedBlockSize,
+&nbsp;                         final int lineLength, final int chunkSeparatorLength, final byte pad) {
+<b class="nc">&nbsp;        this(unencodedBlockSize, encodedBlockSize, lineLength, chunkSeparatorLength, pad, DECODING_POLICY_DEFAULT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Note {@code lineLength} is rounded down to the nearest multiple of the encoded block size.
+&nbsp;     * If {@code chunkSeparatorLength} is zero, then chunking is disabled.
+&nbsp;     *
+&nbsp;     * @param unencodedBlockSize   the size of an unencoded block (e.g. Base64 = 3)
+&nbsp;     * @param encodedBlockSize     the size of an encoded block (e.g. Base64 = 4)
+&nbsp;     * @param lineLength           if &amp;gt; 0, use chunking with a length {@code lineLength}
+&nbsp;     * @param chunkSeparatorLength the chunk separator length, if relevant
+&nbsp;     * @param pad                  byte used as padding byte.
+&nbsp;     * @param decodingPolicy       Decoding policy.
+&nbsp;     * @since 1.15
+&nbsp;     */
+&nbsp;    protected BaseNCodec(final int unencodedBlockSize, final int encodedBlockSize,
+&nbsp;                         final int lineLength, final int chunkSeparatorLength, final byte pad,
+<b class="fc">&nbsp;                         final CodecPolicy decodingPolicy) {</b>
+<b class="fc">&nbsp;        this.unencodedBlockSize = unencodedBlockSize;</b>
+<b class="fc">&nbsp;        this.encodedBlockSize = encodedBlockSize;</b>
+<b class="pc">&nbsp;        final boolean useChunking = lineLength &gt; 0 &amp;&amp; chunkSeparatorLength &gt; 0;</b>
+<b class="pc">&nbsp;        this.lineLength = useChunking ? lineLength / encodedBlockSize * encodedBlockSize : 0;</b>
+<b class="fc">&nbsp;        this.chunkSeparatorLength = chunkSeparatorLength;</b>
+<b class="fc">&nbsp;        this.pad = pad;</b>
+<b class="fc">&nbsp;        this.decodingPolicy = Objects.requireNonNull(decodingPolicy, &quot;codecPolicy&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the amount of buffered data available for reading.
+&nbsp;     *
+&nbsp;     * @param context the context to be used
+&nbsp;     * @return The amount of buffered data available for reading.
+&nbsp;     */
+&nbsp;    int available(final Context context) {  // package protected for access from I/O streams
+<b class="fc">&nbsp;        return hasData(context) ? context.pos - context.readPos : 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tests a given byte array to see if it contains any characters within the alphabet or PAD.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Intended for use in checking line-ending arrays
+&nbsp;     *
+&nbsp;     * @param arrayOctet byte array to test
+&nbsp;     * @return {@code true} if any byte is a valid character in the alphabet or PAD; {@code false} otherwise
+&nbsp;     */
+&nbsp;    protected boolean containsAlphabetOrPad(final byte[] arrayOctet) {
+<b class="pc">&nbsp;        if (arrayOctet == null) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        for (final byte element : arrayOctet) {</b>
+<b class="pc">&nbsp;            if (pad == element || isInAlphabet(element)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static int length(byte[] bytes) {
+<b class="pc">&nbsp;        return bytes != null ? bytes.length : 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static boolean isEmpty(byte[] bytes) {
+<b class="nc">&nbsp;        return length(bytes) == 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Decodes a byte[] containing characters in the Base-N alphabet.
+&nbsp;     *
+&nbsp;     * @param pArray A byte array containing Base-N character data
+&nbsp;     * @return a byte array containing binary data
+&nbsp;     */
+&nbsp;    public byte[] decode(final byte[] pArray) {
+<b class="nc">&nbsp;        if (isEmpty(pArray)) {</b>
+<b class="nc">&nbsp;            return pArray;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        final Context context = new Context();</b>
+<b class="nc">&nbsp;        decode(pArray, 0, pArray.length, context);</b>
+<b class="nc">&nbsp;        decode(pArray, 0, EOF, context); // Notify decoder of EOF.</b>
+<b class="nc">&nbsp;        final byte[] result = new byte[context.pos];</b>
+<b class="nc">&nbsp;        readResults(result, 0, result.length, context);</b>
+<b class="nc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // package protected for access from I/O streams
+&nbsp;    abstract void decode(byte[] pArray, int i, int length, Context context);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Decodes a String containing characters in the Base-N alphabet.
+&nbsp;     *
+&nbsp;     * @param pArray A String containing Base-N character data
+&nbsp;     * @return a byte array containing binary data
+&nbsp;     */
+&nbsp;    public byte[] decode(final String pArray) {
+<b class="nc">&nbsp;        return decode(Strings.utf8(pArray));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Encodes a byte[] containing binary data, into a byte[] containing characters in the alphabet.
+&nbsp;     *
+&nbsp;     * @param pArray a byte array containing binary data
+&nbsp;     * @return A byte array containing only the base N alphabetic character data
+&nbsp;     */
+&nbsp;    public byte[] encode(final byte[] pArray) {
+<b class="nc">&nbsp;        if (isEmpty(pArray)) {</b>
+<b class="nc">&nbsp;            return pArray;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return encode(pArray, 0, pArray.length);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Encodes a byte[] containing binary data, into a byte[] containing
+&nbsp;     * characters in the alphabet.
+&nbsp;     *
+&nbsp;     * @param pArray a byte array containing binary data
+&nbsp;     * @param offset initial offset of the subarray.
+&nbsp;     * @param length length of the subarray.
+&nbsp;     * @return A byte array containing only the base N alphabetic character data
+&nbsp;     */
+&nbsp;    public byte[] encode(final byte[] pArray, final int offset, final int length) {
+<b class="nc">&nbsp;        if (isEmpty(pArray)) {</b>
+<b class="nc">&nbsp;            return pArray;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        final Context context = new Context();</b>
+<b class="nc">&nbsp;        encode(pArray, offset, length, context);</b>
+<b class="nc">&nbsp;        encode(pArray, offset, EOF, context); // Notify encoder of EOF.</b>
+<b class="nc">&nbsp;        final byte[] buf = new byte[context.pos - context.readPos];</b>
+<b class="nc">&nbsp;        readResults(buf, 0, buf.length, context);</b>
+<b class="nc">&nbsp;        return buf;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // package protected for access from I/O streams
+&nbsp;    abstract void encode(byte[] pArray, int i, int length, Context context);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Encodes a byte[] containing binary data, into a String containing characters in the appropriate alphabet.
+&nbsp;     * Uses UTF8 encoding.
+&nbsp;     *
+&nbsp;     * @param pArray a byte array containing binary data
+&nbsp;     * @return String containing only character data in the appropriate alphabet.
+&nbsp;     * @since 1.5
+&nbsp;     * This is a duplicate of {@link #encodeToString(byte[])}; it was merged during refactoring.
+&nbsp;     */
+&nbsp;    public String encodeAsString(final byte[] pArray) {
+<b class="nc">&nbsp;        return Strings.utf8(encode(pArray));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Encodes a byte[] containing binary data, into a String containing characters in the Base-N alphabet.
+&nbsp;     * Uses UTF8 encoding.
+&nbsp;     *
+&nbsp;     * @param pArray a byte array containing binary data
+&nbsp;     * @return A String containing only Base-N character data
+&nbsp;     */
+&nbsp;    public String encodeToString(final byte[] pArray) {
+<b class="nc">&nbsp;        return Strings.utf8(encode(pArray));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensure that the buffer has room for {@code size} bytes
+&nbsp;     *
+&nbsp;     * @param size    minimum spare space required
+&nbsp;     * @param context the context to be used
+&nbsp;     * @return the buffer
+&nbsp;     */
+&nbsp;    protected byte[] ensureBufferSize(final int size, final Context context) {
+<b class="fc">&nbsp;        if (context.buffer == null) {</b>
+<b class="fc">&nbsp;            context.buffer = new byte[Math.max(size, getDefaultBufferSize())];</b>
+<b class="fc">&nbsp;            context.pos = 0;</b>
+<b class="fc">&nbsp;            context.readPos = 0;</b>
+&nbsp;
+&nbsp;            // Overflow-conscious:
+&nbsp;            // x + y &gt; z  ==  x + y - z &gt; 0
+<b class="pc">&nbsp;        } else if (context.pos + size - context.buffer.length &gt; 0) {</b>
+<b class="nc">&nbsp;            return resizeBuffer(context, context.pos + size);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return context.buffer;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;//    /**
+&nbsp;//     * Returns the decoding behavior policy.
+&nbsp;//     *
+&nbsp;//     * &lt;p&gt;
+&nbsp;//     * The default is lenient. If the decoding policy is strict, then decoding will raise an
+&nbsp;//     * {@link IllegalArgumentException} if trailing bits are not part of a valid encoding. Decoding will compose
+&nbsp;//     * trailing bits into 8-bit bytes and discard the remainder.
+&nbsp;//     * &lt;/p&gt;
+&nbsp;//     *
+&nbsp;//     * @return true if using strict decoding
+&nbsp;//     * @since 1.15
+&nbsp;//     */
+&nbsp;//    public CodecPolicy getCodecPolicy() {
+&nbsp;//        return decodingPolicy;
+&nbsp;//    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Get the default buffer size. Can be overridden.
+&nbsp;     *
+&nbsp;     * @return the default buffer size.
+&nbsp;     */
+&nbsp;    protected int getDefaultBufferSize() {
+<b class="fc">&nbsp;        return DEFAULT_BUFFER_SIZE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates the amount of space needed to encode the supplied array.
+&nbsp;     *
+&nbsp;     * @param pArray byte[] array which will later be encoded
+&nbsp;     * @return amount of space needed to encode the supplied array.
+&nbsp;     * Returns a long since a max-len array will require &amp;gt; Integer.MAX_VALUE
+&nbsp;     */
+&nbsp;    public long getEncodedLength(final byte[] pArray) {
+&nbsp;        // Calculate non-chunked size - rounded up to allow for padding
+&nbsp;        // cast to long is needed to avoid possibility of overflow
+<b class="nc">&nbsp;        long len = (pArray.length + unencodedBlockSize - 1) / unencodedBlockSize * (long) encodedBlockSize;</b>
+<b class="nc">&nbsp;        if (lineLength &gt; 0) { // We&#39;re using chunking</b>
+&nbsp;            // Round up to nearest multiple
+<b class="nc">&nbsp;            len += (len + lineLength - 1) / lineLength * chunkSeparatorLength;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return len;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true if this object has buffered data for reading.
+&nbsp;     *
+&nbsp;     * @param context the context to be used
+&nbsp;     * @return true if there is data still available for reading.
+&nbsp;     */
+&nbsp;    boolean hasData(final Context context) {  // package protected for access from I/O streams
+<b class="fc">&nbsp;        return context.pos &gt; context.readPos;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns whether or not the {@code octet} is in the current alphabet.
+&nbsp;     * Does not allow whitespace or pad.
+&nbsp;     *
+&nbsp;     * @param value The value to test
+&nbsp;     * @return {@code true} if the value is defined in the current alphabet, {@code false} otherwise.
+&nbsp;     */
+&nbsp;    protected abstract boolean isInAlphabet(byte value);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tests a given byte array to see if it contains only valid characters within the alphabet.
+&nbsp;     * The method optionally treats whitespace and pad as valid.
+&nbsp;     *
+&nbsp;     * @param arrayOctet byte array to test
+&nbsp;     * @param allowWSPad if {@code true}, then whitespace and PAD are also allowed
+&nbsp;     * @return {@code true} if all bytes are valid characters in the alphabet or if the byte array is empty;
+&nbsp;     * {@code false}, otherwise
+&nbsp;     */
+&nbsp;    public boolean isInAlphabet(final byte[] arrayOctet, final boolean allowWSPad) {
+<b class="nc">&nbsp;        for (final byte octet : arrayOctet) {</b>
+<b class="nc">&nbsp;            if (!isInAlphabet(octet) &amp;&amp;</b>
+<b class="nc">&nbsp;                    (!allowWSPad || octet != pad &amp;&amp; !Character.isWhitespace(octet))) {</b>
+<b class="nc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tests a given String to see if it contains only valid characters within the alphabet.
+&nbsp;     * The method treats whitespace and PAD as valid.
+&nbsp;     *
+&nbsp;     * @param basen String to test
+&nbsp;     * @return {@code true} if all characters in the String are valid characters in the alphabet or if
+&nbsp;     * the String is empty; {@code false}, otherwise
+&nbsp;     * @see #isInAlphabet(byte[], boolean)
+&nbsp;     */
+&nbsp;    public boolean isInAlphabet(final String basen) {
+<b class="nc">&nbsp;        return isInAlphabet(Strings.utf8(basen), true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true if decoding behavior is strict. Decoding will raise an {@link IllegalArgumentException} if trailing
+&nbsp;     * bits are not part of a valid encoding.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The default is false for lenient decoding. Decoding will compose trailing bits into 8-bit bytes and discard the
+&nbsp;     * remainder.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return true if using strict decoding
+&nbsp;     * @since 1.15
+&nbsp;     */
+&nbsp;    public boolean isStrictDecoding() {
+<b class="nc">&nbsp;        return decodingPolicy == CodecPolicy.STRICT;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Extracts buffered data into the provided byte[] array, starting at position bPos, up to a maximum of bAvail
+&nbsp;     * bytes. Returns how many bytes were actually extracted.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Package private for access from I/O streams.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param b       byte[] array to extract the buffered data into.
+&nbsp;     * @param bPos    position in byte[] array to start extraction at.
+&nbsp;     * @param bAvail  amount of bytes we&#39;re allowed to extract. We may extract fewer (if fewer are available).
+&nbsp;     * @param context the context to be used
+&nbsp;     * @return The number of bytes successfully extracted into the provided byte[] array.
+&nbsp;     */
+&nbsp;    int readResults(final byte[] b, final int bPos, final int bAvail, final Context context) {
+<b class="pc">&nbsp;        if (hasData(context)) {</b>
+<b class="fc">&nbsp;            final int len = Math.min(available(context), bAvail);</b>
+<b class="fc">&nbsp;            System.arraycopy(context.buffer, context.readPos, b, bPos, len);</b>
+<b class="fc">&nbsp;            context.readPos += len;</b>
+<b class="pc">&nbsp;            if (!hasData(context)) {</b>
+&nbsp;                // All data read.
+&nbsp;                // Reset position markers but do not set buffer to null to allow its reuse.
+&nbsp;                // hasData(context) will still return false, and this method will return 0 until
+&nbsp;                // more data is available, or -1 if EOF.
+<b class="fc">&nbsp;                context.pos = context.readPos = 0;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            return len;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return context.eof ? EOF : 0;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProtectedHeaderMutator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: ProtectedHeaderMutator (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">ProtectedHeaderMutator$critical</td>
+  </tr>
+  <tr>
+    <td class="name">ProtectedHeaderMutator$jwk$2</td>
+  </tr>
+  <tr>
+    <td class="name">ProtectedHeaderMutator$jwkSetUrl$0</td>
+  </tr>
+  <tr>
+    <td class="name">ProtectedHeaderMutator$keyId$1</td>
+  </tr>
+  <tr>
+    <td class="name">ProtectedHeaderMutator$setAlgorithm$4</td>
+  </tr>
+  <tr>
+    <td class="name">ProtectedHeaderMutator$setKeyId$3</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Conjunctor;
+&nbsp;import io.jsonwebtoken.lang.NestedCollection;
+&nbsp;import io.jsonwebtoken.security.PublicJwk;
+&nbsp;import io.jsonwebtoken.security.X509Mutator;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;
+&nbsp;/**
+&nbsp; * Mutation (modifications) to a {@link ProtectedHeader Header} instance.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the mutator subtype, for method chaining
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface ProtectedHeaderMutator&lt;T extends ProtectedHeaderMutator&lt;T&gt;&gt; extends HeaderMutator&lt;T&gt;, X509Mutator&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures names of header parameters used by JWT or JWA specification extensions that &lt;em&gt;MUST&lt;/em&gt; be
+&nbsp;     * understood and supported by the JWT recipient. When finished, use the collection&#39;s
+&nbsp;     * {@link Conjunctor#and() and()} method to return to the header builder, for example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * builder.critical().add(&quot;headerName&quot;).{@link Conjunctor#and() and()} // etc...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use for {@code crit} configuration.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11&quot;&gt;JWS &lt;code&gt;crit&lt;/code&gt; (Critical) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.13&quot;&gt;JWS &lt;code&gt;crit&lt;/code&gt; (Critical) Header Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    NestedCollection&lt;String, T&gt; critical();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@code jwk} (JSON Web Key) associated with the JWT.  When set for a {@link JwsHeader}, the
+&nbsp;     * {@code jwk} is the public key complement of the private key used to digitally sign the JWS.  When set for a
+&nbsp;     * {@link JweHeader}, the {@code jwk} is the public key to which the JWE was encrypted, and may be used to
+&nbsp;     * determine the private key needed to decrypt the JWE.
+&nbsp;     *
+&nbsp;     * @param jwk the {@code jwk} (JSON Web Key) associated with the header.
+&nbsp;     * @return the header for method chaining
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.3&quot;&gt;JWS &lt;code&gt;jwk&lt;/code&gt; (JSON Web Key) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.5&quot;&gt;JWE &lt;code&gt;jwk&lt;/code&gt; (JSON Web Key) Header Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T jwk(PublicJwk&lt;?&gt; jwk);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@code jku} (JWK Set URL) value that refers to a
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-5&quot;&gt;JWK Set&lt;/a&gt;
+&nbsp;     * resource containing JSON-encoded Public Keys, or {@code null} if not present.  When set for a
+&nbsp;     * {@link JwsHeader}, the first public key in the JWK Set &lt;em&gt;must&lt;/em&gt; be the public key complement of the
+&nbsp;     * private key used to sign the JWS. When set for a {@link JweHeader}, the first public key in the JWK Set
+&nbsp;     * &lt;em&gt;must&lt;/em&gt; be the public key used during encryption.
+&nbsp;     *
+&nbsp;     * @param uri a URI that refers to a &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-5&quot;&gt;JWK Set&lt;/a&gt;
+&nbsp;     *            resource containing JSON-encoded Public Keys
+&nbsp;     * @return the header for method chaining
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.2&quot;&gt;JWS JWK Set URL&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.4&quot;&gt;JWE JWK Set URL&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T jwkSetUrl(URI uri);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JWT case-sensitive {@code kid} (Key ID) header value. A {@code null} value will remove the property
+&nbsp;     * from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The keyId header parameter is a hint indicating which key was used to secure a JWS or JWE.  This parameter
+&nbsp;     * allows originators to explicitly signal a change of key to recipients.  The structure of the keyId value is
+&nbsp;     * unspecified. Its value MUST be a case-sensitive string.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;When used with a JWK, the keyId value is used to match a JWK {@code keyId} parameter value.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param kid the case-sensitive JWS {@code kid} header value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the header instance for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.4&quot;&gt;JWS Key ID&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6&quot;&gt;JWE Key ID&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T keyId(String kid);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deprecated since 0.12.0, delegates to {@link #keyId(String)}.
+&nbsp;     *
+&nbsp;     * @param kid the case-sensitive JWS {@code kid} header value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.4&quot;&gt;JWS Key ID&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.6&quot;&gt;JWE Key ID&lt;/a&gt;
+&nbsp;     * @deprecated since 0.12.0 in favor of the more modern builder-style {@link #keyId(String)} method.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    T setKeyId(String kid);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deprecated as of 0.12.0, there is no need to set this any longer as the {@code JwtBuilder} will
+&nbsp;     * always set the {@code alg} header as necessary.
+&nbsp;     *
+&nbsp;     * @param alg the JWS or JWE algorithm {@code alg} value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     * @since 0.1
+&nbsp;     * @deprecated since 0.12.0 and will be removed before the 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    T setAlgorithm(String alg);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

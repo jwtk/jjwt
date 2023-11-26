@@ -1,0 +1,413 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CharSequenceReader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.io</a>
+</div>
+
+<h1>Coverage Summary for Class: CharSequenceReader (io.jsonwebtoken.impl.io)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CharSequenceReader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (7/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52.9%
+  </span>
+  <span class="absValue">
+    (18/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55.7%
+  </span>
+  <span class="absValue">
+    (34/61)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.io;
+&nbsp;
+&nbsp;import java.io.Reader;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * {@link Reader} implementation that can read from String, StringBuffer, StringBuilder or CharBuffer.
+&nbsp; *
+&nbsp; * &lt;p&gt;
+&nbsp; * &lt;strong&gt;Note:&lt;/strong&gt; Supports {@link #mark(int)} and {@link #reset()}.
+&nbsp; * &lt;/p&gt;
+&nbsp; *
+&nbsp; * @since 0.12.0, copied from commons-io
+&nbsp; * &lt;a href=&quot;https://github.com/apache/commons-io/blob/e67946c81a55069dcd32dd588faa57dd1532455f/src/main/java/org/apache/commons/io/input/CharSequenceInputStream.java&quot;&gt;2.14.0&lt;/a&gt;
+&nbsp; */
+&nbsp;public class CharSequenceReader extends Reader implements Serializable {
+&nbsp;
+&nbsp;    private static final long serialVersionUID = 3724187752191401220L;
+&nbsp;    private final CharSequence charSequence;
+&nbsp;    private int idx;
+&nbsp;    private int mark;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The start index in the character sequence, inclusive.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * When de-serializing a CharSequenceReader that was serialized before
+&nbsp;     * this fields was added, this field will be initialized to 0, which
+&nbsp;     * gives the same behavior as before: start reading from the start.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see #start()
+&nbsp;     * @since 2.7
+&nbsp;     */
+&nbsp;    private final int start;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The end index in the character sequence, exclusive.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * When de-serializing a CharSequenceReader that was serialized before
+&nbsp;     * this fields was added, this field will be initialized to {@code null},
+&nbsp;     * which gives the same behavior as before: stop reading at the
+&nbsp;     * CharSequence&#39;s length.
+&nbsp;     * If this field was an int instead, it would be initialized to 0 when the
+&nbsp;     * CharSequenceReader is de-serialized, causing it to not return any
+&nbsp;     * characters at all.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @see #end()
+&nbsp;     * @since 2.7
+&nbsp;     */
+&nbsp;    private final Integer end;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructs a new instance with the specified character sequence.
+&nbsp;     *
+&nbsp;     * @param charSequence The character sequence, may be {@code null}
+&nbsp;     */
+&nbsp;    public CharSequenceReader(final CharSequence charSequence) {
+<b class="fc">&nbsp;        this(charSequence, 0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructs a new instance with a portion of the specified character sequence.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The start index is not strictly enforced to be within the bounds of the
+&nbsp;     * character sequence. This allows the character sequence to grow or shrink
+&nbsp;     * in size without risking any {@link IndexOutOfBoundsException} to be thrown.
+&nbsp;     * Instead, if the character sequence grows smaller than the start index, this
+&nbsp;     * instance will act as if all characters have been read.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param charSequence The character sequence, may be {@code null}
+&nbsp;     * @param start        The start index in the character sequence, inclusive
+&nbsp;     * @throws IllegalArgumentException if the start index is negative
+&nbsp;     */
+&nbsp;    public CharSequenceReader(final CharSequence charSequence, final int start) {
+<b class="fc">&nbsp;        this(charSequence, start, Integer.MAX_VALUE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructs a new instance with a portion of the specified character sequence.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The start and end indexes are not strictly enforced to be within the bounds
+&nbsp;     * of the character sequence. This allows the character sequence to grow or shrink
+&nbsp;     * in size without risking any {@link IndexOutOfBoundsException} to be thrown.
+&nbsp;     * Instead, if the character sequence grows smaller than the start index, this
+&nbsp;     * instance will act as if all characters have been read; if the character sequence
+&nbsp;     * grows smaller than the end, this instance will use the actual character sequence
+&nbsp;     * length.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param charSequence The character sequence, may be {@code null}
+&nbsp;     * @param start        The start index in the character sequence, inclusive
+&nbsp;     * @param end          The end index in the character sequence, exclusive
+&nbsp;     * @throws IllegalArgumentException if the start index is negative, or if the end index is smaller than the start index
+&nbsp;     */
+<b class="fc">&nbsp;    public CharSequenceReader(final CharSequence charSequence, final int start, final int end) {</b>
+<b class="pc">&nbsp;        if (start &lt; 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Start index is less than zero: &quot; + start);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (end &lt; start) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;End index is less than start &quot; + start + &quot;: &quot; + end);</b>
+&nbsp;        }
+&nbsp;        // Don&#39;t check the start and end indexes against the CharSequence,
+&nbsp;        // to let it grow and shrink without breaking existing behavior.
+&nbsp;
+<b class="pc">&nbsp;        this.charSequence = charSequence != null ? charSequence : &quot;&quot;;</b>
+<b class="fc">&nbsp;        this.start = start;</b>
+<b class="fc">&nbsp;        this.end = end;</b>
+&nbsp;
+<b class="fc">&nbsp;        this.idx = start;</b>
+<b class="fc">&nbsp;        this.mark = start;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Close resets the file back to the start and removes any marked position.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void close() {
+<b class="fc">&nbsp;        idx = start;</b>
+<b class="fc">&nbsp;        mark = start;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the index in the character sequence to end reading at, taking into account its length.
+&nbsp;     *
+&nbsp;     * @return The end index in the character sequence (exclusive).
+&nbsp;     */
+&nbsp;    private int end() {
+&nbsp;        /*
+&nbsp;         * end == null for de-serialized instances that were serialized before start and end were added.
+&nbsp;         * Use Integer.MAX_VALUE to get the same behavior as before - use the entire CharSequence.
+&nbsp;         */
+<b class="pc">&nbsp;        return Math.min(charSequence.length(), end == null ? Integer.MAX_VALUE : end);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Mark the current position.
+&nbsp;     *
+&nbsp;     * @param readAheadLimit ignored
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void mark(final int readAheadLimit) {
+<b class="nc">&nbsp;        mark = idx;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Mark is supported (returns true).
+&nbsp;     *
+&nbsp;     * @return {@code true}
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean markSupported() {
+<b class="nc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read a single character.
+&nbsp;     *
+&nbsp;     * @return the next character from the character sequence
+&nbsp;     * or -1 if the end has been reached.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read() {
+<b class="fc">&nbsp;        if (idx &gt;= end()) {</b>
+<b class="fc">&nbsp;            return Streams.EOF;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return charSequence.charAt(idx++);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Read the specified number of characters into the array.
+&nbsp;     *
+&nbsp;     * @param array  The array to store the characters in
+&nbsp;     * @param offset The starting position in the array to store
+&nbsp;     * @param length The maximum number of characters to read
+&nbsp;     * @return The number of characters read or -1 if there are
+&nbsp;     * no more
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read(final char[] array, final int offset, final int length) {
+<b class="fc">&nbsp;        if (idx &gt;= end()) {</b>
+<b class="fc">&nbsp;            return Streams.EOF;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Objects.requireNonNull(array, &quot;array&quot;);</b>
+<b class="pc">&nbsp;        if (length &lt; 0 || offset &lt; 0 || offset + length &gt; array.length) {</b>
+<b class="nc">&nbsp;            throw new IndexOutOfBoundsException(&quot;Array Size=&quot; + array.length +</b>
+&nbsp;                    &quot;, offset=&quot; + offset + &quot;, length=&quot; + length);
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (charSequence instanceof String) {</b>
+<b class="fc">&nbsp;            final int count = Math.min(length, end() - idx);</b>
+<b class="fc">&nbsp;            ((String) charSequence).getChars(idx, idx + count, array, offset);</b>
+<b class="fc">&nbsp;            idx += count;</b>
+<b class="fc">&nbsp;            return count;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (charSequence instanceof StringBuilder) {</b>
+<b class="nc">&nbsp;            final int count = Math.min(length, end() - idx);</b>
+<b class="nc">&nbsp;            ((StringBuilder) charSequence).getChars(idx, idx + count, array, offset);</b>
+<b class="nc">&nbsp;            idx += count;</b>
+<b class="nc">&nbsp;            return count;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (charSequence instanceof StringBuffer) {</b>
+<b class="nc">&nbsp;            final int count = Math.min(length, end() - idx);</b>
+<b class="nc">&nbsp;            ((StringBuffer) charSequence).getChars(idx, idx + count, array, offset);</b>
+<b class="nc">&nbsp;            idx += count;</b>
+<b class="nc">&nbsp;            return count;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        int count = 0;</b>
+<b class="pc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="fc">&nbsp;            final int c = read();</b>
+<b class="fc">&nbsp;            if (c == Streams.EOF) {</b>
+<b class="fc">&nbsp;                return count;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            array[offset + i] = (char) c;</b>
+<b class="fc">&nbsp;            count++;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return count;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tells whether this stream is ready to be read.
+&nbsp;     *
+&nbsp;     * @return {@code true} if more characters from the character sequence are available, or {@code false} otherwise.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean ready() {
+<b class="nc">&nbsp;        return idx &lt; end();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reset the reader to the last marked position (or the beginning if
+&nbsp;     * mark has not been called).
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void reset() {
+<b class="nc">&nbsp;        idx = mark;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Skip the specified number of characters.
+&nbsp;     *
+&nbsp;     * @param n The number of characters to skip
+&nbsp;     * @return The actual number of characters skipped
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public long skip(final long n) {
+<b class="nc">&nbsp;        if (n &lt; 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Number of characters to skip is less than zero: &quot; + n);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (idx &gt;= end()) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        final int dest = (int) Math.min(end(), idx + n);</b>
+<b class="nc">&nbsp;        final int count = dest - idx;</b>
+<b class="nc">&nbsp;        idx = dest;</b>
+<b class="nc">&nbsp;        return count;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the index in the character sequence to start reading from, taking into account its length.
+&nbsp;     *
+&nbsp;     * @return The start index in the character sequence (inclusive).
+&nbsp;     */
+&nbsp;    private int start() {
+<b class="nc">&nbsp;        return Math.min(charSequence.length(), start);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the underlying
+&nbsp;     * character sequence.
+&nbsp;     *
+&nbsp;     * @return The contents of the character sequence
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        final CharSequence subSequence = charSequence.subSequence(start(), end());</b>
+<b class="nc">&nbsp;        return subSequence.toString();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

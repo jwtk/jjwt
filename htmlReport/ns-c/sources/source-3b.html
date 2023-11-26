@@ -1,0 +1,101 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SecretJwk</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: SecretJwk (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SecretJwk</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;
+&nbsp;/**
+&nbsp; * JWK representation of a {@link SecretKey} as defined by the JWA (RFC 7518) specification section on
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-6.4&quot;&gt;Parameters for Symmetric Keys&lt;/a&gt;.
+&nbsp; *
+&nbsp; * &lt;p&gt;Note that the {@code SecretKey}-specific properties are not available as separate dedicated getter methods, as
+&nbsp; * most Java applications should rarely, if ever, need to access these individual key properties since they typically
+&nbsp; * internal key material and/or serialization details. If you need to access these key properties, it is usually
+&nbsp; * recommended to obtain the corresponding {@link SecretKey} instance returned by {@link #toKey()} and
+&nbsp; * query that instead.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface SecretJwk extends Jwk&lt;SecretKey&gt; {
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

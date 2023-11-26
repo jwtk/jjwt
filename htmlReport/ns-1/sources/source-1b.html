@@ -1,0 +1,262 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JweHeader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: JweHeader (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JweHeader$getAgreementPartyUInfo$0</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getAgreementPartyVInfo$1</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getAuthenticationTag$3</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getEncryptionAlgorithm$6</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getEphemeralPublicKey</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getInitializationVector$5</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getPbes2Count$2</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeader$getPbes2Salt$4</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.security.AeadAlgorithm;
+&nbsp;import io.jsonwebtoken.security.KeyAlgorithm;
+&nbsp;import io.jsonwebtoken.security.PublicJwk;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.security.Key;
+&nbsp;
+&nbsp;/**
+&nbsp; * A &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html&quot;&gt;JWE&lt;/a&gt; header.
+&nbsp; *
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface JweHeader extends ProtectedHeader {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWE &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.2&quot;&gt;{@code enc} (Encryption
+&nbsp;     * Algorithm)&lt;/a&gt; header value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The JWE {@code enc} (encryption algorithm) Header Parameter identifies the content encryption algorithm
+&nbsp;     * used to perform authenticated encryption on the plaintext to produce the ciphertext and the JWE
+&nbsp;     * {@code Authentication Tag}.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that there is no corresponding &#39;setter&#39; method for this &#39;getter&#39; because JJWT users set this value by
+&nbsp;     * supplying an {@link AeadAlgorithm} to a {@link JwtBuilder} via one of its
+&nbsp;     * {@link JwtBuilder#encryptWith(SecretKey, AeadAlgorithm) encryptWith(SecretKey, AeadAlgorithm)} or
+&nbsp;     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(Key, KeyAlgorithm, AeadAlgorithm)}
+&nbsp;     * methods. JJWT will then set this {@code enc} header value automatically to the {@code AeadAlgorithm}&#39;s
+&nbsp;     * {@link AeadAlgorithm#getId() getId()} value during encryption.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the JWE {@code enc} (Encryption Algorithm) header value or {@code null} if not present.  This will
+&nbsp;     * always be {@code non-null} on validly-constructed JWE instances, but could be {@code null} during construction.
+&nbsp;     * @see JwtBuilder#encryptWith(SecretKey, AeadAlgorithm)
+&nbsp;     * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
+&nbsp;     */
+&nbsp;    String getEncryptionAlgorithm();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1&quot;&gt;{@code epk} (Ephemeral
+&nbsp;     * Public Key)&lt;/a&gt; header value created by the JWE originator for use with key agreement algorithms, or
+&nbsp;     * {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that there is no corresponding &#39;setter&#39; method for this &#39;getter&#39; because JJWT users set this value by
+&nbsp;     * supplying an ECDH-ES {@link KeyAlgorithm} to a {@link JwtBuilder} via its
+&nbsp;     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(Key, KeyAlgorithm, AeadAlgorithm)}
+&nbsp;     * method. The ECDH-ES {@code KeyAlgorithm} implementation will then set this {@code epk} header value
+&nbsp;     * automatically when producing the encryption key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1&quot;&gt;{@code epk} (Ephemeral
+&nbsp;     * Public Key)&lt;/a&gt; header value created by the JWE originator for use with key agreement algorithms, or
+&nbsp;     * {@code null} if not present.
+&nbsp;     * @see Jwts.KEY
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    PublicJwk&lt;?&gt; getEphemeralPublicKey();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns any information about the JWE producer for use with key agreement algorithms, or {@code null} if not
+&nbsp;     * present.
+&nbsp;     *
+&nbsp;     * @return any information about the JWE producer for use with key agreement algorithms, or {@code null} if not
+&nbsp;     * present.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2&quot;&gt;JWE &lt;code&gt;apu&lt;/code&gt; (Agreement PartyUInfo) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    byte[] getAgreementPartyUInfo();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns any information about the JWE recipient for use with key agreement algorithms, or {@code null} if not
+&nbsp;     * present.
+&nbsp;     *
+&nbsp;     * @return any information about the JWE recipient for use with key agreement algorithms, or {@code null} if not
+&nbsp;     * present.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3&quot;&gt;JWE &lt;code&gt;apv&lt;/code&gt; (Agreement PartyVInfo) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    byte[] getAgreementPartyVInfo();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the 96-bit &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.1&quot;&gt;&amp;quot;iv&amp;quot;
+&nbsp;     * (Initialization Vector)&lt;/a&gt; generated during key encryption, or {@code null} if not present.
+&nbsp;     * Set by AES GCM {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} implementations.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that there is no corresponding &#39;setter&#39; method for this &#39;getter&#39; because JJWT users set this value by
+&nbsp;     * supplying an AES GCM Wrap {@link KeyAlgorithm} to a {@link JwtBuilder} via its
+&nbsp;     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(Key, KeyAlgorithm, AeadAlgorithm)}
+&nbsp;     * method. The AES GCM Wrap {@code KeyAlgorithm} implementation will then set this {@code iv} header value
+&nbsp;     * automatically when producing the encryption key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the 96-bit initialization vector generated during key encryption, or {@code null} if not present.
+&nbsp;     * @see Jwts.KEY#A128GCMKW
+&nbsp;     * @see Jwts.KEY#A192GCMKW
+&nbsp;     * @see Jwts.KEY#A256GCMKW
+&nbsp;     */
+&nbsp;    byte[] getInitializationVector();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the 128-bit &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.7.1.2&quot;&gt;&amp;quot;tag&amp;quot;
+&nbsp;     * (Authentication Tag)&lt;/a&gt; resulting from key encryption, or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that there is no corresponding &#39;setter&#39; method for this &#39;getter&#39; because JJWT users set this value by
+&nbsp;     * supplying an AES GCM Wrap {@link KeyAlgorithm} to a {@link JwtBuilder} via its
+&nbsp;     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(Key, KeyAlgorithm, AeadAlgorithm)}
+&nbsp;     * method. The AES GCM Wrap {@code KeyAlgorithm} implementation will then set this {@code tag} header value
+&nbsp;     * automatically when producing the encryption key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the 128-bit authentication tag resulting from key encryption, or {@code null} if not present.
+&nbsp;     * @see Jwts.KEY#A128GCMKW
+&nbsp;     * @see Jwts.KEY#A192GCMKW
+&nbsp;     * @see Jwts.KEY#A256GCMKW
+&nbsp;     */
+&nbsp;    byte[] getAuthenticationTag();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the number of PBKDF2 iterations necessary to derive the key used during JWE encryption, or {@code null}
+&nbsp;     * if not present. Used with password-based {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm}s.
+&nbsp;     *
+&nbsp;     * @return the number of PBKDF2 iterations necessary to derive the key used during JWE encryption, or {@code null}
+&nbsp;     * if not present.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2&quot;&gt;JWE &lt;code&gt;p2c&lt;/code&gt; (PBES2 Count) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#PBES2_HS256_A128KW
+&nbsp;     * @see Jwts.KEY#PBES2_HS384_A192KW
+&nbsp;     * @see Jwts.KEY#PBES2_HS512_A256KW
+&nbsp;     */
+&nbsp;    Integer getPbes2Count();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption, or
+&nbsp;     * {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that there is no corresponding &#39;setter&#39; method for this &#39;getter&#39; because JJWT users set this value by
+&nbsp;     * supplying a password-based {@link KeyAlgorithm} to a {@link JwtBuilder} via its
+&nbsp;     * {@link JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm) encryptWith(Key, KeyAlgorithm, AeadAlgorithm)}
+&nbsp;     * method. The password-based {@code KeyAlgorithm} implementation will then set this {@code p2s} header value
+&nbsp;     * automatically when producing the encryption key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption, or
+&nbsp;     * {@code null} if not present.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1&quot;&gt;JWE &lt;code&gt;p2s&lt;/code&gt; (PBES2 Salt Input) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#PBES2_HS256_A128KW
+&nbsp;     * @see Jwts.KEY#PBES2_HS384_A192KW
+&nbsp;     * @see Jwts.KEY#PBES2_HS512_A256KW
+&nbsp;     */
+&nbsp;    byte[] getPbes2Salt();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

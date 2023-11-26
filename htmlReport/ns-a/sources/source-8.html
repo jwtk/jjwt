@@ -1,0 +1,1147 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Objects</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: Objects (io.jsonwebtoken.lang)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Objects</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    34.1%
+  </span>
+  <span class="absValue">
+    (15/44)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    29.3%
+  </span>
+  <span class="absValue">
+    (89/304)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    23.8%
+  </span>
+  <span class="absValue">
+    (81/340)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.lang;
+&nbsp;
+&nbsp;import java.io.Closeable;
+&nbsp;import java.io.Flushable;
+&nbsp;import java.io.IOException;
+&nbsp;import java.lang.reflect.Array;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility methods for working with object instances to reduce pattern repetition and otherwise
+&nbsp; * increased cyclomatic complexity.
+&nbsp; */
+&nbsp;public final class Objects {
+&nbsp;
+&nbsp;    private Objects() {
+&nbsp;    } //prevent instantiation
+&nbsp;
+&nbsp;    private static final int INITIAL_HASH = 7;
+&nbsp;    private static final int MULTIPLIER = 31;
+&nbsp;
+&nbsp;    private static final String EMPTY_STRING = &quot;&quot;;
+&nbsp;    private static final String NULL_STRING = &quot;null&quot;;
+&nbsp;    private static final String ARRAY_START = &quot;{&quot;;
+&nbsp;    private static final String ARRAY_END = &quot;}&quot;;
+&nbsp;    private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
+&nbsp;    private static final String ARRAY_ELEMENT_SEPARATOR = &quot;, &quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return whether the given throwable is a checked exception:
+&nbsp;     * that is, neither a RuntimeException nor an Error.
+&nbsp;     *
+&nbsp;     * @param ex the throwable to check
+&nbsp;     * @return whether the throwable is a checked exception
+&nbsp;     * @see java.lang.Exception
+&nbsp;     * @see java.lang.RuntimeException
+&nbsp;     * @see java.lang.Error
+&nbsp;     */
+&nbsp;    public static boolean isCheckedException(Throwable ex) {
+<b class="nc">&nbsp;        return !(ex instanceof RuntimeException || ex instanceof Error);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether the given exception is compatible with the exceptions
+&nbsp;     * declared in a throws clause.
+&nbsp;     *
+&nbsp;     * @param ex                 the exception to checked
+&nbsp;     * @param declaredExceptions the exceptions declared in the throws clause
+&nbsp;     * @return whether the given exception is compatible
+&nbsp;     */
+&nbsp;    public static boolean isCompatibleWithThrowsClause(Throwable ex, Class[] declaredExceptions) {
+<b class="nc">&nbsp;        if (!isCheckedException(ex)) {</b>
+<b class="nc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (declaredExceptions != null) {</b>
+<b class="nc">&nbsp;            int i = 0;</b>
+<b class="nc">&nbsp;            while (i &lt; declaredExceptions.length) {</b>
+<b class="nc">&nbsp;                if (declaredExceptions[i].isAssignableFrom(ex.getClass())) {</b>
+<b class="nc">&nbsp;                    return true;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                i++;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns {@code true} if the specified argument is an Object or primitive array, {@code false} otherwise.
+&nbsp;     *
+&nbsp;     * @param obj the object instance to check
+&nbsp;     * @return {@code true} if the specified argument is an Object or primitive array, {@code false} otherwise.
+&nbsp;     */
+&nbsp;    public static boolean isArray(Object obj) {
+<b class="fc">&nbsp;        return (obj != null &amp;&amp; obj.getClass().isArray());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns {@code true} if the specified argument:
+&nbsp;     * &lt;ol&gt;
+&nbsp;     *     &lt;li&gt;is {@code null}, or&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;is a CharSequence and {@link Strings#hasText(CharSequence)} is {@code false}, or&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;is a Collection or Map with zero size, or&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;is an empty array&lt;/li&gt;
+&nbsp;     * &lt;/ol&gt;
+&nbsp;     * &lt;p&gt;or {@code false} otherwise.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param v object to check
+&nbsp;     * @return {@code true} if the specified argument is empty, {@code false} otherwise.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    public static boolean isEmpty(Object v) {
+<b class="fc">&nbsp;        return v == null ||</b>
+<b class="fc">&nbsp;                (v instanceof CharSequence &amp;&amp; !Strings.hasText((CharSequence) v)) ||</b>
+<b class="fc">&nbsp;                (v instanceof Collection &amp;&amp; Collections.isEmpty((Collection&lt;?&gt;) v)) ||</b>
+<b class="fc">&nbsp;                (v instanceof Map &amp;&amp; Collections.isEmpty((Map&lt;?, ?&gt;) v)) ||</b>
+<b class="fc">&nbsp;                (v.getClass().isArray() &amp;&amp; Array.getLength(v) == 0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@code true} if the specified array is null or zero length, {@code false} if populated.
+&nbsp;     *
+&nbsp;     * @param array the array to check
+&nbsp;     * @return {@code true} if the specified array is null or zero length, {@code false} if populated.
+&nbsp;     */
+&nbsp;    public static boolean isEmpty(Object[] array) {
+<b class="fc">&nbsp;        return (array == null || array.length == 0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns {@code true} if the specified byte array is null or of zero length, {@code false} if populated.
+&nbsp;     *
+&nbsp;     * @param array the byte array to check
+&nbsp;     * @return {@code true} if the specified byte array is null or of zero length, {@code false} if populated.
+&nbsp;     */
+&nbsp;    public static boolean isEmpty(byte[] array) {
+<b class="fc">&nbsp;        return array == null || array.length == 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns {@code true} if the specified character array is null or of zero length, {@code false} otherwise.
+&nbsp;     *
+&nbsp;     * @param chars the character array to check
+&nbsp;     * @return {@code true} if the specified character array is null or of zero length, {@code false} otherwise.
+&nbsp;     */
+&nbsp;    public static boolean isEmpty(char[] chars) {
+<b class="pc">&nbsp;        return chars == null || chars.length == 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether the given array contains the given element.
+&nbsp;     *
+&nbsp;     * @param array   the array to check (may be &lt;code&gt;null&lt;/code&gt;,
+&nbsp;     *                in which case the return value will always be &lt;code&gt;false&lt;/code&gt;)
+&nbsp;     * @param element the element to check for
+&nbsp;     * @return whether the element has been found in the given array
+&nbsp;     */
+&nbsp;    public static boolean containsElement(Object[] array, Object element) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (Object arrayEle : array) {</b>
+<b class="nc">&nbsp;            if (nullSafeEquals(arrayEle, element)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether the given array of enum constants contains a constant with the given name,
+&nbsp;     * ignoring case when determining a match.
+&nbsp;     *
+&nbsp;     * @param enumValues the enum values to check, typically the product of a call to MyEnum.values()
+&nbsp;     * @param constant   the constant name to find (must not be null or empty string)
+&nbsp;     * @return whether the constant has been found in the given array
+&nbsp;     */
+&nbsp;    public static boolean containsConstant(Enum&lt;?&gt;[] enumValues, String constant) {
+<b class="nc">&nbsp;        return containsConstant(enumValues, constant, false);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Check whether the given array of enum constants contains a constant with the given name.
+&nbsp;     *
+&nbsp;     * @param enumValues    the enum values to check, typically the product of a call to MyEnum.values()
+&nbsp;     * @param constant      the constant name to find (must not be null or empty string)
+&nbsp;     * @param caseSensitive whether case is significant in determining a match
+&nbsp;     * @return whether the constant has been found in the given array
+&nbsp;     */
+&nbsp;    public static boolean containsConstant(Enum&lt;?&gt;[] enumValues, String constant, boolean caseSensitive) {
+<b class="nc">&nbsp;        for (Enum&lt;?&gt; candidate : enumValues) {</b>
+<b class="nc">&nbsp;            if (caseSensitive ?</b>
+<b class="nc">&nbsp;                    candidate.toString().equals(constant) :</b>
+<b class="nc">&nbsp;                    candidate.toString().equalsIgnoreCase(constant)) {</b>
+<b class="nc">&nbsp;                return true;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Case insensitive alternative to {@link Enum#valueOf(Class, String)}.
+&nbsp;     *
+&nbsp;     * @param &lt;E&gt;        the concrete Enum type
+&nbsp;     * @param enumValues the array of all Enum constants in question, usually per Enum.values()
+&nbsp;     * @param constant   the constant to get the enum value of
+&nbsp;     * @return the enum constant of the specified enum type with the specified case-insensitive name
+&nbsp;     * @throws IllegalArgumentException if the given constant is not found in the given array
+&nbsp;     *                                  of enum values. Use {@link #containsConstant(Enum[], String)} as a guard to
+&nbsp;     *                                  avoid this exception.
+&nbsp;     */
+&nbsp;    public static &lt;E extends Enum&lt;?&gt;&gt; E caseInsensitiveValueOf(E[] enumValues, String constant) {
+<b class="nc">&nbsp;        for (E candidate : enumValues) {</b>
+<b class="nc">&nbsp;            if (candidate.toString().equalsIgnoreCase(constant)) {</b>
+<b class="nc">&nbsp;                return candidate;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        throw new IllegalArgumentException(</b>
+<b class="nc">&nbsp;                String.format(&quot;constant [%s] does not exist in enum type %s&quot;,</b>
+<b class="nc">&nbsp;                        constant, enumValues.getClass().getComponentType().getName()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Append the given object to the given array, returning a new array
+&nbsp;     * consisting of the input array contents plus the given object.
+&nbsp;     *
+&nbsp;     * @param array the array to append to (can be &lt;code&gt;null&lt;/code&gt;)
+&nbsp;     * @param &lt;A&gt;   the type of each element in the specified {@code array}
+&nbsp;     * @param obj   the object to append
+&nbsp;     * @param &lt;O&gt;   the type of the specified object, which must be equal to or extend the &lt;code&gt;&amp;lt;A&amp;gt;&lt;/code&gt; type.
+&nbsp;     * @return the new array (of the same component type; never &lt;code&gt;null&lt;/code&gt;)
+&nbsp;     */
+&nbsp;    public static &lt;A, O extends A&gt; A[] addObjectToArray(A[] array, O obj) {
+<b class="nc">&nbsp;        Class&lt;?&gt; compType = Object.class;</b>
+<b class="nc">&nbsp;        if (array != null) {</b>
+<b class="nc">&nbsp;            compType = array.getClass().getComponentType();</b>
+<b class="nc">&nbsp;        } else if (obj != null) {</b>
+<b class="nc">&nbsp;            compType = obj.getClass();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int newArrLength = (array != null ? array.length + 1 : 1);</b>
+&nbsp;        @SuppressWarnings(&quot;unchecked&quot;)
+<b class="nc">&nbsp;        A[] newArr = (A[]) Array.newInstance(compType, newArrLength);</b>
+<b class="nc">&nbsp;        if (array != null) {</b>
+<b class="nc">&nbsp;            System.arraycopy(array, 0, newArr, 0, array.length);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        newArr[newArr.length - 1] = obj;</b>
+<b class="nc">&nbsp;        return newArr;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Convert the given array (which may be a primitive array) to an
+&nbsp;     * object array (if necessary of primitive wrapper objects).
+&nbsp;     * &lt;p&gt;A &lt;code&gt;null&lt;/code&gt; source value will be converted to an
+&nbsp;     * empty Object array.
+&nbsp;     *
+&nbsp;     * @param source the (potentially primitive) array
+&nbsp;     * @return the corresponding object array (never &lt;code&gt;null&lt;/code&gt;)
+&nbsp;     * @throws IllegalArgumentException if the parameter is not an array
+&nbsp;     */
+&nbsp;    public static Object[] toObjectArray(Object source) {
+<b class="fc">&nbsp;        if (source instanceof Object[]) {</b>
+<b class="fc">&nbsp;            return (Object[]) source;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (source == null) {</b>
+<b class="nc">&nbsp;            return new Object[0];</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (!source.getClass().isArray()) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Source is not an array: &quot; + source);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int length = Array.getLength(source);</b>
+<b class="pc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return new Object[0];</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Class wrapperType = Array.get(source, 0).getClass();</b>
+<b class="fc">&nbsp;        Object[] newArray = (Object[]) Array.newInstance(wrapperType, length);</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="fc">&nbsp;            newArray[i] = Array.get(source, i);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return newArray;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    //---------------------------------------------------------------------
+&nbsp;    // Convenience methods for content-based equality/hash-code handling
+&nbsp;    //---------------------------------------------------------------------
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determine if the given objects are equal, returning &lt;code&gt;true&lt;/code&gt;
+&nbsp;     * if both are &lt;code&gt;null&lt;/code&gt; or &lt;code&gt;false&lt;/code&gt; if only one is
+&nbsp;     * &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     * &lt;p&gt;Compares arrays with &lt;code&gt;Arrays.equals&lt;/code&gt;, performing an equality
+&nbsp;     * check based on the array elements rather than the array reference.
+&nbsp;     *
+&nbsp;     * @param o1 first Object to compare
+&nbsp;     * @param o2 second Object to compare
+&nbsp;     * @return whether the given objects are equal
+&nbsp;     * @see java.util.Arrays#equals
+&nbsp;     */
+&nbsp;    public static boolean nullSafeEquals(Object o1, Object o2) {
+<b class="fc">&nbsp;        if (o1 == o2) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (o1 == null || o2 == null) {</b>
+<b class="nc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (o1.equals(o2)) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (o1.getClass().isArray() &amp;&amp; o2.getClass().isArray()) {</b>
+<b class="pc">&nbsp;            if (o1 instanceof Object[] &amp;&amp; o2 instanceof Object[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((Object[]) o1, (Object[]) o2);</b>
+&nbsp;            }
+<b class="pc">&nbsp;            if (o1 instanceof boolean[] &amp;&amp; o2 instanceof boolean[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((boolean[]) o1, (boolean[]) o2);</b>
+&nbsp;            }
+<b class="pc">&nbsp;            if (o1 instanceof byte[] &amp;&amp; o2 instanceof byte[]) {</b>
+<b class="fc">&nbsp;                return Arrays.equals((byte[]) o1, (byte[]) o2);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (o1 instanceof char[] &amp;&amp; o2 instanceof char[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((char[]) o1, (char[]) o2);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (o1 instanceof double[] &amp;&amp; o2 instanceof double[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((double[]) o1, (double[]) o2);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (o1 instanceof float[] &amp;&amp; o2 instanceof float[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((float[]) o1, (float[]) o2);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (o1 instanceof int[] &amp;&amp; o2 instanceof int[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((int[]) o1, (int[]) o2);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (o1 instanceof long[] &amp;&amp; o2 instanceof long[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((long[]) o1, (long[]) o2);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (o1 instanceof short[] &amp;&amp; o2 instanceof short[]) {</b>
+<b class="nc">&nbsp;                return Arrays.equals((short[]) o1, (short[]) o2);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return as hash code for the given object; typically the value of
+&nbsp;     * &lt;code&gt;{@link Object#hashCode()}&lt;/code&gt;. If the object is an array,
+&nbsp;     * this method will delegate to any of the &lt;code&gt;nullSafeHashCode&lt;/code&gt;
+&nbsp;     * methods for arrays in this class. If the object is &lt;code&gt;null&lt;/code&gt;,
+&nbsp;     * this method returns 0.
+&nbsp;     *
+&nbsp;     * @param obj the object to use for obtaining a hashcode
+&nbsp;     * @return the object&#39;s hashcode, which could be 0 if the object is null.
+&nbsp;     * @see #nullSafeHashCode(Object[])
+&nbsp;     * @see #nullSafeHashCode(boolean[])
+&nbsp;     * @see #nullSafeHashCode(byte[])
+&nbsp;     * @see #nullSafeHashCode(char[])
+&nbsp;     * @see #nullSafeHashCode(double[])
+&nbsp;     * @see #nullSafeHashCode(float[])
+&nbsp;     * @see #nullSafeHashCode(int[])
+&nbsp;     * @see #nullSafeHashCode(long[])
+&nbsp;     * @see #nullSafeHashCode(short[])
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(Object obj) {
+<b class="pc">&nbsp;        if (obj == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (obj.getClass().isArray()) {</b>
+<b class="pc">&nbsp;            if (obj instanceof Object[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((Object[]) obj);</b>
+&nbsp;            }
+<b class="pc">&nbsp;            if (obj instanceof boolean[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((boolean[]) obj);</b>
+&nbsp;            }
+<b class="pc">&nbsp;            if (obj instanceof byte[]) {</b>
+<b class="fc">&nbsp;                return nullSafeHashCode((byte[]) obj);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (obj instanceof char[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((char[]) obj);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (obj instanceof double[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((double[]) obj);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (obj instanceof float[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((float[]) obj);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (obj instanceof int[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((int[]) obj);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (obj instanceof long[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((long[]) obj);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            if (obj instanceof short[]) {</b>
+<b class="nc">&nbsp;                return nullSafeHashCode((short[]) obj);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return obj.hashCode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the array to obtain a hashcode
+&nbsp;     * @return the array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(Object... array) {
+<b class="pc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="fc">&nbsp;        int arraySize = array.length;</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="fc">&nbsp;            hash = MULTIPLIER * hash + nullSafeHashCode(array[i]);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the boolean array to obtain a hashcode
+&nbsp;     * @return the boolean array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(boolean[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="nc">&nbsp;        int arraySize = array.length;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="nc">&nbsp;            hash = MULTIPLIER * hash + hashCode(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the byte array to obtain a hashcode
+&nbsp;     * @return the byte array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(byte[] array) {
+<b class="pc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="fc">&nbsp;        int arraySize = array.length;</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="fc">&nbsp;            hash = MULTIPLIER * hash + array[i];</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the char array to obtain a hashcode
+&nbsp;     * @return the char array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(char[] array) {
+<b class="pc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="fc">&nbsp;        int arraySize = array.length;</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="fc">&nbsp;            hash = MULTIPLIER * hash + array[i];</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the double array to obtain a hashcode
+&nbsp;     * @return the double array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(double[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="nc">&nbsp;        int arraySize = array.length;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="nc">&nbsp;            hash = MULTIPLIER * hash + hashCode(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the float array to obtain a hashcode
+&nbsp;     * @return the float array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(float[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="nc">&nbsp;        int arraySize = array.length;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="nc">&nbsp;            hash = MULTIPLIER * hash + hashCode(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the int array to obtain a hashcode
+&nbsp;     * @return the int array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(int[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="nc">&nbsp;        int arraySize = array.length;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="nc">&nbsp;            hash = MULTIPLIER * hash + array[i];</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the long array to obtain a hashcode
+&nbsp;     * @return the long array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(long[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="nc">&nbsp;        int arraySize = array.length;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="nc">&nbsp;            hash = MULTIPLIER * hash + hashCode(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hash code based on the contents of the specified array.
+&nbsp;     * If &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;, this method returns 0.
+&nbsp;     *
+&nbsp;     * @param array the short array to obtain a hashcode
+&nbsp;     * @return the short array&#39;s hashcode, which could be 0 if the array is null.
+&nbsp;     */
+&nbsp;    public static int nullSafeHashCode(short[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int hash = INITIAL_HASH;</b>
+<b class="nc">&nbsp;        int arraySize = array.length;</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; arraySize; i++) {</b>
+<b class="nc">&nbsp;            hash = MULTIPLIER * hash + array[i];</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the same value as &lt;code&gt;{@link Boolean#hashCode()}&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param bool the boolean to get a hashcode
+&nbsp;     * @return the same value as {@link Boolean#hashCode()}.
+&nbsp;     * @see Boolean#hashCode()
+&nbsp;     */
+&nbsp;    public static int hashCode(boolean bool) {
+<b class="nc">&nbsp;        return bool ? 1231 : 1237;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the same value as &lt;code&gt;{@link Double#hashCode()}&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param dbl the double to get a hashcode
+&nbsp;     * @return the same value as {@link Double#hashCode()}.
+&nbsp;     * @see Double#hashCode()
+&nbsp;     */
+&nbsp;    public static int hashCode(double dbl) {
+<b class="nc">&nbsp;        long bits = Double.doubleToLongBits(dbl);</b>
+<b class="nc">&nbsp;        return hashCode(bits);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the same value as &lt;code&gt;{@link Float#hashCode()}&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param flt the float to get a hashcode
+&nbsp;     * @return the same value as {@link Float#hashCode()}.
+&nbsp;     * @see Float#hashCode()
+&nbsp;     */
+&nbsp;    public static int hashCode(float flt) {
+<b class="nc">&nbsp;        return Float.floatToIntBits(flt);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return the same value as &lt;code&gt;{@link Long#hashCode()}&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param lng the long to get a hashcode
+&nbsp;     * @return the same value as {@link Long#hashCode()}.
+&nbsp;     * @see Long#hashCode()
+&nbsp;     */
+&nbsp;    public static int hashCode(long lng) {
+<b class="nc">&nbsp;        return (int) (lng ^ (lng &gt;&gt;&gt; 32));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    //---------------------------------------------------------------------
+&nbsp;    // Convenience methods for toString output
+&nbsp;    //---------------------------------------------------------------------
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of an object&#39;s overall identity.
+&nbsp;     *
+&nbsp;     * @param obj the object (which may be &lt;code&gt;null&lt;/code&gt;).
+&nbsp;     * @return the object&#39;s identity as String representation, or an empty String if the object was &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     */
+&nbsp;    public static String identityToString(Object obj) {
+<b class="nc">&nbsp;        if (obj == null) {</b>
+<b class="nc">&nbsp;            return EMPTY_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return obj.getClass().getName() + &quot;@&quot; + getIdentityHexString(obj);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a hex String form of an object&#39;s identity hash code.
+&nbsp;     *
+&nbsp;     * @param obj the object
+&nbsp;     * @return the object&#39;s identity code in hex notation
+&nbsp;     */
+&nbsp;    public static String getIdentityHexString(Object obj) {
+<b class="nc">&nbsp;        return Integer.toHexString(System.identityHashCode(obj));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a content-based String representation if &lt;code&gt;obj&lt;/code&gt; is
+&nbsp;     * not &lt;code&gt;null&lt;/code&gt;; otherwise returns an empty String.
+&nbsp;     * &lt;p&gt;Differs from {@link #nullSafeToString(Object)} in that it returns
+&nbsp;     * an empty String rather than &quot;null&quot; for a &lt;code&gt;null&lt;/code&gt; value.
+&nbsp;     *
+&nbsp;     * @param obj the object to build a display String for
+&nbsp;     * @return a display String representation of &lt;code&gt;obj&lt;/code&gt;
+&nbsp;     * @see #nullSafeToString(Object)
+&nbsp;     */
+&nbsp;    public static String getDisplayString(Object obj) {
+<b class="nc">&nbsp;        if (obj == null) {</b>
+<b class="nc">&nbsp;            return EMPTY_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return nullSafeToString(obj);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Determine the class name for the given object.
+&nbsp;     * &lt;p&gt;Returns &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;obj&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param obj the object to introspect (may be &lt;code&gt;null&lt;/code&gt;)
+&nbsp;     * @return the corresponding class name
+&nbsp;     */
+&nbsp;    public static String nullSafeClassName(Object obj) {
+<b class="pc">&nbsp;        return (obj != null ? obj.getClass().getName() : NULL_STRING);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the specified Object.
+&nbsp;     * &lt;p&gt;Builds a String representation of the contents in case of an array.
+&nbsp;     * Returns &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;obj&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param obj the object to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;obj&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(Object obj) {
+<b class="pc">&nbsp;        if (obj == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (obj instanceof String) {</b>
+<b class="fc">&nbsp;            return (String) obj;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof Object[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((Object[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof boolean[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((boolean[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof byte[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((byte[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof char[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((char[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof double[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((double[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof float[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((float[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof int[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((int[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof long[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((long[]) obj);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (obj instanceof short[]) {</b>
+<b class="nc">&nbsp;            return nullSafeToString((short[]) obj);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String str = obj.toString();</b>
+<b class="pc">&nbsp;        return (str != null ? str : EMPTY_STRING);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(Object[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(String.valueOf(array[i]));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(boolean[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(byte[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(char[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(&quot;&#39;&quot;).append(array[i]).append(&quot;&#39;&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(double[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(float[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(int[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(long[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Return a String representation of the contents of the specified array.
+&nbsp;     * &lt;p&gt;The String representation consists of a list of the array&#39;s elements,
+&nbsp;     * enclosed in curly braces (&lt;code&gt;&quot;{}&quot;&lt;/code&gt;). Adjacent elements are separated
+&nbsp;     * by the characters &lt;code&gt;&quot;, &quot;&lt;/code&gt; (a comma followed by a space). Returns
+&nbsp;     * &lt;code&gt;&quot;null&quot;&lt;/code&gt; if &lt;code&gt;array&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * @param array the array to build a String representation for
+&nbsp;     * @return a String representation of &lt;code&gt;array&lt;/code&gt;
+&nbsp;     */
+&nbsp;    public static String nullSafeToString(short[] array) {
+<b class="nc">&nbsp;        if (array == null) {</b>
+<b class="nc">&nbsp;            return NULL_STRING;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int length = array.length;</b>
+<b class="nc">&nbsp;        if (length == 0) {</b>
+<b class="nc">&nbsp;            return EMPTY_ARRAY;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        StringBuilder sb = new StringBuilder();</b>
+<b class="nc">&nbsp;        for (int i = 0; i &lt; length; i++) {</b>
+<b class="nc">&nbsp;            if (i == 0) {</b>
+<b class="nc">&nbsp;                sb.append(ARRAY_START);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                sb.append(ARRAY_ELEMENT_SEPARATOR);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            sb.append(array[i]);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        sb.append(ARRAY_END);</b>
+<b class="nc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterate over the specified {@link Closeable} instances, invoking
+&nbsp;     * {@link Closeable#close()} on each one, ignoring any potential {@link IOException}s.
+&nbsp;     *
+&nbsp;     * @param closeables the closeables to close.
+&nbsp;     */
+&nbsp;    public static void nullSafeClose(Closeable... closeables) {
+<b class="pc">&nbsp;        if (closeables == null) {</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        for (Closeable closeable : closeables) {</b>
+<b class="pc">&nbsp;            if (closeable != null) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    closeable.close();</b>
+<b class="nc">&nbsp;                } catch (IOException e) {</b>
+&nbsp;                    //Ignore the exception during close.
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Iterate over the specified {@link Flushable} instances, invoking
+&nbsp;     * {@link Flushable#flush()} on each one, ignoring any potential {@link IOException}s.
+&nbsp;     *
+&nbsp;     * @param flushables the flushables to flush.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    public static void nullSafeFlush(Flushable... flushables) {
+<b class="pc">&nbsp;        if (flushables == null) return;</b>
+<b class="fc">&nbsp;        for (Flushable flushable : flushables) {</b>
+<b class="pc">&nbsp;            if (flushable != null) {</b>
+&nbsp;                try {
+<b class="fc">&nbsp;                    flushable.flush();</b>
+<b class="nc">&nbsp;                } catch (IOException ignored) {</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

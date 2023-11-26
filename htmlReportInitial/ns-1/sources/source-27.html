@@ -1,0 +1,264 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Claims</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: Claims (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Claims$get</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$get$0</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getAudience$6</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getExpiration$3</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getId$0</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getIssuedAt$2</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getIssuer$4</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getNotBefore$5</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getSubject</td>
+  </tr>
+  <tr>
+    <td class="name">Claims$getSubject$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * A JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4&quot;&gt;Claims set&lt;/a&gt;.
+&nbsp; *
+&nbsp; * &lt;p&gt;This is an immutable JSON map with convenient type-safe getters for JWT standard claim names.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Additionally, this interface also extends &lt;code&gt;Map&amp;lt;String, Object&amp;gt;&lt;/code&gt;, so you can use standard
+&nbsp; * {@code Map} accessor/iterator methods as desired, for example:&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp; * claims.get(&quot;someKey&quot;);&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;However, because {@code Claims} instances are immutable, calling any of the map mutation methods
+&nbsp; * (such as {@code Map.}{@link Map#put(Object, Object) put}, etc) will result in a runtime exception.  The
+&nbsp; * {@code Map} interface is implemented specifically for the convenience of working with existing Map-based utilities
+&nbsp; * and APIs.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @since 0.1
+&nbsp; */
+&nbsp;public interface Claims extends Map&lt;String, Object&gt;, Identifiable {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Issuer} claims parameter name: &lt;code&gt;&quot;iss&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String ISSUER = &quot;iss&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Subject} claims parameter name: &lt;code&gt;&quot;sub&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String SUBJECT = &quot;sub&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Audience} claims parameter name: &lt;code&gt;&quot;aud&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String AUDIENCE = &quot;aud&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Expiration} claims parameter name: &lt;code&gt;&quot;exp&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String EXPIRATION = &quot;exp&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Not Before} claims parameter name: &lt;code&gt;&quot;nbf&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String NOT_BEFORE = &quot;nbf&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code Issued At} claims parameter name: &lt;code&gt;&quot;iat&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String ISSUED_AT = &quot;iat&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * JWT {@code JWT ID} claims parameter name: &lt;code&gt;&quot;jti&quot;&lt;/code&gt;
+&nbsp;     */
+&nbsp;    String ID = &quot;jti&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.1&quot;&gt;
+&nbsp;     * &lt;code&gt;iss&lt;/code&gt;&lt;/a&gt; (issuer) value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * @return the JWT {@code iss} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    String getIssuer();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2&quot;&gt;
+&nbsp;     * &lt;code&gt;sub&lt;/code&gt;&lt;/a&gt; (subject) value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * @return the JWT {@code sub} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    String getSubject();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3&quot;&gt;
+&nbsp;     * &lt;code&gt;aud&lt;/code&gt;&lt;/a&gt; (audience) value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * @return the JWT {@code aud} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    Set&lt;String&gt; getAudience();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4&quot;&gt;
+&nbsp;     * &lt;code&gt;exp&lt;/code&gt;&lt;/a&gt; (expiration) timestamp or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;A JWT obtained after this timestamp should not be used.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the JWT {@code exp} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    Date getExpiration();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5&quot;&gt;
+&nbsp;     * &lt;code&gt;nbf&lt;/code&gt;&lt;/a&gt; (not before) timestamp or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;A JWT obtained before this timestamp should not be used.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the JWT {@code nbf} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    Date getNotBefore();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6&quot;&gt;
+&nbsp;     * &lt;code&gt;iat&lt;/code&gt;&lt;/a&gt; (issued at) timestamp or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If present, this value is the timestamp when the JWT was created.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the JWT {@code iat} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    Date getIssuedAt();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWTs &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7&quot;&gt;
+&nbsp;     * &lt;code&gt;jti&lt;/code&gt;&lt;/a&gt; (JWT ID) value or {@code null} if not present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This value is a CaSe-SenSiTiVe unique identifier for the JWT. If available, this value is expected to be
+&nbsp;     * assigned in a manner that ensures that there is a negligible probability that the same value will be
+&nbsp;     * accidentally
+&nbsp;     * assigned to a different data object.  The ID can be used to prevent the JWT from being replayed.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the JWT {@code jti} value or {@code null} if not present.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    // just for JavaDoc specific to the JWT spec
+&nbsp;    String getId();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the JWTs claim ({@code claimName}) value as a {@code requiredType} instance, or {@code null} if not
+&nbsp;     * present.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
+&nbsp;     * complex is expected to be already converted to your desired type by the JSON parser. You may specify a custom
+&nbsp;     * JSON processor using the {@code JwtParserBuilder}&#39;s
+&nbsp;     * {@link JwtParserBuilder#json(io.jsonwebtoken.io.Deserializer) json(Deserializer)} method. See the JJWT
+&nbsp;     * documentation on &lt;a href=&quot;https://github.com/jwtk/jjwt#custom-json-processor&quot;&gt;custom JSON processor&lt;/a&gt;s for more
+&nbsp;     * information. If using Jackson, you can specify custom claim POJO types as described in
+&nbsp;     * &lt;a href=&quot;https://github.com/jwtk/jjwt#json-jackson-custom-types&quot;&gt;custom claim types&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * @param claimName    name of claim
+&nbsp;     * @param requiredType the type of the value expected to be returned
+&nbsp;     * @param &lt;T&gt;          the type of the value expected to be returned
+&nbsp;     * @return the JWT {@code claimName} value or {@code null} if not present.
+&nbsp;     * @throws RequiredTypeException throw if the claim value is not null and not of type {@code requiredType}
+&nbsp;     * @see &lt;a href=&quot;https://github.com/jwtk/jjwt#json-support&quot;&gt;JJWT JSON Support&lt;/a&gt;
+&nbsp;     */
+&nbsp;    &lt;T&gt; T get(String claimName, Class&lt;T&gt; requiredType);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

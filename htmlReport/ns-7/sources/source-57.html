@@ -1,0 +1,240 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PasswordSpec</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: PasswordSpec (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PasswordSpec</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (20/20)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PasswordSpec$equals</td>
+  </tr>
+  <tr>
+    <td class="name">PasswordSpec$hashCode$1</td>
+  </tr>
+  <tr>
+    <td class="name">PasswordSpec$toString$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (20/20)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Objects;
+&nbsp;import io.jsonwebtoken.security.Password;
+&nbsp;
+&nbsp;import java.security.spec.KeySpec;
+&nbsp;
+&nbsp;public class PasswordSpec implements Password, KeySpec {
+&nbsp;
+&nbsp;    private static final String NONE_ALGORITHM = &quot;NONE&quot;;
+&nbsp;    private static final String DESTROYED_MSG = &quot;Password has been destroyed. Password character array may not be obtained.&quot;;
+&nbsp;    private static final String ENCODED_DISABLED_MSG =
+&nbsp;            &quot;getEncoded() is disabled for Password instances as they are intended to be used &quot; +
+&nbsp;                    &quot;with key derivation algorithms only. Because passwords rarely have the length or entropy &quot; +
+&nbsp;                    &quot;necessary for secure cryptographic operations such as authenticated hashing or encryption, &quot; +
+&nbsp;                    &quot;they are disabled as direct inputs for these operations to help avoid accidental misuse; if &quot; +
+&nbsp;                    &quot;you see this exception message, it is likely that the associated Password instance is &quot; +
+&nbsp;                    &quot;being used incorrectly.&quot;;
+&nbsp;
+&nbsp;    private volatile boolean destroyed;
+&nbsp;    private final char[] password;
+&nbsp;
+<b class="fc">&nbsp;    public PasswordSpec(char[] password) {</b>
+<b class="fc">&nbsp;        this.password = Assert.notEmpty(password, &quot;Password character array cannot be null or empty.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private void assertActive() {
+<b class="fc">&nbsp;        if (destroyed) {</b>
+<b class="fc">&nbsp;            throw new IllegalStateException(DESTROYED_MSG);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public char[] toCharArray() {
+<b class="fc">&nbsp;        assertActive();</b>
+<b class="fc">&nbsp;        return this.password.clone();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getAlgorithm() {
+<b class="fc">&nbsp;        return NONE_ALGORITHM;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getFormat() {
+<b class="fc">&nbsp;        return null; // encoding isn&#39;t supported, so we return null per the Key#getFormat() JavaDoc</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getEncoded() {
+<b class="fc">&nbsp;        throw new UnsupportedOperationException(ENCODED_DISABLED_MSG);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void destroy() {
+<b class="fc">&nbsp;        this.destroyed = true;</b>
+<b class="fc">&nbsp;        java.util.Arrays.fill(password, &#39;\u0000&#39;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isDestroyed() {
+<b class="fc">&nbsp;        return this.destroyed;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return Objects.nullSafeHashCode(this.password);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="fc">&nbsp;        if (obj == this) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (obj instanceof PasswordSpec) {</b>
+<b class="fc">&nbsp;            PasswordSpec other = (PasswordSpec) obj;</b>
+<b class="fc">&nbsp;            return Objects.nullSafeEquals(this.password, other.password);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public final String toString() {
+<b class="fc">&nbsp;        return &quot;&lt;redacted&gt;&quot;;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

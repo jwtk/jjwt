@@ -1,0 +1,128 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Serializer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.io</a>
+</div>
+
+<h1>Coverage Summary for Class: Serializer (io.jsonwebtoken.io)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Serializer$serialize</td>
+  </tr>
+  <tr>
+    <td class="name">Serializer$serialize$0</td>
+  </tr>
+  <tr>
+    <td class="name">Serializer$serialize$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.io;
+&nbsp;
+&nbsp;import java.io.OutputStream;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code Serializer} is able to convert a Java object into a formatted byte stream.  It is expected this byte stream
+&nbsp; * can be reconstituted back into a Java object with a matching {@link Deserializer}.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; The type of object to serialize.
+&nbsp; * @since 0.10.0
+&nbsp; */
+&nbsp;public interface Serializer&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts the specified Java object into a formatted data byte array.
+&nbsp;     *
+&nbsp;     * @param t the object to serialize
+&nbsp;     * @return the serialized byte array representing the specified object.
+&nbsp;     * @throws SerializationException if there is a problem converting the object to a byte array.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #serialize(Object, OutputStream)}
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    byte[] serialize(T t) throws SerializationException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts the specified Java object into a formatted data byte stream, writing the bytes to the specified
+&nbsp;     * {@code out}put stream.
+&nbsp;     *
+&nbsp;     * @param t   the object to convert to a byte stream
+&nbsp;     * @param out the stream to write to
+&nbsp;     * @throws SerializationException if there is a problem converting the object to a byte stream or writing the
+&nbsp;     *                                bytes to the {@code out}put stream.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    void serialize(T t, OutputStream out) throws SerializationException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

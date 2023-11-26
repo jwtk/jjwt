@@ -1,0 +1,269 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultJwkSetBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultJwkSetBuilder (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultJwkSetBuilder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.6%
+  </span>
+  <span class="absValue">
+    (40/41)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DefaultJwkSetBuilder$add</td>
+  </tr>
+  <tr>
+    <td class="name">DefaultJwkSetBuilder$delete$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.6%
+  </span>
+  <span class="absValue">
+    (40/41)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.ParameterMap;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameter;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameters;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.security.Jwk;
+&nbsp;import io.jsonwebtoken.security.JwkSet;
+&nbsp;import io.jsonwebtoken.security.JwkSetBuilder;
+&nbsp;import io.jsonwebtoken.security.KeyOperationPolicy;
+&nbsp;
+&nbsp;import java.security.Provider;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;public class DefaultJwkSetBuilder extends AbstractSecurityBuilder&lt;JwkSet, JwkSetBuilder&gt;
+&nbsp;        implements JwkSetBuilder {
+&nbsp;
+&nbsp;    private KeyOperationPolicy operationPolicy;
+&nbsp;    private JwkSetConverter converter;
+&nbsp;    private ParameterMap map;
+&nbsp;
+<b class="fc">&nbsp;    public DefaultJwkSetBuilder() {</b>
+<b class="fc">&nbsp;        this.operationPolicy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY;</b>
+<b class="fc">&nbsp;        this.converter = new JwkSetConverter();</b>
+<b class="fc">&nbsp;        this.map = new ParameterMap(Parameters.registry(DefaultJwkSet.KEYS));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder delete(String key) {
+<b class="fc">&nbsp;        map.remove(key);</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder empty() {
+<b class="fc">&nbsp;        map.clear();</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder add(String key, Object value) {
+<b class="fc">&nbsp;        map.put(key, value);</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder add(Map&lt;? extends String, ?&gt; m) {
+<b class="fc">&nbsp;        map.putAll(m);</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private JwkSetBuilder refresh() {
+<b class="fc">&nbsp;        JwkConverter&lt;Jwk&lt;?&gt;&gt; jwkConverter = new JwkConverter&lt;&gt;(new JwkBuilderSupplier(this.provider, this.operationPolicy));</b>
+<b class="fc">&nbsp;        this.converter = new JwkSetConverter(jwkConverter, this.converter.isIgnoreUnsupported());</b>
+<b class="fc">&nbsp;        Parameter&lt;Set&lt;Jwk&lt;?&gt;&gt;&gt; param = DefaultJwkSet.param(jwkConverter);</b>
+<b class="fc">&nbsp;        this.map = new ParameterMap(Parameters.registry(param), this.map, true);</b>
+&nbsp;        // a new policy could have been applied, ensure that any existing keys match that policy:
+<b class="fc">&nbsp;        Set&lt;Jwk&lt;?&gt;&gt; jwks = this.map.get(param);</b>
+<b class="fc">&nbsp;        if (!Collections.isEmpty(jwks)) {</b>
+<b class="pc">&nbsp;            for (Jwk&lt;?&gt; jwk : jwks) {</b>
+<b class="fc">&nbsp;                this.operationPolicy.validate(jwk.getOperations());</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder provider(Provider provider) {
+<b class="fc">&nbsp;        super.provider(provider);</b>
+<b class="fc">&nbsp;        return refresh();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder operationPolicy(final KeyOperationPolicy policy) throws IllegalArgumentException {
+<b class="fc">&nbsp;        this.operationPolicy = policy != null ? policy : AbstractJwkBuilder.DEFAULT_OPERATION_POLICY;</b>
+<b class="fc">&nbsp;        return refresh();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Collection&lt;Jwk&lt;?&gt;&gt; ensureKeys() {
+<b class="fc">&nbsp;        Collection&lt;Jwk&lt;?&gt;&gt; keys = map.get(DefaultJwkSet.KEYS);</b>
+<b class="fc">&nbsp;        return Collections.isEmpty(keys) ? new LinkedHashSet&lt;Jwk&lt;?&gt;&gt;() : keys;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder add(Jwk&lt;?&gt; jwk) {
+<b class="fc">&nbsp;        if (jwk != null) {</b>
+<b class="fc">&nbsp;            this.operationPolicy.validate(jwk.getOperations());</b>
+<b class="fc">&nbsp;            Collection&lt;Jwk&lt;?&gt;&gt; keys = ensureKeys();</b>
+<b class="fc">&nbsp;            keys.add(jwk);</b>
+<b class="fc">&nbsp;            keys(keys);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder add(Collection&lt;Jwk&lt;?&gt;&gt; c) {
+<b class="fc">&nbsp;        if (!Collections.isEmpty(c)) {</b>
+<b class="fc">&nbsp;            for (Jwk&lt;?&gt; jwk : c) {</b>
+<b class="fc">&nbsp;                add(jwk);</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSetBuilder keys(Collection&lt;Jwk&lt;?&gt;&gt; c) {
+<b class="fc">&nbsp;        return add(DefaultJwkSet.KEYS.getId(), c);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSet build() {
+<b class="fc">&nbsp;        return converter.applyFrom(this.map);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

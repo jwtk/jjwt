@@ -1,0 +1,280 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwkSetConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: JwkSetConverter (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwkSetConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (26/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (62/62)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JwkSetConverter$applyTo</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (26/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (62/62)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.Converter;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameter;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.lang.Supplier;
+&nbsp;import io.jsonwebtoken.security.DynamicJwkBuilder;
+&nbsp;import io.jsonwebtoken.security.Jwk;
+&nbsp;import io.jsonwebtoken.security.JwkSet;
+&nbsp;import io.jsonwebtoken.security.KeyException;
+&nbsp;import io.jsonwebtoken.security.MalformedKeySetException;
+&nbsp;import io.jsonwebtoken.security.UnsupportedKeyException;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;public class JwkSetConverter implements Converter&lt;JwkSet, Object&gt; {
+&nbsp;
+&nbsp;    private final Converter&lt;Jwk&lt;?&gt;, Object&gt; JWK_CONVERTER;
+&nbsp;    private final Parameter&lt;Set&lt;Jwk&lt;?&gt;&gt;&gt; PARAM;
+&nbsp;
+&nbsp;    private final boolean ignoreUnsupported;
+&nbsp;
+&nbsp;    public JwkSetConverter() {
+&nbsp;        // ignore is true by default per https://www.rfc-editor.org/rfc/rfc7517.html#section-5:
+<b class="fc">&nbsp;        this(JwkBuilderSupplier.DEFAULT, true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public JwkSetConverter(boolean ignoreUnsupported) {
+<b class="fc">&nbsp;        this(JwkBuilderSupplier.DEFAULT, ignoreUnsupported);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public JwkSetConverter(Supplier&lt;DynamicJwkBuilder&lt;?, ?&gt;&gt; supplier, boolean ignoreUnsupported) {
+<b class="fc">&nbsp;        this(new JwkConverter&lt;&gt;(supplier), ignoreUnsupported);</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    public JwkSetConverter(Converter&lt;Jwk&lt;?&gt;, Object&gt; jwkConverter, boolean ignoreUnsupported) {</b>
+<b class="fc">&nbsp;        this.JWK_CONVERTER = Assert.notNull(jwkConverter, &quot;JWK converter cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.PARAM = DefaultJwkSet.param(jwkConverter);</b>
+<b class="fc">&nbsp;        this.ignoreUnsupported = ignoreUnsupported;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean isIgnoreUnsupported() {
+<b class="fc">&nbsp;        return ignoreUnsupported;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object applyTo(JwkSet jwkSet) {
+<b class="fc">&nbsp;        return jwkSet;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public JwkSet applyFrom(Object o) {
+<b class="fc">&nbsp;        Assert.notNull(o, &quot;Value cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        if (o instanceof JwkSet) {</b>
+<b class="fc">&nbsp;            return (JwkSet) o;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!(o instanceof Map)) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Value must be a Map&lt;String,?&gt; (JSON Object). Type found: &quot; + o.getClass().getName() + &quot;.&quot;;</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(msg);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        final Map&lt;?, ?&gt; m = Collections.immutable((Map&lt;?, ?&gt;) o);</b>
+&nbsp;
+&nbsp;        // mandatory for all JWK Sets: https://datatracker.ietf.org/doc/html/rfc7517#section-5
+&nbsp;        // no need for builder parameter type conversion overhead if this isn&#39;t present:
+<b class="fc">&nbsp;        if (Collections.isEmpty(m) || !m.containsKey(PARAM.getId())) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Missing required &quot; + PARAM + &quot; parameter.&quot;;</b>
+<b class="fc">&nbsp;            throw new MalformedKeySetException(msg);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Object val = m.get(PARAM.getId());</b>
+<b class="fc">&nbsp;        if (val == null) {</b>
+<b class="fc">&nbsp;            String msg = &quot;JWK Set &quot; + PARAM + &quot; value cannot be null.&quot;;</b>
+<b class="fc">&nbsp;            throw new MalformedKeySetException(msg);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (val instanceof Supplier&lt;?&gt;) {</b>
+<b class="fc">&nbsp;            val = ((Supplier&lt;?&gt;) val).get();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (!(val instanceof Collection)) {</b>
+<b class="fc">&nbsp;            String msg = &quot;JWK Set &quot; + PARAM + &quot; value must be a Collection (JSON Array). Type found: &quot; +</b>
+<b class="fc">&nbsp;                    val.getClass().getName();</b>
+<b class="fc">&nbsp;            throw new MalformedKeySetException(msg);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        int size = Collections.size((Collection&lt;?&gt;) val);</b>
+<b class="fc">&nbsp;        if (size == 0) {</b>
+<b class="fc">&nbsp;            String msg = &quot;JWK Set &quot; + PARAM + &quot; collection cannot be empty.&quot;;</b>
+<b class="fc">&nbsp;            throw new MalformedKeySetException(msg);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Copy values so we don&#39;t mutate the original input
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; src = new LinkedHashMap&lt;&gt;(Collections.size((Map&lt;?, ?&gt;) o));</b>
+<b class="fc">&nbsp;        for (Map.Entry&lt;?, ?&gt; entry : ((Map&lt;?, ?&gt;) o).entrySet()) {</b>
+<b class="fc">&nbsp;            Object key = Assert.notNull(entry.getKey(), &quot;JWK Set map key cannot be null.&quot;);</b>
+<b class="fc">&nbsp;            if (!(key instanceof String)) {</b>
+<b class="fc">&nbsp;                String msg = &quot;JWK Set map keys must be Strings. Encountered key &#39;&quot; + key + &quot;&#39; of type &quot; +</b>
+<b class="fc">&nbsp;                        key.getClass().getName();</b>
+<b class="fc">&nbsp;                throw new IllegalArgumentException(msg);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            String skey = (String) key;</b>
+<b class="fc">&nbsp;            src.put(skey, entry.getValue());</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        Set&lt;Jwk&lt;?&gt;&gt; jwks = new LinkedHashSet&lt;&gt;(size);</b>
+<b class="fc">&nbsp;        int i = 0; // keep track of which element fails (if any)</b>
+<b class="fc">&nbsp;        for (Object candidate : ((Collection&lt;?&gt;) val)) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Jwk&lt;?&gt; jwk = JWK_CONVERTER.applyFrom(candidate);</b>
+<b class="fc">&nbsp;                jwks.add(jwk);</b>
+<b class="fc">&nbsp;            } catch (UnsupportedKeyException e) {</b>
+<b class="fc">&nbsp;                if (!ignoreUnsupported) {</b>
+<b class="fc">&nbsp;                    String msg = &quot;JWK Set keys[&quot; + i + &quot;]: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;                    throw new UnsupportedKeyException(msg, e);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            } catch (IllegalArgumentException | KeyException e) {</b>
+<b class="fc">&nbsp;                if (!ignoreUnsupported) {</b>
+<b class="fc">&nbsp;                    String msg = &quot;JWK Set keys[&quot; + i + &quot;]: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;                    throw new MalformedKeySetException(msg, e);</b>
+&nbsp;                }
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            i++;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // Replace the `keys` value with validated entries:
+<b class="fc">&nbsp;        src.remove(PARAM.getId());</b>
+<b class="fc">&nbsp;        src.put(PARAM.getId(), jwks);</b>
+<b class="fc">&nbsp;        return new DefaultJwkSet(PARAM, src);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

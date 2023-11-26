@@ -1,0 +1,236 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultProtectedHeader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultProtectedHeader (io.jsonwebtoken.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultProtectedHeader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl;
+&nbsp;
+&nbsp;import io.jsonwebtoken.Jwts;
+&nbsp;import io.jsonwebtoken.ProtectedHeader;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameter;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameters;
+&nbsp;import io.jsonwebtoken.impl.security.AbstractAsymmetricJwk;
+&nbsp;import io.jsonwebtoken.impl.security.AbstractJwk;
+&nbsp;import io.jsonwebtoken.impl.security.JwkConverter;
+&nbsp;import io.jsonwebtoken.lang.Registry;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.security.PublicJwk;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * Header implementation satisfying shared JWS and JWE header parameter requirements.  Header parameters specific to
+&nbsp; * either JWE or JWS will be defined in respective subclasses.
+&nbsp; *
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHeader {
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;URI&gt; JKU = Parameters.uri(&quot;jku&quot;, &quot;JWK Set URL&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;PublicJwk&lt;?&gt;&gt; JWK = Parameters.builder(JwkConverter.PUBLIC_JWK_CLASS)</b>
+<b class="fc">&nbsp;            .setId(&quot;jwk&quot;).setName(&quot;JSON Web Key&quot;)</b>
+<b class="fc">&nbsp;            .setConverter(JwkConverter.PUBLIC_JWK).build();</b>
+<b class="fc">&nbsp;    static final Parameter&lt;Set&lt;String&gt;&gt; CRIT = Parameters.stringSet(&quot;crit&quot;, &quot;Critical&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;String&gt; KID = AbstractJwk.KID;</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;URI&gt; X5U = AbstractAsymmetricJwk.X5U;</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;List&lt;X509Certificate&gt;&gt; X5C = AbstractAsymmetricJwk.X5C;</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;byte[]&gt; X5T = AbstractAsymmetricJwk.X5T;</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Parameter&lt;byte[]&gt; X5T_S256 = AbstractAsymmetricJwk.X5T_S256;</b>
+&nbsp;
+<b class="fc">&nbsp;    static final Registry&lt;String, Parameter&lt;?&gt;&gt; PARAMS =</b>
+<b class="fc">&nbsp;            Parameters.registry(DefaultHeader.PARAMS, CRIT, JKU, JWK, KID, X5U, X5C, X5T, X5T_S256);</b>
+&nbsp;
+&nbsp;    static boolean isCandidate(ParameterMap map) {
+<b class="fc">&nbsp;        String id = map.get(DefaultHeader.ALGORITHM);</b>
+<b class="fc">&nbsp;        return Strings.hasText(id) &amp;&amp; !id.equalsIgnoreCase(Jwts.SIG.NONE.getId()); // alg cannot be empty or &#39;none&#39;</b>
+&nbsp;//        return (Strings.hasText(id) &amp;&amp; !Jwts.SIG.NONE.equals(Jwts.SIG.get().get(id))) ||
+&nbsp;//                map.get(JKU) != null ||
+&nbsp;//                map.get(JWK) != null ||
+&nbsp;//                !Collections.isEmpty(map.get(CRIT)) ||
+&nbsp;//                Strings.hasText(map.get(KID)) ||
+&nbsp;//                map.get(X5U) != null ||
+&nbsp;//                !Collections.isEmpty(map.get(X5C)) ||
+&nbsp;//                !Bytes.isEmpty(map.get(X5T)) ||
+&nbsp;//                !Bytes.isEmpty(map.get(X5T_S256));
+&nbsp;    }
+&nbsp;
+&nbsp;    protected DefaultProtectedHeader(Registry&lt;String, Parameter&lt;?&gt;&gt; registry, Map&lt;String, ?&gt; values) {
+<b class="fc">&nbsp;        super(registry, values);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getKeyId() {
+<b class="fc">&nbsp;        return get(KID);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public URI getJwkSetUrl() {
+<b class="fc">&nbsp;        return get(JKU);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PublicJwk&lt;?&gt; getJwk() {
+<b class="fc">&nbsp;        return get(JWK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public URI getX509Url() {
+<b class="fc">&nbsp;        return get(AbstractAsymmetricJwk.X5U);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;X509Certificate&gt; getX509Chain() {
+<b class="fc">&nbsp;        return get(X5C);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getX509Sha1Thumbprint() {
+<b class="fc">&nbsp;        return get(X5T);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getX509Sha256Thumbprint() {
+<b class="fc">&nbsp;        return get(X5T_S256);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;String&gt; getCritical() {
+<b class="fc">&nbsp;        return get(CRIT);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

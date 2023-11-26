@@ -1,0 +1,131 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OctetPublicJwk</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: OctetPublicJwk (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">OctetPublicJwk</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import java.security.PublicKey;
+&nbsp;import java.security.interfaces.ECPublicKey;
+&nbsp;
+&nbsp;/**
+&nbsp; * JWK representation of an &lt;a href=&quot;https://en.wikipedia.org/wiki/Edwards_curve&quot;&gt;Edwards Curve&lt;/a&gt;
+&nbsp; * {@link PublicKey} as defined by RFC 8037, Section 2:
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc8037#section-2&quot;&gt;Key Type &amp;quot;OKP&amp;quot;&lt;/a&gt;.
+&nbsp; *
+&nbsp; * &lt;p&gt;Unlike the {@link EcPublicJwk} interface, which only supports
+&nbsp; * &lt;a href=&quot;https://en.wikipedia.org/wiki/Elliptic_curve&quot;&gt;Weierstrass&lt;/a&gt;-form {@link ECPublicKey}s,
+&nbsp; * {@code OctetPublicJwk} allows for multiple parameterized {@link PublicKey} types
+&nbsp; * because the JDK supports two different types of Edwards Curve public keys:&lt;/p&gt;
+&nbsp; * &lt;ul&gt;
+&nbsp; *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPublicKey.html&quot;&gt;java.security.interfaces.XECPublicKey&lt;/a&gt;, introduced in JDK 11, and&lt;/li&gt;
+&nbsp; *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPublicKey.html&quot;&gt;java.security.interfaces.EdECPublicKey&lt;/a&gt;, introduced in JDK 15.&lt;/li&gt;
+&nbsp; * &lt;/ul&gt;
+&nbsp; * &lt;p&gt;As such, {@code OctetPublicJwk} is parameterized to support both key types.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Earlier JDK Versions&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Even though {@code XECPublicKey} and {@code EdECPublicKey} were introduced in JDK 11 and JDK 15 respectively,
+&nbsp; * JJWT supports Octet public JWKs in earlier versions when BouncyCastle is enabled in the application classpath.  When
+&nbsp; * using earlier JDK versions, the {@code OctetPublicJwk} instance will need be parameterized with the
+&nbsp; * generic {@code PublicKey} type since the latter key types would not be present.  For example:&lt;/p&gt;
+&nbsp; * &lt;pre&gt;&lt;code&gt;OctetPublicJwk&amp;lt;PublicKey&amp;gt; octetPublicJwk = getKey();&lt;/code&gt;&lt;/pre&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;OKP-specific Properties&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Note that the various OKP-specific properties are not available as separate dedicated getter methods, as most Java
+&nbsp; * applications should rarely, if ever, need to access these individual key properties since they typically represent
+&nbsp; * internal key material and/or serialization details. If you need to access these key properties, it is usually
+&nbsp; * recommended to obtain the corresponding {@link PublicKey} instance returned by {@link #toKey()} and
+&nbsp; * query that instead.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Even so, because these properties exist and are readable by nature of every JWK being a
+&nbsp; * {@link java.util.Map Map}, they are still accessible via the standard {@code Map} {@link #get(Object) get} method
+&nbsp; * using an appropriate JWK parameter id, for example:&lt;/p&gt;
+&nbsp; * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp; * jwk.get(&amp;quot;x&amp;quot;);
+&nbsp; * // ... etc ...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp; *
+&nbsp; * @param &lt;K&gt; The type of Edwards-curve {@link PublicKey} represented by this JWK (e.g. XECPublicKey, EdECPublicKey, etc).
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface OctetPublicJwk&lt;K extends PublicKey&gt; extends PublicJwk&lt;K&gt; {
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ExceptionPropagatingDecoder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.io</a>
+</div>
+
+<h1>Coverage Summary for Class: ExceptionPropagatingDecoder (io.jsonwebtoken.io)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ExceptionPropagatingDecoder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.io;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;
+&nbsp;/**
+&nbsp; * Decoder that ensures any exceptions thrown that are &lt;em&gt;not&lt;/em&gt; {@link DecodingException}s are wrapped
+&nbsp; * and re-thrown as a {@code DecodingException}.
+&nbsp; *
+&nbsp; * @since 0.10.0
+&nbsp; */
+&nbsp;class ExceptionPropagatingDecoder&lt;T, R&gt; implements Decoder&lt;T, R&gt; {
+&nbsp;
+&nbsp;    private final Decoder&lt;T, R&gt; decoder;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new instance, wrapping the specified {@code decoder} to invoke during {@link #decode(Object)}.
+&nbsp;     *
+&nbsp;     * @param decoder the decoder to wrap and call during {@link #decode(Object)}
+&nbsp;     */
+<b class="fc">&nbsp;    ExceptionPropagatingDecoder(Decoder&lt;T, R&gt; decoder) {</b>
+<b class="fc">&nbsp;        Assert.notNull(decoder, &quot;Decoder cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.decoder = decoder;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Decode the specified encoded data, delegating to the wrapped Decoder, wrapping any
+&nbsp;     * non-{@link DecodingException} as a {@code DecodingException}.
+&nbsp;     *
+&nbsp;     * @param t the encoded data
+&nbsp;     * @return the decoded data
+&nbsp;     * @throws DecodingException if there is an unexpected problem during decoding.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public R decode(T t) throws DecodingException {
+<b class="fc">&nbsp;        Assert.notNull(t, &quot;Decode argument cannot be null.&quot;);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return decoder.decode(t);</b>
+<b class="fc">&nbsp;        } catch (DecodingException e) {</b>
+<b class="fc">&nbsp;            throw e; //propagate</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Unable to decode input: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;            throw new DecodingException(msg, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

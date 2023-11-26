@@ -1,0 +1,199 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JweHeaderMutator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: JweHeaderMutator (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JweHeaderMutator$agreementPartyUInfo$0</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeaderMutator$agreementPartyUInfo$2</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeaderMutator$agreementPartyVInfo$1</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeaderMutator$agreementPartyVInfo$3</td>
+  </tr>
+  <tr>
+    <td class="name">JweHeaderMutator$pbes2Count</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.security.KeyAlgorithm;
+&nbsp;
+&nbsp;/**
+&nbsp; * Mutation (modifications) to a {@link JweHeader} instance.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the mutator subtype, for method chaining
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface JweHeaderMutator&lt;T extends JweHeaderMutator&lt;T&gt;&gt; extends ProtectedHeaderMutator&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets any information about the JWE producer for use with key agreement algorithms. A {@code null} or empty value
+&nbsp;     * removes the property from the JSON map.
+&nbsp;     *
+&nbsp;     * @param info information about the JWE producer to use with key agreement algorithms.
+&nbsp;     * @return the header for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2&quot;&gt;JWE &lt;code&gt;apu&lt;/code&gt; (Agreement PartyUInfo) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    T agreementPartyUInfo(byte[] info);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets any information about the JWE producer for use with key agreement algorithms. A {@code null} value removes
+&nbsp;     * the property from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If not {@code null}, this is a convenience method that calls the equivalent of the following:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * {@link #agreementPartyUInfo(byte[]) agreementPartyUInfo}(info.getBytes(StandardCharsets.UTF_8))&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param info information about the JWE producer to use with key agreement algorithms.
+&nbsp;     * @return the header for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2&quot;&gt;JWE &lt;code&gt;apu&lt;/code&gt; (Agreement PartyUInfo) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    T agreementPartyUInfo(String info);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets any information about the JWE recipient for use with key agreement algorithms. A {@code null} value removes
+&nbsp;     * the property from the JSON map.
+&nbsp;     *
+&nbsp;     * @param info information about the JWE recipient to use with key agreement algorithms.
+&nbsp;     * @return the header for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3&quot;&gt;JWE &lt;code&gt;apv&lt;/code&gt; (Agreement PartyVInfo) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    T agreementPartyVInfo(byte[] info);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets any information about the JWE recipient for use with key agreement algorithms. A {@code null} value removes
+&nbsp;     * the property from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If not {@code null}, this is a convenience method that calls the equivalent of the following:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * {@link #agreementPartyVInfo(byte[]) setAgreementPartVUInfo}(info.getBytes(StandardCharsets.UTF_8))&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param info information about the JWE recipient to use with key agreement algorithms.
+&nbsp;     * @return the header for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3&quot;&gt;JWE &lt;code&gt;apv&lt;/code&gt; (Agreement PartyVInfo) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#ECDH_ES
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A128KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A192KW
+&nbsp;     * @see Jwts.KEY#ECDH_ES_A256KW
+&nbsp;     */
+&nbsp;    T agreementPartyVInfo(String info);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the number of PBKDF2 iterations necessary to derive the key used during JWE encryption. If this value
+&nbsp;     * is not set when a password-based {@link KeyAlgorithm} is used, JJWT will automatically choose a suitable
+&nbsp;     * number of iterations based on
+&nbsp;     * &lt;a href=&quot;https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2&quot;&gt;OWASP PBKDF2 Iteration Recommendations&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Minimum Count&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;{@code IllegalArgumentException} will be thrown during encryption if a specified {@code count} is
+&nbsp;     * less than 1000 (one thousand), which is the
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2&quot;&gt;minimum number recommended&lt;/a&gt; by the
+&nbsp;     * JWA specification. Anything less is susceptible to security attacks so the default PBKDF2
+&nbsp;     * {@code KeyAlgorithm} implementations reject such values.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param count the number of PBKDF2 iterations necessary to derive the key used during JWE encryption, must be
+&nbsp;     *              greater than or equal to 1000 (one thousand).
+&nbsp;     * @return the header for method chaining
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2&quot;&gt;JWE &lt;code&gt;p2c&lt;/code&gt; (PBES2 Count) Header Parameter&lt;/a&gt;
+&nbsp;     * @see Jwts.KEY#PBES2_HS256_A128KW
+&nbsp;     * @see Jwts.KEY#PBES2_HS384_A192KW
+&nbsp;     * @see Jwts.KEY#PBES2_HS512_A256KW
+&nbsp;     * @see &lt;a href=&quot;https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2&quot;&gt;OWASP PBKDF2 Iteration Recommendations&lt;/a&gt;
+&nbsp;     */
+&nbsp;    T pbes2Count(int count);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

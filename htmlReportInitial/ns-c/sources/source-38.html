@@ -1,0 +1,507 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DynamicJwkBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: DynamicJwkBuilder (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$chain$12</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$ecChain$13</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$ecKeyPair$0</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key$1</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key$2</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key$3</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key$4</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key$5</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$key$6</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$keyPair$9</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$octetChain$10</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$octetKey$14</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$octetKey$15</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$octetKeyPair$8</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$rsaChain$11</td>
+  </tr>
+  <tr>
+    <td class="name">DynamicJwkBuilder$rsaKeyPair$7</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.KeyPair;
+&nbsp;import java.security.PrivateKey;
+&nbsp;import java.security.PublicKey;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;import java.security.interfaces.ECPrivateKey;
+&nbsp;import java.security.interfaces.ECPublicKey;
+&nbsp;import java.security.interfaces.RSAPrivateKey;
+&nbsp;import java.security.interfaces.RSAPublicKey;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@link JwkBuilder} that coerces to a more type-specific builder based on the {@link Key} that will be
+&nbsp; * represented as a JWK.
+&nbsp; *
+&nbsp; * @param &lt;K&gt; the type of Java {@link Key} represented by the created {@link Jwk}.
+&nbsp; * @param &lt;J&gt; the type of {@link Jwk} created by the builder
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface DynamicJwkBuilder&lt;K extends Key, J extends Jwk&lt;K&gt;&gt; extends JwkBuilder&lt;K, J, DynamicJwkBuilder&lt;K, J&gt;&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create a {@link PublicJwk} for the specified Java {@link X509Certificate} chain.
+&nbsp;     * The first {@code X509Certificate} in the chain (at array index 0) &lt;em&gt;MUST&lt;/em&gt; contain a {@link PublicKey}
+&nbsp;     * instance when calling the certificate&#39;s {@link X509Certificate#getPublicKey() getPublicKey()} method.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method is provided for congruence with the other {@code chain} methods and is expected to be used when
+&nbsp;     * the calling code has a variable {@code PublicKey} reference. Based on the argument type, it will
+&nbsp;     * delegate to one of the following methods if possible:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;{@link #rsaChain(List)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #ecChain(List)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #octetChain(List)}&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the specified {@code chain} argument is not capable of being supported by one of those methods, an
+&nbsp;     * {@link UnsupportedKeyException} will be thrown.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Type Parameters&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In addition to the public key type &lt;code&gt;A&lt;/code&gt;, the public key&#39;s associated private key type
+&nbsp;     * &lt;code&gt;B&lt;/code&gt; is parameterized as well. This ensures that any subsequent call to the builder&#39;s
+&nbsp;     * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;Jwks.builder().&amp;lt;EdECPublicKey, &lt;b&gt;EdECPrivateKey&lt;/b&gt;&amp;gt;chain(edECPublicKeyX509CertificateChain)
+&nbsp;     *     .privateKey(&lt;b&gt;aPrivateKey&lt;/b&gt;) // &amp;lt;-- must be an EdECPrivateKey instance
+&nbsp;     *     ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt;   the type of {@link PublicKey} provided by the created public JWK.
+&nbsp;     * @param &lt;B&gt;   the type of {@link PrivateKey} that may be paired with the {@link PublicKey} to produce a
+&nbsp;     *              {@link PrivateJwk} if desired.
+&nbsp;     * @param chain the {@link X509Certificate} chain to inspect to find the {@link PublicKey} to represent as a
+&nbsp;     *              {@link PublicJwk}.
+&nbsp;     * @return the builder coerced as a {@link PublicJwkBuilder} for continued method chaining.
+&nbsp;     * @throws UnsupportedKeyException if the specified key is not a supported type and cannot be used to delegate to
+&nbsp;     *                                 other {@code key} methods.
+&nbsp;     * @see PublicJwk
+&nbsp;     * @see PrivateJwk
+&nbsp;     */
+&nbsp;    &lt;A extends PublicKey, B extends PrivateKey&gt; PublicJwkBuilder&lt;A, B, ?, ?, ?, ?&gt; chain(List&lt;X509Certificate&gt; chain)
+&nbsp;            throws UnsupportedKeyException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create a {@link SecretJwk} for the specified Java {@link SecretKey}.
+&nbsp;     *
+&nbsp;     * @param key the {@link SecretKey} to represent as a {@link SecretJwk}.
+&nbsp;     * @return the builder coerced as a {@link SecretJwkBuilder}.
+&nbsp;     */
+&nbsp;    SecretJwkBuilder key(SecretKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link RSAPublicKey}.
+&nbsp;     *
+&nbsp;     * @param key the {@link RSAPublicKey} to represent as a {@link RsaPublicJwk}.
+&nbsp;     * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
+&nbsp;     */
+&nbsp;    RsaPublicJwkBuilder key(RSAPublicKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java {@link RSAPrivateKey}. If
+&nbsp;     * possible, it is recommended to also call the resulting builder&#39;s
+&nbsp;     * {@link RsaPrivateJwkBuilder#publicKey(PublicKey) publicKey} method with the private key&#39;s matching
+&nbsp;     * {@link PublicKey} for better performance.  See the
+&nbsp;     * {@link RsaPrivateJwkBuilder#publicKey(PublicKey) publicKey} and {@link PrivateJwk} JavaDoc for more
+&nbsp;     * information.
+&nbsp;     *
+&nbsp;     * @param key the {@link RSAPublicKey} to represent as a {@link RsaPublicJwk}.
+&nbsp;     * @return the builder coerced as an {@link RsaPrivateJwkBuilder}.
+&nbsp;     */
+&nbsp;    RsaPrivateJwkBuilder key(RSAPrivateKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link ECPublicKey}.
+&nbsp;     *
+&nbsp;     * @param key the {@link ECPublicKey} to represent as a {@link EcPublicJwk}.
+&nbsp;     * @return the builder coerced as an {@link EcPublicJwkBuilder}.
+&nbsp;     */
+&nbsp;    EcPublicJwkBuilder key(ECPublicKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java {@link ECPrivateKey}. If
+&nbsp;     * possible, it is recommended to also call the resulting builder&#39;s
+&nbsp;     * {@link EcPrivateJwkBuilder#publicKey(PublicKey) publicKey} method with the private key&#39;s matching
+&nbsp;     * {@link PublicKey} for better performance.  See the
+&nbsp;     * {@link EcPrivateJwkBuilder#publicKey(PublicKey) publicKey} and {@link PrivateJwk} JavaDoc for more
+&nbsp;     * information.
+&nbsp;     *
+&nbsp;     * @param key the {@link ECPublicKey} to represent as an {@link EcPublicJwk}.
+&nbsp;     * @return the builder coerced as a {@link EcPrivateJwkBuilder}.
+&nbsp;     */
+&nbsp;    EcPrivateJwkBuilder key(ECPrivateKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create a {@link PublicJwk} for the specified Java {@link PublicKey} argument. This
+&nbsp;     * method is provided for congruence with the other {@code key} methods and is expected to be used when
+&nbsp;     * the calling code has an untyped {@code PublicKey} reference. Based on the argument type, it will delegate to one
+&nbsp;     * of the following methods if possible:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;{@link #key(RSAPublicKey)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #key(ECPublicKey)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #octetKey(PublicKey)}&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the specified {@code key} argument is not capable of being supported by one of those methods, an
+&nbsp;     * {@link UnsupportedKeyException} will be thrown.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Type Parameters&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In addition to the public key type &lt;code&gt;A&lt;/code&gt;, the public key&#39;s associated private key type
+&nbsp;     * &lt;code&gt;B&lt;/code&gt; is parameterized as well. This ensures that any subsequent call to the builder&#39;s
+&nbsp;     * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;Jwks.builder().&amp;lt;EdECPublicKey, &lt;b&gt;EdECPrivateKey&lt;/b&gt;&amp;gt;key(anEdECPublicKey)
+&nbsp;     *     .privateKey(&lt;b&gt;aPrivateKey&lt;/b&gt;) // &amp;lt;-- must be an EdECPrivateKey instance
+&nbsp;     *     ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt; the type of {@link PublicKey} provided by the created public JWK.
+&nbsp;     * @param &lt;B&gt; the type of {@link PrivateKey} that may be paired with the {@link PublicKey} to produce a
+&nbsp;     *            {@link PrivateJwk} if desired.
+&nbsp;     * @param key the {@link PublicKey} to represent as a {@link PublicJwk}.
+&nbsp;     * @return the builder coerced as a {@link PublicJwkBuilder} for continued method chaining.
+&nbsp;     * @throws UnsupportedKeyException if the specified key is not a supported type and cannot be used to delegate to
+&nbsp;     *                                 other {@code key} methods.
+&nbsp;     * @see PublicJwk
+&nbsp;     * @see PrivateJwk
+&nbsp;     */
+&nbsp;    &lt;A extends PublicKey, B extends PrivateKey&gt; PublicJwkBuilder&lt;A, B, ?, ?, ?, ?&gt; key(A key) throws UnsupportedKeyException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create a {@link PrivateJwk} for the specified Java {@link PrivateKey} argument. This
+&nbsp;     * method is provided for congruence with the other {@code key} methods and is expected to be used when
+&nbsp;     * the calling code has an untyped {@code PrivateKey} reference. Based on the argument type, it will delegate to one
+&nbsp;     * of the following methods if possible:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;{@link #key(RSAPrivateKey)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #key(ECPrivateKey)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #octetKey(PrivateKey)}&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the specified {@code key} argument is not capable of being supported by one of those methods, an
+&nbsp;     * {@link UnsupportedKeyException} will be thrown.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Type Parameters&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In addition to the private key type &lt;code&gt;B&lt;/code&gt;, the private key&#39;s associated public key type
+&nbsp;     * &lt;code&gt;A&lt;/code&gt; is parameterized as well. This ensures that any subsequent call to the builder&#39;s
+&nbsp;     * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;Jwks.builder().&amp;lt;&lt;b&gt;EdECPublicKey&lt;/b&gt;, EdECPrivateKey&amp;gt;key(anEdECPrivateKey)
+&nbsp;     *     .publicKey(&lt;b&gt;aPublicKey&lt;/b&gt;) // &amp;lt;-- must be an EdECPublicKey instance
+&nbsp;     *     ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt; the type of {@link PublicKey} paired with the {@code key} argument to produce the {@link PrivateJwk}.
+&nbsp;     * @param &lt;B&gt; the type of the {@link PrivateKey} argument.
+&nbsp;     * @param key the {@link PrivateKey} to represent as a {@link PrivateJwk}.
+&nbsp;     * @return the builder coerced as a {@link PrivateJwkBuilder} for continued method chaining.
+&nbsp;     * @throws UnsupportedKeyException if the specified key is not a supported type and cannot be used to delegate to
+&nbsp;     *                                 other {@code key} methods.
+&nbsp;     * @see PublicJwk
+&nbsp;     * @see PrivateJwk
+&nbsp;     */
+&nbsp;    &lt;A extends PublicKey, B extends PrivateKey&gt; PrivateJwkBuilder&lt;B, A, ?, ?, ?&gt; key(B key) throws UnsupportedKeyException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create a {@link PrivateJwk} for the specified Java {@link KeyPair} argument. This
+&nbsp;     * method is provided for congruence with the other {@code keyPair} methods and is expected to be used when
+&nbsp;     * the calling code has a variable {@code PrivateKey} reference. Based on the argument&#39;s {@code PrivateKey} type,
+&nbsp;     * it will delegate to one of the following methods if possible:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;{@link #key(RSAPrivateKey)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #key(ECPrivateKey)}&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;{@link #octetKey(PrivateKey)}&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     * &lt;p&gt;and automatically set the resulting builder&#39;s {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} with
+&nbsp;     * the pair&#39;s {@code PublicKey}.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the specified {@code key} argument is not capable of being supported by one of those methods, an
+&nbsp;     * {@link UnsupportedKeyException} will be thrown.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Type Parameters&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In addition to the private key type &lt;code&gt;B&lt;/code&gt;, the private key&#39;s associated public key type
+&nbsp;     * &lt;code&gt;A&lt;/code&gt; is parameterized as well. This ensures that any subsequent call to the builder&#39;s
+&nbsp;     * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;Jwks.builder().&amp;lt;&lt;b&gt;EdECPublicKey&lt;/b&gt;, EdECPrivateKey&amp;gt;keyPair(anEdECKeyPair)
+&nbsp;     *     .publicKey(&lt;b&gt;aPublicKey&lt;/b&gt;) // &amp;lt;-- must be an EdECPublicKey instance
+&nbsp;     *     ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt;     the {@code keyPair} argument&#39;s {@link PublicKey} type
+&nbsp;     * @param &lt;B&gt;     the {@code keyPair} argument&#39;s {@link PrivateKey} type
+&nbsp;     * @param keyPair the {@code KeyPair} containing the public and private key
+&nbsp;     * @return the builder coerced as a {@link PrivateJwkBuilder} for continued method chaining.
+&nbsp;     * @throws UnsupportedKeyException if the specified {@code KeyPair}&#39;s keys are not supported and cannot be used to
+&nbsp;     *                                 delegate to other {@code key} methods.
+&nbsp;     * @see PublicJwk
+&nbsp;     * @see PrivateJwk
+&nbsp;     */
+&nbsp;    &lt;A extends PublicKey, B extends PrivateKey&gt; PrivateJwkBuilder&lt;B, A, ?, ?, ?&gt; keyPair(KeyPair keyPair)
+&nbsp;            throws UnsupportedKeyException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link OctetPublicJwk} for the specified Edwards-curve {@code PublicKey}
+&nbsp;     * argument.  The {@code PublicKey} must be an instance of one of the following:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPublicKey.html&quot;&gt;java.security.interfaces.XECPublicKey&lt;/a&gt;, introduced in JDK 11&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPublicKey.html&quot;&gt;java.security.interfaces.EdECPublicKey&lt;/a&gt;, introduced in JDK 15&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;A {@code PublicKey} with a valid Edwards Curve DER {@link Key#getEncoded() encoding}, such as those
+&nbsp;     *         provided by BouncyCastle on earlier JDKs.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Type Parameters&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In addition to the public key type &lt;code&gt;A&lt;/code&gt;, the public key&#39;s associated private key type
+&nbsp;     * &lt;code&gt;B&lt;/code&gt; is parameterized as well. This ensures that any subsequent call to the builder&#39;s
+&nbsp;     * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;Jwks.builder().&amp;lt;EdECPublicKey, &lt;b&gt;EdECPrivateKey&lt;/b&gt;&amp;gt;key(anEdECPublicKey)
+&nbsp;     *     .privateKey(&lt;b&gt;aPrivateKey&lt;/b&gt;) // &amp;lt;-- must be an EdECPrivateKey instance
+&nbsp;     *     ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt; the type of Edwards-curve {@link PublicKey} provided by the created public JWK.
+&nbsp;     * @param &lt;B&gt; the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
+&nbsp;     *            an {@link OctetPrivateJwk} if desired.
+&nbsp;     * @param key the Edwards-curve {@link PublicKey} to represent as an {@link OctetPublicJwk}.
+&nbsp;     * @return the builder coerced as a {@link OctetPublicJwkBuilder} for continued method chaining.
+&nbsp;     * @throws UnsupportedKeyException if the specified key is not a supported Edwards-curve key.
+&nbsp;     * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPublicKey.html&quot;&gt;java.security.interfaces.XECPublicKey&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPublicKey.html&quot;&gt;java.security.interfaces.EdECPublicKey&lt;/a&gt;
+&nbsp;     */
+&nbsp;    &lt;A extends PublicKey, B extends PrivateKey&gt; OctetPublicJwkBuilder&lt;A, B&gt; octetKey(A key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link OctetPrivateJwk} for the specified Edwards-curve {@code PrivateKey}
+&nbsp;     * argument.  The {@code PrivateKey} must be an instance of one of the following:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPrivateKey.html&quot;&gt;
+&nbsp;     *         java.security.interfaces.XECPrivateKey&lt;/a&gt;, introduced in JDK 11&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPrivateKey.html&quot;&gt;
+&nbsp;     *         java.security.interfaces.EdECPrivateKey&lt;/a&gt;, introduced in JDK 15&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;A {@code PrivateKey} with a valid Edwards Curve DER {@link Key#getEncoded() encoding}, such as those
+&nbsp;     *         provided by BouncyCastle on earlier JDKs.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Type Parameters&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;In addition to the private key type &lt;code&gt;B&lt;/code&gt;, the private key&#39;s associated public key type
+&nbsp;     * &lt;code&gt;A&lt;/code&gt; is parameterized as well. This ensures that any subsequent call to the builder&#39;s
+&nbsp;     * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;Jwks.builder().&amp;lt;&lt;b&gt;EdECPublicKey&lt;/b&gt;, EdECPrivateKey&amp;gt;key(anEdECPrivateKey)
+&nbsp;     *     .publicKey(&lt;b&gt;aPublicKey&lt;/b&gt;) // &amp;lt;-- must be an EdECPublicKey instance
+&nbsp;     *     ... etc ...
+&nbsp;     *     .build();&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt; the type of the Edwards-curve {@link PrivateKey} argument.
+&nbsp;     * @param &lt;B&gt; the type of Edwards-curve {@link PublicKey} paired with the {@code key} argument to produce the
+&nbsp;     *            {@link OctetPrivateJwk}.
+&nbsp;     * @param key the Edwards-curve {@link PrivateKey} to represent as an {@link OctetPrivateJwk}.
+&nbsp;     * @return the builder coerced as an {@link OctetPrivateJwkBuilder} for continued method chaining.
+&nbsp;     * @throws UnsupportedKeyException if the specified key is not a supported Edwards-curve key.
+&nbsp;     * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/interfaces/XECPrivateKey.html&quot;&gt;java.security.interfaces.XECPrivateKey&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/security/interfaces/EdECPrivateKey.html&quot;&gt;java.security.interfaces.EdECPrivateKey&lt;/a&gt;
+&nbsp;     */
+&nbsp;    &lt;A extends PrivateKey, B extends PublicKey&gt; OctetPrivateJwkBuilder&lt;A, B&gt; octetKey(A key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link OctetPublicJwk} for the specified Java {@link X509Certificate} chain.
+&nbsp;     * The first {@code X509Certificate} in the chain (at list index 0) &lt;em&gt;MUST&lt;/em&gt;
+&nbsp;     * {@link X509Certificate#getPublicKey() contain} an Edwards-curve public key as defined by
+&nbsp;     * {@link #octetKey(PublicKey)}.
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt;   the type of Edwards-curve {@link PublicKey} contained in the first {@code X509Certificate}.
+&nbsp;     * @param &lt;B&gt;   the type of Edwards-curve {@link PrivateKey} that may be paired with the {@link PublicKey} to produce
+&nbsp;     *              an {@link OctetPrivateJwk} if desired.
+&nbsp;     * @param chain the {@link X509Certificate} chain to inspect to find the Edwards-curve {@code PublicKey} to
+&nbsp;     *              represent as an {@link OctetPublicJwk}.
+&nbsp;     * @return the builder coerced as an {@link OctetPublicJwkBuilder} for continued method chaining.
+&nbsp;     */
+&nbsp;    &lt;A extends PublicKey, B extends PrivateKey&gt; OctetPublicJwkBuilder&lt;A, B&gt; octetChain(List&lt;X509Certificate&gt; chain);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link OctetPrivateJwk} for the specified Java Edwards-curve
+&nbsp;     * {@link KeyPair}.  The pair&#39;s {@link KeyPair#getPublic() public key} &lt;em&gt;MUST&lt;/em&gt; be an
+&nbsp;     * Edwards-curve public key as defined by {@link #octetKey(PublicKey)}.  The pair&#39;s
+&nbsp;     * {@link KeyPair#getPrivate() private key} &lt;em&gt;MUST&lt;/em&gt; be an Edwards-curve private key as defined by
+&nbsp;     * {@link #octetKey(PrivateKey)}.
+&nbsp;     *
+&nbsp;     * @param &lt;A&gt;     the type of Edwards-curve {@link PublicKey} contained in the key pair.
+&nbsp;     * @param &lt;B&gt;     the type of the Edwards-curve {@link PrivateKey} contained in the key pair.
+&nbsp;     * @param keyPair the Edwards-curve {@link KeyPair} to represent as an {@link OctetPrivateJwk}.
+&nbsp;     * @return the builder coerced as an {@link OctetPrivateJwkBuilder} for continued method chaining.
+&nbsp;     * @throws IllegalArgumentException if the {@code keyPair} does not contain Edwards-curve public and private key
+&nbsp;     *                                  instances.
+&nbsp;     */
+&nbsp;    &lt;A extends PrivateKey, B extends PublicKey&gt; OctetPrivateJwkBuilder&lt;A, B&gt; octetKeyPair(KeyPair keyPair);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link EcPublicJwk} for the specified Java {@link X509Certificate} chain.
+&nbsp;     * The first {@code X509Certificate} in the chain (at list index 0) &lt;em&gt;MUST&lt;/em&gt; contain an {@link ECPublicKey}
+&nbsp;     * instance when calling the certificate&#39;s {@link X509Certificate#getPublicKey() getPublicKey()} method.
+&nbsp;     *
+&nbsp;     * @param chain the {@link X509Certificate} chain to inspect to find the {@link ECPublicKey} to represent as a
+&nbsp;     *              {@link EcPublicJwk}.
+&nbsp;     * @return the builder coerced as an {@link EcPublicJwkBuilder}.
+&nbsp;     */
+&nbsp;    EcPublicJwkBuilder ecChain(List&lt;X509Certificate&gt; chain);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link EcPrivateJwk} for the specified Java Elliptic Curve
+&nbsp;     * {@link KeyPair}.  The pair&#39;s {@link KeyPair#getPublic() public key} &lt;em&gt;MUST&lt;/em&gt; be an
+&nbsp;     * {@link ECPublicKey} instance.  The pair&#39;s {@link KeyPair#getPrivate() private key} &lt;em&gt;MUST&lt;/em&gt; be an
+&nbsp;     * {@link ECPrivateKey} instance.
+&nbsp;     *
+&nbsp;     * @param keyPair the EC {@link KeyPair} to represent as an {@link EcPrivateJwk}.
+&nbsp;     * @return the builder coerced as an {@link EcPrivateJwkBuilder}.
+&nbsp;     * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link ECPublicKey} and
+&nbsp;     *                                  {@link ECPrivateKey} instances.
+&nbsp;     */
+&nbsp;    EcPrivateJwkBuilder ecKeyPair(KeyPair keyPair) throws IllegalArgumentException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link RsaPublicJwk} for the specified Java {@link X509Certificate} chain.
+&nbsp;     * The first {@code X509Certificate} in the chain (at list index 0) &lt;em&gt;MUST&lt;/em&gt; contain an {@link RSAPublicKey}
+&nbsp;     * instance when calling the certificate&#39;s {@link X509Certificate#getPublicKey() getPublicKey()} method.
+&nbsp;     *
+&nbsp;     * @param chain the {@link X509Certificate} chain to inspect to find the {@link RSAPublicKey} to represent as a
+&nbsp;     *              {@link RsaPublicJwk}.
+&nbsp;     * @return the builder coerced as an {@link RsaPublicJwkBuilder}.
+&nbsp;     */
+&nbsp;    RsaPublicJwkBuilder rsaChain(List&lt;X509Certificate&gt; chain);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures the builder will create an {@link RsaPrivateJwk} for the specified Java RSA
+&nbsp;     * {@link KeyPair}.  The pair&#39;s {@link KeyPair#getPublic() public key} &lt;em&gt;MUST&lt;/em&gt; be an
+&nbsp;     * {@link RSAPublicKey} instance.  The pair&#39;s {@link KeyPair#getPrivate() private key} &lt;em&gt;MUST&lt;/em&gt; be an
+&nbsp;     * {@link RSAPrivateKey} instance.
+&nbsp;     *
+&nbsp;     * @param keyPair the RSA {@link KeyPair} to represent as an {@link RsaPrivateJwk}.
+&nbsp;     * @return the builder coerced as an {@link RsaPrivateJwkBuilder}.
+&nbsp;     * @throws IllegalArgumentException if the {@code keyPair} does not contain {@link RSAPublicKey} and
+&nbsp;     *                                  {@link RSAPrivateKey} instances.
+&nbsp;     */
+&nbsp;    RsaPrivateJwkBuilder rsaKeyPair(KeyPair keyPair) throws IllegalArgumentException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

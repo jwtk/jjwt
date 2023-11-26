@@ -1,0 +1,227 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwtHandlerAdapter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtHandlerAdapter (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtHandlerAdapter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JwtHandlerAdapter$onDecryptedClaims</td>
+  </tr>
+  <tr>
+    <td class="name">JwtHandlerAdapter$onDecryptedContent$2</td>
+  </tr>
+  <tr>
+    <td class="name">JwtHandlerAdapter$onUnsecuredClaims$1</td>
+  </tr>
+  <tr>
+    <td class="name">JwtHandlerAdapter$onUnsecuredContent$4</td>
+  </tr>
+  <tr>
+    <td class="name">JwtHandlerAdapter$onVerifiedClaims$0</td>
+  </tr>
+  <tr>
+    <td class="name">JwtHandlerAdapter$onVerifiedContent$3</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;/**
+&nbsp; * An &lt;a href=&quot;http://en.wikipedia.org/wiki/Adapter_pattern&quot;&gt;Adapter&lt;/a&gt; implementation of the
+&nbsp; * {@link JwtHandler} interface that allows for anonymous subclasses to process only the JWT results that are
+&nbsp; * known/expected for a particular use case.
+&nbsp; *
+&nbsp; * &lt;p&gt;All of the methods in this implementation throw exceptions: overridden methods represent
+&nbsp; * scenarios expected by calling code in known situations.  It would be unexpected to receive a JWT that did
+&nbsp; * not match parsing expectations, so all non-overridden methods throw exceptions to indicate that the JWT
+&nbsp; * input was unexpected.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the type of object to return to the parser caller after handling the parsed JWT.
+&nbsp; * @since 0.2
+&nbsp; */
+&nbsp;public abstract class JwtHandlerAdapter&lt;T&gt; extends SupportedJwtVisitor&lt;T&gt; implements JwtHandler&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Default constructor, does not initialize any internal state.
+&nbsp;     */
+<b class="fc">&nbsp;    public JwtHandlerAdapter() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onUnsecuredContent(Jwt&lt;Header, byte[]&gt; jwt) {
+<b class="fc">&nbsp;        return onContentJwt(jwt); // bridge for existing implementations</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onUnsecuredClaims(Jwt&lt;Header, Claims&gt; jwt) {
+<b class="fc">&nbsp;        return onClaimsJwt(jwt);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onVerifiedContent(Jws&lt;byte[]&gt; jws) {
+<b class="fc">&nbsp;        return onContentJws(jws);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onVerifiedClaims(Jws&lt;Claims&gt; jws) {
+<b class="fc">&nbsp;        return onClaimsJws(jws);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onDecryptedContent(Jwe&lt;byte[]&gt; jwe) {
+<b class="fc">&nbsp;        return onContentJwe(jwe);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onDecryptedClaims(Jwe&lt;Claims&gt; jwe) {
+<b class="fc">&nbsp;        return onClaimsJwe(jwe);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onContentJwt(Jwt&lt;Header, byte[]&gt; jwt) {
+<b class="fc">&nbsp;        return super.onUnsecuredContent(jwt);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onClaimsJwt(Jwt&lt;Header, Claims&gt; jwt) {
+<b class="fc">&nbsp;        return super.onUnsecuredClaims(jwt);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onContentJws(Jws&lt;byte[]&gt; jws) {
+<b class="fc">&nbsp;        return super.onVerifiedContent(jws);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onClaimsJws(Jws&lt;Claims&gt; jws) {
+<b class="fc">&nbsp;        return super.onVerifiedClaims(jws);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onContentJwe(Jwe&lt;byte[]&gt; jwe) {
+<b class="fc">&nbsp;        return super.onDecryptedContent(jwe);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T onClaimsJwe(Jwe&lt;Claims&gt; jwe) {
+<b class="fc">&nbsp;        return super.onDecryptedClaims(jwe);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

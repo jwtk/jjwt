@@ -1,0 +1,180 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Converters</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: Converters (io.jsonwebtoken.impl.lang)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Converters</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Converters$forList$0</td>
+  </tr>
+  <tr>
+    <td class="name">Converters$forSet</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2020 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.lang;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.io.Codec;
+&nbsp;import io.jsonwebtoken.impl.security.JwtX509StringConverter;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.net.URI;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;public final class Converters {
+&nbsp;
+<b class="fc">&nbsp;    public static final Converter&lt;URI, Object&gt; URI = Converters.forEncoded(URI.class, new UriStringConverter());</b>
+&nbsp;
+<b class="fc">&nbsp;    public static final Converter&lt;byte[], Object&gt; BASE64URL_BYTES = Converters.forEncoded(byte[].class, Codec.BASE64URL);</b>
+&nbsp;
+<b class="fc">&nbsp;    public static final Converter&lt;X509Certificate, Object&gt; X509_CERTIFICATE =</b>
+<b class="fc">&nbsp;            Converters.forEncoded(X509Certificate.class, JwtX509StringConverter.INSTANCE);</b>
+&nbsp;
+<b class="fc">&nbsp;    public static final Converter&lt;BigInteger, byte[]&gt; BIGINT_UBYTES = new BigIntegerUBytesConverter();</b>
+<b class="fc">&nbsp;    public static final Converter&lt;BigInteger, Object&gt; BIGINT = Converters.forEncoded(BigInteger.class,</b>
+<b class="fc">&nbsp;            compound(BIGINT_UBYTES, Codec.BASE64URL));</b>
+&nbsp;
+&nbsp;    //prevent instantiation
+&nbsp;    private Converters() {
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;T&gt; Converter&lt;T, Object&gt; forType(Class&lt;T&gt; clazz) {
+<b class="fc">&nbsp;        return new RequiredTypeConverter&lt;&gt;(clazz);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;T&gt; Converter&lt;Set&lt;T&gt;, Object&gt; forSet(Converter&lt;T, Object&gt; elementConverter) {
+<b class="fc">&nbsp;        return CollectionConverter.forSet(elementConverter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;T&gt; Converter&lt;List&lt;T&gt;, Object&gt; forList(Converter&lt;T, Object&gt; elementConverter) {
+<b class="fc">&nbsp;        return CollectionConverter.forList(elementConverter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;T&gt; Converter&lt;T, Object&gt; forEncoded(Class&lt;T&gt; elementType, Converter&lt;T, CharSequence&gt; elementConverter) {
+<b class="fc">&nbsp;        return new EncodedObjectConverter&lt;&gt;(elementType, elementConverter);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;A, B, C&gt; Converter&lt;A, C&gt; compound(final Converter&lt;A, B&gt; aConv, final Converter&lt;B, C&gt; bConv) {
+<b class="fc">&nbsp;        return new CompoundConverter&lt;&gt;(aConv, bConv);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

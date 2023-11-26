@@ -1,0 +1,113 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HashAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: HashAlgorithm (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">HashAlgorithm</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2022 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.Identifiable;
+&nbsp;
+&nbsp;import java.io.InputStream;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@link DigestAlgorithm} that computes and verifies digests without the use of a cryptographic key, such as for
+&nbsp; * thumbprints and &lt;a href=&quot;https://en.wikipedia.org/wiki/Fingerprint_(computing)&quot;&gt;digital fingerprint&lt;/a&gt;s.
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;Standard Identifier&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;{@code HashAlgorithm} extends {@link Identifiable}: the value returned from
+&nbsp; * {@link Identifiable#getId() getId()} in all JWT standard hash algorithms will return one of the
+&nbsp; * &amp;quot;{@code Hash Name String}&amp;quot; values defined in the IANA
+&nbsp; * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml&quot;&gt;Named Information Hash
+&nbsp; * Algorithm Registry&lt;/a&gt;. This is to ensure the correct algorithm ID is used within other JWT-standard identifiers,
+&nbsp; * such as within &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc9278.html&quot;&gt;JWK Thumbprint URI&lt;/a&gt;s.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;IANA Standard Implementations&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Constant definitions and utility methods for common (&lt;em&gt;but not all&lt;/em&gt;)
+&nbsp; * &lt;a href=&quot;https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg&quot;&gt;IANA Hash
+&nbsp; * Algorithms&lt;/a&gt; are available via {@link Jwks.HASH}.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @see Jwks.HASH
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface HashAlgorithm extends DigestAlgorithm&lt;Request&lt;InputStream&gt;, VerifyDigestRequest&gt; {
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

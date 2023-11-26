@@ -1,0 +1,428 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Bytes</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: Bytes (io.jsonwebtoken.impl.lang)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Bytes</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.6%
+  </span>
+  <span class="absValue">
+    (56/58)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (70/70)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Bytes$bitLength$11</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$bytesMsg$16</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$clear$1</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$concat$10</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$endsWith$15</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$increment$9</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$indexOf$4</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$isEmpty</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$length$12</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$length$2</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$random$3</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$randomBits$0</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$startsWith$13</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$startsWith$14</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$toBytes$5</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$toBytes$7</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$toInt$8</td>
+  </tr>
+  <tr>
+    <td class="name">Bytes$toLong$6</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.6%
+  </span>
+  <span class="absValue">
+    (56/58)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (70/70)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2020 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.lang;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.security.Randoms;
+&nbsp;import io.jsonwebtoken.lang.Arrays;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;
+&nbsp;public final class Bytes {
+&nbsp;
+<b class="fc">&nbsp;    public static final byte[] EMPTY = new byte[0];</b>
+&nbsp;
+&nbsp;    private static final int LONG_BYTE_LENGTH = Long.SIZE / Byte.SIZE;
+&nbsp;    private static final int INT_BYTE_LENGTH = Integer.SIZE / Byte.SIZE;
+&nbsp;    public static final String LONG_REQD_MSG = &quot;Long byte arrays must be &quot; + LONG_BYTE_LENGTH + &quot; bytes in length.&quot;;
+&nbsp;    public static final String INT_REQD_MSG = &quot;Integer byte arrays must be &quot; + INT_BYTE_LENGTH + &quot; bytes in length.&quot;;
+&nbsp;
+&nbsp;    //prevent instantiation
+&nbsp;    private Bytes() {
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] nullSafe(byte[] bytes) {
+<b class="fc">&nbsp;        return bytes != null ? bytes : Bytes.EMPTY;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] randomBits(int numBits) {
+<b class="fc">&nbsp;        return random(numBits / Byte.SIZE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] random(int numBytes) {
+<b class="fc">&nbsp;        if (numBytes &lt;= 0) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(&quot;numBytes argument must be &gt;= 0&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        byte[] bytes = new byte[numBytes];</b>
+<b class="fc">&nbsp;        Randoms.secureRandom().nextBytes(bytes);</b>
+<b class="fc">&nbsp;        return bytes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] toBytes(int i) {
+<b class="fc">&nbsp;        return new byte[]{</b>
+&nbsp;                (byte) (i &gt;&gt;&gt; 24),
+&nbsp;                (byte) (i &gt;&gt;&gt; 16),
+&nbsp;                (byte) (i &gt;&gt;&gt; 8),
+&nbsp;                (byte) i
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] toBytes(long l) {
+<b class="fc">&nbsp;        return new byte[]{</b>
+&nbsp;                (byte) (l &gt;&gt;&gt; 56),
+&nbsp;                (byte) (l &gt;&gt;&gt; 48),
+&nbsp;                (byte) (l &gt;&gt;&gt; 40),
+&nbsp;                (byte) (l &gt;&gt;&gt; 32),
+&nbsp;                (byte) (l &gt;&gt;&gt; 24),
+&nbsp;                (byte) (l &gt;&gt;&gt; 16),
+&nbsp;                (byte) (l &gt;&gt;&gt; 8),
+&nbsp;                (byte) l
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    public static long toLong(byte[] bytes) {
+<b class="pc">&nbsp;        Assert.isTrue(Arrays.length(bytes) == LONG_BYTE_LENGTH, LONG_REQD_MSG);</b>
+<b class="fc">&nbsp;        return ((bytes[0] &amp; 0xFFL) &lt;&lt; 56) |</b>
+&nbsp;                ((bytes[1] &amp; 0xFFL) &lt;&lt; 48) |
+&nbsp;                ((bytes[2] &amp; 0xFFL) &lt;&lt; 40) |
+&nbsp;                ((bytes[3] &amp; 0xFFL) &lt;&lt; 32) |
+&nbsp;                ((bytes[4] &amp; 0xFFL) &lt;&lt; 24) |
+&nbsp;                ((bytes[5] &amp; 0xFFL) &lt;&lt; 16) |
+&nbsp;                ((bytes[6] &amp; 0xFFL) &lt;&lt; 8) |
+&nbsp;                (bytes[7] &amp; 0xFFL);
+&nbsp;    }
+&nbsp;
+&nbsp;    public static int toInt(byte[] bytes) {
+<b class="pc">&nbsp;        Assert.isTrue(Arrays.length(bytes) == INT_BYTE_LENGTH, INT_REQD_MSG);</b>
+<b class="fc">&nbsp;        return ((bytes[0] &amp; 0xFF) &lt;&lt; 24) |</b>
+&nbsp;                ((bytes[1] &amp; 0xFF) &lt;&lt; 16) |
+&nbsp;                ((bytes[2] &amp; 0xFF) &lt;&lt; 8) |
+&nbsp;                (bytes[3] &amp; 0xFF);
+&nbsp;    }
+&nbsp;
+&nbsp;    public static int indexOf(byte[] source, byte[] target) {
+<b class="fc">&nbsp;        return indexOf(source, target, 0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static int indexOf(byte[] source, byte[] target, int fromIndex) {
+<b class="fc">&nbsp;        return indexOf(source, 0, length(source), target, 0, length(target), fromIndex);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    static int indexOf(byte[] source, int srcOffset, int srcLen,
+&nbsp;                       byte[] target, int targetOffset, int targetLen,
+&nbsp;                       int fromIndex) {
+&nbsp;
+<b class="fc">&nbsp;        if (fromIndex &gt;= srcLen) {</b>
+<b class="fc">&nbsp;            return (targetLen == 0 ? srcLen : -1);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (fromIndex &lt; 0) {</b>
+<b class="fc">&nbsp;            fromIndex = 0;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (targetLen == 0) {</b>
+<b class="fc">&nbsp;            return fromIndex;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        byte first = target[targetOffset];</b>
+<b class="fc">&nbsp;        int max = srcOffset + (srcLen - targetLen);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (int i = srcOffset + fromIndex; i &lt;= max; i++) { //</b>
+&nbsp;
+<b class="fc">&nbsp;            if (source[i] != first) { // continue on to find the first matching byte</b>
+&nbsp;                //noinspection StatementWithEmptyBody
+<b class="fc">&nbsp;                while (++i &lt;= max &amp;&amp; source[i] != first) ;</b>
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            if (i &lt;= max) { // found first byte in target, now try to find the rest:</b>
+<b class="fc">&nbsp;                int j = i + 1;</b>
+<b class="fc">&nbsp;                int end = j + targetLen - 1;</b>
+&nbsp;                //noinspection StatementWithEmptyBody
+<b class="fc">&nbsp;                for (int k = targetOffset + 1; j &lt; end &amp;&amp; source[j] == target[k]; j++, k++) ;</b>
+<b class="fc">&nbsp;                if (j == end) {</b>
+<b class="fc">&nbsp;                    return i - srcOffset; // found entire target byte array</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return -1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static boolean startsWith(byte[] src, byte[] prefix) {
+<b class="fc">&nbsp;        return startsWith(src, prefix, 0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static boolean startsWith(byte[] src, byte[] prefix, int offset) {
+<b class="fc">&nbsp;        int to = offset;</b>
+<b class="fc">&nbsp;        int po = 0;</b>
+<b class="fc">&nbsp;        int pc = length(prefix);</b>
+<b class="fc">&nbsp;        if ((offset &lt; 0) || (offset &gt; length(src) - pc)) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        while (--pc &gt;= 0) {</b>
+<b class="fc">&nbsp;            if (src[to++] != prefix[po++]) {</b>
+<b class="fc">&nbsp;                return false;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static boolean endsWith(byte[] src, byte[] suffix) {
+<b class="fc">&nbsp;        return startsWith(src, suffix, length(src) - length(suffix));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] concat(byte[]... arrays) {
+<b class="fc">&nbsp;        int len = 0;</b>
+<b class="fc">&nbsp;        int numArrays = Arrays.length(arrays);</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; numArrays; i++) {</b>
+<b class="fc">&nbsp;            len += length(arrays[i]);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        byte[] output = new byte[len];</b>
+<b class="fc">&nbsp;        int position = 0;</b>
+<b class="fc">&nbsp;        if (len &gt; 0) {</b>
+<b class="fc">&nbsp;            for (byte[] array : arrays) {</b>
+<b class="fc">&nbsp;                int alen = length(array);</b>
+<b class="fc">&nbsp;                if (alen &gt; 0) {</b>
+<b class="fc">&nbsp;                    System.arraycopy(array, 0, output, position, alen);</b>
+<b class="fc">&nbsp;                    position += alen;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return output;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Clears the array by filling it with all zeros. Does nothing with a null or empty argument.
+&nbsp;     *
+&nbsp;     * @param bytes the (possibly null or empty) byte array to clear
+&nbsp;     */
+&nbsp;    public static void clear(byte[] bytes) {
+<b class="fc">&nbsp;        if (isEmpty(bytes)) return;</b>
+<b class="fc">&nbsp;        java.util.Arrays.fill(bytes, (byte) 0);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static boolean isEmpty(byte[] bytes) {
+<b class="fc">&nbsp;        return length(bytes) == 0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static int length(byte[] bytes) {
+<b class="fc">&nbsp;        return bytes == null ? 0 : bytes.length;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static long bitLength(byte[] bytes) {
+<b class="fc">&nbsp;        return length(bytes) * (long) Byte.SIZE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the minimum number of bytes required to represent the specified number of bits.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is defined/used by many specifications, such as:&lt;/p&gt;
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;&lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-2&quot;&gt;JWA RFC 7518, Section 2&lt;/a&gt;&#39;s
+&nbsp;     *     &lt;code&gt;Base64urlUInt&lt;/code&gt; definition&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;Elliptic Curve &lt;code&gt;Integer-to-OctetString&lt;/code&gt; conversion defined by Section 2.3.7 of the
+&nbsp;     *     &lt;a href=&quot;http://www.secg.org/sec1-v2.pdf&quot;&gt;Standards for Efficient Cryptography Group,
+&nbsp;     *     &amp;qupt;SEC 1: Elliptic Curve Cryptography&amp;quot; Version 2.0, May 2009&lt;/a&gt; (as required by
+&nbsp;     *     &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4&quot;&gt;RFC 7518, Section 3.4&lt;/a&gt;)&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;and others.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @param bitLength the number of bits to represent as a byte array, must be &gt;= 0
+&nbsp;     * @return the minimum number of bytes required to represent the specified number of bits.
+&nbsp;     * @throws IllegalArgumentException if {@code bitLength} is less than zero.
+&nbsp;     */
+&nbsp;    public static int length(int bitLength) {
+<b class="fc">&nbsp;        if (bitLength &lt; 0) throw new IllegalArgumentException(&quot;bitLength argument must be &gt;= 0&quot;);</b>
+<b class="fc">&nbsp;        return (bitLength + 7) / Byte.SIZE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String bitsMsg(long bitLength) {
+<b class="fc">&nbsp;        return bitLength + &quot; bits (&quot; + bitLength / Byte.SIZE + &quot; bytes)&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String bytesMsg(int byteArrayLength) {
+<b class="fc">&nbsp;        return bitsMsg((long) byteArrayLength * Byte.SIZE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void increment(byte[] a) {
+<b class="fc">&nbsp;        for (int i = a.length - 1; i &gt;= 0; --i) {</b>
+<b class="fc">&nbsp;            if (++a[i] != 0) {</b>
+<b class="fc">&nbsp;                break;</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

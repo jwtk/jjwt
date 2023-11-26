@@ -1,0 +1,296 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseNCodecOutputStream</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.io</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseNCodecOutputStream (io.jsonwebtoken.impl.io)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseNCodecOutputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (6/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (12/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.8%
+  </span>
+  <span class="absValue">
+    (26/33)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.io;
+&nbsp;
+&nbsp;import java.io.FilterOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract superclass for Base-N output streams.
+&nbsp; * &lt;p&gt;
+&nbsp; * To write the EOF marker without closing the stream, call {@link #eof()} or use an &lt;a
+&nbsp; * href=&quot;https://commons.apache.org/proper/commons-io/&quot;&gt;Apache Commons IO&lt;/a&gt; &lt;a href=
+&nbsp; * &quot;https://commons.apache.org/proper/commons-io/apidocs/org/apache/commons/io/output/CloseShieldOutputStream.html&quot;
+&nbsp; * &gt;CloseShieldOutputStream&lt;/a&gt;.
+&nbsp; * &lt;/p&gt;
+&nbsp; *
+&nbsp; * @since 0.12.0, copied from
+&nbsp; * &lt;a href=&quot;https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6&quot;&gt;commons-codec
+&nbsp; * 585497f09b026f6602daf986723a554e051bdfe6&lt;/a&gt;
+&nbsp; */
+&nbsp;class BaseNCodecOutputStream extends FilterOutputStream {
+&nbsp;
+&nbsp;    private final boolean doEncode;
+&nbsp;
+&nbsp;    private final BaseNCodec baseNCodec;
+&nbsp;
+<b class="fc">&nbsp;    private final byte[] singleByte = new byte[1];</b>
+&nbsp;
+<b class="fc">&nbsp;    private final BaseNCodec.Context context = new BaseNCodec.Context();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * TODO should this be protected?
+&nbsp;     *
+&nbsp;     * @param outputStream the underlying output or null.
+&nbsp;     * @param basedCodec   a BaseNCodec.
+&nbsp;     * @param doEncode     true to encode, false to decode, TODO should be an enum?
+&nbsp;     */
+&nbsp;    BaseNCodecOutputStream(final OutputStream outputStream, final BaseNCodec basedCodec, final boolean doEncode) {
+<b class="fc">&nbsp;        super(outputStream);</b>
+<b class="fc">&nbsp;        this.baseNCodec = basedCodec;</b>
+<b class="fc">&nbsp;        this.doEncode = doEncode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Closes this output stream and releases any system resources associated with the stream.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * To write the EOF marker without closing the stream, call {@link #eof()} or use an
+&nbsp;     * &lt;a href=&quot;https://commons.apache.org/proper/commons-io/&quot;&gt;Apache Commons IO&lt;/a&gt; &lt;a href=
+&nbsp;     * &quot;https://commons.apache.org/proper/commons-io/apidocs/org/apache/commons/io/output/CloseShieldOutputStream.html&quot;
+&nbsp;     * &gt;CloseShieldOutputStream&lt;/a&gt;.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void close() throws IOException {
+<b class="fc">&nbsp;        eof();</b>
+<b class="fc">&nbsp;        flush();</b>
+<b class="fc">&nbsp;        out.close();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes EOF.
+&nbsp;     *
+&nbsp;     * @since 1.11
+&nbsp;     */
+&nbsp;    public void eof() {
+&nbsp;        // Notify encoder of EOF (-1).
+<b class="pc">&nbsp;        if (doEncode) {</b>
+<b class="fc">&nbsp;            baseNCodec.encode(singleByte, 0, BaseNCodec.EOF, context);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            baseNCodec.decode(singleByte, 0, BaseNCodec.EOF, context);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Flushes this output stream and forces any buffered output bytes to be written out to the stream.
+&nbsp;     *
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void flush() throws IOException {
+<b class="fc">&nbsp;        flush(true);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Flushes this output stream and forces any buffered output bytes to be written out to the stream. If propagate is
+&nbsp;     * true, the wrapped stream will also be flushed.
+&nbsp;     *
+&nbsp;     * @param propagate boolean flag to indicate whether the wrapped OutputStream should also be flushed.
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    private void flush(final boolean propagate) throws IOException {
+<b class="fc">&nbsp;        final int avail = baseNCodec.available(context);</b>
+<b class="fc">&nbsp;        if (avail &gt; 0) {</b>
+<b class="fc">&nbsp;            final byte[] buf = new byte[avail];</b>
+<b class="fc">&nbsp;            final int c = baseNCodec.readResults(buf, 0, avail, context);</b>
+<b class="pc">&nbsp;            if (c &gt; 0) {</b>
+<b class="fc">&nbsp;                out.write(buf, 0, c);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        if (propagate) {</b>
+<b class="fc">&nbsp;            out.flush();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true if decoding behavior is strict. Decoding will raise an
+&nbsp;     * {@link IllegalArgumentException} if trailing bits are not part of a valid encoding.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The default is false for lenient encoding. Decoding will compose trailing bits
+&nbsp;     * into 8-bit bytes and discard the remainder.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return true if using strict decoding
+&nbsp;     * @since 1.15
+&nbsp;     */
+&nbsp;    public boolean isStrictDecoding() {
+<b class="nc">&nbsp;        return baseNCodec.isStrictDecoding();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes {@code len} bytes from the specified {@code b} array starting at {@code offset} to this
+&nbsp;     * output stream.
+&nbsp;     *
+&nbsp;     * @param array  source byte array
+&nbsp;     * @param offset where to start reading the bytes
+&nbsp;     * @param len    maximum number of bytes to write
+&nbsp;     * @throws IOException               if an I/O error occurs.
+&nbsp;     * @throws NullPointerException      if the byte array parameter is null
+&nbsp;     * @throws IndexOutOfBoundsException if offset, len or buffer size are invalid
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void write(final byte[] array, final int offset, final int len) throws IOException {
+<b class="fc">&nbsp;        Objects.requireNonNull(array, &quot;array&quot;);</b>
+<b class="pc">&nbsp;        if (offset &lt; 0 || len &lt; 0) {</b>
+<b class="nc">&nbsp;            throw new IndexOutOfBoundsException();</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (offset &gt; array.length || offset + len &gt; array.length) {</b>
+<b class="nc">&nbsp;            throw new IndexOutOfBoundsException();</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (len &gt; 0) {</b>
+<b class="pc">&nbsp;            if (doEncode) {</b>
+<b class="fc">&nbsp;                baseNCodec.encode(array, offset, len, context);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                baseNCodec.decode(array, offset, len, context);</b>
+&nbsp;            }
+<b class="fc">&nbsp;            flush(false);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Writes the specified {@code byte} to this output stream.
+&nbsp;     *
+&nbsp;     * @param i source byte
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void write(final int i) throws IOException {
+<b class="nc">&nbsp;        singleByte[0] = (byte) i;</b>
+<b class="nc">&nbsp;        write(singleByte, 0, 1);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

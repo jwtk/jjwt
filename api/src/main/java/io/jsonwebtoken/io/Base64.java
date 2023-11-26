@@ -85,69 +85,73 @@ final class Base64 { //final and package-protected on purpose
      *                little faster.
      * @return A BASE64 encoded array. Never <code>null</code>.
      */
-    private char[] encodeToChar(byte[] sArr, boolean lineSep) {
 
-        // Check special case
-        int sLen = sArr != null ? sArr.length : 0;
-        if (sLen == 0) {
+    private char[] encodeToChar(byte[] sourceArray, boolean includeLineSeparators) {
+        int sourceLength = (sourceArray != null) ? sourceArray.length : 0;
+        if (sourceLength == 0) {
             return new char[0];
         }
 
-        int eLen = (sLen / 3) * 3; // # of bytes that can encode evenly into 24-bit chunks
-        int left = sLen - eLen;    // # of bytes that remain after 24-bit chunking. Always 0, 1 or 2
+        int evenLength = (sourceLength / 3) * 3;
+        int remainingBytes = sourceLength - evenLength;
 
-        int cCnt = (((sLen - 1) / 3 + 1) << 2); // # of base64-encoded characters including padding
-        int dLen = cCnt + (lineSep ? (cCnt - 1) / 76 << 1 : 0); // Length of returned char array with padding and any line separators
+        int encodedCharCount = (((sourceLength - 1) / 3 + 1) << 2);
+        int totalEncodedLength = encodedCharCount + (includeLineSeparators ? (encodedCharCount - 1) / 76 << 1 : 0);
 
-        int padCount = 0;
-        if (left == 2) {
-            padCount = 1;
-        } else if (left == 1) {
-            padCount = 2;
+        int paddingCount = calculatePaddingCount(remainingBytes);
+
+        char[] encodedArray = initializeEncodedCharArray(totalEncodedLength, paddingCount);
+
+        encodeEvenBits(sourceArray, evenLength, encodedArray, includeLineSeparators, totalEncodedLength);
+
+        encodeLastBits(sourceArray, evenLength, remainingBytes, encodedArray, totalEncodedLength, paddingCount);
+
+        return encodedArray;
+    }
+
+    private int calculatePaddingCount(int remainingBytes) {
+        int paddingCount = 0;
+        if (remainingBytes == 2) {
+            paddingCount = 1;
+        } else if (remainingBytes == 1) {
+            paddingCount = 2;
         }
+        return paddingCount;
+    }
 
-        char[] dArr = new char[urlsafe ? (dLen - padCount) : dLen];
+    private char[] initializeEncodedCharArray(int totalEncodedLength, int paddingCount) {
+        return new char[urlsafe ? (totalEncodedLength - paddingCount) : totalEncodedLength];
+    }
 
-        // Encode even 24-bits
-        for (int s = 0, d = 0, cc = 0; s < eLen; ) {
-
-            // Copy next three bytes into lower 24 bits of int, paying attention to sign.
-            int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
-
-            // Encode the int into four chars
-            dArr[d++] = ALPHABET[(i >>> 18) & 0x3f];
-            dArr[d++] = ALPHABET[(i >>> 12) & 0x3f];
-            dArr[d++] = ALPHABET[(i >>> 6) & 0x3f];
-            dArr[d++] = ALPHABET[i & 0x3f];
-
-            // Add optional line separator
-            if (lineSep && ++cc == 19 && d < dLen - 2) {
-                dArr[d++] = '\r';
-                dArr[d++] = '\n';
-                cc = 0;
+    private void encodeEvenBits(byte[] sourceArray, int evenLength, char[] encodedArray, boolean includeLineSeparators, int totalEncodedLength) {
+        for (int sourceIndex = 0, encodedIndex = 0, lineSeparatorCount = 0; sourceIndex < evenLength; ) {
+            int value = (sourceArray[sourceIndex++] & 0xff) << 16 | (sourceArray[sourceIndex++] & 0xff) << 8 | (sourceArray[sourceIndex++] & 0xff);
+            encodedArray[encodedIndex++] = ALPHABET[(value >>> 18) & 0x3f];
+            encodedArray[encodedIndex++] = ALPHABET[(value >>> 12) & 0x3f];
+            encodedArray[encodedIndex++] = ALPHABET[(value >>> 6) & 0x3f];
+            encodedArray[encodedIndex++] = ALPHABET[value & 0x3f];
+            if (includeLineSeparators && ++lineSeparatorCount == 19 && encodedIndex < totalEncodedLength - 2) {
+                encodedArray[encodedIndex++] = '\r';
+                encodedArray[encodedIndex++] = '\n';
+                lineSeparatorCount = 0;
             }
         }
+    }
 
-        // Pad and encode last bits if source isn't even 24 bits.
-        if (left > 0) {
-            // Prepare the int
-            int i = ((sArr[eLen] & 0xff) << 10) | (left == 2 ? ((sArr[sLen - 1] & 0xff) << 2) : 0);
-
-            // Set last four chars
-            dArr[dLen - 4] = ALPHABET[i >> 12];
-            dArr[dLen - 3] = ALPHABET[(i >>> 6) & 0x3f];
-            //dArr[dLen - 2] = left == 2 ? ALPHABET[i & 0x3f] : '=';
-            //dArr[dLen - 1] = '=';
-            if (left == 2) {
-                dArr[dLen - 2] = ALPHABET[i & 0x3f];
-            } else if (!urlsafe) { // if not urlsafe, we need to include the padding characters
-                dArr[dLen - 2] = '=';
+    private void encodeLastBits(byte[] sourceArray, int evenLength, int remainingBytes, char[] encodedArray, int totalEncodedLength, int paddingCount) {
+        if (remainingBytes > 0) {
+            int value = ((sourceArray[evenLength] & 0xff) << 10) | (remainingBytes == 2 ? ((sourceArray[sourceArray.length - 1] & 0xff) << 2) : 0);
+            encodedArray[totalEncodedLength - 4] = ALPHABET[value >> 12];
+            encodedArray[totalEncodedLength - 3] = ALPHABET[(value >>> 6) & 0x3f];
+            if (remainingBytes == 2) {
+                encodedArray[totalEncodedLength - 2] = ALPHABET[value & 0x3f];
+            } else if (!urlsafe) {
+                encodedArray[totalEncodedLength - 2] = '=';
             }
-            if (!urlsafe) { // include padding
-                dArr[dLen - 1] = '=';
+            if (!urlsafe) {
+                encodedArray[totalEncodedLength - 1] = '=';
             }
         }
-        return dArr;
     }
 
     /*

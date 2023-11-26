@@ -1,0 +1,222 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CryptoAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: CryptoAlgorithm (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CryptoAlgorithm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (31/31)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.Identifiable;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.security.AeadAlgorithm;
+&nbsp;import io.jsonwebtoken.security.KeyRequest;
+&nbsp;import io.jsonwebtoken.security.Request;
+&nbsp;import io.jsonwebtoken.security.SecretKeyBuilder;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.security.Provider;
+&nbsp;import java.security.SecureRandom;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;abstract class CryptoAlgorithm implements Identifiable {
+&nbsp;
+&nbsp;    private final String ID;
+&nbsp;
+&nbsp;    private final String jcaName;
+&nbsp;
+<b class="fc">&nbsp;    CryptoAlgorithm(String id, String jcaName) {</b>
+<b class="fc">&nbsp;        Assert.hasText(id, &quot;id cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        this.ID = id;</b>
+<b class="fc">&nbsp;        Assert.hasText(jcaName, &quot;jcaName cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        this.jcaName = jcaName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getId() {
+<b class="fc">&nbsp;        return this.ID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String getJcaName() {
+<b class="fc">&nbsp;        return this.jcaName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static SecureRandom ensureSecureRandom(Request&lt;?&gt; request) {
+<b class="fc">&nbsp;        SecureRandom random = request != null ? request.getSecureRandom() : null;</b>
+<b class="fc">&nbsp;        return random != null ? random : Randoms.secureRandom();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected JcaTemplate jca() {
+<b class="fc">&nbsp;        return new JcaTemplate(getJcaName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected JcaTemplate jca(Request&lt;?&gt; request) {
+<b class="fc">&nbsp;        Assert.notNull(request, &quot;request cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        String jcaName = Assert.hasText(getJcaName(request), &quot;Request jcaName cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        Provider provider = request.getProvider();</b>
+<b class="fc">&nbsp;        SecureRandom random = ensureSecureRandom(request);</b>
+<b class="fc">&nbsp;        return new JcaTemplate(jcaName, provider, random);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected String getJcaName(Request&lt;?&gt; request) {
+<b class="fc">&nbsp;        return getJcaName();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected SecretKey generateCek(KeyRequest&lt;?&gt; request) {
+<b class="fc">&nbsp;        AeadAlgorithm enc = Assert.notNull(request.getEncryptionAlgorithm(), &quot;Request encryptionAlgorithm cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        SecretKeyBuilder builder = Assert.notNull(enc.key(), &quot;Request encryptionAlgorithm KeyBuilder cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        SecretKey key = builder.random(request.getSecureRandom()).build();</b>
+<b class="fc">&nbsp;        return Assert.notNull(key, &quot;Request encryptionAlgorithm SecretKeyBuilder cannot produce null keys.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="fc">&nbsp;        if (this == obj) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (obj instanceof CryptoAlgorithm) {</b>
+<b class="fc">&nbsp;            CryptoAlgorithm other = (CryptoAlgorithm) obj;</b>
+<b class="fc">&nbsp;            return this.ID.equals(other.getId()) &amp;&amp; this.jcaName.equals(other.getJcaName());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        int hash = 7;</b>
+<b class="fc">&nbsp;        hash = 31 * hash + ID.hashCode();</b>
+<b class="fc">&nbsp;        hash = 31 * hash + jcaName.hashCode();</b>
+<b class="fc">&nbsp;        return hash;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return ID;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

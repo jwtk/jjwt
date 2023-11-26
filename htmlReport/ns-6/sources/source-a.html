@@ -1,0 +1,266 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultParameter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultParameter (io.jsonwebtoken.impl.lang)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultParameter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.8%
+  </span>
+  <span class="absValue">
+    (23/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (41/41)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DefaultParameter$equals$0</td>
+  </tr>
+  <tr>
+    <td class="name">DefaultParameter$hashCode$1</td>
+  </tr>
+  <tr>
+    <td class="name">DefaultParameter$toString</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.8%
+  </span>
+  <span class="absValue">
+    (23/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (41/41)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.lang;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;
+&nbsp;public class DefaultParameter&lt;T&gt; implements Parameter&lt;T&gt; {
+&nbsp;
+&nbsp;    private final String ID;
+&nbsp;    private final String NAME;
+&nbsp;    private final boolean SECRET;
+&nbsp;    private final Class&lt;T&gt; IDIOMATIC_TYPE; // data type, or if collection, element type
+&nbsp;    private final Class&lt;? extends Collection&lt;T&gt;&gt; COLLECTION_TYPE; // null if param doesn&#39;t represent collection
+&nbsp;    private final Converter&lt;T, Object&gt; CONVERTER;
+&nbsp;
+&nbsp;    public DefaultParameter(String id, String name, boolean secret,
+&nbsp;                            Class&lt;T&gt; idiomaticType,
+&nbsp;                            Class&lt;? extends Collection&lt;T&gt;&gt; collectionType,
+<b class="fc">&nbsp;                            Converter&lt;T, Object&gt; converter) {</b>
+<b class="fc">&nbsp;        this.ID = Strings.clean(Assert.hasText(id, &quot;ID argument cannot be null or empty.&quot;));</b>
+<b class="fc">&nbsp;        this.NAME = Strings.clean(Assert.hasText(name, &quot;Name argument cannot be null or empty.&quot;));</b>
+<b class="fc">&nbsp;        this.IDIOMATIC_TYPE = Assert.notNull(idiomaticType, &quot;idiomaticType argument cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.CONVERTER = Assert.notNull(converter, &quot;Converter argument cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.SECRET = secret;</b>
+<b class="fc">&nbsp;        this.COLLECTION_TYPE = collectionType; // can be null if parameter isn&#39;t a collection</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getId() {
+<b class="fc">&nbsp;        return this.ID;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getName() {
+<b class="fc">&nbsp;        return this.NAME;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean supports(Object value) {
+<b class="fc">&nbsp;        if (value == null) {</b>
+<b class="fc">&nbsp;            return true;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (COLLECTION_TYPE != null &amp;&amp; COLLECTION_TYPE.isInstance(value)) {</b>
+<b class="fc">&nbsp;            Collection&lt;? extends T&gt; c = COLLECTION_TYPE.cast(value);</b>
+<b class="fc">&nbsp;            return c.isEmpty() || IDIOMATIC_TYPE.isInstance(c.iterator().next());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return IDIOMATIC_TYPE.isInstance(value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    @Override
+&nbsp;    public T cast(Object value) {
+<b class="fc">&nbsp;        if (value != null) {</b>
+<b class="fc">&nbsp;            if (COLLECTION_TYPE != null) { // parameter represents a collection, ensure it and its elements are the expected type:</b>
+<b class="fc">&nbsp;                if (!COLLECTION_TYPE.isInstance(value)) {</b>
+<b class="fc">&nbsp;                    String msg = &quot;Cannot cast &quot; + value.getClass().getName() + &quot; to &quot; +</b>
+<b class="fc">&nbsp;                            COLLECTION_TYPE.getName() + &quot;&lt;&quot; + IDIOMATIC_TYPE.getName() + &quot;&gt;&quot;;</b>
+<b class="fc">&nbsp;                    throw new ClassCastException(msg);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                Collection&lt;?&gt; c = COLLECTION_TYPE.cast(value);</b>
+<b class="fc">&nbsp;                if (!c.isEmpty()) {</b>
+<b class="fc">&nbsp;                    Object element = c.iterator().next();</b>
+<b class="fc">&nbsp;                    if (!IDIOMATIC_TYPE.isInstance(element)) {</b>
+<b class="fc">&nbsp;                        String msg = &quot;Cannot cast &quot; + value.getClass().getName() + &quot; to &quot; +</b>
+<b class="fc">&nbsp;                                COLLECTION_TYPE.getName() + &quot;&lt;&quot; + IDIOMATIC_TYPE.getName() + &quot;&gt;: At least one &quot; +</b>
+<b class="fc">&nbsp;                                &quot;element is not an instance of &quot; + IDIOMATIC_TYPE.getName();</b>
+<b class="fc">&nbsp;                        throw new ClassCastException(msg);</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="fc">&nbsp;            } else if (!IDIOMATIC_TYPE.isInstance(value)) {</b>
+<b class="fc">&nbsp;                String msg = &quot;Cannot cast &quot; + value.getClass().getName() + &quot; to &quot; + IDIOMATIC_TYPE.getName();</b>
+<b class="fc">&nbsp;                throw new ClassCastException(msg);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return (T) value;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isSecret() {
+<b class="fc">&nbsp;        return SECRET;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int hashCode() {
+<b class="fc">&nbsp;        return this.ID.hashCode();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean equals(Object obj) {
+<b class="fc">&nbsp;        if (obj instanceof Parameter) {</b>
+<b class="fc">&nbsp;            return this.ID.equals(((Parameter&lt;?&gt;) obj).getId());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="fc">&nbsp;        return &quot;&#39;&quot; + this.ID + &quot;&#39; (&quot; + this.NAME + &quot;)&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object applyTo(T t) {
+<b class="fc">&nbsp;        return CONVERTER.applyTo(t);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public T applyFrom(Object o) {
+<b class="fc">&nbsp;        return CONVERTER.applyFrom(o);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

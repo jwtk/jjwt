@@ -1,0 +1,382 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Streams</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.io</a>
+</div>
+
+<h1>Coverage Summary for Class: Streams (io.jsonwebtoken.impl.io)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Streams</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (14/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.2%
+  </span>
+  <span class="absValue">
+    (40/42)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Streams$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$bytes$2</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$of</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$of$4</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$reader$0</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$reader$1</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$reset$5</td>
+  </tr>
+  <tr>
+    <td class="name">Streams$run$3</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    95.2%
+  </span>
+  <span class="absValue">
+    (20/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.6%
+  </span>
+  <span class="absValue">
+    (53/56)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.io;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.Bytes;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Objects;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;
+&nbsp;import java.io.BufferedInputStream;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.Flushable;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.InputStreamReader;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.io.Reader;
+&nbsp;import java.util.concurrent.Callable;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 0.12.0
+&nbsp; */
+<b class="nc">&nbsp;public class Streams {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Represents the end-of-file (or stream).
+&nbsp;     */
+&nbsp;    public static final int EOF = -1;
+&nbsp;
+&nbsp;    public static byte[] bytes(final InputStream in, String exmsg) {
+<b class="fc">&nbsp;        if (in instanceof BytesInputStream) {</b>
+<b class="fc">&nbsp;            return ((BytesInputStream) in).getBytes();</b>
+&nbsp;        }
+&nbsp;        // otherwise we have to copy over:
+<b class="fc">&nbsp;        ByteArrayOutputStream out = new ByteArrayOutputStream(8192);</b>
+<b class="fc">&nbsp;        copy(in, out, new byte[8192], exmsg);</b>
+<b class="fc">&nbsp;        return out.toByteArray();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static InputStream of(byte[] bytes) {
+<b class="fc">&nbsp;        return new BytesInputStream(bytes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static InputStream of(CharSequence seq) {
+<b class="fc">&nbsp;        return of(Strings.utf8(seq));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static Reader reader(byte[] bytes) {
+<b class="fc">&nbsp;        return reader(Streams.of(bytes));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static Reader reader(InputStream in) {
+<b class="fc">&nbsp;        return new InputStreamReader(in, Strings.UTF_8);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static Reader reader(CharSequence seq) {
+<b class="fc">&nbsp;        return new CharSequenceReader(seq);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void flush(Flushable... flushables) {
+<b class="fc">&nbsp;        Objects.nullSafeFlush(flushables);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Copies bytes from a {@link InputStream} to an {@link OutputStream} using the specified {@code buffer}, avoiding
+&nbsp;     * the need for a {@link BufferedInputStream}.
+&nbsp;     *
+&nbsp;     * @param inputStream  the {@link InputStream} to read.
+&nbsp;     * @param outputStream the {@link OutputStream} to write.
+&nbsp;     * @param buffer       the buffer to use for the copy
+&nbsp;     * @return the number of bytes copied.
+&nbsp;     * @throws IllegalArgumentException if the InputStream is {@code null}.
+&nbsp;     * @throws IllegalArgumentException if the OutputStream is {@code null}.
+&nbsp;     * @throws IOException              if an I/O error occurs.
+&nbsp;     */
+&nbsp;    public static long copy(final InputStream inputStream, final OutputStream outputStream, final byte[] buffer)
+&nbsp;            throws IOException {
+<b class="fc">&nbsp;        Assert.notNull(inputStream, &quot;inputStream cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notNull(outputStream, &quot;outputStream cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notEmpty(buffer, &quot;buffer cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        long count = 0;</b>
+<b class="fc">&nbsp;        int n = 0;</b>
+<b class="fc">&nbsp;        while (n != EOF) {</b>
+<b class="fc">&nbsp;            n = inputStream.read(buffer);</b>
+<b class="fc">&nbsp;            if (n &gt; 0) outputStream.write(buffer, 0, n);</b>
+<b class="fc">&nbsp;            count += n;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return count;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static long copy(final InputStream in, final OutputStream out, final byte[] buffer, final String exmsg) {
+<b class="fc">&nbsp;        return run(new Callable&lt;Long&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public Long call() throws IOException {
+&nbsp;                try {
+<b class="fc">&nbsp;                    reset(in);</b>
+<b class="fc">&nbsp;                    return copy(in, out, buffer);</b>
+&nbsp;                } finally {
+<b class="fc">&nbsp;                    Objects.nullSafeFlush(out);</b>
+<b class="fc">&nbsp;                    reset(in);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;        }, exmsg);
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void reset(final InputStream in) {
+<b class="fc">&nbsp;        if (in == null) return;</b>
+<b class="fc">&nbsp;        Callable&lt;Object&gt; callable = new Callable&lt;Object&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public Object call() {
+&nbsp;                try {
+<b class="fc">&nbsp;                    in.reset();</b>
+<b class="fc">&nbsp;                } catch (Throwable ignored) {</b>
+<b class="fc">&nbsp;                }</b>
+<b class="fc">&nbsp;                return null;</b>
+&nbsp;            }
+&nbsp;        };
+&nbsp;        try {
+<b class="fc">&nbsp;            callable.call();</b>
+<b class="nc">&nbsp;        } catch (Throwable ignored) {</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void write(final OutputStream out, final byte[] bytes, String exMsg) {
+<b class="fc">&nbsp;        write(out, bytes, 0, Bytes.length(bytes), exMsg);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void write(final OutputStream out, final byte[] data, final int offset, final int len, String exMsg) {
+<b class="pc">&nbsp;        if (out == null || Bytes.isEmpty(data) || len &lt;= 0) return;</b>
+<b class="fc">&nbsp;        run(new Callable&lt;Object&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public Object call() throws Exception {
+<b class="fc">&nbsp;                out.write(data, offset, len);</b>
+<b class="fc">&nbsp;                return null;</b>
+&nbsp;            }
+&nbsp;        }, exMsg);
+&nbsp;    }
+&nbsp;
+&nbsp;    public static void writeAndClose(final OutputStream out, final byte[] data, String exMsg) {
+&nbsp;        try {
+<b class="fc">&nbsp;            write(out, data, exMsg);</b>
+&nbsp;        } finally {
+<b class="fc">&nbsp;            Objects.nullSafeClose(out);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;V&gt; V run(Callable&lt;V&gt; c, String ioExMsg) {
+<b class="fc">&nbsp;        Assert.hasText(ioExMsg, &quot;IO Exception Message cannot be null or empty.&quot;);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            return c.call();</b>
+<b class="fc">&nbsp;        } catch (Throwable t) {</b>
+<b class="fc">&nbsp;            String msg = &quot;IO failure: &quot; + ioExMsg;</b>
+<b class="fc">&nbsp;            if (!msg.endsWith(&quot;.&quot;)) {</b>
+<b class="fc">&nbsp;                msg += &quot;.&quot;;</b>
+&nbsp;            }
+<b class="fc">&nbsp;            msg += &quot; Cause: &quot; + t.getMessage();</b>
+<b class="fc">&nbsp;            throw new io.jsonwebtoken.io.IOException(msg, t);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

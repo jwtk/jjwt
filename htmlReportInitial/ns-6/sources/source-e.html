@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DelegatingMap</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: DelegatingMap (io.jsonwebtoken.impl.lang)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DelegatingMap</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.lang;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code Map} implementation that delegates all calls to an internal Map instance.
+&nbsp; *
+&nbsp; * @param &lt;K&gt; Map key type
+&nbsp; * @param &lt;V&gt; Map value type
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public class DelegatingMap&lt;K, V, T extends Map&lt;K, V&gt;&gt; implements Map&lt;K, V&gt; {
+&nbsp;
+&nbsp;    protected T DELEGATE;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Initializes the instance with specified non-null backing delegate Map.
+&nbsp;     *
+&nbsp;     * @param delegate non-null delegate map to use for all map method implementations
+&nbsp;     * @throws IllegalArgumentException if {@code delegate} is null.
+&nbsp;     */
+<b class="fc">&nbsp;    protected DelegatingMap(T delegate) {</b>
+<b class="fc">&nbsp;        setDelegate(delegate);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected void setDelegate(T delegate) {
+<b class="fc">&nbsp;        this.DELEGATE = Assert.notNull(delegate, &quot;Delegate cannot be null.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int size() {
+<b class="fc">&nbsp;        return DELEGATE.size();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Collection&lt;V&gt; values() {
+<b class="fc">&nbsp;        return DELEGATE.values();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public V get(Object id) {
+<b class="fc">&nbsp;        return DELEGATE.get(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean isEmpty() {
+<b class="fc">&nbsp;        return DELEGATE.isEmpty();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean containsKey(Object key) {
+<b class="fc">&nbsp;        return DELEGATE.containsKey(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean containsValue(Object value) {
+<b class="fc">&nbsp;        return DELEGATE.containsValue(value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public V put(K key, V value) {
+<b class="fc">&nbsp;        return DELEGATE.put(key, value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public V remove(Object key) {
+<b class="fc">&nbsp;        return DELEGATE.remove(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void putAll(Map&lt;? extends K, ? extends V&gt; m) {
+<b class="fc">&nbsp;        DELEGATE.putAll(m);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void clear() {
+<b class="fc">&nbsp;        DELEGATE.clear();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;K&gt; keySet() {
+<b class="fc">&nbsp;        return DELEGATE.keySet();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;Entry&lt;K, V&gt;&gt; entrySet() {
+<b class="fc">&nbsp;        return DELEGATE.entrySet();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

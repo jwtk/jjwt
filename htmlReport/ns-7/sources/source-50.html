@@ -1,0 +1,302 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > KeysBridge</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: KeysBridge (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KeysBridge</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.6%
+  </span>
+  <span class="absValue">
+    (22/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.2%
+  </span>
+  <span class="absValue">
+    (50/52)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">KeysBridge$toString</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.6%
+  </span>
+  <span class="absValue">
+    (22/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.2%
+  </span>
+  <span class="absValue">
+    (50/52)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.Bytes;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.security.InvalidKeyException;
+&nbsp;import io.jsonwebtoken.security.KeySupplier;
+&nbsp;import io.jsonwebtoken.security.Password;
+&nbsp;import io.jsonwebtoken.security.PrivateKeyBuilder;
+&nbsp;import io.jsonwebtoken.security.SecretKeyBuilder;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.PrivateKey;
+&nbsp;import java.security.PublicKey;
+&nbsp;import java.security.interfaces.ECKey;
+&nbsp;import java.security.interfaces.RSAKey;
+&nbsp;
+&nbsp;@SuppressWarnings({&quot;unused&quot;}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
+&nbsp;public final class KeysBridge {
+&nbsp;
+&nbsp;    private static final String SUNPKCS11_GENERIC_SECRET_CLASSNAME = &quot;sun.security.pkcs11.P11Key$P11SecretKey&quot;;
+&nbsp;    private static final String SUNPKCS11_GENERIC_SECRET_ALGNAME = &quot;Generic Secret&quot;; // https://github.com/openjdk/jdk/blob/4f90abaf17716493bad740dcef76d49f16d69379/src/jdk.crypto.cryptoki/share/classes/sun/security/pkcs11/P11KeyStore.java#L1292
+&nbsp;
+&nbsp;    // prevent instantiation
+&nbsp;    private KeysBridge() {
+&nbsp;    }
+&nbsp;
+&nbsp;    public static Password password(char[] password) {
+<b class="fc">&nbsp;        return new PasswordSpec(password);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static SecretKeyBuilder builder(SecretKey key) {
+<b class="fc">&nbsp;        return new ProvidedSecretKeyBuilder(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static PrivateKeyBuilder builder(PrivateKey key) {
+<b class="fc">&nbsp;        return new ProvidedPrivateKeyBuilder(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the specified {@code key} is a {@link KeySupplier}, the &#39;root&#39; (lowest level) key that may exist in
+&nbsp;     * a {@code KeySupplier} chain is returned, otherwise the {@code key} is returned.
+&nbsp;     *
+&nbsp;     * @param key the key to check if it is a {@code KeySupplier}
+&nbsp;     * @param &lt;K&gt; the key type
+&nbsp;     * @return the lowest-level/root key available.
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public static &lt;K extends Key&gt; K root(K key) {
+<b class="pc">&nbsp;        return (key instanceof KeySupplier&lt;?&gt;) ? (K) root((KeySupplier&lt;?&gt;) key) : key;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static &lt;K extends Key&gt; K root(KeySupplier&lt;K&gt; supplier) {
+<b class="fc">&nbsp;        Assert.notNull(supplier, &quot;KeySupplier canot be null.&quot;);</b>
+<b class="fc">&nbsp;        return Assert.notNull(root(supplier.getKey()), &quot;KeySupplier key cannot be null.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String findAlgorithm(Key key) {
+<b class="fc">&nbsp;        return key != null ? Strings.clean(key.getAlgorithm()) : null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the specified key&#39;s available encoded bytes, or {@code null} if not available.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Some KeyStore implementations - like Hardware Security Modules, PKCS11 key stores, and later versions
+&nbsp;     * of Android - will not allow applications or libraries to obtain a key&#39;s encoded bytes.  In these cases,
+&nbsp;     * this method will return null.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the key to inspect
+&nbsp;     * @return the specified key&#39;s available encoded bytes, or {@code null} if not available.
+&nbsp;     */
+&nbsp;    public static byte[] findEncoded(Key key) {
+<b class="fc">&nbsp;        Assert.notNull(key, &quot;Key cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        byte[] encoded = null;</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            encoded = key.getEncoded();</b>
+<b class="nc">&nbsp;        } catch (Throwable ignored) {</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return encoded;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static boolean isSunPkcs11GenericSecret(Key key) {
+<b class="pc">&nbsp;        return key instanceof SecretKey &amp;&amp;</b>
+<b class="pc">&nbsp;                key.getClass().getName().equals(SUNPKCS11_GENERIC_SECRET_CLASSNAME) &amp;&amp;</b>
+<b class="nc">&nbsp;                SUNPKCS11_GENERIC_SECRET_ALGNAME.equals(key.getAlgorithm());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the specified key&#39;s key length (in bits) if possible, or {@code -1} if unable to determine the length.
+&nbsp;     *
+&nbsp;     * @param key the key to inspect
+&nbsp;     * @return the specified key&#39;s key length in bits, or {@code -1} if unable to determine length.
+&nbsp;     */
+&nbsp;    public static int findBitLength(Key key) {
+&nbsp;
+<b class="fc">&nbsp;        int bitlen = -1;</b>
+&nbsp;
+&nbsp;        // try to parse the length from key specification
+<b class="fc">&nbsp;        if (key instanceof SecretKey) {</b>
+<b class="fc">&nbsp;            SecretKey secretKey = (SecretKey) key;</b>
+<b class="pc">&nbsp;            if (&quot;RAW&quot;.equals(secretKey.getFormat())) {</b>
+<b class="fc">&nbsp;                byte[] encoded = findEncoded(secretKey);</b>
+<b class="fc">&nbsp;                if (!Bytes.isEmpty(encoded)) {</b>
+<b class="fc">&nbsp;                    bitlen = (int) Bytes.bitLength(encoded);</b>
+<b class="fc">&nbsp;                    Bytes.clear(encoded);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="fc">&nbsp;        } else if (key instanceof RSAKey) {</b>
+<b class="fc">&nbsp;            RSAKey rsaKey = (RSAKey) key;</b>
+<b class="fc">&nbsp;            bitlen = rsaKey.getModulus().bitLength();</b>
+<b class="fc">&nbsp;        } else if (key instanceof ECKey) {</b>
+<b class="fc">&nbsp;            ECKey ecKey = (ECKey) key;</b>
+<b class="fc">&nbsp;            bitlen = ecKey.getParams().getOrder().bitLength();</b>
+<b class="fc">&nbsp;        } else {</b>
+&nbsp;            // We can check additional logic for EdwardsCurve even if the current JDK version doesn&#39;t support it:
+<b class="fc">&nbsp;            EdwardsCurve curve = EdwardsCurve.findByKey(key);</b>
+<b class="fc">&nbsp;            if (curve != null) bitlen = curve.getKeyBitLength();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return bitlen;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static byte[] getEncoded(Key key) {
+<b class="fc">&nbsp;        Assert.notNull(key, &quot;Key cannot be null.&quot;);</b>
+&nbsp;        byte[] encoded;
+&nbsp;        try {
+<b class="fc">&nbsp;            encoded = key.getEncoded();</b>
+<b class="fc">&nbsp;        } catch (Throwable t) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Cannot obtain required encoded bytes from key [&quot; + KeysBridge.toString(key) + &quot;]: &quot; +</b>
+<b class="fc">&nbsp;                    t.getMessage();</b>
+<b class="fc">&nbsp;            throw new InvalidKeyException(msg, t);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        if (Bytes.isEmpty(encoded)) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Missing required encoded bytes for key [&quot; + toString(key) + &quot;].&quot;;</b>
+<b class="fc">&nbsp;            throw new InvalidKeyException(msg);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return encoded;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public static String toString(Key key) {
+<b class="fc">&nbsp;        if (key == null) {</b>
+<b class="fc">&nbsp;            return &quot;null&quot;;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (key instanceof PublicKey) {</b>
+<b class="fc">&nbsp;            return key.toString(); // safe to show internal key state as it&#39;s a public key</b>
+&nbsp;        }
+&nbsp;        // else secret or private key, don&#39;t show internal key state, just public attributes
+<b class="fc">&nbsp;        return &quot;class: &quot; + key.getClass().getName() +</b>
+<b class="fc">&nbsp;                &quot;, algorithm: &quot; + key.getAlgorithm() +</b>
+<b class="fc">&nbsp;                &quot;, format: &quot; + key.getFormat();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

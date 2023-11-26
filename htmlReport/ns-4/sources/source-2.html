@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DeflateCompressionAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.compression</a>
+</div>
+
+<h1>Coverage Summary for Class: DeflateCompressionAlgorithm (io.jsonwebtoken.impl.compression)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DeflateCompressionAlgorithm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.1%
+  </span>
+  <span class="absValue">
+    (16/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2015 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.compression;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Objects;
+&nbsp;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.util.zip.DeflaterOutputStream;
+&nbsp;import java.util.zip.InflaterInputStream;
+&nbsp;import java.util.zip.InflaterOutputStream;
+&nbsp;
+&nbsp;/**
+&nbsp; * Codec implementing the &lt;a href=&quot;https://en.wikipedia.org/wiki/DEFLATE&quot;&gt;deflate compression algorithm&lt;/a&gt;.
+&nbsp; *
+&nbsp; * @since 0.6.0
+&nbsp; */
+&nbsp;public class DeflateCompressionAlgorithm extends AbstractCompressionAlgorithm {
+&nbsp;
+&nbsp;    private static final String ID = &quot;DEF&quot;;
+&nbsp;
+&nbsp;    public DeflateCompressionAlgorithm() {
+<b class="fc">&nbsp;        super(ID);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected OutputStream doCompress(OutputStream out) {
+<b class="fc">&nbsp;        return new DeflaterOutputStream(out);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected InputStream doDecompress(InputStream is) {
+<b class="fc">&nbsp;        return new InflaterInputStream(is);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected byte[] doDecompress(final byte[] compressed) throws IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return super.doDecompress(compressed);</b>
+<b class="fc">&nbsp;        } catch (IOException e1) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                return doDecompressBackCompat(compressed);</b>
+<b class="fc">&nbsp;            } catch (IOException e2) {</b>
+<b class="fc">&nbsp;                throw e1; //retain/report original exception</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * This implementation was in 0.10.6 and earlier - it will be used as a fallback for backwards compatibility if
+&nbsp;     * {@link #doDecompress(byte[])} fails per &lt;a href=&quot;https://github.com/jwtk/jjwt/issues/536&quot;&gt;Issue 536&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * @param compressed the compressed byte array
+&nbsp;     * @return decompressed bytes
+&nbsp;     * @throws IOException if unable to decompress using the 0.10.6 and earlier logic
+&nbsp;     * @since 0.10.8
+&nbsp;     */
+&nbsp;    // package protected on purpose
+&nbsp;    byte[] doDecompressBackCompat(byte[] compressed) throws IOException {
+<b class="fc">&nbsp;        InflaterOutputStream inflaterOutputStream = null;</b>
+<b class="fc">&nbsp;        ByteArrayOutputStream decompressedOutputStream = null;</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            decompressedOutputStream = new ByteArrayOutputStream();</b>
+<b class="fc">&nbsp;            inflaterOutputStream = new InflaterOutputStream(decompressedOutputStream);</b>
+<b class="fc">&nbsp;            inflaterOutputStream.write(compressed);</b>
+<b class="fc">&nbsp;            inflaterOutputStream.flush();</b>
+<b class="fc">&nbsp;            return decompressedOutputStream.toByteArray();</b>
+&nbsp;        } finally {
+<b class="fc">&nbsp;            Objects.nullSafeClose(decompressedOutputStream, inflaterOutputStream);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

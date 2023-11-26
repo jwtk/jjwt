@@ -1,0 +1,192 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BigIntegerUBytesConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: BigIntegerUBytesConverter (io.jsonwebtoken.impl.lang)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BigIntegerUBytesConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">BigIntegerUBytesConverter$applyFrom$0</td>
+  </tr>
+  <tr>
+    <td class="name">BigIntegerUBytesConverter$applyTo</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.lang;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;
+<b class="fc">&nbsp;public class BigIntegerUBytesConverter implements Converter&lt;BigInteger, byte[]&gt; {</b>
+&nbsp;
+&nbsp;    private static final String NEGATIVE_MSG =
+&nbsp;        &quot;JWA Base64urlUInt values MUST be &gt;= 0 (non-negative) per the &#39;Base64urlUInt&#39; definition in &quot; +
+&nbsp;            &quot;[JWA RFC 7518, Section 2](https://www.rfc-editor.org/rfc/rfc7518.html#section-2)&quot;;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] applyTo(BigInteger bigInt) {
+<b class="fc">&nbsp;        Assert.notNull(bigInt, &quot;BigInteger argument cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        if (BigInteger.ZERO.compareTo(bigInt) &gt; 0) {</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(NEGATIVE_MSG);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        final int bitLen = bigInt.bitLength();</b>
+<b class="fc">&nbsp;        final byte[] bytes = bigInt.toByteArray();</b>
+&nbsp;        // Determine minimal number of bytes necessary to represent an unsigned byte array.
+&nbsp;        // It must be 1 or more because zero still requires one byte
+<b class="fc">&nbsp;        final int unsignedByteLen = Math.max(1, Bytes.length(bitLen)); // always need at least one byte</b>
+&nbsp;
+<b class="fc">&nbsp;        if (bytes.length == unsignedByteLen) { // already in the form we need</b>
+<b class="fc">&nbsp;            return bytes;</b>
+&nbsp;        }
+&nbsp;        //otherwise, we need to strip the sign byte (start copying at index 1 instead of 0):
+<b class="fc">&nbsp;        byte[] ubytes = new byte[unsignedByteLen];</b>
+<b class="fc">&nbsp;        System.arraycopy(bytes, 1, ubytes, 0, unsignedByteLen);</b>
+<b class="fc">&nbsp;        return ubytes;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public BigInteger applyFrom(byte[] bytes) {
+<b class="fc">&nbsp;        Assert.notEmpty(bytes, &quot;Byte array cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        return new BigInteger(1, bytes);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

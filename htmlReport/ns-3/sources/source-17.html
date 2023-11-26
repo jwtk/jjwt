@@ -1,0 +1,256 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultMutableJweHeader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultMutableJweHeader (io.jsonwebtoken.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultMutableJweHeader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl;
+&nbsp;
+&nbsp;import io.jsonwebtoken.JweHeader;
+&nbsp;import io.jsonwebtoken.impl.lang.Parameter;
+&nbsp;import io.jsonwebtoken.security.PublicJwk;
+&nbsp;
+&nbsp;import java.net.URI;
+&nbsp;import java.security.cert.X509Certificate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;public class DefaultMutableJweHeader extends DefaultJweHeaderMutator&lt;DefaultMutableJweHeader&gt; implements JweHeader {
+&nbsp;
+&nbsp;    public DefaultMutableJweHeader(DefaultJweHeaderMutator&lt;?&gt; src) {
+<b class="fc">&nbsp;        super(src);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private &lt;T&gt; T get(Parameter&lt;T&gt; param) {
+<b class="fc">&nbsp;        return this.DELEGATE.get(param);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // =============================================================
+&nbsp;    // JWT Header methods
+&nbsp;    // =============================================================
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getAlgorithm() {
+<b class="fc">&nbsp;        return get(DefaultHeader.ALGORITHM);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getContentType() {
+<b class="fc">&nbsp;        return get(DefaultHeader.CONTENT_TYPE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getType() {
+<b class="fc">&nbsp;        return get(DefaultHeader.TYPE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getCompressionAlgorithm() {
+<b class="fc">&nbsp;        return get(DefaultHeader.COMPRESSION_ALGORITHM);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // =============================================================
+&nbsp;    // Protected Header methods
+&nbsp;    // =============================================================
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public URI getJwkSetUrl() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.JKU);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PublicJwk&lt;?&gt; getJwk() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.JWK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getKeyId() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.KID);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;String&gt; getCritical() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.CRIT);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // =============================================================
+&nbsp;    // X.509 methods
+&nbsp;    // =============================================================
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public URI getX509Url() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.X5U);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;X509Certificate&gt; getX509Chain() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.X5C);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getX509Sha1Thumbprint() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.X5T);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getX509Sha256Thumbprint() {
+<b class="fc">&nbsp;        return get(DefaultProtectedHeader.X5T_S256);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // =============================================================
+&nbsp;    // JWE Header methods
+&nbsp;    // =============================================================
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getAgreementPartyUInfo() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.APU);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getAgreementPartyVInfo() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.APV);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Integer getPbes2Count() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.P2C);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String getEncryptionAlgorithm() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.ENCRYPTION_ALGORITHM);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PublicJwk&lt;?&gt; getEphemeralPublicKey() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.EPK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getInitializationVector() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.IV);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getAuthenticationTag() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.TAG);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] getPbes2Salt() {
+<b class="fc">&nbsp;        return get(DefaultJweHeader.P2S);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

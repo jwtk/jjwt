@@ -1,0 +1,385 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > FilteredInputStream</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.io</a>
+</div>
+
+<h1>Coverage Summary for Class: FilteredInputStream (io.jsonwebtoken.impl.io)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FilteredInputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    23.1%
+  </span>
+  <span class="absValue">
+    (3/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13.6%
+  </span>
+  <span class="absValue">
+    (6/44)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">FilteredInputStream$read</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    23.1%
+  </span>
+  <span class="absValue">
+    (3/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    13.6%
+  </span>
+  <span class="absValue">
+    (6/44)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.io;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.Bytes;
+&nbsp;
+&nbsp;import java.io.FilterInputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;
+&nbsp;/**
+&nbsp; * A filter stream that delegates its calls to an internal delegate stream without changing behavior, but also providing
+&nbsp; * pre/post/error handling hooks.  It is useful as a base for extending and adding custom functionality.
+&nbsp; *
+&nbsp; * &lt;p&gt;It is an alternative base class to FilterInputStream to increase re-usability, because FilterInputStream changes
+&nbsp; * the methods being called, such as read(byte[]) to read(byte[], int, int).&lt;/p&gt;
+&nbsp; *
+&nbsp; * @since 0.12.0, copied from
+&nbsp; * &lt;a href=&quot;https://github.com/apache/commons-io/blob/3a17f5259b105e734c8adce1d06d68f29884d1bb/src/main/java/org/apache/commons/io/input/ProxyInputStream.java&quot;&gt;
+&nbsp; * commons-io 3a17f5259b105e734c8adce1d06d68f29884d1bb&lt;/a&gt;
+&nbsp; */
+&nbsp;public abstract class FilteredInputStream extends FilterInputStream {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructs a new FilteredInputStream that delegates to the specified {@link InputStream}.
+&nbsp;     *
+&nbsp;     * @param in the InputStream to delegate to
+&nbsp;     */
+&nbsp;    public FilteredInputStream(final InputStream in) {
+<b class="fc">&nbsp;        super(in); // the delegate is stored in a protected superclass variable named &#39;in&#39;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invoked by the read methods after the proxied call has returned
+&nbsp;     * successfully. The number of bytes returned to the caller (or -1 if
+&nbsp;     * the end of stream was reached) is given as an argument.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Subclasses can override this method to add common post-processing
+&nbsp;     * functionality without having to override all the read methods.
+&nbsp;     * The default implementation does nothing.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Note this method is &lt;em&gt;not&lt;/em&gt; called from {@link #skip(long)} or
+&nbsp;     * {@link #reset()}. You need to explicitly override those methods if
+&nbsp;     * you want to add post-processing steps also to them.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param n number of bytes read, or -1 if the end of stream was reached
+&nbsp;     * @throws IOException if the post-processing fails
+&nbsp;     * @since 2.0
+&nbsp;     */
+&nbsp;    @SuppressWarnings({&quot;unused&quot;, &quot;RedundantThrows&quot;}) // Possibly thrown from subclasses.
+&nbsp;    protected void afterRead(final int n) throws IOException {
+&nbsp;        // no-op
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code available()} method.
+&nbsp;     *
+&nbsp;     * @return the number of available bytes
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int available() throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            return super.available();</b>
+<b class="nc">&nbsp;        } catch (final Throwable t) {</b>
+<b class="nc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invoked by the read methods before the call is proxied. The number
+&nbsp;     * of bytes that the caller wanted to read (1 for the {@link #read()}
+&nbsp;     * method, buffer length for {@link #read(byte[])}, etc.) is given as
+&nbsp;     * an argument.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Subclasses can override this method to add common pre-processing
+&nbsp;     * functionality without having to override all the read methods.
+&nbsp;     * The default implementation does nothing.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Note this method is &lt;em&gt;not&lt;/em&gt; called from {@link #skip(long)} or
+&nbsp;     * {@link #reset()}. You need to explicitly override those methods if
+&nbsp;     * you want to add pre-processing steps also to them.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param n number of bytes that the caller asked to be read
+&nbsp;     * @throws IOException if the pre-processing fails
+&nbsp;     * @since 2.0
+&nbsp;     */
+&nbsp;    @SuppressWarnings({&quot;unused&quot;, &quot;RedundantThrows&quot;}) // Possibly thrown from subclasses.
+&nbsp;    protected void beforeRead(final int n) throws IOException {
+&nbsp;        // no-op
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code close()} method.
+&nbsp;     *
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void close() throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            super.close();</b>
+<b class="nc">&nbsp;        } catch (Throwable t) {</b>
+<b class="nc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Handle any Throwable thrown; by default, throws the given exception.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * This method provides a point to implement custom exception
+&nbsp;     * handling. The default behavior is to re-throw the exception.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param t The IOException thrown
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    protected void onThrowable(final Throwable t) throws IOException {
+<b class="nc">&nbsp;        if (t instanceof IOException) throw (IOException) t;</b>
+<b class="nc">&nbsp;        throw new IOException(&quot;IO Exception: &quot; + t.getMessage(), t);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code mark(int)} method.
+&nbsp;     *
+&nbsp;     * @param readlimit read ahead limit
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public synchronized void mark(final int readlimit) {
+<b class="nc">&nbsp;        in.mark(readlimit);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code markSupported()} method.
+&nbsp;     *
+&nbsp;     * @return true if mark is supported, otherwise false
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean markSupported() {
+<b class="nc">&nbsp;        return in.markSupported();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code read()} method.
+&nbsp;     *
+&nbsp;     * @return the byte read or -1 if the end of stream
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read() throws IOException {
+&nbsp;        try {
+<b class="fc">&nbsp;            beforeRead(1);</b>
+<b class="fc">&nbsp;            final int b = in.read();</b>
+<b class="nc">&nbsp;            afterRead(b != Streams.EOF ? 1 : Streams.EOF);</b>
+<b class="nc">&nbsp;            return b;</b>
+<b class="fc">&nbsp;        } catch (final Throwable t) {</b>
+<b class="fc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;            return Streams.EOF;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code read(byte[])} method.
+&nbsp;     *
+&nbsp;     * @param bts the buffer to read the bytes into
+&nbsp;     * @return the number of bytes read or EOF if the end of stream
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read(final byte[] bts) throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            beforeRead(Bytes.length(bts));</b>
+<b class="nc">&nbsp;            final int n = in.read(bts);</b>
+<b class="nc">&nbsp;            afterRead(n);</b>
+<b class="nc">&nbsp;            return n;</b>
+<b class="nc">&nbsp;        } catch (final Throwable t) {</b>
+<b class="nc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;            return Streams.EOF;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code read(byte[], int, int)} method.
+&nbsp;     *
+&nbsp;     * @param bts the buffer to read the bytes into
+&nbsp;     * @param off The start offset
+&nbsp;     * @param len The number of bytes to read
+&nbsp;     * @return the number of bytes read or -1 if the end of stream
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read(final byte[] bts, final int off, final int len) throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            beforeRead(len);</b>
+<b class="nc">&nbsp;            final int n = in.read(bts, off, len);</b>
+<b class="nc">&nbsp;            afterRead(n);</b>
+<b class="nc">&nbsp;            return n;</b>
+<b class="nc">&nbsp;        } catch (final Throwable t) {</b>
+<b class="nc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;            return Streams.EOF;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code reset()} method.
+&nbsp;     *
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public synchronized void reset() throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            in.reset();</b>
+<b class="nc">&nbsp;        } catch (final Throwable t) {</b>
+<b class="nc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Invokes the delegate&#39;s {@code skip(long)} method.
+&nbsp;     *
+&nbsp;     * @param ln the number of bytes to skip
+&nbsp;     * @return the actual number of bytes skipped
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public long skip(final long ln) throws IOException {
+&nbsp;        try {
+<b class="nc">&nbsp;            return in.skip(ln);</b>
+<b class="nc">&nbsp;        } catch (final Throwable t) {</b>
+<b class="nc">&nbsp;            onThrowable(t);</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

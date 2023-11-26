@@ -1,0 +1,983 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwtParserBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtParserBuilder (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JwtParserBuilder$base64UrlDecodeWith$26</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$build$0</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$clock$6</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$critical$25</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$decryptWith$18</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$decryptWith$23</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$deserializeJsonWith$28</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$enc$17</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$json$1</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$key$22</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$keyLocator$21</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$provider$31</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$require$12</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireAudience$11</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireExpiration$9</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireId$3</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireIssuedAt$7</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireIssuer$5</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireNotBefore$15</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$requireSubject$13</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setAllowedClockSkewSeconds$29</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setClock$4</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setCompressionCodecResolver$24</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setSigningKey</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setSigningKey$14</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setSigningKey$2</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setSigningKey$8</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$setSigningKeyResolver$10</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$sig$16</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$unsecured</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$unsecuredDecompression$27</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$verifyWith$19</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$verifyWith$20</td>
+  </tr>
+  <tr>
+    <td class="name">JwtParserBuilder$zip$30</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2019 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.io.CompressionAlgorithm;
+&nbsp;import io.jsonwebtoken.io.Decoder;
+&nbsp;import io.jsonwebtoken.io.Deserializer;
+&nbsp;import io.jsonwebtoken.lang.Builder;
+&nbsp;import io.jsonwebtoken.lang.Conjunctor;
+&nbsp;import io.jsonwebtoken.lang.NestedCollection;
+&nbsp;import io.jsonwebtoken.security.AeadAlgorithm;
+&nbsp;import io.jsonwebtoken.security.KeyAlgorithm;
+&nbsp;import io.jsonwebtoken.security.SecureDigestAlgorithm;
+&nbsp;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.PrivateKey;
+&nbsp;import java.security.Provider;
+&nbsp;import java.security.PublicKey;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * A builder to construct a {@link JwtParser}. Example usage:
+&nbsp; * &lt;pre&gt;{@code
+&nbsp; *     Jwts.parser()
+&nbsp; *         .requireIssuer(&quot;https://issuer.example.com&quot;)
+&nbsp; *         .verifyWith(...)
+&nbsp; *         .build()
+&nbsp; *         .parse(jwtString)
+&nbsp; * }&lt;/pre&gt;
+&nbsp; *
+&nbsp; * @since 0.11.0
+&nbsp; */
+&nbsp;@SuppressWarnings(&quot;JavadocLinkAsPlainText&quot;)
+&nbsp;public interface JwtParserBuilder extends Builder&lt;JwtParser&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Enables parsing of Unsecured JWTs (JWTs with an &#39;alg&#39; (Algorithm) header value of
+&nbsp;     * &#39;none&#39; or missing the &#39;alg&#39; header entirely). &lt;b&gt;Be careful when calling this method - one should fully understand
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5&quot;&gt;Unsecured JWS Security Considerations&lt;/a&gt;
+&nbsp;     * before enabling this feature.&lt;/b&gt;
+&nbsp;     * &lt;p&gt;If this method is not called, Unsecured JWTs are disabled by default as mandated by
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6&quot;&gt;RFC 7518, Section
+&nbsp;     * 3.6&lt;/a&gt;.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5&quot;&gt;Unsecured JWS Security Considerations&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6&quot;&gt;Using the Algorithm &amp;quot;none&amp;quot;&lt;/a&gt;
+&nbsp;     * @see Jwts.SIG#NONE
+&nbsp;     * @see #unsecuredDecompression()
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder unsecured();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * If the parser is {@link #unsecured()}, calling this method additionally enables
+&nbsp;     * payload decompression of Unsecured JWTs (JWTs with an &#39;alg&#39; (Algorithm) header value of &#39;none&#39;) that also have
+&nbsp;     * a &#39;zip&#39; (Compression) header. This behavior is disabled by default because using compression
+&nbsp;     * algorithms with data from unverified (unauthenticated) parties can be susceptible to Denial of Service attacks
+&nbsp;     * and other data integrity problems as described in
+&nbsp;     * &lt;a href=&quot;https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf&quot;&gt;In the
+&nbsp;     * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Because this behavior is only relevant if the parser is unsecured,
+&nbsp;     * calling this method without also calling {@link #unsecured()} will result in a build exception, as the
+&nbsp;     * incongruent state could reflect a misunderstanding of both behaviors which should be remedied by the
+&nbsp;     * application developer.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;b&gt;As is the case for {@link #unsecured()}, be careful when calling this method - one should fully
+&nbsp;     * understand
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5&quot;&gt;Unsecured JWS Security Considerations&lt;/a&gt;
+&nbsp;     * before enabling this feature.&lt;/b&gt;
+&nbsp;     *
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5&quot;&gt;Unsecured JWS Security Considerations&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf&quot;&gt;In the
+&nbsp;     * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services&lt;/a&gt;
+&nbsp;     * @see Jwts.SIG#NONE
+&nbsp;     * @see #unsecured()
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder unsecuredDecompression();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures the {@link ProtectedHeader} parameter names used in JWT extensions supported by the application. If
+&nbsp;     * the parser encounters a Protected JWT that {@link ProtectedHeader#getCritical() requires} extensions, and
+&nbsp;     * those extensions&#39; header names are not specified via this method, the parser will reject that JWT.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Extension Behavior&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The {@code critical} collection only identifies header parameter names that are used in extensions supported
+&nbsp;     * by the application. &lt;b&gt;Application developers, &lt;em&gt;not JJWT&lt;/em&gt;, MUST perform the associated extension behavior
+&nbsp;     * using the parsed JWT&lt;/b&gt;.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use for {@code crit} configuration.
+&nbsp;     * @see ProtectedHeader#getCritical()
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    NestedCollection&lt;String, JwtParserBuilder&gt; critical();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JCA Provider to use during cryptographic signature and key decryption operations, or {@code null} if the
+&nbsp;     * JCA subsystem preferred provider should be used.
+&nbsp;     *
+&nbsp;     * @param provider the JCA Provider to use during cryptographic signature and decryption operations, or {@code null}
+&nbsp;     *                 if the JCA subsystem preferred provider should be used.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder provider(Provider provider);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param id the required value of the {@code jti} header parameter.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireId(String id);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code sub} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param subject the required value of the {@code sub} header parameter.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireSubject(String subject);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code aud} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not contain the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param audience the required value of the {@code aud} header parameter.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireAudience(String audience);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code iss} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param issuer the required value of the {@code iss} header parameter.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireIssuer(String issuer);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code iat} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param issuedAt the required value of the {@code iat} header parameter.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireIssuedAt(Date issuedAt);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param expiration the required value of the {@code exp} header parameter.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireExpiration(Date expiration);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param notBefore the required value of the {@code npf} header parameter.
+&nbsp;     * @return the parser builder for method chaining
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder requireNotBefore(Date notBefore);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Ensures that the specified {@code claimName} exists in the parsed JWT.  If missing or if the parsed
+&nbsp;     * value does not equal the specified value, an exception will be thrown indicating that the
+&nbsp;     * JWT is invalid and may not be used.
+&nbsp;     *
+&nbsp;     * @param claimName the name of a claim that must exist
+&nbsp;     * @param value     the required value of the specified {@code claimName}
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see MissingClaimException
+&nbsp;     * @see IncorrectClaimException
+&nbsp;     */
+&nbsp;    JwtParserBuilder require(String claimName, Object value);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
+&nbsp;     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+&nbsp;     *
+&nbsp;     * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 for the more modern builder-style named {@link #clock(Clock)} method.
+&nbsp;     * This method will be removed before the JJWT 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setClock(Clock clock);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
+&nbsp;     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+&nbsp;     *
+&nbsp;     * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     */
+&nbsp;    JwtParserBuilder clock(Clock clock);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
+&nbsp;     * and {@code nbf} claims.
+&nbsp;     *
+&nbsp;     * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
+&nbsp;     *                                  any such value would cause numeric overflow when multiplying by 1000 to obtain
+&nbsp;     *                                  a millisecond value.
+&nbsp;     * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
+&nbsp;     * {@link #clockSkewSeconds(long)}. This method will be removed before the JJWT 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setAllowedClockSkewSeconds(long seconds) throws IllegalArgumentException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the amount of clock skew in seconds to tolerate when verifying the local time against the {@code exp}
+&nbsp;     * and {@code nbf} claims.
+&nbsp;     *
+&nbsp;     * @param seconds the number of seconds to tolerate for clock skew when verifying {@code exp} or {@code nbf} claims.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @throws IllegalArgumentException if {@code seconds} is a value greater than {@code Long.MAX_VALUE / 1000} as
+&nbsp;     *                                  any such value would cause numeric overflow when multiplying by 1000 to obtain
+&nbsp;     *                                  a millisecond value.
+&nbsp;     */
+&nbsp;    JwtParserBuilder clockSkewSeconds(long seconds) throws IllegalArgumentException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;&lt;b&gt;Deprecation Notice&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method has been deprecated since 0.12.0 and will be removed before 1.0.  It was not
+&nbsp;     * readily obvious to many JJWT users that this method was for bytes that pertained &lt;em&gt;only&lt;/em&gt; to HMAC
+&nbsp;     * {@code SecretKey}s, and could be confused with keys of other types.  It is better to obtain a type-safe
+&nbsp;     * {@link SecretKey} instance and call {@link #verifyWith(SecretKey)} instead.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Previous Documentation&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Sets the signing key used to verify any discovered JWS digital signature.  If the specified JWT string is not
+&nbsp;     * a JWS (no signature), this key is not used.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Note that this key &lt;em&gt;MUST&lt;/em&gt; be a valid key for the signature algorithm found in the JWT header
+&nbsp;     * (as the {@code alg} header parameter).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method overwrites any previously set key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the algorithm-specific signature verification key used to validate any discovered JWS digital
+&nbsp;     *            signature.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #verifyWith(SecretKey)} for type safety and name
+&nbsp;     * congruence with the {@link #decryptWith(SecretKey)} method.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setSigningKey(byte[] key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;&lt;b&gt;Deprecation Notice: Deprecated as of 0.10.0, will be removed in 1.0.0&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method has been deprecated because the {@code key} argument for this method can be confusing: keys for
+&nbsp;     * cryptographic operations are always binary (byte arrays), and many people were confused as to how bytes were
+&nbsp;     * obtained from the String argument.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method always expected a String argument that was effectively the same as the result of the following
+&nbsp;     * (pseudocode):&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;{@code String base64EncodedSecretKey = base64Encode(secretKeyBytes);}&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;However, a non-trivial number of JJWT users were confused by the method signature and attempted to
+&nbsp;     * use raw password strings as the key argument - for example {@code setSigningKey(myPassword)} - which is
+&nbsp;     * almost always incorrect for cryptographic hashes and can produce erroneous or insecure results.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;See this
+&nbsp;     * &lt;a href=&quot;https://stackoverflow.com/questions/40252903/static-secret-as-byte-key-or-string/40274325#40274325&quot;&gt;
+&nbsp;     * StackOverflow answer&lt;/a&gt; explaining why raw (non-base64-encoded) strings are almost always incorrect for
+&nbsp;     * signature operations.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Finally, please use the {@link #verifyWith(SecretKey)} method instead, as this method (and likely
+&nbsp;     * {@link #setSigningKey(byte[])}) will be removed before the 1.0.0 release.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Previous JavaDoc&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is a convenience method that equates to the following:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * byte[] bytes = Decoders.{@link io.jsonwebtoken.io.Decoders#BASE64 BASE64}.decode(base64EncodedSecretKey);
+&nbsp;     * Key key = Keys.{@link io.jsonwebtoken.security.Keys#hmacShaKeyFor(byte[]) hmacShaKeyFor}(bytes);
+&nbsp;     * return {@link #verifyWith(SecretKey) verifyWith}(key);&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param base64EncodedSecretKey BASE64-encoded HMAC-SHA key bytes used to create a Key which will be used to
+&nbsp;     *                               verify all encountered JWS digital signatures.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated in favor of {@link #verifyWith(SecretKey)} as explained in the above &lt;b&gt;Deprecation Notice&lt;/b&gt;,
+&nbsp;     * and will be removed in 1.0.0.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setSigningKey(String base64EncodedSecretKey);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;&lt;b&gt;Deprecation Notice&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method is being renamed to accurately reflect its purpose - the key is not technically a signing key,
+&nbsp;     * it is a signature verification key, and the two concepts can be different, especially with asymmetric key
+&nbsp;     * cryptography.  The method has been deprecated since 0.12.0 in favor of
+&nbsp;     * {@link #verifyWith(SecretKey)} for type safety, to reflect accurate naming of the concept, and for name
+&nbsp;     * congruence with the {@link #decryptWith(SecretKey)} method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method merely delegates directly to {@link #verifyWith(SecretKey)} or {@link #verifyWith(PublicKey)}}.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the algorithm-specific signature verification key to use to verify all encountered JWS digital
+&nbsp;     *            signatures.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #verifyWith(SecretKey)} for naming congruence with the
+&nbsp;     * {@link #decryptWith(SecretKey)} method.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setSigningKey(Key key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the signature verification SecretKey used to verify all encountered JWS signatures. If the encountered JWT
+&nbsp;     * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is a convenience method to use in a specific scenario: when the parser will only ever encounter
+&nbsp;     * JWSs with signatures that can always be verified by a single SecretKey.  This also implies that this key
+&nbsp;     * &lt;em&gt;MUST&lt;/em&gt; be a valid key for the signature algorithm ({@code alg} header) used for the JWS.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If there is any chance that the parser will also encounter JWEs, or JWSs that need different signature
+&nbsp;     * verification keys based on the JWS being parsed, it is strongly recommended to configure your own
+&nbsp;     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Calling this method overrides any previously set signature verification key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the signature verification key to use to verify all encountered JWS digital signatures.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see #verifyWith(PublicKey)
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder verifyWith(SecretKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the signature verification PublicKey used to verify all encountered JWS signatures. If the encountered JWT
+&nbsp;     * string is not a JWS (e.g. unsigned or a JWE), this key is not used.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is a convenience method to use in a specific scenario: when the parser will only ever encounter
+&nbsp;     * JWSs with signatures that can always be verified by a single PublicKey.  This also implies that this key
+&nbsp;     * &lt;em&gt;MUST&lt;/em&gt; be a valid key for the signature algorithm ({@code alg} header) used for the JWS.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If there is any chance that the parser will also encounter JWEs, or JWSs that need different signature
+&nbsp;     * verification keys based on the JWS being parsed, it is strongly recommended to configure your own
+&nbsp;     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Calling this method overrides any previously set signature verification key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the signature verification key to use to verify all encountered JWS digital signatures.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see #verifyWith(SecretKey)
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder verifyWith(PublicKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the decryption SecretKey used to decrypt all encountered JWEs. If the encountered JWT string is not a
+&nbsp;     * JWE (e.g. a JWS), this key is not used.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is a convenience method to use in specific circumstances: when the parser will only ever encounter
+&nbsp;     * JWEs that can always be decrypted by a single SecretKey. This also implies that this key &lt;em&gt;MUST&lt;/em&gt; be a valid
+&nbsp;     * key for both the key management algorithm ({@code alg} header) and the content encryption algorithm
+&nbsp;     * ({@code enc} header) used for the JWE.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If there is any chance that the parser will also encounter JWSs, or JWEs that need different decryption
+&nbsp;     * keys based on the JWE being parsed, it is strongly recommended to configure your own
+&nbsp;     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Calling this method overrides any previously set decryption key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see #decryptWith(PrivateKey)
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder decryptWith(SecretKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the decryption PrivateKey used to decrypt all encountered JWEs. If the encountered JWT string is not a
+&nbsp;     * JWE (e.g. a JWS), this key is not used.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is a convenience method to use in specific circumstances: when the parser will only ever encounter JWEs
+&nbsp;     * that can always be decrypted by a single PrivateKey. This also implies that this key &lt;em&gt;MUST&lt;/em&gt; be a valid
+&nbsp;     * key for the JWE&#39;s key management algorithm ({@code alg} header).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If there is any chance that the parser will also encounter JWSs, or JWEs that need different decryption
+&nbsp;     * keys based on the JWE being parsed, it is strongly recommended to configure your own
+&nbsp;     * {@link #keyLocator(Locator) keyLocator} instead of calling this method.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Calling this method overrides any previously set decryption key.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param key the algorithm-specific decryption key to use to decrypt all encountered JWEs.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @see #decryptWith(SecretKey)
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder decryptWith(PrivateKey key);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the {@link Locator} used to acquire any signature verification or decryption key needed during parsing.
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;If the parsed String is a JWS, the {@code Locator} will be called to find the appropriate key
+&nbsp;     *     necessary to verify the JWS signature.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;If the parsed String is a JWE, it will be called to find the appropriate decryption key.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;A key {@code Locator} is necessary when the signature verification or decryption key is not
+&nbsp;     * already known before parsing the JWT and the JWT header must be inspected first to determine how to
+&nbsp;     * look up the verification or decryption key.  Once returned by the locator, the JwtParser will then either
+&nbsp;     * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * Jws&amp;lt;Claims&amp;gt; jws = Jwts.parser().keyLocator(new Locator&amp;lt;Key&amp;gt;() {
+&nbsp;     *         &amp;#64;Override
+&nbsp;     *         public Key locate(Header&amp;lt;?&amp;gt; header) {
+&nbsp;     *             if (header instanceof JwsHeader) {
+&nbsp;     *                 return getSignatureVerificationKey((JwsHeader)header); // implement me
+&nbsp;     *             } else {
+&nbsp;     *                 return getDecryptionKey((JweHeader)header); // implement me
+&nbsp;     *             }
+&nbsp;     *         }})
+&nbsp;     *     .build()
+&nbsp;     *     .parseSignedClaims(compact);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;A Key {@code Locator} is invoked once during parsing before performing decryption or signature verification.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Provider-constrained Keys&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If any verification or decryption key returned from a Key {@code Locator} must be used with a specific
+&nbsp;     * security {@link Provider} (such as for PKCS11 or Hardware Security Module (HSM) keys), you must make that
+&nbsp;     * Provider available for JWT parsing in one of 3 ways, listed in order of recommendation and simplicity:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;ol&gt;
+&nbsp;     *     &lt;li&gt;&lt;a href=&quot;https://docs.oracle.com/en/java/javase/17/security/howtoimplaprovider.html#GUID-831AA25F-F702-442D-A2E4-8DA6DEA16F33&quot;&gt;
+&nbsp;     *         Configure the Provider in the JVM&lt;/a&gt;, either by modifying the {@code java.security} file or by
+&nbsp;     *         registering the Provider dynamically via
+&nbsp;     *         {@link java.security.Security#addProvider(Provider) Security.addProvider(Provider)}.  This is the
+&nbsp;     *         recommended approach so you do not need to modify code anywhere that may need to parse JWTs.&lt;/li&gt;
+&nbsp;     *      &lt;li&gt;Specify the {@code Provider} as the {@code JwtParser} default via {@link #provider(Provider)}. This will
+&nbsp;     *          ensure the provider is used by default with &lt;em&gt;all&lt;/em&gt; located keys unless overridden by a
+&nbsp;     *          key-specific Provider. This is only recommended when you are confident that all JWTs encountered by the
+&nbsp;     *          parser instance will use keys attributed to the same {@code Provider}, unless overridden by a specific
+&nbsp;     *          key.&lt;/li&gt;
+&nbsp;     *      &lt;li&gt;Associate the {@code Provider} with a specific key so it is used for that key only.  This option
+&nbsp;     *          is useful if some located keys require a specific provider, while other located keys can assume a
+&nbsp;     *          default provider.&lt;/li&gt;
+&nbsp;     * &lt;/ol&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If you need to use option &amp;#35;3, you associate a key for the {@code JwtParser}&#39;s needs by using a
+&nbsp;     * key builder before returning the key as the {@code Locator} return value.  For example:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     *     public Key locate(Header&amp;lt;?&amp;gt; header) {
+&nbsp;     *         PrivateKey key = findKey(header); // or SecretKey
+&nbsp;     *         Provider keySpecificProvider = getKeyProvider(key); // implement me
+&nbsp;     *         // associate the key with its required provider:
+&nbsp;     *         return Keys.builder(key).provider(keySpecificProvider).build();
+&nbsp;     *     }&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * @param keyLocator the locator used to retrieve decryption or signature verification keys.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder keyLocator(Locator&lt;Key&gt; keyLocator);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;&lt;b&gt;Deprecation Notice&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method has been deprecated as of JJWT version 0.12.0 because it only supports key location
+&nbsp;     * for JWSs (signed JWTs) instead of both signed (JWS) and encrypted (JWE) scenarios.  Use the
+&nbsp;     * {@link #keyLocator(Locator) keyLocator} method instead to ensure a locator that can work for both JWS and
+&nbsp;     * JWE inputs.  This method will be removed for the 1.0 release.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Previous Documentation&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Sets the {@link SigningKeyResolver} used to acquire the &lt;code&gt;signing key&lt;/code&gt; that should be used to verify
+&nbsp;     * a JWS&#39;s signature.  If the parsed String is not a JWS (no signature), this resolver is not used.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;Specifying a {@code SigningKeyResolver} is necessary when the signing key is not already known before parsing
+&nbsp;     * the JWT and the JWT header or payload (content byte array or Claims) must be inspected first to determine how to
+&nbsp;     * look up the signing key.  Once returned by the resolver, the JwtParser will then verify the JWS signature with the
+&nbsp;     * returned key.  For example:&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;pre&gt;
+&nbsp;     * Jws&amp;lt;Claims&amp;gt; jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
+&nbsp;     *         &amp;#64;Override
+&nbsp;     *         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
+&nbsp;     *             //inspect the header or claims, lookup and return the signing key
+&nbsp;     *             return getSigningKey(header, claims); //implement me
+&nbsp;     *         }})
+&nbsp;     *     .build().parseSignedClaims(compact);
+&nbsp;     * &lt;/pre&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;A {@code SigningKeyResolver} is invoked once during parsing before the signature is verified.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param signingKeyResolver the signing key resolver used to retrieve the signing key.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #keyLocator(Locator)}
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;DeprecatedIsStillUsed&quot;)
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setSigningKeyResolver(SigningKeyResolver signingKeyResolver);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures the parser&#39;s supported {@link AeadAlgorithm}s used to decrypt JWE payloads. If the parser
+&nbsp;     * encounters a JWE {@link JweHeader#getEncryptionAlgorithm() enc} header value that equals an
+&nbsp;     * AEAD algorithm&#39;s {@link Identifiable#getId() id}, that algorithm will be used to decrypt the JWT
+&nbsp;     * payload.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The collection&#39;s {@link Conjunctor#and() and()} method returns to the builder for continued parser
+&nbsp;     * configuration, for example:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * parserBuilder.enc().add(anAeadAlgorithm).{@link Conjunctor#and() and()} // etc...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Standard Algorithms and Overrides&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;All JWA-standard AEAD encryption algorithms in the {@link Jwts.ENC} registry are supported by default and
+&nbsp;     * do not need to be added. The collection may be useful however for removing some algorithms (for example,
+&nbsp;     * any algorithms not used by the application, or those not compatible with application security requirements),
+&nbsp;     * or for adding custom implementations.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Custom Implementations&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;There may be only one registered {@code AeadAlgorithm} per algorithm {@code id}, and any algorithm
+&nbsp;     * instances that are {@link io.jsonwebtoken.lang.CollectionMutator#add(Object) add}ed to this collection with a
+&nbsp;     * duplicate ID will evict any existing or previously-added algorithm with the same {@code id}. &lt;b&gt;But beware:&lt;/b&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;b&gt;
+&nbsp;     * Any algorithm instance added to this collection with a JWA-standard {@link Identifiable#getId() id} will
+&nbsp;     * replace (override) the JJWT standard algorithm implementation&lt;/b&gt;.&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is to allow application developers to favor their
+&nbsp;     * own implementations over JJWT&#39;s default implementations if necessary (for example, to support legacy or
+&nbsp;     * custom behavior).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use to configure the AEAD encryption algorithms available when parsing.
+&nbsp;     * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
+&nbsp;     * @see Jwts.ENC
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2&quot;&gt;&amp;quot;enc&amp;quot; (Encryption Algorithm) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1&quot;&gt;Encryption Algorithm Name (id) requirements&lt;/a&gt;
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    NestedCollection&lt;AeadAlgorithm, JwtParserBuilder&gt; enc();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures the parser&#39;s supported {@link KeyAlgorithm}s used to obtain a JWE&#39;s decryption key. If the
+&nbsp;     * parser encounters a JWE {@link JweHeader#getAlgorithm()} alg} header value that equals a {@code KeyAlgorithm}&#39;s
+&nbsp;     * {@link Identifiable#getId() id}, that key algorithm will be used to obtain the JWE&#39;s decryption key.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The collection&#39;s {@link Conjunctor#and() and()} method returns to the builder for continued parser
+&nbsp;     * configuration, for example:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * parserBuilder.key().add(aKeyAlgorithm).{@link Conjunctor#and() and()} // etc...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Standard Algorithms and Overrides&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;All JWA-standard key encryption algorithms in the {@link Jwts.KEY} registry are supported by default and
+&nbsp;     * do not need to be added. The collection may be useful however for removing some algorithms (for example,
+&nbsp;     * any algorithms not used by the application, or those not compatible with application security requirements),
+&nbsp;     * or for adding custom implementations.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Custom Implementations&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;There may be only one registered {@code KeyAlgorithm} per algorithm {@code id}, and any algorithm
+&nbsp;     * instances that are {@link io.jsonwebtoken.lang.CollectionMutator#add(Object) add}ed to this collection with a
+&nbsp;     * duplicate ID will evict any existing or previously-added algorithm with the same {@code id}. &lt;b&gt;But beware:&lt;/b&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;b&gt;
+&nbsp;     * Any algorithm instance added to this collection with a JWA-standard {@link Identifiable#getId() id} will
+&nbsp;     * replace (override) the JJWT standard algorithm implementation&lt;/b&gt;.&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is to allow application developers to favor their
+&nbsp;     * own implementations over JJWT&#39;s default implementations if necessary (for example, to support legacy or
+&nbsp;     * custom behavior).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use to configure the key algorithms available when parsing.
+&nbsp;     * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
+&nbsp;     * @see Jwts.KEY
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1&quot;&gt;JWE &amp;quot;alg&amp;quot; (Algorithm) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1&quot;&gt;Key Algorithm Name (id) requirements&lt;/a&gt;
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    NestedCollection&lt;KeyAlgorithm&lt;?, ?&gt;, JwtParserBuilder&gt; key();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures the parser&#39;s supported
+&nbsp;     * {@link io.jsonwebtoken.security.SignatureAlgorithm SignatureAlgorithm} and
+&nbsp;     * {@link io.jsonwebtoken.security.MacAlgorithm MacAlgorithm}s used to verify JWS signatures. If the parser
+&nbsp;     * encounters a JWS {@link ProtectedHeader#getAlgorithm() alg} header value that equals a signature or MAC
+&nbsp;     * algorithm&#39;s {@link Identifiable#getId() id}, that algorithm will be used to verify the JWS signature.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The collection&#39;s {@link Conjunctor#and() and()} method returns to the builder for continued parser
+&nbsp;     * configuration, for example:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * parserBuilder.sig().add(aSignatureAlgorithm).{@link Conjunctor#and() and()} // etc...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Standard Algorithms and Overrides&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;All JWA-standard signature and MAC algorithms in the {@link Jwts.SIG} registry are supported by default and
+&nbsp;     * do not need to be added. The collection may be useful however for removing some algorithms (for example,
+&nbsp;     * any algorithms not used by the application, or those not compatible with application security requirements), or
+&nbsp;     * for adding custom implementations.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Custom Implementations&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;There may be only one registered {@code SecureDigestAlgorithm} per algorithm {@code id}, and any algorithm
+&nbsp;     * instances that are {@link io.jsonwebtoken.lang.CollectionMutator#add(Object) add}ed to this collection with a
+&nbsp;     * duplicate ID will evict any existing or previously-added algorithm with the same {@code id}. &lt;b&gt;But beware:&lt;/b&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;b&gt;
+&nbsp;     * Any algorithm instance added to this collection with a JWA-standard {@link Identifiable#getId() id} will
+&nbsp;     * replace (override) the JJWT standard algorithm implementation&lt;/b&gt;.&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is to allow application developers to favor their
+&nbsp;     * own implementations over JJWT&#39;s default implementations if necessary (for example, to support legacy or
+&nbsp;     * custom behavior).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use to configure the signature and MAC algorithms available when parsing.
+&nbsp;     * @see JwtBuilder#signWith(Key, SecureDigestAlgorithm)
+&nbsp;     * @see Jwts.SIG
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.1&quot;&gt;JWS &amp;quot;alg&amp;quot; (Algorithm) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1&quot;&gt;Algorithm Name (id) requirements&lt;/a&gt;
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    NestedCollection&lt;SecureDigestAlgorithm&lt;?, ?&gt;, JwtParserBuilder&gt; sig();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures the parser&#39;s supported {@link CompressionAlgorithm}s used to decompress JWT payloads. If the parser
+&nbsp;     * encounters a JWT {@link ProtectedHeader#getCompressionAlgorithm() zip} header value that equals a
+&nbsp;     * compression algorithm&#39;s {@link Identifiable#getId() id}, that algorithm will be used to decompress the JWT
+&nbsp;     * payload.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The collection&#39;s {@link Conjunctor#and() and()} method returns to the builder for continued parser
+&nbsp;     * configuration, for example:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * parserBuilder.zip().add(aCompressionAlgorithm).{@link Conjunctor#and() and()} // etc...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Standard Algorithms and Overrides&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;All JWA-standard compression algorithms in the {@link Jwts.ZIP} registry are supported by default and
+&nbsp;     * do not need to be added. The collection may be useful however for removing some algorithms (for example,
+&nbsp;     * any algorithms not used by the application), or for adding custom implementations.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Custom Implementations&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;There may be only one registered {@code CompressionAlgorithm} per algorithm {@code id}, and any algorithm
+&nbsp;     * instances that are {@link io.jsonwebtoken.lang.CollectionMutator#add(Object) add}ed to this collection with a
+&nbsp;     * duplicate ID will evict any existing or previously-added algorithm with the same {@code id}. &lt;b&gt;But beware:&lt;/b&gt;
+&nbsp;     *
+&nbsp;     * &lt;blockquote&gt;&lt;b&gt;
+&nbsp;     * Any algorithm instance added to this collection with a JWA-standard {@link Identifiable#getId() id} will
+&nbsp;     * replace (override) the JJWT standard algorithm implementation&lt;/b&gt;.&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is to allow application developers to favor their
+&nbsp;     * own implementations over JJWT&#39;s default implementations if necessary (for example, to support legacy or
+&nbsp;     * custom behavior).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use to configure the compression algorithms available when parsing.
+&nbsp;     * @see JwtBuilder#compressWith(CompressionAlgorithm)
+&nbsp;     * @see Jwts.ZIP
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7516#section-4.1.3&quot;&gt;&amp;quot;zip&amp;quot; (Compression Algorithm) Header Parameter&lt;/a&gt;
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1&quot;&gt;Compression Algorithm Name (id) requirements&lt;/a&gt;
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    NestedCollection&lt;CompressionAlgorithm, JwtParserBuilder&gt; zip();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * &lt;p&gt;&lt;b&gt;Deprecated as of JJWT 0.12.0. This method will be removed before the 1.0 release.&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method has been deprecated as of JJWT version 0.12.0 because it imposed unnecessary
+&nbsp;     * implementation requirements on application developers when simply adding to a compression algorithm collection
+&nbsp;     * would suffice.  Use the {@link #zip()} method instead to add
+&nbsp;     * any custom algorithm implementations without needing to also implement a Locator implementation.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Previous Documentation&lt;/b&gt;&lt;/p&gt;
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Sets the {@link CompressionCodecResolver} used to acquire the {@link CompressionCodec} that should be used to
+&nbsp;     * decompress the JWT body. If the parsed JWT is not compressed, this resolver is not used.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;WARNING:&lt;/b&gt; Compression is not defined by the JWS Specification - only the JWE Specification - and it is
+&nbsp;     * not expected that other libraries (including JJWT versions &amp;lt; 0.6.0) are able to consume a compressed JWS
+&nbsp;     * body correctly.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Default Support&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;JJWT&#39;s default {@link JwtParser} implementation supports both the {@link Jwts.ZIP#DEF DEF}
+&nbsp;     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
+&nbsp;     * specify a {@code CompressionCodecResolver} in these cases.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #zip()}. This method will be removed before the
+&nbsp;     * 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder setCompressionCodecResolver(CompressionCodecResolver compressionCodecResolver);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform Base64Url decoding with the specified Decoder
+&nbsp;     *
+&nbsp;     * &lt;p&gt;JJWT uses a spec-compliant decoder that works on all supported JDK versions, but you may call this method
+&nbsp;     * to specify a different decoder if you desire.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param base64UrlDecoder the decoder to use when Base64Url-decoding
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #b64Url(Decoder)}. This method will be removed
+&nbsp;     * before the JJWT 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder base64UrlDecodeWith(Decoder&lt;CharSequence, byte[]&gt; base64UrlDecoder);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Perform Base64Url decoding during parsing with the specified {@code InputStream} Decoder.
+&nbsp;     * The Decoder&#39;s {@link Decoder#decode(Object) decode} method will be given a source {@code InputStream} to
+&nbsp;     * wrap, and the resulting (wrapping) {@code InputStream} will be used for reading , ensuring automatic
+&nbsp;     * Base64URL-decoding during read operations.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;JJWT uses a spec-compliant decoder that works on all supported JDK versions, but you may call this method
+&nbsp;     * to specify a different stream decoder if desired.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param base64UrlDecoder the stream decoder to use when Base64Url-decoding
+&nbsp;     * @return the parser builder for method chaining.
+&nbsp;     */
+&nbsp;    JwtParserBuilder b64Url(Decoder&lt;InputStream, InputStream&gt; base64UrlDecoder);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Uses the specified deserializer to convert JSON Strings (UTF-8 byte arrays) into Java Map objects.  This is
+&nbsp;     * used by the parser after Base64Url-decoding to convert JWT/JWS/JWT JSON headers and claims into Java Map
+&nbsp;     * objects.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If this method is not called, JJWT will use whatever deserializer it can find at runtime, checking for the
+&nbsp;     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+&nbsp;     * in the runtime classpath, an exception will be thrown when one of the various {@code parse}* methods is
+&nbsp;     * invoked.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param deserializer the deserializer to use when converting JSON Strings (UTF-8 byte arrays) into Map objects.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #json(Deserializer)}.
+&nbsp;     * This method will be removed before the JJWT 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    JwtParserBuilder deserializeJsonWith(Deserializer&lt;Map&lt;String, ?&gt;&gt; deserializer);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Uses the specified JSON {@link Deserializer} to deserialize JSON (UTF-8 byte streams) into Java Map objects.
+&nbsp;     * This is used by the parser after Base64Url-decoding to convert JWT/JWS/JWT headers and Claims into Java Map
+&nbsp;     * instances.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If this method is not called, JJWT will use whatever Deserializer it can find at runtime, checking for the
+&nbsp;     * presence of well-known implementations such Jackson, Gson, and org.json.  If one of these is not found
+&nbsp;     * in the runtime classpath, an exception will be thrown when one of the various {@code parse}* methods is
+&nbsp;     * invoked.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param deserializer the deserializer to use to deserialize JSON (UTF-8 byte streams) into Map instances.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @since 0.12.0
+&nbsp;     */
+&nbsp;    JwtParserBuilder json(Deserializer&lt;Map&lt;String, ?&gt;&gt; deserializer);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an immutable/thread-safe {@link JwtParser} created from the configuration from this JwtParserBuilder.
+&nbsp;     *
+&nbsp;     * @return an immutable/thread-safe JwtParser created from the configuration from this JwtParserBuilder.
+&nbsp;     */
+&nbsp;    JwtParser build();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

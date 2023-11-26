@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > HeaderMutator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: HeaderMutator (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">HeaderMutator$contentType$2</td>
+  </tr>
+  <tr>
+    <td class="name">HeaderMutator$setCompressionAlgorithm$1</td>
+  </tr>
+  <tr>
+    <td class="name">HeaderMutator$setContentType$0</td>
+  </tr>
+  <tr>
+    <td class="name">HeaderMutator$setType</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.MapMutator;
+&nbsp;
+&nbsp;/**
+&nbsp; * Mutation (modifications) to a {@link Header Header} instance.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the mutator subtype, for method chaining
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface HeaderMutator&lt;T extends HeaderMutator&lt;T&gt;&gt; extends MapMutator&lt;String, Object, T&gt; {
+&nbsp;
+&nbsp;    //IMPLEMENTOR NOTE: if this `algorithm` method ever needs to be exposed in the public API, it might be better to
+&nbsp;    //                  have it in the Jwts.HeaderBuilder interface and NOT this one: in the context of
+&nbsp;    //                  JwtBuilder.Header, there is never a reason for an application developer to call algorithm(id)
+&nbsp;    //                  directly because the KeyAlgorithm or SecureDigestAlgorithm instance must always be provided
+&nbsp;    //                  via the signWith or encryptWith methods.  The JwtBuilder will always set the algorithm
+&nbsp;    //                  header based on these two instances, so there is no need for an app dev to do so.
+&nbsp;    /*
+&nbsp;     * Sets the JWT {@code alg} (Algorithm) header value.  A {@code null} value will remove the property
+&nbsp;     * from the JSON map.
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;If the JWT is a Signed JWT (a JWS), the
+&nbsp;     *     &lt;a href=&quot;https://tools.ietf.org/html/rfc7515#section-4.1.1&quot;&gt;{@code alg}&lt;/a&gt; (Algorithm) header
+&nbsp;     *     parameter identifies the cryptographic algorithm used to secure the JWS.&lt;/li&gt;
+&nbsp;     *      &lt;li&gt;If the JWT is an Encrypted JWT (a JWE), the
+&nbsp;     * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.1&quot;&gt;&lt;code&gt;alg&lt;/code&gt;&lt;/a&gt; (Algorithm) header parameter
+&nbsp;     * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
+&nbsp;     * Encryption Key (CEK).  The encrypted content is not usable if the &lt;code&gt;alg&lt;/code&gt; value does not represent a
+&nbsp;     * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.&lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * @param alg the {@code alg} header value
+&nbsp;     * @return this header for method chaining
+&nbsp;     * @since 0.12.0
+&nbsp;     *
+&nbsp;    T algorithm(String alg);
+&nbsp;    */
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JWT &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7519.html#section-5.1&quot;&gt;
+&nbsp;     * &lt;code&gt;typ&lt;/code&gt; (Type)&lt;/a&gt; header value.  A {@code null} value will remove the property from the JSON map.
+&nbsp;     *
+&nbsp;     * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     */
+&nbsp;    T type(String typ);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the compact &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10&quot;&gt;
+&nbsp;     * &lt;code&gt;cty&lt;/code&gt; (Content Type)&lt;/a&gt; header parameter value, used by applications to declare the
+&nbsp;     * &lt;a href=&quot;https://www.iana.org/assignments/media-types/media-types.xhtml&quot;&gt;IANA MediaType&lt;/a&gt; of the JWT
+&nbsp;     * payload.  A {@code null} value will remove the property from the JSON map.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Compact Media Type Identifier&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This method will automatically remove any &lt;code&gt;&lt;b&gt;application/&lt;/b&gt;&lt;/code&gt; prefix from the
+&nbsp;     * {@code cty} string if possible according to the rules defined in the last paragraph of
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10&quot;&gt;RFC 7517, Section 4.1.10&lt;/a&gt;:&lt;/p&gt;
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     *     To keep messages compact in common situations, it is RECOMMENDED that
+&nbsp;     *     producers omit an &quot;application/&quot; prefix of a media type value in a
+&nbsp;     *     &quot;cty&quot; Header Parameter when no other &#39;/&#39; appears in the media type
+&nbsp;     *     value.  A recipient using the media type value MUST treat it as if
+&nbsp;     *     &quot;application/&quot; were prepended to any &quot;cty&quot; value not containing a
+&nbsp;     *     &#39;/&#39;.  For instance, a &quot;cty&quot; value of &quot;example&quot; SHOULD be used to
+&nbsp;     *     represent the &quot;application/example&quot; media type, whereas the media
+&nbsp;     *     type &quot;application/example;part=&quot;1/2&quot;&quot; cannot be shortened to
+&nbsp;     *     &quot;example;part=&quot;1/2&quot;&quot;.&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;JJWT performs the reverse during JWT parsing: {@link Header#getContentType()} will automatically prepend the
+&nbsp;     * {@code application/} prefix if the parsed {@code cty} value does not contain a &#39;&lt;code&gt;/&lt;/code&gt;&#39; character (as
+&nbsp;     * mandated by the RFC language above). This ensures application developers can use and read standard IANA Media
+&nbsp;     * Type identifiers without needing JWT-specific prefix conditional logic in application code.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param cty the JWT {@code cty} header value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     */
+&nbsp;    T contentType(String cty);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deprecated since of 0.12.0, delegates to {@link #type(String)}.
+&nbsp;     *
+&nbsp;     * @param typ the JWT JOSE {@code typ} header value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     * @see #type(String)
+&nbsp;     * @deprecated since 0.12.0 in favor of the more modern builder-style {@link #type(String)} method.
+&nbsp;     * This method will be removed before the 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    T setType(String typ);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deprecated as of 0.12.0, delegates to {@link #contentType(String)}.
+&nbsp;     *
+&nbsp;     * @param cty the JWT JOSE {@code cty} header value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     * @see #contentType(String)
+&nbsp;     * @deprecated since 0.12.0 in favor of the more modern builder-style {@link #contentType(String)}.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    T setContentType(String cty);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deprecated as of 0.12.0, there is no need to set this any longer as the {@code JwtBuilder} will
+&nbsp;     * always set the {@code zip} header as necessary.
+&nbsp;     *
+&nbsp;     * @param zip the JWT compression algorithm {@code zip} value or {@code null} to remove the property from the JSON map.
+&nbsp;     * @return the instance for method chaining.
+&nbsp;     * @since 0.6.0
+&nbsp;     * @deprecated since 0.12.0 and will be removed before the 1.0 release.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    T setCompressionAlgorithm(String zip);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

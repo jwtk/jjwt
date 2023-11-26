@@ -1,0 +1,195 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AbstractSecureDigestAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: AbstractSecureDigestAlgorithm (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AbstractSecureDigestAlgorithm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.security.KeyException;
+&nbsp;import io.jsonwebtoken.security.SecureDigestAlgorithm;
+&nbsp;import io.jsonwebtoken.security.SecureRequest;
+&nbsp;import io.jsonwebtoken.security.SecurityException;
+&nbsp;import io.jsonwebtoken.security.SignatureException;
+&nbsp;import io.jsonwebtoken.security.VerifySecureDigestRequest;
+&nbsp;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.security.Key;
+&nbsp;
+&nbsp;abstract class AbstractSecureDigestAlgorithm&lt;S extends Key, V extends Key&gt; extends CryptoAlgorithm implements SecureDigestAlgorithm&lt;S, V&gt; {
+&nbsp;
+&nbsp;    AbstractSecureDigestAlgorithm(String id, String jcaName) {
+<b class="fc">&nbsp;        super(id, jcaName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected static String keyType(boolean signing) {
+<b class="fc">&nbsp;        return signing ? &quot;signing&quot; : &quot;verification&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    protected abstract void validateKey(Key key, boolean signing);
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public final byte[] digest(SecureRequest&lt;InputStream, S&gt; request) throws SecurityException {
+<b class="fc">&nbsp;        Assert.notNull(request, &quot;Request cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        final S key = Assert.notNull(request.getKey(), &quot;Signing key cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notNull(request.getPayload(), &quot;Request content cannot be null.&quot;);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            validateKey(key, true);</b>
+<b class="fc">&nbsp;            return doDigest(request);</b>
+<b class="fc">&nbsp;        } catch (SignatureException | KeyException e) {</b>
+<b class="fc">&nbsp;            throw e; //propagate</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Unable to compute &quot; + getId() + &quot; signature with JCA algorithm &#39;&quot; + getJcaName() + &quot;&#39; &quot; +</b>
+<b class="fc">&nbsp;                    &quot;using key {&quot; + KeysBridge.toString(key) + &quot;}: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;            throw new SignatureException(msg, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected abstract byte[] doDigest(SecureRequest&lt;InputStream, S&gt; request) throws Exception;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public final boolean verify(VerifySecureDigestRequest&lt;V&gt; request) throws SecurityException {
+<b class="fc">&nbsp;        Assert.notNull(request, &quot;Request cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        final V key = Assert.notNull(request.getKey(), &quot;Verification key cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notNull(request.getPayload(), &quot;Request content cannot be null or empty.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notEmpty(request.getDigest(), &quot;Request signature byte array cannot be null or empty.&quot;);</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            validateKey(key, false);</b>
+<b class="fc">&nbsp;            return doVerify(request);</b>
+<b class="fc">&nbsp;        } catch (SignatureException | KeyException e) {</b>
+<b class="fc">&nbsp;            throw e; //propagate</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Unable to verify &quot; + getId() + &quot; signature with JCA algorithm &#39;&quot; + getJcaName() + &quot;&#39; &quot; +</b>
+<b class="fc">&nbsp;                    &quot;using key {&quot; + KeysBridge.toString(key) + &quot;}: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;            throw new SignatureException(msg, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    protected abstract boolean doVerify(VerifySecureDigestRequest&lt;V&gt; request);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

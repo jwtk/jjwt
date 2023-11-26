@@ -1,0 +1,441 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ECCurve</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: ECCurve (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ECCurve</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.5%
+  </span>
+  <span class="absValue">
+    (43/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (105/105)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ECCurve$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ECCurve$contains</td>
+  </tr>
+  <tr>
+    <td class="name">ECCurve$equals$1</td>
+  </tr>
+  <tr>
+    <td class="name">ECCurve$toParameterSpec$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.5%
+  </span>
+  <span class="absValue">
+    (43/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (108/108)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.CheckedFunction;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.security.KeyPairBuilder;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.security.AlgorithmParameters;
+&nbsp;import java.security.Key;
+&nbsp;import java.security.interfaces.ECKey;
+&nbsp;import java.security.interfaces.ECPrivateKey;
+&nbsp;import java.security.interfaces.ECPublicKey;
+&nbsp;import java.security.spec.ECFieldFp;
+&nbsp;import java.security.spec.ECGenParameterSpec;
+&nbsp;import java.security.spec.ECParameterSpec;
+&nbsp;import java.security.spec.ECPoint;
+&nbsp;import java.security.spec.ECPublicKeySpec;
+&nbsp;import java.security.spec.EllipticCurve;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.LinkedHashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;public class ECCurve extends AbstractCurve {
+&nbsp;
+<b class="fc">&nbsp;    private static final BigInteger TWO = BigInteger.valueOf(2);</b>
+<b class="fc">&nbsp;    private static final BigInteger THREE = BigInteger.valueOf(3);</b>
+&nbsp;
+&nbsp;    static final String KEY_PAIR_GENERATOR_JCA_NAME = &quot;EC&quot;;
+&nbsp;
+<b class="fc">&nbsp;    public static final ECCurve P256 = new ECCurve(&quot;P-256&quot;, &quot;secp256r1&quot;); // JDK standard</b>
+<b class="fc">&nbsp;    public static final ECCurve P384 = new ECCurve(&quot;P-384&quot;, &quot;secp384r1&quot;); // JDK standard</b>
+<b class="fc">&nbsp;    public static final ECCurve P521 = new ECCurve(&quot;P-521&quot;, &quot;secp521r1&quot;); // JDK standard</b>
+&nbsp;
+<b class="fc">&nbsp;    public static final Collection&lt;ECCurve&gt; VALUES = Collections.setOf(P256, P384, P521);</b>
+<b class="fc">&nbsp;    private static final Map&lt;String, ECCurve&gt; BY_ID = new LinkedHashMap&lt;&gt;(3);</b>
+<b class="fc">&nbsp;    private static final Map&lt;EllipticCurve, ECCurve&gt; BY_JCA_CURVE = new LinkedHashMap&lt;&gt;(3);</b>
+&nbsp;
+&nbsp;    static {
+<b class="fc">&nbsp;        for (ECCurve curve : VALUES) {</b>
+<b class="fc">&nbsp;            BY_ID.put(curve.getId(), curve);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        for (ECCurve curve : VALUES) {</b>
+<b class="fc">&nbsp;            BY_JCA_CURVE.put(curve.spec.getCurve(), curve);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static EllipticCurve assertJcaCurve(ECKey key) {
+<b class="fc">&nbsp;        Assert.notNull(key, &quot;ECKey cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        ECParameterSpec spec = Assert.notNull(key.getParams(), &quot;ECKey params() cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        return Assert.notNull(spec.getCurve(), &quot;ECKey params().getCurve() cannot be null.&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static ECCurve findById(String id) {
+<b class="fc">&nbsp;        return BY_ID.get(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static ECCurve findByJcaCurve(EllipticCurve curve) {
+<b class="fc">&nbsp;        return BY_JCA_CURVE.get(curve);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static ECCurve findByKey(Key key) {
+<b class="fc">&nbsp;        if (!(key instanceof ECKey)) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        ECKey ecKey = (ECKey) key;</b>
+<b class="fc">&nbsp;        ECParameterSpec spec = ecKey.getParams();</b>
+<b class="fc">&nbsp;        if (spec == null) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        EllipticCurve jcaCurve = spec.getCurve();</b>
+<b class="fc">&nbsp;        ECCurve curve = BY_JCA_CURVE.get(jcaCurve);</b>
+<b class="fc">&nbsp;        if (curve != null &amp;&amp; key instanceof ECPublicKey) {</b>
+<b class="fc">&nbsp;            ECPublicKey pub = (ECPublicKey) key;</b>
+<b class="fc">&nbsp;            ECPoint w = pub.getW();</b>
+<b class="fc">&nbsp;            if (w == null || !curve.contains(w)) { // don&#39;t support keys with a point not on its indicated curve</b>
+<b class="fc">&nbsp;                curve = null;</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return curve;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    static ECPublicKeySpec publicKeySpec(ECPrivateKey key) throws IllegalArgumentException {
+<b class="fc">&nbsp;        EllipticCurve jcaCurve = assertJcaCurve(key);</b>
+<b class="fc">&nbsp;        ECCurve curve = BY_JCA_CURVE.get(jcaCurve);</b>
+<b class="fc">&nbsp;        Assert.notNull(curve, &quot;There is no JWA-standard Elliptic Curve for specified ECPrivateKey.&quot;);</b>
+<b class="fc">&nbsp;        final ECPoint w = curve.multiply(key.getS());</b>
+<b class="fc">&nbsp;        return new ECPublicKeySpec(w, curve.spec);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private final ECParameterSpec spec;
+&nbsp;
+&nbsp;    public ECCurve(String id, String jcaName) {
+<b class="fc">&nbsp;        super(id, jcaName);</b>
+<b class="fc">&nbsp;        JcaTemplate template = new JcaTemplate(KEY_PAIR_GENERATOR_JCA_NAME);</b>
+<b class="fc">&nbsp;        this.spec = template.withAlgorithmParameters(new CheckedFunction&lt;AlgorithmParameters, ECParameterSpec&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public ECParameterSpec apply(AlgorithmParameters params) throws Exception {
+<b class="fc">&nbsp;                params.init(new ECGenParameterSpec(getJcaName()));</b>
+<b class="fc">&nbsp;                return params.getParameterSpec(ECParameterSpec.class);</b>
+&nbsp;            }
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    public ECParameterSpec toParameterSpec() {
+<b class="fc">&nbsp;        return this.spec;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public KeyPairBuilder keyPair() {
+<b class="fc">&nbsp;        return new DefaultKeyPairBuilder(KEY_PAIR_GENERATOR_JCA_NAME, toParameterSpec());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean contains(Key key) {
+<b class="fc">&nbsp;        if (key instanceof ECPublicKey) {</b>
+<b class="fc">&nbsp;            ECPublicKey pub = (ECPublicKey) key;</b>
+<b class="fc">&nbsp;            ECParameterSpec pubSpec = pub.getParams();</b>
+<b class="fc">&nbsp;            return pubSpec != null &amp;&amp;</b>
+<b class="fc">&nbsp;                    this.spec.getCurve().equals(pubSpec.getCurve()) &amp;&amp;</b>
+<b class="fc">&nbsp;                    contains(pub.getW());</b>
+&nbsp;
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    boolean contains(ECPoint point) {
+<b class="fc">&nbsp;        return contains(this.spec.getCurve(), point);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns {@code true} if the specified curve contains the specified {@code point}, {@code false} otherwise.
+&nbsp;     * Assumes elliptic curves over finite fields adhering to the reduced (a.k.a short or narrow)
+&nbsp;     * Weierstrass form:
+&nbsp;     * &lt;p&gt;
+&nbsp;     * &lt;code&gt;y&lt;sup&gt;2&lt;/sup&gt; = x&lt;sup&gt;3&lt;/sup&gt; + ax + b&lt;/code&gt;
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param curve the EllipticCurve to check
+&nbsp;     * @param point a point that may or may not be defined on this elliptic curve
+&nbsp;     * @return {@code true} if this curve contains the specified {@code point}, {@code false} otherwise.
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;BooleanMethodIsAlwaysInverted&quot;)
+&nbsp;    static boolean contains(EllipticCurve curve, ECPoint point) {
+&nbsp;
+<b class="pc">&nbsp;        if (point == null || ECPoint.POINT_INFINITY.equals(point)) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        final BigInteger a = curve.getA();</b>
+<b class="fc">&nbsp;        final BigInteger b = curve.getB();</b>
+<b class="fc">&nbsp;        final BigInteger x = point.getAffineX();</b>
+<b class="fc">&nbsp;        final BigInteger y = point.getAffineY();</b>
+&nbsp;
+&nbsp;        // The reduced Weierstrass form y^2 = x^3 + ax + b reflects an elliptic curve E over any field K (e.g. all real
+&nbsp;        // numbers or all complex numbers, etc). For computational simplicity, cryptographic (e.g. NIST) elliptic curves
+&nbsp;        // restrict K to be a field of integers modulo a prime number &#39;p&#39;.  As such, we apply modulo p (the field prime)
+&nbsp;        // to the equation to account for the restricted field.  For a nice overview of the math behind EC curves and
+&nbsp;        // their application in cryptography, see
+&nbsp;        // https://web.northeastern.edu/dummit/docs/cryptography_5_elliptic_curves_in_cryptography.pdf
+&nbsp;
+<b class="fc">&nbsp;        final BigInteger p = ((ECFieldFp) curve.getField()).getP();</b>
+&nbsp;
+&nbsp;        // Verify the point coordinates are in field range:
+<b class="pc">&nbsp;        if (x.compareTo(BigInteger.ZERO) &lt; 0 || x.compareTo(p) &gt;= 0 ||</b>
+<b class="pc">&nbsp;                y.compareTo(BigInteger.ZERO) &lt; 0 || y.compareTo(p) &gt;= 0) {</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Finally, assert Weierstrass form equality:
+<b class="fc">&nbsp;        final BigInteger lhs = y.modPow(TWO, p); //mod p to account for field prime</b>
+<b class="fc">&nbsp;        final BigInteger rhs = x.modPow(THREE, p).add(a.multiply(x)).add(b).mod(p); //mod p to account for field prime</b>
+<b class="fc">&nbsp;        return lhs.equals(rhs);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Multiply this curve&#39;s generator (aka &#39;base point&#39;) by scalar {@code s} on the curve.
+&nbsp;     *
+&nbsp;     * @param s the scalar value to multiply
+&nbsp;     */
+&nbsp;    private ECPoint multiply(BigInteger s) {
+<b class="fc">&nbsp;        return multiply(this.spec.getGenerator(), s);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Multiply a point {@code p} by scalar {@code s} on the curve.
+&nbsp;     *
+&nbsp;     * @param p the Elliptic Curve point to multiply
+&nbsp;     * @param s the scalar value to multiply
+&nbsp;     */
+&nbsp;    private ECPoint multiply(ECPoint p, BigInteger s) {
+&nbsp;
+<b class="fc">&nbsp;        if (ECPoint.POINT_INFINITY.equals(p)) {</b>
+<b class="fc">&nbsp;            return p;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        final BigInteger n = this.spec.getOrder();</b>
+<b class="fc">&nbsp;        final BigInteger k = s.mod(n);</b>
+&nbsp;
+<b class="fc">&nbsp;        ECPoint r0 = ECPoint.POINT_INFINITY;</b>
+<b class="fc">&nbsp;        ECPoint r1 = p;</b>
+&nbsp;
+&nbsp;        // Montgomery Ladder implementation to mitigate side-channel attacks (i.e. an &#39;add&#39; operation and a &#39;double&#39;
+&nbsp;        // operation is calculated for every loop iteration, regardless if the &#39;add&#39;&#39; is needed or not)
+&nbsp;        // See: https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication#Montgomery_ladder
+&nbsp;//        while (k.compareTo(BigInteger.ZERO) &gt; 0) {
+&nbsp;//            ECPoint temp = add(r0, r1, curve);
+&nbsp;//            r0 = k.testBit(0) ? temp : r0;
+&nbsp;//            r1 = doublePoint(r1, curve);
+&nbsp;//            k = k.shiftRight(1);
+&nbsp;//        }
+&nbsp;        // above implementation (k.compareTo/k.shiftRight) works correctly , but this is a little faster:
+<b class="fc">&nbsp;        for (int i = k.bitLength() - 1; i &gt;= 0; i--) {</b>
+<b class="fc">&nbsp;            if (k.testBit(i)) { // bit == 1</b>
+<b class="fc">&nbsp;                r0 = add(r0, r1);</b>
+<b class="fc">&nbsp;                r1 = doublePoint(r1);</b>
+&nbsp;            } else { // bit == 0
+<b class="fc">&nbsp;                r1 = add(r0, r1);</b>
+<b class="fc">&nbsp;                r0 = doublePoint(r0);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return r0;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ECPoint add(ECPoint P, ECPoint Q) {
+&nbsp;
+<b class="fc">&nbsp;        if (ECPoint.POINT_INFINITY.equals(P)) {</b>
+<b class="fc">&nbsp;            return Q;</b>
+<b class="fc">&nbsp;        } else if (ECPoint.POINT_INFINITY.equals(Q)) {</b>
+<b class="fc">&nbsp;            return P;</b>
+<b class="fc">&nbsp;        } else if (P.equals(Q)) {</b>
+<b class="fc">&nbsp;            return doublePoint(P);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        final EllipticCurve curve = this.spec.getCurve();</b>
+&nbsp;
+<b class="fc">&nbsp;        final BigInteger Px = P.getAffineX();</b>
+<b class="fc">&nbsp;        final BigInteger Py = P.getAffineY();</b>
+<b class="fc">&nbsp;        final BigInteger Qx = Q.getAffineX();</b>
+<b class="fc">&nbsp;        final BigInteger Qy = Q.getAffineY();</b>
+<b class="fc">&nbsp;        final BigInteger prime = ((ECFieldFp) curve.getField()).getP();</b>
+<b class="fc">&nbsp;        final BigInteger slope = Qy.subtract(Py).multiply(Qx.subtract(Px).modInverse(prime)).mod(prime);</b>
+<b class="fc">&nbsp;        final BigInteger Rx = slope.pow(2).subtract(Px).subtract(Qx).mod(prime);</b>
+<b class="fc">&nbsp;        final BigInteger Ry = slope.multiply(Px.subtract(Rx)).subtract(Py).mod(prime);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new ECPoint(Rx, Ry);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ECPoint doublePoint(ECPoint P) {
+&nbsp;
+<b class="fc">&nbsp;        if (ECPoint.POINT_INFINITY.equals(P)) {</b>
+<b class="fc">&nbsp;            return P;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        final EllipticCurve curve = this.spec.getCurve();</b>
+<b class="fc">&nbsp;        final BigInteger Px = P.getAffineX();</b>
+<b class="fc">&nbsp;        final BigInteger Py = P.getAffineY();</b>
+<b class="fc">&nbsp;        final BigInteger p = ((ECFieldFp) curve.getField()).getP();</b>
+<b class="fc">&nbsp;        final BigInteger a = curve.getA();</b>
+<b class="fc">&nbsp;        final BigInteger s = THREE.multiply(Px.pow(2)).add(a).mod(p).multiply(TWO.multiply(Py).modInverse(p)).mod(p);</b>
+<b class="fc">&nbsp;        final BigInteger x = s.pow(2).subtract(TWO.multiply(Px)).mod(p);</b>
+<b class="fc">&nbsp;        final BigInteger y = s.multiply(Px.subtract(x)).subtract(Py).mod(p);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new ECPoint(x, y);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

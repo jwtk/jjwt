@@ -1,0 +1,218 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwkBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: JwkBuilder (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">JwkBuilder$algorithm$1</td>
+  </tr>
+  <tr>
+    <td class="name">JwkBuilder$id$0</td>
+  </tr>
+  <tr>
+    <td class="name">JwkBuilder$idFromThumbprint$2</td>
+  </tr>
+  <tr>
+    <td class="name">JwkBuilder$operations</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Conjunctor;
+&nbsp;import io.jsonwebtoken.lang.MapMutator;
+&nbsp;import io.jsonwebtoken.lang.NestedCollection;
+&nbsp;
+&nbsp;import java.security.Key;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@link SecurityBuilder} that produces a JWK.  A JWK is an immutable set of name/value pairs that represent a
+&nbsp; * cryptographic key as defined by
+&nbsp; * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html&quot;&gt;RFC 7517: JSON Web Key (JWK)&lt;/a&gt;.
+&nbsp; * The {@code JwkBuilder} interface represents common JWK properties that may be specified for any type of JWK.
+&nbsp; * Builder subtypes support additional JWK properties specific to different types of cryptographic keys
+&nbsp; * (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
+&nbsp; *
+&nbsp; * @param &lt;K&gt; the type of Java {@link Key} represented by the constructed JWK.
+&nbsp; * @param &lt;J&gt; the type of {@link Jwk} created by the builder
+&nbsp; * @param &lt;T&gt; the type of the builder, for subtype method chaining
+&nbsp; * @see SecretJwkBuilder
+&nbsp; * @see RsaPublicJwkBuilder
+&nbsp; * @see RsaPrivateJwkBuilder
+&nbsp; * @see EcPublicJwkBuilder
+&nbsp; * @see EcPrivateJwkBuilder
+&nbsp; * @see OctetPublicJwkBuilder
+&nbsp; * @see OctetPrivateJwkBuilder
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface JwkBuilder&lt;K extends Key, J extends Jwk&lt;K&gt;, T extends JwkBuilder&lt;K, J, T&gt;&gt;
+&nbsp;        extends MapMutator&lt;String, Object, T&gt;, SecurityBuilder&lt;J, T&gt;, KeyOperationPolicied&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JWK &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4&quot;&gt;{@code alg} (Algorithm)
+&nbsp;     * Parameter&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The {@code alg} (algorithm) parameter identifies the algorithm intended for use with the key.  The
+&nbsp;     * value specified should either be one of the values in the IANA
+&nbsp;     * &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1&quot;&gt;JSON Web Signature and Encryption
+&nbsp;     * Algorithms&lt;/a&gt; registry or be a value that contains a {@code Collision-Resistant Name}.  The {@code alg}
+&nbsp;     * must be a CaSe-SeNsItIvE ASCII string.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param alg the JWK {@code alg} value.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @throws IllegalArgumentException if {@code alg} is {@code null} or empty.
+&nbsp;     */
+&nbsp;    T algorithm(String alg) throws IllegalArgumentException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JWK &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.5&quot;&gt;{@code kid} (Key ID)
+&nbsp;     * Parameter&lt;/a&gt;.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The {@code kid} (key ID) parameter is used to match a specific key.  This is used, for instance,
+&nbsp;     * to choose among a set of keys within a {@code JWK Set} during key rollover.  The structure of the
+&nbsp;     * {@code kid} value is unspecified.  When {@code kid} values are used within a JWK Set, different keys
+&nbsp;     * within the {@code JWK Set} &lt;em&gt;SHOULD&lt;/em&gt; use distinct {@code kid} values. (One example in which
+&nbsp;     * different keys might use the same {@code kid} value is if they have different {@code kty} (key type)
+&nbsp;     * values but are considered to be equivalent alternatives by the application using them.)&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The {@code kid} value is a CaSe-SeNsItIvE string, and it is optional. When used with JWS or JWE,
+&nbsp;     * the {@code kid} value is used to match a JWS or JWE {@code kid} Header Parameter value.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param kid the JWK {@code kid} value.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @throws IllegalArgumentException if the argument is {@code null} or empty.
+&nbsp;     */
+&nbsp;    T id(String kid) throws IllegalArgumentException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JWK&#39;s {@link #id(String) kid} value to be the Base64URL-encoding of its {@code SHA-256}
+&nbsp;     * {@link Jwk#thumbprint(HashAlgorithm) thumbprint}.  That is, the constructed JWK&#39;s {@code kid} value will equal
+&nbsp;     * &lt;code&gt;jwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}({@link Jwks.HASH}.{@link Jwks.HASH#SHA256 SHA256}).{@link JwkThumbprint#toString() toString()}&lt;/code&gt;.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;This is a convenience method that delegates to {@link #idFromThumbprint(HashAlgorithm)} using
+&nbsp;     * {@link Jwks.HASH}{@code .}{@link Jwks.HASH#SHA256 SHA256}.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     */
+&nbsp;    T idFromThumbprint();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JWK&#39;s {@link #id(String) kid} value to be the Base64URL-encoding of its
+&nbsp;     * {@link Jwk#thumbprint(HashAlgorithm) thumbprint} using the specified {@link HashAlgorithm}.  That is, the
+&nbsp;     * constructed JWK&#39;s {@code kid} value will equal
+&nbsp;     * &lt;code&gt;{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(alg).{@link JwkThumbprint#toString() toString()}.&lt;/code&gt;
+&nbsp;     *
+&nbsp;     * @param alg the hash algorithm to use to compute the thumbprint.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @see Jwks.HASH
+&nbsp;     */
+&nbsp;    T idFromThumbprint(HashAlgorithm alg);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Configures the &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3&quot;&gt;key operations&lt;/a&gt; for which
+&nbsp;     * the key is intended to be used. When finished, use the collection&#39;s {@link Conjunctor#and() and()} method to
+&nbsp;     * return to the JWK builder, for example:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * jwkBuilder.operations().add(aKeyOperation).{@link Conjunctor#and() and()} // etc...&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;The {@code and()} method will throw an {@link IllegalArgumentException} if any of the specified
+&nbsp;     * {@code KeyOperation}s are not permitted by the JWK&#39;s
+&nbsp;     * {@link #operationPolicy(KeyOperationPolicy) operationPolicy}. See that documentation for more
+&nbsp;     * information on security vulnerabilities when using the same key with multiple algorithms.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;&lt;b&gt;Standard {@code KeyOperation}s and Overrides&lt;/b&gt;&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;All RFC-standard JWK Key Operations in the {@link Jwks.OP} registry are supported via the builder&#39;s default
+&nbsp;     * {@link #operationPolicy(KeyOperationPolicy) operationPolicy}, but other (custom) values
+&nbsp;     * &lt;em&gt;MAY&lt;/em&gt; be specified (for example, using a {@link Jwks.OP#builder()}).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
+&nbsp;     * should be enabled by configuring an {@link #operationPolicy(KeyOperationPolicy) operationPolicy}
+&nbsp;     * that includes the custom values (e.g. via
+&nbsp;     * {@link Jwks.OP#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;For best interoperability with other applications however, it is recommended to use only the {@link Jwks.OP}
+&nbsp;     * constants.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return the {@link NestedCollection} to use for {@code key_ops} configuration.
+&nbsp;     * @see Jwks.OP
+&nbsp;     * @see &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3&quot;&gt;RFC 7517: key_ops (Key Operations) Parameter&lt;/a&gt;
+&nbsp;     */
+&nbsp;    NestedCollection&lt;KeyOperation, T&gt; operations();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

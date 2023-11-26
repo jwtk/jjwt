@@ -1,0 +1,128 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ParserBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.io</a>
+</div>
+
+<h1>Coverage Summary for Class: ParserBuilder (io.jsonwebtoken.io)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">ParserBuilder$json</td>
+  </tr>
+  <tr>
+    <td class="name">ParserBuilder$provider$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.io;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Builder;
+&nbsp;
+&nbsp;import java.security.Provider;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code ParserBuilder} configures and creates new {@link Parser} instances.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; The resulting parser&#39;s {@link Parser#parse parse} output type
+&nbsp; * @param &lt;B&gt; builder type used for method chaining
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public interface ParserBuilder&lt;T, B extends ParserBuilder&lt;T, B&gt;&gt; extends Builder&lt;Parser&lt;T&gt;&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the JCA Provider to use during cryptographic operations, or {@code null} if the
+&nbsp;     * JCA subsystem preferred provider should be used.
+&nbsp;     *
+&nbsp;     * @param provider the JCA Provider to use during cryptographic key factory operations, or {@code null}
+&nbsp;     *                 if the JCA subsystem preferred provider should be used.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     */
+&nbsp;    B provider(Provider provider);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Uses the specified {@code Deserializer} to convert JSON Strings (UTF-8 byte streams) into Java Map objects.  The
+&nbsp;     * resulting Maps are then used to construct respective JWT objects (JWTs, JWKs, etc).
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If this method is not called, JJWT will use whatever Deserializer it can find at runtime, checking for the
+&nbsp;     * presence of well-known implementations such as Jackson, Gson, and org.json.  If one of these is not found
+&nbsp;     * in the runtime classpath, an exception will be thrown when the {@link #build()} method is called.
+&nbsp;     *
+&nbsp;     * @param deserializer the Deserializer to use when converting JSON Strings (UTF-8 byte streams) into Map objects.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     */
+&nbsp;    B json(Deserializer&lt;Map&lt;String, ?&gt;&gt; deserializer);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

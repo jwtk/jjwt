@@ -1,0 +1,228 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > LocatorAdapter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: LocatorAdapter (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LocatorAdapter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;
+&nbsp;/**
+&nbsp; * Adapter pattern implementation for the {@link Locator} interface.  Subclasses can override any of the
+&nbsp; * {@link #doLocate(Header)}, {@link #locate(ProtectedHeader)}, {@link #locate(JwsHeader)}, or
+&nbsp; * {@link #locate(JweHeader)} methods for type-specific logic if desired when the encountered header is an
+&nbsp; * unprotected JWT, or an integrity-protected JWT (either a JWS or JWE).
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the type of object to locate
+&nbsp; * @since 0.12.0
+&nbsp; */
+&nbsp;public abstract class LocatorAdapter&lt;T&gt; implements Locator&lt;T&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructs a new instance, where all default method implementations return {@code null}.
+&nbsp;     */
+<b class="fc">&nbsp;    public LocatorAdapter() {</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Inspects the specified header, and delegates to the {@link #locate(ProtectedHeader)} method if the header
+&nbsp;     * is protected (either a {@link JwsHeader} or {@link JweHeader}), or the {@link #doLocate(Header)} method
+&nbsp;     * if the header is not integrity protected.
+&nbsp;     *
+&nbsp;     * @param header the JWT header to inspect; may be an instance of {@link Header}, {@link JwsHeader}, or
+&nbsp;     *               {@link JweHeader} depending on if the respective JWT is an unprotected JWT, JWS or JWE.
+&nbsp;     * @return an object referenced in the specified header, or {@code null} if the referenced object cannot be found
+&nbsp;     * or does not exist.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public final T locate(Header header) {
+<b class="fc">&nbsp;        Assert.notNull(header, &quot;Header cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        if (header instanceof ProtectedHeader) {</b>
+<b class="fc">&nbsp;            ProtectedHeader protectedHeader = (ProtectedHeader) header;</b>
+<b class="fc">&nbsp;            return locate(protectedHeader);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return doLocate(header);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an object referenced in the specified {@link ProtectedHeader}, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist.  This is a convenience method that delegates to
+&nbsp;     * {@link #locate(JwsHeader)} if the {@code header} is a {@link JwsHeader} or {@link #locate(JweHeader)} if the
+&nbsp;     * {@code header} is a {@link JweHeader}.
+&nbsp;     *
+&nbsp;     * @param header the protected header of an encountered JWS or JWE.
+&nbsp;     * @return an object referenced in the specified {@link ProtectedHeader}, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist.
+&nbsp;     */
+&nbsp;    protected T locate(ProtectedHeader header) {
+<b class="fc">&nbsp;        if (header instanceof JwsHeader) {</b>
+<b class="fc">&nbsp;            return locate((JwsHeader) header);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            Assert.isInstanceOf(JweHeader.class, header, &quot;Unrecognized ProtectedHeader type.&quot;);</b>
+<b class="fc">&nbsp;            return locate((JweHeader) header);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an object referenced in the specified JWE header, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist.  Default implementation simply returns {@code null}.
+&nbsp;     *
+&nbsp;     * @param header the header of an encountered JWE.
+&nbsp;     * @return an object referenced in the specified JWE header, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist.
+&nbsp;     */
+&nbsp;    protected T locate(JweHeader header) {
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an object referenced in the specified JWS header, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist. Default implementation simply returns {@code null}.
+&nbsp;     *
+&nbsp;     * @param header the header of an encountered JWS.
+&nbsp;     * @return an object referenced in the specified JWS header, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist.
+&nbsp;     */
+&nbsp;    protected T locate(JwsHeader header) {
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an object referenced in the specified unprotected JWT header, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist. Default implementation simply returns {@code null}.
+&nbsp;     *
+&nbsp;     * @param header the header of an encountered JWT.
+&nbsp;     * @return an object referenced in the specified unprotected JWT header, or {@code null} if the referenced
+&nbsp;     * object cannot be found or does not exist.
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unused&quot;)
+&nbsp;    protected T doLocate(Header header) {
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

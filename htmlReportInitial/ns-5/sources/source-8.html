@@ -1,0 +1,352 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > BaseNCodecInputStream</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.io</a>
+</div>
+
+<h1>Coverage Summary for Class: BaseNCodecInputStream (io.jsonwebtoken.impl.io)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BaseNCodecInputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/50)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.io;
+&nbsp;
+&nbsp;import java.io.FilterInputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.util.Objects;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract superclass for Base-N input streams.
+&nbsp; *
+&nbsp; * @since 0.12.0, copied from
+&nbsp; * &lt;a href=&quot;https://github.com/apache/commons-codec/tree/585497f09b026f6602daf986723a554e051bdfe6&quot;&gt;commons-codec
+&nbsp; * 585497f09b026f6602daf986723a554e051bdfe6&lt;/a&gt;
+&nbsp; */
+&nbsp;class BaseNCodecInputStream extends FilterInputStream {
+&nbsp;
+&nbsp;    private final BaseNCodec baseNCodec;
+&nbsp;
+&nbsp;    private final boolean doEncode;
+&nbsp;
+<b class="nc">&nbsp;    private final byte[] singleByte = new byte[1];</b>
+&nbsp;
+&nbsp;    private final byte[] buf;
+&nbsp;
+<b class="nc">&nbsp;    private final BaseNCodec.Context context = new BaseNCodec.Context();</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Create an instance.
+&nbsp;     *
+&nbsp;     * @param inputStream the input stream
+&nbsp;     * @param baseNCodec  the codec
+&nbsp;     * @param doEncode    set to true to perform encoding, else decoding
+&nbsp;     */
+&nbsp;    protected BaseNCodecInputStream(final InputStream inputStream, final BaseNCodec baseNCodec, final boolean doEncode) {
+<b class="nc">&nbsp;        super(inputStream);</b>
+<b class="nc">&nbsp;        this.doEncode = doEncode;</b>
+<b class="nc">&nbsp;        this.baseNCodec = baseNCodec;</b>
+<b class="nc">&nbsp;        this.buf = new byte[doEncode ? 4096 : 8192];</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @return {@code 0} if the {@link InputStream} has reached {@code EOF},
+&nbsp;     * {@code 1} otherwise
+&nbsp;     * @since 1.7
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int available() throws IOException {
+&nbsp;        // Note: the logic is similar to the InflaterInputStream:
+&nbsp;        //       as long as we have not reached EOF, indicate that there is more
+&nbsp;        //       data available. As we do not know for sure how much data is left,
+&nbsp;        //       just return 1 as a safe guess.
+&nbsp;
+<b class="nc">&nbsp;        return context.eof ? 0 : 1;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns true if decoding behavior is strict. Decoding will raise an
+&nbsp;     * {@link IllegalArgumentException} if trailing bits are not part of a valid encoding.
+&nbsp;     *
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The default is false for lenient encoding. Decoding will compose trailing bits
+&nbsp;     * into 8-bit bytes and discard the remainder.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @return true if using strict decoding
+&nbsp;     * @since 1.15
+&nbsp;     */
+&nbsp;    public boolean isStrictDecoding() {
+<b class="nc">&nbsp;        return baseNCodec.isStrictDecoding();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Marks the current position in this input stream.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The {@link #mark} method of {@link BaseNCodecInputStream} does nothing.
+&nbsp;     * &lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid.
+&nbsp;     * @see #markSupported()
+&nbsp;     * @since 1.7
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public synchronized void mark(final int readLimit) {
+&nbsp;        // noop
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @return Always returns {@code false}
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean markSupported() {
+<b class="nc">&nbsp;        return false; // not an easy job to support marks</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Reads one {@code byte} from this input stream.
+&nbsp;     *
+&nbsp;     * @return the byte as an integer in the range 0 to 255. Returns -1 if EOF has been reached.
+&nbsp;     * @throws IOException if an I/O error occurs.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read() throws IOException {
+<b class="nc">&nbsp;        int r = read(singleByte, 0, 1);</b>
+<b class="nc">&nbsp;        while (r == 0) {</b>
+<b class="nc">&nbsp;            r = read(singleByte, 0, 1);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (r &gt; 0) {</b>
+<b class="nc">&nbsp;            final byte b = singleByte[0];</b>
+<b class="nc">&nbsp;            return b &lt; 0 ? 256 + b : b;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return BaseNCodec.EOF;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Attempts to read {@code len} bytes into the specified {@code b} array starting at {@code offset}
+&nbsp;     * from this InputStream.
+&nbsp;     *
+&nbsp;     * @param array  destination byte array
+&nbsp;     * @param offset where to start writing the bytes
+&nbsp;     * @param len    maximum number of bytes to read
+&nbsp;     * @return number of bytes read
+&nbsp;     * @throws IOException               if an I/O error occurs.
+&nbsp;     * @throws NullPointerException      if the byte array parameter is null
+&nbsp;     * @throws IndexOutOfBoundsException if offset, len or buffer size are invalid
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public int read(final byte[] array, final int offset, final int len) throws IOException {
+<b class="nc">&nbsp;        Objects.requireNonNull(array, &quot;array&quot;);</b>
+<b class="nc">&nbsp;        if (offset &lt; 0 || len &lt; 0) {</b>
+<b class="nc">&nbsp;            throw new IndexOutOfBoundsException();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (offset &gt; array.length || offset + len &gt; array.length) {</b>
+<b class="nc">&nbsp;            throw new IndexOutOfBoundsException();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (len == 0) {</b>
+<b class="nc">&nbsp;            return 0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        int readLen = 0;</b>
+&nbsp;        /*
+&nbsp;         Rationale for while-loop on (readLen == 0):
+&nbsp;         -----
+&nbsp;         Base32.readResults() usually returns &gt; 0 or EOF (-1).  In the
+&nbsp;         rare case where it returns 0, we just keep trying.
+&nbsp;
+&nbsp;         This is essentially an undocumented contract for InputStream
+&nbsp;         implementors that want their code to work properly with
+&nbsp;         java.io.InputStreamReader, since the latter hates it when
+&nbsp;         InputStream.read(byte[]) returns a zero.  Unfortunately our
+&nbsp;         readResults() call must return 0 if a large amount of the data
+&nbsp;         being decoded was non-base32, so this while-loop enables proper
+&nbsp;         interop with InputStreamReader for that scenario.
+&nbsp;         -----
+&nbsp;         This is a fix for CODEC-101
+&nbsp;        */
+&nbsp;        // Attempt to read the request length
+<b class="nc">&nbsp;        while (readLen &lt; len) {</b>
+<b class="nc">&nbsp;            if (!baseNCodec.hasData(context)) {</b>
+&nbsp;                // Obtain more data.
+&nbsp;                // buf is reused across calls to read to avoid repeated allocations
+<b class="nc">&nbsp;                final int c = in.read(buf);</b>
+<b class="nc">&nbsp;                if (doEncode) {</b>
+<b class="nc">&nbsp;                    baseNCodec.encode(buf, 0, c, context);</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    baseNCodec.decode(buf, 0, c, context);</b>
+&nbsp;                }
+&nbsp;            }
+<b class="nc">&nbsp;            final int read = baseNCodec.readResults(array, offset + readLen, len - readLen, context);</b>
+<b class="nc">&nbsp;            if (read &lt; 0) {</b>
+&nbsp;                // Return the amount read or EOF
+<b class="nc">&nbsp;                return readLen != 0 ? readLen : -1;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            readLen += read;</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return readLen;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Repositions this stream to the position at the time the mark method was last called on this input stream.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * The {@link #reset} method of {@link BaseNCodecInputStream} does nothing except throw an {@link IOException}.
+&nbsp;     *
+&nbsp;     * @throws IOException if this method is invoked
+&nbsp;     * @since 1.7
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public synchronized void reset() throws IOException {
+<b class="nc">&nbsp;        throw new IOException(&quot;mark/reset not supported&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * {@inheritDoc}
+&nbsp;     *
+&nbsp;     * @throws IllegalArgumentException if the provided skip length is negative
+&nbsp;     * @since 1.7
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public long skip(final long n) throws IOException {
+<b class="nc">&nbsp;        if (n &lt; 0) {</b>
+<b class="nc">&nbsp;            throw new IllegalArgumentException(&quot;Negative skip length: &quot; + n);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // skip in chunks of 512 bytes
+<b class="nc">&nbsp;        final byte[] b = new byte[512];</b>
+<b class="nc">&nbsp;        long todo = n;</b>
+&nbsp;
+<b class="nc">&nbsp;        while (todo &gt; 0) {</b>
+<b class="nc">&nbsp;            int len = (int) Math.min(b.length, todo);</b>
+<b class="nc">&nbsp;            len = this.read(b, 0, len);</b>
+<b class="nc">&nbsp;            if (len == BaseNCodec.EOF) {</b>
+<b class="nc">&nbsp;                break;</b>
+&nbsp;            }
+<b class="nc">&nbsp;            todo -= len;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return n - todo;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

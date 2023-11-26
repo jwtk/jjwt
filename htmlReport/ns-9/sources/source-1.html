@@ -1,0 +1,286 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JacksonDeserializer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.jackson.io</a>
+</div>
+
+<h1>Coverage Summary for Class: JacksonDeserializer (io.jsonwebtoken.jackson.io)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JacksonDeserializer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JacksonDeserializer$1</td>
+  </tr>
+  <tr>
+    <td class="name">JacksonDeserializer$MappedTypeDeserializer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.jackson.io;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.core.JsonParser;
+&nbsp;import com.fasterxml.jackson.databind.DeserializationContext;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
+&nbsp;import com.fasterxml.jackson.databind.module.SimpleModule;
+&nbsp;import io.jsonwebtoken.io.AbstractDeserializer;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Reader;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Deserializer using a Jackson {@link ObjectMapper}.
+&nbsp; *
+&nbsp; * @since 0.10.0
+&nbsp; */
+&nbsp;public class JacksonDeserializer&lt;T&gt; extends AbstractDeserializer&lt;T&gt; {
+&nbsp;
+&nbsp;    private final Class&lt;T&gt; returnType;
+&nbsp;
+&nbsp;    private final ObjectMapper objectMapper;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor using JJWT&#39;s default {@link ObjectMapper} singleton for deserialization.
+&nbsp;     */
+&nbsp;    public JacksonDeserializer() {
+<b class="fc">&nbsp;        this(JacksonSerializer.DEFAULT_OBJECT_MAPPER);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new JacksonDeserializer where the values of the claims can be parsed into given types. A common usage
+&nbsp;     * example is to parse custom User object out of a claim, for example the claims:
+&nbsp;     * &lt;pre&gt;{@code
+&nbsp;     * {
+&nbsp;     *     &quot;issuer&quot;: &quot;https://issuer.example.com&quot;,
+&nbsp;     *     &quot;user&quot;: {
+&nbsp;     *         &quot;firstName&quot;: &quot;Jill&quot;,
+&nbsp;     *         &quot;lastName&quot;: &quot;Coder&quot;
+&nbsp;     *     }
+&nbsp;     * }}&lt;/pre&gt;
+&nbsp;     * Passing a map of {@code [&quot;user&quot;: User.class]} to this constructor would result in the {@code user} claim being
+&nbsp;     * transformed to an instance of your custom {@code User} class, instead of the default of {@code Map}.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Because custom type parsing requires modifying the state of a Jackson {@code ObjectMapper}, this
+&nbsp;     * constructor creates a new internal {@code ObjectMapper} instance and customizes it to support the
+&nbsp;     * specified {@code claimTypeMap}.  This ensures that the JJWT parsing behavior does not unexpectedly
+&nbsp;     * modify the state of another application-specific {@code ObjectMapper}.
+&nbsp;     * &lt;p&gt;
+&nbsp;     * If you would like to use your own {@code ObjectMapper} instance that also supports custom types for
+&nbsp;     * JWT {@code Claims}, you will need to first customize your {@code ObjectMapper} instance by registering
+&nbsp;     * your custom types and then use the {@link #JacksonDeserializer(ObjectMapper)} constructor instead.
+&nbsp;     *
+&nbsp;     * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
+&nbsp;     */
+&nbsp;    public JacksonDeserializer(Map&lt;String, Class&lt;?&gt;&gt; claimTypeMap) {
+&nbsp;        // DO NOT reuse JacksonSerializer.DEFAULT_OBJECT_MAPPER as this could result in sharing the custom deserializer
+&nbsp;        // between instances
+<b class="fc">&nbsp;        this(new ObjectMapper());</b>
+<b class="fc">&nbsp;        Assert.notNull(claimTypeMap, &quot;Claim type map cannot be null.&quot;);</b>
+&nbsp;        // register a new Deserializer
+<b class="fc">&nbsp;        SimpleModule module = new SimpleModule();</b>
+<b class="fc">&nbsp;        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));</b>
+<b class="fc">&nbsp;        objectMapper.registerModule(module);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constructor using the specified Jackson {@link ObjectMapper}.
+&nbsp;     *
+&nbsp;     * @param objectMapper the ObjectMapper to use for deserialization.
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public JacksonDeserializer(ObjectMapper objectMapper) {
+<b class="fc">&nbsp;        this(objectMapper, (Class&lt;T&gt;) Object.class);</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    private JacksonDeserializer(ObjectMapper objectMapper, Class&lt;T&gt; returnType) {</b>
+<b class="fc">&nbsp;        Assert.notNull(objectMapper, &quot;ObjectMapper cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        Assert.notNull(returnType, &quot;Return type cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        this.objectMapper = objectMapper;</b>
+<b class="fc">&nbsp;        this.returnType = returnType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected T doDeserialize(Reader reader) throws Exception {
+<b class="fc">&nbsp;        return objectMapper.readValue(reader, returnType);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * A Jackson {@link com.fasterxml.jackson.databind.JsonDeserializer JsonDeserializer}, that will convert claim
+&nbsp;     * values to types based on {@code claimTypeMap}.
+&nbsp;     */
+<b class="fc">&nbsp;    private static class MappedTypeDeserializer extends UntypedObjectDeserializer {</b>
+&nbsp;
+&nbsp;        private final Map&lt;String, Class&lt;?&gt;&gt; claimTypeMap;
+&nbsp;
+&nbsp;        private MappedTypeDeserializer(Map&lt;String, Class&lt;?&gt;&gt; claimTypeMap) {
+<b class="fc">&nbsp;            super(null, null);</b>
+<b class="fc">&nbsp;            this.claimTypeMap = claimTypeMap;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Override
+&nbsp;        public Object deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+&nbsp;            // check if the current claim key is mapped, if so traverse it&#39;s value
+<b class="fc">&nbsp;            String name = parser.currentName();</b>
+<b class="pc">&nbsp;            if (claimTypeMap != null &amp;&amp; name != null &amp;&amp; claimTypeMap.containsKey(name)) {</b>
+<b class="fc">&nbsp;                Class&lt;?&gt; type = claimTypeMap.get(name);</b>
+&nbsp;                //noinspection resource
+<b class="fc">&nbsp;                return parser.readValueAsTree().traverse(parser.getCodec()).readValueAs(type);</b>
+&nbsp;            }
+&nbsp;            // otherwise default to super
+<b class="fc">&nbsp;            return super.deserialize(parser, context);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

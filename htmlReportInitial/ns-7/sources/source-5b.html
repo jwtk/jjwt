@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ProvidedPrivateKeyBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: ProvidedPrivateKeyBuilder (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProvidedPrivateKeyBuilder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.security.PrivateKeyBuilder;
+&nbsp;
+&nbsp;import java.security.PrivateKey;
+&nbsp;import java.security.PublicKey;
+&nbsp;import java.security.interfaces.ECKey;
+&nbsp;
+&nbsp;public class ProvidedPrivateKeyBuilder extends ProvidedKeyBuilder&lt;PrivateKey, PrivateKeyBuilder&gt;
+&nbsp;        implements PrivateKeyBuilder {
+&nbsp;
+&nbsp;    private PublicKey publicKey;
+&nbsp;
+&nbsp;    ProvidedPrivateKeyBuilder(PrivateKey key) {
+<b class="fc">&nbsp;        super(key);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PrivateKeyBuilder publicKey(PublicKey publicKey) {
+<b class="fc">&nbsp;        this.publicKey = publicKey;</b>
+<b class="fc">&nbsp;        return this;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PrivateKey doBuild() {
+&nbsp;
+<b class="fc">&nbsp;        PrivateKey key = this.key;</b>
+&nbsp;
+&nbsp;        // We only need to wrap as an ECKey if:
+&nbsp;        // 1. The private key is not already an ECKey. If it is, we can validate normally
+&nbsp;        // 2. The private key indicates via its algorithm that it is intended to be used as an EC key.
+&nbsp;        // 3. The public key is an ECKey - this must be true to represent EC params for the private key
+<b class="fc">&nbsp;        String privAlg = Strings.clean(this.key.getAlgorithm());</b>
+<b class="pc">&nbsp;        if (!(key instanceof ECKey) &amp;&amp; (&quot;EC&quot;.equalsIgnoreCase(privAlg) || &quot;ECDSA&quot;.equalsIgnoreCase(privAlg)) &amp;&amp;</b>
+&nbsp;                this.publicKey instanceof ECKey) {
+<b class="fc">&nbsp;            key = new PrivateECKey(key, ((ECKey) this.publicKey).getParams());</b>
+&nbsp;        }
+&nbsp;
+<b class="pc">&nbsp;        return this.provider != null ? new ProviderPrivateKey(this.provider, key) : key;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

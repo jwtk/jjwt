@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DefaultHashAlgorithm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.security</a>
+</div>
+
+<h1>Coverage Summary for Class: DefaultHashAlgorithm (io.jsonwebtoken.impl.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DefaultHashAlgorithm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">DefaultHashAlgorithm$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.security;
+&nbsp;
+&nbsp;import io.jsonwebtoken.impl.lang.CheckedFunction;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.security.HashAlgorithm;
+&nbsp;import io.jsonwebtoken.security.Request;
+&nbsp;import io.jsonwebtoken.security.VerifyDigestRequest;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.security.MessageDigest;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;public final class DefaultHashAlgorithm extends CryptoAlgorithm implements HashAlgorithm {
+&nbsp;
+<b class="fc">&nbsp;    public static final HashAlgorithm SHA1 = new DefaultHashAlgorithm(&quot;sha-1&quot;);</b>
+&nbsp;
+&nbsp;    DefaultHashAlgorithm(String id) {
+<b class="fc">&nbsp;        super(id, id.toUpperCase(Locale.ENGLISH));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public byte[] digest(final Request&lt;InputStream&gt; request) {
+<b class="fc">&nbsp;        Assert.notNull(request, &quot;Request cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        final InputStream payload = Assert.notNull(request.getPayload(), &quot;Request payload cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        return jca(request).withMessageDigest(new CheckedFunction&lt;MessageDigest, byte[]&gt;() {</b>
+&nbsp;            @Override
+&nbsp;            public byte[] apply(MessageDigest md) throws IOException {
+<b class="fc">&nbsp;                byte[] buf = new byte[1024];</b>
+<b class="fc">&nbsp;                int len = 0;</b>
+<b class="fc">&nbsp;                while (len != -1) {</b>
+<b class="fc">&nbsp;                    len = payload.read(buf);</b>
+<b class="fc">&nbsp;                    if (len &gt; 0) md.update(buf, 0, len);</b>
+&nbsp;                }
+<b class="fc">&nbsp;                return md.digest();</b>
+&nbsp;            }
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public boolean verify(VerifyDigestRequest request) {
+<b class="fc">&nbsp;        Assert.notNull(request, &quot;VerifyDigestRequest cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        byte[] digest = Assert.notNull(request.getDigest(), &quot;Digest cannot be null.&quot;);</b>
+<b class="fc">&nbsp;        byte[] computed = digest(request);</b>
+<b class="fc">&nbsp;        return MessageDigest.isEqual(computed, digest); // time-constant comparison required, not standard equals</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

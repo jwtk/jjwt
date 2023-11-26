@@ -1,0 +1,249 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwtTokenizer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtTokenizer (io.jsonwebtoken.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtTokenizer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (47/47)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JwtTokenizer$tokenize</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (47/47)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl;
+&nbsp;
+&nbsp;import io.jsonwebtoken.MalformedJwtException;
+&nbsp;import io.jsonwebtoken.impl.io.Streams;
+&nbsp;import io.jsonwebtoken.lang.Assert;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.Reader;
+&nbsp;
+<b class="fc">&nbsp;public class JwtTokenizer {</b>
+&nbsp;
+&nbsp;    static final char DELIMITER = &#39;.&#39;;
+&nbsp;
+&nbsp;    private static final String DELIM_ERR_MSG_PREFIX = &quot;Invalid compact JWT string: Compact JWSs must contain &quot; +
+&nbsp;            &quot;exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: &quot;;
+&nbsp;
+&nbsp;    private static int read(Reader r, char[] buf) {
+&nbsp;        try {
+<b class="fc">&nbsp;            return r.read(buf);</b>
+<b class="fc">&nbsp;        } catch (IOException e) {</b>
+<b class="fc">&nbsp;            String msg = &quot;Unable to read compact JWT: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;            throw new MalformedJwtException(msg, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+&nbsp;    public &lt;T extends TokenizedJwt&gt; T tokenize(Reader reader) {
+&nbsp;
+<b class="fc">&nbsp;        Assert.notNull(reader, &quot;Reader argument cannot be null.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        CharSequence protectedHeader = Strings.EMPTY; //Both JWS and JWE</b>
+<b class="fc">&nbsp;        CharSequence body = Strings.EMPTY; //JWS payload or JWE Ciphertext</b>
+<b class="fc">&nbsp;        CharSequence encryptedKey = Strings.EMPTY; //JWE only</b>
+<b class="fc">&nbsp;        CharSequence iv = Strings.EMPTY; //JWE only</b>
+<b class="fc">&nbsp;        CharSequence digest = Strings.EMPTY; //JWS Signature or JWE AAD Tag</b>
+&nbsp;
+<b class="fc">&nbsp;        int delimiterCount = 0;</b>
+<b class="fc">&nbsp;        char[] buf = new char[4096];</b>
+<b class="fc">&nbsp;        int len = 0;</b>
+<b class="fc">&nbsp;        StringBuilder sb = new StringBuilder(4096);</b>
+<b class="fc">&nbsp;        while (len != Streams.EOF) {</b>
+&nbsp;
+<b class="fc">&nbsp;            len = read(reader, buf);</b>
+&nbsp;
+<b class="fc">&nbsp;            for (int i = 0; i &lt; len; i++) {</b>
+&nbsp;
+<b class="fc">&nbsp;                char c = buf[i];</b>
+&nbsp;
+<b class="fc">&nbsp;                if (Character.isWhitespace(c)) {</b>
+<b class="fc">&nbsp;                    String msg = &quot;Compact JWT strings may not contain whitespace.&quot;;</b>
+<b class="fc">&nbsp;                    throw new MalformedJwtException(msg);</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;                if (c == DELIMITER) {</b>
+&nbsp;
+<b class="fc">&nbsp;                    CharSequence seq = Strings.clean(sb);</b>
+<b class="fc">&nbsp;                    String token = seq != null ? seq.toString() : Strings.EMPTY;</b>
+&nbsp;
+<b class="pc">&nbsp;                    switch (delimiterCount) {</b>
+&nbsp;                        case 0:
+<b class="fc">&nbsp;                            protectedHeader = token;</b>
+<b class="fc">&nbsp;                            break;</b>
+&nbsp;                        case 1:
+<b class="fc">&nbsp;                            body = token; //for JWS</b>
+<b class="fc">&nbsp;                            encryptedKey = token; //for JWE</b>
+<b class="fc">&nbsp;                            break;</b>
+&nbsp;                        case 2:
+<b class="fc">&nbsp;                            body = Strings.EMPTY; //clear out value set for JWS</b>
+<b class="fc">&nbsp;                            iv = token;</b>
+<b class="fc">&nbsp;                            break;</b>
+&nbsp;                        case 3:
+<b class="fc">&nbsp;                            body = token;</b>
+&nbsp;                            break;
+&nbsp;                    }
+&nbsp;
+<b class="fc">&nbsp;                    delimiterCount++;</b>
+<b class="fc">&nbsp;                    sb.setLength(0);</b>
+<b class="fc">&nbsp;                } else {</b>
+<b class="fc">&nbsp;                    sb.append(c);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (delimiterCount != 2 &amp;&amp; delimiterCount != 4) {</b>
+<b class="fc">&nbsp;            String msg = DELIM_ERR_MSG_PREFIX + delimiterCount;</b>
+<b class="fc">&nbsp;            throw new MalformedJwtException(msg);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (sb.length() &gt; 0) {</b>
+<b class="fc">&nbsp;            digest = sb.toString();</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (delimiterCount == 2) {</b>
+<b class="fc">&nbsp;            return (T) new DefaultTokenizedJwt(protectedHeader, body, digest);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return (T) new DefaultTokenizedJwe(protectedHeader, body, digest, encryptedKey, iv);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

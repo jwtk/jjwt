@@ -1,0 +1,245 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > JwtDateConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.impl.lang</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtDateConverter (io.jsonwebtoken.impl.lang)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtDateConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (34/34)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">JwtDateConverter$toDate</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (34/34)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2021 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.impl.lang;
+&nbsp;
+&nbsp;import io.jsonwebtoken.lang.DateFormats;
+&nbsp;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Date;
+&nbsp;
+<b class="fc">&nbsp;public class JwtDateConverter implements Converter&lt;Date, Object&gt; {</b>
+&nbsp;
+<b class="fc">&nbsp;    public static final JwtDateConverter INSTANCE = new JwtDateConverter();</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Object applyTo(Date date) {
+<b class="fc">&nbsp;        if (date == null) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;        // https://www.rfc-editor.org/rfc/rfc7519.html#section-2, &#39;Numeric Date&#39; definition:
+<b class="fc">&nbsp;        return date.getTime() / 1000L;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Date applyFrom(Object o) {
+<b class="fc">&nbsp;        return toSpecDate(o);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
+&nbsp;     *
+&nbsp;     * @param value object to convert to a {@code Date} using heuristics.
+&nbsp;     * @return an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
+&nbsp;     * @since 0.10.0
+&nbsp;     */
+&nbsp;    public static Date toSpecDate(Object value) {
+<b class="fc">&nbsp;        if (value == null) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (value instanceof String) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                value = Long.parseLong((String) value);</b>
+<b class="fc">&nbsp;            } catch (NumberFormatException ignored) { // will try in the fallback toDate method call below</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (value instanceof Number) {</b>
+&nbsp;            // https://github.com/jwtk/jjwt/issues/122:
+&nbsp;            // The JWT RFC *mandates* NumericDate values are represented as seconds.
+&nbsp;            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
+<b class="fc">&nbsp;            long seconds = ((Number) value).longValue();</b>
+<b class="fc">&nbsp;            value = seconds * 1000;</b>
+&nbsp;        }
+&nbsp;        //v would have been normalized to milliseconds if it was a number value, so perform normal date conversion:
+<b class="fc">&nbsp;        return toDate(value);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns a {@link Date} equivalent of the specified object value using heuristics.
+&nbsp;     *
+&nbsp;     * @param v the object value to represent as a Date.
+&nbsp;     * @return a {@link Date} equivalent of the specified object value using heuristics.
+&nbsp;     */
+&nbsp;    public static Date toDate(Object v) {
+<b class="fc">&nbsp;        if (v == null) {</b>
+<b class="fc">&nbsp;            return null;</b>
+<b class="fc">&nbsp;        } else if (v instanceof Date) {</b>
+<b class="fc">&nbsp;            return (Date) v;</b>
+<b class="fc">&nbsp;        } else if (v instanceof Calendar) { //since 0.10.0</b>
+<b class="fc">&nbsp;            return ((Calendar) v).getTime();</b>
+<b class="fc">&nbsp;        } else if (v instanceof Number) {</b>
+&nbsp;            //assume millis:
+<b class="fc">&nbsp;            long millis = ((Number) v).longValue();</b>
+<b class="fc">&nbsp;            return new Date(millis);</b>
+<b class="fc">&nbsp;        } else if (v instanceof String) {</b>
+<b class="fc">&nbsp;            return parseIso8601Date((String) v); //ISO-8601 parsing since 0.10.0</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            String msg = &quot;Cannot create Date from object of type &quot; + v.getClass().getName() + &quot;.&quot;;</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(msg);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses the specified ISO-8601-formatted string and returns the corresponding {@link Date} instance.
+&nbsp;     *
+&nbsp;     * @param value an ISO-8601-formatted string.
+&nbsp;     * @return a {@link Date} instance reflecting the specified ISO-8601-formatted string.
+&nbsp;     * @since 0.10.0
+&nbsp;     */
+&nbsp;    private static Date parseIso8601Date(String value) throws IllegalArgumentException {
+&nbsp;        try {
+<b class="fc">&nbsp;            return DateFormats.parseIso8601Date(value);</b>
+<b class="fc">&nbsp;        } catch (ParseException e) {</b>
+<b class="fc">&nbsp;            String msg = &quot;String value is not a JWT NumericDate, nor is it ISO-8601-formatted. &quot; +</b>
+<b class="fc">&nbsp;                    &quot;All heuristics exhausted. Cause: &quot; + e.getMessage();</b>
+<b class="fc">&nbsp;            throw new IllegalArgumentException(msg, e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

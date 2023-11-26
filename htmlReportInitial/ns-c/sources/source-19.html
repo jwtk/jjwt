@@ -1,0 +1,122 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > KeyOperationPolicied</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.security</a>
+</div>
+
+<h1>Coverage Summary for Class: KeyOperationPolicied (io.jsonwebtoken.security)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">KeyOperationPolicied$operationPolicy</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright © 2023 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.security;
+&nbsp;
+&nbsp;/**
+&nbsp; * A marker interface that indicates the implementing instance supports the ability to configure a
+&nbsp; * {@link KeyOperationPolicy} used to validate JWK instances.
+&nbsp; *
+&nbsp; * @param &lt;T&gt; the implementing instance for method chaining
+&nbsp; */
+&nbsp;public interface KeyOperationPolicied&lt;T extends KeyOperationPolicied&lt;T&gt;&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Sets the key operation policy that determines which {@link KeyOperation}s may be assigned to a
+&nbsp;     * JWK. Unless overridden by this method, the default RFC-recommended policy is used where:
+&nbsp;     * &lt;ul&gt;
+&nbsp;     *     &lt;li&gt;All {@link Jwks.OP RFC-standard key operations} are supported.&lt;/li&gt;
+&nbsp;     *     &lt;li&gt;Multiple unrelated operations may &lt;b&gt;not&lt;/b&gt; be assigned to the JWK per the
+&nbsp;     *     &lt;a href=&quot;https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3&quot;&gt;RFC 7517, Section 4.3&lt;/a&gt; recommendation:
+&nbsp;     * &lt;blockquote&gt;&lt;pre&gt;
+&nbsp;     * Multiple unrelated key operations SHOULD NOT be specified for a key
+&nbsp;     * because of the potential vulnerabilities associated with using the
+&nbsp;     * same key with multiple algorithms.  Thus, the combinations &quot;{@link Jwks.OP#SIGN sign}&quot;
+&nbsp;     * with &quot;{@link Jwks.OP#VERIFY verify}&quot;, &quot;{@link Jwks.OP#ENCRYPT encrypt}&quot; with &quot;{@link Jwks.OP#DECRYPT decrypt}&quot;, and &quot;{@link Jwks.OP#WRAP_KEY wrapKey}&quot; with
+&nbsp;     * &quot;{@link Jwks.OP#UNWRAP_KEY unwrapKey}&quot; are permitted, but other combinations SHOULD NOT be used.&lt;/pre&gt;&lt;/blockquote&gt;
+&nbsp;     * &lt;/li&gt;
+&nbsp;     * &lt;/ul&gt;
+&nbsp;     *
+&nbsp;     * &lt;p&gt;If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
+&nbsp;     * one can be created by using the {@link Jwks.OP#policy()} builder, or by implementing the
+&nbsp;     * {@link KeyOperationPolicy} interface directly.&lt;/p&gt;
+&nbsp;     *
+&nbsp;     * @param policy the policy that determines which {@link KeyOperation}s may be assigned to a JWK.
+&nbsp;     * @return the builder for method chaining.
+&nbsp;     * @throws IllegalArgumentException if {@code policy} is null
+&nbsp;     */
+&nbsp;    T operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>

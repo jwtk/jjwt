@@ -1,0 +1,153 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > CompressionCodec</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken</a>
+</div>
+
+<h1>Coverage Summary for Class: CompressionCodec (io.jsonwebtoken)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">CompressionCodec$compress</td>
+  </tr>
+  <tr>
+    <td class="name">CompressionCodec$compress$2</td>
+  </tr>
+  <tr>
+    <td class="name">CompressionCodec$decompress$0</td>
+  </tr>
+  <tr>
+    <td class="name">CompressionCodec$decompress$1</td>
+  </tr>
+  <tr>
+    <td class="name">CompressionCodec$getAlgorithmName$3</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2015 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken;
+&nbsp;
+&nbsp;import io.jsonwebtoken.io.CompressionAlgorithm;
+&nbsp;
+&nbsp;/**
+&nbsp; * Compresses and decompresses byte arrays according to a compression algorithm.
+&nbsp; *
+&nbsp; * &lt;p&gt;&lt;b&gt;&amp;quot;zip&amp;quot; identifier&lt;/b&gt;&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;{@code CompressionCodec} extends {@code Identifiable}; the value returned from
+&nbsp; * {@link Identifiable#getId() getId()} will be used as the JWT
+&nbsp; * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.3&quot;&gt;&lt;code&gt;zip&lt;/code&gt;&lt;/a&gt; header value.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @see Jwts.ZIP#DEF
+&nbsp; * @see Jwts.ZIP#GZIP
+&nbsp; * @since 0.6.0
+&nbsp; * @deprecated since 0.12.0 in favor of {@link io.jsonwebtoken.io.CompressionAlgorithm} to equal the RFC name for this concept.
+&nbsp; */
+&nbsp;@Deprecated
+&nbsp;public interface CompressionCodec extends CompressionAlgorithm {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * The algorithm name to use as the JWT
+&nbsp;     * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.3&quot;&gt;&lt;code&gt;zip&lt;/code&gt;&lt;/a&gt; header value.
+&nbsp;     *
+&nbsp;     * @return the algorithm name to use as the JWT
+&nbsp;     * &lt;a href=&quot;https://tools.ietf.org/html/rfc7516#section-4.1.3&quot;&gt;&lt;code&gt;zip&lt;/code&gt;&lt;/a&gt; header value.
+&nbsp;     * @deprecated since 0.12.0 in favor of {@link #getId()} to ensure congruence with
+&nbsp;     * all other identifiable algorithms.
+&nbsp;     */
+&nbsp;    @SuppressWarnings(&quot;DeprecatedIsStillUsed&quot;)
+&nbsp;    @Deprecated
+&nbsp;    String getAlgorithmName();
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Compresses the specified byte array, returning the compressed byte array result.
+&nbsp;     *
+&nbsp;     * @param content bytes to compress
+&nbsp;     * @return compressed bytes
+&nbsp;     * @throws CompressionException if the specified byte array cannot be compressed.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    byte[] compress(byte[] content) throws CompressionException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Decompresses the specified compressed byte array, returning the decompressed byte array result.  The
+&nbsp;     * specified byte array must already be in compressed form.
+&nbsp;     *
+&nbsp;     * @param compressed compressed bytes
+&nbsp;     * @return decompressed bytes
+&nbsp;     * @throws CompressionException if the specified byte array cannot be decompressed.
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    byte[] decompress(byte[] compressed) throws CompressionException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:24</div>
+</div>
+</body>
+</html>

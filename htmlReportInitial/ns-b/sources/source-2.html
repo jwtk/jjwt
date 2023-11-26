@@ -1,0 +1,312 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OrgJsonSerializer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.jsonwebtoken.orgjson.io</a>
+</div>
+
+<h1>Coverage Summary for Class: OrgJsonSerializer (io.jsonwebtoken.orgjson.io)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OrgJsonSerializer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.6%
+  </span>
+  <span class="absValue">
+    (56/58)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (58/58)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; * Copyright (C) 2014 jsonwebtoken.io
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; */
+&nbsp;package io.jsonwebtoken.orgjson.io;
+&nbsp;
+&nbsp;import io.jsonwebtoken.io.AbstractSerializer;
+&nbsp;import io.jsonwebtoken.io.Encoders;
+&nbsp;import io.jsonwebtoken.lang.Classes;
+&nbsp;import io.jsonwebtoken.lang.Collections;
+&nbsp;import io.jsonwebtoken.lang.DateFormats;
+&nbsp;import io.jsonwebtoken.lang.Objects;
+&nbsp;import io.jsonwebtoken.lang.Strings;
+&nbsp;import io.jsonwebtoken.lang.Supplier;
+&nbsp;import org.json.JSONArray;
+&nbsp;import org.json.JSONObject;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.OutputStream;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.util.Calendar;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * @since 0.10.0
+&nbsp; */
+<b class="fc">&nbsp;public class OrgJsonSerializer&lt;T&gt; extends AbstractSerializer&lt;T&gt; {</b>
+&nbsp;
+&nbsp;    // we need reflection for these because of Android - see https://github.com/jwtk/jjwt/issues/388
+&nbsp;    private static final String JSON_WRITER_CLASS_NAME = &quot;org.json.JSONWriter&quot;;
+<b class="fc">&nbsp;    private static final Class&lt;?&gt;[] VALUE_TO_STRING_ARG_TYPES = new Class[]{Object.class};</b>
+&nbsp;    private static final String JSON_STRING_CLASS_NAME = &quot;org.json.JSONString&quot;;
+&nbsp;    private static final Class&lt;?&gt; JSON_STRING_CLASS;
+&nbsp;
+&nbsp;    static { // see see https://github.com/jwtk/jjwt/issues/388
+<b class="fc">&nbsp;        if (Classes.isAvailable(JSON_STRING_CLASS_NAME)) {</b>
+<b class="fc">&nbsp;            JSON_STRING_CLASS = Classes.forName(JSON_STRING_CLASS_NAME);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            JSON_STRING_CLASS = null;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected void doSerialize(T t, OutputStream out) throws Exception {
+<b class="fc">&nbsp;        Object o = toJSONInstance(t);</b>
+<b class="fc">&nbsp;        String s = toString(o);</b>
+<b class="fc">&nbsp;        byte[] bytes = Strings.utf8(s);</b>
+<b class="fc">&nbsp;        out.write(bytes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * @since 0.10.5 see https://github.com/jwtk/jjwt/issues/388
+&nbsp;     */
+&nbsp;    private static boolean isJSONString(Object o) {
+<b class="fc">&nbsp;        if (JSON_STRING_CLASS != null) {</b>
+<b class="fc">&nbsp;            return JSON_STRING_CLASS.isInstance(o);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Object toJSONInstance(Object object) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        if (object == null) {</b>
+<b class="fc">&nbsp;            return JSONObject.NULL;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Supplier) {</b>
+<b class="fc">&nbsp;            object = ((Supplier&lt;?&gt;) object).get();</b>
+&nbsp;        }
+&nbsp;
+<b class="pc">&nbsp;        if (object instanceof JSONObject || object instanceof JSONArray</b>
+<b class="fc">&nbsp;                || JSONObject.NULL.equals(object) || isJSONString(object)</b>
+&nbsp;                || object instanceof Byte || object instanceof Character
+&nbsp;                || object instanceof Short || object instanceof Integer
+&nbsp;                || object instanceof Long || object instanceof Boolean
+&nbsp;                || object instanceof Float || object instanceof Double
+&nbsp;                || object instanceof String || object instanceof BigInteger
+&nbsp;                || object instanceof BigDecimal || object instanceof Enum) {
+<b class="fc">&nbsp;            return object;</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Calendar) {</b>
+<b class="fc">&nbsp;            object = ((Calendar) object).getTime(); //sets object to date, will be converted in next if-statement:</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Date) {</b>
+<b class="fc">&nbsp;            Date date = (Date) object;</b>
+<b class="fc">&nbsp;            return DateFormats.formatIso8601(date);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof byte[]) {</b>
+<b class="fc">&nbsp;            return Encoders.BASE64.encode((byte[]) object);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof char[]) {</b>
+<b class="fc">&nbsp;            return new String((char[]) object);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Map) {</b>
+<b class="fc">&nbsp;            Map&lt;?, ?&gt; map = (Map&lt;?, ?&gt;) object;</b>
+<b class="fc">&nbsp;            return toJSONObject(map);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (Objects.isArray(object)) {</b>
+<b class="fc">&nbsp;            object = Collections.arrayToList(object); //sets object to List, will be converted in next if-statement:</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (object instanceof Collection) {</b>
+<b class="fc">&nbsp;            Collection&lt;?&gt; coll = (Collection&lt;?&gt;) object;</b>
+<b class="fc">&nbsp;            return toJSONArray(coll);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        //not an immediately JSON-compatible object and probably a JavaBean (or similar).  We can&#39;t convert that
+&nbsp;        //directly without using a marshaller of some sort:
+<b class="fc">&nbsp;        String msg = &quot;Unable to serialize object of type &quot; + object.getClass().getName() + &quot; to JSON using known heuristics.&quot;;</b>
+<b class="fc">&nbsp;        throw new IOException(msg);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private JSONObject toJSONObject(Map&lt;?, ?&gt; m) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        JSONObject obj = new JSONObject();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Map.Entry&lt;?, ?&gt; entry : m.entrySet()) {</b>
+<b class="fc">&nbsp;            Object k = entry.getKey();</b>
+<b class="fc">&nbsp;            Object value = entry.getValue();</b>
+&nbsp;
+<b class="fc">&nbsp;            String key = String.valueOf(k);</b>
+<b class="fc">&nbsp;            value = toJSONInstance(value);</b>
+<b class="fc">&nbsp;            obj.put(key, value);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return obj;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private JSONArray toJSONArray(Collection&lt;?&gt; c) throws IOException {
+&nbsp;
+<b class="fc">&nbsp;        JSONArray array = new JSONArray();</b>
+&nbsp;
+<b class="fc">&nbsp;        for (Object o : c) {</b>
+<b class="fc">&nbsp;            o = toJSONInstance(o);</b>
+<b class="fc">&nbsp;            array.put(o);</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+<b class="fc">&nbsp;        return array;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Serializes the specified org.json instance a JSON String.
+&nbsp;     *
+&nbsp;     * @param o the org.json instance to convert to a String
+&nbsp;     * @return the JSON String
+&nbsp;     */
+&nbsp;    protected String toString(Object o) {
+&nbsp;        // https://github.com/jwtk/jjwt/issues/380 for Android compatibility (Android doesn&#39;t have org.json.JSONWriter):
+&nbsp;        // This instanceof check is a sneaky (hacky?) heuristic: A JwtBuilder only ever provides Map&lt;String,Object&gt;
+&nbsp;        // instances to its serializer instances, so by the time this method is invoked, &#39;o&#39; will always be a
+&nbsp;        // JSONObject.
+&nbsp;        //
+&nbsp;        // This is sufficient for all JJWT-supported scenarios on Android since Android users shouldn&#39;t ever use
+&nbsp;        // JJWT&#39;s internal Serializer implementation for general JSON serialization.  That is, its intended use
+&nbsp;        // is within the context of JwtBuilder execution and not for application use beyond that.
+<b class="fc">&nbsp;        if (o instanceof JSONObject) {</b>
+<b class="fc">&nbsp;            return o.toString();</b>
+&nbsp;        }
+&nbsp;        // we still call JSONWriter for all other values &#39;just in case&#39;, and this works for all valid JSON values
+&nbsp;        // This would fail on Android unless they include the newer org.json dependency and ignore Android&#39;s.
+<b class="fc">&nbsp;        return Classes.invokeStatic(JSON_WRITER_CLASS_NAME, &quot;valueToString&quot;, VALUE_TO_STRING_ARG_TYPES, o);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Serializes the specified org.json instance a byte array.
+&nbsp;     *
+&nbsp;     * @param o the org.json instance to serialize
+&nbsp;     * @return the JSON byte array
+&nbsp;     * @deprecated not called by JJWT
+&nbsp;     */
+&nbsp;    @Deprecated
+&nbsp;    protected byte[] toBytes(Object o) {
+<b class="fc">&nbsp;        String s = toString(o);</b>
+<b class="fc">&nbsp;        return Strings.utf8(s);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-11-02 22:13</div>
+</div>
+</body>
+</html>
