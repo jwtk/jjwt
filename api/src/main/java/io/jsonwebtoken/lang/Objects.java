@@ -356,37 +356,37 @@ public final class Objects {
         if (obj == null) {
             return 0;
         }
+
         if (obj.getClass().isArray()) {
-            if (obj instanceof Object[]) {
-                return nullSafeHashCode((Object[]) obj);
-            }
-            if (obj instanceof boolean[]) {
-                return nullSafeHashCode((boolean[]) obj);
-            }
-            if (obj instanceof byte[]) {
-                return nullSafeHashCode((byte[]) obj);
-            }
-            if (obj instanceof char[]) {
-                return nullSafeHashCode((char[]) obj);
-            }
-            if (obj instanceof double[]) {
-                return nullSafeHashCode((double[]) obj);
-            }
-            if (obj instanceof float[]) {
-                return nullSafeHashCode((float[]) obj);
-            }
-            if (obj instanceof int[]) {
-                return nullSafeHashCode((int[]) obj);
-            }
-            if (obj instanceof long[]) {
-                return nullSafeHashCode((long[]) obj);
-            }
-            if (obj instanceof short[]) {
-                return nullSafeHashCode((short[]) obj);
-            }
+            return handleArrayHashCode(obj);
+        }
+
+        return obj.hashCode();
+    }
+
+    private static int handleArrayHashCode(Object obj) {
+        if (obj instanceof Object[]) {
+            return nullSafeHashCode((Object[]) obj);
+        } else if (obj instanceof boolean[]) {
+            return nullSafeHashCode((boolean[]) obj);
+        } else if (obj instanceof byte[]) {
+            return nullSafeHashCode((byte[]) obj);
+        } else if (obj instanceof char[]) {
+            return nullSafeHashCode((char[]) obj);
+        } else if (obj instanceof double[]) {
+            return nullSafeHashCode((double[]) obj);
+        } else if (obj instanceof float[]) {
+            return nullSafeHashCode((float[]) obj);
+        } else if (obj instanceof int[]) {
+            return nullSafeHashCode((int[]) obj);
+        } else if (obj instanceof long[]) {
+            return nullSafeHashCode((long[]) obj);
+        } else if (obj instanceof short[]) {
+            return nullSafeHashCode((short[]) obj);
         }
         return obj.hashCode();
     }
+
 
     /**
      * Return a hash code based on the contents of the specified array.
