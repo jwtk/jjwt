@@ -30,40 +30,7 @@ package io.jsonwebtoken;
  */
 public abstract class JwtHandlerAdapter<T> extends SupportedJwtVisitor<T> implements JwtHandler<T> {
 
-    /**
-     * Default constructor, does not initialize any internal state.
-     */
     public JwtHandlerAdapter() {
-    }
-
-    @Override
-    public T onUnsecuredContent(Jwt<Header, byte[]> jwt) {
-        return onContentJwt(jwt); // bridge for existing implementations
-    }
-
-    @Override
-    public T onUnsecuredClaims(Jwt<Header, Claims> jwt) {
-        return onClaimsJwt(jwt);
-    }
-
-    @Override
-    public T onVerifiedContent(Jws<byte[]> jws) {
-        return onContentJws(jws);
-    }
-
-    @Override
-    public T onVerifiedClaims(Jws<Claims> jws) {
-        return onClaimsJws(jws);
-    }
-
-    @Override
-    public T onDecryptedContent(Jwe<byte[]> jwe) {
-        return onContentJwe(jwe);
-    }
-
-    @Override
-    public T onDecryptedClaims(Jwe<Claims> jwe) {
-        return onClaimsJwe(jwe);
     }
 
     @Override

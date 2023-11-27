@@ -958,7 +958,7 @@ public final class Jwts {
      * @since 0.12.0
      */
     public static final class ZIP {
-
+    
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms";
         private static final Registry<String, CompressionAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
