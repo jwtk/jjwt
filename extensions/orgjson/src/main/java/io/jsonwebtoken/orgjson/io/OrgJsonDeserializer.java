@@ -39,23 +39,29 @@ public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
     }
 
     private Object parse(java.io.Reader reader) throws JSONException {
-
         JSONTokener tokener = new JSONTokener(reader);
+        char c = tokener.nextClean(); // peak ahead
+        tokener.back(); // revert
 
-        char c = tokener.nextClean(); //peak ahead
-        tokener.back(); //revert
-
-        if (c == '{') { //json object
-            JSONObject o = new JSONObject(tokener);
-            return toMap(o);
+        if (c == '{') { // json object
+            return parseJsonObject(tokener);
         } else if (c == '[') {
-            JSONArray a = new JSONArray(tokener);
-            return toList(a);
+            return parseJsonArray(tokener);
         } else {
-            //raw json value
+            // raw json value
             Object value = tokener.nextValue();
             return convertIfNecessary(value);
         }
+    }
+
+    private Map<String, Object> parseJsonObject(JSONTokener tokener) throws JSONException {
+        JSONObject o = new JSONObject(tokener);
+        return toMap(o);
+    }
+
+    private List<Object> parseJsonArray(JSONTokener tokener) throws JSONException {
+        JSONArray a = new JSONArray(tokener);
+        return toList(a);
     }
 
     private Map<String, Object> toMap(JSONObject o) {
