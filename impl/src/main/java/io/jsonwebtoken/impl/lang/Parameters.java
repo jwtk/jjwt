@@ -24,8 +24,8 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,8 +41,8 @@ public final class Parameters {
         return builder(String.class).setId(id).setName(name).build();
     }
 
-    public static Parameter<Date> rfcDate(String id, String name) {
-        return builder(Date.class).setConverter(JwtDateConverter.INSTANCE).setId(id).setName(name).build();
+    public static Parameter<Instant> rfcDate(String id, String name) {
+        return builder(Instant.class).setConverter(JwtDateConverter.INSTANCE).setId(id).setName(name).build();
     }
 
     public static Parameter<List<X509Certificate>> x509Chain(String id, String name) {

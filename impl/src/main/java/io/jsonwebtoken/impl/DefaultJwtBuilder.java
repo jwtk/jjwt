@@ -73,7 +73,9 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.Date;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -239,12 +241,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.key = key;
         //noinspection unchecked
         this.sigAlg = (SecureDigestAlgorithm<Key, ?>) alg;
-        this.signFunction = Functions.wrap(new Function<SecureRequest<InputStream, Key>, byte[]>() {
-            @Override
-            public byte[] apply(SecureRequest<InputStream, Key> request) {
-                return sigAlg.digest(request);
-            }
-        }, SignatureException.class, "Unable to compute %s signature.", id);
+        this.signFunction = Functions.wrap(request -> sigAlg.digest(request), SignatureException.class, "Unable to compute %s signature.", id);
         return this;
     }
 
@@ -309,12 +306,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
 
         final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
-        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
-            @Override
-            public KeyResult apply(KeyRequest<Key> request) {
-                return alg.getEncryptionKey(request);
-            }
-        }, SecurityException.class, cekMsg, algId);
+        this.keyAlgFunction = Functions.wrap(alg::getEncryptionKey, SecurityException.class, cekMsg, algId);
 
         return this;
     }
@@ -434,37 +426,67 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public AudienceCollection<JwtBuilder> audience() {
-        return new DelegateAudienceCollection<>((JwtBuilder) this, claims().audience());
+        return new DelegateAudienceCollection<>(this, claims().audience());
     }
 
     @Override
-    public JwtBuilder setExpiration(Date exp) {
+    public JwtBuilder setExpiration(Instant exp) {
         return expiration(exp);
     }
 
     @Override
-    public JwtBuilder expiration(Date exp) {
+    public JwtBuilder expiration(Instant exp) {
         return claims().expiration(exp).and();
     }
 
     @Override
-    public JwtBuilder setNotBefore(Date nbf) {
+    public JwtBuilder expiration(OffsetDateTime exp) {
+        return this.expiration(exp.toInstant());
+    }
+
+    @Override
+    public JwtBuilder expiration(ZonedDateTime exp) {
+        return this.expiration(exp.toInstant());
+    }
+
+    @Override
+    public JwtBuilder setNotBefore(Instant nbf) {
         return notBefore(nbf);
     }
 
     @Override
-    public JwtBuilder notBefore(Date nbf) {
+    public JwtBuilder notBefore(Instant nbf) {
         return claims().notBefore(nbf).and();
     }
 
     @Override
-    public JwtBuilder setIssuedAt(Date iat) {
+    public JwtBuilder notBefore(OffsetDateTime nbf) {
+        return this.notBefore(nbf.toInstant());
+    }
+
+    @Override
+    public JwtBuilder notBefore(ZonedDateTime nbf) {
+        return this.notBefore(nbf.toInstant());
+    }
+
+    @Override
+    public JwtBuilder setIssuedAt(Instant iat) {
         return issuedAt(iat);
     }
 
     @Override
-    public JwtBuilder issuedAt(Date iat) {
+    public JwtBuilder issuedAt(Instant iat) {
         return claims().issuedAt(iat).and();
+    }
+
+    @Override
+    public JwtBuilder issuedAt(OffsetDateTime iat) {
+        return this.issuedAt(iat.toInstant());
+    }
+
+    @Override
+    public JwtBuilder issuedAt(ZonedDateTime iat) {
+        return this.issuedAt(iat.toInstant());
     }
 
     @Override
@@ -674,12 +696,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     private void encrypt(final AeadRequest req, final AeadResult res) throws SecurityException {
-        Function<Object, Object> fn = Functions.wrap(new Function<Object, Object>() {
-            @Override
-            public Object apply(Object o) {
-                enc.encrypt(req, res);
-                return null;
-            }
+        Function<Object, Object> fn = Functions.wrap(o -> {
+            enc.encrypt(req, res);
+            return null;
         }, SecurityException.class, "%s encryption failed.", enc.getId());
         fn.apply(null);
     }

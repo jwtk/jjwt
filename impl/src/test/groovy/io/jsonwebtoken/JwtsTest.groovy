@@ -40,6 +40,8 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import static org.junit.Assert.*
 
@@ -49,6 +51,14 @@ class JwtsTest {
         long seconds = (millis / 1000) as long
         long secondOnlyPrecisionMillis = seconds * 1000
         return new Date(secondOnlyPrecisionMillis)
+    }
+
+    private static Instant instantWithOnlySecondPrecision(long millis) {
+        return instantWithOnlySecondPrecision(Instant.ofEpochMilli(millis))
+    }
+
+    private static Instant instantWithOnlySecondPrecision(Instant instant) {
+        return instant.truncatedTo(ChronoUnit.SECONDS)
     }
 
     private static Date now() {
@@ -66,6 +76,10 @@ class JwtsTest {
         def millis = seconds * 1000L
         def time = System.currentTimeMillis() + millis
         return dateWithOnlySecondPrecision(time)
+    }
+
+    private static Instant laterInstant(int seconds) {
+        return instantWithOnlySecondPrecision(Instant.now().plusSeconds(seconds))
     }
 
     protected static String base64Url(String s) {
@@ -153,7 +167,7 @@ class JwtsTest {
         } catch (MalformedJwtException e) {
             String expected = 'Invalid claims: Invalid JWT Claims \'exp\' (Expiration Time) value: -42-. ' +
                     'String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics exhausted. ' +
-                    'Cause: Unparseable date: "-42-"'
+                    'Cause: Text \'-42-\' could not be parsed at index 1'
             assertEquals expected, e.getMessage()
         }
     }
@@ -409,7 +423,7 @@ class JwtsTest {
 
     @Test
     void testConvenienceExpiration() {
-        Date then = laterDate(10000)
+        Instant then = laterInstant(10000)
         String compact = Jwts.builder().setExpiration(then).compact()
         Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         def claimedDate = claims.getExpiration()
@@ -426,7 +440,7 @@ class JwtsTest {
 
     @Test
     void testConvenienceNotBefore() {
-        Date now = now() //jwt exp only supports *seconds* since epoch:
+        Instant now = instantWithOnlySecondPrecision(Instant.now()) //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setNotBefore(now).compact()
         Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         def claimedDate = claims.getNotBefore()
@@ -443,7 +457,7 @@ class JwtsTest {
 
     @Test
     void testConvenienceIssuedAt() {
-        Date now = now() //jwt exp only supports *seconds* since epoch:
+        Instant now = instantWithOnlySecondPrecision(Instant.now()) //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setIssuedAt(now).compact()
         Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
         def claimedDate = claims.getIssuedAt()

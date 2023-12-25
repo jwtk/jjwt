@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Clock;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * A {@code Clock} implementation that is constructed with a seed timestamp and always reports that same
@@ -27,14 +27,14 @@ import java.util.Date;
  */
 public class FixedClock implements Clock {
 
-    private final Date now;
+    private final Instant now;
 
     /**
-     * Creates a new fixed clock using <code>new {@link Date Date}()</code> as the seed timestamp.  All calls to
+     * Creates a new fixed clock using <code>new {@link Instant instant}()</code> as the seed timestamp.  All calls to
      * {@link #now now()} will always return this seed Date.
      */
     public FixedClock() {
-        this(new Date());
+        this(Instant.now());
     }
 
     /**
@@ -43,7 +43,7 @@ public class FixedClock implements Clock {
      *
      * @param now the specified Date to always return from all calls to {@link #now now()}.
      */
-    public FixedClock(Date now) {
+    public FixedClock(Instant now) {
         this.now = now;
     }
 
@@ -54,11 +54,11 @@ public class FixedClock implements Clock {
      * @param timeInMillis the specified Date in milliseconds to always return from all calls to {@link #now now()}.
      */
     public FixedClock(long timeInMillis) {
-        this(new Date(timeInMillis));
+        this(Instant.ofEpochMilli(timeInMillis));
     }
 
     @Override
-    public Date now() {
+    public Instant now() {
         return this.now;
     }
 }

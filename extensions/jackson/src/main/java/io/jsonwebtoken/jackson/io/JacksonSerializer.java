@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.lang.Assert;
 
@@ -41,7 +42,7 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
         MODULE = module;
     }
 
-    static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper().registerModule(MODULE);
+    static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper().registerModule(MODULE).registerModule(new JavaTimeModule());
 
     protected final ObjectMapper objectMapper;
 

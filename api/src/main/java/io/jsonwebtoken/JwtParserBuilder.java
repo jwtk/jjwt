@@ -31,7 +31,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -182,7 +182,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParserBuilder requireIssuedAt(Date issuedAt);
+    JwtParserBuilder requireIssuedAt(Instant issuedAt);
 
     /**
      * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
@@ -194,7 +194,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParserBuilder requireExpiration(Date expiration);
+    JwtParserBuilder requireExpiration(Instant expiration);
 
     /**
      * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
@@ -206,7 +206,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see MissingClaimException
      * @see IncorrectClaimException
      */
-    JwtParserBuilder requireNotBefore(Date notBefore);
+    JwtParserBuilder requireNotBefore(Instant notBefore);
 
     /**
      * Ensures that the specified {@code claimName} exists in the parsed JWT.  If missing or if the parsed

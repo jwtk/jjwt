@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,7 +106,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      *
      * @return the JWT {@code exp} value or {@code null} if not present.
      */
-    Date getExpiration();
+    Instant getExpiration();
 
     /**
      * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -116,7 +116,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      *
      * @return the JWT {@code nbf} value or {@code null} if not present.
      */
-    Date getNotBefore();
+    Instant getNotBefore();
 
     /**
      * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -126,7 +126,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      *
      * @return the JWT {@code iat} value or {@code null} if not present.
      */
-    Date getIssuedAt();
+    Instant getIssuedAt();
 
     /**
      * Returns the JWTs <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
@@ -147,7 +147,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * Returns the JWTs claim ({@code claimName}) value as a {@code requiredType} instance, or {@code null} if not
      * present.
      *
-     * <p>JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
+     * <p>JJWT only converts simple String, Date, OffsetDateTime, ZonedDateTime, Long, Integer, Short and Byte types automatically. Anything more
      * complex is expected to be already converted to your desired type by the JSON parser. You may specify a custom
      * JSON processor using the {@code JwtParserBuilder}'s
      * {@link JwtParserBuilder#json(io.jsonwebtoken.io.Deserializer) json(Deserializer)} method. See the JJWT

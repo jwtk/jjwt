@@ -17,8 +17,8 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.NestedCollection;
 
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 
 /**
  * Mutation (modifications) to a {@link io.jsonwebtoken.Claims Claims} instance.
@@ -113,10 +113,10 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
-     * {@link #expiration(Date)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #expiration(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
-    T setExpiration(Date exp);
+    T setExpiration(Instant exp);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
@@ -129,7 +129,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @return the {@code Claims} instance for method chaining.
      * @since 0.12.0
      */
-    T expiration(Date exp);
+    T expiration(Instant exp);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -141,10 +141,10 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
-     * {@link #notBefore(Date)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #notBefore(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
-    T setNotBefore(Date nbf);
+    T setNotBefore(Instant nbf);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -157,7 +157,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @return the {@code Claims} instance for method chaining.
      * @since 0.12.0
      */
-    T notBefore(Date nbf);
+    T notBefore(Instant nbf);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -169,10 +169,10 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
-     * {@link #issuedAt(Date)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #issuedAt(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
-    T setIssuedAt(Date iat);
+    T setIssuedAt(Instant iat);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -185,7 +185,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @return the {@code Claims} instance for method chaining.
      * @since 0.12.0
      */
-    T issuedAt(Date iat);
+    T issuedAt(Instant iat);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">

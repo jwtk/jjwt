@@ -991,8 +991,8 @@ String jws = Jwts.builder()
     .issuer("me")
     .subject("Bob")
     .audience("you")
-    .expiration(expiration) //a java.util.Date
-    .notBefore(notBefore) //a java.util.Date 
+    .expiration(expiration) //a java.time.Instant
+    .notBefore(notBefore) //a java.time.Instant
     .issuedAt(new Date()) // for example, now
     .id(UUID.randomUUID().toString()) //just an example id
     
