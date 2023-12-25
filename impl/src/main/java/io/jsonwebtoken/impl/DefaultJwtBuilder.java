@@ -31,6 +31,7 @@ import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
+import io.jsonwebtoken.impl.lang.JwtDateConverter;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
@@ -76,7 +77,9 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
@@ -475,6 +478,20 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder id(String jti) {
         return claims().id(jti).and();
+    }
+
+    @Override
+    public JwtBuilder expireAfter(long duration, TimeUnit timeUnit) {  // TODO: use java.time for version 1.0?
+        Assert.state(duration > 0, "duration must be a positive value.");
+        Assert.stateNotNull(timeUnit, "timeUnit is required.");
+
+        Date exp = Optional.ofNullable(this.claimsBuilder.get(DefaultClaims.ISSUED_AT))
+                .map(Date::getTime)
+                .map(time -> time + timeUnit.toMillis(duration))
+                .map(expMillis -> JwtDateConverter.INSTANCE.applyFrom(expMillis / 1000L))
+                .orElse(JwtDateConverter.INSTANCE.applyFrom((System.currentTimeMillis() + timeUnit.toMillis(duration)) / 1000L));
+
+        return claims().expiration(exp).and();
     }
 
     private void assertPayloadEncoding(String type) {

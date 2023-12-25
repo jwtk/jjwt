@@ -32,6 +32,7 @@ import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.SecretKey
+import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.*
 
@@ -270,6 +271,50 @@ class DefaultJwtParserTest {
             Jwts.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
         } catch (ExpiredJwtException expected) {
             def exp8601 = DateFormats.formatIso8601(exp, true)
+            def later8601 = DateFormats.formatIso8601(later, true)
+            String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testExpiredAfterExceptionMessage() {
+        long differenceMillis = 781 // arbitrary, anything > 0 is fine
+        def duration = 15L
+        def timeUnit = TimeUnit.MINUTES
+        def expectedExpiry = JwtDateConverter.INSTANCE.applyFrom((System.currentTimeMillis() + timeUnit.toMillis(duration)) / 1000L)
+        def later = new Date(expectedExpiry.getTime() + differenceMillis)
+        def s = Jwts.builder().expireAfter(duration, timeUnit).compact()
+
+        try {
+            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
+        } catch (ExpiredJwtException expected) {
+            def exp8601 = DateFormats.formatIso8601(expectedExpiry, true)
+            def later8601 = DateFormats.formatIso8601(later, true)
+            String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testExpiredAfterWithIssuedAtExceptionMessage() {
+        long differenceMillis = 781 // arbitrary, anything > 0 is fine
+        def duration = 15L
+        def timeUnit = TimeUnit.MINUTES
+        def issuedAt = JwtDateConverter.INSTANCE.applyFrom((System.currentTimeMillis() + timeUnit.toMillis(-1L)) / 1000L) //set it to one minute earlier
+        def expectedExpiry = JwtDateConverter.INSTANCE.applyFrom((System.currentTimeMillis() + timeUnit.toMillis(duration - 1L)) / 1000L) // we expect it to expire a minute earlier
+        def later = new Date(expectedExpiry.getTime() + differenceMillis)
+        def s = Jwts.builder()
+                .issuedAt(issuedAt)
+                .expireAfter(duration, timeUnit)
+                .compact()
+
+        try {
+            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
+        } catch (ExpiredJwtException expected) {
+            def exp8601 = DateFormats.formatIso8601(expectedExpiry, true)
             def later8601 = DateFormats.formatIso8601(later, true)
             String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
                     "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
