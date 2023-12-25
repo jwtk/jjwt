@@ -279,6 +279,31 @@ class DefaultJwtParserTest {
     }
 
     @Test
+    void testExpiredAfterDurationValidationMessage() {
+        def duration = -1L
+        def timeUnit = TimeUnit.MINUTES
+        try {
+            Jwts.builder().expireAfter(duration, timeUnit).compact()
+        } catch (IllegalArgumentException expected) {
+            String msg = "duration must be > 0."
+            assertEquals msg, expected.message
+        }
+    }
+
+    @Test
+    void testExpiredAfterTimeUnitValidationMessage() {
+        def duration = 15L
+        def timeUnit = null
+        try {
+            Jwts.builder().expireAfter(duration, timeUnit).compact()
+        } catch (IllegalArgumentException expected) {
+            String msg = "timeUnit cannot be null."
+            assertEquals msg, expected.message
+        }
+    }
+
+
+    @Test
     void testExpiredAfterExceptionMessage() {
         long differenceMillis = 781 // arbitrary, anything > 0 is fine
         def duration = 15L
@@ -293,7 +318,7 @@ class DefaultJwtParserTest {
             def exp8601 = DateFormats.formatIso8601(expectedExpiry, true)
             def later8601 = DateFormats.formatIso8601(later, true)
             String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
-                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds."
             assertEquals msg, expected.message
         }
     }
@@ -317,7 +342,7 @@ class DefaultJwtParserTest {
             def exp8601 = DateFormats.formatIso8601(expectedExpiry, true)
             def later8601 = DateFormats.formatIso8601(later, true)
             String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
-                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds."
             assertEquals msg, expected.message
         }
     }
@@ -336,7 +361,7 @@ class DefaultJwtParserTest {
             def nbf8601 = DateFormats.formatIso8601(nbf, true)
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
             String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
-                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
+                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds."
             assertEquals msg, expected.message
         }
     }

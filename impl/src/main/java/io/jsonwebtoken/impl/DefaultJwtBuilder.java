@@ -482,8 +482,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public JwtBuilder expireAfter(long duration, TimeUnit timeUnit) {  // TODO: use java.time for version 1.0?
-        Assert.state(duration > 0, "duration must be a positive value.");
-        Assert.stateNotNull(timeUnit, "timeUnit is required.");
+        Assert.gt(duration, 0L, "duration must be > 0.");
+        Assert.notNull(timeUnit, "timeUnit cannot be null.");
 
         Date exp = Optional.ofNullable(this.claimsBuilder.get(DefaultClaims.ISSUED_AT))
                 .map(Date::getTime)
