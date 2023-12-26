@@ -18,11 +18,7 @@ package io.jsonwebtoken.impl.lang;
 import io.jsonwebtoken.lang.DateFormats;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
-import java.util.Calendar;
 
 public class JwtDateConverter implements Converter<Instant, Object> {
 
@@ -51,7 +47,7 @@ public class JwtDateConverter implements Converter<Instant, Object> {
             long seconds = ((Number) value).longValue();
             value = Instant.ofEpochSecond(seconds);
         }
-        // would have been normalized to Instant if it was a number value, so perform normal date conversion:
+        // would have been normalized to Instant if it was a number value, so perform normal instant conversion:
         return toInstant(value);
     }
 
@@ -66,20 +62,9 @@ public class JwtDateConverter implements Converter<Instant, Object> {
             return null;
         } else if (v instanceof Instant) {
             return (Instant) v;
-        } else if (v instanceof ZonedDateTime) {
-            return ((ZonedDateTime) v).toInstant();
-        }else if (v instanceof OffsetDateTime) {
-            return ((OffsetDateTime) v).toInstant();
-        } else if (v instanceof Date) {
-            //assume UTC
-            return ((Date) v).toInstant();
-        } else if (v instanceof Calendar) { //since 0.10.0
-            //assume UTC
-            return ((Calendar) v).getTime().toInstant();
         } else if (v instanceof Number) {
             //assume millis:
             long millis = ((Number) v).longValue();
-            //assume UTC
             return Instant.ofEpochMilli(millis);
         } else if (v instanceof String) {
             return parseIso8601Date((String) v); //ISO-8601 parsing since 0.10.0

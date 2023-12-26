@@ -30,7 +30,7 @@ import java.util.Set;
 public class DefaultClaims extends ParameterMap implements Claims {
 
     private static final String CONVERSION_ERROR_MSG = "Cannot convert existing claim value of type '%s' to desired type " +
-            "'%s'. JJWT only converts simple String, Date, Instant, OffsetDateTime, ZonedDateTime, Long, Integer, Short " +
+            "'%s'. JJWT only converts simple String, Instant, Long, Integer, Short " +
             "and Byte types automatically. Anything more complex is expected to be already converted to your desired type " +
             "by the JSON Deserializer implementation. You may specify a custom Deserializer for a JwtParser with the " +
             "desired conversion configuration via the JwtParserBuilder.deserializer() method. " +

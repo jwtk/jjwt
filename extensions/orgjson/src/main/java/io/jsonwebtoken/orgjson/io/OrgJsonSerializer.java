@@ -31,11 +31,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -96,24 +92,8 @@ public class OrgJsonSerializer<T> extends AbstractSerializer<T> {
             return object;
         }
 
-        if(object instanceof Instant) {
+        if (object instanceof Instant) {
             return DateFormats.formatIso8601((Instant) object);
-        }
-
-        if(object instanceof OffsetDateTime) {
-            return DateFormats.formatIso8601(((OffsetDateTime) object).toInstant());
-        }
-
-        if(object instanceof ZonedDateTime) {
-            return DateFormats.formatIso8601(((ZonedDateTime) object).toInstant());
-        }
-
-        if (object instanceof Calendar) {
-            return DateFormats.formatIso8601(((Calendar) object).getTime().toInstant());
-        }
-
-        if (object instanceof Date) {
-            return DateFormats.formatIso8601(((Date) object).toInstant());
         }
 
         if (object instanceof byte[]) {

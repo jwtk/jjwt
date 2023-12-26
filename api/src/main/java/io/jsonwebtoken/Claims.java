@@ -147,7 +147,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * Returns the JWTs claim ({@code claimName}) value as a {@code requiredType} instance, or {@code null} if not
      * present.
      *
-     * <p>JJWT only converts simple String, Date, OffsetDateTime, ZonedDateTime, Long, Integer, Short and Byte types automatically. Anything more
+     * <p>JJWT only converts simple String, Instant, Long, Integer, Short and Byte types automatically. Anything more
      * complex is expected to be already converted to your desired type by the JSON parser. You may specify a custom
      * JSON processor using the {@code JwtParserBuilder}'s
      * {@link JwtParserBuilder#json(io.jsonwebtoken.io.Deserializer) json(Deserializer)} method. See the JJWT

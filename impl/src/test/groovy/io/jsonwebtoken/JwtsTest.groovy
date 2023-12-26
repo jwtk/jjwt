@@ -53,17 +53,8 @@ class JwtsTest {
         return new Date(secondOnlyPrecisionMillis)
     }
 
-    private static Instant instantWithOnlySecondPrecision(long millis) {
-        return instantWithOnlySecondPrecision(Instant.ofEpochMilli(millis))
-    }
-
     private static Instant instantWithOnlySecondPrecision(Instant instant) {
         return instant.truncatedTo(ChronoUnit.SECONDS)
-    }
-
-    private static Date now() {
-        Date date = dateWithOnlySecondPrecision(System.currentTimeMillis())
-        return date
     }
 
     private static int later() {

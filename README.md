@@ -2992,7 +2992,7 @@ Jwts.parser()
 <a name="json-jackson-custom-types"></a>
 #### Parsing of Custom Claim Types
 
-By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to 
+By default JJWT will only convert simple claim types: String, Instant, Long, Integer, Short and Byte.  If you need to 
 deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in 
 through a constructor. For example:
 

@@ -28,8 +28,6 @@ import org.junit.Before
 import org.junit.Test
 
 import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZonedDateTime
 
 import static org.junit.Assert.*
 
@@ -202,35 +200,11 @@ class OrgJsonSerializerTest {
     }
 
     @Test
-    void testOffsetDateTime() {
-        OffsetDateTime offsetDateTime = OffsetDateTime.now()
-        def now = offsetDateTime.toInstant()
-        String formatted = DateFormats.formatIso8601(now)
-        assertEquals "\"$formatted\"" as String, ser(offsetDateTime)
-    }
-
-    @Test
-    void testZonedDateTime() {
-        ZonedDateTime zonedDateTime = ZonedDateTime.now()
-        def now = zonedDateTime.toInstant()
-        String formatted = DateFormats.formatIso8601(now)
-        assertEquals "\"$formatted\"" as String, ser(zonedDateTime)
-    }
-
-    @Test
     void testDate() {
         Date date = new Date()
         def now = date.toInstant()
         String formatted = DateFormats.formatIso8601(now)
         assertEquals "\"$formatted\"" as String, ser(date)
-    }
-
-    @Test
-    void testCalendar() {
-        def cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        def now = cal.toInstant()
-        String formatted = DateFormats.formatIso8601(now)
-        assertEquals "\"$formatted\"" as String, ser(cal)
     }
 
     @Test
