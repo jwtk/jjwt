@@ -223,7 +223,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
-     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+     * The parser uses a default Clock implementation that simply returns {@code new Instant()} when called.
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the parser builder for method chaining.
@@ -235,7 +235,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
-     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+     * The parser uses a default Clock implementation that simply returns {@code new Instant()} when called.
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the parser builder for method chaining.

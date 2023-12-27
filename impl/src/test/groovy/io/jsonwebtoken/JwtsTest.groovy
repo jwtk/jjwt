@@ -47,29 +47,17 @@ import static org.junit.Assert.*
 
 class JwtsTest {
 
-    private static Date dateWithOnlySecondPrecision(long millis) {
-        long seconds = (millis / 1000) as long
-        long secondOnlyPrecisionMillis = seconds * 1000
-        return new Date(secondOnlyPrecisionMillis)
-    }
 
     private static Instant instantWithOnlySecondPrecision(Instant instant) {
         return instant.truncatedTo(ChronoUnit.SECONDS)
     }
 
-    private static int later() {
-        def date = laterDate(10000)
-        def seconds = date.getTime() / 1000
-        return seconds as int
+    private static long later() {
+        def instant = laterInstant(10000L)
+        return instant.getEpochSecond();
     }
 
-    private static Date laterDate(int seconds) {
-        def millis = seconds * 1000L
-        def time = System.currentTimeMillis() + millis
-        return dateWithOnlySecondPrecision(time)
-    }
-
-    private static Instant laterInstant(int seconds) {
+    private static Instant laterInstant(long seconds) {
         return instantWithOnlySecondPrecision(Instant.now().plusSeconds(seconds))
     }
 
@@ -417,8 +405,8 @@ class JwtsTest {
         Instant then = laterInstant(10000)
         String compact = Jwts.builder().setExpiration(then).compact()
         Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
-        def claimedDate = claims.getExpiration()
-        assertEquals then, claimedDate
+        def claimedInstant = claims.getExpiration()
+        assertEquals then, claimedInstant
 
         compact = Jwts.builder().setIssuer("Me")
                 .setExpiration(then) //set it
@@ -434,8 +422,8 @@ class JwtsTest {
         Instant now = instantWithOnlySecondPrecision(Instant.now()) //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setNotBefore(now).compact()
         Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
-        def claimedDate = claims.getNotBefore()
-        assertEquals now, claimedDate
+        def claimedInstant = claims.getNotBefore()
+        assertEquals now, claimedInstant
 
         compact = Jwts.builder().setIssuer("Me")
                 .setNotBefore(now) //set it
@@ -451,8 +439,8 @@ class JwtsTest {
         Instant now = instantWithOnlySecondPrecision(Instant.now()) //jwt exp only supports *seconds* since epoch:
         String compact = Jwts.builder().setIssuedAt(now).compact()
         Claims claims = Jwts.parser().unsecured().build().parse(compact).payload as Claims
-        def claimedDate = claims.getIssuedAt()
-        assertEquals now, claimedDate
+        def claimedInstant = claims.getIssuedAt()
+        assertEquals now, claimedInstant
 
         compact = Jwts.builder().setIssuer("Me")
                 .setIssuedAt(now) //set it

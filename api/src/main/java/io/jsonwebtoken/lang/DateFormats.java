@@ -43,8 +43,8 @@ public final class DateFormats {
      * Return an ISO-8601-formatted string with millisecond precision representing the
      * specified {@code instant}. Will always convert to UTC timezone.
      *
-     * @param instant the date for which to create an ISO-8601-formatted string
-     * @return the date represented as an ISO-8601-formatted string in UTC timezone with millisecond precision.
+     * @param instant the instant for which to create an ISO-8601-formatted string
+     * @return the instant represented as an ISO-8601-formatted string in UTC timezone with millisecond precision.
      */
     public static String formatIso8601(Instant instant) {
         return formatIso8601(instant, true);
@@ -56,7 +56,7 @@ public final class DateFormats {
      *
      * @param instant           the instant for which to create an ISO-8601-formatted string
      * @param includeMillis     whether to include millisecond notation within the string.
-     * @return the date represented as an ISO-8601-formatted string in UTC timezone with optional millisecond precision.
+     * @return the instant represented as an ISO-8601-formatted string in UTC timezone with optional millisecond precision.
      */
     public static String formatIso8601(Instant instant, boolean includeMillis) {
         Assert.notNull(instant, "Instant argument cannot be null.");
@@ -67,8 +67,8 @@ public final class DateFormats {
     }
 
     /**
-     * Parse the specified ISO-8601-formatted date string and return the corresponding {@link Instant} instance.  The
-     * date string may optionally contain millisecond notation, and those milliseconds will be represented accordingly.
+     * Parse the specified ISO-8601-formatted date string and return the corresponding {@link Instant} instance.
+     * The date string may optionally contain millisecond notation, and those milliseconds will be represented accordingly.
      *
      * @param s the ISO-8601-formatted string to parse
      * @return the string's corresponding {@link Instant} instance.

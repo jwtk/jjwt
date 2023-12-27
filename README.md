@@ -993,7 +993,7 @@ String jws = Jwts.builder()
     .audience("you")
     .expiration(expiration) //a java.time.Instant
     .notBefore(notBefore) //a java.time.Instant
-    .issuedAt(new Date()) // for example, now
+    .issuedAt(Instant.now) // for example, now
     .id(UUID.randomUUID().toString()) //just an example id
     
     /// ... etc ...
@@ -1416,7 +1416,7 @@ Clock clock = new MyClock();
 Jwts.parser().clock(myClock) //... etc ...
 ``` 
 
-The `JwtParser`'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
+The `JwtParser`'s default `Clock` implementation simply returns `Instant.now()` to reflect the time when parsing occurs,
 as most would expect.  However, supplying your own clock could be useful, especially when writing test cases to
 guarantee deterministic behavior.
 

@@ -175,9 +175,9 @@ class DefaultClaimsTest {
     }
 
     @Test
-    void testGetRequiredDateFromNull() {
-        Date date = claims.get("aDate", Date.class)
-        assertNull date
+    void testGetRequiredInstantFromNull() {
+        Instant instant = claims.get("anInstant", Instant.class)
+        assertNull instant
     }
 
     @Test
@@ -215,15 +215,14 @@ class DefaultClaimsTest {
 
     @Test
     void testGetRequiredDateFromInvalidIso8601String() {
-        Date d = new Date()
-        String s = d.toString()
-        claims.put('aDate', s)
+        def s = "23-12-27T11:36:31Z"
+        claims.put('anInstant', s)
         try {
-            claims.get('aDate', Instant.class)
+            claims.get('anInstant', Instant.class)
             fail()
         } catch (IllegalArgumentException expected) {
 
-            String expectedMsg = "Cannot create Instant from 'aDate' value '$s'. Cause: " +
+            String expectedMsg = "Cannot create Instant from 'anInstant' value '$s'. Cause: " +
                     "String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics " +
                     "exhausted. Cause: Text \'$s\' could not be parsed at index 0"
             assertEquals expectedMsg, expected.getMessage()

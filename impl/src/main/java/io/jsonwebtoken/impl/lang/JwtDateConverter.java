@@ -38,7 +38,7 @@ public class JwtDateConverter implements Converter<Instant, Object> {
         if (value instanceof String) {
             try {
                 value = Long.parseLong((String) value);
-            } catch (NumberFormatException ignored) { // will try in the fallback toDate method call below
+            } catch (NumberFormatException ignored) { // will try in the fallback toInstant method call below
             }
         }
         if (value instanceof Number) {
@@ -54,7 +54,7 @@ public class JwtDateConverter implements Converter<Instant, Object> {
     /**
      * Returns a {@link Instant} equivalent of the specified object value using heuristics.
      *
-     * @param v the object value to represent as a Date.
+     * @param v the object value to represent as an Instant.
      * @return a {@link Instant} equivalent of the specified object value using heuristics.
      */
     public static Instant toInstant(Object v) {

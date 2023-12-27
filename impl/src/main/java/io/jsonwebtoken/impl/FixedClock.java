@@ -31,7 +31,7 @@ public class FixedClock implements Clock {
 
     /**
      * Creates a new fixed clock using <code>new {@link Instant instant}()</code> as the seed timestamp.  All calls to
-     * {@link #now now()} will always return this seed Date.
+     * {@link #now now()} will always return this seed Instant.
      */
     public FixedClock() {
         this(Instant.now());
@@ -39,9 +39,9 @@ public class FixedClock implements Clock {
 
     /**
      * Creates a new fixed clock using the specified seed timestamp.  All calls to
-     * {@link #now now()} will always return this seed Date.
+     * {@link #now now()} will always return this seed Instant.
      *
-     * @param now the specified Date to always return from all calls to {@link #now now()}.
+     * @param now the specified Instant to always return from all calls to {@link #now now()}.
      */
     public FixedClock(Instant now) {
         this.now = now;
@@ -49,9 +49,9 @@ public class FixedClock implements Clock {
 
     /**
      * Creates a new fixed clock using the specified seed timestamp.  All calls to
-     * {@link #now now()} will always return this seed Date.
+     * {@link #now now()} will always return this seed Instant.
      *
-     * @param timeInMillis the specified Date in milliseconds to always return from all calls to {@link #now now()}.
+     * @param timeInMillis the specified Instant in milliseconds to always return from all calls to {@link #now now()}.
      */
     public FixedClock(long timeInMillis) {
         this(Instant.ofEpochMilli(timeInMillis));

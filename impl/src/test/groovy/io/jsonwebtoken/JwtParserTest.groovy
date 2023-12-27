@@ -1532,7 +1532,7 @@ class JwtParserTest {
 
     @Test
     void testParseRequireCustomDate_Missing_Fail() {
-        def aDate = new Date(System.currentTimeMillis())
+        def anInstant = Instant.now()
 
         byte[] key = randomKey()
 
@@ -1542,12 +1542,12 @@ class JwtParserTest {
 
         try {
             Jwts.parser().setSigningKey(key).
-                    require("aDate", aDate).
+                    require("anInstant", anInstant).
                     build().
                     parseSignedClaims(compact)
             fail()
         } catch (MissingClaimException e) {
-            String msg = "Missing 'aDate' claim. Expected value: $aDate"
+            String msg = "Missing 'anInstant' claim. Expected value: $anInstant"
             assertEquals msg, e.getMessage()
         }
     }

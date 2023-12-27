@@ -62,36 +62,36 @@ class DateFormatsTest {
     @Test
     void testParseIso8601DateWithMillisZuluOffset() {
         String dateString = "2023-12-25T15:30:00.123Z"
-        Instant parsedDate = DateFormats.parseIso8601Date(dateString)
-        assertNotNull(parsedDate)
+        Instant parsedInstant = DateFormats.parseIso8601Date(dateString)
+        assertNotNull(parsedInstant)
         final expectedInstant = OffsetDateTime.of(2023, 12, 25, 15, 30, 0, 123000000, ZoneOffset.UTC).toInstant()
-        assertEquals expectedInstant, parsedDate
+        assertEquals expectedInstant, parsedInstant
     }
 
     @Test
     void testParseIso8601DateWithMillisNonZuluOffset() {
         String dateString = "2023-12-25T15:30:00.123-01:00"
-        Instant parsedDate = DateFormats.parseIso8601Date(dateString)
-        assertNotNull(parsedDate)
+        Instant parsedInstant = DateFormats.parseIso8601Date(dateString)
+        assertNotNull(parsedInstant)
         final expectedInstant = OffsetDateTime.of(2023, 12, 25, 15, 30, 0, 123000000, ZoneOffset.ofHours(-1)).toInstant()
-        assertEquals expectedInstant, parsedDate
+        assertEquals expectedInstant, parsedInstant
     }
 
     @Test
     void testParseIso8601DateWithoutMillisZuluOffset() {
         String dateString = "2023-12-25T15:30:00Z"
-        Instant parsedDate = DateFormats.parseIso8601Date(dateString)
-        assertNotNull(parsedDate)
+        Instant parsedInstant = DateFormats.parseIso8601Date(dateString)
+        assertNotNull(parsedInstant)
         final expectedInstant = OffsetDateTime.of(2023, 12, 25, 15, 30, 0, 0, ZoneOffset.UTC).toInstant()
-        assertEquals expectedInstant, parsedDate
+        assertEquals expectedInstant, parsedInstant
     }
 
     @Test
     void testParseIso8601DateWithoutMillisNonZuluOffset() {
         String dateString = "2023-12-25T15:30:00+01:00"
-        Instant parsedDate = DateFormats.parseIso8601Date(dateString)
-        assertNotNull(parsedDate)
-        assertEquals OffsetDateTime.of(2023,12,25,15,30,0, 0, ZoneOffset.ofHours(1)).toInstant(), parsedDate
+        Instant parsedInstant = DateFormats.parseIso8601Date(dateString)
+        assertNotNull(parsedInstant)
+        assertEquals OffsetDateTime.of(2023,12,25,15,30,0, 0, ZoneOffset.ofHours(1)).toInstant(), parsedInstant
     }
 
     @Test(expected = DateTimeParseException)
