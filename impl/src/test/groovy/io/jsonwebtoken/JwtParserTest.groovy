@@ -1460,22 +1460,22 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseRequireCustomDate_Success() {
+    void testParseRequireCustomInstant_Success() {
 
-        def aDate = Instant.now()
+        def anInstant = Instant.now()
 
         byte[] key = randomKey()
 
         String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
-                claim("aDate", aDate).
+                claim("anInstant", anInstant).
                 compact()
 
         Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).
-                require("aDate", aDate).
+                require("anInstant", anInstant).
                 build().
                 parseSignedClaims(compact)
 
-        assertEquals jwt.getPayload().get("aDate", Instant.class), aDate
+        assertEquals jwt.getPayload().get("anInstant", Instant.class), anInstant
     }
 
     @Test
@@ -1505,7 +1505,7 @@ class JwtParserTest {
     }
 
     @Test
-    void testParseRequireCustomDate_Incorrect_Fail() {
+    void testParseRequireCustomInstant_Incorrect_Fail() {
 
         def goodInstant = Instant.now()
         def badInstant = Instant.now().minusMillis(10000)

@@ -63,7 +63,7 @@ public class JwtDateConverter implements Converter<Instant, Object> {
         } else if (v instanceof Instant) {
             return (Instant) v;
         } else if (v instanceof Number) {
-            //assume millis:
+            // TODO millis are assume or expected but instant is in json as epochSeconds NOT epochMillis
             long millis = ((Number) v).longValue();
             return Instant.ofEpochMilli(millis);
         } else if (v instanceof String) {
