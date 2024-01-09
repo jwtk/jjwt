@@ -276,7 +276,7 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
   serialize to JSON correctly.
 
 
-* `io.jsonwebtoken.InvalidClaimException` and it's two subclasses (`IncorrectClaimException` and `MissingClaimException`)
+* `io.jsonwebtoken.InvalidClaimException` and its two subclasses (`IncorrectClaimException` and `MissingClaimException`)
   were previously mutable, allowing the corresponding claim name and claim value to be set on the exception after
   creation.  These should have always been immutable without those setters (just getters), and this was a previous
   implementation oversight.  This release has ensured they are immutable without the setters.
