@@ -589,7 +589,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
      * <code>exp</code></a> (expiration) claim. It will set the expiration Date to the issuedAt time plus the duration
-     * specified it if has been set, otherwise it will use the current system time plus the duration specified
+     * specified if it has been set, otherwise it will use the current system time plus the duration specified
      *
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
