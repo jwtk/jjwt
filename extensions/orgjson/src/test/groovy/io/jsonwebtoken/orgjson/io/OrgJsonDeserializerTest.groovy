@@ -18,7 +18,9 @@ package io.jsonwebtoken.orgjson.io
 
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
+import io.jsonwebtoken.io.IOException
 import io.jsonwebtoken.lang.Strings
+import org.json.JSONTokener
 import org.junit.Before
 import org.junit.Test
 
@@ -28,9 +30,17 @@ class OrgJsonDeserializerTest {
 
     private OrgJsonDeserializer des
 
-    private Object fromBytes(byte[] data) {
+    private static Reader reader(byte[] data) {
         def ins = new ByteArrayInputStream(data)
-        def reader = new InputStreamReader(ins, Strings.UTF_8)
+        return new InputStreamReader(ins, Strings.UTF_8)
+    }
+
+    private static Reader reader(String s) {
+        return reader(Strings.utf8(s))
+    }
+
+    private Object fromBytes(byte[] data) {
+        def reader = reader(data)
         return des.deserialize(reader)
     }
 
@@ -185,6 +195,68 @@ class OrgJsonDeserializerTest {
         } catch (DeserializationException expected) {
             String msg = 'Unable to deserialize: foo'
             assertEquals msg, expected.message
+        }
+    }
+
+    /**
+     * Asserts that, when the JSONTokener(Reader) constructor isn't available (e.g. on Android), that the Reader is
+     * converted to a String and the JSONTokener(String) constructor is used instead.
+     * @since 0.12.4
+     */
+    @Test
+    void jsonTokenerMissingReaderConstructor() {
+
+        def json = '{"hello": "世界", "test": [1, 2]}'
+        def expected = read(json) // 'normal' reading
+
+        des = new OrgJsonDeserializer() {
+            @Override
+            protected JSONTokener newTokener(Reader reader) throws NoSuchMethodError {
+                throw new NoSuchMethodError('Android says nope!')
+            }
+        }
+
+        def reader = reader('{"hello": "世界", "test": [1, 2]}')
+
+        def result = des.deserialize(reader) // should still work
+
+        assertEquals expected, result
+    }
+
+    /**
+     * Asserts that, when the JSONTokener(Reader) constructor isn't available, and conversion of the Reader to a String
+     * fails, that a JSONException is thrown
+     * @since 0.12.4
+     */
+    @Test
+    void readerFallbackToStringFails() {
+        def causeMsg = 'Reader failed.'
+        def cause = new java.io.IOException(causeMsg)
+        def reader = new Reader() {
+            @Override
+            int read(char[] cbuf, int off, int len) throws IOException {
+                throw cause
+            }
+
+            @Override
+            void close() throws IOException {
+            }
+        }
+        des = new OrgJsonDeserializer() {
+            @Override
+            protected JSONTokener newTokener(Reader r) throws NoSuchMethodError {
+                throw new NoSuchMethodError('Android says nope!')
+            }
+        }
+
+        try {
+            des.deserialize(reader)
+            fail()
+        } catch (DeserializationException expected) {
+            def jsonEx = expected.getCause()
+            String msg = "Unable to obtain JSON String from Reader: $causeMsg"
+            assertEquals msg, jsonEx.getMessage()
+            assertSame cause, jsonEx.getCause()
         }
     }
 

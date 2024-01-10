@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,9 +39,71 @@ public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
         return parse(reader);
     }
 
-    private Object parse(java.io.Reader reader) throws JSONException {
 
-        JSONTokener tokener = new JSONTokener(reader);
+    // protected for testing override only
+
+    /**
+     * Returns a new {@link JSONTokener} instance using the {@link JSONTokener#JSONTokener(Reader) JSONTokener(Reader)}
+     * constructor, primarily exposed for unit testing.
+     *
+     * @param reader the reader to wrap
+     * @return a new JSONTokener
+     * @throws NoSuchMethodError if the {@link JSONTokener#JSONTokener(Reader) JSONTokener(Reader)} constructor is not
+     *                           available, for example, on Android.
+     * @since 0.12.4
+     */
+    protected JSONTokener newTokener(Reader reader) throws NoSuchMethodError {
+        return new JSONTokener(reader);
+    }
+
+    /**
+     * Reads all content from the specified reader and returns it as a single String.
+     *
+     * @param reader the reader to read characters from
+     * @return the reader content as a single string
+     * @since 0.12.4
+     */
+    private static String toString(Reader reader) throws IOException {
+        StringBuilder sb = new StringBuilder(4096);
+        char[] buf = new char[4096];
+        int n = 0;
+        while (EOF != n) {
+            n = reader.read(buf);
+            if (n > 0) sb.append(buf, 0, n);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Attempts to create a {@link JSONTokener} using the more efficient
+     * {@link JSONTokener#JSONTokener(Reader) JSONTokener(Reader)} constructor.  If that constructor is not available
+     * (for example, on Android), this method reads the {@code Reader} argument in its entirety to a {@code String}
+     * first, then falls back to using the {@link JSONTokener#JSONTokener(String) JSONTokener(String)} constructor
+     * (which is available on Android).
+     *
+     * @param reader the reader to convert to use when constructing a {@link JSONTokener}.
+     * @return the JSONTokener to use for parsing.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/882">JJWT Issue 882</a>.
+     * @since 0.12.4
+     */
+    private JSONTokener toTokener(Reader reader) {
+        try {
+            return newTokener(reader);
+        } catch (NoSuchMethodError e) { // Reader constructor not available (Android), fall back to String ctor:
+            String s;
+            try {
+                s = toString(reader);
+            } catch (IOException ex) {
+                String msg = "Unable to obtain JSON String from Reader: " + ex.getMessage();
+                throw new JSONException(msg, ex);
+            }
+            return new JSONTokener(s);
+        }
+    }
+
+    private Object parse(Reader reader) throws JSONException {
+
+        JSONTokener tokener = toTokener(reader);
 
         char c = tokener.nextClean(); //peak ahead
         tokener.back(); //revert
